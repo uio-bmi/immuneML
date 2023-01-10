@@ -34,11 +34,11 @@ class PDBDataset(Dataset):
 
     # Return an iterator of the pdb structures
     def get_data(self):
-        for files in self.get_files():
+        for current_file in self.get_files():
             pdbParser = PDBParser(
                 PERMISSIVE=True
             )
-            pdbStructure = pdbParser.get_structure("pdbStructure", files)
+            pdbStructure = pdbParser.get_structure("pdbStructure", current_file)
             yield pdbStructure
 
 
@@ -96,7 +96,7 @@ class PDBDataset(Dataset):
 
         """
         assert isinstance(self.metadata_file, Path) and self.metadata_file.is_file(), \
-            f"RepertoireDataset: for dataset {self.name} (id: {self.identifier}) metadata file is not set properly. The metadata file points to " \
+            f"PDBDataset: for dataset {self.name} (id: {self.identifier}) metadata file is not set properly. The metadata file points to " \
             f"{self.metadata_file}."
 
         df = pd.read_csv(self.metadata_file, sep=",", usecols=field_names, comment=Constants.COMMENT_SIGN)
@@ -105,11 +105,8 @@ class PDBDataset(Dataset):
         else:
             return df.to_dict("list")
 
-    def getPdbFilepaths(self):
+    def get_pdb_filepaths(self):
         return self.pdbFilePaths
 
-    def getFilenames(self):
-        return self.filenames
-
-    def getMetadataFile(self):
+    def get_metadata_file(self):
         return self.metadata_file

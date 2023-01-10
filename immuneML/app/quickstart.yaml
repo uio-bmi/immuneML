@@ -1,6 +1,6 @@
 definitions:
   reports:
-    my_data_report: PDBDataReport
+    my_data_report: AtomDistanceHeatmap
   datasets:
     my_dataset:
       format: PDB

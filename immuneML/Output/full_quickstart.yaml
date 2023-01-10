@@ -16,7 +16,7 @@ definitions:
   preprocessing_sequences: {}
   reports:
     my_data_report:
-      PDBDataReport:
+      AtomDistanceHeatmap:
         name: my_data_report
   signals: {}
   simulations: {}

@@ -177,15 +177,15 @@ class PDBDistanceMatrixEncoder(DatasetEncoder):
 
                             else:
                                 if "IMGT_CDR3" in region and (
-                                        self.isInCDR3(atom.full_id[3][1]) or len(collection) >= 2):
+                                        self.is_in_CDR3(atom.full_id[3][1]) or len(collection) >= 2):
                                     list.append(atom.get_coord())
 
                                 if "IMGT_CDR2" in region and (
-                                        self.isInCDR2(atom.full_id[3][1]) or len(collection) >= 2):
+                                        self.is_in_CDR2(atom.full_id[3][1]) or len(collection) >= 2):
                                     list.append(atom.get_coord())
 
                                 if "IMGT_CDR1" in region and (
-                                        self.isInCDR1(atom.full_id[3][1]) or len(collection) >= 2):
+                                        self.is_in_CDR1(atom.full_id[3][1]) or len(collection) >= 2):
                                     list.append(atom.get_coord())
 
                 save_list = list.copy()
@@ -230,21 +230,21 @@ class PDBDistanceMatrixEncoder(DatasetEncoder):
         return light_id, heavy_id, antigen_id
 
 
-    def isInCDR3(self, num):
+    def is_in_CDR3(self, num):
         if 117 >= num >= 105:
             return True
         else:
             return False
 
 
-    def isInCDR2(self, num):
+    def is_in_CDR2(self, num):
         if 65 >= num >= 56:
             return True
         else:
             return False
 
 
-    def isInCDR1(self, num):
+    def is_in_CDR1(self, num):
         if 38 >= num >= 27:
             return True
         else:
