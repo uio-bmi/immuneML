@@ -125,8 +125,8 @@ class SimulationParser:
     @staticmethod
     def _parse_ligo_simulation(simulation: dict, key: str, symbol_table: SymbolTable) -> Tuple[Simulation, dict]:
         location = SimulationParser.__name__
-        valid_keys = {'is_repertoire': bool, 'paired': bool, 'sequence_type': str, 'use_generation_probabilities': bool,
-                      'simulation_strategy': str, 'sim_items': dict, 'type': str}
+        valid_keys = {'is_repertoire': bool, 'paired': bool, 'sequence_type': str, 'p_gen_bin_count': int, 'simulation_strategy': str,
+                      'sim_items': dict, 'type': str, 'keep_p_gen_dist': bool, 'remove_seqs_with_signals': bool}
 
         simulation = {**DefaultParamsLoader.load("simulation", "ligo_simulation"), **simulation}
 

@@ -67,7 +67,7 @@ class LigoImplanter:
 
             sequences = self._implant_in_sequences(sequences, copy.deepcopy(seqs_per_signal_count))
 
-            if self._state.keep_p_gen_dist or self._state.p_gen_threshold:
+            if self.use_p_gens:
                 sequences = self._filter_using_p_gens(sequences)
 
             seqs_per_signal_count['no_signal'] = update_seqs_without_signal(seqs_per_signal_count['no_signal'], sequences,

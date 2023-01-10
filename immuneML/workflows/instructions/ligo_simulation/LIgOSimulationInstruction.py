@@ -115,7 +115,8 @@ class LIgOSimulationInstruction(Instruction):
         return res
 
     def _create_receptors(self, item: LIgOSimulationItem):
-        if self.state.simulation.paired:
+        if self.state.simulation.paired \
+            or (self.state.simulation.simulation_strategy == SimulationStrategy.REJECTION_SAMPLING and self.state.simulation.keep_p_gen_dist):
             raise NotImplementedError
         else:
             if self.state.simulation.simulation_strategy == SimulationStrategy.REJECTION_SAMPLING:
@@ -123,9 +124,18 @@ class LIgOSimulationInstruction(Instruction):
                                            seed=item.seed, sequence_batch_size=self.state.sequence_batch_size,
                                            max_iterations=self.state.max_iterations, export_pgens=self.export_p_gens)
                 sequences = sampler.make_sequences(self.state.result_path)
-                return sequences
+
             else:
-                raise NotImplementedError
+                implanter = LigoImplanter(
+                    LigoImplanterState(sim_item=item, sequence_type=self.state.simulation.sequence_type, all_signals=self.state.signals,
+                                       seed=item.seed, sequence_batch_size=self.state.sequence_batch_size, export_p_gens=self.export_p_gens,
+                                       keep_p_gen_dist=self.state.simulation.keep_p_gen_dist,
+                                       remove_seqs_with_signals=self.state.simulation.remove_seqs_with_signals,
+                                       max_iterations=self.state.max_iterations, p_gen_bin_count=self.state.simulation.p_gen_bin_count))
+
+                sequences = implanter.make_sequences(self.state.result_path)
+
+            return sequences
 
     def _create_repertoires(self, item: LIgOSimulationItem) -> list:
 
@@ -133,7 +143,7 @@ class LIgOSimulationInstruction(Instruction):
 
             repertoires = LigoImplanter(state=LigoImplanterState(sim_item=item, sequence_type=self.state.simulation.sequence_type, seed=item.seed,
                                                                  all_signals=self.state.signals, sequence_batch_size=self.state.sequence_batch_size,
-                                                                 export_p_gens=self.export_p_gens))\
+                                                                 export_p_gens=self.export_p_gens)) \
                 .make_repertoires(self.state.result_path)
 
         elif self.state.simulation.simulation_strategy == SimulationStrategy.REJECTION_SAMPLING:

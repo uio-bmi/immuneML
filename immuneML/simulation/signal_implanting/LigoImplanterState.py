@@ -8,19 +8,21 @@ from immuneML.simulation.implants.Signal import Signal
 
 @dataclass
 class LigoImplanterState:
-    sim_item: LIgOSimulationItem = None
-    sequence_type: SequenceType = None
-    all_signals: List[Signal] = None
-    sequence_batch_size: int = None
-    seed: int = None
-    export_p_gens: bool = None
-    keep_p_gen_dist: bool = None
-    remove_seqs_with_signals: bool = None
-    max_iterations: int = None
-    p_gen_threshold: float = None
-    target_p_gen_histogram = None
-    current_p_gen_histogram = None
-    p_gen_bin_count: int = None
+    sim_item: LIgOSimulationItem
+    sequence_type: SequenceType
+    all_signals: List[Signal]
+    sequence_batch_size: int
+    seed: int
+    export_p_gens: bool
+    keep_p_gen_dist: bool
+    remove_seqs_with_signals: bool
+    max_iterations: int
+    p_gen_bin_count: int
+
+    # not implemented yet
     keep_low_p_gen_proba: float = None
+
+    # defined at runtime
+    target_p_gen_histogram = None
     sequence_paths: dict = None
     p_gen_bins = None
