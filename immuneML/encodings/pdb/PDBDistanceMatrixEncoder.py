@@ -1,13 +1,11 @@
-import matplotlib.colors
 import numpy
-from Bio.PDB import PDBParser
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
-
 from immuneML.data_model.dataset.PDBDataset import PDBDataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 import numpy as np
 from immuneML.data_model.receptor.RegionType import RegionType
+
 
 
 class PDBDistanceMatrixEncoder(DatasetEncoder):
@@ -27,7 +25,7 @@ class PDBDistanceMatrixEncoder(DatasetEncoder):
 
         processed_data = self.extract_data_for_encoding(dataset, params)
 
-        encoded_dataset = PDBDataset(self, dataset.pdbFilePaths,dataset.labels,dataset.metadata_file,EncodedData(processed_data,None,dataset.get_example_ids()))
+        encoded_dataset = PDBDataset(self, dataset.pdb_file_paths, dataset.labels, dataset.metadata_file, EncodedData(processed_data, None, dataset.get_example_ids()))
 
         #print("Shape of encoded_dataset.encoded_data.examples: " , numpy.shape(encoded_dataset.encoded_data.examples))
         return encoded_dataset
@@ -125,9 +123,7 @@ class PDBDistanceMatrixEncoder(DatasetEncoder):
             return (light_chain, heavy_chain)
 
 
-
     def pad_antigens_to_same_length(self, chains, antigen_length, chain_length):
-
         return_array = chains.copy()
         if chain_length > len(chains[0][0]):
             for x in range(0, len(chains)):

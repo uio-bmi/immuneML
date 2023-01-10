@@ -2,12 +2,8 @@ from pathlib import Path
 from uuid import uuid4
 import pandas as pd
 from immuneML.environment.Constants import Constants
-
-import Bio
-
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.data_model.receptor.ElementGenerator import ElementGenerator
 from Bio.PDB import *
 from typing import List
 
@@ -15,61 +11,60 @@ from typing import List
 
 class PDBDataset(Dataset):
     """
-    This is the base class for ReceptorDataset and SequenceDataset which implements all the functionality for both classes. The only difference between
-    these two classes is whether paired or single chain data is stored.
+    This is the Dataset class that is used to store the information in a PDB file.
     """
 
 
 
-    def __init__(self,pdbFilePaths: List= None, filenames: list = None, labels: dict = None, metadata_file: Path = None,encoded_data: EncodedData = None, identifier: str = None,
-             name: str = None, element_ids: list = None ):
+    def __init__(self, pdb_file_paths: List= None, file_names: list = None, labels: dict = None, metadata_file: Path = None, encoded_data: EncodedData = None, identifier: str = None,
+                 name: str = None, element_ids: list = None):
         super().__init__()
         self.encoded_data = encoded_data
         self.labels = labels
         self.identifier = identifier if identifier is not None else uuid4().hex
         self.name = name
-        self.pdbFilePaths = pdbFilePaths
-        self.filenames = filenames
+        self.pdb_file_paths = pdb_file_paths
+        self.file_names = file_names
         self.metadata_file = metadata_file
 
     # Return an iterator of the pdb structures
     def get_data(self):
         for current_file in self.get_files():
-            pdbParser = PDBParser(
+            pdb_parser = PDBParser(
                 PERMISSIVE=True
             )
-            pdbStructure = pdbParser.get_structure("pdbStructure", current_file)
-            yield pdbStructure
+            pdb_structure = pdb_parser.get_structure("pdbStructure", current_file)
+            yield pdb_structure
 
 
 
 #Return an iterator of the pdb files
     def get_files(self):
-        for files in self.pdbFilePaths:
+        for files in self.pdb_file_paths:
             yield files
 
        ## return self.pdbFilePaths
 
     def get_batch(self, batch_size: int = 10000):
-        self.filenames.sort()
-        self.element_generator.file_list = self.filenames
+        self.file_names.sort()
+        self.element_generator.file_list = self.file_names
         return self.element_generator.build_batch_generator()
 
     def get_filenames(self):
-        return self.filenames
+        return self.file_names
 
     def set_filenames(self, filenames):
-        self.filenames = filenames
+        self.file_names = filenames
 
     def get_example_count(self):
-        return len(self.pdbFilePaths)
+        return len(self.pdb_file_paths)
 
-#Filenames as temp
+
     def get_example_ids(self):
         example_ids =[]
-        for files in self.filenames:
-            fileName = Path(files).name.split(".")[0]
-            example_ids.append(fileName)
+        for files in self.file_names:
+            file_name = Path(files).name.split(".")[0]
+            example_ids.append(file_name)
 
         return example_ids
 
@@ -82,19 +77,6 @@ class PDBDataset(Dataset):
         raise NotImplementedError
 
     def get_metadata(self, field_names: list, return_df: bool = False):
-        """
-        A function to get the metadata of the repertoires. It can be useful in encodings or reports when the repertoire information needed is not
-        present only in the label chosen for the ML model (e.g., disease), but also other information (e.g., age, HLA).
-
-        Args:
-            field_names (list): list of the metadata fields to return; the fields must be present in the metadata files. To find fields available, use :py:obj:`~immuneML.data_model.dataset.RepertoireDataset.RepertoireDataset.get_label_names` function.
-            return_df (bool): determines if the results should be returned as a dataframe where each column corresponds to a field or as a dictionary
-
-        Returns:
-
-            a dictionary where keys are fields names and values are lists of field values for each repertoire; alternatively returns the same information in dataframe format
-
-        """
         assert isinstance(self.metadata_file, Path) and self.metadata_file.is_file(), \
             f"PDBDataset: for dataset {self.name} (id: {self.identifier}) metadata file is not set properly. The metadata file points to " \
             f"{self.metadata_file}."
@@ -106,7 +88,7 @@ class PDBDataset(Dataset):
             return df.to_dict("list")
 
     def get_pdb_filepaths(self):
-        return self.pdbFilePaths
+        return self.pdb_file_paths
 
     def get_metadata_file(self):
         return self.metadata_file
