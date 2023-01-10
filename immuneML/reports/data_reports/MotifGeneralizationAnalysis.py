@@ -64,10 +64,10 @@ class MotifGeneralizationAnalysis(DataReport):
 
     def __init__(self, training_set_identifier_path: str = None, training_percentage: float = None,
                  max_positions: int = None, min_precision: float = None, min_recall: float = None, min_true_positives: int = None,
+                 test_precision_threshold: float = None,
                  split_by_motif_size: bool = None, random_seed: int = None, label: dict = None,
                  smoothen_combined_precision: bool = None,
                  min_points_in_window: int = None, smoothing_constant1: float = None, smoothing_constant2: float = None,
-                 precision_difference: float = None,
                  highlight_motifs_path: str = None, highlight_motifs_name: str = None,
                  dataset: SequenceDataset = None, result_path: Path = None, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
@@ -76,6 +76,7 @@ class MotifGeneralizationAnalysis(DataReport):
         self.max_positions = max_positions
         self.max_positions = max_positions
         self.min_precision = min_precision
+        self.test_precision_threshold = test_precision_threshold
         self.min_recall = min_recall
         self.min_true_positives = min_true_positives
         self.split_by_motif_size = split_by_motif_size
@@ -83,7 +84,6 @@ class MotifGeneralizationAnalysis(DataReport):
         self.min_points_in_window = min_points_in_window
         self.smoothing_constant1 = smoothing_constant1
         self.smoothing_constant2 = smoothing_constant2
-        self.precision_difference = precision_difference
         self.random_seed = random_seed
         self.label = label
         self.col_names = None
@@ -100,16 +100,12 @@ class MotifGeneralizationAnalysis(DataReport):
         ParameterValidator.assert_type_and_value(kwargs["min_precision"], (int, float), location, "min_precision", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_recall"], (int, float), location, "min_recall", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_true_positives"], int, location, "min_true_positives", min_inclusive=1)
+        ParameterValidator.assert_type_and_value(kwargs["test_precision_threshold"], float, location, "test_precision_threshold", min_inclusive=0, max_exclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["split_by_motif_size"], bool, location, "split_by_motif_size")
         ParameterValidator.assert_type_and_value(kwargs["smoothen_combined_precision"], bool, location, "smoothen_combined_precision")
         ParameterValidator.assert_type_and_value(kwargs["min_points_in_window"], int, location, "min_points_in_window", min_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["smoothing_constant1"], (int, float), location, "smoothing_constant1", min_exclusive=0)
         ParameterValidator.assert_type_and_value(kwargs["smoothing_constant2"], (int, float), location, "smoothing_constant2", min_exclusive=0)
-
-        if kwargs["precision_difference"] is None:
-            kwargs["precision_difference"] = 1 - kwargs["min_precision"]
-
-        ParameterValidator.assert_type_and_value(kwargs["precision_difference"], (int, float), location, "precision_difference", min_inclusive=0, max_inclusive=1)
 
         if kwargs["training_set_identifier_path"] is not None:
             ParameterValidator.assert_type_and_value(kwargs["training_set_identifier_path"], str, location, "training_set_identifier_path")
@@ -174,8 +170,8 @@ class MotifGeneralizationAnalysis(DataReport):
     def _construct_and_plot_data(self, training_plotting_data, test_plotting_data, motif_size=None):
         training_combined_precision = self._get_combined_precision(training_plotting_data)
         test_combined_precision = self._get_combined_precision(test_plotting_data)
-        tp_cutoff = self._determine_tp_cutoff(training_combined_precision, test_combined_precision, motif_size)
-        recall_cutoff = self._determine_recall_cutoff(tp_cutoff)
+        tp_cutoff = self._determine_tp_cutoff(test_combined_precision, motif_size)
+        recall_cutoff = self._tp_to_recall(tp_cutoff)
 
         motif_size_suffix = f"_motif_size={motif_size}" if motif_size is not None else ""
         motifs_name = f"motifs of lenght {motif_size}" if motif_size is not None else "motifs"
@@ -398,24 +394,25 @@ class MotifGeneralizationAnalysis(DataReport):
 
         return df
 
-    def _determine_tp_cutoff(self, training_combined_precision, test_combined_precision, motif_size=None):
+    def _determine_tp_cutoff(self, combined_precision, motif_size=None):
         col = "smooth_combined_precision" if self.smoothen_combined_precision else "combined_precision"
 
         try:
-            assert all(training_combined_precision["training_tp"] == test_combined_precision["training_tp"])
-
-            train_test_difference = training_combined_precision[col] - test_combined_precision[col]
-            return min(test_combined_precision[train_test_difference <= self.precision_difference]["training_tp"])
-            # max_tp_below_threshold = max(combined_precision[combined_precision[col] < self.min_precision]["training_tp"])
-            # all_above_threshold = combined_precision[combined_precision["training_tp"] > max_tp_below_threshold]
+            # assert all(training_combined_precision["training_tp"] == test_combined_precision["training_tp"])
             #
-            # return min(all_above_threshold["training_tp"])
+            # train_test_difference = training_combined_precision[col] - test_combined_precision[col]
+            # return min(test_combined_precision[train_test_difference <= self.precision_difference]["training_tp"])
+
+            max_tp_below_threshold = max(combined_precision[combined_precision[col] < self.test_precision_threshold]["training_tp"])
+            all_above_threshold = combined_precision[combined_precision["training_tp"] > max_tp_below_threshold]
+
+            return min(all_above_threshold["training_tp"])
         except ValueError:
             motif_size_warning = f" for motif size = {motif_size}" if motif_size is not None else ""
-            warnings.warn(f"{MotifGeneralizationAnalysis.__name__}: could not automatically determine optimal TP threshold{motif_size_warning} with precison difference {self.precision_difference} based on {col}")
+            warnings.warn(f"{MotifGeneralizationAnalysis.__name__}: could not automatically determine optimal TP threshold{motif_size_warning} with precison differenc  based on {col}")
             return None
 
-    def _determine_recall_cutoff(self, tp_cutoff):
+    def _tp_to_recall(self, tp_cutoff):
         if tp_cutoff is not None:
             return tp_cutoff / self.n_positives_in_training_data
 

@@ -58,13 +58,12 @@ class TestMotifGeneralizationAnalysis(TestCase):
 
 
     def test_set_tp_cutoff(self):
-        training_df = pd.DataFrame({"training_tp": [1, 2, 3, 4, 5, 6, 7, 8], "combined_precision": [1, 1, 1, 1, 1, 1, 1, 1]})
         test_df = pd.DataFrame({"training_tp": [1, 2, 3, 4, 5, 6, 7, 8], "combined_precision": [0.1, 0.2, 0.3, 0.4, 0.8, 0.6, 0.7, 0.8]})
         ma = MotifGeneralizationAnalysis()
 
-        ma.precision_difference = 0.3
-        self.assertEqual(ma._determine_tp_cutoff(training_df, test_df), 5)
+        ma.test_precision_threshold = 0.7
+        self.assertEqual(ma._determine_tp_cutoff(test_df), 7)
 
-        ma.precision_difference = 0
-        self.assertEqual(ma._determine_tp_cutoff(training_df, test_df), None)
+        ma.test_precision_threshold = 1
+        self.assertEqual(ma._determine_tp_cutoff(test_df), None)
 
