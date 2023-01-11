@@ -178,8 +178,7 @@ class MotifEncoder(DatasetEncoder):
                                                    example_weights=dataset.get_example_weights(),
                                                    info={"candidate_motif_filepath": self.candidate_motif_filepath,
                                                          "learned_motif_filepath": self.learned_motif_filepath,
-                                                         "min_precision": self.min_precision,
-                                                         "min_recall": self.min_recall})
+                                                         "positive_class": self._get_positive_class(params.label_config)})
 
         return encoded_dataset
 
@@ -230,6 +229,12 @@ class MotifEncoder(DatasetEncoder):
         label = label_config.get_label_object(label_name)
 
         return np.array([cls == label.positive_class for cls in labels[label_name]])
+
+    def _get_positive_class(self, label_config):
+        label_name = self._get_label_name(label_config)
+        label = label_config.get_label_object(label_name)
+
+        return label.positive_class
 
     def _get_label_name(self, label_config: LabelConfiguration):
         if self.label is not None:

@@ -113,7 +113,6 @@ class PositionalMotifFrequencies(EncodingReport):
         return positional_aa_counts_df
 
     def _plot_gap_sizes(self, gap_size_dict):
-        file_path = self.result_path / f"positional_motif_frequencies.html"
         gap_size_figs = []
 
         for motif_size in gap_size_dict:
