@@ -25,9 +25,8 @@ class PDBDistanceMatrixEncoder(DatasetEncoder):
 
         processed_data = self.extract_data_for_encoding(dataset, params)
 
-        encoded_dataset = PDBDataset(self, dataset.pdb_file_paths, dataset.labels, dataset.metadata_file, EncodedData(processed_data, None, dataset.get_example_ids()))
+        encoded_dataset = PDBDataset(dataset.pdb_file_paths, dataset.file_names, dataset.labels, dataset.metadata_file, EncodedData(processed_data, None, dataset.get_example_ids()))
 
-        #print("Shape of encoded_dataset.encoded_data.examples: " , numpy.shape(encoded_dataset.encoded_data.examples))
         return encoded_dataset
 
 

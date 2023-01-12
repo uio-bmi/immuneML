@@ -1,6 +1,8 @@
 from pathlib import Path
 from uuid import uuid4
 import pandas as pd
+
+from immuneML.data_model.pdb_structure.PDBStructure import PDBStructure
 from immuneML.environment.Constants import Constants
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
@@ -17,7 +19,7 @@ class PDBDataset(Dataset):
 
 
     def __init__(self, pdb_file_paths: List= None, file_names: list = None, labels: dict = None, metadata_file: Path = None, encoded_data: EncodedData = None, identifier: str = None,
-                 name: str = None, element_ids: list = None):
+                 name: str = None, list_of_PDBStructures: list = None, element_ids: list = None):
         super().__init__()
         self.encoded_data = encoded_data
         self.labels = labels
@@ -26,8 +28,20 @@ class PDBDataset(Dataset):
         self.pdb_file_paths = pdb_file_paths
         self.file_names = file_names
         self.metadata_file = metadata_file
+        self.list_of_PDBStructures = self.generate_PDB_Structures()
 
-    # Return an iterator of the pdb structures
+
+
+    def generate_PDB_Structures(self):
+        list_of_PDBStructures = []
+
+        for structure in self.get_data():
+
+            list_of_PDBStructures.append(PDBStructure(structure, contains_antigen=False, receptor_type="TCR"))
+
+        return list_of_PDBStructures
+
+
     def get_data(self):
         for current_file in self.get_files():
             pdb_parser = PDBParser(
@@ -38,12 +52,12 @@ class PDBDataset(Dataset):
 
 
 
-#Return an iterator of the pdb files
+
     def get_files(self):
         for files in self.pdb_file_paths:
             yield files
 
-       ## return self.pdbFilePaths
+
 
     def get_batch(self, batch_size: int = 10000):
         self.file_names.sort()

@@ -1,8 +1,12 @@
 import pandas as pd
 import pathlib
+
+from Bio.PDB import PDBParser
+
 from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.PDBDataset import PDBDataset
+from immuneML.data_model.pdb_structure.PDBStructure import PDBStructure
 from immuneML.data_model.receptor.RegionType import RegionType
 from scripts.specification_util import update_docs_per_mapping
 
@@ -16,18 +20,19 @@ class PDBImport(DataImport):
         current_path = params.get("path")
 
 
-        paths_of_pdb_structures = []
+        paths_to_pdb_structures = []
         file_names = []
 
 
         for pdb_file in pathlib.Path(str(current_path)).glob('*.pdb'):
-            paths_of_pdb_structures.append(str(pdb_file))
+            paths_to_pdb_structures.append(str(pdb_file))
             file_names.append(str(pdb_file))
 
         dataframe = pd.read_csv(params.get("metadata_file"))
         labels = list(dataframe.columns)
 
-        return PDBDataset(paths_of_pdb_structures, file_names,labels, params.get("metadata_file"))
+
+        return PDBDataset(pdb_file_paths=paths_to_pdb_structures, file_names=file_names,labels=labels, metadata_file=params.get("metadata_file"))
 
     @staticmethod
     def get_documentation():
