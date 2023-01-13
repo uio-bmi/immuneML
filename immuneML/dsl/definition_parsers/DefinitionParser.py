@@ -21,11 +21,9 @@ from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.reports.ml_reports.MLReport import MLReport
 from immuneML.reports.multi_dataset_reports.MultiDatasetReport import MultiDatasetReport
 from immuneML.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
-from immuneML.simulation.Implanting import Implanting
 from immuneML.simulation.implants.Motif import Motif
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.motif_instantiation_strategy.MotifInstantiationStrategy import MotifInstantiationStrategy
-from immuneML.simulation.signal_implanting.SignalImplantingStrategy import SignalImplantingStrategy
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from scripts.DocumentatonFormat import DocumentationFormat
@@ -73,13 +71,8 @@ class DefinitionParser:
         instantiations = [DocumentationFormat(inst, inst.__name__.replace('Instantiation', ""), DocumentationFormat.LEVELS[2])
                           for inst in instantiations]
 
-        implanting_strategies = ReflectionHandler.all_nonabstract_subclasses(SignalImplantingStrategy, 'Implanting', 'signal_implanting/')
-        implanting_strategies = [DocumentationFormat(implanting, implanting.__name__.replace('Implanting', ""), DocumentationFormat.LEVELS[2])
-                                 for implanting in implanting_strategies]
-
         classes_to_document = [DocumentationFormat(Motif, Motif.__name__, DocumentationFormat.LEVELS[1])] + instantiations + \
-                              [DocumentationFormat(Signal, Signal.__name__, DocumentationFormat.LEVELS[1])] + implanting_strategies + \
-                               [DocumentationFormat(Implanting, Implanting.__name__, DocumentationFormat.LEVELS[1])]
+                              [DocumentationFormat(Signal, Signal.__name__, DocumentationFormat.LEVELS[1])]
 
         file_path = path / "simulation.rst"
         with file_path.open("w") as file:

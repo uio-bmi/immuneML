@@ -44,7 +44,6 @@ class OLGA(GenerativeModel):
     model_path: Path
     default_model_name: str
     chain: Chain = None
-    use_only_productive: bool = True
     _olga_model: InternalOlgaModel = None
 
     DEFAULT_MODEL_FOLDER_MAP = {
@@ -61,9 +60,7 @@ class OLGA(GenerativeModel):
 
         location = OLGA.__name__
 
-        ParameterValidator.assert_keys_present(list(kwargs.keys()), ['model_path', 'default_model_name', 'use_only_productive'], location,
-                                               'OLGA generative model')
-        ParameterValidator.assert_type_and_value(kwargs['use_only_productive'], bool, location, 'use_only_productive')
+        ParameterValidator.assert_keys_present(list(kwargs.keys()), ['model_path', 'default_model_name'], location, 'OLGA generative model')
 
         if kwargs['model_path']:
             assert 'chain' in kwargs, f"{OLGA.__name__}: chain not defined."
@@ -109,22 +106,27 @@ class OLGA(GenerativeModel):
         return InternalOlgaModel(sequence_gen_model=sequence_gen_model, v_gene_mapping=v_gene_mapping, j_gene_mapping=j_gene_mapping,
                                  genomic_data=genomic_data, olga_gen_model=olga_gen_model)
 
-    def generate_sequences(self, count: int, seed: int = 1, path: Path = None, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> Path:
+    def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool) -> Path:
 
         if not self._olga_model:
             self._olga_model = self.load_model()
 
-        self._generate_productive_sequences(count, path, seed, self._olga_model)
+        self._generate_productive_sequences(count, path, seed, self._olga_model, compute_p_gen, sequence_type)
 
         return path
 
-    def _generate_productive_sequences(self, count: int, path: Path, seed: int, olga_model: InternalOlgaModel, **kwargs):
+    def _generate_productive_sequences(self, count: int, path: Path, seed: int, olga_model: InternalOlgaModel, compute_p_gen: bool,
+                                       sequence_type: SequenceType, **kwargs):
         sequences = pd.DataFrame(index=np.arange(count), columns=OLGA.OUTPUT_COLUMNS)
 
         for i in range(count):
             seq_row = olga_model.sequence_gen_model.gen_rnd_prod_CDR3()
+
+            p_gen = self.compute_p_gen({'sequence': seq_row[0], 'sequence_aa': seq_row[1], 'v_call': olga_model.v_gene_mapping[seq_row[2]],
+                                        'j_call': olga_model.j_gene_mapping[seq_row[3]]}, sequence_type) if compute_p_gen else -1.
+
             sequences.loc[i] = (seq_row[0], seq_row[1], olga_model.v_gene_mapping[seq_row[2]], olga_model.j_gene_mapping[seq_row[3]],
-                                RegionType.IMGT_JUNCTION.name, SequenceFrameType.IN.name, -1.)
+                                RegionType.IMGT_JUNCTION.name, SequenceFrameType.IN.name, p_gen)
 
         sequences.to_csv(path, index=False, sep='\t')
         return path
@@ -152,7 +154,8 @@ class OLGA(GenerativeModel):
     def can_generate_from_skewed_gene_models(self) -> bool:
         return True
 
-    def generate_from_skewed_gene_models(self, v_genes: list, j_genes: list, seed: int, path: Path, sequence_type: SequenceType, batch_size: int):
+    def generate_from_skewed_gene_models(self, v_genes: list, j_genes: list, seed: int, path: Path, sequence_type: SequenceType, batch_size: int,
+                                         compute_p_gen: bool):
         if len(v_genes) > 0 or len(j_genes) > 0:
 
             skewed_model_path = PathBuilder.build(path.parent / "skewed_model/")
@@ -160,7 +163,8 @@ class OLGA(GenerativeModel):
             make_skewed_model_files(v_genes, j_genes, self.model_path, skewed_model_path)
             skewed_model = self.load_model(skewed_model_path)
 
-            self._generate_productive_sequences(count=batch_size, path=skewed_seqs_path, seed=seed, olga_model=skewed_model)
+            self._generate_productive_sequences(count=batch_size, path=skewed_seqs_path, seed=seed, olga_model=skewed_model,
+                                                compute_p_gen=compute_p_gen, sequence_type=sequence_type)
 
             if skewed_seqs_path.is_file():
                 pd.read_csv(skewed_seqs_path, sep='\t').to_csv(path, mode='a', sep='\t', index=False, header=False)

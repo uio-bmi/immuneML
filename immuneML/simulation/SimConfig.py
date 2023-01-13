@@ -1,16 +1,19 @@
 from dataclasses import dataclass
+from typing import List
 
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.simulation.SimConfigItem import SimConfigItem
+from immuneML.simulation.simulation_strategy.SimulationStrategy import SimulationStrategy
 
 
 @dataclass
-class Simulation:
-    sim_items: list = None
+class SimConfig:
+    sim_items: List[SimConfigItem] = None
     identifier: str = None
     is_repertoire: bool = None
     paired: bool = None
     sequence_type: SequenceType = None
-    simulation_strategy: str = None
+    simulation_strategy: SimulationStrategy = None
     p_gen_bin_count: int = None
     keep_p_gen_dist: bool = None
     remove_seqs_with_signals: bool = None

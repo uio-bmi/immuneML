@@ -6,9 +6,9 @@ from immuneML.simulation.implants.Signal import Signal
 
 
 @dataclass
-class LIgOSimulationItem:
+class SimConfigItem:
     """
-    When performing a Simulation, one or more implantings can be specified. An implanting represents
+    When performing a SimConfig, one or more implantings can be specified. An implanting represents
     a set of signals which are implanted in a RepertoireDataset with given rates.
 
     Multiple implantings may be specified in one simulation. In this case, each implanting will only
@@ -34,7 +34,11 @@ class LIgOSimulationItem:
 
         seed (int): starting random seed for the generative model (ideally should differ across simulation items)
 
-        immune_events (dict): a set of key-value pairs that will be added to the metadata (same values for all data generated in one simulation item) and can be later used as labels
+        false_positives_prob_in_receptors (float): when doing repertoire level simulation, what percentage of sequences should be false positives
+
+        false_negative_prob_in_receptors (float): when doing repertoire level simulation, what percentage of sequences should be false negatives
+
+        immune_events (dict): a set of key-value pairs that will be added to the metadata (same values for all data generated in one simulation sim_item) and can be later used as labels
 
     YAML specification:
 
@@ -66,4 +70,6 @@ class LIgOSimulationItem:
     generative_model: GenerativeModel = None
     number_of_examples: int = 0
     receptors_in_repertoire_count: int = 0
+    false_positive_prob_in_receptors: float = 0.
+    false_negative_prob_in_receptors: float = 0.
     immune_events: dict = field(default_factory=dict)

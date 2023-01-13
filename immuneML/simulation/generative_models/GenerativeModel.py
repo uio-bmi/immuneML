@@ -15,7 +15,7 @@ class GenerativeModel:
         pass
 
     @abc.abstractmethod
-    def generate_sequences(self, count: int, seed: int = None, path: Path = None, sequence_type: SequenceType = SequenceType.AMINO_ACID):
+    def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
         pass
 
     @abc.abstractmethod
@@ -35,5 +35,6 @@ class GenerativeModel:
         pass
 
     @abc.abstractmethod
-    def generate_from_skewed_gene_models(self, v_genes: list, j_genes: list, seed: int, path: Path, sequence_type: SequenceType, batch_size: int):
+    def generate_from_skewed_gene_models(self, v_genes: list, j_genes: list, seed: int, path: Path, sequence_type: SequenceType, batch_size: int,
+                                         compute_p_gen: bool):
         pass

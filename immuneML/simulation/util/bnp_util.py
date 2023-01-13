@@ -15,15 +15,17 @@ def make_bnp_dataclass_object_from_dicts(dict_objects: List[dict], field_type_ma
 
     transformed_objs = _list_of_dicts_to_dict_of_lists(dict_objects)
     fields = _extract_fields(transformed_objs, field_type_map)
+    fields_list = sorted(list(fields.items()), key=lambda x: x[0])
 
     if signals is not None:
         signal_names = [field for field in fields if field in [signal.id for signal in signals]]
         functions = {"get_signal_matrix": lambda self: np.array([getattr(self, name) for name in signal_names]).T,
                      "get_signal_names": lambda self: signal_names}
+
         new_class = bnpdataclass(dc_make_dataclass("DynamicDC", bases=tuple([base_class]) if base_class is not None else (), namespace=functions,
-                                                   fields=[(field_name, field_type) for field_name, field_type in fields.items()]))
+                                                   fields=fields_list))
     else:
-        new_class = base_class.extend(list(fields.items()))
+        new_class = base_class.extend(fields)
 
     for key in transformed_objs:
         if transformed_objs[key] is None and isinstance(fields[key], Encoding):
@@ -55,7 +57,7 @@ def _extract_fields(transformed_objs, field_type_map):
 
 
 def merge_dataclass_objects(objects: list):  # TODO: replace with equivalent from npstructures
-    field_names = list(set(chain.from_iterable([field.name for field in get_fields(obj)] for obj in objects)))
+    field_names = sorted(list(set(chain.from_iterable([field.name for field in get_fields(obj)] for obj in objects))))
 
     for obj in objects:
         assert all(hasattr(obj, field) for field in field_names), (obj, field_names)
@@ -70,6 +72,8 @@ def _make_new_fields(new_fields: dict) -> List[tuple]:
     for field_name, field_vals in new_fields.items():
         assert all(isinstance(field_val, type(field_vals[0])) for field_val in field_vals)
         fields.append((field_name, type(field_vals[0])))
+
+    fields.sort(key=lambda x: x[0])
 
     return fields
 

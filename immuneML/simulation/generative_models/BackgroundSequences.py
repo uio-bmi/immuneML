@@ -5,7 +5,7 @@ from immuneML.environment.SequenceType import SequenceType
 
 
 @bnpdataclass
-class GenModelAsTSV:
+class BackgroundSequences:
     sequence_aa: AminoAcidEncoding
     sequence: DNAEncoding
     v_call: str
