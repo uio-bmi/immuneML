@@ -28,6 +28,7 @@ class MotifTestSetPerformance(EncodingReport):
     """
     Plots the performance of a set of motifs learned by MotifEncoder on an independent test set.
 
+    # todo should precision/recall be added also?
 
 
 
@@ -191,11 +192,6 @@ class MotifTestSetPerformance(EncodingReport):
 
         return [table for table in [train_results_table, test_results_table, training_combined_precision_table,
                                     test_combined_precision_table] if table is not None]
-
-    def _write_output_table(self, feature_annotations, file_path, name=None):
-        feature_annotations.to_csv(file_path, index=False)
-
-        return ReportOutput(path=file_path, name=name)
 
     def _write_plots(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision):
         training_tp_plot = self._safe_plot(plot_callable="_plot_precision_per_tp", plotting_data=training_plotting_data, combined_precision=training_combined_precision, dataset_type=self.training_set_name, file_path=self.result_path / f"training_precision_per_tp.html")

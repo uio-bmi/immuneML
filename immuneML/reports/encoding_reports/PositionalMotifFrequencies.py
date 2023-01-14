@@ -5,7 +5,7 @@ import plotly.express as px
 import pandas as pd
 from typing import List
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.dataset import SequenceDataset
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
@@ -36,7 +36,7 @@ class PositionalMotifFrequencies(EncodingReport):
     def build_object(cls, **kwargs):
         return PositionalMotifFrequencies(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, name: str = None,
+    def __init__(self, dataset: SequenceDataset = None, result_path: Path = None, name: str = None,
                  number_of_processes: int = 1):
         super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
 
@@ -181,7 +181,7 @@ class PositionalMotifFrequencies(EncodingReport):
             name=f"Frequencies of amino acids found in the high-precision high-recall motifs",
         )
 
-    def _write_gap_size_table(self, gap_size_dict) -> ReportOutput:
+    def _write_gap_size_table(self, gap_size_dict) -> List[ReportOutput]:
         gap_size_tables = []
         for motif_size in gap_size_dict:
             table_path = (
@@ -202,6 +202,7 @@ class PositionalMotifFrequencies(EncodingReport):
         return gap_size_tables
     def check_prerequisites(self):
         valid_encodings = [MotifEncoder.__name__]
+
         if self.dataset.encoded_data is None or self.dataset.encoded_data.info is None:
             logging.warning("PositonalMotifFrequencies: the dataset is not encoded, skipping this report...")
             return False

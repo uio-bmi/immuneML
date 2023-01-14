@@ -306,6 +306,7 @@ class MotifGeneralizationAnalysis(DataReport):
         results_table_name = f"Confusion matrix and precision/recall scores for significant {motifs_name}" + " on the {} set"
         combined_precision_table_name = f"Combined precision scores of {motifs_name}" + " on the {} set for each TP value on the " + str(self.training_set_name)
 
+
         train_results_table = self._write_output_table(training_plotting_data, self.result_path / f"training_set_scores{file_suffix}.csv", results_table_name.format("training"))
         test_results_table = self._write_output_table(test_plotting_data, self.result_path / f"test_set_scores{file_suffix}.csv", results_table_name.format("test"))
         training_combined_precision_table = self._write_output_table(training_combined_precision, self.result_path / f"training_combined_precision{file_suffix}.csv", combined_precision_table_name.format("training"))
@@ -323,11 +324,6 @@ class MotifGeneralizationAnalysis(DataReport):
                              f"training recall cutoff: {recall_cutoff}"])
 
         return [ReportOutput(path=output_path, name=f"TP and recall cutoffs for {motifs_name}")]
-
-    def _write_output_table(self, feature_annotations, file_path, name=None):
-        feature_annotations.to_csv(file_path, index=False)
-
-        return ReportOutput(path=file_path, name=name)
 
     def _write_plots(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, tp_cutoff, motifs_name, file_suffix=""):
         training_tp_plot = self._safe_plot(plot_callable="_plot_precision_per_tp", plotting_data=training_plotting_data, combined_precision=training_combined_precision, dataset_type=self.training_set_name, file_path=self.result_path / f"training_precision_per_tp{file_suffix}.html", motifs_name=motifs_name)
