@@ -110,7 +110,7 @@ class MotifEncoder(DatasetEncoder):
                                                                                         f"When setting separate recall cutoffs for each motif size, the values of the dictionary " \
                                                                                         f"must be numeric or None."
 
-            min_recall = {key: value if isinstance(value, int) else np.inf for key, value in min_recall.items()}
+            min_recall = {key: value if isinstance(value, (int, float)) else 1 for key, value in min_recall.items()}
 
         else:
             ParameterValidator.assert_type_and_value(min_recall, (int, float), location, "min_recall", min_inclusive=0, max_inclusive=1)
