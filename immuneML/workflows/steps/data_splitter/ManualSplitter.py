@@ -49,7 +49,8 @@ class ManualSplitter:
         ManualSplitter._check_unique_count(example_ids, input_params.dataset)
 
         metadata_df = ManualSplitter._get_metadata(metadata_path, dataset_type, col_name)
-        indices = [i for i in range(len(example_ids)) if example_ids[i] in metadata_df[col_name].values.tolist()]
+        indices_of_interest = metadata_df[col_name].astype(str).values.tolist()
+        indices = [i for i in range(len(example_ids)) if str(example_ids[i]) in indices_of_interest]
 
         logging.info(f"{ManualSplitter.__name__}: Making {dataset_type} dataset subset {len(indices)} elements with indices: {indices}")
 
