@@ -52,7 +52,7 @@ class ManualSplitter:
         indices_of_interest = metadata_df[col_name].astype(str).values.tolist()
         indices = [i for i in range(len(example_ids)) if str(example_ids[i]) in indices_of_interest]
 
-        logging.info(f"{ManualSplitter.__name__}: Making {dataset_type} dataset subset {len(indices)} elements with indices: {indices}")
+        logging.info(f"{ManualSplitter.__name__}: Making {dataset_type} dataset subset with {len(indices)} elements.")
 
         return Util.make_dataset(input_params.dataset, indices, input_params, 0, dataset_type)
 
