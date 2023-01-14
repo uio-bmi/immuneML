@@ -5,7 +5,7 @@ from unittest import TestCase
 from immuneML.caching.CacheType import CacheType
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
-from immuneML.reports.encoding_reports.NonMotifSimilarity import NonMotifSimilarity
+from immuneML.reports.encoding_reports.NonMotifSequenceSimilarity import NonMotifSequenceSimilarity
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -14,7 +14,7 @@ from immuneML.simulation.dataset_generation.RandomDatasetGenerator import Random
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class TestNonMotifSimilarity(TestCase):
+class TestNonMotifSequenceSimilarity(TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
@@ -55,7 +55,7 @@ class TestNonMotifSimilarity(TestCase):
 
         encoded_dataset = self._create_dummy_encoded_data(path)
 
-        report = NonMotifSimilarity.build_object(
+        report = NonMotifSequenceSimilarity.build_object(
             **{"dataset": encoded_dataset, "result_path": path}
         )
 

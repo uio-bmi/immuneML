@@ -16,7 +16,7 @@ from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class NonMotifSimilarity(EncodingReport):
+class NonMotifSequenceSimilarity(EncodingReport):
     """
     Plots the similarity of positions outside the motifs of interest. This report can be used to investigate if the
     motifs of interest as determined by the :py:obj:`~immuneML.encodings.motif_encoding.MotifEncoder.MotifEncoder`
@@ -39,7 +39,7 @@ class NonMotifSimilarity(EncodingReport):
 
     @classmethod
     def build_object(cls, **kwargs):
-        return NonMotifSimilarity(**kwargs)
+        return NonMotifSequenceSimilarity(**kwargs)
 
     def __init__(self, dataset: SequenceDataset = None, result_path: Path = None, name: str = None,
                  number_of_processes: int = 1):
