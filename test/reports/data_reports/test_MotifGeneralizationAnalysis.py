@@ -22,6 +22,7 @@ class TestMotifGeneralizationAnalysis(TestCase):
         training_set_identifiers = identifiers[::2]
 
         with open(path / "training_ids.txt", "w") as identifiers_file:
+            identifiers_file.writelines("example_id\n")
             identifiers_file.writelines([identifier + "\n" for identifier in training_set_identifiers])
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "MotifGeneralizationAnalysis")

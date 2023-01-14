@@ -45,7 +45,8 @@ class MotifGeneralizationAnalysis(DataReport):
 
         smoothen_combined_precision (bool): whether to add a smoothed line representing the combined precision to the precision-vs-TP plot. When set to True, this may take considerable extra time to compute. By default, plot_smoothed_combined_precision is set to True.
 
-        training_set_identifier_path (str): path to a file containing 'sequence_identifiers' of the sequences used for the training set. Each line in the file should represent one sequence identifier, with no file header. The remaining sequences will be used as the validation set. If training_set_identifier_path is not set, a random subset of the data (according to training_percentage) will be assigned to be the training set.
+        training_set_identifier_path (str): path to a file containing 'sequence_identifiers' of the sequences used for the training set. This file should have a single column named 'example_id' and have one sequence identifier per line. If training_set_identifier_path is not set, a random subset of the data (according to training_percentage) will be assigned to be the training set.
+
 
     YAML specification:
 
@@ -235,8 +236,7 @@ class MotifGeneralizationAnalysis(DataReport):
 
 
     def _get_train_val_indices_from_file(self):
-        with open(self.training_set_identifier_path, "r") as file:
-            input_train_identifiers = [identifier.strip() for identifier in file.readlines()]
+        input_train_identifiers = list(pd.read_csv(self.training_set_identifier_path, usecols=["example_id"])["example_id"])
 
         train_indices = []
         val_indices = []
