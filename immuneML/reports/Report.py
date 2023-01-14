@@ -1,6 +1,7 @@
 import abc
 import logging
 
+from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 
 
@@ -136,3 +137,11 @@ class Report(metaclass=abc.ABCMeta):
         except Exception as e:
             logging.exception(f"An exception occurred while plotting the data in report {self.name}. See the details below:")
             logging.warning(warning_mssg)
+
+    def _write_output_table(self, table, file_path, name=None):
+        sep = "," if file_path.suffix == "csv" else "\t"
+        table.to_csv(file_path, index=False, sep=sep)
+
+        return ReportOutput(path=file_path, name=name)
+
+

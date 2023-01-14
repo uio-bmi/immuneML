@@ -12,13 +12,13 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.receptor.receptor_sequence import ReceptorSequence
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
 from immuneML.environment.Constants import Constants
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
+from immuneML.util.ReadsType import ReadsType
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
@@ -122,7 +122,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
         ParameterValidator.assert_in_valid_list(normalization_type.upper(), [item.name for item in NormalizationType], location, "normalization_type")
         ParameterValidator.assert_in_valid_list(reads.upper(), [item.name for item in ReadsType], location, "reads")
-        ParameterValidator.assert_in_valid_list(sequence_encoding.upper(), [item.name for item in SequenceEncodingType], location, "sequence_encoding")
+        ParameterValidator.assert_in_valid_list(sequence_encoding.upper(), [item.name for item in SequenceEncodingType], location,
+                                                "sequence_encoding")
         ParameterValidator.assert_type_and_value(scale_to_zero_mean, bool, location, "scale_to_zero_mean")
         ParameterValidator.assert_type_and_value(scale_to_unit_variance, bool, location, "scale_to_unit_variance")
         ParameterValidator.assert_type_and_value(sequence_type, str, location, 'sequence_type')
@@ -130,7 +131,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
         if "IMGT" in sequence_encoding.upper():
             assert sequence_type.upper() == SequenceType.AMINO_ACID.name, f"{location}: for IMGT-based k-mer frequency encoding (here: " \
-                                                                     f"{sequence_encoding.upper()}), sequence type has to be 'amino_acid'."
+                                                                          f"{sequence_encoding.upper()}), sequence type has to be 'amino_acid'."
 
         vars_to_check = {"k": k, "k_left": k_left, "k_right": k_right, "min_gap": min_gap, "max_gap": max_gap}
         for param in vars_to_check.keys():
@@ -156,7 +157,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
         prepared_params = KmerFrequencyEncoder._prepare_parameters(**params)
         encoder = ReflectionHandler.get_class_by_name(KmerFrequencyEncoder.dataset_mapping[dataset.__class__.__name__],
-                                                          "kmer_frequency/")(**prepared_params)
+                                                      "kmer_frequency/")(**prepared_params)
 
         return encoder
 

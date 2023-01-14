@@ -36,13 +36,14 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
     """
 
     def __init__(self, training_percentage: float = None, max_motifs: int = None,
-                 patience: int = None, min_delta: float = None,
+                 patience: int = None, min_delta: float = None, keep_all: bool = None,
                  result_path: Path = None):
         super().__init__()
         self.training_percentage = training_percentage
         self.max_motifs = max_motifs
         self.patience = patience
         self.min_delta = min_delta
+        self.keep_all = keep_all
 
         self.feature_names = None
         self.rule_tree_indices = None
@@ -50,10 +51,11 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         self.label = None
         self.optimization_metric = None
         self.class_mapping = None
+
         self.result_path = result_path
 
     def predict(self, encoded_data: EncodedData, label: Label):
-        return {self.label.name: self._get_rule_tree_predictions(encoded_data, self.rule_tree_indices)}
+        return {self.label.name: self._get_rule_tree_predictions_class(encoded_data, self.rule_tree_indices)}
 
     def predict_proba(self, encoded_data: EncodedData, label: Label):
         warnings.warn(f"{MotifClassifier.__name__}: cannot predict probabilities.")
@@ -63,21 +65,30 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         self.feature_names = encoded_data.feature_names
         self.label = label
         self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name])
+        self.optimization_metric = optimization_metric
+        
         # todo deal with positive_class, what if it is not explicitly set?
         # todo generalize with the positive class label stuff in MotifEncoder
         # todo weights in immuneML general must also be recalculated here for specific training and validation sets!
 
-        encoded_train_data, encoded_val_data = self._prepare_and_split_data(encoded_data)
-        self.optimization_metric = optimization_metric
-        self.rule_tree_indices = self._build_rule_tree(encoded_train_data, encoded_val_data)
+        self.rule_tree_indices = self._build_rule_tree(encoded_data)
         self.rule_tree_features = self._get_rule_tree_features_from_indices(self.rule_tree_indices, self.feature_names)
+        self._export_selected_features(self.result_path, self.rule_tree_features)
 
         logging.info(f"{MotifClassifier.__name__}: finished training.")
 
-    def _build_rule_tree(self, encoded_train_data, encoded_val_data):
-        return self._recursively_select_rules(encoded_train_data=encoded_train_data,
-                                              encoded_val_data=encoded_val_data,
-                                              last_val_scores=[], prev_rule_indices=[])
+    def _build_rule_tree(self, encoded_data):
+        if self.keep_all:
+            rules = list(range(len(self.feature_names)))
+            logging.info(f"{MotifClassifier.__name__}: all {len(rules)} rules kept.")
+        else:
+            encoded_train_data, encoded_val_data = self._prepare_and_split_data(encoded_data)
+            rules = self._recursively_select_rules(encoded_train_data=encoded_train_data,
+                                                  encoded_val_data=encoded_val_data,
+                                                  last_val_scores=[], prev_rule_indices=[])
+            logging.info(f"{MotifClassifier.__name__}: selected {len(rules)} out of {len(self.feature_names)} rules.")
+
+        return rules
 
     def _get_rule_tree_features_from_indices(self, rule_tree_indices, feature_names):
         return [feature_names[idx] for idx in rule_tree_indices]
@@ -163,15 +174,19 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
 
     def _test_performance_rule_tree(self, encoded_data, rule_indices):
         optimization_scoring_fn = MetricUtil.get_metric_fn(Metric[self.optimization_metric.upper()])
-        pred = self._get_rule_tree_predictions(encoded_data, rule_indices)
+        pred = self._get_rule_tree_predictions_bool(encoded_data, rule_indices)
 
         y_true = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
         return optimization_scoring_fn(y_true=y_true, y_pred=pred, sample_weight=encoded_data.example_weights)
 
-    def _get_rule_tree_predictions(self, encoded_data, rule_indices):
+    def _get_rule_tree_predictions_bool(self, encoded_data, rule_indices):
         self._check_features(encoded_data.feature_names)
         return np.logical_or.reduce([encoded_data.examples[:, i] for i in rule_indices])
+
+    def _get_rule_tree_predictions_class(self, encoded_data, rule_indices):
+        y = self._get_rule_tree_predictions_bool(encoded_data, rule_indices).astype(int)
+        return Util.map_to_old_class_values(y, self.class_mapping)
 
     def _check_features(self, encoded_data_features):
         if self.feature_names != encoded_data_features:
@@ -180,11 +195,16 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
             logging.info(mssg + f"\n\nEvaluation features: {encoded_data_features}\nFitting features: {self.feature_names}")
             raise ValueError(mssg + " See the log file for more info.")
 
+    def _export_selected_features(self, path, rule_tree_features):
+        if path is not None:
+            PathBuilder.build(path)
+            with open(path / "selected_features.txt", "w") as file:
+                file.writelines([f"{feature}\n" for feature in rule_tree_features])
+
     def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric: str = None,
                                 number_of_splits: int = 5, cores_for_training: int = -1):
         logging.warning(f"{MotifClassifier.__name__}: cross_validation is not implemented for this method. Using standard fitting instead...")
         self.fit(encoded_data=encoded_data, label=label)
-
 
     def _prepare_and_split_data(self, encoded_data: EncodedData):
         train_indices, val_indices = Util.get_train_val_indices(len(encoded_data.example_ids), self.training_percentage)

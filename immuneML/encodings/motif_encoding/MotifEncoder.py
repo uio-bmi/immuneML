@@ -15,11 +15,11 @@ from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.motif_encoding.PositionalMotifParams import PositionalMotifParams
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.util.EncoderHelper import EncoderHelper
-from immuneML.util.NumpyHelper import NumpyHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 
 
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class MotifEncoder(DatasetEncoder):
@@ -148,7 +148,7 @@ class MotifEncoder(DatasetEncoder):
             return self._encode_data(dataset, params)
         else:
             learned_motifs = PositionalMotifHelper.read_motifs_from_file(self.learned_motif_filepath)
-            return self.get_encoded_dataset_from_motifs(dataset, learned_motifs, params.label_config, params.pool_size)
+            return self.get_encoded_dataset_from_motifs(dataset, learned_motifs, params)
 
     def _encode_data(self, dataset, params: EncoderParams):
         learned_motifs = self._compute_motifs(dataset, params)
@@ -156,7 +156,7 @@ class MotifEncoder(DatasetEncoder):
         self.learned_motif_filepath = params.result_path / "significant_motifs.tsv"
         PositionalMotifHelper.write_motifs_to_file(learned_motifs, self.learned_motif_filepath)
 
-        return self.get_encoded_dataset_from_motifs(dataset, learned_motifs, params.label_config, params.pool_size)
+        return self.get_encoded_dataset_from_motifs(dataset, learned_motifs, params)
 
     def _compute_motifs(self, dataset, params):
         motifs = self._prepare_candidate_motifs(dataset, params)
@@ -173,11 +173,13 @@ class MotifEncoder(DatasetEncoder):
 
         return motifs
 
-    def get_encoded_dataset_from_motifs(self, dataset, motifs, label_config, number_of_processes):
-        labels = EncoderHelper.encode_element_dataset_labels(dataset, label_config)
+    def get_encoded_dataset_from_motifs(self, dataset, motifs, params):
+        labels = EncoderHelper.encode_element_dataset_labels(dataset, params.label_config)
 
         examples, feature_names, feature_annotations = self._construct_encoded_data_matrix(dataset, motifs,
-                                                                                           label_config, number_of_processes)
+                                                                                           params.label_config, params.pool_size)
+
+        self._export_confusion_matrix(params.result_path, feature_annotations)
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=examples,
@@ -189,10 +191,16 @@ class MotifEncoder(DatasetEncoder):
                                                    example_weights=dataset.get_example_weights(),
                                                    info={"candidate_motif_filepath": self.candidate_motif_filepath,
                                                          "learned_motif_filepath": self.learned_motif_filepath,
-                                                         "min_precision": self.min_precision,
-                                                         "min_recall": self.min_recall})
+                                                         "positive_class": self._get_positive_class(params.label_config)})
 
         return encoded_dataset
+
+    def _export_confusion_matrix(self, result_path, feature_annotations):
+        try:
+            PathBuilder.build(result_path)
+            feature_annotations.to_csv(result_path / "confusion_matrix.tsv", index=False, sep="\t")
+        except Exception as e:
+            logging.exception(f"MotifEncoder: An exception occurred while exporting the confusion matrix: {e}")
 
     def _prepare_candidate_motifs(self, dataset, params):
         full_dataset = EncoderHelper.get_current_dataset(dataset, self.context)
@@ -234,6 +242,12 @@ class MotifEncoder(DatasetEncoder):
         label = label_config.get_label_object(label_name)
 
         return np.array([cls == label.positive_class for cls in labels[label_name]])
+
+    def _get_positive_class(self, label_config):
+        label_name = self._get_label_name(label_config)
+        label = label_config.get_label_object(label_name)
+
+        return label.positive_class
 
     def _get_label_name(self, label_config: LabelConfiguration):
         if self.label is not None:

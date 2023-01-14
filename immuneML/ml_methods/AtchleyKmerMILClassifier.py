@@ -102,7 +102,7 @@ class AtchleyKmerMILClassifier(MLMethod):
         self.feature_names = encoded_data.feature_names
 
         self.label = label
-        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name])
+        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name], self.label.positive_class)
 
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
         self.logistic_regression = None

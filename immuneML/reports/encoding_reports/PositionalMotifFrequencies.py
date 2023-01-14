@@ -1,15 +1,17 @@
 from pathlib import Path
 
+import logging
 import plotly.express as px
 import pandas as pd
 from typing import List
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.dataset import SequenceDataset
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
+from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -20,10 +22,6 @@ class PositionalMotifFrequencies(EncodingReport):
     Plots a stacked bar plot of amino acid occurrence at different indices in any given dataset, along with a plot
     investigating motif continuity which displays a bar plot of the gap sizes between the amino acids in the motifs in
     the given dataset. Note that a distance of 1 means that the amino acids are continuous (next to each other).
-
-    # todo: make gap sizes 0-based (essentially: subtract 1 from all gap sizes, so that contiguous amino acids have gap size 0)
-    # todo: the header of gap_size_table_motif_size_{motif_size}.csv is wrong; make sure it contains no quotes
-    # todo: implement check_prerequisites() (from Report class), which should check that the used encoder is MotifEncoder. see e.g. RelevantSequenceExporter for an example
 
     YAML specification example:
 
@@ -38,7 +36,7 @@ class PositionalMotifFrequencies(EncodingReport):
     def build_object(cls, **kwargs):
         return PositionalMotifFrequencies(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, name: str = None,
+    def __init__(self, dataset: SequenceDataset = None, result_path: Path = None, name: str = None,
                  number_of_processes: int = 1):
         super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
 
@@ -70,7 +68,7 @@ class PositionalMotifFrequencies(EncodingReport):
     def _get_gap_sizes(self, motifs):
         gap_size_count = {
             motif_size: {
-                gap_size: 0 for gap_size in range(1, self.get_sequence_length())
+                gap_size: 0 for gap_size in range(0, self.get_sequence_length()-1)
             }
             for motif_size in range(self.get_sequence_length())
         }
@@ -82,7 +80,7 @@ class PositionalMotifFrequencies(EncodingReport):
             indices_gap_size = len(indices)
 
             for i in range(indices_gap_size - 1):
-                gap_size_count[indices_gap_size][indices[i + 1] - indices[i]] += 1
+                gap_size_count[indices_gap_size][indices[i + 1] - indices[i] -1] += 1
         gap_size_dict = dict()
 
         for gap_size in gap_size_count:
@@ -113,7 +111,6 @@ class PositionalMotifFrequencies(EncodingReport):
         return positional_aa_counts_df
 
     def _plot_gap_sizes(self, gap_size_dict):
-        file_path = self.result_path / f"positional_motif_frequencies.html"
         gap_size_figs = []
 
         for motif_size in gap_size_dict:
@@ -184,7 +181,7 @@ class PositionalMotifFrequencies(EncodingReport):
             name=f"Frequencies of amino acids found in the high-precision high-recall motifs",
         )
 
-    def _write_gap_size_table(self, gap_size_dict) -> ReportOutput:
+    def _write_gap_size_table(self, gap_size_dict) -> List[ReportOutput]:
         gap_size_tables = []
         for motif_size in gap_size_dict:
             table_path = (
@@ -192,9 +189,9 @@ class PositionalMotifFrequencies(EncodingReport):
             )
             gap_size_sub_dict = gap_size_dict[motif_size]
             gap_size_df = pd.DataFrame.from_dict(
-                gap_size_sub_dict, orient="index", dtype=str
+                gap_size_sub_dict, columns=["occurrence"], orient="index", dtype=str
             )
-            gap_size_df.to_csv(table_path, index=True, header=["Gap size, occurrence"])
+            gap_size_df.to_csv(table_path, index=True, index_label="gap size", header=True)
             gap_size_tables.append(
                 ReportOutput(
                     path=table_path,
@@ -203,3 +200,15 @@ class PositionalMotifFrequencies(EncodingReport):
             )
 
         return gap_size_tables
+    def check_prerequisites(self):
+        valid_encodings = [MotifEncoder.__name__]
+
+        if self.dataset.encoded_data is None or self.dataset.encoded_data.info is None:
+            logging.warning("PositonalMotifFrequencies: the dataset is not encoded, skipping this report...")
+            return False
+        elif self.dataset.encoded_data.encoding not in valid_encodings:
+            logging.warning(f"PositonalMotifFrequencies: the dataset encoding ({self.dataset.encoded_data.encoding}) was not in the list of valid "
+                            f"encodings ({valid_encodings}), skipping this report...")
+            return False
+        else:
+            return True

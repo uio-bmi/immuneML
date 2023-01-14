@@ -1,7 +1,7 @@
 import os
 import shutil
-from pathlib import Path
 from unittest import TestCase
+
 import pandas as pd
 
 from immuneML.caching.CacheType import CacheType
@@ -12,7 +12,6 @@ from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.SequencesWithSignificantKmers import SequencesWithSignificantKmers
-from immuneML.reports.data_reports.SignificantKmerPositions import SignificantKmerPositions
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -69,7 +68,7 @@ class TestSequencesWithSignificantKmers(TestCase):
         return str(file_path)
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path / f"test/tmp/significant_kmer_positions/"
+        path = EnvironmentSettings.tmp_test_path / f"seqs_with_significant_kmer_positions/"
 
         PathBuilder.build(path)
 
@@ -77,11 +76,11 @@ class TestSequencesWithSignificantKmers(TestCase):
         implanted_sequences_path = self._get_implanted_sequences(path)
 
         report = SequencesWithSignificantKmers.build_object(**{"dataset": dataset,
-                                                              "p_values": [1.0, 0.1],
-                                                              "k_values": [2, 3],
-                                                              "reference_sequences_path": implanted_sequences_path,
-                                                              "label": {"mylabel": {"positive_class": "+"}},
-                                                              "result_path": path})
+                                                               "p_values": [1.0, 0.1],
+                                                               "k_values": [2, 3],
+                                                               "reference_sequences_path": implanted_sequences_path,
+                                                               "label": {"mylabel": {"positive_class": "+"}},
+                                                               "result_path": path})
 
         self.assertListEqual(report.reference_sequences, ["IAIAA", "GGGG"])
 
@@ -90,11 +89,10 @@ class TestSequencesWithSignificantKmers(TestCase):
         self.assertIsInstance(result, ReportResult)
         self.assertEqual(len(result.output_tables), 4)
 
-        self.assertEqual(result.output_tables[0].path, Path(path / "sequences_with_significant_2-mers_at_p=1.0.txt"))
-        self.assertEqual(result.output_tables[1].path, Path(path / "sequences_with_significant_2-mers_at_p=0.1.txt"))
-        self.assertEqual(result.output_tables[2].path, Path(path / "sequences_with_significant_3-mers_at_p=1.0.txt"))
-        self.assertEqual(result.output_tables[3].path, Path(path / "sequences_with_significant_3-mers_at_p=0.1.txt"))
-
+        self.assertEqual(result.output_tables[0].path, path / "sequences_with_significant_2-mers_at_p=1.0.txt")
+        self.assertEqual(result.output_tables[1].path, path / "sequences_with_significant_2-mers_at_p=0.1.txt")
+        self.assertEqual(result.output_tables[2].path, path / "sequences_with_significant_3-mers_at_p=1.0.txt")
+        self.assertEqual(result.output_tables[3].path, path / "sequences_with_significant_3-mers_at_p=0.1.txt")
 
         self.assertTrue(os.path.isfile(result.output_tables[0].path))
         self.assertTrue(os.path.isfile(result.output_tables[1].path))
@@ -114,5 +112,3 @@ class TestSequencesWithSignificantKmers(TestCase):
         self.assertListEqual(list(result_output[0]), ['GGGG'])
 
         shutil.rmtree(path)
-
-

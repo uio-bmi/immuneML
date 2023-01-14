@@ -90,7 +90,7 @@ class SklearnMethod(MLMethod):
     def fit(self, encoded_data: EncodedData, label: Label, optimization_metric=None, cores_for_training: int = 2):
 
         self.label = label
-        self.class_mapping = Util.make_class_mapping(encoded_data.labels[self.label.name])
+        self.class_mapping = Util.make_class_mapping(encoded_data.labels[self.label.name], self.label.positive_class)
         self.feature_names = encoded_data.feature_names
 
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
@@ -158,7 +158,7 @@ class SklearnMethod(MLMethod):
     def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric="balanced_accuracy",
                                 number_of_splits: int = 5, cores_for_training: int = -1):
 
-        self.class_mapping = Util.make_class_mapping(encoded_data.labels[label.name])
+        self.class_mapping = Util.make_class_mapping(encoded_data.labels[label.name], label.positive_class)
         self.feature_names = encoded_data.feature_names
         self.label = label
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
@@ -171,7 +171,7 @@ class SklearnMethod(MLMethod):
                                  number_of_splits: int = 5, cores_for_training: int = 1):
 
         model = self._get_ml_model()
-        scoring = Metric.get_sklearn_score_name(Metric[optimization_metric.upper()])
+        scoring = Metric.get_sklearn_score_name(Metric.get_metric(optimization_metric.upper()))
 
         if scoring not in SCORERS.keys():
             scoring = "balanced_accuracy"

@@ -18,6 +18,7 @@ class TestAminoAcidFrequencyDistribution(TestCase):
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "AminoAcidFrequencyDistribution")
         params["dataset"] = dataset
+        params["split_by_label"] = True
         params["result_path"] = path / "result"
 
         report = AminoAcidFrequencyDistribution.build_object(**params)

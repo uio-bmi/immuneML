@@ -110,7 +110,7 @@ class TestPositionalMotifFrequencies(TestCase):
 
         self.assertTrue(report.check_prerequisites())
 
-        result = report.generate_report()
+        result = report._generate()
 
         self.assertIsInstance(result, ReportResult)
 
@@ -120,7 +120,8 @@ class TestPositionalMotifFrequencies(TestCase):
         self.assertEqual(result.output_tables[1].path, path / "positional_aa_counts.csv")
 
         content = pd.read_csv(path / "gap_size_table_motif_size_2.csv")
-        self.assertEqual((list(content.columns))[1], "Gap size, occurrence")
+        self.assertEqual((list(content.columns))[0], "gap size")
+        self.assertEqual((list(content.columns))[1], "occurrence")
 
         content = pd.read_csv(path / "positional_aa_counts.csv")
         self.assertEqual(list(content.index), [i for i in range(4)])
