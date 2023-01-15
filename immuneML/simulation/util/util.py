@@ -12,7 +12,6 @@ from bionumpy.bnpdataclass import bnpdataclass, BNPDataClass
 from bionumpy.encodings import BaseEncoding
 from bionumpy.io import delimited_buffers
 from bionumpy.sequence.string_matcher import RegexMatcher, StringMatcher
-from immuneML.simulation.LIgOSimulationItem import SimConfigItem
 from npstructures import RaggedArray
 
 from immuneML.data_model.receptor.RegionType import RegionType
@@ -20,6 +19,7 @@ from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import Rece
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.simulation.SimConfigItem import SimConfigItem
 from immuneML.simulation.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.implants.MotifInstance import MotifInstance
 from immuneML.simulation.implants.Signal import Signal
@@ -249,20 +249,24 @@ def check_sequence_count(sim_item, sequences: BackgroundSequences):
 
 
 def prepare_data_for_repertoire_obj(sequences: BNPDataClass, custom_fields: list) -> dict:
+    indices = np.arange(len(sequences))
+    np.random.shuffle(indices)
+    shuffled_sequences = sequences[indices]
+
     custom_lists = {}
     for field, field_type in custom_fields:
         if field_type is int or field_type is float:
-            custom_lists[field] = getattr(sequences, field)
+            custom_lists[field] = getattr(shuffled_sequences, field)
         else:
-            custom_lists[field] = [el.to_string() for el in getattr(sequences, field)]
+            custom_lists[field] = [el.to_string() for el in getattr(shuffled_sequences, field)]
 
     default_lists = {}
-    for field in dataclasses.fields(sequences):
+    for field in dataclasses.fields(shuffled_sequences):
         if field.name not in custom_lists:
-            if isinstance(getattr(sequences, field.name), EncodedRaggedArray):
-                default_lists[field.name] = [el.to_string() for el in getattr(sequences, field.name)]
+            if isinstance(getattr(shuffled_sequences, field.name), EncodedRaggedArray):
+                default_lists[field.name] = [el.to_string() for el in getattr(shuffled_sequences, field.name)]
             else:
-                default_lists[field.name] = getattr(sequences, field.name)
+                default_lists[field.name] = getattr(shuffled_sequences, field.name)
 
     return {**{"custom_lists": custom_lists}, **default_lists}
 

@@ -94,7 +94,7 @@ class SimulationParser:
         valid_keys = {'is_repertoire': bool, 'paired': bool, 'sequence_type': str, 'p_gen_bin_count': int, 'simulation_strategy': str,
                       'sim_items': dict, 'keep_p_gen_dist': bool, 'remove_seqs_with_signals': bool}
 
-        simulation = {**DefaultParamsLoader.load("simulation", "ligo_simulation_setup"), **simulation}
+        simulation = {**DefaultParamsLoader.load("simulation", "ligo_sim_config"), **simulation}
 
         ParameterValidator.assert_keys(simulation.keys(), valid_keys.keys(), location, key, exclusive=True)
         for k, val_type in valid_keys.items():
@@ -127,7 +127,7 @@ class SimulationParser:
                                       "false_positive_prob_in_receptors", "false_negative_prob_in_receptors",
                                       "receptors_in_repertoire_count", "generative_model", "immune_events"]
 
-        simulation_item = {**DefaultParamsLoader.load('simulation', 'ligo_simulation_item'), **simulation_item}
+        simulation_item = {**DefaultParamsLoader.load('simulation', 'ligo_sim_config_item'), **simulation_item}
 
         ParameterValidator.assert_keys(simulation_item.keys(), valid_simulation_item_keys, location, key, exclusive=True)
         ParameterValidator.assert_keys(simulation_item["signals"], symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, key, False)

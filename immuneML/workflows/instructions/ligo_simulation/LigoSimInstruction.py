@@ -1,6 +1,7 @@
 import copy
 import dataclasses
 import math
+import random
 from itertools import chain
 from multiprocessing import Pool
 from pathlib import Path
@@ -23,7 +24,7 @@ from immuneML.simulation.util.bnp_util import merge_dataclass_objects
 from immuneML.simulation.util.util import get_bnp_data, make_receptor_sequence_objects, make_annotated_dataclass, get_sequence_per_signal_count, \
     update_seqs_without_signal, update_seqs_with_signal, check_iteration_progress, make_sequence_paths, make_signal_metadata, needs_seqs_with_signal, \
     get_signal_sequence_count, check_sequence_count, make_repertoire_from_sequences, get_no_signal_sequences, get_signal_sequences, \
-    annotate_sequences, filter_out_illegal_sequences
+    annotate_sequences
 from immuneML.util.ExporterHelper import ExporterHelper
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
@@ -95,11 +96,13 @@ class LigoSimInstruction(Instruction):
         self._custom_fields = self._annotation_fields + [('p_gen', float)]
         self._background_fields = [(field.name, field.type) for field in dataclasses.fields(BackgroundSequences)]
 
-        self._annotated_dataclass = make_annotated_dataclass(self._annotation_fields, self.state.signals)
-
     @property
     def sequence_type(self) -> SequenceType:
         return self.state.simulation.sequence_type
+
+    @property
+    def _annotated_dataclass(self):
+        return make_annotated_dataclass(self._annotation_fields, self.state.signals)
 
     MIN_RANGE_PROBABILITY = 1e-5
 
@@ -120,9 +123,10 @@ class LigoSimInstruction(Instruction):
     def _simulate_dataset(self):
         chunk_size = math.ceil(len(self.state.simulation.sim_items) / self._number_of_processes)
 
-        with Pool(processes=self._number_of_processes) as pool:
+        with Pool(processes=max(self._number_of_processes, len(self.state.simulation.sim_items))) as pool:
             result = pool.map(self._create_examples, [vars(item) for item in self.state.simulation.sim_items], chunksize=chunk_size)
             examples = list(chain.from_iterable(result))
+            random.shuffle(examples)
 
         labels = {signal.id: [True, False] for signal in self.state.signals}
 
@@ -135,7 +139,7 @@ class LigoSimInstruction(Instruction):
             self.state.resulting_dataset = SequenceDataset.build_from_objects(examples, path=self.state.result_path, name='simulated_dataset',
                                                                               file_size=SequenceDataset.DEFAULT_FILE_SIZE, labels=labels)
 
-    def _create_examples(self, item_in: dict) -> list:
+    def _create_examples(self, item_in: dict):
 
         item = SimConfigItem(**item_in)
 
@@ -193,7 +197,7 @@ class LigoSimInstruction(Instruction):
         return repertoires
 
     def _gen_necessary_sequences(self, base_path: Path, sim_item: SimConfigItem) -> Dict[str, Path]:
-        path = PathBuilder.build(base_path / sim_item.name)
+        path = PathBuilder.build(base_path)
         seqs_per_signal_count = get_sequence_per_signal_count(sim_item)
         seq_paths = make_sequence_paths(path, sim_item.signals)
         iteration = 0
@@ -204,10 +208,11 @@ class LigoSimInstruction(Instruction):
             if self.state.simulation.keep_p_gen_dist and iteration == 0:
                 self._make_p_gen_histogram(sequences)
 
-            sequences = self._filter_background_sequences(sequences, self.max_signals(sim_item), sim_item)
+            sequences = annotate_sequences(sequences, self.sequence_type == SequenceType.AMINO_ACID, self.state.signals, self._annotated_dataclass)
 
-            sequences = self.state.simulation.simulation_strategy.process_sequences(sequences, copy.deepcopy(seqs_per_signal_count),
-                                                                                    self.max_signals(sim_item), self._use_p_gens)
+            sequences = self.state.simulation.simulation_strategy.process_sequences(sequences, copy.deepcopy(seqs_per_signal_count), self._use_p_gens,
+                                                                                    self.sequence_type, sim_item, self.state.signals,
+                                                                                    self.state.simulation.remove_seqs_with_signals)
 
             if self._use_p_gens:
                 sequences = self._filter_using_p_gens(sequences, sim_item)
@@ -224,9 +229,6 @@ class LigoSimInstruction(Instruction):
                                f"with parameters: {vars(self.state.simulation)}.\n")
 
         return seq_paths
-
-    def max_signals(self, sim_item: SimConfigItem):
-        return 1 if len(sim_item.signals) > 0 else 0
 
     def _make_background_sequences(self, path, iteration: int, sim_item: SimConfigItem, sequence_per_signal_count: dict) -> BackgroundSequences:
         sequence_path = PathBuilder.build(path / f"gen_model/") / f"tmp_{iteration}.tsv"
@@ -247,15 +249,6 @@ class LigoSimInstruction(Instruction):
                                                                        compute_p_gen=self._use_p_gens)
 
         return get_bnp_data(sequence_path, BackgroundSequences)
-
-    def _filter_background_sequences(self, sequences: BackgroundSequences, max_signals: int, sim_item: SimConfigItem) -> BackgroundSequences:
-        annotated_sequences = annotate_sequences(sequences, self.sequence_type == SequenceType.AMINO_ACID, self.state.signals,
-                                                 self._annotated_dataclass)
-
-        if self.state.simulation.remove_seqs_with_signals:
-            annotated_sequences = filter_out_illegal_sequences(annotated_sequences, sim_item, self.state.signals, max_signals)
-
-        return annotated_sequences
 
     def _make_p_gen_histogram(self, sequences: BackgroundSequences):
 
