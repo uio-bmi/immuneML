@@ -236,7 +236,7 @@ class MotifGeneralizationAnalysis(DataReport):
 
 
     def _get_train_val_indices_from_file(self):
-        input_train_identifiers = list(pd.read_csv(self.training_set_identifier_path, usecols=["example_id"])["example_id"])
+        input_train_identifiers = list(pd.read_csv(self.training_set_identifier_path, usecols=["example_id"])["example_id"].astype(str))
 
         train_indices = []
         val_indices = []
@@ -244,7 +244,7 @@ class MotifGeneralizationAnalysis(DataReport):
         actual_train_identifiers = []
 
         for idx, sequence in enumerate(self.dataset.get_data()):
-            if sequence.identifier in input_train_identifiers:
+            if str(sequence.identifier) in input_train_identifiers:
                 train_indices.append(idx)
                 actual_train_identifiers.append(sequence.identifier)
             else:
