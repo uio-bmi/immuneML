@@ -34,8 +34,8 @@ class PDBDistanceMatrixEncoder(DatasetEncoder):
 
         structures =[]
 
-        for parser_object in dataset.get_data():
-            collection = self.get_carbon_alphas(parser_object)
+        for PDB_structure in dataset.list_of_PDB_Structures:
+            collection = self.get_carbon_alphas(PDB_structure)
 
             chain_IDs = self.get_chain_ID(collection)
 
@@ -62,6 +62,80 @@ class PDBDistanceMatrixEncoder(DatasetEncoder):
 
         return numpy_array
 
+
+    def get_carbon_alphas(self, PDB_structure):
+        if PDB_structure.get_has_imgt_numbering():
+            return self.get_carbon_alphas_with_IMGT_numbering(PDB_structure.get_pdb_structure())
+        else:
+            return self.get_carbon_alphas_with_start_stop(PDB_structure)
+
+
+
+    def get_carbon_alphas_with_start_stop(self, PDB_structure):
+        collection = []
+        list = []
+        counter = 0
+
+        for model in PDB_structure.get_pdb_structure():
+            for chain in model:
+                residue_counter = 0
+                for residue in chain:
+                    if residue_counter == 0:
+                        list.append(residue.get_parent())
+                        residue_counter = 1
+
+                    for atom in residue:
+                        if (atom.get_name() == "CA"):
+                            if (self.is_in_start_and_stop_positions(atom.full_id[3][1], PDB_structure.get_start_position(), PDB_structure.get_stop_position())) or len(collection) >= 2:
+                                list.append(atom.get_coord())
+
+                save_list = list.copy()
+                collection.append(save_list)
+                counter = counter + 1
+                list.clear()
+
+        return collection
+
+    def get_carbon_alphas_with_IMGT_numbering(self, parser_object):
+        collection = []
+        list = []
+
+        region = self.region_type
+        counter = 0
+
+        for model in parser_object:
+            for chain in model:
+                residue_counter = 0
+                for residue in chain:
+                    if residue_counter == 0:
+                        list.append(residue.get_parent())
+                        residue_counter = 1
+
+                    for atom in residue:
+                        if (atom.get_name() == "CA"):
+
+                            if "FULL_SEQUENCE" in region:
+                                list.append(atom.get_coord())
+
+                            else:
+                                if "IMGT_CDR3" in region and (
+                                        self.is_in_CDR3(atom.full_id[3][1]) or len(collection) >= 2):
+                                    list.append(atom.get_coord())
+
+                                if "IMGT_CDR2" in region and (
+                                        self.is_in_CDR2(atom.full_id[3][1]) or len(collection) >= 2):
+                                    list.append(atom.get_coord())
+
+                                if "IMGT_CDR1" in region and (
+                                        self.is_in_CDR1(atom.full_id[3][1]) or len(collection) >= 2):
+                                    list.append(atom.get_coord())
+
+                save_list = list.copy()
+                collection.append(save_list)
+                counter = counter + 1
+                list.clear()
+
+        return collection
 
     def caluculate_atom_distance(self, collection, chain, antigen, list):
         for x in range(len(collection[antigen])):
@@ -149,46 +223,8 @@ class PDBDistanceMatrixEncoder(DatasetEncoder):
 
         return return_array
 
-    def get_carbon_alphas(self, parser_object):
-        collection = []
-        list = []
 
-        region = self.region_type
-        counter = 0
 
-        for model in parser_object:
-            for chain in model:
-                residue_counter = 0
-                for residue in chain:
-                    if residue_counter == 0:
-                        list.append(residue.get_parent())
-                        residue_counter = 1
-
-                    for atom in residue:
-                        if (atom.get_name() == "CA"):
-
-                            if "FULL_SEQUENCE" in region:
-                                list.append(atom.get_coord())
-
-                            else:
-                                if "IMGT_CDR3" in region and (
-                                        self.is_in_CDR3(atom.full_id[3][1]) or len(collection) >= 2):
-                                    list.append(atom.get_coord())
-
-                                if "IMGT_CDR2" in region and (
-                                        self.is_in_CDR2(atom.full_id[3][1]) or len(collection) >= 2):
-                                    list.append(atom.get_coord())
-
-                                if "IMGT_CDR1" in region and (
-                                        self.is_in_CDR1(atom.full_id[3][1]) or len(collection) >= 2):
-                                    list.append(atom.get_coord())
-
-                save_list = list.copy()
-                collection.append(save_list)
-                counter = counter + 1
-                list.clear()
-
-        return collection
 
 
     def get_chain_ID(self, collection):
@@ -245,3 +281,8 @@ class PDBDistanceMatrixEncoder(DatasetEncoder):
         else:
             return False
 
+    def is_in_start_and_stop_positions(self, num, start, stop):
+        if stop >= num >= start:
+            return True
+        else:
+            return False

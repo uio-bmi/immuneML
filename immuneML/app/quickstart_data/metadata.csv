@@ -1,9 +1,9 @@
-filename,subject_id,CDR
-1u80.pdb,1, 1
-2p8l.pdb,2, 1
-2p8m.pdb,3, 2
-5vic.pdb,4, 3
-6b0e.pdb,5, 12
-6phd.pdb,6, 13
-6xqw.pdb,7, 23
-6ym0.pdb,8, 123
+filename,subject_id,start_position,stop_position
+1u80.pdb,1, 0,0
+2p8l.pdb,2, 0,0
+2p8m.pdb,3, 0,0
+5vic.pdb,4, 0,0
+6b0e.pdb,5, 0,0
+6phd.pdb,6, 0,0
+6xqw.pdb,7, 10,15
+6ym0.pdb,8,0,0
