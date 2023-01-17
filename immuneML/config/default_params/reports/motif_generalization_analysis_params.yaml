@@ -1,6 +1,6 @@
 training_set_identifier_path: null
 training_percentage: 0.7
-split_by_motif_size: false
+split_by_motif_size: true
 max_positions: 4
 min_precision: 0.9
 min_recall: 0

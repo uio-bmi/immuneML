@@ -7,6 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
+from immuneML.reports.ReportOutput import ReportOutput
 
 
 class MotifPerformancePlotHelper():
@@ -120,9 +121,8 @@ class MotifPerformancePlotHelper():
         return x_rng
 
     @staticmethod
-    def get_precision_per_tp_fig(plotting_data, combined_precision, dataset_type, training_set_name,
-                                 tp_cutoff=None,
-                                 highlight_motifs_name="highlight"):
+    def plot_precision_per_tp(file_path, plotting_data, combined_precision, dataset_type, training_set_name,
+                              tp_cutoff=None, motifs_name="motifs", highlight_motifs_name="highlight"):
         fig = px.strip(plotting_data,
                        y="precision", x="training_TP", hover_data=["feature_names"],
                        range_y=[0, 1.01], color_discrete_sequence=["#74C4C4"],
@@ -164,4 +164,57 @@ class MotifPerformancePlotHelper():
 
         fig.update_layout(xaxis=dict(dtick=1), showlegend=True)
 
-        return fig
+        fig.write_html(str(file_path))
+
+        return ReportOutput(
+            path=file_path,
+            name=f"Precision scores on the {dataset_type} for {motifs_name} found at each true positive count of the {training_set_name}.",
+        )
+
+    @staticmethod
+    def plot_precision_recall(file_path, plotting_data, min_recall=None, min_precision=None, dataset_type=None, motifs_name="motifs",
+                              highlight_motifs_name="highlight"):
+        fig = px.scatter(plotting_data,
+                         y="precision", x="recall", hover_data=["feature_names"],
+                         range_x=[0, 1.01], range_y=[0, 1.01], color="highlight",
+                         color_discrete_map={"Motif": px.colors.qualitative.Pastel[0],
+                                             highlight_motifs_name: px.colors.qualitative.Pastel[1]},
+                         labels={
+                             "precision": f"Precision ({dataset_type})",
+                             "recall": f"Recall ({dataset_type})",
+                             "feature_names": "Motif",
+                         })
+
+        if min_precision is not None and min_precision > 0:
+            fig.add_hline(y=min_precision, line_dash="dash")
+
+        if min_recall is not None and min_recall > 0:
+            fig.add_vline(x=min_recall, line_dash="dash")
+
+        fig.write_html(str(file_path))
+
+        return ReportOutput(
+            path=file_path,
+            name=f"Precision versus recall of significant {motifs_name} on the {dataset_type}",
+        )
+
+    @staticmethod
+    def write_output_tables(report_obj, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, motifs_name="motifs", file_suffix=""):
+        results_table_name = f"Confusion matrix and precision/recall scores for significant {motifs_name}" + " on the {} set"
+        combined_precision_table_name = f"Combined precision scores of {motifs_name}" + " on the {} set for each TP value on the " + str(report_obj.training_set_name)
+
+        train_results_table = report_obj._write_output_table(training_plotting_data, report_obj.result_path / f"training_set_scores{file_suffix}.csv", results_table_name.format(report_obj.training_set_name))
+        test_results_table = report_obj._write_output_table(test_plotting_data, report_obj.result_path / f"test_set_scores{file_suffix}.csv", results_table_name.format(report_obj.test_set_name))
+        training_combined_precision_table = report_obj._write_output_table(training_combined_precision, report_obj.result_path / f"training_combined_precision{file_suffix}.csv", combined_precision_table_name.format(report_obj.training_set_name))
+        test_combined_precision_table = report_obj._write_output_table(test_combined_precision, report_obj.result_path / f"test_combined_precision{file_suffix}.csv", combined_precision_table_name.format(report_obj.test_set_name))
+
+        return [table for table in [train_results_table, test_results_table, training_combined_precision_table, test_combined_precision_table] if table is not None]
+
+    @staticmethod
+    def write_plots(report_obj, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, tp_cutoff=None, motifs_name="motifs", file_suffix=""):
+        training_tp_plot = report_obj._safe_plot(plot_callable="_plot_precision_per_tp", plotting_data=training_plotting_data, combined_precision=training_combined_precision, dataset_type=report_obj.training_set_name, file_path=report_obj.result_path / f"training_precision_per_tp{file_suffix}.html", motifs_name=motifs_name)
+        test_tp_plot = report_obj._safe_plot(plot_callable="_plot_precision_per_tp", plotting_data=test_plotting_data, combined_precision=test_combined_precision, dataset_type=report_obj.test_set_name, file_path=report_obj.result_path / f"test_precision_per_tp{file_suffix}.html", motifs_name=motifs_name, tp_cutoff=tp_cutoff)
+        training_pr_plot = report_obj._safe_plot(plot_callable="_plot_precision_recall", plotting_data=training_plotting_data, dataset_type=report_obj.training_set_name, file_path=report_obj.result_path / f"training_precision_recall{file_suffix}.html", motifs_name=motifs_name)
+        test_pr_plot = report_obj._safe_plot(plot_callable="_plot_precision_recall", plotting_data=test_plotting_data, dataset_type=report_obj.test_set_name, file_path=report_obj.result_path / f"test_precision_recall{file_suffix}.html", motifs_name=motifs_name)
+
+        return [plot for plot in [training_tp_plot, test_tp_plot, training_pr_plot, test_pr_plot] if plot is not None]

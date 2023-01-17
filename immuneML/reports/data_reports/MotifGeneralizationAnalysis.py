@@ -187,9 +187,9 @@ class MotifGeneralizationAnalysis(DataReport):
         motif_size_suffix = f"_motif_size={motif_size}" if motif_size is not None else ""
         motifs_name = f"motifs of lenght {motif_size}" if motif_size is not None else "motifs"
 
-        output_tables = self._write_output_tables(training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, motifs_name=motifs_name, file_suffix=motif_size_suffix)
+        output_tables = MotifPerformancePlotHelper.write_output_tables(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, motifs_name=motifs_name, file_suffix=motif_size_suffix)
         output_texts = self._write_stats(tp_cutoff, recall_cutoff, motifs_name=motifs_name, file_suffix=motif_size_suffix)
-        output_plots = self._write_plots(training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, tp_cutoff, motifs_name=motifs_name, file_suffix=motif_size_suffix)
+        output_plots = MotifPerformancePlotHelper.write_plots(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, tp_cutoff, motifs_name=motifs_name, file_suffix=motif_size_suffix)
 
         return output_tables, output_texts, output_plots
 
@@ -284,18 +284,6 @@ class MotifGeneralizationAnalysis(DataReport):
 
         return sum([1 for label_class in dataset.get_metadata([label_name])[label_name] if label_class == label_positive_class])
 
-    def _write_output_tables(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, motifs_name="motifs", file_suffix=""):
-        results_table_name = f"Confusion matrix and precision/recall scores for significant {motifs_name}" + " on the {} set"
-        combined_precision_table_name = f"Combined precision scores of {motifs_name}" + " on the {} set for each TP value on the " + str(self.training_set_name)
-
-
-        train_results_table = self._write_output_table(training_plotting_data, self.result_path / f"training_set_scores{file_suffix}.csv", results_table_name.format("training"))
-        test_results_table = self._write_output_table(test_plotting_data, self.result_path / f"test_set_scores{file_suffix}.csv", results_table_name.format("test"))
-        training_combined_precision_table = self._write_output_table(training_combined_precision, self.result_path / f"training_combined_precision{file_suffix}.csv", combined_precision_table_name.format("training"))
-        test_combined_precision_table = self._write_output_table(test_combined_precision, self.result_path / f"test_combined_precision{file_suffix}.csv", combined_precision_table_name.format("test"))
-
-        return [table for table in [train_results_table, test_results_table, training_combined_precision_table, test_combined_precision_table] if table is not None]
-
     def _write_stats(self, tp_cutoff, recall_cutoff, motifs_name="all motifs", file_suffix=""):
         output_path = self.result_path / f"tp_recall_cutoffs{file_suffix}.txt"
 
@@ -306,14 +294,6 @@ class MotifGeneralizationAnalysis(DataReport):
                              f"training recall cutoff: {recall_cutoff}"])
 
         return [ReportOutput(path=output_path, name=f"TP and recall cutoffs for {motifs_name}")]
-
-    def _write_plots(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, tp_cutoff, motifs_name, file_suffix=""):
-        training_tp_plot = self._safe_plot(plot_callable="_plot_precision_per_tp", plotting_data=training_plotting_data, combined_precision=training_combined_precision, dataset_type=self.training_set_name, file_path=self.result_path / f"training_precision_per_tp{file_suffix}.html", motifs_name=motifs_name)
-        test_tp_plot = self._safe_plot(plot_callable="_plot_precision_per_tp", plotting_data=test_plotting_data, combined_precision=test_combined_precision, dataset_type=self.test_set_name, file_path=self.result_path / f"test_precision_per_tp{file_suffix}.html", motifs_name=motifs_name, tp_cutoff=tp_cutoff)
-        training_pr_plot = self._safe_plot(plot_callable="_plot_precision_recall", plotting_data=training_plotting_data, dataset_type=self.training_set_name, file_path=self.result_path / f"training_precision_recall{file_suffix}.html", motifs_name=motifs_name)
-        test_pr_plot = self._safe_plot(plot_callable="_plot_precision_recall", plotting_data=test_plotting_data, dataset_type=self.test_set_name, file_path=self.result_path / f"test_precision_recall{file_suffix}.html", motifs_name=motifs_name)
-
-        return [plot for plot in [training_tp_plot, test_tp_plot, training_pr_plot, test_pr_plot] if plot is not None]
 
     def _get_combined_precision(self, plotting_data):
         return MotifPerformancePlotHelper.get_combined_precision(plotting_data,
@@ -346,39 +326,11 @@ class MotifGeneralizationAnalysis(DataReport):
             return tp_cutoff / self.n_positives_in_training_data
 
     def _plot_precision_per_tp(self, file_path, plotting_data, combined_precision, dataset_type, tp_cutoff=None, motifs_name="motifs"):
-        fig = MotifPerformancePlotHelper.get_precision_per_tp_fig(plotting_data, combined_precision, dataset_type,
-                                                                  training_set_name=self.training_set_name,
-                                                                  tp_cutoff=tp_cutoff,
-                                                                  highlight_motifs_name=self.highlight_motifs_name)
-
-        fig.write_html(str(file_path))
-
-        return ReportOutput(
-            path=file_path,
-            name=f"Precision scores on the {dataset_type} for {motifs_name} found at each true positive count of the {self.training_set_name}.",
-        )
+         return MotifPerformancePlotHelper.plot_precision_per_tp(file_path, plotting_data, combined_precision, dataset_type,
+                                                                 training_set_name=self.training_set_name,
+                                                                 tp_cutoff=tp_cutoff, motifs_name=motifs_name,
+                                                                 highlight_motifs_name=self.highlight_motifs_name)
 
     def _plot_precision_recall(self, file_path, plotting_data, min_recall=None, min_precision=None, dataset_type=None, motifs_name="motifs"):
-        fig = px.scatter(plotting_data,
-                         y="precision", x="recall", hover_data=["feature_names"],
-                         range_x=[0, 1.01], range_y=[0, 1.01], color="highlight",
-                         color_discrete_map={"Motif": px.colors.qualitative.Pastel[0],
-                                             self.highlight_motifs_name: px.colors.qualitative.Pastel[1]},
-                         labels={
-                             "precision": f"Precision ({dataset_type})",
-                             "recall": f"Recall ({dataset_type})",
-                             "feature_names": "Motif",
-                         })
-
-        if min_precision is not None and min_precision > 0:
-            fig.add_hline(y=min_precision, line_dash="dash")
-
-        if min_recall is not None and min_recall > 0:
-            fig.add_vline(x=min_recall, line_dash="dash")
-
-        fig.write_html(str(file_path))
-
-        return ReportOutput(
-            path=file_path,
-            name=f"Precision versus recall of significant {motifs_name} on the {dataset_type}",
-        )
+        return MotifPerformancePlotHelper.plot_precision_recall(file_path, plotting_data, min_recall=min_recall, min_precision=min_precision,
+                                                                 dataset_type=dataset_type, motifs_name=motifs_name, highlight_motifs_name=self.highlight_motifs_name)

@@ -58,6 +58,7 @@ class MotifTestSetPerformance(EncodingReport):
     def __init__(self, dataset: Dataset = None, result_path: Path = None, test_dataset_import_cls: DataImport = None,
                  test_dataset_import_params: DatasetImportParams = None,
                  training_set_name: str = None, test_set_name: str = None,
+                 split_by_motif_size: bool = None,
                  highlight_motifs_path: str = None, highlight_motifs_name: str = None,
                  min_points_in_window: int = None,
                  smoothing_constant1: float = None, smoothing_constant2: float = None,
@@ -66,6 +67,7 @@ class MotifTestSetPerformance(EncodingReport):
         self.test_dataset_import_cls = test_dataset_import_cls
         self.test_dataset_import_params = test_dataset_import_params
 
+        self.split_by_motif_size = split_by_motif_size
         self.training_set_name = training_set_name
         self.test_set_name = test_set_name
         self.highlight_motifs_path = highlight_motifs_path
@@ -85,6 +87,7 @@ class MotifTestSetPerformance(EncodingReport):
 
         del kwargs["test_dataset"]
 
+        ParameterValidator.assert_type_and_value(kwargs["split_by_motif_size"], bool, location, "split_by_motif_size")
         ParameterValidator.assert_type_and_value(kwargs["training_set_name"], str, location, "training_set_name")
         ParameterValidator.assert_type_and_value(kwargs["test_set_name"], str, location, "test_set_name")
         ParameterValidator.assert_type_and_value(kwargs["min_points_in_window"], int, location, "min_points_in_window", min_inclusive=1)
@@ -141,20 +144,41 @@ class MotifTestSetPerformance(EncodingReport):
         training_plotting_data["motif_size"] = training_plotting_data["feature_names"].apply(PositionalMotifHelper.get_motif_size)
         test_plotting_data["motif_size"] = test_plotting_data["feature_names"].apply(PositionalMotifHelper.get_motif_size)
 
-        output_tables, output_plots = self._construct_and_plot_data(training_plotting_data, test_plotting_data)
+        output_tables, output_plots = self._get_report_outputs(training_plotting_data, test_plotting_data)
 
         return ReportResult(name=self.name,
-                            info="Performance ",
-                            output_figures=output_plots,
-                            output_tables=output_tables)
+                    info="Performance of motifs on an independent test set",
+                    output_figures=output_plots,
+                    output_tables=output_tables)
+    def _get_report_outputs(self, training_plotting_data, test_plotting_data):
+        if self.split_by_motif_size:
+            return self._construct_and_plot_data_per_motif_size(training_plotting_data, test_plotting_data)
+        else:
+            return self._construct_and_plot_data(training_plotting_data, test_plotting_data)
 
 
-    def _construct_and_plot_data(self, training_plotting_data, test_plotting_data):
+    def _construct_and_plot_data_per_motif_size(self, training_plotting_data, test_plotting_data):
+        output_tables, output_plots = [], []
+
+        for motif_size in sorted(set(training_plotting_data["motif_size"])):
+            sub_training_plotting_data = training_plotting_data[training_plotting_data["motif_size"] == motif_size]
+            sub_test_plotting_data = test_plotting_data[test_plotting_data["motif_size"] == motif_size]
+
+            sub_output_tables, sub_output_plots = self._construct_and_plot_data(sub_training_plotting_data, sub_test_plotting_data, motif_size=motif_size)
+
+            output_tables.extend(sub_output_tables)
+            output_plots.extend(sub_output_plots)
+
+        return output_tables, output_plots
+    def _construct_and_plot_data(self, training_plotting_data, test_plotting_data, motif_size=None):
         training_combined_precision = self._get_combined_precision(training_plotting_data)
         test_combined_precision = self._get_combined_precision(test_plotting_data)
 
-        output_tables = self._write_output_tables(training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision)
-        output_plots = self._write_plots(training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision)
+        motif_size_suffix = f"_motif_size={motif_size}" if motif_size is not None else ""
+        motifs_name = f"motifs of length {motif_size}" if motif_size is not None else "motifs"
+
+        output_tables = MotifPerformancePlotHelper.write_output_tables(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, motifs_name=motifs_name, file_suffix=motif_size_suffix)
+        output_plots = MotifPerformancePlotHelper.write_plots(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, motifs_name=motifs_name, file_suffix=motif_size_suffix)
 
         return output_tables, output_plots
 
@@ -164,37 +188,27 @@ class MotifTestSetPerformance(EncodingReport):
                                                                  smoothing_constant1=self.smoothing_constant1,
                                                                  smoothing_constant2=self.smoothing_constant2)
 
-    def _write_output_tables(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision):
+    def _write_output_tables(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, file_suffix=""):
         results_table_name = "Confusion matrix and precision/recall scores for significant motifs on the {}"
         combined_precision_table_name = "Combined precision scores of motifs on the {} for each TP value on the " + str(self.training_set_name)
 
-        train_results_table = self._write_output_table(training_plotting_data, self.result_path / f"training_set_scores.csv", results_table_name.format(self.training_set_name))
-        test_results_table = self._write_output_table(test_plotting_data, self.result_path / f"test_set_scores.csv", results_table_name.format(self.test_set_name))
-        training_combined_precision_table = self._write_output_table(training_combined_precision, self.result_path / f"training_combined_precision.csv", combined_precision_table_name.format(self.training_set_name))
-        test_combined_precision_table = self._write_output_table(test_combined_precision, self.result_path / f"test_combined_precision.csv", combined_precision_table_name.format(self.test_set_name))
+        train_results_table = self._write_output_table(training_plotting_data, self.result_path / f"training_set_scores{file_suffix}.csv", results_table_name.format(self.training_set_name))
+        test_results_table = self._write_output_table(test_plotting_data, self.result_path / f"test_set_scores{file_suffix}.csv", results_table_name.format(self.test_set_name))
+        training_combined_precision_table = self._write_output_table(training_combined_precision, self.result_path / f"training_combined_precision{file_suffix}.csv", combined_precision_table_name.format(self.training_set_name))
+        test_combined_precision_table = self._write_output_table(test_combined_precision, self.result_path / f"test_combined_precision{file_suffix}.csv", combined_precision_table_name.format(self.test_set_name))
 
         return [table for table in [train_results_table, test_results_table, training_combined_precision_table,
                                     test_combined_precision_table] if table is not None]
 
-    def _write_plots(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision):
-        training_tp_plot = self._safe_plot(plot_callable="_plot_precision_per_tp", plotting_data=training_plotting_data, combined_precision=training_combined_precision, dataset_type=self.training_set_name, file_path=self.result_path / f"training_precision_per_tp.html")
-        test_tp_plot = self._safe_plot(plot_callable="_plot_precision_per_tp", plotting_data=test_plotting_data, combined_precision=test_combined_precision, dataset_type=self.test_set_name, file_path=self.result_path / f"test_precision_per_tp.html")
+    def _plot_precision_per_tp(self, file_path, plotting_data, combined_precision, dataset_type, tp_cutoff=None, motifs_name="motifs"):
+        return MotifPerformancePlotHelper.plot_precision_per_tp(file_path, plotting_data, combined_precision, dataset_type,
+                                                                training_set_name=self.training_set_name,
+                                                                motifs_name=motifs_name,
+                                                                highlight_motifs_name=self.highlight_motifs_name)
 
-        return [plot for plot in [training_tp_plot, test_tp_plot] if plot is not None]
-
-    def _plot_precision_per_tp(self, file_path, plotting_data, combined_precision, dataset_type):
-        # todo color = motif_size
-        fig = MotifPerformancePlotHelper.get_precision_per_tp_fig(plotting_data, combined_precision, dataset_type,
-                                                                  training_set_name=self.training_set_name,
-                                                                  highlight_motifs_name=self.highlight_motifs_name)
-
-        fig.write_html(str(file_path))
-
-        return ReportOutput(
-            path=file_path,
-            name=f"Precision scores on the {dataset_type} for motifs found at each true positive count of the {self.training_set_name}.",
-        )
-
+    def _plot_precision_recall(self, file_path, plotting_data, min_recall=None, min_precision=None, dataset_type=None, motifs_name="motifs"):
+        return MotifPerformancePlotHelper.plot_precision_recall(file_path, plotting_data, min_recall=min_recall, min_precision=min_precision,
+                                                                dataset_type=dataset_type, motifs_name=motifs_name, highlight_motifs_name=self.highlight_motifs_name)
 
     def _encode_test_data(self, test_dataset):
         encoder = self._get_encoder()

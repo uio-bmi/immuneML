@@ -70,11 +70,11 @@ class TestMotifTestSetPerformance(TestCase):
 
         report._generate()
 
-        self.assertTrue(os.path.isfile(path / "result_path/training_set_scores.csv"))
-        self.assertTrue(os.path.isfile(path / "result_path/training_combined_precision.csv"))
-        self.assertTrue(os.path.isfile(path / "result_path/test_combined_precision.csv"))
-        self.assertTrue(os.path.isfile(path / "result_path/training_precision_per_tp.html"))
-        self.assertTrue(os.path.isfile(path / "result_path/test_precision_per_tp.html"))
+        self.assertTrue(os.path.isfile(path / "result_path/training_set_scores_motif_size=1.csv"))
+        self.assertTrue(os.path.isfile(path / "result_path/training_combined_precision_motif_size=1.csv"))
+        self.assertTrue(os.path.isfile(path / "result_path/test_combined_precision_motif_size=1.csv"))
+        self.assertTrue(os.path.isfile(path / "result_path/training_precision_per_tp_motif_size=1.html"))
+        self.assertTrue(os.path.isfile(path / "result_path/test_precision_per_tp_motif_size=1.html"))
 
         shutil.rmtree(path)
 
