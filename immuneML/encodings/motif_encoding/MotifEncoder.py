@@ -333,27 +333,22 @@ class MotifEncoder(DatasetEncoder):
 
         prefix = "weighted_" if weights is not None else ""
 
-        # feature_annotations0 = pd.DataFrame({"feature_names": feature_names,
-        #                                     f"{prefix}precision_scores": precision_scores,
-        #                                     f"{prefix}recall_scores": recall_scores,
-        #                                     "raw_tp_count": tp_counts})
-
         feature_annotations = self._get_feature_annotations(feature_names, conf_matrix_raw, conf_matrix_weighted)
 
         return np.column_stack(predictions), feature_names, feature_annotations
 
     def _get_feature_annotations(self, feature_names, conf_matrix_raw, conf_matrix_weighted):
         feature_annotations_mapping = {"feature_names": feature_names,
-                                       "raw_tn_count": conf_matrix_raw.T[0],
-                                       "raw_fp_count": conf_matrix_raw.T[1],
-                                       "raw_fn_count": conf_matrix_raw.T[2],
-                                       "raw_tp_count": conf_matrix_raw.T[3]}
+                                       "TN": conf_matrix_raw.T[0],
+                                       "FP": conf_matrix_raw.T[1],
+                                       "FN": conf_matrix_raw.T[2],
+                                       "TP": conf_matrix_raw.T[3]}
 
         if conf_matrix_weighted is not None:
-            feature_annotations_mapping["weighted_tn_count"] = conf_matrix_weighted.T[0]
-            feature_annotations_mapping["weighted_fp_count"] = conf_matrix_weighted.T[1]
-            feature_annotations_mapping["weighted_fn_count"] = conf_matrix_weighted.T[2]
-            feature_annotations_mapping["weighted_tp_count"] = conf_matrix_weighted.T[3]
+            feature_annotations_mapping["weighted_TN"] = conf_matrix_weighted.T[0]
+            feature_annotations_mapping["weighted_FP"] = conf_matrix_weighted.T[1]
+            feature_annotations_mapping["weighted_FN"] = conf_matrix_weighted.T[2]
+            feature_annotations_mapping["weighted_TP"] = conf_matrix_weighted.T[3]
 
         return pd.DataFrame(feature_annotations_mapping)
 

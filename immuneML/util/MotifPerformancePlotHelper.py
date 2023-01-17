@@ -12,36 +12,30 @@ from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMo
 class MotifPerformancePlotHelper():
 
     @staticmethod
-    def get_plotting_data(training_encoded_data, test_encoded_data, col_names, highlight_motifs_path=None, highlight_motifs_name="highlight"):
-        training_feature_annotations = MotifPerformancePlotHelper._get_annotated_feature_annotations(training_encoded_data, col_names, highlight_motifs_path, highlight_motifs_name)
-        test_feature_annotations = MotifPerformancePlotHelper._get_annotated_feature_annotations(test_encoded_data, col_names, highlight_motifs_path, highlight_motifs_name)
+    def get_plotting_data(training_encoded_data, test_encoded_data, highlight_motifs_path=None, highlight_motifs_name="highlight"):
+        training_feature_annotations = MotifPerformancePlotHelper._get_annotated_feature_annotations(training_encoded_data, highlight_motifs_path, highlight_motifs_name)
+        test_feature_annotations = MotifPerformancePlotHelper._get_annotated_feature_annotations(test_encoded_data, highlight_motifs_path, highlight_motifs_name)
 
-        training_feature_annotations["training_tp_count"] = training_feature_annotations["raw_tp_count"]
+        training_feature_annotations["training_TP"] = training_feature_annotations["TP"]
         test_feature_annotations = MotifPerformancePlotHelper.merge_train_test_feature_annotations(training_feature_annotations, test_feature_annotations)
 
         return training_feature_annotations, test_feature_annotations
 
     @staticmethod
-    def _get_annotated_feature_annotations(encoded_data, col_names, highlight_motifs_path, highlight_motifs_name):
+    def _get_annotated_feature_annotations(encoded_data, highlight_motifs_path, highlight_motifs_name):
         feature_annotations = encoded_data.feature_annotations.copy()
-        MotifPerformancePlotHelper._annotate_confusion_matrix(feature_annotations, col_names)
+        MotifPerformancePlotHelper._annotate_confusion_matrix(feature_annotations)
         MotifPerformancePlotHelper._annotate_highlight(feature_annotations, highlight_motifs_path, highlight_motifs_name)
 
         return feature_annotations
 
     @staticmethod
-    def _annotate_confusion_matrix(feature_annotations, col_names):
-        precision = col_names["precision"]
-        recall = col_names["recall"]
-        tp = col_names["tp"]
-        fp = col_names["fp"]
-        fn = col_names["fn"]
+    def _annotate_confusion_matrix(feature_annotations):
+        feature_annotations["precision"] = feature_annotations.apply(
+            lambda row: 0 if row["TP"] == 0 else row["TP"] / (row["TP"] + row["FP"]), axis="columns")
 
-        feature_annotations[precision] = feature_annotations.apply(
-            lambda row: 0 if row[tp] == 0 else row[tp] / (row[tp] + row[fp]), axis="columns")
-
-        feature_annotations[recall] = feature_annotations.apply(
-            lambda row: 0 if row[tp] == 0 else row[tp] / (row[tp] + row[fn]), axis="columns")
+        feature_annotations["recall"] = feature_annotations.apply(
+            lambda row: 0 if row["TP"] == 0 else row["TP"] / (row["TP"] + row["FN"]), axis="columns")
 
     @staticmethod
     def _annotate_highlight(feature_annotations, highlight_motifs_path, highlight_motifs_name):
@@ -60,7 +54,7 @@ class MotifPerformancePlotHelper():
 
     @staticmethod
     def merge_train_test_feature_annotations(training_feature_annotations, test_feature_annotations):
-        training_info_to_merge = training_feature_annotations[["feature_names", "training_tp_count"]].copy()
+        training_info_to_merge = training_feature_annotations[["feature_names", "training_TP"]].copy()
         test_info_to_merge = test_feature_annotations.copy()
 
         merged_train_test_info = training_info_to_merge.merge(test_info_to_merge)
@@ -68,18 +62,17 @@ class MotifPerformancePlotHelper():
         return merged_train_test_info
 
     @staticmethod
-    def get_combined_precision(plotting_data, col_names, min_points_in_window, smoothing_constant1, smoothing_constant2):
-        group_by_tp = plotting_data.groupby("training_tp_count")
+    def get_combined_precision(plotting_data, min_points_in_window, smoothing_constant1, smoothing_constant2):
+        group_by_tp = plotting_data.groupby("training_TP")
 
-        tp, fp = col_names["tp"], col_names["fp"]
-        combined_precision = group_by_tp[tp].sum() / (group_by_tp[tp].sum() + group_by_tp[fp].sum())
+        combined_precision = group_by_tp["TP"].sum() / (group_by_tp["TP"].sum() + group_by_tp["FP"].sum())
 
-        df = pd.DataFrame({"training_tp": list(combined_precision.index),
+        df = pd.DataFrame({"training_TP": list(combined_precision.index),
                            "combined_precision": list(combined_precision)})
 
         df["smooth_combined_precision"] = MotifPerformancePlotHelper._smooth_combined_precision(list(combined_precision.index),
                                                                                                     list(combined_precision),
-                                                                                                    list(group_by_tp[tp].count()),
+                                                                                                    list(group_by_tp["TP"].count()),
                                                                                                     min_points_in_window,
                                                                                                     smoothing_constant1,
                                                                                                     smoothing_constant2)
@@ -128,40 +121,39 @@ class MotifPerformancePlotHelper():
 
     @staticmethod
     def get_precision_per_tp_fig(plotting_data, combined_precision, dataset_type, training_set_name,
-                                 col_names, tp_cutoff=None,
+                                 tp_cutoff=None,
                                  highlight_motifs_name="highlight"):
         fig = px.strip(plotting_data,
-                       y=col_names["precision"], x="training_tp_count", hover_data=["feature_names"],
+                       y="precision", x="training_TP", hover_data=["feature_names"],
                        range_y=[0, 1.01], color_discrete_sequence=["#74C4C4"],
                        # color="highlight",
                        # color_discrete_map={"Motif": "#74C4C4",
                        #                     self.highlight_motifs_name: px.colors.qualitative.Pastel[1]},
                        stripmode='overlay', log_x=True,
                        labels={
-                           "precision_scores": f"Precision ({dataset_type})",
-                           "weighted_precision_scores": f"Weighted precision ({dataset_type})",
+                           "precision": f"Precision ({dataset_type})",
                            "feature_names": "Motif",
-                           "training_tp_count": f"True positive predictions ({training_set_name})"
+                           "training_TP": f"True positive predictions ({training_set_name})"
                        })
 
         # add combined precision
-        fig.add_trace(go.Scatter(x=combined_precision["training_tp"], y=combined_precision["combined_precision"],
-                                 mode='markers+lines', name=col_names["combined precision"],
+        fig.add_trace(go.Scatter(x=combined_precision["training_TP"], y=combined_precision["combined_precision"],
+                                 mode='markers+lines', name="Combined precision",
                                  marker=dict(symbol="diamond", color=px.colors.diverging.Tealrose[0])),
                       secondary_y=False)
 
         # add smoothed combined precision
         if "smooth_combined_precision" in combined_precision:
-            fig.add_trace(go.Scatter(x=combined_precision["training_tp"], y=combined_precision["smooth_combined_precision"],
+            fig.add_trace(go.Scatter(x=combined_precision["training_TP"], y=combined_precision["smooth_combined_precision"],
                                      marker=dict(color=px.colors.diverging.Tealrose[-1]),
-                                     name=col_names["combined precision"] + ", smoothed",
+                                     name="Combined precision, smoothed",
                                      mode="lines", line_shape='spline', line={'smoothing': 1.3}),
                           secondary_y=False, )
 
         # add highlighted motifs
         plotting_data_highlight = plotting_data[plotting_data["highlight"] != "Motif"]
         if len(plotting_data_highlight) > 0:
-            fig.add_trace(go.Scatter(x=plotting_data_highlight["training_tp_count"], y=plotting_data_highlight[col_names["precision"]],
+            fig.add_trace(go.Scatter(x=plotting_data_highlight["training_TP"], y=plotting_data_highlight["precision"],
                                      mode='markers', name=highlight_motifs_name,
                                      marker=dict(symbol="circle", color="#F5C144")),
                           secondary_y=False)

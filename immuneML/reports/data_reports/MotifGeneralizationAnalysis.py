@@ -29,11 +29,16 @@ from immuneML.workflows.steps.DataEncoderParams import DataEncoderParams
 
 class MotifGeneralizationAnalysis(DataReport):
     """
-    This report splits the given dataset into a training and test set, identifies significant motifs using the
+    This report splits the given dataset into a training and validation set, identifies significant motifs using the
     :py:obj:`~immuneML.encodings.motif_encoding.MotifEncoder.MotifEncoder`
     on the training set and plots the precision/recall and precision/true positive predictions of motifs
-    on both the training and test sets. This can be used to investigate generalizability of motifs and calibrate
-    example weighting parameters.
+    on both the training and validation sets. This can be used to:
+    - determine the optimal recall cutoff for motifs of a given size
+    - investigate how well motifs learned on a training set generalize to a test set
+
+    After running this report and determining the optimal recall cutoffs, the report
+    :py:obj:`~immuneML.reports.encoding_reports.MotifTestSetPerformance.MotifTestSetPerformance` can be run to
+    plot the performance on an independent test set.
 
     Arguments:
 
@@ -87,7 +92,6 @@ class MotifGeneralizationAnalysis(DataReport):
         self.smoothing_constant2 = smoothing_constant2
         self.random_seed = random_seed
         self.label = label
-        self.col_names = None
         self.n_positives_in_training_data = None
 
         self.training_set_name = training_set_name
@@ -136,12 +140,10 @@ class MotifGeneralizationAnalysis(DataReport):
         return MotifGeneralizationAnalysis(**kwargs)
 
     def _generate(self):
-        self._set_colnames()
-
         encoded_training_dataset, encoded_test_dataset = self._get_encoded_train_test_datasets()
         training_plotting_data, test_plotting_data = MotifPerformancePlotHelper.get_plotting_data(encoded_training_dataset.encoded_data,
                                                                                                   encoded_test_dataset.encoded_data,
-                                                                                                  self.col_names, self.highlight_motifs_path, self.highlight_motifs_name)
+                                                                                                  self.highlight_motifs_path, self.highlight_motifs_name)
 
         self.n_positives_in_training_data = self._get_positive_count(encoded_training_dataset)
 
@@ -190,26 +192,6 @@ class MotifGeneralizationAnalysis(DataReport):
         output_plots = self._write_plots(training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, tp_cutoff, motifs_name=motifs_name, file_suffix=motif_size_suffix)
 
         return output_tables, output_texts, output_plots
-
-    def _set_colnames(self):
-        self.col_names = dict()
-
-        if self.dataset.get_example_weights() is not None:
-            for name in ["precision", "recall"]:
-                self.col_names[name] = f"weighted_{name}_scores"
-
-            for name in ["tp", "fp", "fn", "tn"]:
-                self.col_names[name] = f"weighted_{name}_count"
-
-            self.col_names["combined precision"] = "Combined weighted precision"
-        else:
-            for name in ["precision", "recall"]:
-                self.col_names[name] = f"{name}_scores"
-
-            for name in ["tp", "fp", "fn", "tn"]:
-                self.col_names[name] = f"raw_{name}_count"
-
-            self.col_names["combined precision"] = "Combined precision"
 
     def _get_encoded_train_test_datasets(self):
         train_data_path = PathBuilder.build(self.result_path / "datasets/train")
@@ -335,7 +317,6 @@ class MotifGeneralizationAnalysis(DataReport):
 
     def _get_combined_precision(self, plotting_data):
         return MotifPerformancePlotHelper.get_combined_precision(plotting_data,
-                                                                 col_names=self.col_names,
                                                                  min_points_in_window=self.min_points_in_window,
                                                                  smoothing_constant1=self.smoothing_constant1,
                                                                  smoothing_constant2=self.smoothing_constant2)
@@ -346,15 +327,15 @@ class MotifGeneralizationAnalysis(DataReport):
         col = "smooth_combined_precision" if "smooth_combined_precision" in combined_precision else "combined_precision"
 
         try:
-            # assert all(training_combined_precision["training_tp"] == test_combined_precision["training_tp"])
+            # assert all(training_combined_precision["training_TP"] == test_combined_precision["training_TP"])
             #
             # train_test_difference = training_combined_precision[col] - test_combined_precision[col]
-            # return min(test_combined_precision[train_test_difference <= self.precision_difference]["training_tp"])
+            # return min(test_combined_precision[train_test_difference <= self.precision_difference]["training_TP"])
 
-            max_tp_below_threshold = max(combined_precision[combined_precision[col] < self.test_precision_threshold]["training_tp"])
-            all_above_threshold = combined_precision[combined_precision["training_tp"] > max_tp_below_threshold]
+            max_tp_below_threshold = max(combined_precision[combined_precision[col] < self.test_precision_threshold]["training_TP"])
+            all_above_threshold = combined_precision[combined_precision["training_TP"] > max_tp_below_threshold]
 
-            return min(all_above_threshold["training_tp"])
+            return min(all_above_threshold["training_TP"])
         except ValueError:
             motif_size_warning = f" for motif size = {motif_size}" if motif_size is not None else ""
             warnings.warn(f"{MotifGeneralizationAnalysis.__name__}: could not automatically determine optimal TP threshold{motif_size_warning} with precison differenc  based on {col}")
@@ -367,7 +348,6 @@ class MotifGeneralizationAnalysis(DataReport):
     def _plot_precision_per_tp(self, file_path, plotting_data, combined_precision, dataset_type, tp_cutoff=None, motifs_name="motifs"):
         fig = MotifPerformancePlotHelper.get_precision_per_tp_fig(plotting_data, combined_precision, dataset_type,
                                                                   training_set_name=self.training_set_name,
-                                                                  col_names=self.col_names,
                                                                   tp_cutoff=tp_cutoff,
                                                                   highlight_motifs_name=self.highlight_motifs_name)
 
@@ -380,15 +360,13 @@ class MotifGeneralizationAnalysis(DataReport):
 
     def _plot_precision_recall(self, file_path, plotting_data, min_recall=None, min_precision=None, dataset_type=None, motifs_name="motifs"):
         fig = px.scatter(plotting_data,
-                         y=self.col_names["precision"], x=self.col_names["recall"], hover_data=["feature_names"],
+                         y="precision", x="recall", hover_data=["feature_names"],
                          range_x=[0, 1.01], range_y=[0, 1.01], color="highlight",
                          color_discrete_map={"Motif": px.colors.qualitative.Pastel[0],
                                              self.highlight_motifs_name: px.colors.qualitative.Pastel[1]},
                          labels={
-                             "precision_scores": f"Precision ({dataset_type})",
-                             "recall_scores": f"Recall ({dataset_type})",
-                             "weighted_precision_scores": f"Weighted precision ({dataset_type})",
-                             "weighted_recall_scores": f"Weighted recall ({dataset_type})",
+                             "precision": f"Precision ({dataset_type})",
+                             "recall": f"Recall ({dataset_type})",
                              "feature_names": "Motif",
                          })
 

@@ -26,24 +26,16 @@ from immuneML.util.ReflectionHandler import ReflectionHandler
 
 class MotifTestSetPerformance(EncodingReport):
     """
-    Plots the performance of a set of motifs learned by MotifEncoder on an independent test set.
+    This report can be used to show the performance of a learned set motifs using the :py:obj:`~immuneML.encodings.motif_encoding.MotifEncoder.MotifEncoder`
+    on an independent test set of unseen data.
 
-    # todo should precision/recall be added also?
-
-
+    It is recommended to first run the report :py:obj:`~immuneML.reports.data_reports.MotifGeneralizationAnalysis.MotifGeneralizationAnalysis`
+    in order to calibrate the optimal recall thresholds and plot the performance of motifs on training- and validation sets.
 
     Arguments:
 
         test_dataset (dict): parameters for importing a SequenceDataset to use as an independent test set. By default,
         the import parameters 'is_repertoire' and 'paired' will be set to False to ensure a SequenceDataset is imported.
-
-
-
-
-
-
-
-
 
 
     YAML specification:
@@ -81,8 +73,6 @@ class MotifTestSetPerformance(EncodingReport):
         self.min_points_in_window = min_points_in_window
         self.smoothing_constant1 = smoothing_constant1
         self.smoothing_constant2 = smoothing_constant2
-
-
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -143,26 +133,20 @@ class MotifTestSetPerformance(EncodingReport):
         test_encoded_data = self._encode_test_data(test_dataset)
 
 
-        # todo refactor this different
-        self.col_names = {"precision": "precision_scores",
-                          "recall": "recall_scores",
-                          "tp": "raw_tp_count",
-                          "fp": "raw_fp_count",
-                          "fn": "raw_fn_count",
-                          "tn": "raw_tn_count",
-                          "combined precision": "Combined precision"}
-
-
         training_plotting_data, test_plotting_data = MotifPerformancePlotHelper.get_plotting_data(self.dataset.encoded_data,
                                                                                                   test_encoded_data.encoded_data,
-                                                                                                  self.col_names,
                                                                                                   self.highlight_motifs_path,
                                                                                                   self.highlight_motifs_name)
 
         training_plotting_data["motif_size"] = training_plotting_data["feature_names"].apply(PositionalMotifHelper.get_motif_size)
         test_plotting_data["motif_size"] = test_plotting_data["feature_names"].apply(PositionalMotifHelper.get_motif_size)
 
-        self._construct_and_plot_data(training_plotting_data, test_plotting_data)
+        output_tables, output_plots = self._construct_and_plot_data(training_plotting_data, test_plotting_data)
+
+        return ReportResult(name=self.name,
+                            info="Performance ",
+                            output_figures=output_plots,
+                            output_tables=output_tables)
 
 
     def _construct_and_plot_data(self, training_plotting_data, test_plotting_data):
@@ -176,7 +160,6 @@ class MotifTestSetPerformance(EncodingReport):
 
     def _get_combined_precision(self, plotting_data):
         return MotifPerformancePlotHelper.get_combined_precision(plotting_data,
-                                                                 col_names=self.col_names,
                                                                  min_points_in_window=self.min_points_in_window,
                                                                  smoothing_constant1=self.smoothing_constant1,
                                                                  smoothing_constant2=self.smoothing_constant2)
@@ -203,7 +186,6 @@ class MotifTestSetPerformance(EncodingReport):
         # todo color = motif_size
         fig = MotifPerformancePlotHelper.get_precision_per_tp_fig(plotting_data, combined_precision, dataset_type,
                                                                   training_set_name=self.training_set_name,
-                                                                  col_names=self.col_names,
                                                                   highlight_motifs_name=self.highlight_motifs_name)
 
         fig.write_html(str(file_path))
