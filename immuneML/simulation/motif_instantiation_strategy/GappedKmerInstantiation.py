@@ -184,6 +184,7 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
             if key not in weights:
                 weights[key] = 0
 
-        assert 0.99 <= sum(list(weights.values())) <= 1.
+        if weights:
+            assert 0.99 <= sum(list(weights.values())) <= 1., f'{GappedKmerInstantiation.__name__}: weights don\'t sum up to 1: {weights}'
 
         return weights
