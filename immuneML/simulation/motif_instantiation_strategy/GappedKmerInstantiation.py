@@ -185,6 +185,7 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
                 weights[key] = 0
 
         if weights:
-            assert 0.99 <= sum(list(weights.values())) <= 1., f'{GappedKmerInstantiation.__name__}: weights don\'t sum up to 1: {weights}'
+            assert 0.99 <= sum(list(weights.values())) <= 1. or sum(list(weights.values())) == 0, \
+                f'{GappedKmerInstantiation.__name__}: weights sum should be either 1 or 0, but it is between 0 and 1: {weights}'
 
         return weights
