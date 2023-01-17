@@ -72,11 +72,11 @@ class LSTM(GenerativeModel):
         PathBuilder.build(result_path)
 
         self.vocab_size = len(self._alphabet)
-        self.rnn_units = 1024
+        self.rnn_units = 128
         self.max_length = 42
         step = 3
-        epochs = 20
-        batch_size = 64
+        epochs = 5
+        batch_size = 32
 
         self.char2idx = {u: i for i, u in enumerate(self._alphabet)}
         self.idx2char = np.array(self._alphabet)
@@ -147,25 +147,30 @@ class LSTM(GenerativeModel):
         return self.model
 
     def generate(self, amount=10, path_to_model: Path = None):
+        sequences = []
+        for _ in range(amount):
 
-        generated = ""
-        sentence = "NDARTDNAAAYLHWVDFNLQ" #Random sequence chosen from dataset
-        print('...Generating with seed: "' + sentence + '"')
+            generated = ""
+            sentence = "NDARTDNAAAYLHWVDFNLQ" #Random sequence chosen from dataset
+            print('...Generating with seed: "' + sentence + '"')
 
 
-        for i in range(7000):  # Make one sequence at a time
-            x_pred = np.zeros((1, self.max_length, self.vocab_size))
-            for t, char in enumerate(sentence):
-                x_pred[0, t, self.char2idx[char]] = 1.0
-            preds = self.model.predict(x_pred, verbose=0)[0]
-            next_index = self.sample(preds, 1)
-            next_char = self.idx2char[next_index]
-            sentence = sentence[1:] + next_char
-            generated += next_char
 
-        print(generated)
 
-        return generated
+            for i in range(20):
+                x_pred = np.zeros((1, self.max_length, self.vocab_size))
+                for t, char in enumerate(sentence):
+                    x_pred[0, t, self.char2idx[char]] = 1.0
+                test_prediction = self.model(x_pred)
+                preds = self.model.predict(x_pred, verbose=0)[0]
+                next_index = self.sample(preds, 1)
+                next_char = self.idx2char[next_index]
+                sentence = sentence[1:] + next_char
+                generated += next_char
+
+            print(generated)
+            sequences.append(generated)
+        return sequences
 
     def get_params(self):
         return self._parameters
