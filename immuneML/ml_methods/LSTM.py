@@ -1,6 +1,9 @@
 import csv
-import yaml
+import json
+import os
+
 import datetime
+import random
 
 import numpy as np
 import pandas as pd
@@ -20,39 +23,35 @@ class LSTM(GenerativeModel):
         parameters = parameters if parameters is not None else {}
         parameter_grid = parameter_grid if parameter_grid is not None else {}
         super(LSTM, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
-
+        self.model_params = {}
+        self.char2idx = {}
+        self.idx2char = {}
+        self.vocab_size = 0
+        self.max_length = 40
+        self.rnn_units = 1024
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
 
-
-        """
-        :param cores_for_training:
-        :param X:
-        :return: keras.Sequential object
-
-        The initial parameters set have been determined through testing on a previous project using LSTM. It is
-        worthwhile considering changing these.
-        """
-        embedding_dim = 256
-        rnn_units = 1024
-        seq_length = 42  # window size (w)
-        batch_size = 64
-        buffer_size = 1000
-
-        vocab_size = len(self._alphabet)
-
         self.model = tf.keras.Sequential([
-            tf.keras.layers.Embedding(vocab_size, embedding_dim, batch_input_shape=[batch_size, None]),
-            tf.keras.layers.LSTM(rnn_units,
-                                 return_sequences=True,
-                                 stateful=True,
-                                 recurrent_initializer='glorot_uniform'),
-            tf.keras.layers.Dense(vocab_size)
+            tf.keras.layers.Input(shape=(self.max_length, self.vocab_size)),
+            tf.keras.layers.LSTM(self.rnn_units),
+            tf.keras.layers.Dense(self.vocab_size, activation="softmax")
         ])
+        optimizer = tf.keras.optimizers.RMSprop(learning_rate=0.01)
+        self.model.compile(loss="categorical_crossentropy", optimizer=optimizer)
 
-        return self.model
+    @staticmethod
+    def sample(preds, temperature=1.0):
+        # helper function to sample an index from a probability array
+        preds = np.asarray(preds).astype("float64")
+        preds = np.log(preds) / temperature
+        exp_preds = np.exp(preds)
+        preds = exp_preds / np.sum(exp_preds)
+        probas = np.random.multinomial(1, preds, 1)
+        return np.argmax(probas)
 
-    def loss(self, labels, logits):
+    @staticmethod
+    def loss(labels, logits):
         '''
         loss function for the net output
         :param labels:
@@ -62,77 +61,111 @@ class LSTM(GenerativeModel):
         loss = tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
         return loss
 
-    # split input target
-    def split_input_target(self, seq):
-        '''
-        split input output, return input-output pairs
-        :param seq:
-        :return:
-        '''
-        input_seq = seq[:-1]
-        target_seq = seq[1:]
-        return input_seq, target_seq
 
-    def _fit(self, encoded_data, cores_for_training: int = 1):
+    def _fit(self, dataset, cores_for_training: int = 1, result_path: Path = None):
 
-        nb_epoch = 20
+        """
+        Hard values made from previous testing with LSTM. These values may not be suitable for protein sequence
+        generation
+        """
 
-        char_dataset = tf.data.Dataset.from_tensor_slices(encoded_data)
+        PathBuilder.build(result_path)
 
-        sequences = char_dataset.batch(self._length_of_sequence + 1, drop_remainder=True)
-
-        dataset = sequences.map(self.split_input_target)
+        self.vocab_size = len(self._alphabet)
+        self.rnn_units = 1024
+        self.max_length = 42
+        step = 3
+        epochs = 20
         batch_size = 64
-        buffer_size = 1000
-        dataset = dataset.shuffle(buffer_size).batch(batch_size, drop_remainder=True)
-        # get dataset size since there is no dim/shape attributes in tf.dataset
-        dataset_size = 0
-        for _ in dataset:
-            dataset_size += 1
-        scaller = 1
-        # split train, val, test
-        train_size = int(0.7 / scaller * dataset_size)
-        val_size = int(0.15 / scaller * dataset_size)
-        test_size = int(0.15 / scaller * dataset_size)
-        print('Trains batches {}, val batches {}, test batches {}'.format(train_size, val_size, test_size))
 
-        train_dataset = dataset.take(train_size)
-        test_dataset = dataset.skip(train_size)
-        val_dataset = test_dataset.skip(val_size)
-        test_dataset = test_dataset.take(test_size)
+        self.char2idx = {u: i for i, u in enumerate(self._alphabet)}
+        self.idx2char = np.array(self._alphabet)
 
-        self.model = self._get_ml_model()
+        sentences = []
+        next_chars = []
+        for i in range(0, len(dataset) - self.max_length, step):
+            sentences.append(dataset[i: i + self.max_length])
+            next_chars.append(dataset[i + self.max_length])
+        print("Number of sequences:", len(sentences))
+
+        x = np.zeros((len(sentences), self.max_length, len(self._alphabet)), dtype=np.bool)
+        y = np.zeros((len(sentences), len(self._alphabet)), dtype=np.bool)
+        for i, sentence in enumerate(sentences):
+            for t, char in enumerate(sentence):
+                x[i, t, self.char2idx[char]] = 1
+            y[i, self.char2idx[next_chars[i]]] = 1
+
+        self._get_ml_model()
 
         self.model.summary()
-        # sanity checks
-        for input_example_batch, output_example_batch in dataset.take(1):
-            example_batch_predictions = self.model(input_example_batch)
-            print(example_batch_predictions.shape)
-            sampled_indices = tf.random.categorical(example_batch_predictions[0], num_samples=1)
-            print(sampled_indices)
-            sampled_indices = tf.squeeze(sampled_indices, axis=-1).numpy()
-        ####
 
-        example_loss = self.loss(output_example_batch, example_batch_predictions)
-        print(example_loss.numpy().mean())
-        self.model.compile(optimizer='adam', loss=self.loss)
+        #Prep checkpoint paths
+        checkpoints_path = result_path / f"{self._get_model_filename()}_checkpoints.csv"
+        checkpoint_prefix = os.path.join(checkpoints_path, 'ckpt_{epoch}')
+        checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+            filepath=checkpoint_prefix,
+            save_weights_only=True,
+            verbose=1,
+            save_best_only=False
+        )
 
-        self.model.fit(train_dataset, epochs=nb_epoch,
-                            validation_data=val_dataset)
+        self.model.fit(x, y, batch_size=batch_size, epochs=epochs, callbacks=[checkpoint_callback])
+
+        # for epoch in range(epochs):
+        #     self.model.fit(x, y, batch_size=batch_size, epochs=1, callbacks=[checkpoint_callback])
+        #     print()
+        #     print("Generating text after epoch: %d" % epoch)
+        #
+        #     start_index = random.randint(0, len(dataset) - self.max_length - 1)
+        #     for diversity in [0.2, 0.5, 1.0, 1.2]:
+        #         print("...Diversity:", diversity)
+        #
+        #         generated = ""
+        #         sentence = ''.join(dataset[start_index: start_index + self.max_length])
+        #         print('...Generating with seed: "' + sentence + '"')
+        #
+        #         for i in range(100):
+        #             x_pred = np.zeros((1, self.max_length, self.vocab_size))
+        #             for t, char in enumerate(sentence):
+        #                 x_pred[0, t, self.char2idx[char]] = 1.0
+        #             preds = self.model.predict(x_pred, verbose=0)[0]
+        #             next_index = self.sample(preds, diversity)
+        #             next_char = self.idx2char[next_index]
+        #             sentence = sentence[1:] + next_char
+        #             generated += next_char
+        #
+        #         print("...Generated: ", generated)
+        #         print()
+
+        self.model_params = {
+            'nb_epoch': epochs,
+            'batch_size': batch_size,
+            'vocab_size': self.vocab_size,
+            'rnn_units': self.rnn_units
+        }
 
         return self.model
 
     def generate(self, amount=10, path_to_model: Path = None):
 
-        test = self.model("VICTR")
+        generated = ""
+        sentence = "NDARTDNAAAYLHWVDFNLQ" #Random sequence chosen from dataset
+        print('...Generating with seed: "' + sentence + '"')
 
-        test2 = self.model.predict(self._length_of_sequences)
 
+        for i in range(7000):  # Make one sequence at a time
+            x_pred = np.zeros((1, self.max_length, self.vocab_size))
+            for t, char in enumerate(sentence):
+                x_pred[0, t, self.char2idx[char]] = 1.0
+            preds = self.model.predict(x_pred, verbose=0)[0]
+            next_index = self.sample(preds, 1)
+            next_char = self.idx2char[next_index]
+            sentence = sentence[1:] + next_char
+            generated += next_char
 
-        print(test)
-        print(test2)
+        print(generated)
 
-        return test2
+        return generated
 
     def get_params(self):
         return self._parameters
@@ -145,29 +178,29 @@ class LSTM(GenerativeModel):
 
     def load(self, path: Path, details_path: Path = None):
 
-        name = f"{self._get_model_filename()}.csv"
-        file_path = path / name
-        if file_path.is_file():
-            dataframe = file_path
-        else:
-            raise FileNotFoundError(f"{self.__class__.__name__} model could not be loaded from {file_path}"
-                                    f". Check if the path to the {name} file is properly set.")
+        model_params = json.load(path / f"{self._get_model_filename()}_model_params.csv")
+        self.char2idx = json.load(path / f"{self._get_model_filename()}_char2idx.csv")
+        self.idx2char = list(self.char2idx.keys())
 
-        if details_path is None:
-            params_path = path / f"{self._get_model_filename()}.yaml"
-        else:
-            params_path = details_path
-
-        if params_path.is_file():
-            with params_path.open("r") as file:
-                desc = yaml.safe_load(file)
-                for param in ["feature_names"]:
-                    if param in desc:
-                        setattr(self, param, desc[param])
+        checkpoint_dir = path / f"{self._get_model_filename()}_checkpoints.csv"
+        self.vocab_size = model_params['vocab_size']
+        self.rnn_units = model_params['rnn_units']
+        self.model.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
 
     def store(self, path: Path, feature_names=None, details_path: Path = None):
 
-        pass
+        PathBuilder.build(path)
+
+        print(f'{datetime.datetime.now()}: Writing to file...')
+        params_path = path / f"{self._get_model_filename()}_model_params.csv"
+        char2idx_path = path / f"{self._get_model_filename()}_char2idx.csv"
+
+
+        model_params_outname = params_path
+        char2idx_outname = char2idx_path
+        json.dump(self.model_params, open(model_params_outname, 'w'))
+        json.dump(self.char2idx, open(char2idx_outname, 'w'))
+
 
     @staticmethod
     def get_documentation():
