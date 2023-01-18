@@ -22,3 +22,4 @@ logomaker>=0.8
 matplotlib-venn>=0.11
 scipy
 Cython
+tensorflow
