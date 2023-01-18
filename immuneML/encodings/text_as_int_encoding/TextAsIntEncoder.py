@@ -63,6 +63,7 @@ class TextAsIntEncoder(DatasetEncoder):
         instances = ' '.join(
             [(sequence.get_sequence()) for repertoire in dataset.get_data() for sequence in repertoire.sequences])
         alphabet = sorted(set(instances)) #This assumes all acids are included, consider hardcoding in alphabet
+        instances = instances.replace("\n", " ")
         char2idx = {u: i for i, u in enumerate(alphabet)}
         text_as_int = np.array([c for c in instances])
 
@@ -70,7 +71,7 @@ class TextAsIntEncoder(DatasetEncoder):
 
         info = {"alphabet": alphabet, "length_of_sequence": length_of_sequence}
 
-        encoded_data = EncodedData(examples=text_as_int,
+        encoded_data = EncodedData(examples=instances,
                                    #feature_names=feature_names,
                                    encoding=TextAsIntEncoder.__name__,
                                    info=info)
