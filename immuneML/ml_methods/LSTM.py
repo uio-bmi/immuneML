@@ -8,6 +8,7 @@ import random
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+import keras_tuner as kt
 
 from pathlib import Path
 from immuneML.ml_methods.GenerativeModel import GenerativeModel
@@ -23,22 +24,39 @@ class LSTM(GenerativeModel):
         parameters = parameters if parameters is not None else {}
         parameter_grid = parameter_grid if parameter_grid is not None else {}
         super(LSTM, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
+        self.epochs = 20
+        self.checkpoint_dir = ""
         self.model_params = {}
         self.char2idx = {}
         self.idx2char = {}
-        self.vocab_size = 0
         self.max_length = 40
-        self.rnn_units = 1024
+        self.historydf = None
+        self.generated_sequences = []
 
-    def _get_ml_model(self, cores_for_training: int = 2, X=None):
+    def split_input_target(self, seq):
+        '''
+        split input output, return input-output pairs
+        :param seq:
+        :return:
+        '''
+        input_seq = seq[:-1]
+        target_seq = seq[1:]
+        return input_seq, target_seq
 
+    def _get_ml_model(self, cores_for_training: int = 2, X=None, vocab_size=21, rnn_units=128, embedding_dim=256, batch_size=64):
+
+        #put one hot
         self.model = tf.keras.Sequential([
-            tf.keras.layers.Input(shape=(self.max_length, self.vocab_size)),
-            tf.keras.layers.LSTM(self.rnn_units),
-            tf.keras.layers.Dense(self.vocab_size, activation="softmax")
+            tf.keras.layers.Embedding(vocab_size,
+                                      embedding_dim,
+                                      batch_input_shape=[batch_size, None]),
+            tf.keras.layers.LSTM(rnn_units,
+                                 return_sequences=True,
+                                 stateful=True,
+                                 recurrent_initializer='glorot_uniform'),
+            tf.keras.layers.Dense(vocab_size)
         ])
-        optimizer = tf.keras.optimizers.RMSprop(learning_rate=0.01)
-        self.model.compile(loss="categorical_crossentropy", optimizer=optimizer)
+
 
     @staticmethod
     def sample(preds, temperature=1.0):
@@ -71,37 +89,68 @@ class LSTM(GenerativeModel):
 
         PathBuilder.build(result_path)
 
-        self.vocab_size = len(self._alphabet)
-        self.rnn_units = 128
+        vocab_size = len(self._alphabet)
+        rnn_units = 64
         self.max_length = 42
-        step = 3
-        epochs = 4
+        self.epochs = 4
         batch_size = 128
+        buffer_size = 1000
+        embedding_dim = 32
 
         self.char2idx = {u: i for i, u in enumerate(self._alphabet)}
         self.idx2char = np.array(self._alphabet)
 
         sentences = []
         next_chars = []
-        for i in range(0, len(dataset) - self.max_length, self.max_length):
-            sentences.append(dataset[i: i + self.max_length])
-            next_chars.append(dataset[i + self.max_length])
-        print("Number of sequences:", len(sentences))
+        # for i in range(0, len(dataset) - self.max_length, self.max_length):
+        #     sentences.append(dataset[i: i + self.max_length])
+        #     next_chars.append(dataset[i + self.max_length])
+        # print("Number of sequences:", len(sentences))
 
-        x = np.zeros((len(sentences), self.max_length, len(self._alphabet)), dtype=np.bool)
-        y = np.zeros((len(sentences), len(self._alphabet)), dtype=np.bool)
-        for i, sentence in enumerate(sentences):
-            for t, char in enumerate(sentence):
-                x[i, t, self.char2idx[char]] = 1
-            y[i, self.char2idx[next_chars[i]]] = 1
+        # x = np.zeros((len(sentences), self.max_length, len(self._alphabet)), dtype=np.bool)
+        # y = np.zeros((len(sentences), len(self._alphabet)), dtype=np.bool)
+        # for i, sentence in enumerate(sentences):
+        #     for t, char in enumerate(sentence):
+        #         x[i, t, self.char2idx[char]] = 1
+        #     y[i, self.char2idx[next_chars[i]]] = 1
+        tensor_x = tf.data.Dataset.from_tensor_slices([self.char2idx[i] for i in dataset])
+        sequences_as_one_hot = tensor_x.batch(self.max_length, drop_remainder=True)
+        final_data = sequences_as_one_hot.map(self.split_input_target)
+        final_data = final_data.shuffle(buffer_size).batch(batch_size, drop_remainder=True)
+        dataset_size = 0
+        for _ in dataset:
+            dataset_size += 1
+        print(dataset_size)
+        scaller = 1
+        # split train, val, test
+        train_size = int(0.7 / scaller * dataset_size)
+        val_size = int(0.15 / scaller * dataset_size)
+        test_size = int(0.15 / scaller * dataset_size)
+        print('Trains batches {}, val batches {}, test batches {}'.format(train_size, val_size, test_size))
+        train_dataset = final_data.take(train_size)
+        test_dataset = final_data.skip(train_size)
+        val_dataset = test_dataset.skip(val_size)
 
-        self._get_ml_model()
+        self._get_ml_model(vocab_size=vocab_size, rnn_units=rnn_units, embedding_dim=embedding_dim, batch_size=batch_size)
+
+        for input_example_batch, output_example_batch in final_data.take(1):
+            example_batch_predictions = self.model(input_example_batch)
+            print(example_batch_predictions.shape)
+            sampled_indices = tf.random.categorical(example_batch_predictions[0], num_samples=1)
+            print(sampled_indices)
+            sampled_indices = tf.squeeze(sampled_indices, axis=-1).numpy()
+            print(''.join(self.idx2char[sampled_indices]))
+            print(''.join(self.idx2char[input_example_batch[0].numpy()]))
+        ####
+
+        example_loss = self.loss(output_example_batch, example_batch_predictions)
+        print(example_loss.numpy().mean())
 
         self.model.summary()
-
+        self.model.compile(loss=self.loss, optimizer='adam', metrics=['accuracy'])
         #Prep checkpoint paths
-        checkpoints_path = result_path / f"{self._get_model_filename()}_checkpoints.csv"
-        checkpoint_prefix = os.path.join(checkpoints_path, 'ckpt_{epoch}')
+        self.checkpoint_dir = result_path / f"{self._get_model_filename()}_checkpoints"
+        checkpoint_prefix = os.path.join(self.checkpoint_dir, 'ckpt_{epoch}')
         checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
             filepath=checkpoint_prefix,
             save_weights_only=True,
@@ -109,7 +158,18 @@ class LSTM(GenerativeModel):
             save_best_only=False
         )
 
-        self.model.fit(x, y, batch_size=batch_size, epochs=epochs, callbacks=[checkpoint_callback])
+        history = self.model.fit(train_dataset,
+                                 epochs=self.epochs,
+                                 callbacks=[checkpoint_callback],
+                                 validation_data=val_dataset)
+        history_contents = []
+        for metric in history.history:
+            metric_contents = []
+            for i, val in enumerate(history.history[metric]):
+                history_content = [val]
+                metric_contents.append(history_content)
+            history_contents.append([metric, metric_contents])
+        self.historydf = pd.DataFrame(history_contents, columns=['metric', 'data'])
 
         # for epoch in range(epochs):
         #     self.model.fit(x, y, batch_size=batch_size, epochs=1, callbacks=[checkpoint_callback])
@@ -138,35 +198,50 @@ class LSTM(GenerativeModel):
         #         print()
 
         self.model_params = {
-            'nb_epoch': epochs,
+            'epochs': self.epochs,
             'batch_size': batch_size,
-            'vocab_size': self.vocab_size,
-            'rnn_units': self.rnn_units
+            'buffer_size': buffer_size,
+            'vocab_size': vocab_size,
+            'embedding_dim': embedding_dim,
+            'rnn_units': rnn_units
         }
 
         return self.model
 
     def generate(self, amount=10, path_to_model: Path = None):
 
-        generated = ""
+        self._get_ml_model(vocab_size=self.model_params['vocab_size'],
+                           rnn_units=self.model_params['rnn_units'],
+                           embedding_dim=self.model_params['embedding_dim'],
+                           batch_size=1)
+
+        self.model.load_weights(tf.train.latest_checkpoint(self.checkpoint_dir))
+
         sentence = "VICTR" #Random sequence chosen from dataset
         print('...Generating with seed: "' + sentence + '"')
 
+        input_vect = [self.char2idx[s] for s in sentence]
+        input_vect = tf.expand_dims(input_vect, 0)
+        generated_seq = ''
+        temperature = 1.
+        self.model.reset_states()
+        count = 0
+
+        while True:
+            prediction = self.model(input_vect)
+            prediction = tf.squeeze(prediction, 0)
+            prediction = prediction / temperature
+            predicted_char = tf.random.categorical(prediction, num_samples=1)[-1, 0].numpy()
+            input_vect = tf.expand_dims([predicted_char], 0)
+            if self.idx2char[predicted_char] == ' ':
+                count += 1
+            if count == amount:
+                break
+            generated_seq += self.idx2char[predicted_char]
 
 
-
-        for i in range(3500):
-            x_pred = np.zeros((1, self.max_length, self.vocab_size))
-            for t, char in enumerate(sentence):
-                x_pred[0, t, self.char2idx[char]] = 1.0
-            preds = self.model.predict(x_pred, verbose=0)[0]
-            next_index = self.sample(preds, 1)
-            next_char = self.idx2char[next_index]
-            sentence = sentence[1:] + next_char
-            generated += next_char
-
-        print(generated)
-        return generated
+        self.generated_sequences = np.array(generated_seq.split(' '))
+        return self.generated_sequences
 
     def get_params(self):
         return self._parameters
@@ -179,14 +254,12 @@ class LSTM(GenerativeModel):
 
     def load(self, path: Path, details_path: Path = None):
 
-        model_params = json.load(path / f"{self._get_model_filename()}_model_params.csv")
-        self.char2idx = json.load(path / f"{self._get_model_filename()}_char2idx.csv")
+        self.model_params = json.load(open(path / f"{self._get_model_filename()}_model_params.json"))
+        self.char2idx = json.load(open(path / f"{self._get_model_filename()}_char2idx.json"))
         self.idx2char = list(self.char2idx.keys())
+        self.checkpoint_dir = path / f"{self._get_model_filename()}_checkpoints"
 
-        checkpoint_dir = path / f"{self._get_model_filename()}_checkpoints"
-        self.vocab_size = model_params['vocab_size']
-        self.rnn_units = model_params['rnn_units']
-        self.model.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
+
 
     def store(self, path: Path, feature_names=None, details_path: Path = None):
 

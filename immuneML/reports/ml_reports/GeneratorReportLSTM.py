@@ -10,17 +10,16 @@ from immuneML.reports.ml_reports.UnsupervisedMLReport import UnsupervisedMLRepor
 from immuneML.util.PathBuilder import PathBuilder
 import numpy as np
 import pandas as pd
-import matplotlib.pylab as plt
-plt.style.use("seaborn")
+import plotly.express as px
 
 import plotly.graph_objs as go
 
 
-class GeneratorReport(UnsupervisedMLReport):
+class GeneratorReportLSTM(UnsupervisedMLReport):
     @classmethod
     def build_object(cls, **kwargs):
-        name = kwargs["name"] if "name" in kwargs else "GeneratorReport"
-        return GeneratorReport(name=name)
+        name = kwargs["name"] if "name" in kwargs else "GeneratorReportLSTM"
+        return GeneratorReportLSTM(name=name)
 
     def __init__(self, dataset: Dataset = None, method: UnsupervisedMLMethod = None, result_path: Path = None,
                  name: str = None, number_of_processes: int = 1):
@@ -43,11 +42,27 @@ class GeneratorReport(UnsupervisedMLReport):
         # result = ReportOutput(filename)
 
         # return ReportResult(self.name, output_figures=[result])
+        loss_over_time = self.result_path / f"{self.name}loss.html"
+        PathBuilder.build(self.result_path)
+
+        fig = px.line(self.method.historydf['data'][0], x=np.arange(1, len(self.method.historydf['data'][1]) + 1))
+        with loss_over_time.open("w") as file:
+            fig.write_html(file)
+
+        accuracy_over_epoch = self.result_path / f"{self.name}acc.html"
+        PathBuilder.build(self.result_path)
+
+        fig2 = px.line(self.method.historydf['data'][1], x=np.arange(1, len(self.method.historydf['data'][1]) + 1))
+        with accuracy_over_epoch.open("w") as file:
+            fig2.write_html(file)
 
         generated_sequences = self.result_path / f"{self.name}GeneratedSequences.csv"
 
         data = pd.DataFrame(self.method.generated_sequences, columns=["Generated Sequences"])
         data.to_csv(generated_sequences, index=False)
-        sequences_to_output = ReportOutput(generated_sequences, name="Generated Sequences")
 
-        return ReportResult(self.name, output_tables=[sequences_to_output])
+        sequences_to_output = ReportOutput(generated_sequences, name="Generated Sequences")
+        loss = ReportOutput(loss_over_time, name="Loss")
+        acc = ReportOutput(accuracy_over_epoch, name="Accuracy")
+
+        return ReportResult(self.name, output_figures=[loss, acc], output_tables=[sequences_to_output])
