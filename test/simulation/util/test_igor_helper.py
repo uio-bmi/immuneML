@@ -455,6 +455,7 @@ class IGoRHelperTest(TestCase):
 
         self.assertEqual(len(genes['j']), 7)
         self.assertEqual(len(genes['v']), 97)
+        self.assertEqual(genes['v'].index("IGHV4-28*01"), 73)
 
         shutil.rmtree(path)
 
