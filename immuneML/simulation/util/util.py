@@ -144,6 +144,7 @@ def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annota
 
             signal_pos_col = np.logical_or(signal_pos_col, matches) if signal_pos_col is not None else matches
             signal_matrix[:, index] = np.logical_or(signal_matrix[:, index], np.logical_or.reduce(matches, axis=1))
+            # TODO: we want to remove a receptor if it has multiple matches of the motif -> xor? or somehow removed?
 
         np_mask = RaggedArray(np.where(signal_pos_col.ravel(), "1", "0"), shape=signal_pos_col.shape)
         signal_positions[f'{signal.id}_positions'] = ['m' + "".join(np_mask[ind, :]) for ind in range(len(signal_pos_col))]

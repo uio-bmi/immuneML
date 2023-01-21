@@ -14,7 +14,7 @@ from immuneML.simulation.implants.MotifInstance import MotifInstance
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.simulation_strategy.SimulationStrategy import SimulationStrategy
 from immuneML.simulation.util.bnp_util import merge_dataclass_objects
-from immuneML.simulation.util.util import build_imgt_positions, choose_implant_position, filter_out_illegal_sequences
+from immuneML.simulation.util.util import build_imgt_positions, choose_implant_position, filter_out_illegal_sequences, annotate_sequences
 from immuneML.util.PositionHelper import PositionHelper
 
 
@@ -27,6 +27,24 @@ class ImplantingStrategy(SimulationStrategy):
 
         filtered_sequences = filter_out_illegal_sequences(sequences, sim_item, all_signals,
                                                           max_signals_per_sequence=0 if remove_positives_first else -1)
+
+        remaining_seq_mask, implanted_sequences = self._implant_in_sequences(filtered_sequences, sequence_type, sim_item, seqs_per_signal_count,
+                                                                             all_signals, use_p_gens)
+
+        annotated_dc = type(sequences)
+        processed_seqs = merge_dataclass_objects([filtered_sequences[remaining_seq_mask], annotated_dc(**implanted_sequences)])
+
+        if remove_positives_first:
+            processed_seqs = self._remove_invalid(processed_seqs, sequence_type, sim_item, all_signals, annotated_dc)
+
+        return processed_seqs
+
+    def _remove_invalid(self, processed_seqs, sequence_type, sim_item, all_signals, annotated_dc):
+        processed_seqs = annotate_sequences(processed_seqs, sequence_type == SequenceType.AMINO_ACID, all_signals, annotated_dc)
+        return filter_out_illegal_sequences(processed_seqs, sim_item, all_signals, 1)
+
+    def _implant_in_sequences(self, filtered_sequences, sequence_type: SequenceType, sim_item: SimConfigItem, seqs_per_signal_count: dict,
+                              all_signals: list, use_p_gens: bool):
 
         sequence_lengths = getattr(filtered_sequences, sequence_type.value).lengths
         remaining_seq_mask = np.ones(len(filtered_sequences), dtype=bool)
@@ -41,7 +59,8 @@ class ImplantingStrategy(SimulationStrategy):
                     if suitable_seqs.shape[0] > 0:
                         sequence_index = np.random.choice(suitable_seqs, size=1)[0]
 
-                        sequence_obj = self._implant_in_sequence(filtered_sequences[sequence_index], signal, instance, use_p_gens, sequence_type, sim_item, all_signals)
+                        sequence_obj = self._implant_in_sequence(filtered_sequences[sequence_index], signal, instance, use_p_gens, sequence_type,
+                                                                 sim_item, all_signals)
                         for field in get_fields(filtered_sequences):
                             implanted_sequences[field.name].append(sequence_obj[field.name])
 
@@ -51,7 +70,7 @@ class ImplantingStrategy(SimulationStrategy):
                         logging.warning(f"{ImplantingStrategy.__name__}: could not find a sequence to implant {instance} for signal {signal.id}, "
                                         f"skipping for now.")
 
-        return merge_dataclass_objects([filtered_sequences[remaining_seq_mask], type(sequences)(**implanted_sequences)])
+        return remaining_seq_mask, implanted_sequences
 
     def _implant_in_sequence(self, sequence_row: BackgroundSequences, signal: Signal, motif_instance: MotifInstance, use_p_gens: bool,
                              sequence_type: SequenceType, sim_item: SimConfigItem, all_signals: List[Signal]) -> dict:
