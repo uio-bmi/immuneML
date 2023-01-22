@@ -1,7 +1,7 @@
 import dataclasses
 import logging
 import uuid
-from dataclasses import make_dataclass
+from dataclasses import make_dataclass, fields as get_fields
 from pathlib import Path
 from typing import List, Dict
 
@@ -109,7 +109,7 @@ def get_allowed_positions(signal: Signal, sequence_array: RaggedArray, region_ty
 
 def get_region_type(sequences) -> RegionType:
     if hasattr(sequences, "region_type") and \
-        np.all([el.to_string() == getattr(sequences, 'region_type')[0].to_string() for el in getattr(sequences, 'region_type')]):
+       np.all([el.to_string() == getattr(sequences, 'region_type')[0].to_string() for el in getattr(sequences, 'region_type')]):
         return RegionType[getattr(sequences, 'region_type')[0].to_string()]
     else:
         raise RuntimeError(f"The region types could not be obtained.")
@@ -202,12 +202,17 @@ def make_repertoire_from_sequences(sequences: BNPDataClass, repertoires_path, si
     return Repertoire.build(**rep_data, path=repertoires_path, metadata=metadata)
 
 
-def make_bnp_annotated_sequences(sequences: BackgroundSequences, bnp_data_class, all_signals: list, signal_matrix: np.ndarray, signal_positions: dict):
+def make_bnp_annotated_sequences(sequences: BackgroundSequences, bnp_data_class, all_signals: list, signal_matrix: np.ndarray,
+                                 signal_positions: dict):
     kwargs = {**{s.id: signal_matrix[:, ind].astype(int) for ind, s in enumerate(all_signals)},
               **{f"{s.id}_positions": bnp.as_encoded_array(signal_positions[f"{s.id}_positions"], bnp.encodings.BaseEncoding) for ind, s in
                  enumerate(all_signals)},
-              **{f'observed_{s.id}': signal_matrix[:, ind].astype(int) for ind, s in enumerate(all_signals)},
               **{field_name: getattr(sequences, field_name) for field_name in BackgroundSequences.__annotations__.keys()}}
+
+    dc_fields = get_fields(bnp_data_class)
+    if any([f'observed_{s.id}' in dc_fields for s in all_signals]):
+        kwargs = {**kwargs,
+                  **{f'observed_{s.id}': signal_matrix[:, ind].astype(int) for ind, s in enumerate(all_signals)}}
 
     return bnp_data_class(**kwargs)
 
@@ -299,7 +304,6 @@ def update_seqs_with_signal(max_counts: dict, annotated_sequences, all_signals, 
 
 
 def get_signal_sequences(sequences, bnp_data_class, used_seq_count: dict, sim_item: SimConfigItem, sequence_paths: Dict[str, Path]):
-
     for signal in sim_item.signals:
 
         skip_rows = used_seq_count[signal.id]

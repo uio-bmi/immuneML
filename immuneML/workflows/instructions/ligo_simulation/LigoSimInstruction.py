@@ -164,7 +164,7 @@ class LigoSimInstruction(Instruction):
             sequences = get_bnp_data(sequence_paths['no_signal'], self._background_fields + self._custom_fields)
         else:
             for signal in sim_item.signals:
-                signal_sequences = get_bnp_data(sequence_paths[signal.id], self._background_fields + self._custom_fields)
+                signal_sequences = get_bnp_data(sequence_paths[signal.id], self._annotated_dataclass)
                 sequences = signal_sequences if sequences is None else merge_dataclass_objects([sequences, signal_sequences])
 
         sequences = make_receptor_sequence_objects(sequences, metadata=make_signal_metadata(sim_item, self.state.signals),
@@ -214,7 +214,7 @@ class LigoSimInstruction(Instruction):
                                                                                     self.sequence_type, sim_item, self.state.signals,
                                                                                     self.state.simulation.remove_seqs_with_signals)
 
-            if self._use_p_gens:
+            if self.state.simulation.keep_p_gen_dist:
                 sequences = self._filter_using_p_gens(sequences, sim_item)
 
             seqs_per_signal_count['no_signal'] = update_seqs_without_signal(seqs_per_signal_count['no_signal'], sequences, seq_paths['no_signal'])
