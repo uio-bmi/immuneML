@@ -55,6 +55,8 @@ class TestMotifGeneralizationAnalysis(TestCase):
         self.assertTrue(os.path.isfile(path / "result/training_precision_recall_motif_size=1.html"))
         self.assertTrue(os.path.isfile(path / "result/test_precision_recall_motif_size=1.html"))
 
+        self.assertTrue(os.path.isfile(path / "result/tp_recall_cutoffs.tsv"))
+
         shutil.rmtree(path)
 
 
