@@ -1,4 +1,5 @@
 import logging
+import warnings
 from functools import partial
 from multiprocessing.pool import Pool
 from pathlib import Path
@@ -154,7 +155,10 @@ class MotifEncoder(DatasetEncoder):
         learned_motifs = self._compute_motifs(dataset, params)
 
         self.learned_motif_filepath = params.result_path / "significant_motifs.tsv"
+        self.motif_stats_filepath = params.result_path / "motif_stats.tsv"
+
         PositionalMotifHelper.write_motifs_to_file(learned_motifs, self.learned_motif_filepath)
+        self._write_motif_stats(learned_motifs, self.motif_stats_filepath)
 
         return self.get_encoded_dataset_from_motifs(dataset, learned_motifs, params)
 
@@ -172,6 +176,22 @@ class MotifEncoder(DatasetEncoder):
             motifs += generalized_motifs
 
         return motifs
+
+    def _write_motif_stats(self, learned_motifs, motif_stats_filepath):
+        try:
+            data = {}
+
+            data["motif_size"] = list(range(1, self.max_positions + 1))
+            data["min_precision"] = [self.min_precision] * self.max_positions
+            data["min_recall"] = [self.min_recall.get(motif_size, 1) for motif_size in range(1, self.max_positions + 1)]
+
+            all_motif_sizes = [len(motif) for motif in learned_motifs]
+            data["n_motifs"] = [all_motif_sizes.count(motif_size) for motif_size in range(1, self.max_positions + 1)]
+
+            df = pd.DataFrame(data)
+            df.to_csv(motif_stats_filepath, index=False, sep="\t")
+        except Exception as e:
+            warnings.warn(f"{MotifEncoder.__name__}: could not write motif stats. Exception was: {e}")
 
     def get_encoded_dataset_from_motifs(self, dataset, motifs, params):
         labels = EncoderHelper.encode_element_dataset_labels(dataset, params.label_config)
