@@ -91,6 +91,32 @@ class PositionalMotifHelper:
         return new_candidates
 
     @staticmethod
+    def identify_n_possible_motifs(np_sequences, count_threshold, motif_sizes):
+        n_possible_motifs = {}
+
+        legal_pos_aas = PositionalMotifHelper.identify_legal_positional_aas(np_sequences, count_threshold=count_threshold)
+        n_aas_per_pos = {position: len(aas) for position, aas in legal_pos_aas.items()}
+
+        for motif_size in motif_sizes:
+            n_possible_motifs[motif_size] = PositionalMotifHelper._identify_n_motifs_of_size(n_aas_per_pos, motif_size)
+
+        return n_possible_motifs
+
+    @staticmethod
+    def _identify_n_motifs_of_size(n_aas_per_pos, motif_size):
+        n_motifs_for_motif_size = 0
+
+        for index_set in it.combinations(n_aas_per_pos.keys(), motif_size):
+            n_motifs_for_index = 1
+
+            for index in index_set:
+                n_motifs_for_index *= n_aas_per_pos[index]
+
+            n_motifs_for_motif_size += n_motifs_for_index
+
+        return n_motifs_for_motif_size
+
+    @staticmethod
     def identify_legal_positional_aas(np_sequences, count_threshold=10):
         sequence_length = len(np_sequences[0])
 
