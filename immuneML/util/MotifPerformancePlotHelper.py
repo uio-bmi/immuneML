@@ -134,7 +134,7 @@ class MotifPerformancePlotHelper():
                            "precision": f"Precision ({dataset_type})",
                            "feature_names": "Motif",
                            "training_TP": f"True positive predictions ({training_set_name})"
-                       })
+                       }, template="plotly_white")
 
         # add combined precision
         fig.add_trace(go.Scatter(x=combined_precision["training_TP"], y=combined_precision["combined_precision"],
@@ -183,7 +183,7 @@ class MotifPerformancePlotHelper():
                              "precision": f"Precision ({dataset_type})",
                              "recall": f"Recall ({dataset_type})",
                              "feature_names": "Motif",
-                         })
+                         }, template="plotly_white")
 
         if min_precision is not None and min_precision > 0:
             fig.add_hline(y=min_precision, line_dash="dash")
