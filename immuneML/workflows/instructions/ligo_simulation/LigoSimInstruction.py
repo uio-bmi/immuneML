@@ -161,7 +161,7 @@ class LigoSimInstruction(Instruction):
         sequences = None
 
         if len(sim_item.signals) == 0:
-            sequences = get_bnp_data(sequence_paths['no_signal'], self._background_fields + self._custom_fields)
+            sequences = get_bnp_data(sequence_paths['no_signal'], self._annotated_dataclass)
         else:
             for signal in sim_item.signals:
                 signal_sequences = get_bnp_data(sequence_paths[signal.id], self._annotated_dataclass)

@@ -109,7 +109,7 @@ def get_allowed_positions(signal: Signal, sequence_array: RaggedArray, region_ty
 
 def get_region_type(sequences) -> RegionType:
     if hasattr(sequences, "region_type") and \
-       np.all([el.to_string() == getattr(sequences, 'region_type')[0].to_string() for el in getattr(sequences, 'region_type')]):
+        np.all([el.to_string() == getattr(sequences, 'region_type')[0].to_string() for el in getattr(sequences, 'region_type')]):
         return RegionType[getattr(sequences, 'region_type')[0].to_string()]
     else:
         raise RuntimeError(f"The region types could not be obtained.")
@@ -178,7 +178,7 @@ def match_motif(motif: str, encoding, sequence_array):
 def filter_out_illegal_sequences(sequences, sim_item: SimConfigItem, all_signals: list, max_signals_per_sequence: int):
     if max_signals_per_sequence > 1:
         raise NotImplementedError
-    elif max_signals_per_sequence == -1:
+    elif max_signals_per_sequence == -1 or all_signals is None or len(all_signals) == 0:
         return sequences
 
     sim_signal_ids = [signal.id for signal in sim_item.signals]
@@ -218,7 +218,7 @@ def make_bnp_annotated_sequences(sequences: BackgroundSequences, bnp_data_class,
 
 
 def make_annotated_dataclass(annotation_fields: list, signals: list):
-    functions = {"get_signal_matrix": lambda self: np.array([getattr(self, signal.id) for signal in signals]).T,
+    functions = {"get_signal_matrix": lambda self: np.array([getattr(self, signal.id) for signal in signals]).T if signals and len(signals) > 0 else None,
                  "get_signal_names": lambda self: [signal.id for signal in signals]}
 
     return bnpdataclass(make_dataclass("AnnotatedGenData", namespace=functions, bases=tuple([BackgroundSequences]), fields=annotation_fields))
@@ -279,7 +279,8 @@ def prepare_data_for_repertoire_obj(sequences: BNPDataClass, custom_fields: list
 
 def update_seqs_without_signal(max_count, annotated_sequences, seqs_no_signal_path: Path):
     if max_count > 0:
-        selection = annotated_sequences.get_signal_matrix().sum(axis=1) == 0
+        signal_matrix = annotated_sequences.get_signal_matrix()
+        selection = signal_matrix.sum(axis=1) == 0 if signal_matrix is not None else np.ones(len(annotated_sequences), dtype=bool)
         data_to_write = annotated_sequences[selection][:max_count]
         if len(data_to_write) > 0:
             write_bnp_data(data=data_to_write, path=seqs_no_signal_path)
