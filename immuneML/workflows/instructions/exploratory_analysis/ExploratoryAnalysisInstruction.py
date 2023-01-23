@@ -79,9 +79,10 @@ class ExploratoryAnalysisInstruction(Instruction):
         unit.dataset = self.preprocess_dataset(unit, result_path / "preprocessed_dataset")
         encoded_dataset = self.encode(unit, result_path / "encoded_dataset")
         if unit.dimensionality_reduction is not None:
-            unit.dimensionality_reduction.fit(encoded_dataset.encoded_data)
+            #unit.dimensionality_reduction.fit(encoded_dataset.encoded_data)
+            unit.dimensionality_reduction.fit_transform(encoded_dataset.encoded_data)
             unit.dimensionality_reduction.store(result_path)
-            unit.dimensionality_reduction.transform(encoded_dataset.encoded_data)
+            #unit.dimensionality_reduction.transform(encoded_dataset.encoded_data)
             unit.report.method = unit.dimensionality_reduction
         unit.report.dataset = encoded_dataset
         unit.report.result_path = result_path / "report"

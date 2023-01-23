@@ -40,6 +40,24 @@ class UnsupervisedSklearnMethod(UnsupervisedMLMethod):
 
         self.model = self._fit(encoded_data.examples, cores_for_training)
 
+    def fit_transform(self, encoded_data: EncodedData, cores_for_training: int = 2):
+        X = encoded_data.examples
+        if not self.show_warnings:
+            warnings.simplefilter("ignore")
+            os.environ["PYTHONWARNINGS"] = "ignore"
+
+        self.model = self._get_ml_model(cores_for_training, X)
+        if type(self.model).__name__ in ["AgglomerativeClustering", "PCA"]:
+            if isinstance(X, csr_matrix):
+                X = X.todense()
+        encoded_data.set_dim_reduction(self.model.fit_transform(X))
+
+        if not self.show_warnings:
+            del os.environ["PYTHONWARNINGS"]
+            warnings.simplefilter("always")
+
+        return self.model
+
     def _fit(self, X, cores_for_training: int = 1):
         if not self.show_warnings:
             warnings.simplefilter("ignore")

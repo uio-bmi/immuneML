@@ -16,11 +16,13 @@ class DimensionalityReduction(UnsupervisedMLReport):
     @classmethod
     def build_object(cls, **kwargs):
         name = kwargs["name"] if "name" in kwargs else "DimensionalityReduction"
-        return DimensionalityReduction(name=name)
+        label = kwargs["label"] if "label" in kwargs else "epitope"
+        return DimensionalityReduction(name=name, label=label)
 
-    def __init__(self, dataset: Dataset = None, method: UnsupervisedMLMethod = None, result_path: Path = None, name: str = None, number_of_processes: int = 1):
+    def __init__(self, dataset: Dataset = None, method: UnsupervisedMLMethod = None, result_path: Path = None, label: [str] = None, name: str = None, number_of_processes: int = 1):
         super().__init__(dataset=dataset, method=method, result_path=result_path,
                          name=name, number_of_processes=number_of_processes)
+        self.label = label
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
@@ -75,24 +77,35 @@ class DimensionalityReduction(UnsupervisedMLReport):
         traces = []
         filename = self.result_path / f"{output_name}.html"
 
-        trace0 = go.Scatter(x=plotting_data[:, 0],
-                            y=plotting_data[:, 1],
-                            name='Data points',
-                            mode='markers',
-                            marker=go.scatter.Marker(opacity=1),
-                            showlegend=True
-                            )
-        traces.append(trace0)
+        data_grouped_by_label = {}
+        for index, data in enumerate(list(self.dataset.get_data())):
+            if data.metadata[self.label] not in data_grouped_by_label.keys():
+                data_grouped_by_label.update({data.metadata[self.label]: {}})
+            data_grouped_by_label[data.metadata[self.label]].update({self.dataset.encoded_data.example_ids[index]: plotting_data[index]})
+
+        for label_value in data_grouped_by_label:
+            data = np.array(list(data_grouped_by_label[label_value].values()))
+            markerText = list("{}: {}<br>Datapoint id: {}".format(self.label, label_value, list(data_grouped_by_label[label_value].keys())[i])
+                              for i in range(len(data)))
+            trace = go.Scatter(x=data[:, 0],
+                               y=data[:, 1],
+                               text=markerText,
+                               name=str(label_value),
+                               mode='markers',
+                               marker=go.scatter.Marker(opacity=1,
+                                                        color=list(self.dataset.labels[self.label]).index(label_value)),
+                               showlegend=True
+                               )
+            traces.append(trace)
+
         layout = go.Layout(xaxis=go.layout.XAxis(showgrid=False,
                                                  zeroline=False,
                                                  showline=True,
                                                  mirror=True,
-                                                 title="PC1",
                                                  linewidth=1,
                                                  linecolor='gray',
                                                  showticklabels=True),
                            yaxis=go.layout.YAxis(showgrid=False,
-                                                 title="PC2",
                                                  zeroline=False,
                                                  showline=True,
                                                  mirror=True,
@@ -103,8 +116,6 @@ class DimensionalityReduction(UnsupervisedMLReport):
                            template="ggplot2"
                            )
         figure = go.Figure(data=traces, layout=layout)
-
-
 
         with filename.open("w") as file:
             figure.write_html(file)
