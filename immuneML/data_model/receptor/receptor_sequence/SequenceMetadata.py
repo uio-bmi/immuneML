@@ -46,6 +46,8 @@ class SequenceMetadata:
         self.cell_id = cell_id
         self.custom_params = custom_params if custom_params is not None else {}
 
+    def __getitem__(self, item):
+        return self.get_attribute(item)
     def get_attribute(self, name: str):
         """Returns the attribute value if attribute is present either directly or in custom_params, otherwise returns None"""
         if hasattr(self, name):
