@@ -1,8 +1,6 @@
 import abc
 from pathlib import Path
 
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
-
 
 class UnsupervisedMLMethod(metaclass=abc.ABCMeta):
     def __init__(self):

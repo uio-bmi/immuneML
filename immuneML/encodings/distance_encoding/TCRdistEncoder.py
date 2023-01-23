@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
+from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
@@ -41,10 +42,10 @@ class TCRdistEncoder(DatasetEncoder):
 
     @staticmethod
     def build_object(dataset, **params):
-        if isinstance(dataset, ReceptorDataset):
+        if isinstance(dataset, ReceptorDataset) or isinstance(dataset, SequenceDataset):
             return TCRdistEncoder(**params)
         else:
-            raise ValueError("TCRdistEncoder is not defined for dataset types which are not ReceptorDataset.")
+            raise ValueError("TCRdistEncoder is not defined for dataset types which are not ReceptorDataset or Sequencedatasets.")
 
     def set_context(self, context: dict):
         self.context = context

@@ -17,5 +17,7 @@ class Clustering(UnsupervisedSklearnMethod, ABC):
     def get_compatible_encoders(self):
         from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
         from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
+        from immuneML.encodings.word2vec.W2VSequenceEncoder import W2VSequenceEncoder
+        from immuneML.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
 
-        return [KmerFrequencyEncoder, OneHotEncoder]
+        return [KmerFrequencyEncoder, OneHotEncoder, W2VSequenceEncoder, TCRdistEncoder]

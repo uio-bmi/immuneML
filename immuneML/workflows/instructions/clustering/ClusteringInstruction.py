@@ -14,15 +14,6 @@ from immuneML.util.Logger import print_log
 
 from scipy.sparse import csr_matrix
 
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.repertoire.Repertoire import Repertoire
-from immuneML.util.ImportHelper import ImportHelper
-from pandas import DataFrame, read_csv
-from yaml import dump
-
-from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score, adjusted_rand_score, adjusted_mutual_info_score, homogeneity_score, completeness_score, v_measure_score, \
-    fowlkes_mallows_score
-
 
 class ClusteringInstruction(Instruction):
     def __init__(self, clustering_units: dict, name: str = None):
@@ -47,25 +38,20 @@ class ClusteringInstruction(Instruction):
         encoded_dataset = self.encode(unit, result_path / "encoded_dataset")
         encoded_dataset.name = unit.dataset.name
         if unit.dim_red_before_clustering:
-            if unit.dimensionality_reduction is not None:
-                unit.dimensionality_reduction.fit(encoded_dataset.encoded_data)
-                unit.dimensionality_reduction.transform(encoded_dataset.encoded_data)
+            self._dim_reduce(unit, encoded_dataset)
 
         unit.clustering_method.fit(encoded_dataset.encoded_data)
 
         labels_true = None
-        if unit.true_labels_path is not None:
-            if unit.true_labels_path.is_file():
-                try:
-                    labels_true = genfromtxt(unit.true_labels_path, dtype=int, delimiter=',')
-                except:
-                    print_log("Problem getting true_labels_path file\nCheck the file is in the right format(CSV, 1 line)")
+        if unit.true_labels_path is not None and unit.true_labels_path.is_file():
+            try:
+                labels_true = genfromtxt(unit.true_labels_path, dtype=int, delimiter=',')
+            except:
+                print_log("Problem getting true_labels_path file\nCheck the file is in the right format(CSV, 1 line)")
         self.calculate_scores(key, encoded_dataset.encoded_data.examples, unit.clustering_method.model.labels_, labels_true)
 
         if not unit.dim_red_before_clustering:
-            if unit.dimensionality_reduction is not None:
-                unit.dimensionality_reduction.fit(encoded_dataset.encoded_data)
-                unit.dimensionality_reduction.transform(encoded_dataset.encoded_data)
+            self._dim_reduce(unit, encoded_dataset)
 
         processed_dataset = self.add_label(encoded_dataset, unit.clustering_method.model.labels_, result_path / "dataset_clustered")
 
@@ -92,6 +78,11 @@ class ClusteringInstruction(Instruction):
             encoded_dataset = unit.dataset
         return encoded_dataset
 
+    def _dim_reduce(self, unit: ClusteringUnit, dataset):
+        if unit.dimensionality_reduction is not None:
+            unit.dimensionality_reduction.fit(dataset.encoded_data)
+            unit.dimensionality_reduction.transform(dataset.encoded_data)
+
     def calculate_scores(self, key, data, labels_pred, labels_true):
         if self.state.clustering_scores is None:
             self.state.clustering_scores = {}
@@ -107,11 +98,13 @@ class ClusteringInstruction(Instruction):
                 "Davies-Bouldin": "Only 1 cluster"
             }
         else:
+            from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
             scores = {
                 "Silhouette": silhouette_score(data, labels_pred),
                 "Calinski-Harabasz": calinski_harabasz_score(data, labels_pred),
                 "Davies-Bouldin": davies_bouldin_score(data, labels_pred)
             }
+
         if "target_score" not in self.state.clustering_scores.keys():
             self.state.clustering_scores["target_score"] = {
                 "Silhouette": 1,
@@ -130,6 +123,7 @@ class ClusteringInstruction(Instruction):
                     "Fowlkes-Mallows": "Only 1 cluster"
                 }
             else:
+                from sklearn.metrics import adjusted_rand_score, adjusted_mutual_info_score, homogeneity_score, completeness_score, v_measure_score, fowlkes_mallows_score
                 labels_true_scores = {
                     "Rand index": adjusted_rand_score(labels_true, labels_pred),
                     "Mutual Information": adjusted_mutual_info_score(labels_true, labels_pred),
@@ -156,6 +150,9 @@ class ClusteringInstruction(Instruction):
         print_log("Started copying dataset...", include_datetime=True)
         PathBuilder.build(path)
         if type(dataset).__name__ == "RepertoireDataset":
+            from immuneML.data_model.repertoire.Repertoire import Repertoire
+            from immuneML.util.ImportHelper import ImportHelper
+            from yaml import dump
             repertoiresPath = path / "repertoires"
             PathBuilder.build(repertoiresPath)
             dataset_name = dataset.name
@@ -180,7 +177,8 @@ class ClusteringInstruction(Instruction):
             processed_dataset.repertoires = repertoires
             processed_dataset.metadata_file = metadata_filename
             processed_dataset.metadata_fields.append("cluster_id")
-        else:
+        elif type(dataset).__name__ == "ReceptorDataset":
+            from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
             processed_receptors = [x for x in dataset.get_data()]
             for index, receptor in enumerate(processed_receptors):
                 for seq in receptor.get_chains():
@@ -188,6 +186,15 @@ class ClusteringInstruction(Instruction):
                 receptor.metadata["cluster_id"] = str(labels[index])
 
             processed_dataset = ReceptorDataset.build_from_objects(receptors=processed_receptors, file_size=dataset.file_size, name=dataset.name, path=path)
+            processed_dataset.encoded_data = dataset.encoded_data
+            processed_dataset.labels = dataset.labels
+        else:
+            from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+            processed_sequences = [x for x in dataset.get_data()]
+            for index, seq in enumerate(processed_sequences):
+                seq.metadata.custom_params["cluster_id"] = str(labels[index])
+
+            processed_dataset = SequenceDataset.build_from_objects(sequences=processed_sequences, file_size=dataset.file_size, name=dataset.name, path=path)
             processed_dataset.encoded_data = dataset.encoded_data
             processed_dataset.labels = dataset.labels
 

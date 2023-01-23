@@ -75,7 +75,12 @@ class TCRdistHelper:
             [], [], [], [], [], [], [], [], [], [], [], []
 
         for receptor in dataset.get_data():
-            subject.append(receptor.metadata["subject"] if "subject" in receptor.metadata else "sub" + receptor.identifier)
+            if type(dataset).__name__ == "SequenceDataset" and hasattr(receptor.metadata, "subject"):
+                subject.append(receptor.metadata.subject)
+            elif type(dataset).__name__ == "ReceptorDataset" and "subject" in receptor.metadata:
+                subject.append(receptor.metadata["subject"])
+            else:
+                subject.append("sub" + receptor.identifier)
             epitope.append(receptor.metadata[label_name])
             count.append(receptor.get_chain("alpha").metadata.count
                          if receptor.get_chain("alpha").metadata.count == receptor.get_chain("beta").metadata.count

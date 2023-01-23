@@ -1,13 +1,14 @@
 import shutil
 from pathlib import Path
 
+import numpy as np
+
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.ml_methods.UnsupervisedMLMethod import UnsupervisedMLMethod
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.UnsupervisedMLReport import UnsupervisedMLReport
 from immuneML.util.PathBuilder import PathBuilder
-from immuneML.util.ParameterValidator import ParameterValidator
 
 from scipy.sparse import csr_matrix
 
@@ -60,18 +61,27 @@ class ClusteringReport(UnsupervisedMLReport):
         traces = []
         filename = self.result_path / f"{output_name}.html"
 
-        markerText = list(
-            "Cluster id: {}<br>Repertoire id: {}".format(self.method.model.labels_[i], self.dataset.encoded_data.example_ids[i]) for i in range(len(self.dataset.encoded_data.example_ids)))
-        trace0 = go.Scatter(x=plotting_data[:, 0],
-                            y=plotting_data[:, 1],
-                            name='Data points',
-                            text=markerText,
-                            mode='markers',
-                            marker=go.scatter.Marker(opacity=1,
-                                                     color=self.method.model.labels_),
-                            showlegend=True
-                            )
-        traces.append(trace0)
+        data_grouped_by_cluster = {}
+        for index, data in enumerate(plotting_data):
+            if self.method.model.labels_[index] not in data_grouped_by_cluster.keys():
+                data_grouped_by_cluster.update({self.method.model.labels_[index]: {}})
+            data_grouped_by_cluster[self.method.model.labels_[index]].update({self.dataset.encoded_data.example_ids[index]: data})
+
+        for cluster_id in data_grouped_by_cluster:
+            data = np.array(list(data_grouped_by_cluster[cluster_id].values()))
+            markerText = list("Cluster id: {}<br>Datapoint id: {}".format(cluster_id, list(data_grouped_by_cluster[cluster_id].keys())[i])
+                              for i in range(len(data)))
+            trace = go.Scatter(x=data[:, 0],
+                               y=data[:, 1],
+                               text=markerText,
+                               name=str(cluster_id),
+                               mode='markers',
+                               marker=go.scatter.Marker(opacity=1,
+                                                        color=cluster_id),
+                               showlegend=True
+                               )
+            traces.append(trace)
+
         layout = go.Layout(
             xaxis=go.layout.XAxis(showgrid=False,
                                   zeroline=False,
@@ -87,6 +97,7 @@ class ClusteringReport(UnsupervisedMLReport):
                                   linewidth=1,
                                   linecolor='black',
                                   showticklabels=False),
+            legend_title_text="Cluster Id",
             hovermode='closest',
             template="ggplot2",
             title=f"Clustering scatter plot"
@@ -105,24 +116,31 @@ class ClusteringReport(UnsupervisedMLReport):
         traces = []
         filename = self.result_path / f"{output_name}.html"
 
-        markerText = list(
-            "Cluster id: {}<br> Item id: {}".format(self.method.model.labels_[i], self.dataset.encoded_data.example_ids[i]) for i in range(len(self.dataset.encoded_data.example_ids)))
-        trace0 = go.Scatter3d(x=plotting_data[:, 0],
-                              y=plotting_data[:, 1],
-                              z=plotting_data[:, 2],
-                              name='Data points',
-                              text=markerText,
-                              mode='markers',
-                              marker=dict(opacity=1,
-                                          color=self.method.model.labels_),
-                              showlegend=True
-                              )
-        traces.append(trace0)
+        data_grouped_by_cluster = {}
+        for index, data in enumerate(plotting_data):
+            if self.method.model.labels_[index] not in data_grouped_by_cluster.keys():
+                data_grouped_by_cluster.update({self.method.model.labels_[index]: {}})
+            data_grouped_by_cluster[self.method.model.labels_[index]].update({self.dataset.encoded_data.example_ids[index]: data})
+
+        for cluster_id in data_grouped_by_cluster:
+            data = np.array(list(data_grouped_by_cluster[cluster_id].values()))
+            markerText = list("Cluster id: {}<br>Datapoint id: {}".format(cluster_id, list(data_grouped_by_cluster[cluster_id].keys())[i])
+                              for i in range(len(data)))
+            trace = go.Scatter3d(x=data[:, 0],
+                                 y=data[:, 1],
+                                 z=data[:, 2],
+                                 text=markerText,
+                                 name=str(cluster_id),
+                                 mode='markers',
+                                 marker=dict(opacity=1,
+                                             color=cluster_id),
+                                 showlegend=True
+                                 )
+            traces.append(trace)
+
         figure = go.Figure(
             data=traces,
-            layout=go.Layout(
-                title=f"Clustering scatter plot"
-            )
+            layout=go.Layout(title=f"Clustering scatter plot")
         )
 
         with filename.open("w") as file:
@@ -138,13 +156,17 @@ class ClusteringReport(UnsupervisedMLReport):
         total = {}
 
         for item in list(self.dataset.get_data()):
-            label_value = item.metadata[label]
+            if type(item).__name__ == 'ReceptorSequence':
+                label_value = item.metadata.get_attribute(label)
+                cluster_id = item.metadata.get_attribute("cluster_id")
+            else:
+                label_value = item.metadata[label]
+                cluster_id = item.metadata["cluster_id"]
 
             if label_value not in total.keys():
                 total[label_value] = 0
             total[label_value] += 1
 
-            cluster_id = item.metadata["cluster_id"]
             if cluster_id not in clusters.keys():
                 clusters[cluster_id] = {}
             if label_value in clusters[cluster_id].keys():
