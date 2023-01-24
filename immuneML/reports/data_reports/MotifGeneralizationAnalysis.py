@@ -195,15 +195,17 @@ class MotifGeneralizationAnalysis(DataReport):
         return output_tables, output_plots, {motif_size: tp_cutoff}
 
     def _write_tp_recall_thresholds(self, tp_cutoff_dict):
+        training_set_name = self.training_set_name.replace(" ", "_")
+
         data = {"n_positives_in_training_data": [self.n_positives_in_training_data] * len(tp_cutoff_dict),
-                f"{self.training_set_name}_tp_cutoff": [],
-                f"{self.training_set_name}_recall_cutoff": [],
+                f"{training_set_name}_tp_cutoff": [],
+                f"{training_set_name}_recall_cutoff": [],
                 "motif_size": []}
 
         for motif_size, tp_cutoff in tp_cutoff_dict.items():
             data["motif_size"].append(motif_size if motif_size is not None else "all")
-            data[f"{self.training_set_name}_tp_cutoff"].append(tp_cutoff)
-            data[f"{self.training_set_name}_recall_cutoff"].append(self._tp_to_recall(tp_cutoff))
+            data[f"{training_set_name}_tp_cutoff"].append(tp_cutoff)
+            data[f"{training_set_name}_recall_cutoff"].append(self._tp_to_recall(tp_cutoff))
 
         return self._write_output_table(table=pd.DataFrame(data),
                                         file_path=self.result_path / "tp_recall_cutoffs.tsv",
