@@ -82,7 +82,9 @@ class GroundtruthMotifOverlap(EncodingReport):
             groundtruth_motifs = []
             groundtruth_implant_rate = []
             for line in file.readlines():
-                motif, implant_rate = self._get_motif_and_implant_rate(line, motif_sep="\t")
+                motif, implant_rate = self._get_motif_and_implant_rate(
+                    line, motif_sep="\t"
+                )
                 groundtruth_motifs.append(motif)
                 groundtruth_implant_rate.append(implant_rate)
 
@@ -90,16 +92,14 @@ class GroundtruthMotifOverlap(EncodingReport):
             groundtruth_motifs[i]: groundtruth_implant_rate[i]
             for i in range(len(groundtruth_motifs))
         }
-        return groundtruth_motifs, implant_rate_dict 
+        return groundtruth_motifs, implant_rate_dict
 
     def _get_motif_and_implant_rate(self, string, motif_sep):
         indices_str, amino_acids_str, implant_rate = string.strip().split(motif_sep)
         motif = indices_str + "-" + amino_acids_str
         return motif, implant_rate
 
-    def _generate_overlap(
-        self, learned_motifs, groundtruth_motifs, implant_rate_dict
-    ):
+    def _generate_overlap(self, learned_motifs, groundtruth_motifs, implant_rate_dict):
         overlap_df = pd.DataFrame({"learned motifs": learned_motifs})
 
         for gt_motif in groundtruth_motifs:
@@ -111,16 +111,22 @@ class GroundtruthMotifOverlap(EncodingReport):
         overlap_df["max_groundtruth_overlap"] = overlap_df.drop(
             "learned motifs", axis=1
         ).max(axis=1)
+
+        overlap_df["motif_overlap"] = overlap_df["max_groundtruth_overlap"].apply(
+            lambda x: 1
+        )
+
         overlap_df["groundtruth_motif"] = overlap_df.drop(
-            ["learned motifs", "max_groundtruth_overlap"], axis=1
+            ["learned motifs", "max_groundtruth_overlap", "motif_overlap"], axis=1
         ).idxmax(axis=1)
+
         overlap_df["groundtruth_motif"] = overlap_df["groundtruth_motif"].apply(
             lambda x: int(implant_rate_dict[x])
         )
-        overlap_df = overlap_df[["groundtruth_motif", "max_groundtruth_overlap"]]
+        overlap_df = overlap_df[["groundtruth_motif", "motif_overlap"]]
         overlap_df = (
-            overlap_df.max_groundtruth_overlap.groupby(
-                [overlap_df.groundtruth_motif, overlap_df.max_groundtruth_overlap]
+            overlap_df.motif_overlap.groupby(
+                [overlap_df.groundtruth_motif, overlap_df.motif_overlap]
             )
             .sum()
             .unstack()
@@ -153,7 +159,9 @@ class GroundtruthMotifOverlap(EncodingReport):
         while loop_counter < max_larger_index:
             score = 0
 
-            for larger_index, smaller_index in zip(range(start, max_larger_index), range(max_smaller_index)):
+            for larger_index, smaller_index in zip(
+                range(start, max_larger_index), range(max_smaller_index)
+            ):
                 if (
                     larger_ind[larger_index] == smaller_ind[smaller_index]
                     and larger_aa[larger_index] == smaller_aa[smaller_index]
