@@ -69,7 +69,7 @@ class TestMotifClassifier(TestCase):
 
         with open(path / "selected_features.txt", "r") as file:
             lines = file.readlines()
-            self.assertEqual(lines, ['rule1\n', 'rule2\n'])
+            self.assertEqual(sorted(lines), ['rule1\n', 'rule2\n'])
 
         shutil.rmtree(path)
 
