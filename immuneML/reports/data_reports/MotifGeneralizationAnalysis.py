@@ -197,7 +197,8 @@ class MotifGeneralizationAnalysis(DataReport):
     def _write_tp_recall_thresholds(self, tp_cutoff_dict):
         training_set_name = self.training_set_name.replace(" ", "_")
 
-        data = {"n_positives_in_training_data": [self.n_positives_in_training_data] * len(tp_cutoff_dict),
+        data = {"precision_cutoff": [self.min_precision] * len(tp_cutoff_dict),
+                "n_positives_in_training_data": [self.n_positives_in_training_data] * len(tp_cutoff_dict),
                 f"{training_set_name}_tp_cutoff": [],
                 f"{training_set_name}_recall_cutoff": [],
                 "motif_size": []}
