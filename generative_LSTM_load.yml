@@ -1,0 +1,18 @@
+definitions:
+  ml_methods:
+    G1:
+      LSTM:
+        cores_for_training: 2
+  reports:
+    GeneratorReport: GeneratorReportLSTM
+instructions:
+  machine_learning_instruction:
+    type: GenerativeModelLoad
+    generators:
+      generator_1:
+        ml_method: G1
+        report: GeneratorReport
+        path: existing_LSTM_model\machine_learning_instruction\analysis_generator_1
+        amount: 100
+
+

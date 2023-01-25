@@ -1,0 +1,29 @@
+definitions:
+  datasets:
+    d1:
+      format: AIRR
+      params:
+        path: LSTM_dataset\AIRR\repertoires
+        metadata_file: LSTM_dataset\AIRR\repertoires\metadata.csv
+        is_repertoire: True
+  encodings:
+    e1: TextAsInt
+  ml_methods:
+    G1:
+      LSTM:
+        cores_for_training: 2
+        rnn_units: 32
+        epochs: 8
+  reports:
+    GeneratorReport: GeneratorReportLSTM
+instructions:
+  machine_learning_instruction:
+    type: GenerativeModel
+    generators:
+      generator_1:
+        dataset: d1
+        encoding: e1
+        ml_method: G1
+        report: GeneratorReport
+
+
