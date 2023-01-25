@@ -24,7 +24,7 @@ class LSTM(GenerativeModel):
         parameters = parameters if parameters is not None else {}
         parameter_grid = parameter_grid if parameter_grid is not None else {}
         super(LSTM, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
-        self.epochs = 20
+
         self.checkpoint_dir = ""
         self.model_params = {}
         self.char2idx = {}
@@ -89,13 +89,18 @@ class LSTM(GenerativeModel):
 
         PathBuilder.build(result_path)
 
+        params = self._parameters
+
+        #default values of optional params
+        rnn_units = 128 if "rnn_units" not in params else params["rnn_units"]
+        epochs = 10 if "epochs" not in params else params["epochs"]
+
         vocab_size = len(self._alphabet)
-        rnn_units = 64
+        embedding_dim = 32
         self.max_length = 42
-        self.epochs = 4
         batch_size = 128
         buffer_size = 1000
-        embedding_dim = 32
+
 
         self.char2idx = {u: i for i, u in enumerate(self._alphabet)}
         self.idx2char = np.array(self._alphabet)
@@ -147,7 +152,7 @@ class LSTM(GenerativeModel):
         print(example_loss.numpy().mean())
 
         self.model.summary()
-        self.model.compile(loss=self.loss, optimizer='adam', metrics=['accuracy'])
+        self.model.compile(loss=self.loss, optimizer='adam')
         #Prep checkpoint paths
         self.checkpoint_dir = result_path / f"{self._get_model_filename()}_checkpoints"
         checkpoint_prefix = os.path.join(self.checkpoint_dir, 'ckpt_{epoch}')
@@ -159,7 +164,7 @@ class LSTM(GenerativeModel):
         )
 
         history = self.model.fit(train_dataset,
-                                 epochs=self.epochs,
+                                 epochs=epochs,
                                  callbacks=[checkpoint_callback],
                                  validation_data=val_dataset)
         history_contents = []
@@ -198,7 +203,7 @@ class LSTM(GenerativeModel):
         #         print()
 
         self.model_params = {
-            'epochs': self.epochs,
+            'epochs': epochs,
             'batch_size': batch_size,
             'buffer_size': buffer_size,
             'vocab_size': vocab_size,

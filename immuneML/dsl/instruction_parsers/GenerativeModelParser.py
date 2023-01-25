@@ -75,7 +75,10 @@ class GenerativeModelParser:
             params["amount"] = generator["amount"]
         if "encoding" in generator:
             params["encoder"] = symbol_table.get(generator["encoding"]).build_object(dataset, **symbol_table.get_config(generator["encoding"])["encoder_params"])
-
+        if "rnn_units" in generator:
+            params["rnn_units"] = generator["rnn_units"]
+        if "epochs" in generator:
+            params["epochs"] = generator["epochs"]
 
         return params
 
