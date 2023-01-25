@@ -31,11 +31,13 @@ class TCRdistEncoder(DatasetEncoder):
         my_tcr_dist_enc: # user-defined name
             TCRdist:
                 cores: 4
+                chains: TRA/TRB/TRA_TRB
 
     """
 
-    def __init__(self, cores: int, name: str = None):
+    def __init__(self, cores: int, chains: str, name: str = None):
         self.cores = cores
+        self.chains = chains
         self.name = name
         self.distance_matrix = None
         self.context = None
@@ -45,7 +47,7 @@ class TCRdistEncoder(DatasetEncoder):
         if isinstance(dataset, ReceptorDataset) or isinstance(dataset, SequenceDataset):
             return TCRdistEncoder(**params)
         else:
-            raise ValueError("TCRdistEncoder is not defined for dataset types which are not ReceptorDataset or Sequencedatasets.")
+            raise ValueError("TCRdistEncoder is not defined for dataset types which are not ReceptorDataset or SequenceDatasets.")
 
     def set_context(self, context: dict):
         self.context = context
@@ -69,9 +71,16 @@ class TCRdistEncoder(DatasetEncoder):
         from immuneML.util.TCRdistHelper import TCRdistHelper
 
         current_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
-        tcr_rep = TCRdistHelper.compute_tcr_dist(current_dataset, label_names, self.cores)
-        self.distance_matrix = pd.DataFrame(tcr_rep.pw_alpha + tcr_rep.pw_beta, index=tcr_rep.clone_df.clone_id.values,
-                                            columns=tcr_rep.clone_df.clone_id.values)
+        tcr_rep = TCRdistHelper.compute_tcr_dist(current_dataset, label_names, self.cores, self.chains)
+        if self.chains == "TRA_TRB":
+            self.distance_matrix = pd.DataFrame(tcr_rep.pw_alpha + tcr_rep.pw_beta, index=tcr_rep.clone_df.clone_id.values,
+                                                columns=tcr_rep.clone_df.clone_id.values)
+        elif self.chains == "TRA":
+            self.distance_matrix = pd.DataFrame(tcr_rep.pw_alpha, index=tcr_rep.clone_df.clone_id.values,
+                                                columns=tcr_rep.clone_df.clone_id.values)
+        elif self.chains == "TRB":
+            self.distance_matrix = pd.DataFrame(tcr_rep.pw_beta, index=tcr_rep.clone_df.clone_id.values,
+                                                columns=tcr_rep.clone_df.clone_id.values)
 
     def _build_labels(self, dataset: ReceptorDataset, params: EncoderParams) -> dict:
         labels = {label: [] for label in params.label_config.get_labels_by_name()}

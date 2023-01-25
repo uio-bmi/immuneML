@@ -90,7 +90,7 @@ class ClusteringInstruction(Instruction):
         if isinstance(data, csr_matrix):
             data = data.toarray()
 
-        #Check if more than one cluster
+        # Check if more than one cluster
         if max(labels_pred) <= 0:
             scores = {
                 "Silhouette": "Only 1 cluster",
@@ -202,14 +202,3 @@ class ClusteringInstruction(Instruction):
         processed_dataset.labels["cluster_id"] = list(range(max(labels) + 1))
         print_log("Finished copying dataset.", include_datetime=True)
         return processed_dataset
-
-    @staticmethod
-    def _copy_if_exists(old_file: Path, path: Path):
-        import shutil
-        if old_file is not None and old_file.is_file():
-            new_file = path / old_file.name
-            if not new_file.is_file():
-                shutil.copyfile(old_file, new_file)
-            return new_file
-        else:
-            raise RuntimeError(f"Clustering instruction: tried exporting file {old_file}, but it does not exist.")
