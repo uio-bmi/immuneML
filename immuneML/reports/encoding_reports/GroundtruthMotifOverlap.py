@@ -2,7 +2,7 @@ from pathlib import Path
 
 import logging
 import plotly.express as px
-import plotly.graph_objects as go
+import numpy as np
 import pandas as pd
 from typing import List
 
@@ -66,11 +66,11 @@ class GroundtruthMotifOverlap(EncodingReport):
 
         learned_motifs = self.dataset.encoded_data.feature_names
 
-        overlap_dataframe = self._generate_overlap(
+        overlap_df = self._generate_overlap(
             learned_motifs, groundtruth_motifs, implant_rate_dict
         )
 
-        output_figures = self._plot(overlap_dataframe, implant_rate_dict)
+        output_figures = self._plot(overlap_df)
         return ReportResult(
             name=self.name,
             output_figures=output_figures,
@@ -112,31 +112,39 @@ class GroundtruthMotifOverlap(EncodingReport):
             "learned motifs", axis=1
         ).max(axis=1)
 
-        overlap_df["motif_overlap"] = overlap_df["max_groundtruth_overlap"].apply(
-            lambda x: 1
-        )
-
         overlap_df["groundtruth_motif"] = overlap_df.drop(
-            ["learned motifs", "max_groundtruth_overlap", "motif_overlap"], axis=1
+            ["learned motifs", "max_groundtruth_overlap"], axis=1
         ).idxmax(axis=1)
 
-        overlap_df["groundtruth_motif"] = overlap_df["groundtruth_motif"].apply(
+        overlap_df["implant_rate"] = overlap_df["groundtruth_motif"].apply(
             lambda x: int(implant_rate_dict[x])
         )
-        overlap_df = overlap_df[["groundtruth_motif", "motif_overlap"]]
-        overlap_df = (
-            overlap_df.motif_overlap.groupby(
-                [overlap_df.groundtruth_motif, overlap_df.motif_overlap]
+        overlap_df = overlap_df[["implant_rate", "max_groundtruth_overlap"]]
+
+        barplot_data = (
+            overlap_df.max_groundtruth_overlap.groupby(
+                [overlap_df.implant_rate, overlap_df.max_groundtruth_overlap]
             )
             .sum()
-            .unstack()
             .fillna(0)
             .astype(int)
         )
-        overlap_df.drop(columns=overlap_df.iloc[:, 0], inplace=True)
-        overlap_df.sort_index(axis=1, inplace=True, ascending=True)
-        overlap_df.sort_index(axis=0, inplace=True, ascending=False)
-        return overlap_df
+        barplot_df = pd.DataFrame(barplot_data[1:])
+        barplot_df.rename(
+            columns={"max_groundtruth_overlap": "total_overlapping_motifs"},
+            inplace=True,
+        )
+        barplot_df["index"] = barplot_df.index
+        barplot_df["implant_rate"] = barplot_df["index"].apply(lambda x: str(x[0]))
+        barplot_df["max_groundtruth_overlap"] = barplot_df["index"].apply(
+            lambda x: x[1]
+        )
+        barplot_df["total_overlapping_motifs"] = (
+            barplot_df["total_overlapping_motifs"]
+            / barplot_df["max_groundtruth_overlap"]
+        )
+
+        return barplot_df
 
     def _get_max_overlap(self, learned_motif, groundtruth_motif):
         larger, smaller = groundtruth_motif, learned_motif
@@ -174,25 +182,32 @@ class GroundtruthMotifOverlap(EncodingReport):
 
         return max_score
 
-    def _plot(self, overlap_dataframe, implant_rate_dict) -> ReportOutput:
+    def _get_color_discrete_sequence(self):
+        return px.colors.qualitative.Pastel[:-1] + px.colors.qualitative.Set3
+
+    def _plot(self, overlap_df) -> ReportOutput:
         file_path = self.result_path / f"motif_overlap.html"
-        heatmap = px.imshow(
-            overlap_dataframe,
-            text_auto=True,
-            aspect="auto",
-            x=[str(num) for num in overlap_dataframe.columns],
-            y=[str(num) for num in overlap_dataframe.index],
+        categories = np.sort([int(cat) for cat in overlap_df["implant_rate"].unique()])
+        facet_barplot = px.histogram(
+            overlap_df,
+            x="implant_rate",
+            y="total_overlapping_motifs",
+            labels={
+                "implant_rate": "Implant rate of groundtruth motif",
+                "total_overlapping_motifs": "Total overlapping learned motifs",
+                "max_groundtruth_overlap": "max groundtruth overlap",
+            },
+            facet_col="max_groundtruth_overlap",
+            color_discrete_sequence=self._get_color_discrete_sequence(),
+            category_orders=dict(implant_rate=categories),
+            facet_col_spacing=0.05,
         )
-        heatmap.update_layout(
-            xaxis_title="Maximum overlap with groundtruth motifs",
-            yaxis_title="Implant rate of groundtruth motif",
+        facet_barplot.update_yaxes(matches=None, showticklabels=True)
+        facet_barplot.update_layout(
+            xaxis_title="Implant rate of groundtruth motif",
+            yaxis_title="Total overlapping learned motifs",
         )
-        heatmap.update_layout(
-            coloraxis_colorbar=dict(
-                title="Total overlap of learned motifs",
-            ),
-        )
-        heatmap.write_html(str(file_path))
+        facet_barplot.write_html(str(file_path))
 
         return ReportOutput(
             path=file_path,
