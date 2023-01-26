@@ -112,7 +112,9 @@ class GroundtruthMotifOverlap(EncodingReport):
             "learned_motifs", axis=1
         ).max(axis=1)
 
-        overlap_df["learned_motifs"] = overlap_df["learned_motifs"].apply(lambda x: len(x.split("-")[0].replace("&", "")))
+        overlap_df["learned_motifs"] = overlap_df["learned_motifs"].apply(
+            lambda x: len(x.split("-")[0].replace("&", ""))
+        )
         overlap_df["groundtruth_motif"] = overlap_df.drop(
             ["learned_motifs", "max_groundtruth_overlap"], axis=1
         ).idxmax(axis=1)
@@ -120,11 +122,17 @@ class GroundtruthMotifOverlap(EncodingReport):
         overlap_df["implant_rate"] = overlap_df["groundtruth_motif"].apply(
             lambda x: int(implant_rate_dict[x])
         )
-        overlap_df = overlap_df[["learned_motifs", "implant_rate", "max_groundtruth_overlap"]]
+        overlap_df = overlap_df[
+            ["learned_motifs", "implant_rate", "max_groundtruth_overlap"]
+        ]
 
         barplot_data = (
             overlap_df.max_groundtruth_overlap.groupby(
-                [overlap_df.implant_rate, overlap_df.max_groundtruth_overlap, overlap_df.learned_motifs]
+                [
+                    overlap_df.implant_rate,
+                    overlap_df.max_groundtruth_overlap,
+                    overlap_df.learned_motifs,
+                ]
             )
             .sum()
             .fillna(0)
@@ -141,7 +149,9 @@ class GroundtruthMotifOverlap(EncodingReport):
             lambda x: x[1]
         )
         barplot_df["motif_size"] = barplot_df["index"].apply(lambda x: x[2])
-        barplot_df = barplot_df.drop(barplot_df[barplot_df.max_groundtruth_overlap==0].index)
+        barplot_df = barplot_df.drop(
+            barplot_df[barplot_df.max_groundtruth_overlap == 0].index
+        )
         barplot_df["total_overlapping_motifs"] = (
             barplot_df["total_overlapping_motifs"]
             / barplot_df["max_groundtruth_overlap"]
@@ -198,7 +208,8 @@ class GroundtruthMotifOverlap(EncodingReport):
             labels={
                 "implant_rate": "Implant rate of groundtruth motif",
                 "total_overlapping_motifs": "Total overlapping learned motifs",
-                "max_groundtruth_overlap": "max groundtruth overlap",
+                "max_groundtruth_overlap": "Max groundtruth overlap",
+                "motif_size": "Motif size",
             },
             facet_col="max_groundtruth_overlap",
             color_discrete_sequence=self._get_color_discrete_sequence(),
