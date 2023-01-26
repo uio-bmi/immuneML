@@ -12,11 +12,11 @@ from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.MotifClassifier import MotifClassifier
+from immuneML.ml_methods.BinaryFeatureClassifier import BinaryFeatureClassifier
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class TestMotifClassifier(TestCase):
+class TestBinaryFeatureClassifier(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -39,12 +39,12 @@ class TestMotifClassifier(TestCase):
         return enc_data, label
 
     def get_fitted_classifier(self, path, enc_data, label):
-        motif_classifier = MotifClassifier(training_percentage=0.7,
-                                           max_motifs=100,
-                                           patience=10,
-                                           min_delta=0,
-                                           keep_all=False,
-                                           result_path=path)
+        motif_classifier = BinaryFeatureClassifier(training_percentage=0.7,
+                                                   max_motifs=100,
+                                                   patience=10,
+                                                   min_delta=0,
+                                                   keep_all=False,
+                                                   result_path=path)
 
         random.seed(1)
         motif_classifier.fit(encoded_data=enc_data, label=label,
@@ -54,7 +54,7 @@ class TestMotifClassifier(TestCase):
         return motif_classifier
 
     def test_fit(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "motif_classifier_fit")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "binary_feature_classifier_fit")
 
         enc_data, label = self.get_enc_data()
         motif_classifier = self.get_fitted_classifier(path, enc_data, label)
@@ -74,14 +74,14 @@ class TestMotifClassifier(TestCase):
         shutil.rmtree(path)
 
     def test_load_store(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "motif_classifier_load_store")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "binary_feature_classifier_load_store")
 
         enc_data, label = self.get_enc_data()
         motif_classifier = self.get_fitted_classifier(path, enc_data, label)
 
         motif_classifier.store(path / "model_storage")
 
-        motif_classifier2 = MotifClassifier()
+        motif_classifier2 = BinaryFeatureClassifier()
         motif_classifier2.load(path / "model_storage")
 
         motif_classifier2_vars = vars(motif_classifier2)
@@ -111,9 +111,9 @@ class TestMotifClassifier(TestCase):
         shutil.rmtree(path)
 
     def test_recursively_select_rules(self):
-        motif_classifier = MotifClassifier(max_motifs = 100,
-                                           min_delta = 0,
-                                           patience = 10)
+        motif_classifier = BinaryFeatureClassifier(max_motifs = 100,
+                                                   min_delta = 0,
+                                                   patience = 10)
         motif_classifier.optimization_metric = "accuracy"
         motif_classifier.class_mapping = {0: False, 1: True}
         motif_classifier.label = Label("l1", positive_class=True)
@@ -157,13 +157,13 @@ class TestMotifClassifier(TestCase):
 
 
     def test_get_rule_tree_features_from_indices(self):
-        motif_classifier = MotifClassifier()
+        motif_classifier = BinaryFeatureClassifier()
         features = motif_classifier._get_rule_tree_features_from_indices([0, 2], ["A", "B", "C"])
 
         self.assertListEqual(features, ["A", "C"])
 
     def test_test_is_improvement(self):
-        motif_classifier = MotifClassifier()
+        motif_classifier = BinaryFeatureClassifier()
 
         result = motif_classifier._test_is_improvement([0.0, 0.1, 0.5, 1], 0.1)
         self.assertListEqual(result, [True, False, True, True])
@@ -175,7 +175,7 @@ class TestMotifClassifier(TestCase):
         self.assertListEqual(result, [True])
 
     def test_test_earlystopping(self):
-        motif_classifier = MotifClassifier(patience=5)
+        motif_classifier = BinaryFeatureClassifier(patience=5)
 
         self.assertEqual(motif_classifier._test_earlystopping([]), False)
         self.assertEqual(motif_classifier._test_earlystopping([False, False, False]), False)
@@ -185,7 +185,7 @@ class TestMotifClassifier(TestCase):
         self.assertEqual(motif_classifier._test_earlystopping([True, True, True, False, False, False, False, False]), True)
 
     def test_get_optimal_indices(self):
-        motif_classifier = MotifClassifier(patience=3)
+        motif_classifier = BinaryFeatureClassifier(patience=3)
 
 
         result = motif_classifier._get_optimal_indices([1,2,3,4,5,6,7,8,9,10], [True, True, True, False, False])
@@ -207,7 +207,7 @@ class TestMotifClassifier(TestCase):
                                                   [False, False, False]]),
                                labels={"l1": [True, True, True, True]})
 
-        motif_classifier = MotifClassifier()
+        motif_classifier = BinaryFeatureClassifier()
         motif_classifier.feature_names = ["rule1", "rule2", "rule3"]
 
         result = motif_classifier._get_rule_tree_predictions_bool(enc_data, [0])

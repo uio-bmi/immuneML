@@ -50,7 +50,7 @@ class TestNonMotifSequenceSimilarity(TestCase):
         return encoded_dataset
 
     def test_generate(self):
-        path = EnvironmentSettings.tmp_test_path / "positional_motif_frequencies/"
+        path = EnvironmentSettings.tmp_test_path / "non_motif_sequence_similarity/"
         PathBuilder.build(path)
 
         encoded_dataset = self._create_dummy_encoded_data(path)

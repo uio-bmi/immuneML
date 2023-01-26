@@ -15,8 +15,14 @@ from immuneML.ml_metrics.MetricUtil import MetricUtil
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? RuleTree? something with OR?
+class BinaryFeatureClassifier(MLMethod):
     """
+    A simple classifier that takes in encoded data containing features with only 1/0 or True/False values.
+    This classifier tries to select an optimal subset of such binary features, and gives a positive prediction
+    if any of the features are 'True'.
+
+    This classifier can be used in combination with the :py:obj:`~immuneML.encodings.motif_encoding.MotifEncoder.MotifEncoder`
+    and the todo formatting: SimilarToPositiveSequenceEncoder
 
     Arguments:
 
@@ -58,7 +64,7 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         return {self.label.name: self._get_rule_tree_predictions_class(encoded_data, self.rule_tree_indices)}
 
     def predict_proba(self, encoded_data: EncodedData, label: Label):
-        warnings.warn(f"{MotifClassifier.__name__}: cannot predict probabilities.")
+        warnings.warn(f"{BinaryFeatureClassifier.__name__}: cannot predict probabilities.")
         return None
 
     def fit(self, encoded_data: EncodedData, label: Label, optimization_metric: str, cores_for_training: int = 2):
@@ -75,18 +81,18 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         self.rule_tree_features = self._get_rule_tree_features_from_indices(self.rule_tree_indices, self.feature_names)
         self._export_selected_features(self.result_path, self.rule_tree_features)
 
-        logging.info(f"{MotifClassifier.__name__}: finished training.")
+        logging.info(f"{BinaryFeatureClassifier.__name__}: finished training.")
 
     def _build_rule_tree(self, encoded_data):
         if self.keep_all:
             rules = list(range(len(self.feature_names)))
-            logging.info(f"{MotifClassifier.__name__}: all {len(rules)} rules kept.")
+            logging.info(f"{BinaryFeatureClassifier.__name__}: all {len(rules)} rules kept.")
         else:
             encoded_train_data, encoded_val_data = self._prepare_and_split_data(encoded_data)
             rules = self._recursively_select_rules(encoded_train_data=encoded_train_data,
                                                   encoded_val_data=encoded_val_data,
                                                   last_val_scores=[], prev_rule_indices=[])
-            logging.info(f"{MotifClassifier.__name__}: selected {len(rules)} out of {len(self.feature_names)} rules.")
+            logging.info(f"{BinaryFeatureClassifier.__name__}: selected {len(rules)} out of {len(self.feature_names)} rules.")
 
         return rules
 
@@ -97,7 +103,7 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         new_rule_indices = self._add_next_best_rule(encoded_train_data, prev_rule_indices)
 
         if new_rule_indices == prev_rule_indices or len(new_rule_indices) > self.max_motifs:
-            logging.info(f"{MotifClassifier.__name__}: no improvement on training set or max motifs reached")
+            logging.info(f"{BinaryFeatureClassifier.__name__}: no improvement on training set or max motifs reached")
 
             is_improvement = self._test_is_improvement(last_val_scores, self.min_delta)
             return self._get_optimal_indices(new_rule_indices, is_improvement)
@@ -106,7 +112,7 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         is_improvement = self._test_is_improvement(val_scores, self.min_delta)
 
         if self._test_earlystopping(is_improvement): # originally also included 'if args.earlystopping'
-            logging.info(f"{MotifClassifier.__name__}: reached earlystopping criterion")
+            logging.info(f"{BinaryFeatureClassifier.__name__}: reached earlystopping criterion")
 
             return self._get_optimal_indices(new_rule_indices, is_improvement)
 
@@ -190,7 +196,7 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
 
     def _check_features(self, encoded_data_features):
         if self.feature_names != encoded_data_features:
-            mssg = f"{MotifClassifier.__name__}: features during evaluation did not match the features set during fitting."
+            mssg = f"{BinaryFeatureClassifier.__name__}: features during evaluation did not match the features set during fitting."
 
             logging.info(mssg + f"\n\nEvaluation features: {encoded_data_features}\nFitting features: {self.feature_names}")
             raise ValueError(mssg + " See the log file for more info.")
@@ -203,7 +209,7 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
 
     def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric: str = None,
                                 number_of_splits: int = 5, cores_for_training: int = -1):
-        logging.warning(f"{MotifClassifier.__name__}: cross_validation is not implemented for this method. Using standard fitting instead...")
+        logging.warning(f"{BinaryFeatureClassifier.__name__}: cross_validation is not implemented for this method. Using standard fitting instead...")
         self.fit(encoded_data=encoded_data, label=label)
 
     def _prepare_and_split_data(self, encoded_data: EncodedData):
@@ -263,7 +269,8 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
 
     def get_compatible_encoders(self):
         from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
-        return [MotifEncoder]
+        from immuneML.encodings.motif_encoding.SimilarToPositiveSequenceEncoder import SimilarToPositiveSequenceEncoder
+        return [MotifEncoder, SimilarToPositiveSequenceEncoder]
 
 
 

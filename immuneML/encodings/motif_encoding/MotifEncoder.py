@@ -71,10 +71,6 @@ class MotifEncoder(DatasetEncoder):
 
     """
 
-    dataset_mapping = {
-        "SequenceDataset": "PositionalMotifSequenceEncoder",
-    }
-
     def __init__(self, max_positions: int = None, min_precision: float = None, min_recall: dict = None,
                  min_true_positives: int = None, generalize_motifs: bool = False,
                  candidate_motif_filepath: str = None, label: str = None, name: str = None):
@@ -276,11 +272,7 @@ class MotifEncoder(DatasetEncoder):
                                                                     f"{', '.join(label_config.get_labels_by_name())}"
             label_name = self.label
         else:
-            assert label_config.get_label_count() != 0, f"{MotifEncoder.__name__}: the dataset does not contain labels, please specify a label under 'instructions'."
-            assert label_config.get_label_count() == 1, f"{MotifEncoder.__name__}: multiple labels were found: {', '.join(label_config.get_labels_by_name())}. " \
-                                                        f"Please reduce the number of labels to one, or use the parameter 'label' to specify one of these labels. "
-
-            label_name = label_config.get_labels_by_name()[0]
+            label_name = EncoderHelper.get_single_label_name_from_config(label_config, MotifEncoder.__name__)
 
         return label_name
 

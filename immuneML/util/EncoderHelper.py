@@ -106,7 +106,6 @@ class EncoderHelper:
         assert len(label.values) == 2, f"{location}: only binary classification (2 classes) is possible when extracting " \
                                        f"relevant sequences for the label, but got these classes for label {label.name} instead: {label.values}."
 
-
     @staticmethod
     def get_example_weights_by_identifiers(dataset, example_identifiers):
         weights = dataset.get_example_weights()
@@ -115,4 +114,11 @@ class EncoderHelper:
             weights_dict = dict(zip(dataset.get_example_ids(), weights))
 
             return [weights_dict[identifier] for identifier in example_identifiers]
+    @staticmethod
+    def get_single_label_name_from_config(label_config: LabelConfiguration, location="EncoderHelper"):
+        assert label_config.get_label_count() != 0, f"{location}: the dataset does not contain labels, please specify a label under 'instructions'."
+        assert label_config.get_label_count() == 1, f"{location}: multiple labels were found: {', '.join(label_config.get_labels_by_name())}, expected a single label."
+
+        return label_config.get_labels_by_name()[0]
+
 
