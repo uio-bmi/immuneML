@@ -97,7 +97,7 @@ def make_sequence_paths(path: Path, signals: List[Signal]) -> Dict[str, Path]:
 
 def get_allowed_positions(signal: Signal, sequence_array: RaggedArray, region_type: RegionType):
     sequence_lengths = sequence_array.lengths
-    if signal.sequence_position_weights is not None:
+    if bool(signal.sequence_position_weights):
         signal_positions = [key for key, val in signal.sequence_position_weights.items() if val > 0]
         allowed_positions = RaggedArray([[pos in signal_positions for pos in PositionHelper.gen_imgt_positions_from_length(seq_len, region_type)]
                                          for seq_len in sequence_lengths])
@@ -150,6 +150,8 @@ def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annota
         signal_positions[f'{signal.id}_positions'] = ['m' + "".join(np_mask[ind, :]) for ind in range(len(signal_pos_col))]
 
     signal_matrix = make_bnp_annotated_sequences(sequences, annotated_dc, all_signals, signal_matrix, signal_positions)
+
+    logging.info(f"Annotated {len(sequences)} sequences with signal information.", True)
 
     return signal_matrix
 
@@ -218,8 +220,9 @@ def make_bnp_annotated_sequences(sequences: BackgroundSequences, bnp_data_class,
 
 
 def make_annotated_dataclass(annotation_fields: list, signals: list):
-    functions = {"get_signal_matrix": lambda self: np.array([getattr(self, signal.id) for signal in signals]).T if signals and len(signals) > 0 else None,
-                 "get_signal_names": lambda self: [signal.id for signal in signals]}
+    functions = {
+        "get_signal_matrix": lambda self: np.array([getattr(self, signal.id) for signal in signals]).T if signals and len(signals) > 0 else None,
+        "get_signal_names": lambda self: [signal.id for signal in signals]}
 
     return bnpdataclass(make_dataclass("AnnotatedGenData", namespace=functions, bases=tuple([BackgroundSequences]), fields=annotation_fields))
 

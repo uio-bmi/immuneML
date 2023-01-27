@@ -107,9 +107,10 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
         allowed_positions = [key for key, val in self.set_default_weights(self.position_weights, allowed_positions).items() if val > 0]
         return allowed_positions
 
-    def _get_all_motif_regex(self, alphabet_weights: dict, allowed_positions: list, hamming_dist: int, base: str):
+    def _get_all_motif_regex(self, alphabet_weights: dict, allowed_positions: list, hamming_dist: int, base: str, sequence_type: SequenceType):
         motif_regex_instances = []
-        replacement_alphabet = "[" + "".join([letter for letter, weight in alphabet_weights.items() if weight > 0]) + "]"
+        letter_to_use = [letter for letter, weight in alphabet_weights.items() if weight > 0]
+        replacement_alphabet = f"[{''.join(letter_to_use)}]" if len(letter_to_use) != len(EnvironmentSettings.get_sequence_alphabet(sequence_type)) else "."
 
         for position_group in combinations(allowed_positions, hamming_dist):
             motif_parts = [base[i: j] for i, j in zip([0] + [el + 1 for el in position_group], list(position_group) + [len(base)])]
@@ -126,7 +127,7 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
 
         for hamming_dist, dist_proba in self.hamming_distance_probabilities.items():
             if hamming_dist > 0 and dist_proba > 0:
-                motif_regex_instances = self._get_all_motif_regex(alphabet_weights, allowed_positions, hamming_dist, base)
+                motif_regex_instances = self._get_all_motif_regex(alphabet_weights, allowed_positions, hamming_dist, base, sequence_type)
                 motif_instances.extend(motif_regex_instances)
             elif dist_proba > 0:
                 motif_instance = self._add_gap(base)

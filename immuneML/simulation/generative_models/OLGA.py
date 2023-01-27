@@ -53,7 +53,7 @@ class OLGA(GenerativeModel):
     }
     MODEL_FILENAMES = {'marginals': 'model_marginals.txt', 'params': 'model_params.txt', 'v_gene_anchor': 'V_gene_CDR3_anchors.csv',
                        'j_gene_anchor': 'J_gene_CDR3_anchors.csv'}
-    OUTPUT_COLUMNS = ["sequence", 'sequence_aa', 'v_call', 'j_call', 'region_type', "frame_type", "p_gen"]
+    OUTPUT_COLUMNS = ["sequence", 'sequence_aa', 'v_call', 'j_call', 'region_type', "frame_type", "p_gen", "from_default_model"]
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -126,7 +126,7 @@ class OLGA(GenerativeModel):
                                         'j_call': olga_model.j_gene_mapping[seq_row[3]]}, sequence_type) if compute_p_gen else -1.
 
             sequences.loc[i] = (seq_row[0], seq_row[1], olga_model.v_gene_mapping[seq_row[2]], olga_model.j_gene_mapping[seq_row[3]],
-                                RegionType.IMGT_JUNCTION.name, SequenceFrameType.IN.name, p_gen)
+                                RegionType.IMGT_JUNCTION.name, SequenceFrameType.IN.name, p_gen, int(olga_model == self._olga_model))
 
         sequences.to_csv(path, index=False, sep='\t')
         return path
@@ -167,7 +167,8 @@ class OLGA(GenerativeModel):
                                                 compute_p_gen=compute_p_gen, sequence_type=sequence_type)
 
             if skewed_seqs_path.is_file():
-                pd.read_csv(skewed_seqs_path, sep='\t').to_csv(path, mode='a', sep='\t', index=False, header=False)
+                pd.read_csv(skewed_seqs_path, sep='\t').to_csv(path, mode='a' if path.is_file() else 'w', sep='\t', index=False,
+                                                               header=not path.is_file())
                 os.remove(skewed_seqs_path)
 
     def _import_olga_sequences(self, sequence_type: SequenceType, path: Path):
