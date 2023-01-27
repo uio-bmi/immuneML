@@ -76,14 +76,13 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         freq_dist = self._get_plotting_data()
 
-
         results_table = self._write_results_table(freq_dist)
         report_output_fig = self._safe_plot(freq_dist=freq_dist)
 
         return ReportResult(name=self.name,
-                            info="A a barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.",
-                            output_figures=None if report_output_fig is None else [report_output_fig],
-                            output_tables=None if results_table is None else [results_table])
+                            info="A barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.",
+                            output_figures=[] if report_output_fig is None else [report_output_fig],
+                            output_tables=[] if results_table is None else [results_table])
 
     def _get_plotting_data(self):
         if isinstance(self.dataset, SequenceDataset):
