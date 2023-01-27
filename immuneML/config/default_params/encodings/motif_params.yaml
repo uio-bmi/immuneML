@@ -1,4 +1,5 @@
 max_positions: 4
+min_positions: 1
 min_precision: 0
 min_recall: 0
 min_true_positives: 10

@@ -160,6 +160,7 @@ class PositionalMotifHelper:
         legal_positional_aas = PositionalMotifHelper.identify_legal_positional_aas(np_sequences, params.count_threshold)
         candidate_motifs = PositionalMotifHelper._get_single_aa_candidate_motifs(legal_positional_aas)
         candidate_motifs = PositionalMotifHelper._add_multi_aa_candidate_motifs(np_sequences, candidate_motifs, legal_positional_aas, params)
+        candidate_motifs = {motif_size: motifs for motif_size, motifs in candidate_motifs.items() if motif_size >= params.min_positions}
         candidate_motifs = list(it.chain(*candidate_motifs.values()))
 
         logging.info(f"{PositionalMotifHelper.__name__}: candidate motif computing done")

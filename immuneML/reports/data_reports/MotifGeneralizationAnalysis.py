@@ -70,7 +70,7 @@ class MotifGeneralizationAnalysis(DataReport):
     """
 
     def __init__(self, training_set_identifier_path: str = None, training_percentage: float = None,
-                 max_positions: int = None, min_precision: float = None, min_recall: float = None, min_true_positives: int = None,
+                 max_positions: int = None, min_positions: int = None, min_precision: float = None, min_recall: float = None, min_true_positives: int = None,
                  test_precision_threshold: float = None,
                  split_by_motif_size: bool = None, random_seed: int = None, label: dict = None,
                  min_points_in_window: int = None, smoothing_constant1: float = None, smoothing_constant2: float = None,
@@ -81,7 +81,7 @@ class MotifGeneralizationAnalysis(DataReport):
         self.training_set_identifier_path = Path(training_set_identifier_path) if training_set_identifier_path is not None else None
         self.training_percentage = training_percentage
         self.max_positions = max_positions
-        self.max_positions = max_positions
+        self.min_positions = min_positions
         self.min_precision = min_precision
         self.test_precision_threshold = test_precision_threshold
         self.min_recall = min_recall
@@ -104,6 +104,9 @@ class MotifGeneralizationAnalysis(DataReport):
         location = MotifGeneralizationAnalysis.__name__
 
         ParameterValidator.assert_type_and_value(kwargs["max_positions"], int, location, "max_positions", min_inclusive=1)
+        ParameterValidator.assert_type_and_value(kwargs["min_positions"], int, location, "min_positions", min_inclusive=1)
+        assert kwargs["max_positions"] >= kwargs["min_positions"], f"{location}: max_positions ({kwargs['max_positions']}) must be greater than or equal to min_positions ({kwargs['min_positions']})"
+
         ParameterValidator.assert_type_and_value(kwargs["min_precision"], (int, float), location, "min_precision", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_recall"], (int, float), location, "min_recall", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_true_positives"], int, location, "min_true_positives", min_inclusive=1)
@@ -272,6 +275,7 @@ class MotifGeneralizationAnalysis(DataReport):
 
     def _get_encoder(self):
         encoder = MotifEncoder.build_object(self.dataset, **{"max_positions": self.max_positions,
+                                                             "min_positions": self.min_positions,
                                                             "min_precision": self.min_precision,
                                                             "min_recall": self.min_recall,
                                                             "min_true_positives": self.min_true_positives,
