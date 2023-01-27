@@ -163,7 +163,7 @@ class PositionalMotifHelper:
         candidate_motifs = {motif_size: motifs for motif_size, motifs in candidate_motifs.items() if motif_size >= params.min_positions}
         candidate_motifs = list(it.chain(*candidate_motifs.values()))
 
-        logging.info(f"{PositionalMotifHelper.__name__}: candidate motif computing done")
+        logging.info(f"{PositionalMotifHelper.__name__}: candidate motif computing done. Found {len(candidate_motifs)} with a length between {params.min_positions} and {params.max_positions}")
 
         return candidate_motifs
 
