@@ -138,7 +138,7 @@ class PositionalMotifHelper:
     @staticmethod
     def _add_multi_aa_candidate_motifs(np_sequences, candidate_motifs, legal_positional_aas, params):
         for n_positions in range(2, params.max_positions + 1):
-            logging.info(f"{PositionalMotifHelper.__name__}: finding motifs with {n_positions} positions and occurrence > {params.count_threshold}")
+            logging.info(f"{PositionalMotifHelper.__name__}: extrapolating motifs with {n_positions} positions and occurrence > {params.count_threshold}")
 
             with Pool(params.pool_size) as pool:
                 partial_func = partial(PositionalMotifHelper.extend_motif, np_sequences=np_sequences,

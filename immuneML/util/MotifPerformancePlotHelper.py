@@ -148,14 +148,6 @@ class MotifPerformancePlotHelper():
                                  marker=dict(symbol="circle", color="#74C4C4")),
                       secondary_y=False)
 
-        # add highlighted motifs
-        plotting_data_highlight = plotting_data[plotting_data["highlight"] != "Motif"]
-        if len(plotting_data_highlight) > 0:
-            fig.add_trace(go.Scatter(x=plotting_data_highlight["training_TP"], y=plotting_data_highlight["precision"],
-                                     mode='markers', name=f"{highlight_motifs_name} precision",
-                                     marker=dict(symbol="circle", color="#F5C144")),
-                          secondary_y=False)
-
         # add combined precision
         fig.add_trace(go.Scatter(x=combined_precision["training_TP"], y=combined_precision["combined_precision"],
                                  mode='markers+lines', name="Combined precision",
@@ -169,6 +161,14 @@ class MotifPerformancePlotHelper():
                                      name="Combined precision, smoothed",
                                      mode="lines", line_shape='spline', line={'smoothing': 1.3}),
                           secondary_y=False, )
+
+        # add highlighted motifs
+        plotting_data_highlight = plotting_data[plotting_data["highlight"] != "Motif"]
+        if len(plotting_data_highlight) > 0:
+            fig.add_trace(go.Scatter(x=plotting_data_highlight["training_TP"], y=plotting_data_highlight["precision"],
+                                     mode='markers', name=f"{highlight_motifs_name} precision",
+                                     marker=dict(symbol="circle", color="#F5C144")),
+                          secondary_y=False)
 
         # add vertical TP cutoff line
         if tp_cutoff is not None:
