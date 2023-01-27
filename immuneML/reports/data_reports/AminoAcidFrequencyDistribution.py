@@ -207,7 +207,7 @@ class AminoAcidFrequencyDistribution(DataReport):
             positions = PositionHelper.gen_imgt_positions_from_length(len(sequence.get_sequence(SequenceType.AMINO_ACID)),
                                                                       sequence.get_attribute("region_type"))
         else:
-            positions = list(range(len(sequence.get_sequence(SequenceType.AMINO_ACID))))
+            positions = list(range(1, len(sequence.get_sequence(SequenceType.AMINO_ACID))+1))
 
         return [str(pos) for pos in positions]
 
@@ -236,7 +236,7 @@ class AminoAcidFrequencyDistribution(DataReport):
                         facet_col="class" if "class" in freq_dist.columns else None,
                         facet_row="chain" if "chain" in freq_dist.columns else None,
                         color_discrete_sequence=self._get_colors(), category_orders=category_orders,
-                        labels={"position": "IMGT position" if self.imgt_positions else "Sequence index",
+                        labels={"position": "IMGT position" if self.imgt_positions else "Position",
                                 "count": "Count",
                                 "relative frequency": "Relative frequency",
                                 "amino acid": "Amino acid"}, template="plotly_white")
