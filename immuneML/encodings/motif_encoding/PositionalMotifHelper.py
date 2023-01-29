@@ -158,9 +158,12 @@ class PositionalMotifHelper:
 
     @staticmethod
     def _check_file_header(header, motif_filepath):
-        assert header == "indices\tamino_acids\n", f"{PositionalMotifHelper.__name__}: motif file at {motif_filepath} " \
+        assert (header == "indices\tamino_acids\n", f"{PositionalMotifHelper.__name__}: motif file at {motif_filepath} " \
                                                    f"is expected to contain this header: 'indices\tamino_acids', " \
-                                                   f"found the following instead: '{header}'"
+                                                   f"found the following instead: '{header}'") or (header == "indices\tamino_acids\nNumber_of_binder_sequences",
+                                                    f"{PositionalMotifHelper.__name__}: motif file at {motif_filepath} " \
+                                                    f"is expected to contain this header: 'indices\tamino_acids', " \
+                                                    f"found the following instead: '{header}'")
     @staticmethod
     def check_motif_filepath(motif_filepath, location, parameter_name):
         ParameterValidator.assert_type_and_value(motif_filepath, str, location, parameter_name)
