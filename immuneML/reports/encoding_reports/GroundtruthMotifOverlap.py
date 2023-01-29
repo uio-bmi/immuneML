@@ -115,9 +115,24 @@ class GroundtruthMotifOverlap(EncodingReport):
         overlap_df["learned_motifs"] = overlap_df["learned_motifs"].apply(
             lambda x: len(x.split("-")[0].replace("&", ""))
         )
-        overlap_df["groundtruth_motif"] = overlap_df.drop(
+
+        for _, row in overlap_df.iterrows():
+            row = row.to_numpy()
+            max = np.argwhere(row == np.amax(row))
+            for index in max:
+                pass
+        """
+
+        
+
+
+        """
+        overlap_df["groundtruth_motif"] = overlap_df[overlap_df.drop(
             ["learned_motifs", "max_groundtruth_overlap"], axis=1
-        ).idxmax(axis=1)
+        ).values == overlap_df.drop(
+            ["learned_motifs", "max_groundtruth_overlap"], axis=1
+        ).max()].T
+
 
         overlap_df["implant_rate"] = overlap_df["groundtruth_motif"].apply(
             lambda x: int(implant_rate_dict[x])
