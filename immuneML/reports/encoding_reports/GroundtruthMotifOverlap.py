@@ -116,61 +116,37 @@ class GroundtruthMotifOverlap(EncodingReport):
             lambda x: len(x.split("-")[0].replace("&", ""))
         )
 
-        for _, row in overlap_df.iterrows():
-            row = row.to_numpy()
-            max = np.argwhere(row == np.amax(row))
-            for index in max:
-                pass
-        """
-
-        
-
-
-        """
-        overlap_df["groundtruth_motif"] = overlap_df[overlap_df.drop(
-            ["learned_motifs", "max_groundtruth_overlap"], axis=1
-        ).values == overlap_df.drop(
-            ["learned_motifs", "max_groundtruth_overlap"], axis=1
-        ).max()].T
-
-
-        overlap_df["implant_rate"] = overlap_df["groundtruth_motif"].apply(
-            lambda x: int(implant_rate_dict[x])
-        )
-        overlap_df = overlap_df[
-            ["learned_motifs", "implant_rate", "max_groundtruth_overlap"]
+        implant_rates = [
+            implant_rate_dict[col_name]
+            for col_name in overlap_df.drop(
+                ["learned_motifs", "max_groundtruth_overlap"], axis=1
+            ).columns
         ]
 
-        barplot_data = (
-            overlap_df.max_groundtruth_overlap.groupby(
-                [
-                    overlap_df.implant_rate,
-                    overlap_df.max_groundtruth_overlap,
-                    overlap_df.learned_motifs,
-                ]
-            )
-            .sum()
-            .fillna(0)
-            .astype(int)
-        )
-        barplot_df = pd.DataFrame(barplot_data)
-        barplot_df.rename(
-            columns={"max_groundtruth_overlap": "total_overlapping_motifs"},
-            inplace=True,
-        )
-        barplot_df["index"] = barplot_df.index
-        barplot_df["implant_rate"] = barplot_df["index"].apply(lambda x: str(x[0]))
-        barplot_df["max_groundtruth_overlap"] = barplot_df["index"].apply(
-            lambda x: x[1]
-        )
-        barplot_df["motif_size"] = barplot_df["index"].apply(lambda x: x[2])
-        barplot_df = barplot_df.drop(
-            barplot_df[barplot_df.max_groundtruth_overlap == 0].index
-        )
-        barplot_df["total_overlapping_motifs"] = (
-            barplot_df["total_overlapping_motifs"]
-            / barplot_df["max_groundtruth_overlap"]
-        )
+        overlap_values = overlap_df.drop(
+            ["learned_motifs", "max_groundtruth_overlap"], axis=1
+        ).values
+
+        max_groundtruth_overlap_values = overlap_df["max_groundtruth_overlap"].values
+        motif_size_values = overlap_df["learned_motifs"].values
+
+        implant_rate = list()
+        max_groundtruth_overlap = list()
+        motif_size = list()
+        for row in range(overlap_values.shape[0]):
+            if max_groundtruth_overlap_values[row] != 0:
+                max_index = np.argwhere(
+                    overlap_values[row, :] == np.amax(overlap_values[row, :])
+                )
+                for ind in max_index:
+                    implant_rate.append(implant_rates[ind[0]])
+                    max_groundtruth_overlap.append(max_groundtruth_overlap_values[row])
+                    motif_size.append(motif_size_values[row])
+
+        barplot_df = pd.DataFrame()
+        barplot_df["implant_rate"] = implant_rate
+        barplot_df["max_groundtruth_overlap"] = max_groundtruth_overlap
+        barplot_df["motif_size"] = motif_size
 
         return barplot_df
 
@@ -219,10 +195,8 @@ class GroundtruthMotifOverlap(EncodingReport):
         facet_barplot = px.histogram(
             overlap_df,
             x="implant_rate",
-            y="total_overlapping_motifs",
             labels={
                 "implant_rate": "Implant rate of groundtruth motif",
-                "total_overlapping_motifs": "Total overlapping learned motifs",
                 "max_groundtruth_overlap": "Max groundtruth overlap",
                 "motif_size": "Motif size",
             },
@@ -231,6 +205,7 @@ class GroundtruthMotifOverlap(EncodingReport):
             category_orders=dict(implant_rate=categories),
             facet_col_spacing=0.05,
             color="motif_size",
+            title="Amount of overlapping motifs per implant rate",
         )
         facet_barplot.update_yaxes(matches=None, showticklabels=True)
         facet_barplot.update_layout(
@@ -240,8 +215,7 @@ class GroundtruthMotifOverlap(EncodingReport):
         facet_barplot.write_html(str(file_path))
 
         return ReportOutput(
-            path=file_path,
-            name=f"Overlap between learned and groundtruth motifs over implant rate",
+            path=file_path, name="Amount of overlapping motifs per implant rate"
         )
 
     def check_prerequisites(self):
