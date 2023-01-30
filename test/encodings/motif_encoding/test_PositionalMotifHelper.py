@@ -103,17 +103,43 @@ class TestPositionalMotifHelper(TestCase):
     def test_compute_all_candidate_motifs(self):
         np_sequences = np.asarray(['A' 'A', 'A' 'A', 'C' 'C']).view('U1').reshape(3, -1)
 
-        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=1, count_threshold=2))
+        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=1, min_positions=1, count_threshold=2, allow_negative_aas=False))
         expected = [[[0], ["A"]], [[1], ["A"]]]
         self.assertListEqual(outcome, expected)
 
-        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=1, count_threshold=1))
+        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=2, min_positions=1, count_threshold=2, allow_negative_aas=False))
+        expected = [[[0], ["A"]], [[1], ["A"]], [[0, 1], ["A", "A"]]]
+        self.assertListEqual(outcome, expected)
+
+        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=1, min_positions=1, count_threshold=1, allow_negative_aas=False))
         expected = [[[0], ["A"]], [[0], ["C"]], [[1], ["A"]], [[1], ["C"]]]
         self.assertListEqual(outcome, expected)
 
-        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=2, count_threshold=2))
+        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=2, min_positions=1, count_threshold=2, allow_negative_aas=False))
         expected = [[[0], ["A"]], [[1], ["A"]], [[0, 1], ["A", "A"]]]
         self.assertListEqual(outcome, expected)
+
+        np_sequences = np.asarray(['A' 'A', 'A' 'C']).view('U1').reshape(2, -1)
+
+        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=2, min_positions=2, count_threshold=1, allow_negative_aas=True))
+        expected = [[[0, 1], ["A", "A"]], [[0, 1], ["A", "C"]], [[0, 1], ["A", "a"]], [[0, 1], ["A", "c"]]]
+        self.assertListEqual(outcome, expected)
+
+        np_sequences = np.asarray(['A' 'D', 'A' 'D', 'A' 'C', 'A' 'F']).view('U1').reshape(4, -1)
+
+        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=2, min_positions=2, count_threshold=2, allow_negative_aas=True))
+        expected = [[[0, 1], ["A", "D"]], [[0, 1], ["A", "d"]]]
+        self.assertListEqual(outcome, expected)
+
+    def test_add_position_to_base_motif(self):
+        base_motif = [[0, 5], ["A", "C"]]
+
+        result = PositionalMotifHelper.add_position_to_base_motif(base_motif, 2, "D")
+
+        self.assertListEqual(result[0], [0, 2, 5])
+        self.assertListEqual(result[1], ["A", "D", "C"])
+        self.assertListEqual(base_motif[0], [0, 5])
+        self.assertListEqual(base_motif[1], ["A", "C"])
 
     def test_readwrite(self):
         path = EnvironmentSettings.tmp_test_path / "positional_motif_sequence_encoder/test_readwrite/"
@@ -140,6 +166,22 @@ class TestPositionalMotifHelper(TestCase):
         expected = []
 
         self.assertListEqual(result, expected)
+
+        motifs = [[[2, 3, 5], ["A", "A", "a"]], [[2, 3, 5], ["A", "A", "D"]], [[2, 3, 5], ["A", "A", "C"]]]
+
+        result = PositionalMotifHelper.get_generalized_motifs(motifs)
+        expected = [[[2, 3, 5], ["A", "A", "CD"]]]
+
+        self.assertListEqual(result, expected)
+
+        motifs = [[[2, 3, 5], ["A", "A", "a"]], [[2, 3, 5], ["A", "A", "D"]]]
+
+        result = PositionalMotifHelper.get_generalized_motifs(motifs)
+        expected = []
+
+        self.assertListEqual(result, expected)
+
+
 
     def test__sort_motifs_by_index(self):
         motifs = [[[1,2], ["A", "A"]], [[1, 2], ["A", "F"]], [[1, 2], ["G", "D"]], [[5, 6], ["A", "A"]], [[6, 7], ["A", "A"]]]

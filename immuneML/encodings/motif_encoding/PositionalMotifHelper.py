@@ -47,8 +47,11 @@ class PositionalMotifHelper:
         return unicode.view('U1').reshape(n_sequences, -1)
 
     @staticmethod
-    def test_aa(np_sequences, index, aa):
-        return np_sequences[:, index] == aa
+    def test_aa(sequences, index, aa):
+        if aa.isupper():
+            return sequences[:, index] == aa
+        else:
+            return sequences[:, index] != aa.upper()
 
     @staticmethod
     def test_position(np_sequences, index, aas):
@@ -63,26 +66,41 @@ class PositionalMotifHelper:
                                       index, amino_acid in zip(indices, amino_acids)])
 
     @staticmethod
-    def _test_new_position(existing_positions, new_position):
+    def _test_new_position(existing_positions, new_position, negative_aa=False):
         if new_position in existing_positions:
             return False
 
-        if max(existing_positions) > new_position:
-            return False
+        # regular amino acids are only allowed to be added to the right of a motif (to prevent recomputing the same motif)
+        # whereas negative amino acids may be added anywhere
+        if not negative_aa:
+            if max(existing_positions) > new_position:
+                return False
 
         return True
 
     @staticmethod
-    def extend_motif(base_motif, np_sequences, legal_positional_aas, count_threshold=10):
+    def add_position_to_base_motif(base_motif, new_position, new_aa):
+        # new_index = base_motif[0] + [new_position]
+        # new_aas = base_motif[1] + [new_aa]
+
+        new_index = sorted(base_motif[0] + [new_position])
+        new_aas = base_motif[1].copy()
+        new_aas.insert(new_index.index(new_position), new_aa)
+
+        return new_index, new_aas
+
+    @staticmethod
+    def extend_motif(base_motif, np_sequences, legal_positional_aas, count_threshold=10, negative_aa=False):
         new_candidates = []
 
         sequence_length = len(np_sequences[0])
 
         for new_position in range(sequence_length):
-            if PositionalMotifHelper._test_new_position(base_motif[0], new_position):
+            if PositionalMotifHelper._test_new_position(base_motif[0], new_position, negative_aa=negative_aa):
                 for new_aa in legal_positional_aas[new_position]:
-                    new_index = base_motif[0] + [new_position]
-                    new_aas = base_motif[1] + [new_aa]
+                    new_aa = new_aa.lower() if negative_aa else new_aa
+
+                    new_index, new_aas = PositionalMotifHelper.add_position_to_base_motif(base_motif, new_position, new_aa)
                     pred = PositionalMotifHelper.test_motif(np_sequences, new_index, new_aas)
 
                     if sum(pred) >= count_threshold:
@@ -142,13 +160,32 @@ class PositionalMotifHelper:
 
             with Pool(params.pool_size) as pool:
                 partial_func = partial(PositionalMotifHelper.extend_motif, np_sequences=np_sequences,
-                                       legal_positional_aas=legal_positional_aas, count_threshold=params.count_threshold)
+                                       legal_positional_aas=legal_positional_aas, count_threshold=params.count_threshold,
+                                       negative_aa=False)
                 new_candidates = pool.map(partial_func, candidate_motifs[n_positions - 1])
 
                 candidate_motifs[n_positions] = list(
                     it.chain.from_iterable(new_candidates))
 
                 logging.info(f"{PositionalMotifHelper.__name__}: found {len(candidate_motifs[n_positions])} candidate motifs with {n_positions} positions")
+
+        return candidate_motifs
+
+    @staticmethod
+    def _add_negative_aa_candidate_motifs(np_sequences, candidate_motifs, legal_positional_aas, params):
+        for n_positions in range(max(params.min_positions, 2), params.max_positions + 1):
+            logging.info(f"{PositionalMotifHelper.__name__}: computing motifs with {n_positions+1} positions of which 1 negative amino acid")
+
+            with Pool(params.pool_size) as pool:
+                partial_func = partial(PositionalMotifHelper.extend_motif, np_sequences=np_sequences,
+                                       legal_positional_aas=legal_positional_aas, count_threshold=params.count_threshold,
+                                       negative_aa=True)
+                new_candidates = pool.map(partial_func, candidate_motifs[n_positions - 1])
+                new_candidates = list(it.chain.from_iterable(new_candidates))
+
+                candidate_motifs[n_positions].extend(new_candidates)
+
+            logging.info(f"{PositionalMotifHelper.__name__}: found {len(new_candidates)} candidate motifs with {n_positions} positions of which 1 negative amino acid")
 
         return candidate_motifs
 
@@ -160,7 +197,13 @@ class PositionalMotifHelper:
         legal_positional_aas = PositionalMotifHelper.identify_legal_positional_aas(np_sequences, params.count_threshold)
         candidate_motifs = PositionalMotifHelper._get_single_aa_candidate_motifs(legal_positional_aas)
         candidate_motifs = PositionalMotifHelper._add_multi_aa_candidate_motifs(np_sequences, candidate_motifs, legal_positional_aas, params)
+
+        # todo caching at single aa and multi-aa
+        if params.allow_negative_aas:
+            candidate_motifs = PositionalMotifHelper._add_negative_aa_candidate_motifs(np_sequences, candidate_motifs, legal_positional_aas, params)
+
         candidate_motifs = {motif_size: motifs for motif_size, motifs in candidate_motifs.items() if motif_size >= params.min_positions}
+
         candidate_motifs = list(it.chain(*candidate_motifs.values()))
 
         logging.info(f"{PositionalMotifHelper.__name__}: candidate motif computing done. Found {len(candidate_motifs)} with a length between {params.min_positions} and {params.max_positions}")
@@ -270,6 +313,7 @@ class PositionalMotifHelper:
     def get_flex_aa_sets(amino_acids):
         sets = []
         amino_acids = sorted(amino_acids)
+        amino_acids = [aa for aa in amino_acids if aa.isupper()]
 
         for subset_size in range(2, len(amino_acids)+1):
             for combo in it.combinations(amino_acids, subset_size):

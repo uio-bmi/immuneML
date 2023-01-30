@@ -48,6 +48,14 @@ class MotifEncoder(DatasetEncoder):
 
         label (str):
 
+        # note on negative aa: the aa must occur at least count_threshold times in that position, but the negative aa
+        must also occur as often in that position. This to prevent motifs that are extreme outlier cases; if F never
+        occurs in position 8, it is not worth having a motif with not-F in position 8.
+        Similarly if there are only less-than-threshold sequences with F in position 8 (almost always F-8), it is also
+        not worth considering not-F in pos 8
+
+        # todo check all motif related reports to see if they can work with negative aas
+
 
         # todo should weighting be a parameter here?
 
@@ -76,6 +84,7 @@ class MotifEncoder(DatasetEncoder):
     def __init__(self, max_positions: int = None, min_positions: int = None,
                  min_precision: float = None, min_recall: dict = None,
                  min_true_positives: int = None, generalize_motifs: bool = False,
+                 allow_negative_aas: bool = False,
                  candidate_motif_filepath: str = None, label: str = None, name: str = None):
         self.max_positions = max_positions
         self.min_positions = min_positions
@@ -83,6 +92,7 @@ class MotifEncoder(DatasetEncoder):
         self.min_recall = min_recall
         self.min_true_positives = min_true_positives
         self.generalize_motifs = generalize_motifs
+        self.allow_negative_aas = allow_negative_aas
         self.candidate_motif_filepath = Path(candidate_motif_filepath) if candidate_motif_filepath is not None else None
         self.learned_motif_filepath = None
 
@@ -92,7 +102,7 @@ class MotifEncoder(DatasetEncoder):
 
     @staticmethod
     def _prepare_parameters(max_positions: int = None, min_positions: int = None, min_precision: float = None, min_recall: dict = None,
-                            min_true_positives: int = None, generalize_motifs: bool = False,
+                            min_true_positives: int = None, generalize_motifs: bool = False, allow_negative_aas: bool = False,
                             candidate_motif_filepath: str = None, label: str = None, name: str = None):
 
         location = MotifEncoder.__name__
@@ -104,6 +114,7 @@ class MotifEncoder(DatasetEncoder):
         ParameterValidator.assert_type_and_value(min_precision, (int, float), location, "min_precision", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(min_true_positives, int, location, "min_true_positives", min_inclusive=1)
         ParameterValidator.assert_type_and_value(generalize_motifs, bool, location, "generalize_motifs")
+        ParameterValidator.assert_type_and_value(allow_negative_aas, bool, location, "allow_negative_aas")
 
         if isinstance(min_recall, dict):
             assert set(min_recall.keys()) == set(range(min_positions, max_positions+1)), f"{location}: {min_recall} is not a valid value for parameter min_recall. " \
@@ -133,6 +144,7 @@ class MotifEncoder(DatasetEncoder):
             "min_recall": min_recall,
             "min_true_positives": min_true_positives,
             "generalize_motifs": generalize_motifs,
+            "allow_negative_aas": allow_negative_aas,
             "candidate_motif_filepath": candidate_motif_filepath,
             "label": label,
             "name": name,
@@ -256,7 +268,7 @@ class MotifEncoder(DatasetEncoder):
     def _compute_candidate_motifs(self, full_dataset, pool_size=4):
         np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(full_dataset)
         params = PositionalMotifParams(max_positions=self.max_positions, min_positions=self.min_positions,
-                                       count_threshold=self.min_true_positives,
+                                       count_threshold=self.min_true_positives, allow_negative_aas=self.allow_negative_aas,
                                        pool_size=pool_size)
         return PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params)
 
