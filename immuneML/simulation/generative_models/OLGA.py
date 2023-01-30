@@ -156,6 +156,10 @@ class OLGA(GenerativeModel):
 
     def generate_from_skewed_gene_models(self, v_genes: list, j_genes: list, seed: int, path: Path, sequence_type: SequenceType, batch_size: int,
                                          compute_p_gen: bool):
+
+        if not self._olga_model:
+            self._olga_model = self.load_model()
+
         if len(v_genes) > 0 or len(j_genes) > 0:
 
             skewed_model_path = PathBuilder.build(path.parent / "skewed_model/")
