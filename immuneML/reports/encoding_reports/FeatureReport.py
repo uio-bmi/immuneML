@@ -28,9 +28,16 @@ class FeatureReport(EncodingReport):
         PathBuilder.build(self.result_path)
         data_long_format = DataReshaper.reshape(self.dataset, self.dataset.get_label_names())
         table_result = self._write_results_table(data_long_format)
-        report_output_fig = self._safe_plot(data_long_format=data_long_format)
-        output_figures = None if report_output_fig is None else [report_output_fig]
-        return ReportResult(name=self.name, output_figures=output_figures, output_tables=[table_result])
+        report_output = self._safe_plot(data_long_format=data_long_format)
+        output_tables = [table_result]
+        if report_output is None:
+            output_figures = None
+        elif isinstance(report_output, tuple):
+            output_figures = report_output[0] if isinstance(report_output[0], list) else [report_output[0]]
+            output_tables = report_output[1]
+        else:
+            output_figures = report_output if isinstance(report_output, list) else [report_output]
+        return ReportResult(name=self.name, output_figures=output_figures, output_tables=output_tables)
 
     def _write_results_table(self, data) -> ReportOutput:
         table_path = self.result_path / f"feature_values.csv"
