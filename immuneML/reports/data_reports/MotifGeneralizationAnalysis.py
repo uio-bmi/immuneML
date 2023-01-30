@@ -70,8 +70,9 @@ class MotifGeneralizationAnalysis(DataReport):
     """
 
     def __init__(self, training_set_identifier_path: str = None, training_percentage: float = None,
-                 max_positions: int = None, min_positions: int = None, min_precision: float = None, min_recall: float = None, min_true_positives: int = None,
-                 test_precision_threshold: float = None,
+                 max_positions: int = None, min_positions: int = None, min_precision: float = None, min_recall: float = None,
+                 min_true_positives: int = None,
+                 test_precision_threshold: float = None, allow_negative_aas: float = None,
                  split_by_motif_size: bool = None, random_seed: int = None, label: dict = None,
                  min_points_in_window: int = None, smoothing_constant1: float = None, smoothing_constant2: float = None,
                  highlight_motifs_path: str = None, highlight_motifs_name: str = None,
@@ -87,6 +88,7 @@ class MotifGeneralizationAnalysis(DataReport):
         self.min_recall = min_recall
         self.min_true_positives = min_true_positives
         self.split_by_motif_size = split_by_motif_size
+        self.allow_negative_aas = allow_negative_aas
         self.min_points_in_window = min_points_in_window
         self.smoothing_constant1 = smoothing_constant1
         self.smoothing_constant2 = smoothing_constant2
@@ -110,6 +112,7 @@ class MotifGeneralizationAnalysis(DataReport):
         ParameterValidator.assert_type_and_value(kwargs["min_precision"], (int, float), location, "min_precision", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_recall"], (int, float), location, "min_recall", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_true_positives"], int, location, "min_true_positives", min_inclusive=1)
+        ParameterValidator.assert_type_and_value(kwargs["allow_negative_aas"], bool, location, "allow_negative_aas")
         ParameterValidator.assert_type_and_value(kwargs["test_precision_threshold"], float, location, "test_precision_threshold", min_inclusive=0, max_exclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["split_by_motif_size"], bool, location, "split_by_motif_size")
         ParameterValidator.assert_type_and_value(kwargs["min_points_in_window"], int, location, "min_points_in_window", min_inclusive=1)
@@ -280,6 +283,7 @@ class MotifGeneralizationAnalysis(DataReport):
                                                             "min_recall": self.min_recall,
                                                             "min_true_positives": self.min_true_positives,
                                                             "generalize_motifs": False,
+                                                            "allow_negative_aas": self.allow_negative_aas,
                                                             "label": None,
                                                             "name": f"motif_encoder"})
 
