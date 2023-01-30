@@ -47,7 +47,7 @@ class TCRdistEncoder(DatasetEncoder):
         if isinstance(dataset, ReceptorDataset) or isinstance(dataset, SequenceDataset):
             return TCRdistEncoder(**params)
         else:
-            raise ValueError("TCRdistEncoder is not defined for dataset types which are not ReceptorDataset or SequenceDatasets.")
+            raise ValueError("TCRdistEncoder is not defined for datasets of type other than ReceptorDataset or SequenceDataset.")
 
     def set_context(self, context: dict):
         self.context = context
@@ -57,9 +57,10 @@ class TCRdistEncoder(DatasetEncoder):
         train_receptor_ids = EncoderHelper.prepare_training_ids(dataset, params)
         if params.learn_model:
             self._build_tcr_dist_matrix(dataset, params.label_config.get_labels_by_name())
-
-        distance_matrix = self.distance_matrix.loc[dataset.get_example_ids(), train_receptor_ids]
-        labels = self._build_labels(dataset, params) if params.encode_labels else None
+            distance_matrix = self.distance_matrix
+        else:
+            distance_matrix = self.distance_matrix.loc[dataset.get_example_ids(), train_receptor_ids]
+        labels = self._build_labels(dataset, params, distance_matrix) if params.encode_labels else None
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=distance_matrix, labels=labels, example_ids=distance_matrix.index.values,
@@ -67,7 +68,7 @@ class TCRdistEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-    def _build_tcr_dist_matrix(self, dataset: ReceptorDataset, label_names):
+    def _build_tcr_dist_matrix(self, dataset, label_names):
         from immuneML.util.TCRdistHelper import TCRdistHelper
 
         current_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
@@ -82,11 +83,12 @@ class TCRdistEncoder(DatasetEncoder):
             self.distance_matrix = pd.DataFrame(tcr_rep.pw_beta, index=tcr_rep.clone_df.clone_id.values,
                                                 columns=tcr_rep.clone_df.clone_id.values)
 
-    def _build_labels(self, dataset: ReceptorDataset, params: EncoderParams) -> dict:
+    def _build_labels(self, dataset, params: EncoderParams, distance_matrix) -> dict:
         labels = {label: [] for label in params.label_config.get_labels_by_name()}
         for receptor in dataset.get_data():
-            for label_name in labels.keys():
-                labels[label_name].append(receptor.metadata[label_name])
+            if receptor.identifier in distance_matrix.index:
+                for label_name in labels.keys():
+                    labels[label_name].append(receptor.metadata[label_name])
         return labels
 
     @staticmethod

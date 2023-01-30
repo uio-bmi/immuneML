@@ -83,6 +83,6 @@ class TestTCRdistEncoder(TestCase):
         encoded_dataset = encoder.encode(dataset, EncoderParams(path / "result/", LabelConfiguration([Label("epitope")])))
 
         self.assertTrue(encoded_dataset.encoded_data.examples.shape[0] == encoded_dataset.encoded_data.examples.shape[1]
-                        and encoded_dataset.encoded_data.examples.shape[0] == dataset.get_example_count())
+                        and encoded_dataset.encoded_data.examples.shape[0] == 2)
 
         shutil.rmtree(path)
