@@ -18,12 +18,14 @@ class TestMotifOverlap(TestCase):
         # sequence_count: int, length_probabilities: dict, labels: dict, path: Path
 
         report = MotifOverlap.build_object(**{"n_splits": 5,
-                                                      "max_positions": 1,
-                                                      "min_precision": 0.8,
-                                                      "min_recall": 0.01,
-                                                      "min_true_positives": 1,
-                                                      "dataset": dataset,
-                                                      "random_seed": 1,
+                                              "max_positions": 1,
+                                              "min_positions": 1,
+                                              "min_precision": 0.8,
+                                              "allow_negative_aas": False,
+                                              "min_recall": 0.01,
+                                              "min_true_positives": 1,
+                                              "dataset": dataset,
+                                              "random_seed": 1,
                                               "result_path": path / "result",
                                               "label": {"l1": {"positive_class": "A"}}})
 
