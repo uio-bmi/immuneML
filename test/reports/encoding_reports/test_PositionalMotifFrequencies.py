@@ -105,7 +105,7 @@ class TestPositionalMotifFrequencies(TestCase):
         encoded_dataset = self._create_dummy_encoded_data(path)
 
         report = PositionalMotifFrequencies.build_object(
-            **{"dataset": encoded_dataset, "result_path": path}
+            **{"dataset": encoded_dataset, "result_path": path, "max_gap_size_only": False}
         )
 
         self.assertTrue(report.check_prerequisites())

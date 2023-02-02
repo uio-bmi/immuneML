@@ -46,6 +46,7 @@ class PositionalMotifFrequencies(EncodingReport):
         result_path: Path = None,
         name: str = None,
         number_of_processes: int = 1,
+        max_gap_size_only: bool = None,
     ):
         super().__init__(
             dataset=dataset,
@@ -53,6 +54,7 @@ class PositionalMotifFrequencies(EncodingReport):
             name=name,
             number_of_processes=number_of_processes,
         )
+        self.max_gap_size_only = max_gap_size_only
 
     def get_sequence_length(self):
         my_sequence = next(self.dataset.get_data())
@@ -91,10 +93,15 @@ class PositionalMotifFrequencies(EncodingReport):
             indices, amino_acids = PositionalMotifHelper.string_to_motif(
                 motif, "&", "-"
             )
-            indices_gap_size = len(indices)
+            motif_size = len(indices)
 
-            for i in range(indices_gap_size - 1):
-                gap_size_count[indices_gap_size][indices[i + 1] - indices[i] - 1] += 1
+            if self.max_gap_size_only and motif_size-1 != 0:
+                gap_size = max([indices[i+1]-indices[i] -1 for i in range(motif_size-1)])
+                gap_size_count[motif_size][gap_size] += 1
+            else:
+                for i in range(motif_size - 1):
+                    gap_size = indices[i+1]-indices[i] -1
+                    gap_size_count[motif_size][gap_size] += 1
 
         motif_sizes = list()
         gap_sizes = list()
@@ -137,6 +144,13 @@ class PositionalMotifFrequencies(EncodingReport):
     def _plot_gap_sizes(self, gap_size_df):
         file_path = self.result_path / f"gap_and_motif_size.html"
 
+        if self.max_gap_size_only:
+            title = "Maximum gap size in motif distribution"
+            x_label = "Max gap size"
+        else:
+            title= "Distances between Amino Acids for all positions"
+            x_label = "Gap size"
+
         gap_size_fig = px.bar(
             gap_size_df,
             x="gap_size",
@@ -144,10 +158,10 @@ class PositionalMotifFrequencies(EncodingReport):
             color="motif_size",
             color_discrete_sequence=self._get_color_discrete_sequence(),
             template="plotly_white",
-            title=f"Distances between Amino Acids for all positions",
+            title=title,
             labels={
-                "gap_size": "Gap size",
-                "occurrence": "Gap size occurrence",
+                "gap_size": x_label,
+                "occurrence": "Occurrence",
                 "motif_size": "Motif size",
             },
         )
@@ -223,6 +237,8 @@ class PositionalMotifFrequencies(EncodingReport):
                 f"PositonalMotifFrequencies: the dataset encoding ({self.dataset.encoded_data.encoding}) was not in the list of valid "
                 f"encodings ({valid_encodings}), skipping this report..."
             )
+            return False
+        elif self.max_gap_size_only is None:
             return False
         else:
             return True
