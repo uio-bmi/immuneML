@@ -32,15 +32,16 @@ class TestReceptorCNN(TestCase):
         cnn = ReceptorCNN(kernel_count=2, kernel_size=[3], positional_channels=3, sequence_type="amino_acid", device="cpu",
                           number_of_threads=4, random_seed=1, learning_rate=0.01, iteration_count=10, l1_weight_decay=0.1, evaluate_at=5,
                           batch_size=100, training_percentage=0.8, l2_weight_decay=0.0)
-        cnn.fit(encoded_data=enc_dataset.encoded_data, label=Label("CMV"))
+        cnn.fit(encoded_data=enc_dataset.encoded_data, label=Label("CMV", [True, False]))
 
-        predictions = cnn.predict(enc_dataset.encoded_data, Label("CMV"))
+        predictions = cnn.predict(enc_dataset.encoded_data, Label("CMV", [True, False]))
         self.assertEqual(500, len(predictions["CMV"]))
         self.assertEqual(500, len([pred for pred in predictions["CMV"] if isinstance(pred, bool)]))
 
-        predictions_proba = cnn.predict_proba(enc_dataset.encoded_data, Label("CMV"))
-        self.assertEqual(500, np.rint(np.sum(predictions_proba["CMV"])))
-        self.assertEqual(500, predictions_proba["CMV"].shape[0])
+        predictions_proba = cnn.predict_proba(enc_dataset.encoded_data, Label("CMV", [True, False]))
+        self.assertEqual(500, len(predictions_proba["CMV"][True]))
+        self.assertEqual(500, len(predictions_proba["CMV"][False]))
+        self.assertEqual(500 * [1], list(predictions_proba["CMV"][True] + predictions_proba["CMV"][False]))
 
         cnn.store(path / "model_storage")
 
