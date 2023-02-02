@@ -392,7 +392,7 @@ class DeepRC(MLMethod):
                 "classes": self.get_classes()
             }
             if self.label is not None:
-                desc["label"] = {key.lstrip("_"): value for key, value in vars(self.label).items()}
+                desc["label"] = self.label.get_desc_for_storage()
 
             yaml.dump(desc, file)
 
