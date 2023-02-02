@@ -90,12 +90,6 @@ class PDBDataset(Dataset):
             yield files
 
 
-
-    def get_batch(self, batch_size: int = 10000):
-        self.file_names.sort()
-        self.element_generator.file_list = self.file_names
-        return self.element_generator.build_batch_generator()
-
     def get_filenames(self):
         return self.file_names
 

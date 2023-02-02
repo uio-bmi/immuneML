@@ -13,6 +13,7 @@ class PDBStructure(DatasetItem):
                  receptor_type: str = None,
                  region_type: RegionType = RegionType.IMGT_CDR3, has_imgt_numbering: bool = False,
                  start_position: int = 0, stop_position : int = 0):
+
         self.pdb_structure = pdb_structure
         self.contains_antigen = contains_antigen
         self.receptor_type = receptor_type

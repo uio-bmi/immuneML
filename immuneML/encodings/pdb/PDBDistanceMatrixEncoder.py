@@ -23,14 +23,14 @@ class PDBDistanceMatrixEncoder(DatasetEncoder):
 
     def encode(self, dataset, params: EncoderParams):
 
-        processed_data = self.extract_data_for_encoding(dataset, params)
+        processed_data = self.extract_data_for_encoding(dataset)
 
         encoded_dataset = PDBDataset(dataset.pdb_file_paths, dataset.file_names, dataset.labels, dataset.metadata_file, EncodedData(processed_data, None, dataset.get_example_ids()))
 
         return encoded_dataset
 
 
-    def extract_data_for_encoding(self, dataset, params: EncoderParams):
+    def extract_data_for_encoding(self, dataset):
 
         structures =[]
 
