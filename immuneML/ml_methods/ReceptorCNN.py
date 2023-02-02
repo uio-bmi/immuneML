@@ -122,7 +122,7 @@ class ReceptorCNN(MLMethod):
         self.feature_names = None
 
     def predict(self, encoded_data: EncodedData, label: Label):
-        predictions_proba = self.predict_proba(encoded_data, label)[label.name][self.label.positive_class]
+        predictions_proba = self.predict_proba(encoded_data, label)[label.name][label.positive_class]
         return {label.name: [self.class_mapping[val] for val in (predictions_proba > 0.5).tolist()]}
 
     def set_background_probabilities(self):

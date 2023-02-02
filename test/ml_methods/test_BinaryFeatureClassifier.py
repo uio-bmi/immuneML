@@ -35,7 +35,7 @@ class TestBinaryFeatureClassifier(TestCase):
                                                   [True, False, False, False]]),
                                labels={"l1": ["True", "True", "True", "True", "False", "False", "False", "False"]})
 
-        label = Label("l1", positive_class=True)
+        label = Label("l1", values=[True, False], positive_class=True)
         return enc_data, label
 
     def get_fitted_classifier(self, path, enc_data, label):
@@ -116,7 +116,7 @@ class TestBinaryFeatureClassifier(TestCase):
                                                    patience = 10)
         motif_classifier.optimization_metric = "accuracy"
         motif_classifier.class_mapping = {0: False, 1: True}
-        motif_classifier.label = Label("l1", positive_class=True)
+        motif_classifier.label = Label("l1", values=[True, False], positive_class=True)
         motif_classifier.feature_names = ["rule"]
 
         enc_data = EncodedData(encoding=MotifEncoder.__name__,

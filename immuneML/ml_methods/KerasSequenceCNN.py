@@ -36,12 +36,15 @@ class KerasSequenceCNN(MLMethod):
         self.feature_names = None
 
     def predict(self, encoded_data: EncodedData, label: Label):
-        predictions_proba = self.predict_proba(encoded_data, label)
-        return {label.name: [self.class_mapping[val] for val in (predictions_proba[label.name][:, 1] > 0.5).tolist()]}
+        predictions_proba = self.predict_proba(encoded_data, label)[label.name][label.positive_class]
+
+        return {label.name: [self.class_mapping[val] for val in (predictions_proba > 0.5).tolist()]}
 
     def predict_proba(self, encoded_data: EncodedData, label: Label):
-        predictions = self.model.predict(x=encoded_data.examples)
-        return {self.label.name: np.hstack([1 - np.array(predictions), predictions])}
+        predictions = self.model.predict(x=encoded_data.examples).flatten()
+
+        return {label.name: {label.positive_class: predictions,
+                             label.get_binary_negative_class(): 1 - predictions}}
 
     def _create_cnn(self, units_per_layer, input_shape,
                activation, regularizer):
@@ -163,7 +166,7 @@ class KerasSequenceCNN(MLMethod):
         del custom_vars["result_path"]
 
         if self.label:
-            custom_vars["label"] = vars(self.label)
+            custom_vars["label"] = {key.lstrip("_"): value for key, value in vars(self.label).items()}
 
         params_path = path / "custom_params.yaml"
         with params_path.open('w') as file:
