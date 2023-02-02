@@ -42,6 +42,11 @@ class ReceptorSequence(DatasetItem):
         self.annotation = annotation
         self.metadata = metadata
 
+    def __repr__(self):
+        return f"ReceptorSequence(sequence_aa={self.amino_acid_sequence}, sequence={self.nucleotide_sequence}, " \
+               f"annotation={vars(self.annotation) if self.annotation is not None else '{}'}, " \
+               f"metadata={vars(self.metadata) if self.metadata is not None else '{}'})"
+
     def set_metadata(self, metadata: SequenceMetadata):
         self.metadata = metadata
 

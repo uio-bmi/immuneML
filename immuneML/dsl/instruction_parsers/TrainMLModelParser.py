@@ -46,8 +46,8 @@ class TrainMLModelParser:
         selection = self._parse_split_config(key, instruction, "selection", symbol_table, len(settings), label_config)
         assessment, selection = self._update_split_configs(assessment, selection, dataset)
         strategy = ReflectionHandler.get_class_by_name(instruction["strategy"], "hyperparameter_optimization/")
-        metrics = {Metric[metric.upper()] for metric in instruction["metrics"]}
-        optimization_metric = Metric[instruction["optimization_metric"].upper()]
+        metrics = {Metric.get_metric(metric) for metric in instruction["metrics"]}
+        optimization_metric = Metric.get_metric(instruction["optimization_metric"].upper())
         metric_search_criterion = Metric.get_search_criterion(optimization_metric)
         path = self._prepare_path(instruction)
         context = self._prepare_context(instruction, symbol_table)
