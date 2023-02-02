@@ -108,8 +108,10 @@ class SklearnMethod(MLMethod):
 
     def predict_proba(self, encoded_data: EncodedData, label: Label):
         if self.can_predict_proba():
-            predictions = self.apply_with_weights(self.model.predict_proba, encoded_data.example_weights, X=encoded_data.examples)
-            return {label.name: predictions}
+            probabilities = self.apply_with_weights(self.model.predict_proba, encoded_data.example_weights, X=encoded_data.examples)
+            class_names = Util.map_to_old_class_values(self.model.classes_, self.class_mapping)
+
+            return {label.name: {class_name: probabilities[:,i] for i, class_name in enumerate(class_names)}}
         else:
             warnings.warn(f"{self.__class__.__name__}: cannot predict probabilities.")
             return None
@@ -215,7 +217,7 @@ class SklearnMethod(MLMethod):
             }
 
             if self.label is not None:
-                desc["label"] = vars(self.label)
+                desc["label"] = {key.lstrip("_"): value for key, value in vars(self.label).items()}
 
             yaml.dump(desc, file)
 
