@@ -42,3 +42,6 @@ class Label:
     def get_binary_negative_class(self):
         assert len(self._values) == 2, f"Label: binary negative class was requested for label {self.name} but this label contains {len(self._values)} classes: {self.values}"
         return [val for val in self._values if val != self.positive_class][0]
+
+    def get_desc_for_storage(self):
+        return {key.lstrip("_"): value for key, value in vars(self).items()}
