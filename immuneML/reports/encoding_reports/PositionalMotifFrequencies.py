@@ -25,6 +25,10 @@ class PositionalMotifFrequencies(EncodingReport):
     investigating motif continuity which displays a bar plot of the gap sizes between the amino acids in the motifs in
     the given dataset. Note that a distance of 1 means that the amino acids are continuous (next to each other).
 
+    Arguments:
+
+        max_gap_size_only (bool): When True, only the maximum gap size within each motif is plotted. When False, all gap sizes are plotted. By default, max_gap_size_only is True.
+
     YAML specification example:
 
     .. indent with spaces
