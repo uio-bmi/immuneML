@@ -51,9 +51,8 @@ class MLMethodTrainer(Step):
                            f"{input_params.label.name}_predicted_class": train_predictions[input_params.label.name],
                            f"{input_params.label.name}_true_class": input_params.dataset.encoded_data.labels[input_params.label.name]})
 
-        classes = method.get_classes()
-        for cls_index, cls in enumerate(classes):
-            tmp = train_proba_predictions[input_params.label.name][:, cls_index] if train_proba_predictions is not None and train_proba_predictions[input_params.label.name] is not None else None
-            df[f"{input_params.label.name}_{cls}_proba"] = tmp
+        for cls in method.get_classes():
+            tmp = train_proba_predictions[input_params.label.name][cls] if train_proba_predictions is not None and train_proba_predictions[input_params.label.name] is not None else None
+            df[f'{input_params.label.name}_{cls}_proba'] = tmp
 
         df.to_csv(input_params.train_predictions_path, index=False)

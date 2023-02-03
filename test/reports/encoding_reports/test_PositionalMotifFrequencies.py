@@ -77,11 +77,13 @@ class TestPositionalMotifFrequencies(TestCase):
         encoder = MotifEncoder.build_object(
             dataset,
             **{
+                "min_positions": 1,
                 "max_positions": 3,
                 "min_precision": 0.9,
                 "min_recall": 0.5,
                 "min_true_positives": 1,
                 "generalize_motifs": False,
+                "allow_negative_aas": False,
             }
         )
 

@@ -123,18 +123,30 @@ class MotifPerformancePlotHelper():
     @staticmethod
     def plot_precision_per_tp(file_path, plotting_data, combined_precision, dataset_type, training_set_name,
                               tp_cutoff=None, motifs_name="motifs", highlight_motifs_name="highlight"):
-        fig = px.strip(plotting_data,
-                       y="precision", x="training_TP", hover_data=["feature_names"],
-                       range_y=[0, 1.01], color_discrete_sequence=["#74C4C4"],
-                       # color="highlight",
-                       # color_discrete_map={"Motif": "#74C4C4",
-                       #                     self.highlight_motifs_name: px.colors.qualitative.Pastel[1]},
-                       stripmode='overlay', log_x=True,
-                       labels={
-                           "precision": f"Precision ({dataset_type})",
-                           "feature_names": "Motif",
-                           "training_TP": f"True positive predictions ({training_set_name})"
-                       })
+        # fig = px.scatter(plotting_data,
+        #                y="precision", x="training_TP", hover_data=["feature_names"],
+        #                range_y=[0, 1.01], color_discrete_sequence=["#74C4C4"],
+        #                # stripmode="overlay",
+        #                log_x=True,
+        #                labels={
+        #                    "precision": f"Precision ({dataset_type})",
+        #                    "feature_names": "Motif",
+        #                    "training_TP": f"True positive predictions ({training_set_name})"
+        #                }, template="plotly_white")
+
+
+        # make 'base figure' with 1 point
+        fig = px.scatter(plotting_data, y=[0], x=[0], range_y=[-0.01, 1.01], log_x=True,
+                         template="plotly_white")
+
+        # hide 'base figure' point
+        fig.update_traces(marker=dict(size=12, opacity=0), selector=dict(mode='markers'))
+
+        # add data points (needs to be separate trace to show up in legend)
+        fig.add_trace(go.Scatter(x=plotting_data["training_TP"], y=plotting_data["precision"],
+                                 mode='markers', name="Motif precision",
+                                 marker=dict(symbol="circle", color="#74C4C4")),
+                      secondary_y=False)
 
         # add combined precision
         fig.add_trace(go.Scatter(x=combined_precision["training_TP"], y=combined_precision["combined_precision"],
@@ -154,7 +166,7 @@ class MotifPerformancePlotHelper():
         plotting_data_highlight = plotting_data[plotting_data["highlight"] != "Motif"]
         if len(plotting_data_highlight) > 0:
             fig.add_trace(go.Scatter(x=plotting_data_highlight["training_TP"], y=plotting_data_highlight["precision"],
-                                     mode='markers', name=highlight_motifs_name,
+                                     mode='markers', name=f"{highlight_motifs_name} precision",
                                      marker=dict(symbol="circle", color="#F5C144")),
                           secondary_y=False)
 
@@ -162,7 +174,11 @@ class MotifPerformancePlotHelper():
         if tp_cutoff is not None:
             fig.add_vline(x=tp_cutoff, line_dash="dash")
 
-        fig.update_layout(xaxis=dict(dtick=1), showlegend=True)
+        tickvals = MotifPerformancePlotHelper._get_log_x_axis_ticks(plotting_data, tp_cutoff)
+        fig.update_layout(xaxis=dict(tickvals=tickvals),
+                          xaxis_title=f"True positive predictions ({training_set_name})",
+                          yaxis_title=f"Precision ({dataset_type})",
+                          showlegend=True)
 
         fig.write_html(str(file_path))
 
@@ -170,6 +186,26 @@ class MotifPerformancePlotHelper():
             path=file_path,
             name=f"Precision scores on the {dataset_type} for {motifs_name} found at each true positive count of the {training_set_name}.",
         )
+
+    @staticmethod
+    def _get_log_x_axis_ticks(plotting_data, tp_cutoff):
+        ticks = []
+
+        min_val, max_val = min(plotting_data["training_TP"]), max(plotting_data["training_TP"])
+
+        i = 1
+        while i < max_val:
+            if i > min_val:
+                ticks.append(i)
+            i *= 10
+
+        ticks.append(min_val)
+        ticks.append(max_val)
+
+        if tp_cutoff is not None:
+            ticks.append(tp_cutoff)
+
+        return sorted(ticks)
 
     @staticmethod
     def plot_precision_recall(file_path, plotting_data, min_recall=None, min_precision=None, dataset_type=None, motifs_name="motifs",
@@ -183,7 +219,7 @@ class MotifPerformancePlotHelper():
                              "precision": f"Precision ({dataset_type})",
                              "recall": f"Recall ({dataset_type})",
                              "feature_names": "Motif",
-                         })
+                         }, template="plotly_white")
 
         if min_precision is not None and min_precision > 0:
             fig.add_hline(y=min_precision, line_dash="dash")

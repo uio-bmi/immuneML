@@ -50,13 +50,15 @@ class MotifOverlap(DataReport):
 
     """
 
-    def __init__(self, n_splits: int = None, max_positions: int = None, min_precision: float = None, min_recall: float = None,
-                 min_true_positives: int = None, random_seed: int = None, label: dict = None,
+    def __init__(self, n_splits: int = None, max_positions: int = None, min_positions: int = None, min_precision: float = None, min_recall: float = None,
+                 min_true_positives: int = None, allow_negative_aas: bool = None, random_seed: int = None, label: dict = None,
                  dataset: Dataset = None, result_path: Path = None, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.n_splits = n_splits
         self.max_positions = max_positions
+        self.min_positions = min_positions
         self.min_precision = min_precision
+        self.allow_negative_aas = allow_negative_aas
         self.min_recall = min_recall
         self.min_true_positives = min_true_positives
         self.random_seed = random_seed
@@ -69,6 +71,8 @@ class MotifOverlap(DataReport):
 
         ParameterValidator.assert_type_and_value(kwargs["n_splits"], int, location, "n_splits", min_inclusive=2)
         ParameterValidator.assert_type_and_value(kwargs["max_positions"], int, location, "max_positions", min_inclusive=1)
+        ParameterValidator.assert_type_and_value(kwargs["min_positions"], int, location, "min_positions", min_inclusive=1)
+        ParameterValidator.assert_type_and_value(kwargs["allow_negative_aas"], bool, location, "allow_negative_aas")
         ParameterValidator.assert_type_and_value(kwargs["min_precision"], (int, float), location, "min_precision", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_recall"], (int, float), location, "min_recall", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_true_positives"], int, location, "min_true_positives", min_inclusive=1)
@@ -235,6 +239,7 @@ class MotifOverlap(DataReport):
                                                                       "min_precision": self.min_precision,
                                                                       "min_recall": self.min_recall,
                                                                       "min_true_positives": self.min_true_positives,
+                                                                      "allow_negative_aas": self.allow_negative_aas,
                                                                       "generalize_motifs": False,
                                                             "label": None,
                                                             "name": f"motif_encoder_{data_subset.name}"})

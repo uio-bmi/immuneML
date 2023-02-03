@@ -6,7 +6,7 @@ from sklearn import metrics as sklearn_metrics
 class MetricUtil:
 
     @staticmethod
-    def get_metric_fn(metric: Metric) -> str:
+    def get_metric_fn(metric: Metric):
         if hasattr(ml_metrics, metric.value):
             fn = getattr(ml_metrics, metric.value)
         else:

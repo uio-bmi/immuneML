@@ -76,14 +76,13 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         freq_dist = self._get_plotting_data()
 
-
         results_table = self._write_results_table(freq_dist)
         report_output_fig = self._safe_plot(freq_dist=freq_dist)
 
         return ReportResult(name=self.name,
-                            info="A a barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.",
-                            output_figures=None if report_output_fig is None else [report_output_fig],
-                            output_tables=None if results_table is None else [results_table])
+                            info="A barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.",
+                            output_figures=[] if report_output_fig is None else [report_output_fig],
+                            output_tables=[] if results_table is None else [results_table])
 
     def _get_plotting_data(self):
         if isinstance(self.dataset, SequenceDataset):
@@ -207,7 +206,7 @@ class AminoAcidFrequencyDistribution(DataReport):
             positions = PositionHelper.gen_imgt_positions_from_length(len(sequence.get_sequence(SequenceType.AMINO_ACID)),
                                                                       sequence.get_attribute("region_type"))
         else:
-            positions = list(range(len(sequence.get_sequence(SequenceType.AMINO_ACID))))
+            positions = list(range(1, len(sequence.get_sequence(SequenceType.AMINO_ACID))+1))
 
         return [str(pos) for pos in positions]
 
@@ -236,7 +235,7 @@ class AminoAcidFrequencyDistribution(DataReport):
                         facet_col="class" if "class" in freq_dist.columns else None,
                         facet_row="chain" if "chain" in freq_dist.columns else None,
                         color_discrete_sequence=self._get_colors(), category_orders=category_orders,
-                        labels={"position": "IMGT position" if self.imgt_positions else "Sequence index",
+                        labels={"position": "IMGT position" if self.imgt_positions else "Position",
                                 "count": "Count",
                                 "relative frequency": "Relative frequency",
                                 "amino acid": "Amino acid"}, template="plotly_white")

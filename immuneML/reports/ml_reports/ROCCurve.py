@@ -35,8 +35,7 @@ class ROCCurve(MLReport):
         x = self.test_dataset.encoded_data
 
         if self.method.can_predict_proba():
-            y_score = self.method.predict_proba(x, self.label)[self.label.name]
-            predicted_y = y_score[:, 0]
+            predicted_y = self.method.predict_proba(x, self.label)[self.label.name][self.label.positive_class]
         else:
             predicted_y = self.method.predict(x, self.label)[self.label.name]
             predicted_y = Util.map_to_new_class_values(predicted_y, self.method.get_class_mapping())
@@ -59,7 +58,7 @@ class ROCCurve(MLReport):
         layout = go.Layout(title='Receiver operating characteristic example',
                            xaxis=dict(title='False Positive Rate'),
                            yaxis=dict(title='True Positive Rate'),
-                           template='plotly_white')
+                           template="plotly_white")
 
         fig = go.Figure(data=[trace1, trace2], layout=layout)
 
