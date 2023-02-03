@@ -227,15 +227,12 @@ class PositionalMotifHelper:
         return len(PositionalMotifHelper.string_to_motif(string_repr, value_sep=value_sep, motif_sep=motif_sep)[0])
 
     @staticmethod
-    def _check_file_header(header, motif_filepath):
-        assert (header == "indices\tamino_acids\n", f"{PositionalMotifHelper.__name__}: motif file at {motif_filepath} " \
-                                                   f"is expected to contain this header: 'indices\tamino_acids', " \
-                                                   f"found the following instead: '{header}'") or (header == "indices\tamino_acids\nNumber_of_binder_sequences",
-                                                    f"{PositionalMotifHelper.__name__}: motif file at {motif_filepath} " \
-                                                    f"is expected to contain this header: 'indices\tamino_acids', " \
-                                                    f"found the following instead: '{header}'")
+    def check_file_header(header, motif_filepath, expected_header="indices\tamino_acids\n"):
+        assert header == expected_header, f"{PositionalMotifHelper.__name__}: motif file at {motif_filepath} " \
+                                                   f"is expected to contain this header: '{expected_header}', " \
+                                                   f"found the following instead: '{header}'"
     @staticmethod
-    def check_motif_filepath(motif_filepath, location, parameter_name):
+    def check_motif_filepath(motif_filepath, location, parameter_name, expected_header="indices\tamino_acids\n"):
         ParameterValidator.assert_type_and_value(motif_filepath, str, location, parameter_name)
 
         motif_filepath = Path(motif_filepath)
@@ -244,12 +241,12 @@ class PositionalMotifHelper:
                                                    f"Specify the correct path under motif_filepath."
 
         with open(motif_filepath) as file:
-            PositionalMotifHelper._check_file_header(file.readline(), motif_filepath)
+            PositionalMotifHelper.check_file_header(file.readline(), motif_filepath, expected_header)
 
     @staticmethod
     def read_motifs_from_file(filepath):
         with open(filepath) as file:
-            PositionalMotifHelper._check_file_header(file.readline(), filepath)
+            PositionalMotifHelper.check_file_header(file.readline(), filepath, expected_header="indices\tamino_acids\n")
             motifs = [PositionalMotifHelper.string_to_motif(line, value_sep="&", motif_sep="\t") for line in file.readlines()]
 
         return motifs

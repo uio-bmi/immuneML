@@ -4,17 +4,10 @@ import logging
 import plotly.express as px
 import numpy as np
 import pandas as pd
-from typing import List
 
 from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.encodings.motif_encoding.PositionalMotifHelper import (
-    PositionalMotifHelper,
-)
-from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.environment.SequenceType import SequenceType
-from immuneML.environment.Label import Label
-from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
+
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
@@ -22,40 +15,26 @@ from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class GroundtruthMotifOverlap(EncodingReport):
+class GroundTruthMotifOverlap(EncodingReport):
     """
     Creates report displaying overlap between learned motifs and groundtruth motifs
+
+    # todo: arguments, yaml spec, explanation of format of highlight motifs file
     """
 
-    def __init__(
-        self,
-        dataset: Dataset = None,
-        result_path: Path = None,
-        name: str = None,
-        number_of_processes: int = 1,
-        highlight_motifs_path: str = None,
-    ):
-        super().__init__(
-            dataset=dataset,
-            result_path=result_path,
-            name=name,
-            number_of_processes=number_of_processes,
-        )
+    def __init__(self, dataset: Dataset = None, result_path: Path = None, name: str = None,
+                 number_of_processes: int = 1, highlight_motifs_path: str = None):
+        super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
         self.highlight_motifs_path = highlight_motifs_path
 
     @classmethod
     def build_object(cls, **kwargs):
-        location = GroundtruthMotifOverlap.__name__
+        location = GroundTruthMotifOverlap.__name__
 
-        if (
-            "highlight_motifs_path" in kwargs
-            and kwargs["highlight_motifs_path"] is not None
-        ):
-            PositionalMotifHelper.check_motif_filepath(
-                kwargs["highlight_motifs_path"], location, "highlight_motifs_path"
-            )
+        if "highlight_motifs_path" in kwargs and kwargs["highlight_motifs_path"] is not None:
+            PositionalMotifHelper.check_motif_filepath(kwargs["highlight_motifs_path"], location, "highlight_motifs_path", expected_header="indices\tamino_acids\tNumber_of_binder_sequences\n")
 
-        return GroundtruthMotifOverlap(**kwargs)
+        return GroundTruthMotifOverlap(**kwargs)
 
     def _generate(self):
         PathBuilder.build(self.result_path)
@@ -70,15 +49,16 @@ class GroundtruthMotifOverlap(EncodingReport):
             learned_motifs, groundtruth_motifs, implant_rate_dict
         )
 
-        output_figures = self._plot(overlap_df)
+        output_figure = self._safe_plot(overlap_df)
+
         return ReportResult(
             name=self.name,
-            output_figures=output_figures,
+            output_figures=[output_figure],
         )
 
     def _read_highlight_motifs(self, filepath):
         with open(filepath) as file:
-            PositionalMotifHelper._check_file_header(file.readline(), filepath)
+            PositionalMotifHelper.check_file_header(file.readline(), filepath, expected_header="indices\tamino_acids\tNumber_of_binder_sequences\n")
             groundtruth_motifs = []
             groundtruth_implant_rate = []
             for line in file.readlines():
@@ -223,12 +203,12 @@ class GroundtruthMotifOverlap(EncodingReport):
 
         if self.dataset.encoded_data is None or self.dataset.encoded_data.info is None:
             logging.warning(
-                "GroundtruthMotifOverlap: the dataset is not encoded, skipping this report..."
+                "GroundTruthMotifOverlap: the dataset is not encoded, skipping this report..."
             )
             return False
         elif self.dataset.encoded_data.encoding not in valid_encodings:
             logging.warning(
-                f"GroundtruthMotifOverlap: the dataset encoding ({self.dataset.encoded_data.encoding}) was not in the list of valid "
+                f"GroundTruthMotifOverlap: the dataset encoding ({self.dataset.encoded_data.encoding}) was not in the list of valid "
                 f"encodings ({valid_encodings}), skipping this report..."
             )
             return False
