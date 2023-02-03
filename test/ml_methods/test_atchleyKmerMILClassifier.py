@@ -44,6 +44,7 @@ class TestAtchleyKmerMILClassifier(TestCase):
         self.assertEqual(repertoire_count, predictions_proba["l1"][True].shape[0])
         self.assertEqual(repertoire_count, predictions_proba["l1"][False].shape[0])
         self.assertEqual([1] * repertoire_count, list(predictions_proba["l1"][True] + predictions_proba["l1"][False]))
+        self.assertListEqual(list(predictions_proba["l1"][True] > 0.5), [pred == True for pred in list(predictions["l1"])])
 
 
         cls.store(path / "model_storage", feature_names=enc_dataset.encoded_data.feature_names)
