@@ -221,7 +221,7 @@ class LigoSimInstruction(Instruction):
 
             if self.state.simulation.keep_p_gen_dist and iteration == 0:
                 self._make_p_gen_histogram(sequences)
-                logging.info("Computed a histogram from the first batch of background sequences.", True)
+                logging.info("Computed a histogram from the first batch of background sequences.")
 
             sequences = annotate_sequences(sequences, self.sequence_type == SequenceType.AMINO_ACID, self.state.signals, self._annotated_dataclass)
 
@@ -236,7 +236,7 @@ class LigoSimInstruction(Instruction):
             seqs_per_signal_count = update_seqs_with_signal(copy.deepcopy(seqs_per_signal_count), sequences, self.state.signals, sim_item.signals,
                                                             seq_paths)
 
-            logging.info(f"Iteration: {iteration} in {sim_item.name}: remaining sequence count per signal for {sim_item.name}: {seqs_per_signal_count}", True)
+            logging.info(f"Iteration: {iteration} in {sim_item.name}: remaining sequence count per signal for {sim_item.name}: {seqs_per_signal_count}")
             check_iteration_progress(iteration, self._max_iterations)
             iteration += 1
 
@@ -253,7 +253,7 @@ class LigoSimInstruction(Instruction):
             sim_item.generative_model.generate_sequences(self._sequence_batch_size, seed=sim_item.seed, path=sequence_path,
                                                          sequence_type=self.sequence_type, compute_p_gen=self._use_p_gens)
 
-            logging.info(f"Generated {self._sequence_batch_size} background sequences, stored at {sequence_path}.", True)
+            logging.info(f"Generated {self._sequence_batch_size} background sequences, stored at {sequence_path}.")
 
         skew_model_for_signal = needs_seqs_with_signal(sequence_per_signal_count)
 
@@ -268,12 +268,12 @@ class LigoSimInstruction(Instruction):
                                                                        sequence_type=self.sequence_type, batch_size=self._sequence_batch_size,
                                                                        compute_p_gen=self._use_p_gens)
 
-            logging.info(f"Generated {self._sequence_batch_size} sequences from skewed model for given V/J genes at {sequence_path}.", True)
+            logging.info(f"Generated {self._sequence_batch_size} sequences from skewed model for given V/J genes at {sequence_path}.")
 
         data = get_bnp_data(sequence_path, BackgroundSequences)
 
         os.remove(sequence_path)
-        logging.info(f"Prepared sequences for processing and removed temporary file {sequence_path}.", True)
+        logging.info(f"Prepared sequences for processing and removed temporary file {sequence_path}.")
 
         return data
 
@@ -298,6 +298,6 @@ class LigoSimInstruction(Instruction):
         sequence_bins = np.digitize(p_gens, self.state.p_gen_bins) - 1
         keep_sequences = np.random.uniform(0, 1, len(sequences)) <= self.state.target_p_gen_histogram[sequence_bins]
 
-        logging.info(f"Removed {len(sequences) - sum(keep_sequences)} out of {len(sequences)} when filtering by p_gens.", True)
+        logging.info(f"Removed {len(sequences) - sum(keep_sequences)} out of {len(sequences)} when filtering by p_gens.")
 
         return sequences[keep_sequences]
