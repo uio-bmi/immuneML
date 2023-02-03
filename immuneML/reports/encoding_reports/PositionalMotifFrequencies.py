@@ -15,6 +15,7 @@ from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
+from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -40,6 +41,9 @@ class PositionalMotifFrequencies(EncodingReport):
 
     @classmethod
     def build_object(cls, **kwargs):
+        location = PositionalMotifFrequencies.__name__
+        ParameterValidator.assert_type_and_value(kwargs["max_gap_size_only"], bool, location, "max_gap_size_only")
+
         return PositionalMotifFrequencies(**kwargs)
 
     def __init__(
