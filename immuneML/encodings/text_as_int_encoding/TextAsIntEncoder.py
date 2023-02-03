@@ -62,14 +62,11 @@ class TextAsIntEncoder(DatasetEncoder):
         #Creates one long string containing every single sequence
         instances = ' '.join(
             [(sequence.get_sequence()) for repertoire in dataset.get_data() for sequence in repertoire.sequences])
-        alphabet = sorted(set(instances)) #This assumes all acids are included, consider hardcoding in alphabet
-        instances = instances.replace("\n", " ")
-        char2idx = {u: i for i, u in enumerate(alphabet)}
-        text_as_int = np.array([c for c in instances])
+
 
         length_of_sequence = 21 #hardcoded length of the sequence, consider making different
 
-        info = {"alphabet": alphabet, "length_of_sequence": length_of_sequence}
+        info = {"length_of_sequence": length_of_sequence}
 
         encoded_data = EncodedData(examples=instances,
                                    #feature_names=feature_names,

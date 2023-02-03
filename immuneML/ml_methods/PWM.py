@@ -18,21 +18,25 @@ class PWM(GenerativeModel):
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         parameters = parameters if parameters is not None else {}
         parameter_grid = parameter_grid if parameter_grid is not None else {}
-        self.alphabet = ""
+        self._alphabet = ""
         self.generated_sequences = []
         super(PWM, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
 
-    def _get_ml_model(self, cores_for_training: int = 2, X=None):
+    def _get_ml_model(self, cores_for_training: int = 2, dataset=None):
 
-        instances = np.array([list(sequence.get_sequence()) for repertoire in X.get_data() for sequence in repertoire.sequences])
 
-        self.alphabet = sorted(set(instances.view().reshape(instances.shape[0] * instances.shape[1]))) #Mashes all data into 1 dimension and uses the set function to find the unique characters
-        matrix = np.zeros(shape=(instances.shape[1], len(self.alphabet)))
+        sequences = dataset.split(" ")
+        self._length_of_sequence = len(sequences[0])
+        sequences_without_spaces = "".join(sequences)
+        dataset = np.array(list(sequences_without_spaces))
+        dataset = np.reshape(dataset, (len(sequences), self._length_of_sequence))
+        self._alphabet = sorted(set("".join(sequences)))
+        matrix = np.zeros(shape=(self._length_of_sequence, len(self._alphabet)))
 
-        instances = instances.T
+        instances = dataset.T
         for x, pos in enumerate(instances):
             for element in pos:
-                for y, char in enumerate(self.alphabet):
+                for y, char in enumerate(self._alphabet):
                     if element == char:
                         matrix[x][y] += 1
                         break
@@ -55,7 +59,7 @@ class PWM(GenerativeModel):
         #     with open(path_to_model, 'r') as file:
         #
         #         reader = csv.reader(file)
-        #         self.alphabet = "".join(next(reader))
+        #         self._alphabet = "".join(next(reader))
         #         for row in reader:
         #             model_as_array.append(row)
         #     self.model = np.array(model_as_array)
@@ -66,18 +70,18 @@ class PWM(GenerativeModel):
         for _ in range(amount):
             sequence = []
             for i in range(length_of_sequences):
-                sequence.append(np.random.choice(self.alphabet, 1, p=self.model[i])[0])
+                sequence.append(np.random.choice(self._alphabet, 1, p=self.model[i])[0])
             generated_sequences.append(sequence)
 
         instances = np.array(generated_sequences)
 
-        matrix = np.zeros(shape=(instances.shape[1], len(self.alphabet)))
+        matrix = np.zeros(shape=(instances.shape[1], len(self._alphabet)))
 
         instances = instances.T
 
         for x, pos in enumerate(instances):
             for i, element in enumerate(pos):
-                for y, char in enumerate(self.alphabet):
+                for y, char in enumerate(self._alphabet):
                     if element == char:
                         matrix[x][y] += 1
                         break
@@ -110,7 +114,7 @@ class PWM(GenerativeModel):
         file_path = path / name
         if file_path.is_file():
             dataframe = pd.read_csv(file_path, index_col=False)
-            self.alphabet = dataframe.pop('alphabet').values
+            self._alphabet = dataframe.pop('alphabet').values
             self.model = np.array(dataframe.values).T
         else:
             raise FileNotFoundError(f"{self.__class__.__name__} model could not be loaded from {file_path}"
@@ -136,7 +140,7 @@ class PWM(GenerativeModel):
         file_path = path / f"{self._get_model_filename()}.csv"
         data = {str(ind + 1): numbers for ind, numbers in enumerate(self.model)}
 
-        data["alphabet"] = list(self.alphabet)
+        data["alphabet"] = list(self._alphabet)
         dataframe = pd.DataFrame(data)
         dataframe.to_csv(file_path, index=False)
 

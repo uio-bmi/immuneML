@@ -1,9 +1,9 @@
 disease: true
 field_list:
 - ''
-- stop_codon
 - vj_in_frame
 - productive
+- stop_codon
 - sequence_aas
 - v_genes
 - j_genes

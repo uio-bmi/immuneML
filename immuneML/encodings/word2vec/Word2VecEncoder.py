@@ -125,7 +125,7 @@ class Word2VecEncoder(DatasetEncoder):
         return (("dataset_id", dataset.identifier),
                 ("example_ids", tuple(dataset.get_example_ids())),
                 ("dataset_type", dataset.__class__.__name__),
-                ("labels", tuple(params.label_config.get_labels_by_name())),
+                ("labels", None if params.label_config is None else tuple(params.label_config.get_labels_by_name())),
                 ("vectors", hashlib.sha256(str(vectors).encode("utf-8")).hexdigest()),
                 ("description", description),
                 ("encoding", Word2VecEncoder.__name__),
@@ -173,7 +173,7 @@ class Word2VecEncoder(DatasetEncoder):
 
         encoded_dataset = dataset.clone()
 
-        label_names = params.label_config.get_labels_by_name()
+        label_names = params.label_config.get_labels_by_name() if params.label_config is not None else None
         feature_names = [str(i) for i in range(scaled_examples.shape[1])]
         feature_annotations = pd.DataFrame({"feature": feature_names})
 

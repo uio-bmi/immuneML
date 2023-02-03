@@ -30,6 +30,7 @@ definitions:
     G1:
       LSTM:
         cores_for_training: 2
+        epochs: 8
         rnn_units: 32
       model_selection_cv: false
       model_selection_n_folds: -1
