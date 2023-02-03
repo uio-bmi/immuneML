@@ -95,7 +95,7 @@ class LigoSimInstruction(Instruction):
         self._annotation_fields = sorted([(signal.id, int) for signal in self.state.signals] +
                                          [(f"{signal.id}_positions", str) for signal in self.state.signals] + self._noise_fields, key=lambda x: x[0])
 
-        self._custom_fields = self._annotation_fields + [('p_gen', float)]
+        self._custom_fields = self._annotation_fields + [('p_gen', float), ('from_default_model', int)]
         self._background_fields = [(field.name, field.type) for field in dataclasses.fields(BackgroundSequences)]
 
     @property
@@ -249,18 +249,18 @@ class LigoSimInstruction(Instruction):
     def _make_background_sequences(self, path, iteration: int, sim_item: SimConfigItem, sequence_per_signal_count: dict, need_background_seqs: bool) -> BackgroundSequences:
         sequence_path = PathBuilder.build(path / f"gen_model/") / f"tmp_{iteration}.tsv"
 
-        if sequence_per_signal_count['no_signal'] > 0 or need_background_seqs:
+        v_genes = sorted(
+            list(set(chain.from_iterable([[motif.v_call for motif in signal.motifs if motif.v_call] for signal in sim_item.signals]))))
+        j_genes = sorted(
+            list(set(chain.from_iterable([[motif.j_call for motif in signal.motifs if motif.j_call] for signal in sim_item.signals]))))
+
+        if sequence_per_signal_count['no_signal'] > 0 or need_background_seqs or (len(v_genes) == 0 and len(j_genes) == 0):
             sim_item.generative_model.generate_sequences(self._sequence_batch_size, seed=sim_item.seed, path=sequence_path,
                                                          sequence_type=self.sequence_type, compute_p_gen=self._use_p_gens)
 
             logging.info(f"Generated {self._sequence_batch_size} background sequences, stored at {sequence_path}.")
 
         skew_model_for_signal = needs_seqs_with_signal(sequence_per_signal_count)
-
-        v_genes = sorted(
-            list(set(chain.from_iterable([[motif.v_call for motif in signal.motifs if motif.v_call] for signal in sim_item.signals]))))
-        j_genes = sorted(
-            list(set(chain.from_iterable([[motif.j_call for motif in signal.motifs if motif.j_call] for signal in sim_item.signals]))))
 
         if sim_item.generative_model.can_generate_from_skewed_gene_models() and skew_model_for_signal and (len(v_genes) > 0 or len(j_genes) > 0):
 
