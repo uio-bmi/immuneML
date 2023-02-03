@@ -43,6 +43,8 @@ class TestReceptorCNN(TestCase):
         self.assertEqual(500, len(predictions_proba["CMV"][False]))
         self.assertEqual(500 * [1], list(predictions_proba["CMV"][True] + predictions_proba["CMV"][False]))
 
+        self.assertListEqual(list(predictions_proba["CMV"][True] > 0.5), [pred == True for pred in list(predictions["CMV"])])
+
         cnn.store(path / "model_storage")
 
         cnn2 = ReceptorCNN(sequence_type="amino_acid")
