@@ -51,7 +51,7 @@ definitions:
     d1:
       format: VDJdb # specify what format the data is in
       params:
-        path: AVF.tsv # path to dataset
+        path: ../../AVF.tsv # path to dataset
         is_repertoire: False # no, this is receptor dataset
         paired: True
         receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
@@ -61,8 +61,8 @@ definitions:
     dim_red: # user-defined report name
       DimensionalityReduction # Which report to use
   dimensionality_reduction: # Specifying what dimensionality reduction method(s) to use
-    pca: # user-defined instruction name
-      PCA: # Dimensionality reduction method name
+    tsne: # user-defined instruction name
+      TSNE: # Dimensionality reduction method name
         n_components: 2 # user-defined parameters
 instructions:
   my_expl_analysis_instruction: # user-defined instruction name
@@ -71,7 +71,7 @@ instructions:
       my_analysis: # user-defined name of the analysisy
         dataset: d1 # dataset to use in the first analysis
         encoding: kmer_encoding # what encoding to use on the dataset
-        dimensionality_reduction: pca # what dimensionality reduction method to use
+        dimensionality_reduction: tsne # what dimensionality reduction method to use
         report: dim_red # which report to generate using the dataset d1
     number_of_processes: 4
 ```
@@ -82,8 +82,7 @@ For a detailed explanation of the YAML specification file, see the tutorial [How
 #### Expected result
 After running the quickstart and opening the html file in the output folder, the expected result should be something like this:
 
-![quickstart_expected_result_pca_plot](https://user-images.githubusercontent.com/33656177/202473145-f8c5eb10-6750-4fe2-8f7f-9448d8bf3f15.PNG)
-![quickstart_expected_result_pca_explained](https://user-images.githubusercontent.com/33656177/202472563-3f606020-15c0-49f4-a146-6e933eb4975d.PNG)
+![quickstart_expected_result_tsne](https://user-images.githubusercontent.com/33656177/216645387-a44a47ed-8700-4308-960d-1c31b929eccf.PNG)
 
 ## Support
 
