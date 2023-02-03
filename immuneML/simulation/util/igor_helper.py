@@ -127,9 +127,13 @@ def _import_genes_from_model_params(original_model_path: Path) -> dict:
         line = lines[index]
         while line[0] != "#" and line != "":
             gene = line.split("%")[1].split(";")[0]
+            gene_index = int(line.split("%")[1].split(";")[-1].replace("\n", ""))
             assert gene_name.upper() in gene, (gene, gene_name + " gene")
-            genes[gene_name].append(gene)
+            genes[gene_name].append((gene, gene_index))
             index += 1
             line = lines[index]
+
+        genes[gene_name] = sorted(genes[gene_name], key=lambda g: g[1])
+        genes[gene_name] = [g[0] for g in genes[gene_name]]
 
     return genes

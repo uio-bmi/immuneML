@@ -5,12 +5,10 @@ from immuneML.presentation.html.ExploratoryAnalysisHTMLBuilder import Explorator
 from immuneML.presentation.html.HPHTMLBuilder import HPHTMLBuilder
 from immuneML.presentation.html.LIgOSimulationHTMLBuilder import LIgOSimulationHTMLBuilder
 from immuneML.presentation.html.MLApplicationHTMLBuilder import MLApplicationHTMLBuilder
-from immuneML.presentation.html.SimulationHTMLBuilder import SimulationHTMLBuilder
 from immuneML.presentation.html.SubsamplingHTMLBuilder import SubsamplingHTMLBuilder
-from immuneML.simulation.SimulationState import SimulationState
+from immuneML.simulation.LigoSimState import LigoSimState
 from immuneML.workflows.instructions.dataset_generation.DatasetExportState import DatasetExportState
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisState import ExploratoryAnalysisState
-from immuneML.workflows.instructions.ligo_simulation.LIgOSimulationState import LIgOSimulationState
 from immuneML.workflows.instructions.ml_model_application.MLApplicationState import MLApplicationState
 from immuneML.workflows.instructions.subsampling.SubsamplingState import SubsamplingState
 
@@ -23,15 +21,13 @@ class PresentationFactory:
             return HPHTMLBuilder
         elif isinstance(state, ExploratoryAnalysisState) and presentation_format == PresentationFormat.HTML:
             return ExploratoryAnalysisHTMLBuilder
-        elif isinstance(state, SimulationState) and presentation_format == PresentationFormat.HTML:
-            return SimulationHTMLBuilder
         elif isinstance(state, DatasetExportState) and presentation_format == PresentationFormat.HTML:
             return DatasetExportHTMLBuilder
         elif isinstance(state, MLApplicationState) and presentation_format == PresentationFormat.HTML:
             return MLApplicationHTMLBuilder
         elif isinstance(state, SubsamplingState) and presentation_format == PresentationFormat.HTML:
             return SubsamplingHTMLBuilder
-        elif isinstance(state, LIgOSimulationState) and presentation_format == PresentationFormat.HTML:
+        elif isinstance(state, LigoSimState) and presentation_format == PresentationFormat.HTML:
             return LIgOSimulationHTMLBuilder
         else:
             raise ValueError(f"PresentationFactory: state and format combination ({type(state).__name__}, {presentation_format.name}) "

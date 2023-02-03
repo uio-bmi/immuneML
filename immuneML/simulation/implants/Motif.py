@@ -1,5 +1,4 @@
 # quality: gold
-import re
 from dataclasses import dataclass
 
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
@@ -30,19 +29,6 @@ class Motif:
         Alternatively, instantiation can be specified with parameters as in the example YAML specification below. For the detailed list of
         parameters, see the specific instantiation strategies below.
 
-        seed_chain1 (str): in case when representing motifs for paired chain data, it is possible to define a motif seed per chain; if this parameter
-        is set, the generated motif instances will include a motif instance for both chains; for more details on how it works see `seed` argument
-        above. Used only if the seed argument is not set.
-
-        seed_chain2 (str): used for paired chain data, for the other receptor chain; for more details on how it works see `seed` argument. This
-        argument is used only if the seed argument is not set.
-
-        name_chain1: name of the first chain if paired receptor data are simulated. The value should be an instance of
-        :py:obj:`~immuneML.data_model.receptor.receptor_sequence.Chain.Chain`. This argument is used only if the seed argument is not set.
-
-        name_chain2: name of the second chain 2 if paired receptor data are simulated. The value should be an instance of
-        :py:obj:`~immuneML.data_model.receptor.receptor_sequence.Chain.Chain`. This argument is used only if the seed argument is not set.
-
         v_call: V gene with allele if available that has to co-occur with one of the motifs for the signal to exist; can be used in combination with rejection sampling, or full sequence implanting, otherwise ignored; to match in a sequence for rejection sampling, it is checked if this value is contained in the same field of generated sequence;
 
         j_call: J gene with allele if available that has to co-occur with one of the motifs for the signal to exist; can be used in combination with rejection sampling, or full sequence implanting, otherwise ignored; to match in a sequence for rejection sampling, it is checked if this value is contained in the same field of generated sequence;
@@ -66,23 +52,12 @@ class Motif:
                     GappedKmer:
                         min_gap: 1
                         max_gap: 2
-            # examples for paired chain receptor data
-            my_paired_motif:
-                seed_chain1: AAA # seed for chain1 or chain2 can optionally include gap, same as for single chain receptor data
-                name_chain1: ALPHA # alpha chain of TCR
-                seed_chain2: CCC
-                name_chain2: BETA # beta chain of TCR
-                instantiation: GappedKmer # same as for single chain receptor data
 
     """
 
     identifier: str
     instantiation: MotifInstantiationStrategy
     seed: str = None
-    seed_chain1: str = None
-    name_chain1: Chain = None
-    seed_chain2: str = None
-    name_chain2: Chain = None
     v_call: str = None
     j_call: str = None
     all_possible_instances: list = None
@@ -109,19 +84,7 @@ class Motif:
             raise NotImplementedError
 
     def get_max_length(self):
-        if self.seed is not None:
-            return len(self.seed.replace("/", "")) + self.instantiation.get_max_gap()
-        else:
-            return max(len(self.seed_chain1.replace("/", "")), len(self.seed_chain2.replace("/", ""))) + self.instantiation.get_max_gap()
-
-    def is_in(self, sequence: dict, sequence_type: SequenceType) -> bool:
-        if self.all_possible_instances is None:
-            self.all_possible_instances = self.instantiation.get_all_possible_instances(self.seed, sequence_type)
-
-        gene_match = all(getattr(self, gene) in getattr(sequence, gene) if getattr(self, gene) else True for gene in ['v_call', 'j_call'])
-        return gene_match and \
-               any(re.search(motif_instance, sequence['sequence'] if sequence_type == SequenceType.NUCLEOTIDE else sequence['sequence_aa'])
-                   for motif_instance in self.all_possible_instances)
+        return len(self.seed.replace("/", "")) + self.instantiation.get_max_gap()
 
     def get_all_possible_instances(self, sequence_type: SequenceType):
         if self.all_possible_instances is None:
@@ -130,8 +93,7 @@ class Motif:
         return self.all_possible_instances
 
     def __str__(self):
-        return self.identifier + " - " + \
-               (self.seed if self.seed is not None else f"{self.name_chain1}_{self.seed_chain1}__{self.name_chain2}_{self.seed_chain2}")
+        return str(vars(self))
 
     @staticmethod
     def get_documentation():
