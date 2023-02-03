@@ -11,6 +11,7 @@ from immuneML.util.PathBuilder import PathBuilder
 import numpy as np
 import pandas as pd
 import matplotlib.pylab as plt
+import logomaker
 plt.style.use("seaborn")
 
 import plotly.graph_objs as go
@@ -29,25 +30,57 @@ class GeneratorReport(UnsupervisedMLReport):
         self.dataset = dataset
 
     def _generate(self) -> ReportResult:
-        # filename = self.result_path / f"{self.name}.html"
-        # PathBuilder.build(self.result_path)
-        #
-        # fig = go.Figure(data=go.Heatmap(
-        #     x=np.arange(1, len(self.method.model[0]) + 1),
-        #     y=list(reversed(list(self.method.alphabet))),
-        #     z=list(reversed(self.method.model.T,))))
-        # fig.update_xaxes(side="top", dtick=1)
-        # with filename.open("w") as file:
-        #     fig.write_html(file)
-        #
-        # result = ReportOutput(filename)
-
-        # return ReportResult(self.name, output_figures=[result])
 
         generated_sequences = self.result_path / f"{self.name}GeneratedSequences.csv"
 
         data = pd.DataFrame(self.method.generated_sequences, columns=["Generated Sequences"])
         data.to_csv(generated_sequences, index=False)
+        logo_path = self.result_path / f"{self.name}Logo.png"
+        data_logo_path = self.result_path / f"{self.name}Data_Logo.png"
+
+        sequences_dict = {}
+        output_figures = []
+
+        for sequence in self.method.generated_sequences:
+            if len(sequence) not in sequences_dict.keys():
+                sequences_dict[len(sequence)] = [sequence]
+            else:
+                sequences_dict[len(sequence)].append(sequence)
+
+        new_sequences = []
+        for key in sequences_dict:
+            if len(sequences_dict[key]) > len(new_sequences):
+                new_sequences = sequences_dict[key]
+
+        data_counts = logomaker.alignment_to_matrix(sequences=new_sequences, to_type='counts')
+        logo = logomaker.Logo(data_counts, color_scheme="dmslogo_funcgroup")
+        plt.grid(False)
+        plt.savefig(logo_path)
+
+        output_figures.append(ReportOutput(logo_path, name="Logo"))
         sequences_to_output = ReportOutput(generated_sequences, name="Generated Sequences")
 
-        return ReportResult(self.name, output_tables=[sequences_to_output])
+        if self.dataset:
+            sequences = self.dataset.encoded_data.examples.split(" ")
+            sequences_dict = {}
+
+            for sequence in sequences:
+                if len(sequence) not in sequences_dict.keys():
+                    sequences_dict[len(sequence)] = [sequence]
+                else:
+                    sequences_dict[len(sequence)].append(sequence)
+
+            new_sequences = []
+            for key in sequences_dict:
+                if len(sequences_dict[key]) > len(new_sequences):
+                    new_sequences = sequences_dict[key]
+
+            data_counts = logomaker.alignment_to_matrix(sequences=new_sequences, to_type='counts')
+            data_logo = logomaker.Logo(data_counts, color_scheme="dmslogo_funcgroup")
+            plt.grid(False)
+            plt.savefig(data_logo_path)
+            output_figures.append(ReportOutput(data_logo_path, name="Dataset Logo"))
+
+        sequences_to_output = ReportOutput(generated_sequences, name="Generated Sequences")
+
+        return ReportResult(self.name, output_figures=output_figures, output_tables=[sequences_to_output])

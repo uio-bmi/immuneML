@@ -1,14 +1,18 @@
 import csv
 import json
 import os
+import sys
 
 import datetime
 import random
+import time
+import pyprind
 
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 import keras_tuner as kt
+
 
 from pathlib import Path
 from immuneML.ml_methods.GenerativeModel import GenerativeModel
@@ -90,20 +94,21 @@ class LSTM(GenerativeModel):
         PathBuilder.build(result_path)
 
         params = self._parameters
+        alphabet = sorted(set(dataset))
 
-        #default values of optional params
+        # default values of optional params
         rnn_units = 128 if "rnn_units" not in params else params["rnn_units"]
         epochs = 10 if "epochs" not in params else params["epochs"]
 
-        vocab_size = len(self._alphabet)
+        vocab_size = len(alphabet)
         embedding_dim = 32
         self.max_length = 42
         batch_size = 128
         buffer_size = 1000
 
 
-        self.char2idx = {u: i for i, u in enumerate(self._alphabet)}
-        self.idx2char = np.array(self._alphabet)
+        self.char2idx = {u: i for i, u in enumerate(alphabet)}
+        self.idx2char = np.array(alphabet)
 
         sentences = []
         next_chars = []
@@ -112,8 +117,8 @@ class LSTM(GenerativeModel):
         #     next_chars.append(dataset[i + self.max_length])
         # print("Number of sequences:", len(sentences))
 
-        # x = np.zeros((len(sentences), self.max_length, len(self._alphabet)), dtype=np.bool)
-        # y = np.zeros((len(sentences), len(self._alphabet)), dtype=np.bool)
+        # x = np.zeros((len(sentences), self.max_length, len(alphabet)), dtype=np.bool)
+        # y = np.zeros((len(sentences), len(alphabet)), dtype=np.bool)
         # for i, sentence in enumerate(sentences):
         #     for t, char in enumerate(sentence):
         #         x[i, t, self.char2idx[char]] = 1
@@ -137,19 +142,18 @@ class LSTM(GenerativeModel):
         val_dataset = test_dataset.skip(val_size)
 
         self._get_ml_model(vocab_size=vocab_size, rnn_units=rnn_units, embedding_dim=embedding_dim, batch_size=batch_size)
-
-        for input_example_batch, output_example_batch in final_data.take(1):
-            example_batch_predictions = self.model(input_example_batch)
-            print(example_batch_predictions.shape)
-            sampled_indices = tf.random.categorical(example_batch_predictions[0], num_samples=1)
-            print(sampled_indices)
-            sampled_indices = tf.squeeze(sampled_indices, axis=-1).numpy()
-            print(''.join(self.idx2char[sampled_indices]))
-            print(''.join(self.idx2char[input_example_batch[0].numpy()]))
-        ####
-
-        example_loss = self.loss(output_example_batch, example_batch_predictions)
-        print(example_loss.numpy().mean())
+        #
+        # for input_example_batch, output_example_batch in final_data.take(1):
+        #     example_batch_predictions = self.model(input_example_batch)
+        #     print(example_batch_predictions.shape)
+        #     sampled_indices = tf.random.categorical(example_batch_predictions[0], num_samples=1)
+        #     sampled_indices = tf.squeeze(sampled_indices, axis=-1).numpy()
+        #     print(''.join(self.idx2char[sampled_indices]))
+        #     print(''.join(self.idx2char[input_example_batch[0].numpy()]))
+        # ####
+        #
+        # example_loss = self.loss(output_example_batch, example_batch_predictions)
+        # print(example_loss.numpy().mean())
 
         self.model.summary()
         self.model.compile(loss=self.loss, optimizer='adam')
@@ -222,7 +226,7 @@ class LSTM(GenerativeModel):
 
         self.model.load_weights(tf.train.latest_checkpoint(self.checkpoint_dir))
 
-        sentence = "VICTR" #Random sequence chosen from dataset
+        sentence = "CARFL" #Random sequence chosen from dataset
         print('...Generating with seed: "' + sentence + '"')
 
         input_vect = [self.char2idx[s] for s in sentence]
@@ -231,6 +235,7 @@ class LSTM(GenerativeModel):
         temperature = 1.
         self.model.reset_states()
         count = 0
+        bar = pyprind.ProgBar(amount, bar_char="=", stream=sys.stdout, width=60)
 
         while True:
             prediction = self.model(input_vect)
@@ -240,16 +245,18 @@ class LSTM(GenerativeModel):
             input_vect = tf.expand_dims([predicted_char], 0)
             if self.idx2char[predicted_char] == ' ':
                 count += 1
+                bar.update()
             if count == amount:
                 break
             generated_seq += self.idx2char[predicted_char]
 
-
+        print()
         self.generated_sequences = np.array(generated_seq.split(' '))
         return self.generated_sequences
 
     def get_params(self):
         return self._parameters
+
 
     def can_predict_proba(self) -> bool:
         raise Exception("can_predict_proba has not been implemented")

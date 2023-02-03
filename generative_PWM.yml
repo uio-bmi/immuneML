@@ -6,17 +6,20 @@ definitions:
         path: random_generative_model_data\my_dataset_export_instruction\d1\AIRR
         metadata_file: random_generative_model_data\my_dataset_export_instruction\d1\AIRR\metadata.csv
         is_repertoire: True
+  encodings:
+    e1: TextAsInt
   ml_methods:
     G1:
       PWM:
         cores_for_training: 2
   reports:
-    GeneratorReport: GeneratorReport
+    GeneratorReport: GeneratorReportPWM
 instructions:
   machine_learning_instruction:
     type: GenerativeModel
     generators:
       generator_1:
+        encoding: e1
         dataset: d1
         ml_method: G1
         report: GeneratorReport
