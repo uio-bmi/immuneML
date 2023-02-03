@@ -31,6 +31,7 @@ class TestMotifTestSetPerformance(TestCase):
         lc.add_label("is_binder", ["yes", "no"], positive_class="yes")
 
         encoder = MotifEncoder.build_object(dataset, **{
+            "min_positions": 1,
             "max_positions": 1,
             "min_precision": 0.1,
             "min_recall": 0,

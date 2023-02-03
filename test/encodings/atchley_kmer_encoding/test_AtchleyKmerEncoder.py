@@ -24,7 +24,7 @@ class TestAtchleyKmerEncoder(TestCase):
 
         encoder = AtchleyKmerEncoder.build_object(dataset, **{"k": 2, "skip_first_n_aa": 1, "skip_last_n_aa": 1, "abundance": "RELATIVE_ABUNDANCE",
                                                               "normalize_all_features": False})
-        encoded_dataset = encoder.encode(dataset, EncoderParams(path / "result", LabelConfiguration(labels=[Label("l1")])))
+        encoded_dataset = encoder.encode(dataset, EncoderParams(path / "result", LabelConfiguration(labels=[Label("l1", [True, False])])))
 
         self.assertEqual((3, 11, 3), encoded_dataset.encoded_data.examples.shape)
         self.assertEqual(0., encoded_dataset.encoded_data.examples[0, -1, 0])

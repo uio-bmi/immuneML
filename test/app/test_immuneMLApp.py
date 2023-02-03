@@ -162,7 +162,7 @@ class TestImmuneMLApp(TestCase):
                     "labels": ["CD", "CMV"],
                     "dataset": "d1",
                     "strategy": "GridSearch",
-                    "metrics": ["accuracy", "auc"],
+                    "metrics": ["accuracy", "auc", "log_loss", "f1_micro", "f1_macro", "precision", "recall"],
                     "reports": ["rep2"],
                     "number_of_processes": 10,
                     "optimization_metric": "accuracy",

@@ -29,11 +29,11 @@ class TestKerasSequenceCNN(TestCase):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "keras_cnn")
 
         dataset = RandomDatasetGenerator.generate_sequence_dataset(sequence_count=500, length_probabilities={5: 1},
-                                                                   labels={"CMV": {True: 0.5, False: 0.5}}, path=path / "dataset")
+                                                                   labels={"CMV": {"yes": 0.5, "no": 0.5}}, path=path / "dataset")
 
+        label = Label("CMV", values=["yes", "no"], positive_class="yes")
         encoder = OneHotSequenceEncoder(False, None, False, "enc1")
-        enc_dataset = encoder.encode(dataset, EncoderParams(path / "result",
-                                                                                        LabelConfiguration([Label("CMV", [True, False])])))
+        enc_dataset = encoder.encode(dataset, EncoderParams(path / "result", LabelConfiguration([label])))
 
         cnn = KerasSequenceCNN(units_per_layer=[['CONV', 400, 3, 1],
                                                   ['DROP', 0.5],
@@ -50,19 +50,18 @@ class TestKerasSequenceCNN(TestCase):
         self.assertRaises(AssertionError, lambda: cnn.check_encoder_compatibility(OneHotSequenceEncoder(use_positional_info=True, distance_to_seq_middle=1, flatten=False)))
         self.assertRaises(AssertionError, lambda: cnn.check_encoder_compatibility(OneHotSequenceEncoder(use_positional_info=False, distance_to_seq_middle=1, flatten=True)))
 
+        cnn.fit(encoded_data=enc_dataset.encoded_data, label=label)
 
-        cnn.fit(encoded_data=enc_dataset.encoded_data, label=Label("CMV"))
-
-        predictions_proba = cnn.predict_proba(enc_dataset.encoded_data, Label("CMV"))
-        self.assertEqual(500, np.rint(np.sum(predictions_proba["CMV"])))
-        self.assertEqual(500, predictions_proba["CMV"].shape[0])
-        self.assertEqual(2, predictions_proba["CMV"].shape[1])
-
-        predictions = cnn.predict(enc_dataset.encoded_data, Label("CMV"))
+        predictions = cnn.predict(enc_dataset.encoded_data, label)
         self.assertEqual(500, len(predictions["CMV"]))
-        self.assertEqual(500, len([pred for pred in predictions["CMV"] if isinstance(pred, bool)]))
+        self.assertEqual(500, len([pred for pred in predictions["CMV"]]))
 
-        self.assertListEqual(list(predictions_proba["CMV"][:, 1] > 0.5), list(predictions["CMV"]))
+        predictions_proba = cnn.predict_proba(enc_dataset.encoded_data, label)
+        self.assertEqual(500 * [1], list(predictions_proba["CMV"]["yes"] + predictions_proba["CMV"]["no"]))
+        self.assertEqual(500, predictions_proba["CMV"]["yes"].shape[0])
+        self.assertEqual(500, predictions_proba["CMV"]["no"].shape[0])
+
+        self.assertListEqual(list(predictions_proba["CMV"]["yes"] > 0.5), [pred == "yes" for pred in list(predictions["CMV"])])
 
         cnn.store(path / "model_storage")
 
@@ -80,12 +79,12 @@ class TestKerasSequenceCNN(TestCase):
             elif not isinstance(value, keras.Sequential):
                 self.assertEqual(value, cnn2_vars[item])
 
-        predictions_proba2 = cnn2.predict_proba(enc_dataset.encoded_data, Label("CMV"))
+        predictions_proba2 = cnn2.predict_proba(enc_dataset.encoded_data, label)
 
         print(predictions_proba2)
 
-        for i in range(len(predictions_proba["CMV"])):
-            self.assertTrue(all(predictions_proba["CMV"][i] == predictions_proba2["CMV"][i]))
+        self.assertTrue(all(predictions_proba["CMV"]["yes"] == predictions_proba2["CMV"]["yes"]))
+        self.assertTrue(all(predictions_proba["CMV"]["no"] == predictions_proba2["CMV"]["no"]))
 
         shutil.rmtree(path)
 

@@ -27,9 +27,11 @@ class TestMotifGeneralizationAnalysis(TestCase):
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "MotifGeneralizationAnalysis")
         params["training_set_identifier_path"] = str(path / "training_ids.txt")
+        params["min_positions"] = 1
         params["max_positions"] = 1
         params["min_precision"] = 0.8
         params["split_by_motif_size"] = True
+        params["allow_negative_aas"] = False
         params["random_seed"] = 1
         params["dataset"] = dataset
         params["result_path"] = path / "result"
@@ -54,6 +56,8 @@ class TestMotifGeneralizationAnalysis(TestCase):
 
         self.assertTrue(os.path.isfile(path / "result/training_precision_recall_motif_size=1.html"))
         self.assertTrue(os.path.isfile(path / "result/test_precision_recall_motif_size=1.html"))
+
+        self.assertTrue(os.path.isfile(path / "result/tp_recall_cutoffs.tsv"))
 
         shutil.rmtree(path)
 

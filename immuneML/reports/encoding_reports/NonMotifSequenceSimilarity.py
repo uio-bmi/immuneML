@@ -45,10 +45,6 @@ class NonMotifSequenceSimilarity(EncodingReport):
                  number_of_processes: int = 1):
         super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
 
-    def get_sequence_length(self):
-        my_sequence = next(self.dataset.get_data())
-        return len(my_sequence.get_sequence())
-
     def _generate(self):
         PathBuilder.build(self.result_path)
 
@@ -112,7 +108,6 @@ class NonMotifSequenceSimilarity(EncodingReport):
 
         return plotting_data
 
-
     def _plot(self, plotting_data) -> ReportOutput:
         fig = px.line(plotting_data, x='Hamming', y='Percentage', markers=True, line_group='motif', color="motif_size",
                       template='plotly_white', color_discrete_sequence=px.colors.sequential.Sunsetdark,
@@ -132,9 +127,6 @@ class NonMotifSequenceSimilarity(EncodingReport):
         fig.write_html(str(output_path))
 
         return ReportOutput(path=output_path, name="Hamming distances between sequences sharing the same motif")
-
-    def _get_color_discrete_sequence(self):
-        return px.colors.qualitative.Pastel[:-1] + px.colors.qualitative.Set3
 
     def check_prerequisites(self):
         valid_encodings = [MotifEncoder.__name__]

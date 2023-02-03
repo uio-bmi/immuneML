@@ -70,8 +70,9 @@ class MotifGeneralizationAnalysis(DataReport):
     """
 
     def __init__(self, training_set_identifier_path: str = None, training_percentage: float = None,
-                 max_positions: int = None, min_precision: float = None, min_recall: float = None, min_true_positives: int = None,
-                 test_precision_threshold: float = None,
+                 max_positions: int = None, min_positions: int = None, min_precision: float = None, min_recall: float = None,
+                 min_true_positives: int = None,
+                 test_precision_threshold: float = None, allow_negative_aas: float = None,
                  split_by_motif_size: bool = None, random_seed: int = None, label: dict = None,
                  min_points_in_window: int = None, smoothing_constant1: float = None, smoothing_constant2: float = None,
                  highlight_motifs_path: str = None, highlight_motifs_name: str = None,
@@ -81,12 +82,13 @@ class MotifGeneralizationAnalysis(DataReport):
         self.training_set_identifier_path = Path(training_set_identifier_path) if training_set_identifier_path is not None else None
         self.training_percentage = training_percentage
         self.max_positions = max_positions
-        self.max_positions = max_positions
+        self.min_positions = min_positions
         self.min_precision = min_precision
         self.test_precision_threshold = test_precision_threshold
         self.min_recall = min_recall
         self.min_true_positives = min_true_positives
         self.split_by_motif_size = split_by_motif_size
+        self.allow_negative_aas = allow_negative_aas
         self.min_points_in_window = min_points_in_window
         self.smoothing_constant1 = smoothing_constant1
         self.smoothing_constant2 = smoothing_constant2
@@ -104,9 +106,13 @@ class MotifGeneralizationAnalysis(DataReport):
         location = MotifGeneralizationAnalysis.__name__
 
         ParameterValidator.assert_type_and_value(kwargs["max_positions"], int, location, "max_positions", min_inclusive=1)
+        ParameterValidator.assert_type_and_value(kwargs["min_positions"], int, location, "min_positions", min_inclusive=1)
+        assert kwargs["max_positions"] >= kwargs["min_positions"], f"{location}: max_positions ({kwargs['max_positions']}) must be greater than or equal to min_positions ({kwargs['min_positions']})"
+
         ParameterValidator.assert_type_and_value(kwargs["min_precision"], (int, float), location, "min_precision", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_recall"], (int, float), location, "min_recall", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_true_positives"], int, location, "min_true_positives", min_inclusive=1)
+        ParameterValidator.assert_type_and_value(kwargs["allow_negative_aas"], bool, location, "allow_negative_aas")
         ParameterValidator.assert_type_and_value(kwargs["test_precision_threshold"], float, location, "test_precision_threshold", min_inclusive=0, max_exclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["split_by_motif_size"], bool, location, "split_by_motif_size")
         ParameterValidator.assert_type_and_value(kwargs["min_points_in_window"], int, location, "min_points_in_window", min_inclusive=1)
@@ -151,16 +157,19 @@ class MotifGeneralizationAnalysis(DataReport):
 
     def _get_report_result(self, training_plotting_data, test_plotting_data):
         if self.split_by_motif_size:
-            output_tables, output_texts, output_plots = self._construct_and_plot_data_per_motif_size(training_plotting_data, test_plotting_data)
+            output_tables, output_plots, tp_cutoff_dict = self._construct_and_plot_data_per_motif_size(training_plotting_data, test_plotting_data)
         else:
-            output_tables, output_texts, output_plots = self._construct_and_plot_data(training_plotting_data, test_plotting_data)
+            output_tables, output_plots, tp_cutoff_dict = self._construct_and_plot_data(training_plotting_data, test_plotting_data)
+
+        tp_cutoff_table = self._write_tp_recall_thresholds(tp_cutoff_dict)
+        output_tables.append(tp_cutoff_table)
 
         return ReportResult(output_tables=output_tables,
-                            output_text=output_texts,
                             output_figures=output_plots)
 
     def _construct_and_plot_data_per_motif_size(self, training_plotting_data, test_plotting_data):
-        output_tables, output_texts, output_plots = [], [], []
+        output_tables, output_plots = [], []
+        tp_cutoff_dict = {}
 
         training_plotting_data["motif_size"] = training_plotting_data["feature_names"].apply(PositionalMotifHelper.get_motif_size)
         test_plotting_data["motif_size"] = test_plotting_data["feature_names"].apply(PositionalMotifHelper.get_motif_size)
@@ -169,29 +178,48 @@ class MotifGeneralizationAnalysis(DataReport):
             sub_training_plotting_data = training_plotting_data[training_plotting_data["motif_size"] == motif_size]
             sub_test_plotting_data = test_plotting_data[test_plotting_data["motif_size"] == motif_size]
 
-            sub_output_tables, sub_output_texts, sub_output_plots = self._construct_and_plot_data(sub_training_plotting_data, sub_test_plotting_data, motif_size=motif_size)
+            sub_output_tables, sub_output_plots, sub_tp_cutoff_dict = self._construct_and_plot_data(sub_training_plotting_data, sub_test_plotting_data, motif_size=motif_size)
 
             output_tables.extend(sub_output_tables)
-            output_texts.extend(sub_output_texts)
             output_plots.extend(sub_output_plots)
+            tp_cutoff_dict.update(sub_tp_cutoff_dict)
 
-        return output_tables, output_texts, output_plots
+        return output_tables, output_plots, tp_cutoff_dict
 
 
     def _construct_and_plot_data(self, training_plotting_data, test_plotting_data, motif_size=None):
         training_combined_precision = self._get_combined_precision(training_plotting_data)
         test_combined_precision = self._get_combined_precision(test_plotting_data)
         tp_cutoff = self._determine_tp_cutoff(test_combined_precision, motif_size)
-        recall_cutoff = self._tp_to_recall(tp_cutoff)
 
         motif_size_suffix = f"_motif_size={motif_size}" if motif_size is not None else ""
-        motifs_name = f"motifs of lenght {motif_size}" if motif_size is not None else "motifs"
+        motifs_name = f"motifs of length {motif_size}" if motif_size is not None else "motifs"
 
         output_tables = MotifPerformancePlotHelper.write_output_tables(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, motifs_name=motifs_name, file_suffix=motif_size_suffix)
-        output_texts = self._write_stats(tp_cutoff, recall_cutoff, motifs_name=motifs_name, file_suffix=motif_size_suffix)
         output_plots = MotifPerformancePlotHelper.write_plots(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, tp_cutoff, motifs_name=motifs_name, file_suffix=motif_size_suffix)
 
-        return output_tables, output_texts, output_plots
+        return output_tables, output_plots, {motif_size: tp_cutoff}
+
+    def _write_tp_recall_thresholds(self, tp_cutoff_dict):
+        training_set_name = self.training_set_name.replace(" ", "_")
+
+        data = {"precision_cutoff": [self.min_precision] * len(tp_cutoff_dict),
+                "n_positives_in_training_data": [self.n_positives_in_training_data] * len(tp_cutoff_dict),
+                f"{training_set_name}_tp_cutoff": [],
+                f"{training_set_name}_recall_cutoff": [],
+                "motif_size": []}
+
+        for motif_size, tp_cutoff in tp_cutoff_dict.items():
+            data["motif_size"].append(motif_size if motif_size is not None else "all")
+            data[f"{training_set_name}_tp_cutoff"].append(tp_cutoff)
+            data[f"{training_set_name}_recall_cutoff"].append(self._tp_to_recall(tp_cutoff))
+
+        return self._write_output_table(table=pd.DataFrame(data),
+                                        file_path=self.result_path / "tp_recall_cutoffs.tsv",
+                                        name=f"{self.training_set_name}-TP and recall cutoff(s)")
+    def _tp_to_recall(self, tp_cutoff):
+        if tp_cutoff is not None:
+            return tp_cutoff / self.n_positives_in_training_data
 
     def _get_encoded_train_test_datasets(self):
         train_data_path = PathBuilder.build(self.result_path / "datasets/train")
@@ -250,10 +278,12 @@ class MotifGeneralizationAnalysis(DataReport):
 
     def _get_encoder(self):
         encoder = MotifEncoder.build_object(self.dataset, **{"max_positions": self.max_positions,
+                                                             "min_positions": self.min_positions,
                                                             "min_precision": self.min_precision,
                                                             "min_recall": self.min_recall,
                                                             "min_true_positives": self.min_true_positives,
                                                             "generalize_motifs": False,
+                                                            "allow_negative_aas": self.allow_negative_aas,
                                                             "label": None,
                                                             "name": f"motif_encoder"})
 
@@ -284,24 +314,11 @@ class MotifGeneralizationAnalysis(DataReport):
 
         return sum([1 for label_class in dataset.get_metadata([label_name])[label_name] if label_class == label_positive_class])
 
-    def _write_stats(self, tp_cutoff, recall_cutoff, motifs_name="all motifs", file_suffix=""):
-        output_path = self.result_path / f"tp_recall_cutoffs{file_suffix}.txt"
-
-        with open(output_path, "w") as file:
-            file.writelines([f"total training+test size: {self.dataset.get_example_count()}\n",
-                             f"total positives in training data: {self.n_positives_in_training_data}\n"
-                             f"training TP cutoff: {tp_cutoff}\n",
-                             f"training recall cutoff: {recall_cutoff}"])
-
-        return [ReportOutput(path=output_path, name=f"TP and recall cutoffs for {motifs_name}")]
-
     def _get_combined_precision(self, plotting_data):
         return MotifPerformancePlotHelper.get_combined_precision(plotting_data,
                                                                  min_points_in_window=self.min_points_in_window,
                                                                  smoothing_constant1=self.smoothing_constant1,
                                                                  smoothing_constant2=self.smoothing_constant2)
-
-
 
     def _determine_tp_cutoff(self, combined_precision, motif_size=None):
         col = "smooth_combined_precision" if "smooth_combined_precision" in combined_precision else "combined_precision"
@@ -320,10 +337,6 @@ class MotifGeneralizationAnalysis(DataReport):
             motif_size_warning = f" for motif size = {motif_size}" if motif_size is not None else ""
             warnings.warn(f"{MotifGeneralizationAnalysis.__name__}: could not automatically determine optimal TP threshold{motif_size_warning} with precison differenc  based on {col}")
             return None
-
-    def _tp_to_recall(self, tp_cutoff):
-        if tp_cutoff is not None:
-            return tp_cutoff / self.n_positives_in_training_data
 
     def _plot_precision_per_tp(self, file_path, plotting_data, combined_precision, dataset_type, tp_cutoff=None, motifs_name="motifs"):
          return MotifPerformancePlotHelper.plot_precision_per_tp(file_path, plotting_data, combined_precision, dataset_type,

@@ -122,8 +122,8 @@ class ReceptorCNN(MLMethod):
         self.feature_names = None
 
     def predict(self, encoded_data: EncodedData, label: Label):
-        predictions_proba = self.predict_proba(encoded_data, label)
-        return {label.name: [self.class_mapping[val] for val in (predictions_proba[label.name][:, 1] > 0.5).tolist()]}
+        predictions_proba = self.predict_proba(encoded_data, label)[label.name][label.positive_class]
+        return {label.name: [self.class_mapping[val] for val in (predictions_proba > 0.5).tolist()]}
 
     def set_background_probabilities(self):
         self.background_probabilities = np.array([1. / len(EnvironmentSettings.get_sequence_alphabet(self.sequence_type))
@@ -144,7 +144,8 @@ class ReceptorCNN(MLMethod):
                 prediction = torch.sigmoid(logit_outputs)
                 predictions.extend(prediction.numpy())
 
-        return {self.label.name: np.vstack([1 - np.array(predictions), predictions]).T}
+        return {self.label.name: {self.label.positive_class: np.array(predictions),
+                                  self.label.get_binary_negative_class(): 1 - np.array(predictions)}}
 
     def fit(self, encoded_data: EncodedData, label: Label, optimization_metric=None, cores_for_training: int = 2):
         if encoded_data.example_weights is not None:
@@ -279,7 +280,7 @@ class ReceptorCNN(MLMethod):
         custom_vars["sequence_type"] = custom_vars["sequence_type"].name.lower()
 
         if self.label:
-            custom_vars["label"] = vars(self.label)
+            custom_vars["label"] = self.label.get_desc_for_storage()
 
         params_path = path / "custom_params.yaml"
         with params_path.open('w') as file:
