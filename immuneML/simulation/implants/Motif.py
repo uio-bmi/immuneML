@@ -29,11 +29,6 @@ class Motif:
         Alternatively, instantiation can be specified with parameters as in the example YAML specification below. For the detailed list of
         parameters, see the specific instantiation strategies below.
 
-        v_call: V gene with allele if available that has to co-occur with one of the motifs for the signal to exist; can be used in combination with rejection sampling, or full sequence implanting, otherwise ignored; to match in a sequence for rejection sampling, it is checked if this value is contained in the same field of generated sequence;
-
-        j_call: J gene with allele if available that has to co-occur with one of the motifs for the signal to exist; can be used in combination with rejection sampling, or full sequence implanting, otherwise ignored; to match in a sequence for rejection sampling, it is checked if this value is contained in the same field of generated sequence;
-
-
     YAML specification:
 
     .. indent with spaces
@@ -44,8 +39,6 @@ class Motif:
             my_simple_motif: # this will be the identifier of the motif
                 seed: AAA
                 instantiation: GappedKmer
-                v_call: TRBV1
-                j_call: TRBJ1
             my_gapped_motif:
                 seed: AA/A
                 instantiation:

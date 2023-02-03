@@ -3,11 +3,11 @@ import logging
 import uuid
 from dataclasses import make_dataclass, fields as get_fields
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Union
 
 import bionumpy as bnp
 import numpy as np
-from bionumpy import AminoAcidEncoding, DNAEncoding, EncodedRaggedArray
+from bionumpy import AminoAcidEncoding, DNAEncoding, EncodedRaggedArray, get_motif_scores
 from bionumpy.bnpdataclass import bnpdataclass, BNPDataClass
 from bionumpy.encodings import BaseEncoding
 from bionumpy.io import delimited_buffers
@@ -22,6 +22,7 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.SimConfigItem import SimConfigItem
 from immuneML.simulation.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.implants.MotifInstance import MotifInstance
+from immuneML.simulation.implants.PWM import PWM
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.util.bnp_util import merge_dataclass_objects
 from immuneML.util.PathBuilder import PathBuilder
@@ -126,9 +127,9 @@ def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annota
     for index, signal in enumerate(all_signals):
         signal_pos_col = None
         allowed_positions = get_allowed_positions(signal, sequence_array, region_type)
+        matches_gene = match_genes(signal.v_call, sequences.v_call, signal.j_call, sequences.j_call)
 
-        for motifs, v_call, j_call in signal.get_all_motif_instances(SequenceType.AMINO_ACID if is_amino_acid else SequenceType.NUCLEOTIDE):
-            matches_gene = match_genes(v_call, sequences.v_call, j_call, sequences.j_call)
+        for motifs in signal.get_all_motif_instances(SequenceType.AMINO_ACID if is_amino_acid else SequenceType.NUCLEOTIDE):
             matches = None
 
             for motif in motifs:
@@ -151,7 +152,7 @@ def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annota
 
     signal_matrix = make_bnp_annotated_sequences(sequences, annotated_dc, all_signals, signal_matrix, signal_positions)
 
-    logging.info(f"Annotated {len(sequences)} sequences with signal information.", True)
+    logging.info(f"Annotated {len(sequences)} sequences with signal information.")
 
     return signal_matrix
 
@@ -171,9 +172,12 @@ def match_genes(v_call, v_call_array, j_call, j_call_array):
     return matches_gene.astype(bool)
 
 
-def match_motif(motif: str, encoding, sequence_array):
-    matcher = RegexMatcher(motif, encoding=encoding)
-    matches = matcher.rolling_window(sequence_array, mode='same')
+def match_motif(motif: Union[str, PWM], encoding, sequence_array):
+    if isinstance(motif, str):
+        matcher = RegexMatcher(motif, encoding=encoding)
+        matches = matcher.rolling_window(sequence_array, mode='same')
+    else:
+        matches = get_motif_scores(sequence_array, motif.matrix) > motif.threshold
     return matches
 
 

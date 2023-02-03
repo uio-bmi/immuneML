@@ -1,11 +1,11 @@
-# quality: gold
 import random
 from dataclasses import dataclass
 from itertools import chain
-from typing import List
+from typing import List, Union
 
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.implants.Motif import Motif
+from immuneML.simulation.implants.PWM import PWM
 from immuneML.simulation.signal_implanting.SignalImplantingStrategy import SignalImplantingStrategy
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from scripts.specification_util import update_docs_per_mapping
@@ -24,9 +24,14 @@ class Signal:
 
     Arguments:
 
-        motifs (list): A list of the motifs associated with this signal.
+        motifs (list): A list of the motifs associated with this signal, either defined by seed or by position weight matrix.
 
         sequence_position_weights (dict): a dictionary specifying for each IMGT position in the sequence how likely it is for signal to be there. For positions not specified, the probability of having the signal there is 0.
+
+        v_call (str): V gene with allele if available that has to co-occur with one of the motifs for the signal to exist; can be used in combination with rejection sampling, or full sequence implanting, otherwise ignored; to match in a sequence for rejection sampling, it is checked if this value is contained in the same field of generated sequence;
+
+        j_call (str): J gene with allele if available that has to co-occur with one of the motifs for the signal to exist; can be used in combination with rejection sampling, or full sequence implanting, otherwise ignored; to match in a sequence for rejection sampling, it is checked if this value is contained in the same field of generated sequence;
+
 
     YAML specification:
 
@@ -41,23 +46,24 @@ class Signal:
                 sequence_position_weights:
                     109: 0.5
                     110: 0.5
+                v_call: TRBV1
+                j_call: TRBJ1
 
     """
     id: str
-    motifs: List[Motif]
+    motifs: List[Union[Motif, PWM]]
     sequence_position_weights: dict = None
-
-    def is_in(self, sequence: dict, sequence_type: SequenceType):
-        return any(motif.is_in(sequence, sequence_type) for motif in self.motifs)
+    v_call: str = None
+    j_call: str = None
 
     def get_all_motif_instances(self, sequence_type: SequenceType):
-        return chain((motif.get_all_possible_instances(sequence_type), motif.v_call, motif.j_call) for motif in self.motifs)
+        return chain(motif.get_all_possible_instances(sequence_type) for motif in self.motifs)
 
     def make_motif_instances(self, count, sequence_type):
         return [motif.instantiate_motif(sequence_type=sequence_type) for motif in random.choices(self.motifs, k=count)]
 
     def __str__(self):
-        return "Signal id: " + self.id + "; motifs: " + ", ".join([str(motif) for motif in self.motifs])
+        return str(vars(self))
 
     @staticmethod
     def get_documentation():
