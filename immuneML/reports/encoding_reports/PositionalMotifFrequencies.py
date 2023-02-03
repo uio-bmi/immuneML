@@ -1,11 +1,9 @@
 from pathlib import Path
 
 import logging
-import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
 from typing import List
-from plotly.subplots import make_subplots
 
 from immuneML.data_model.dataset import SequenceDataset
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import (
@@ -70,7 +68,7 @@ class PositionalMotifFrequencies(EncodingReport):
         positional_aa_counts_table = self._write_positional_aa_counts_table(
             positional_aa_counts_df
         )
-        gap_size_tables = self._write_gap_size_table(gap_size_df)
+        gap_size_table = self._write_gap_size_table(gap_size_df)
 
         output_figures = self._safe_plot(
             positional_aa_counts_df=positional_aa_counts_df, gap_size_df=gap_size_df
@@ -78,7 +76,7 @@ class PositionalMotifFrequencies(EncodingReport):
         return ReportResult(
             name=self.name,
             output_figures=output_figures,
-            output_tables=[gap_size_tables, positional_aa_counts_table],
+            output_tables=[gap_size_table, positional_aa_counts_table],
         )
 
     def _get_gap_sizes(self, motifs):
@@ -151,7 +149,7 @@ class PositionalMotifFrequencies(EncodingReport):
             title= "Distances between Amino Acids for all positions"
             x_label = "Gap size"
 
-        gap_size_fig = px.bar(
+        gap_size_fig = px.line(
             gap_size_df,
             x="gap_size",
             y="occurrence",
@@ -215,7 +213,7 @@ class PositionalMotifFrequencies(EncodingReport):
             name=f"Frequencies of amino acids found in the high-precision high-recall motifs",
         )
 
-    def _write_gap_size_table(self, gap_size_df) -> List[ReportOutput]:
+    def _write_gap_size_table(self, gap_size_df) -> ReportOutput:
         table_path = self.result_path / f"gap_size_table.csv"
         gap_size_df.to_csv(table_path, index=False, header=True)
 
