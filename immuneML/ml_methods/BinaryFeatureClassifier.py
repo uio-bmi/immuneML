@@ -95,6 +95,9 @@ class BinaryFeatureClassifier(MLMethod):
             logging.info(f"{BinaryFeatureClassifier.__name__}: all {len(rules)} rules kept.")
         else:
             encoded_train_data, encoded_val_data = self._prepare_and_split_data(encoded_data)
+            if self.learn_all:
+                self.max_motifs = encoded_train_data.examples.shape[1]
+
             rules = self._recursively_select_rules(encoded_train_data=encoded_train_data,
                                                   encoded_val_data=encoded_val_data,
                                                   last_val_scores=[], prev_rule_indices=[])
@@ -107,8 +110,9 @@ class BinaryFeatureClassifier(MLMethod):
 
     def _recursively_select_rules(self, encoded_train_data, encoded_val_data, last_val_scores, prev_rule_indices):
         new_rule_indices = self._add_next_best_rule(encoded_train_data, prev_rule_indices)
+        logging.info(f"{BinaryFeatureClassifier.__name__}: rule indices: {new_rule_indices}")
 
-        if new_rule_indices == prev_rule_indices or (len(new_rule_indices) > self.max_motifs and not self.learn_all):
+        if new_rule_indices == prev_rule_indices or len(new_rule_indices) > self.max_motifs:
             logging.info(f"{BinaryFeatureClassifier.__name__}: no improvement on training set or max motifs reached")
 
             is_improvement = self._test_is_improvement(last_val_scores, self.min_delta)

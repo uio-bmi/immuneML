@@ -83,6 +83,8 @@ class TestBinaryFeatureClassifier(TestCase):
 
         predictions = motif_classifier.predict(enc_data, label)
 
+        self.assertEqual(motif_classifier.max_motifs, 4)
+
         self.assertListEqual(motif_classifier.rule_tree_features, ["rule1", "rule2", "rule3", "useless_rule"])
         self.assertListEqual(motif_classifier.rule_tree_indices, [1, 2, 3, 0])
 
