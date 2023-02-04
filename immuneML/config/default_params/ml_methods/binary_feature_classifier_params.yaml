@@ -3,3 +3,4 @@ max_motifs: 100
 patience: 5
 min_delta: 0
 keep_all: false
+learn_all: false
