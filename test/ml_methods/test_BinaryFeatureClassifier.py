@@ -38,7 +38,7 @@ class TestBinaryFeatureClassifier(TestCase):
         label = Label("l1", values=[True, False], positive_class=True)
         return enc_data, label
 
-    def get_fitted_classifier(self, path, enc_data, label, learn_all=False):
+    def get_fitted_classifier(self, path, enc_data, label, learn_all=False, max_motifs=100):
         motif_classifier = BinaryFeatureClassifier(training_percentage=0.7,
                                                    random_seed=1,
                                                    max_motifs=100,
@@ -79,7 +79,7 @@ class TestBinaryFeatureClassifier(TestCase):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "binary_feature_classifier_fit_learn_all")
 
         enc_data, label = self.get_enc_data()
-        motif_classifier = self.get_fitted_classifier(path, enc_data, label, learn_all=True)
+        motif_classifier = self.get_fitted_classifier(path, enc_data, label, learn_all=True, max_motifs=2)
 
         predictions = motif_classifier.predict(enc_data, label)
 
