@@ -26,6 +26,14 @@ Then checkout to the correct branch (name is also WIP):
 git checkout GenerativeModelsWUnsupervisedLearning
 ```
 
+## Installation
+When using this version of immuneML you need to install extra requirements to run the quickstart, all of these requirements can be found in the requirements.txt file.
+In order to do this, run this command:
+
+```bash
+pip install -r requirements.txt
+```
+
 ## Usage 
 
 immuneML as a whole has many unique usages, most of which is not touched upon within this documentation. However, if 
