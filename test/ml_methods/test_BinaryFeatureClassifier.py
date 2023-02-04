@@ -41,7 +41,7 @@ class TestBinaryFeatureClassifier(TestCase):
     def get_fitted_classifier(self, path, enc_data, label, learn_all=False, max_motifs=100):
         motif_classifier = BinaryFeatureClassifier(training_percentage=0.7,
                                                    random_seed=1,
-                                                   max_motifs=100,
+                                                   max_motifs=max_motifs,
                                                    patience=10,
                                                    min_delta=0,
                                                    keep_all=False,

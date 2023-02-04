@@ -109,17 +109,18 @@ class BinaryFeatureClassifier(MLMethod):
         return [feature_names[idx] for idx in rule_tree_indices]
 
     def _recursively_select_rules(self, encoded_train_data, encoded_val_data, last_val_scores, prev_rule_indices):
-        new_rule_indices = self._add_next_best_rule(encoded_train_data, prev_rule_indices)
+        new_rule_indices, val_scores = self._add_next_best_rule(encoded_train_data, encoded_val_data, prev_rule_indices, last_val_scores)
+        is_improvement = self._test_is_improvement(val_scores, self.min_delta)
         logging.info(f"{BinaryFeatureClassifier.__name__}: rule indices: {new_rule_indices}")
 
         if new_rule_indices == prev_rule_indices or len(new_rule_indices) >= self.max_motifs:
             logging.info(f"{BinaryFeatureClassifier.__name__}: no improvement on training set or max motifs reached")
 
-            is_improvement = self._test_is_improvement(last_val_scores, self.min_delta)
+            # is_improvement = self._test_is_improvement(last_val_scores, self.min_delta)
             return self._get_optimal_indices(new_rule_indices, is_improvement)
 
-        val_scores = last_val_scores + [self._test_performance_rule_tree(encoded_data=encoded_val_data, rule_indices=new_rule_indices)]
-        is_improvement = self._test_is_improvement(val_scores, self.min_delta)
+        # val_scores = last_val_scores + [self._test_performance_rule_tree(encoded_data=encoded_val_data, rule_indices=new_rule_indices)]
+        # is_improvement = self._test_is_improvement(val_scores, self.min_delta)
 
         if self._test_earlystopping(is_improvement):
             logging.info(f"{BinaryFeatureClassifier.__name__}: reached earlystopping criterion")
@@ -163,17 +164,20 @@ class BinaryFeatureClassifier(MLMethod):
         if self.learn_all:
             return rule_indices
         else:
+            if len(rule_indices) == 0:
+                return []
+
             optimal_tree_idx = max([i if is_improvement[i] else -1 for i in range(len(is_improvement))])
 
             return rule_indices[:optimal_tree_idx + 1]
 
-    def _add_next_best_rule(self, encoded_train_data, prev_rule_indices):
+    def _add_next_best_rule(self, encoded_train_data, encoded_val_data, prev_rule_indices, last_val_scores):
         prev_train_performance = self._get_prev_train_performance(encoded_train_data, prev_rule_indices)
 
         unused_indices = self._get_unused_rule_indices(encoded_train_data, prev_rule_indices)
 
         if len(unused_indices) == 0:
-            return prev_rule_indices
+            return prev_rule_indices, last_val_scores
 
         new_training_performances = self._get_new_performances(encoded_train_data, prev_rule_indices=prev_rule_indices, new_indices_to_test=unused_indices)
 
@@ -181,9 +185,12 @@ class BinaryFeatureClassifier(MLMethod):
         best_new_index = unused_indices[new_training_performances.index(best_new_performance)]
 
         if best_new_performance > prev_train_performance or self.learn_all:
-            return prev_rule_indices + [best_new_index]
+            new_rule_indices = prev_rule_indices + [best_new_index]
+            new_val_scores = last_val_scores + [self._test_performance_rule_tree(encoded_data=encoded_val_data, rule_indices=new_rule_indices)]
+
+            return new_rule_indices, new_val_scores
         else:
-            return prev_rule_indices
+            return prev_rule_indices, last_val_scores
 
     def _get_prev_train_performance(self, encoded_train_data, prev_rule_indices):
         if not prev_rule_indices:
