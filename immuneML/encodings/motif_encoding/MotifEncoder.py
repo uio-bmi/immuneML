@@ -132,7 +132,7 @@ class MotifEncoder(DatasetEncoder):
             min_recall = {motif_size: min_recall for motif_size in range(min_positions, max_positions+1)}
 
         if candidate_motif_filepath is not None:
-            PositionalMotifHelper.check_motif_filepath(candidate_motif_filepath, location)
+            PositionalMotifHelper.check_motif_filepath(candidate_motif_filepath, location, "candidate_motif_filepath")
 
         if label is not None:
             ParameterValidator.assert_type_and_value(label, str, location, "label")
@@ -311,7 +311,6 @@ class MotifEncoder(DatasetEncoder):
     def _filter_motifs(self, candidate_motifs, dataset, y_true, pool_size, generalized=False):
         motif_type = "generalized motifs" if generalized else "motifs"
 
-
         logging.info(f"{MotifEncoder.__name__}: filtering {len(candidate_motifs)} {motif_type} with precision >= {self.min_precision} and recall >= {self._get_recall_repr()}")
 
         np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(dataset)
@@ -336,8 +335,11 @@ class MotifEncoder(DatasetEncoder):
 
         if sum(pred & y_true) >= self.min_true_positives:
             if precision_score(y_true=y_true, y_pred=pred, sample_weight=weights) >= self.min_precision:
-                if recall_score(y_true=y_true, y_pred=pred, sample_weight=weights) >= self.min_recall[len(indices)]:
-                    return motif
+                if len(indices) in self.min_recall.keys():
+                    if recall_score(y_true=y_true, y_pred=pred, sample_weight=weights) >= self.min_recall[len(indices)]:
+                        return motif
+
+
 
     def _construct_encoded_data_matrix(self, dataset, motifs, label_config, number_of_processes):
         feature_names = [PositionalMotifHelper.motif_to_string(indices, amino_acids, motif_sep="-", newline=False)

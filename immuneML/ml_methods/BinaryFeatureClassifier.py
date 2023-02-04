@@ -28,6 +28,7 @@ class BinaryFeatureClassifier(MLMethod):
 
         training_percentage (float): what percentage of data to use for training (the rest will be used for validation); values between 0 and 1
 
+        random_seed (int):
 
 
     YAML specification:
@@ -41,15 +42,18 @@ class BinaryFeatureClassifier(MLMethod):
 
     """
 
-    def __init__(self, training_percentage: float = None, max_motifs: int = None,
-                 patience: int = None, min_delta: float = None, keep_all: bool = None,
+    def __init__(self, training_percentage: float = None,
+                 random_seed: int = None, max_motifs: int = None, patience: int = None,
+                 min_delta: float = None, keep_all: bool = None, learn_all: bool = None,
                  result_path: Path = None):
         super().__init__()
         self.training_percentage = training_percentage
+        self.random_seed = random_seed
         self.max_motifs = max_motifs
         self.patience = patience
         self.min_delta = min_delta
         self.keep_all = keep_all
+        self.learn_all = learn_all
 
         self.feature_names = None
         self.rule_tree_indices = None
@@ -61,6 +65,8 @@ class BinaryFeatureClassifier(MLMethod):
         self.result_path = result_path
 
     def predict(self, encoded_data: EncodedData, label: Label):
+        self._check_features(encoded_data.feature_names)
+
         return {self.label.name: self._get_rule_tree_predictions_class(encoded_data, self.rule_tree_indices)}
 
     def predict_proba(self, encoded_data: EncodedData, label: Label):
@@ -111,7 +117,7 @@ class BinaryFeatureClassifier(MLMethod):
         val_scores = last_val_scores + [self._test_performance_rule_tree(encoded_data=encoded_val_data, rule_indices=new_rule_indices)]
         is_improvement = self._test_is_improvement(val_scores, self.min_delta)
 
-        if self._test_earlystopping(is_improvement): # originally also included 'if args.earlystopping'
+        if self._test_earlystopping(is_improvement):
             logging.info(f"{BinaryFeatureClassifier.__name__}: reached earlystopping criterion")
 
             return self._get_optimal_indices(new_rule_indices, is_improvement)
@@ -120,6 +126,9 @@ class BinaryFeatureClassifier(MLMethod):
                                         last_val_scores=val_scores, prev_rule_indices=new_rule_indices)
 
     def _test_earlystopping(self, is_improvement):
+        if self.learn_all:
+            return False
+
         # patience has not reached yet, continue training
         if len(is_improvement) < self.patience:
             return False
@@ -144,9 +153,12 @@ class BinaryFeatureClassifier(MLMethod):
         return is_improvement
 
     def _get_optimal_indices(self, rule_indices, is_improvement):
-        optimal_tree_idx = max([i if is_improvement[i] else -1 for i in range(len(is_improvement))])
+        if self.learn_all:
+            return rule_indices
+        else:
+            optimal_tree_idx = max([i if is_improvement[i] else -1 for i in range(len(is_improvement))])
 
-        return rule_indices[:optimal_tree_idx + 1]
+            return rule_indices[:optimal_tree_idx + 1]
 
     def _add_next_best_rule(self, encoded_train_data, prev_rule_indices):
         prev_train_performance = self._get_prev_train_performance(encoded_train_data, prev_rule_indices)
@@ -161,7 +173,7 @@ class BinaryFeatureClassifier(MLMethod):
         best_new_performance = max(new_training_performances)
         best_new_index = unused_indices[new_training_performances.index(best_new_performance)]
 
-        if best_new_performance > prev_train_performance:
+        if best_new_performance > prev_train_performance or self.learn_all:
             return prev_rule_indices + [best_new_index]
         else:
             return prev_rule_indices
@@ -187,7 +199,6 @@ class BinaryFeatureClassifier(MLMethod):
         return optimization_scoring_fn(y_true=y_true, y_pred=pred, sample_weight=encoded_data.example_weights)
 
     def _get_rule_tree_predictions_bool(self, encoded_data, rule_indices):
-        self._check_features(encoded_data.feature_names)
         return np.logical_or.reduce([encoded_data.examples[:, i] for i in rule_indices])
 
     def _get_rule_tree_predictions_class(self, encoded_data, rule_indices):
@@ -213,7 +224,7 @@ class BinaryFeatureClassifier(MLMethod):
         self.fit(encoded_data=encoded_data, label=label)
 
     def _prepare_and_split_data(self, encoded_data: EncodedData):
-        train_indices, val_indices = Util.get_train_val_indices(len(encoded_data.example_ids), self.training_percentage)
+        train_indices, val_indices = Util.get_train_val_indices(len(encoded_data.example_ids), self.training_percentage, random_seed=self.random_seed)
 
         train_data = Util.subset_encoded_data(encoded_data, train_indices)
         val_data = Util.subset_encoded_data(encoded_data, val_indices)
