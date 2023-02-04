@@ -12,18 +12,11 @@ from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.BinaryFeatureClassifier import BinaryFeatureClassifier
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
-from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.ml_methods.RandomForestClassifier import RandomForestClassifier
-from immuneML.ml_methods.SVC import SVC
-from immuneML.ml_methods.SVM import SVM
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
-from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
-from immuneML.ml_methods.util.Util import Util
 
 
 
