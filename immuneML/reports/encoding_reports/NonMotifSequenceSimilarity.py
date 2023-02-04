@@ -44,6 +44,7 @@ class NonMotifSequenceSimilarity(EncodingReport):
     def __init__(self, dataset: SequenceDataset = None, result_path: Path = None, name: str = None,
                  number_of_processes: int = 1):
         super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
+        self.sequence_length = 0
 
     def _generate(self):
         PathBuilder.build(self.result_path)
@@ -69,6 +70,7 @@ class NonMotifSequenceSimilarity(EncodingReport):
         # motifs = filter_single_motifs(read_motifs_from_file(motifs_file))
 
         np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(self.dataset)
+        self.sequence_length = len(np_sequences[0])
 
         with Pool(processes=self.number_of_processes) as pool:
             partial_func = partial(self._make_hamming_distance_hist_for_motif,  np_sequences=np_sequences)
@@ -82,7 +84,7 @@ class NonMotifSequenceSimilarity(EncodingReport):
         positive_sequences = np_sequences[motif_presence]
         return self._make_hamming_distance_hist(positive_sequences)
     def _make_hamming_distance_hist(self, sequences):
-        counts = {i: 0 for i in range(len(sequences[0]))}
+        counts = {i: 0 for i in range(self.sequence_length)}
         for dist in self._calculate_all_hamming_distances(sequences):
             counts[dist] += 1
 
