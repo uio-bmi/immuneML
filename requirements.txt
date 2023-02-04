@@ -23,3 +23,6 @@ matplotlib-venn>=0.11
 scipy
 Cython
 tensorflow
+pyprind
+keras-tuner
+logomaker
