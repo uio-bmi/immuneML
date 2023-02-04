@@ -144,6 +144,9 @@ class BinaryFeatureClassifier(MLMethod):
         return False
 
     def _test_is_improvement(self, scores, min_delta):
+        if len(scores) == 0:
+            return []
+
         best = scores[0]
         is_improvement = [True]
 
