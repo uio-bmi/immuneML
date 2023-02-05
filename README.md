@@ -48,35 +48,38 @@ model as input.
 
 Within the Generative Models branch are a few files and directories, not found elsewhere in immuneML which can be
 used to run a quickstart.<br/>
-There are two YAML specifications, one for training and one for generation, and two directories, one relevant for each 
-YAML.
+There are four YAML specifications, two for PWM and two for LSTM, one for training and one for generation.
+There are also some directories containing previously trained models, and dataset containing repertoires inteded for training new models.
 
-The file generative_quickstart.yaml runs the training of a PWM model and generates some sequences displayed in a report
-This file uses the data found in generative_model_data to train. This specification relays the minimum needed to run
-the generative models. An optional parameter for both instrucitons is the "amount" parameter, which determines the number
-of sequences to produce.
+The files generative_LSTM and generative_PWM are to be run for training, and the files with the added _load are used for loaing existing models.
+Within the training yamls there is little room for variation. They only work using the given encoding, and using repertoires.
+The LSTM can be modified using the optional parameters of rnn_units and epochs. Moreover, every generative model can produce a requested amount of sequences
+using the amount parameter in the instruction part of the yaml. If left unspecified, 10 is set as standard.
 
-#### generative_quickstart.yml
+#### generative_PWM.yml
 ```yaml
 definitions:
   datasets:
     d1:
       format: AIRR
       params:
-        path: random_generative_model_data\my_dataset_export_instruction\d1\AIRR
-        metadata_file: random_generative_model_data\my_dataset_export_instruction\d1\AIRR\metadata.csv
+        path: random_generative_model_data/my_dataset_export_instruction/d1/AIRR
+        metadata_file: random_generative_model_data/my_dataset_export_instruction/d1/AIRR/metadata.csv
         is_repertoire: True
+  encodings:
+    e1: TextAsInt
   ml_methods:
     G1:
       PWM:
         cores_for_training: 2
   reports:
-    GeneratorReport: GeneratorReport
+    GeneratorReport: GeneratorReportPWM
 instructions:
   machine_learning_instruction:
     type: GenerativeModel
     generators:
       generator_1:
+        encoding: e1
         dataset: d1
         ml_method: G1
         report: GeneratorReport
@@ -99,15 +102,15 @@ instructions:
       generator_1:
         ml_method: G1
         report: GeneratorReport
-        path: existing_PWM_model\machine_learning_instruction\analysis_generator_1
+        path: existing_PWM_model/machine_learning_instruction/analysis_generator_1
 ```
 
 #### Report
 
-So far there are two different reports that can be used on the genrative models, GeneratorReport and GeneratorReportPWM.
+So far there are three different reports that can be used on the genrative models, GeneratorReport, GeneratorReportLSTM and GeneratorReportPWM.
 GeneratorReport can be used on all generative models but relays little information. While GeneratorReportPWM is tailored 
 for the PWM and displayes useful graphics. These reports can be found in the output directory specified when running the
-program.
+program. The LSTM report also contains a loss graph showing the improvements of the models over each epoch.
 
 ### Overview of input, analyses and results
 
@@ -151,6 +154,12 @@ For each instruction specified in the YAML specification file, a subfolder is cr
    - [scikit-learn](https://scikit-learn.org/) (0.23 or higher)
    - [scipy](https://www.scipy.org)
    - [tqdm](https://tqdm.github.io/) (0.24 or higher)
+   - [tzlocal](https://pypi.org/project/tzlocal/)
+   - [tensorboard](https://pypi.org/project/tensorboard/) (1.14.0 or higher)
+   - [Cython](https://pypi.org/project/Cython/)
+   - [tensorflow](https://pypi.org/project/tensorflow/)
+   - [pyprind](https://pypi.org/project/PyPrind/)
+   - [keras-tuner](https://pypi.org/project/keras-tuner/)
 
 # Citing immuneML
 

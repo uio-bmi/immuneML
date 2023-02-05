@@ -3,8 +3,8 @@ definitions:
     d1:
       format: AIRR
       params:
-        path: LSTM_dataset\AIRR\repertoires
-        metadata_file: LSTM_dataset\AIRR\repertoires\metadata.csv
+        path: LSTM_dataset/AIRR/repertoires
+        metadata_file: LSTM_dataset/AIRR/repertoires/metadata.csv
         is_repertoire: True
   encodings:
     e1: TextAsInt
