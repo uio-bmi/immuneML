@@ -38,10 +38,10 @@ class TestBinaryFeatureClassifier(TestCase):
         label = Label("l1", values=[True, False], positive_class=True)
         return enc_data, label
 
-    def get_fitted_classifier(self, path, enc_data, label, learn_all=False, max_motifs=100):
+    def get_fitted_classifier(self, path, enc_data, label, learn_all=False, max_features=100):
         motif_classifier = BinaryFeatureClassifier(training_percentage=0.7,
                                                    random_seed=1,
-                                                   max_motifs=max_motifs,
+                                                   max_features=max_features,
                                                    patience=10,
                                                    min_delta=0,
                                                    keep_all=False,
@@ -51,7 +51,6 @@ class TestBinaryFeatureClassifier(TestCase):
         random.seed(1)
         motif_classifier.fit(encoded_data=enc_data, label=label,
                              optimization_metric="accuracy")
-        random.seed(None)
 
         return motif_classifier
 
@@ -79,11 +78,11 @@ class TestBinaryFeatureClassifier(TestCase):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "binary_feature_classifier_fit_learn_all")
 
         enc_data, label = self.get_enc_data()
-        motif_classifier = self.get_fitted_classifier(path, enc_data, label, learn_all=True, max_motifs=2)
+        motif_classifier = self.get_fitted_classifier(path, enc_data, label, learn_all=True, max_features=2)
 
         predictions = motif_classifier.predict(enc_data, label)
 
-        self.assertEqual(motif_classifier.max_motifs, 4)
+        self.assertEqual(motif_classifier.max_features, 4)
 
         self.assertListEqual(motif_classifier.rule_tree_features, ["rule1", "rule2", "rule3", "useless_rule"])
         self.assertListEqual(motif_classifier.rule_tree_indices, [1, 2, 3, 0])
@@ -135,7 +134,7 @@ class TestBinaryFeatureClassifier(TestCase):
         shutil.rmtree(path)
 
     def test_recursively_select_rules(self):
-        motif_classifier = BinaryFeatureClassifier(max_motifs = 100,
+        motif_classifier = BinaryFeatureClassifier(max_features = 100,
                                                    min_delta = 0,
                                                    patience = 10)
         motif_classifier.optimization_metric = "accuracy"
@@ -169,12 +168,12 @@ class TestBinaryFeatureClassifier(TestCase):
         result_add_one_rule = motif_classifier._recursively_select_rules(enc_data, enc_data, [0], [0])
         self.assertListEqual(result_add_one_rule, [0, 1])
 
-        motif_classifier.max_motifs = 1
+        motif_classifier.max_features = 1
 
         result_max_motifs_reached = motif_classifier._recursively_select_rules(enc_data, enc_data, [], [])
         self.assertListEqual(result_max_motifs_reached, [0])
 
-        motif_classifier.max_motifs = 2
+        motif_classifier.max_features = 2
 
         result_max_motifs_reached = motif_classifier._recursively_select_rules(enc_data, enc_data, [], [])
         self.assertListEqual(result_max_motifs_reached, [0, 1])

@@ -1,5 +1,5 @@
 training_percentage: 0.7
-max_motifs: 100
+max_features: 100
 patience: 5
 min_delta: 0
 keep_all: false

@@ -1,3 +1,4 @@
+import sys
 import copy
 import logging
 import warnings
@@ -43,13 +44,13 @@ class BinaryFeatureClassifier(MLMethod):
     """
 
     def __init__(self, training_percentage: float = None,
-                 random_seed: int = None, max_motifs: int = None, patience: int = None,
+                 random_seed: int = None, max_features: int = None, patience: int = None,
                  min_delta: float = None, keep_all: bool = None, learn_all: bool = None,
                  result_path: Path = None):
         super().__init__()
         self.training_percentage = training_percentage
         self.random_seed = random_seed
-        self.max_motifs = max_motifs
+        self.max_features = max_features
         self.patience = patience
         self.min_delta = min_delta
         self.keep_all = keep_all
@@ -96,11 +97,18 @@ class BinaryFeatureClassifier(MLMethod):
         else:
             encoded_train_data, encoded_val_data = self._prepare_and_split_data(encoded_data)
             if self.learn_all:
-                self.max_motifs = encoded_train_data.examples.shape[1]
+                self.max_features = encoded_train_data.examples.shape[1]
+
+            old_recursion_limit = sys.getrecursionlimit()
+            new_recursion_limit = old_recursion_limit + encoded_train_data.examples.shape[1]
+            sys.setrecursionlimit(new_recursion_limit)
 
             rules = self._recursively_select_rules(encoded_train_data=encoded_train_data,
                                                   encoded_val_data=encoded_val_data,
                                                   last_val_scores=[], prev_rule_indices=[])
+
+            sys.setrecursionlimit(old_recursion_limit)
+
             logging.info(f"{BinaryFeatureClassifier.__name__}: selected {len(rules)} out of {len(self.feature_names)} rules.")
 
         return rules
@@ -111,16 +119,12 @@ class BinaryFeatureClassifier(MLMethod):
     def _recursively_select_rules(self, encoded_train_data, encoded_val_data, last_val_scores, prev_rule_indices):
         new_rule_indices, val_scores = self._add_next_best_rule(encoded_train_data, encoded_val_data, prev_rule_indices, last_val_scores)
         is_improvement = self._test_is_improvement(val_scores, self.min_delta)
-        logging.info(f"{BinaryFeatureClassifier.__name__}: rule indices: {new_rule_indices}")
+        logging.info(f"{BinaryFeatureClassifier.__name__}: added rule {len(new_rule_indices)}/{encoded_train_data.examples.shape[1]}")
 
-        if new_rule_indices == prev_rule_indices or len(new_rule_indices) >= self.max_motifs:
-            logging.info(f"{BinaryFeatureClassifier.__name__}: no improvement on training set or max motifs reached")
+        if new_rule_indices == prev_rule_indices or len(new_rule_indices) >= self.max_features:
+            logging.info(f"{BinaryFeatureClassifier.__name__}: no improvement on training set or max features reached")
 
-            # is_improvement = self._test_is_improvement(last_val_scores, self.min_delta)
             return self._get_optimal_indices(new_rule_indices, is_improvement)
-
-        # val_scores = last_val_scores + [self._test_performance_rule_tree(encoded_data=encoded_val_data, rule_indices=new_rule_indices)]
-        # is_improvement = self._test_is_improvement(val_scores, self.min_delta)
 
         if self._test_earlystopping(is_improvement):
             logging.info(f"{BinaryFeatureClassifier.__name__}: reached earlystopping criterion")
