@@ -25,4 +25,3 @@ Cython
 tensorflow
 pyprind
 keras-tuner
-logomaker
