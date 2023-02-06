@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.SequenceType import SequenceType
 
 
 class CompAIRRHelper:
@@ -48,13 +49,13 @@ class CompAIRRHelper:
         return compairr_path
 
     @staticmethod
-    def get_cmd_args(compairr_params, input_file_list, result_path):
+    def get_cmd_args(compairr_params, input_file_list, result_path, mode="-m"):
         indels_args = ["-i"] if compairr_params.indels else []
         frequency_args = ["-f"] if compairr_params.ignore_counts else []
         ignore_genes = ["-g"] if compairr_params.ignore_genes else []
         output_args = ["-o", str(result_path / compairr_params.output_filename), "-l", str(result_path / compairr_params.log_filename)]
 
-        return [str(compairr_params.compairr_path), "-m", "-d", str(compairr_params.differences), "-t", str(compairr_params.threads)] + \
+        return [str(compairr_params.compairr_path), mode, "-d", str(compairr_params.differences), "-t", str(compairr_params.threads)] + \
                indels_args + frequency_args + ignore_genes + output_args + input_file_list
 
     @staticmethod
@@ -68,6 +69,37 @@ class CompAIRRHelper:
 
             mode = "a"
             header = False
+
+    @staticmethod
+    def write_sequences_file(sequence_dataset, filename, compairr_params, repertoire_id="sequence_dataset"):
+        compairr_data = {"junction_aa": [],
+                         "repertoire_id": [],
+                         "sequence_id": []}
+
+        if not compairr_params.ignore_genes:
+            compairr_data["v_call"] = []
+            compairr_data["j_call"] = []
+
+        if not compairr_params.ignore_counts:
+            compairr_data["duplicate_count"] = []
+
+        for sequence in sequence_dataset.get_data():
+            compairr_data["junction_aa"].append(sequence.get_sequence(sequence_type=SequenceType.AMINO_ACID))
+
+            assert sequence.identifier is not None, f"{CompAIRRHelper.__name__}: sequence identifiers must be set when exporting a sequence dataset for CompAIRR"
+            compairr_data["sequence_id"].append(sequence.identifier)
+            compairr_data["repertoire_id"].append(repertoire_id)
+
+            if not compairr_params.ignore_genes:
+                compairr_data["v_call"].append(sequence.get_attribute("v_gene"))
+                compairr_data["j_call"].append(sequence.get_attribute("j_gene"))
+
+            if not compairr_params.ignore_counts:
+                compairr_data["duplicate_count"].append(sequence.get_attribute("count"))
+
+        df = pd.DataFrame(compairr_data)
+
+        df.to_csv(filename, mode="w", header=True, index=False, sep="\t")
 
     @staticmethod
     def get_repertoire_contents(repertoire, compairr_params):

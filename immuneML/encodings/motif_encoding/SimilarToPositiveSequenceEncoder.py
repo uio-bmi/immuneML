@@ -2,6 +2,7 @@ from pathlib import Path
 
 import numpy as np
 
+
 from immuneML.analysis.SequenceMatcher import SequenceMatcher
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
@@ -9,6 +10,8 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.util.CompAIRRHelper import CompAIRRHelper
+from immuneML.util.CompAIRRParams import CompAIRRParams
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 
@@ -26,6 +29,17 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
 
         hamming_distance (int):
 
+        compairr_path
+
+        ignore_genes (bool): only used when compairr is used
+
+        threads (int): The number of threads to use for parallelization. This does not affect the results of the encoding, only the speed.
+        The default number of threads is 8.
+
+        keep_temporary_files (bool): whether to keep temporary files, including CompAIRR input, output and log files, and the sequence
+        presence matrix. This may take a lot of storage space if the input dataset is large. By default temporary files are not kept.
+
+
 
     YAML specification:
 
@@ -37,21 +51,41 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
                     hamming_distance: 2
     """
 
-    def __init__(self, hamming_distance: int = None, name: str = None):
+    def __init__(self, hamming_distance: int = None, compairr_path: str = None,
+                 ignore_genes: bool = None, threads: int = None, keep_temporary_files: bool = None,
+                 name: str = None):
         self.hamming_distance = hamming_distance
+        self.compairr_path = Path(compairr_path) if compairr_path is not None else None
+        self.ignore_genes = ignore_genes
+        self.threads = threads
+        self.keep_temporary_files = keep_temporary_files
 
         self.positive_sequences = None
         self.name = name
         self.context = None
 
     @staticmethod
-    def _prepare_parameters(hamming_distance: int = None, name: str = None):
+    def _prepare_parameters(hamming_distance: int = None, compairr_path: str = None, ignore_genes: bool = None,
+                            threads: int = None, keep_temporary_files: bool = None, name: str = None):
         location = SimilarToPositiveSequenceEncoder.__name__
 
         ParameterValidator.assert_type_and_value(hamming_distance, int, location, "hamming_distance", min_inclusive=0)
 
+        if compairr_path is not None:
+            ParameterValidator.assert_type_and_value(compairr_path, str, location, "compairr_path")
+            CompAIRRHelper.check_compairr_path(compairr_path)
+
+            ParameterValidator.assert_type_and_value(ignore_genes, bool, location, "ignore_genes")
+            ParameterValidator.assert_type_and_value(threads, int, location, "threads")
+            ParameterValidator.assert_type_and_value(keep_temporary_files, int, location, "keep_temporary_files")
+
+
         return {
             "hamming_distance": hamming_distance,
+            "ignore_genes": ignore_genes,
+            "threads": threads,
+            "keep_temporary_files": keep_temporary_files,
+            "compairr_path": compairr_path,
             "name": name,
         }
 
@@ -86,7 +120,7 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
                                    dataset_type=Dataset.SUBSAMPLED)
 
     def _encode_data(self, dataset, params: EncoderParams):
-        examples = self.get_sequence_matching_feature(dataset)
+        examples = self.get_sequence_matching_feature(dataset, params)
 
         labels = EncoderHelper.encode_element_dataset_labels(dataset, params.label_config)
 
@@ -102,7 +136,49 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-    def get_sequence_matching_feature(self, dataset):
+    def get_sequence_matching_feature(self, dataset, params: EncoderParams):
+        if self.compairr_path is None:
+            return self.get_sequence_matching_feature_without_compairr(dataset)
+        else:
+            return self.get_sequence_matching_feature_with_compairr(dataset, params)
+
+    def get_sequence_matching_feature_with_compairr(self, dataset, params: EncoderParams):
+        import subprocess
+        import shutil
+
+        compairr_result_path = PathBuilder.build(params.result_path / "compairr_data")
+        pos_sequences_path = compairr_result_path / "positive_sequences.tsv"
+        all_sequences_path = compairr_result_path / "all_sequences.tsv"
+
+        compairr_params = self._get_compairr_params(compairr_result_path)
+
+        CompAIRRHelper.write_sequences_file(self.positive_sequences, pos_sequences_path, compairr_params, repertoire_id="all_sequences")
+        CompAIRRHelper.write_sequences_file(dataset, all_sequences_path, compairr_params, repertoire_id="pos_sequences")
+
+        args = CompAIRRHelper.get_cmd_args(compairr_params, [all_sequences_path, pos_sequences_path], compairr_result_path, mode="-x")
+        compairr_result = subprocess.run(args, capture_output=True, text=True)
+        result = CompAIRRHelper.process_compairr_output_file(compairr_result, compairr_params, compairr_result_path)
+
+        if list(result.index) != dataset.get_example_ids():
+            result = result.reindex(dataset.get_example_ids())
+
+        if not self.keep_temporary_files:
+            shutil.rmtree(compairr_result_path, ignore_errors=False, onerror=None)
+
+        return np.array([result["all_sequences"] > 0]).T
+
+    def _get_compairr_params(self, compairr_result_path):
+        return CompAIRRParams(compairr_path=self.compairr_path,
+                              keep_compairr_input=self.keep_temporary_files,
+                              differences=self.hamming_distance,
+                              indels=False,
+                              ignore_counts=True,
+                              ignore_genes=self.ignore_genes,
+                              threads=self.threads,
+                              output_filename=compairr_result_path / "compairr_out.txt",
+                              log_filename=compairr_result_path / "compairr_log.txt")
+
+    def get_sequence_matching_feature_without_compairr(self, dataset):
         matcher = SequenceMatcher()
 
         examples = []

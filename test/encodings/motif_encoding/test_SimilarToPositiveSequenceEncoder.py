@@ -1,5 +1,6 @@
 import os
 import shutil
+from pathlib import Path
 from unittest import TestCase
 
 
@@ -7,6 +8,7 @@ from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.motif_encoding.SimilarToPositiveSequenceEncoder import SimilarToPositiveSequenceEncoder
 from immuneML.environment.Constants import Constants
@@ -21,46 +23,63 @@ class TestSimilarToPositiveSequenceEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def _prepare_dataset(self, path):
-        sequences = [ReceptorSequence(amino_acid_sequence="AACC", identifier="1",
+        sequences = [ReceptorSequence(amino_acid_sequence="AACC", identifier="a",
                                       metadata=SequenceMetadata(custom_params={"l1": "yes"})),
-                     ReceptorSequence(amino_acid_sequence="AGDD", identifier="2",
+                     ReceptorSequence(amino_acid_sequence="AGDD", identifier="b",
                                       metadata=SequenceMetadata(custom_params={"l1": "yes"})),
-                     ReceptorSequence(amino_acid_sequence="AAEE", identifier="3",
+                     ReceptorSequence(amino_acid_sequence="AAEE", identifier="d",
                                       metadata=SequenceMetadata(custom_params={"l1": "yes"})),
-                     ReceptorSequence(amino_acid_sequence="CCCC", identifier="4",
+                     ReceptorSequence(amino_acid_sequence="CCCC", identifier="e",
                                       metadata=SequenceMetadata(custom_params={"l1": "no"})),
-                     ReceptorSequence(amino_acid_sequence="AGDE", identifier="5",
+                     ReceptorSequence(amino_acid_sequence="AGDE", identifier="c",
                                       metadata=SequenceMetadata(custom_params={"l1": "no"})),
-                     ReceptorSequence(amino_acid_sequence="EEEE", identifier="6",
+                     ReceptorSequence(amino_acid_sequence="EEEE", identifier="f",
                                       metadata=SequenceMetadata(custom_params={"l1": "no"}))]
 
 
         PathBuilder.build(path)
-        return SequenceDataset.build_from_objects(sequences, 100, PathBuilder.build(path / 'data'), 'd2')
-
-    def test(self):
-        path = EnvironmentSettings.tmp_test_path / "significant_motif_sequence_encoder_test/"
-        dataset = self._prepare_dataset(path)
+        dataset = SequenceDataset.build_from_objects(sequences, 100, PathBuilder.build(path / 'data'), 'd2')
 
         lc = LabelConfiguration()
         lc.add_label("l1", ["yes", "no"], positive_class="yes")
 
-        encoder = SimilarToPositiveSequenceEncoder.build_object(dataset, **{"hamming_distance": 1})
+        return dataset, lc
 
-        encoded_dataset = encoder.encode(dataset, EncoderParams(
+    def _get_encoder_params(self, path, lc):
+        return  EncoderParams(
             result_path=path / "encoder_result/",
             label_config=lc,
             pool_size=4,
             learn_model=True,
             model={},
-        ))
+        )
+
+    def test_generate(self, compairr_path=None):
+        path_suffix = "compairr" if compairr_path else "no_compairr"
+        path = EnvironmentSettings.tmp_test_path / f"significant_motif_sequence_encoder_test_{path_suffix}/"
+        dataset, lc = self._prepare_dataset(path)
+
+        default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "encodings/", "similar_to_positive_sequence")
+
+        encoder = SimilarToPositiveSequenceEncoder.build_object(dataset, **{**default_params, **{"hamming_distance": 1,
+                                                                                                 "compairr_path": compairr_path,
+                                                                                                 "ignore_genes": True}})
+
+        encoded_dataset = encoder.encode(dataset, self._get_encoder_params(path, lc))
 
         self.assertEqual(6, encoded_dataset.encoded_data.examples.shape[0])
         self.assertTrue(all(identifier in encoded_dataset.encoded_data.example_ids
-                            for identifier in ['1', '2', '3', '4', '5', '6']))
+                            for identifier in ["a", "b", "c", "d", "e", "f"]))
 
         self.assertListEqual(["similar_to_positive_sequence"], encoded_dataset.encoded_data.feature_names)
 
         self.assertListEqual([True, True, True, False, True, False], list(encoded_dataset.encoded_data.examples))
 
         shutil.rmtree(path)
+
+    def test_generate_with_compairr(self):
+        compairr_paths = [Path("/usr/local/bin/compairr"), Path("./compairr/src/compairr")]
+
+        for compairr_path in compairr_paths:
+            if compairr_path.exists():
+                self.test_generate(str(compairr_path))
