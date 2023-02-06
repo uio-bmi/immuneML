@@ -32,7 +32,7 @@ class GroundTruthMotifOverlap(EncodingReport):
         location = GroundTruthMotifOverlap.__name__
 
         if "highlight_motifs_path" in kwargs and kwargs["highlight_motifs_path"] is not None:
-            PositionalMotifHelper.check_motif_filepath(kwargs["highlight_motifs_path"], location, "highlight_motifs_path", expected_header="indices\tamino_acids\tNumber_of_binder_sequences\n")
+            PositionalMotifHelper.check_motif_filepath(kwargs["highlight_motifs_path"], location, "highlight_motifs_path", expected_header="indices\tamino_acids\tn_sequences\n")
 
         return GroundTruthMotifOverlap(**kwargs)
 
@@ -58,7 +58,7 @@ class GroundTruthMotifOverlap(EncodingReport):
 
     def _read_highlight_motifs(self, filepath):
         with open(filepath) as file:
-            PositionalMotifHelper.check_file_header(file.readline(), filepath, expected_header="indices\tamino_acids\tNumber_of_binder_sequences\n")
+            PositionalMotifHelper.check_file_header(file.readline(), filepath, expected_header="indices\tamino_acids\tn_sequences\n")
             groundtruth_motifs = []
             groundtruth_implant_rate = []
             for line in file.readlines():
