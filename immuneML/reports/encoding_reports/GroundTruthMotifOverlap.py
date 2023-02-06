@@ -23,32 +23,27 @@ class GroundTruthMotifOverlap(EncodingReport):
     """
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, name: str = None,
-                 number_of_processes: int = 1, highlight_motifs_path: str = None):
+                 number_of_processes: int = 1, groundtruth_motifs_path: str = None):
         super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
-        self.highlight_motifs_path = highlight_motifs_path
+        self.groundtruth_motifs_path = groundtruth_motifs_path
 
     @classmethod
     def build_object(cls, **kwargs):
         location = GroundTruthMotifOverlap.__name__
 
-        if "highlight_motifs_path" in kwargs and kwargs["highlight_motifs_path"] is not None:
-            PositionalMotifHelper.check_motif_filepath(kwargs["highlight_motifs_path"], location, "highlight_motifs_path", expected_header="indices\tamino_acids\tn_sequences\n")
+        if "groundtruth_motifs_path" in kwargs and kwargs["groundtruth_motifs_path"] is not None:
+            PositionalMotifHelper.check_motif_filepath(kwargs["groundtruth_motifs_path"], location, "groundtruth_motifs_path", expected_header="indices\tamino_acids\tn_sequences\n")
 
         return GroundTruthMotifOverlap(**kwargs)
 
     def _generate(self):
         PathBuilder.build(self.result_path)
 
-        groundtruth_motifs, implant_rate_dict = self._read_highlight_motifs(
-            self.highlight_motifs_path
-        )
+        groundtruth_motifs, implant_rate_dict = self._read_groundtruth_motifs(self.groundtruth_motifs_path)
 
         learned_motifs = self.dataset.encoded_data.feature_names
 
-        overlap_df = self._generate_overlap(
-            learned_motifs, groundtruth_motifs, implant_rate_dict
-        )
-
+        overlap_df = self._generate_overlap(learned_motifs, groundtruth_motifs, implant_rate_dict)
         output_figure = self._safe_plot(overlap_df=overlap_df)
 
         return ReportResult(
@@ -56,7 +51,7 @@ class GroundTruthMotifOverlap(EncodingReport):
             output_figures=[output_figure],
         )
 
-    def _read_highlight_motifs(self, filepath):
+    def _read_groundtruth_motifs(self, filepath):
         with open(filepath) as file:
             PositionalMotifHelper.check_file_header(file.readline(), filepath, expected_header="indices\tamino_acids\tn_sequences\n")
             groundtruth_motifs = []
