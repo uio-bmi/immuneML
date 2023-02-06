@@ -8,6 +8,7 @@ import plotly.express as px
 
 from sklearn.metrics import precision_score, recall_score, accuracy_score, balanced_accuracy_score
 
+from immuneML.ml_methods.util.Util import Util
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
@@ -50,20 +51,34 @@ class BinaryFeaturePrecisionRecall(MLReport):
     def _generate(self):
         PathBuilder.build(self.result_path)
 
-        plotting_data_train = self._compute_plotting_data(self.train_dataset.encoded_data)
-        plotting_data_test = self._compute_plotting_data(self.test_dataset.encoded_data)
+        encoded_train_data, encoded_val_data = self._split_train_val_data(self.train_dataset.encoded_data)
+        encoded_test_data = self.test_dataset.encoded_data
 
+        plotting_data_train = self._compute_plotting_data(encoded_train_data)
+        plotting_data_val = self._compute_plotting_data(encoded_val_data)
+        plotting_data_test = self._compute_plotting_data(encoded_test_data)
 
-        train_table = self._write_output_table(plotting_data_train, self.result_path / "training_performance.tsv", name="Training set performance of every subset of binary features")
-        test_table = self._write_output_table(plotting_data_test, self.result_path / "test_performance.tsv", name="Test set performance of every subset of binary features")
+        train_table = self._write_plotting_data(plotting_data_train, dataset_type="training")
+        val_table = self._write_plotting_data(plotting_data_val, dataset_type="validation")
+        test_table = self._write_plotting_data(plotting_data_test, dataset_type="test")
+
+        # train_table = self._write_output_table(plotting_data_train, self.result_path / "training_performance.tsv", name="Training set performance of every subset of binary features")
+        # test_table = self._write_output_table(plotting_data_test, self.result_path / "test_performance.tsv", name="Test set performance of every subset of binary features")
 
         train_fig = self._plot(plotting_data_train, dataset_type="training")
+        val_fig = self._plot(plotting_data_val, dataset_type="validation")
         test_fig = self._plot(plotting_data_test, dataset_type="test")
 
         return ReportResult(self.name,
                             info="Precision and recall scores for each subset of learned binary motifs",
-                            output_tables=[table for table in [train_table, test_table] if table is not None],
-                            output_figures=[fig for fig in [train_fig, test_fig] if fig is not None])
+                            output_tables=[table for table in [train_table, val_table, test_table] if table is not None],
+                            output_figures=[fig for fig in [train_fig, val_fig, test_fig] if fig is not None])
+
+    def _split_train_val_data(self, encoded_train_val_data):
+        encoded_train_data = Util.subset_encoded_data(encoded_train_val_data, self.method.train_indices)
+        encoded_val_data = Util.subset_encoded_data(encoded_train_val_data, self.method.val_indices)
+
+        return encoded_train_data, encoded_val_data
 
     def _compute_plotting_data(self, encoded_data):
         rule_tree_indices = self.method.rule_tree_indices
@@ -88,6 +103,9 @@ class BinaryFeaturePrecisionRecall(MLReport):
             data["balanced_accuracy"].append(balanced_accuracy_score(y_true_bool, y_pred_bool))
 
         return pd.DataFrame(data)
+
+    def _write_plotting_data(self, plotting_data, dataset_type):
+        return self._write_output_table(plotting_data, self.result_path / f"{dataset_type}_performance.tsv", name=f"{dataset_type.title()} set performance of every subset of binary features")
 
     def _plot(self, plotting_data, dataset_type):
         fig = px.line(plotting_data, x="recall", y="precision",

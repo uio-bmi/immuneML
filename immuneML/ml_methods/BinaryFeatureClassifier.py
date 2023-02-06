@@ -56,6 +56,8 @@ class BinaryFeatureClassifier(MLMethod):
         self.keep_all = keep_all
         self.learn_all = learn_all
 
+        self.train_indices = None
+        self.val_indices = None
         self.feature_names = None
         self.rule_tree_indices = None
         self.rule_tree_features = None
@@ -119,7 +121,7 @@ class BinaryFeatureClassifier(MLMethod):
     def _recursively_select_rules(self, encoded_train_data, encoded_val_data, last_val_scores, prev_rule_indices):
         new_rule_indices, val_scores = self._add_next_best_rule(encoded_train_data, encoded_val_data, prev_rule_indices, last_val_scores)
         is_improvement = self._test_is_improvement(val_scores, self.min_delta)
-        logging.info(f"{BinaryFeatureClassifier.__name__}: added rule {len(new_rule_indices)}/{encoded_train_data.examples.shape[1]}")
+        logging.info(f"{BinaryFeatureClassifier.__name__}: added rule {len(new_rule_indices)}/{min(self.max_features, encoded_train_data.examples.shape[1])}")
 
         if new_rule_indices == prev_rule_indices or len(new_rule_indices) >= self.max_features:
             logging.info(f"{BinaryFeatureClassifier.__name__}: no improvement on training set or max features reached")
@@ -243,6 +245,9 @@ class BinaryFeatureClassifier(MLMethod):
 
     def _prepare_and_split_data(self, encoded_data: EncodedData):
         train_indices, val_indices = Util.get_train_val_indices(len(encoded_data.example_ids), self.training_percentage, random_seed=self.random_seed)
+
+        self.train_indices = train_indices
+        self.val_indices = val_indices
 
         train_data = Util.subset_encoded_data(encoded_data, train_indices)
         val_data = Util.subset_encoded_data(encoded_data, val_indices)

@@ -49,7 +49,7 @@ class TestCoefficients(TestCase):
 
         motif_classifier = BinaryFeatureClassifier(training_percentage=0.7,
                                                    random_seed=1,
-                                                   max_motifs=100,
+                                                   max_features=100,
                                                    patience=10,
                                                    min_delta=0,
                                                    keep_all=False,
@@ -86,10 +86,12 @@ class TestCoefficients(TestCase):
 
         self.assertIsInstance(result, ReportResult)
 
-        self.assertTrue(os.path.isfile(path / "test_performance.tsv"))
         self.assertTrue(os.path.isfile(path / "training_performance.tsv"))
-        self.assertTrue(os.path.isfile(path / "test_precision_recall.html"))
+        self.assertTrue(os.path.isfile(path / "validation_performance.tsv"))
+        self.assertTrue(os.path.isfile(path / "test_performance.tsv"))
         self.assertTrue(os.path.isfile(path / "training_precision_recall.html"))
+        self.assertTrue(os.path.isfile(path / "validation_precision_recall.html"))
+        self.assertTrue(os.path.isfile(path / "test_precision_recall.html"))
 
         shutil.rmtree(path)
 
