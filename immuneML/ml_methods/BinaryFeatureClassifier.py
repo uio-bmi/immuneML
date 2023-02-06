@@ -98,7 +98,7 @@ class BinaryFeatureClassifier(MLMethod):
             logging.info(f"{BinaryFeatureClassifier.__name__}: all {len(rules)} rules kept.")
         else:
             encoded_train_data, encoded_val_data = self._prepare_and_split_data(encoded_data)
-            if self.learn_all:
+            if self.learn_all or self.max_features is None:
                 self.max_features = encoded_train_data.examples.shape[1]
 
             old_recursion_limit = sys.getrecursionlimit()

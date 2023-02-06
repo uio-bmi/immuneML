@@ -49,7 +49,7 @@ class GroundTruthMotifOverlap(EncodingReport):
             learned_motifs, groundtruth_motifs, implant_rate_dict
         )
 
-        output_figure = self._safe_plot(overlap_df)
+        output_figure = self._safe_plot(overlap_df=overlap_df)
 
         return ReportResult(
             name=self.name,
@@ -170,6 +170,7 @@ class GroundTruthMotifOverlap(EncodingReport):
         return px.colors.qualitative.Pastel[:-1] + px.colors.qualitative.Set3
 
     def _plot(self, overlap_df) -> ReportOutput:
+        print(overlap_df)
         file_path = self.result_path / f"motif_overlap.html"
         categories = np.sort([int(cat) for cat in overlap_df["implant_rate"].unique()])
         facet_barplot = px.histogram(
@@ -186,6 +187,7 @@ class GroundTruthMotifOverlap(EncodingReport):
             facet_col_spacing=0.05,
             color="motif_size",
             title="Amount of overlapping motifs per implant rate",
+            template="plotly_white"
         )
         facet_barplot.update_yaxes(matches=None, showticklabels=True)
         facet_barplot.update_layout(
