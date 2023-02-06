@@ -170,7 +170,6 @@ class GroundTruthMotifOverlap(EncodingReport):
         return px.colors.qualitative.Pastel[:-1] + px.colors.qualitative.Set3
 
     def _plot(self, overlap_df) -> ReportOutput:
-        print(overlap_df)
         file_path = self.result_path / f"motif_overlap.html"
         categories = np.sort([int(cat) for cat in overlap_df["implant_rate"].unique()])
         facet_barplot = px.histogram(
