@@ -13,14 +13,15 @@ from immuneML.data_model.receptor.Receptor import Receptor
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.simulation.SequenceDispenser import SequenceDispenser
 from immuneML.simulation.SimulationState import SimulationState
-from immuneML.simulation.signal_implanting_strategy.MutationImplanting import MutationImplanting
+from immuneML.simulation.signal_implanting_strategy.DecoyImplanting import DecoyImplanting
+from immuneML.simulation.signal_implanting_strategy.MutatedSequenceImplanting import MutatedSequenceImplanting
+from immuneML.util import Logger
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.steps.Step import Step
 
 
 class SignalImplanter(Step):
-
     DATASET_NAME = "simulated_dataset"
 
     @staticmethod
@@ -47,32 +48,35 @@ class SignalImplanter(Step):
 
     @staticmethod
     def _implant_signals_in_receptors(simulation_state: SimulationState) -> Dataset:
-        processed_receptors = SignalImplanter._implant_signals(simulation_state, SignalImplanter._process_receptor, None)
-        processed_dataset = ReceptorDataset.build_from_objects(receptors=processed_receptors, file_size=simulation_state.dataset.file_size,
-                                                               name=simulation_state.dataset.name, path=simulation_state.result_path)
+        processed_receptors = SignalImplanter._implant_signals(simulation_state, SignalImplanter._process_receptor,
+                                                               None)
+        processed_dataset = ReceptorDataset.build_from_objects(receptors=processed_receptors,
+                                                               file_size=simulation_state.dataset.file_size,
+                                                               name=simulation_state.dataset.name,
+                                                               path=simulation_state.result_path)
 
-        processed_dataset.labels = {**(simulation_state.dataset.labels if simulation_state.dataset.labels is not None else {}),
-                                    **{signal.id: [True, False] for signal in simulation_state.signals}}
+        processed_dataset.labels = {
+            **(simulation_state.dataset.labels if simulation_state.dataset.labels is not None else {}),
+            **{signal.id: [True, False] for signal in simulation_state.signals}}
 
         return processed_dataset
 
     @staticmethod
     def _implant_signals_in_repertoires(simulation_state: SimulationState = None) -> Dataset:
 
-        # only runs if any of the signal implanting strategies are MutationImplanting
-        if any([isinstance(signal.implanting_strategy, MutationImplanting) for implanting in
-                simulation_state.simulation.implantings for signal in implanting.signals]):
-            for implanting in simulation_state.simulation.implantings:
-                for signal in implanting.signals:
-                    if isinstance(signal.implanting_strategy, MutationImplanting):
-                        signal.implanting_strategy.set_sequence_dispenser(SequenceDispenser(simulation_state.dataset.get_data()))
+        SignalImplanter._set_sequence_dispensers(simulation_state)
+        SignalImplanter._load_default_model_name(simulation_state)
 
         repertoires_path = PathBuilder.build(simulation_state.result_path / "repertoires")
-        processed_repertoires = SignalImplanter._implant_signals(simulation_state, SignalImplanter._process_repertoire, repertoires_path)
-        processed_dataset = RepertoireDataset(repertoires=processed_repertoires, labels={**(simulation_state.dataset.labels if simulation_state.dataset.labels is not None else {}),
-                                                                                         **{signal.id: [True, False] for signal in simulation_state.signals}},
+        processed_repertoires = SignalImplanter._implant_signals(simulation_state, SignalImplanter._process_repertoire,
+                                                                 repertoires_path)
+        processed_dataset = RepertoireDataset(repertoires=processed_repertoires, labels={
+            **(simulation_state.dataset.labels if simulation_state.dataset.labels is not None else {}),
+            **{signal.id: [True, False] for signal in simulation_state.signals}},
                                               name=simulation_state.dataset.name,
-                                              metadata_file=Path(SignalImplanter._create_metadata_file(processed_repertoires, simulation_state)))
+                                              metadata_file=Path(
+                                                  SignalImplanter._create_metadata_file(processed_repertoires,
+                                                                                        simulation_state)))
         return processed_dataset
 
     @staticmethod
@@ -91,6 +95,9 @@ class SignalImplanter(Step):
                     current_implanting = simulation_state.simulation.implantings[current_implanting_index]
                 else:
                     current_implanting = None
+            if current_implanting:
+                Logger.print_log(f"Processing rep {index + 1} of {simulation_limits[current_implanting.name]}",
+                                 include_datetime=True)
 
             processed_element = process_element_func(index, element, current_implanting, simulation_state, output_path)
             processed_elements.append(processed_element)
@@ -111,15 +118,23 @@ class SignalImplanter(Step):
         return new_receptor
 
     @staticmethod
-    def _process_repertoire(index, repertoire, current_implanting, simulation_state, output_path: Path = None) -> Repertoire:
+    def _process_repertoire(index, repertoire, current_implanting, simulation_state,
+                            output_path: Path = None) -> Repertoire:
         if current_implanting is not None:
 
-            new_repertoire = SignalImplanter._implant_in_repertoire(index, repertoire, current_implanting, simulation_state)
+            new_repertoire = SignalImplanter._implant_in_repertoire(index, repertoire, current_implanting,
+                                                                    simulation_state)
 
         else:
             new_metadata = {**repertoire.metadata, **{f"{signal.id}": False for signal in simulation_state.signals}}
-            new_repertoire = Repertoire.build_from_sequence_objects(repertoire.sequences, simulation_state.result_path / "repertoires",
-                                                                    metadata=new_metadata)
+            if any([isinstance(signal.implanting_strategy, DecoyImplanting) for implanting in
+                    simulation_state.simulation.implantings for signal in
+                    implanting.signals]):
+                new_repertoire = DecoyImplanting.implant_decoys_in_repertoire(repertoire, simulation_state, new_metadata)
+            else:
+                new_repertoire = Repertoire.build_from_sequence_objects(repertoire.sequences,
+                                                                        simulation_state.result_path / "repertoires",
+                                                                        metadata=new_metadata)
 
         return new_repertoire
 
@@ -128,7 +143,8 @@ class SignalImplanter(Step):
 
         path = simulation_state.result_path / "metadata.csv"
 
-        new_df = pd.DataFrame([{**repertoire.metadata, **{'identifier': repertoire.identifier}} for repertoire in processed_repertoires])
+        new_df = pd.DataFrame(
+            [{**repertoire.metadata, **{'identifier': repertoire.identifier}} for repertoire in processed_repertoires])
         new_df.drop('field_list', axis=1, inplace=True)
         new_df["filename"] = [repertoire.data_filename.name for repertoire in processed_repertoires]
         new_df.to_csv(path, index=False)
@@ -140,6 +156,7 @@ class SignalImplanter(Step):
         new_repertoire = copy.deepcopy(repertoire)
 
         for signal in implanting.signals:
+            Logger.print_log(f"Processing {repertoire.identifier}. Signal: {signal.id}")
 
             new_repertoire = signal.implant_to_repertoire(repertoire=new_repertoire,
                                                           repertoire_implanting_rate=implanting.repertoire_implanting_rate,
@@ -160,9 +177,28 @@ class SignalImplanter(Step):
         return new_repertoire
 
     @staticmethod
+    def _set_sequence_dispensers(simulation_state: SimulationState):
+        """Set SequenceDispenser for signal implanting strategies of type MutatedSequenceImplanting"""
+        if not any([isinstance(signal.implanting_strategy, MutatedSequenceImplanting) for implanting in
+                    simulation_state.simulation.implantings for signal in implanting.signals]):
+            return
+
+        for implanting in simulation_state.simulation.implantings:
+            for signal in implanting.signals:
+                if isinstance(signal.implanting_strategy, MutatedSequenceImplanting):
+                    signal.implanting_strategy.set_sequence_dispenser(
+                        SequenceDispenser(simulation_state.dataset,
+                                          signal.implanting_strategy.occurrence_limit_pgen_range,
+                                          signal.implanting_strategy.mutation_hamming_distance))
+
+    @staticmethod
+    def _load_default_model_name(simulation_state):
+        DecoyImplanting.default_model_name = SequenceDispenser.get_default_model_name(simulation_state.dataset)
+
+    @staticmethod
     def _prepare_simulation_limits(simulation: list, element_count: int) -> dict:
         """for each implanting returns the last index of the element in the dataset with that implanting scheme"""
         limits = {item.name: int(item.dataset_implanting_rate * element_count) for item in simulation}
-        limits = {item_name: sum(list(limits.values())[:i+1]) for i, item_name in enumerate(limits.keys())}
+        limits = {item_name: sum(list(limits.values())[:i + 1]) for i, item_name in enumerate(limits.keys())}
 
         return limits

@@ -81,7 +81,7 @@ class SimulationParser:
     def _parse_simulation(key: str, simulation: dict, symbol_table: SymbolTable) -> SymbolTable:
 
         location = "SimulationParser"
-        valid_implanting_keys = ["dataset_implanting_rate", "repertoire_implanting_rate", "signals", "is_noise"]
+        valid_implanting_keys = ["dataset_implanting_rate", "repertoire_implanting_rate", "signals", "is_noise", "occurrence_limit_pgen_range"]
         implantings = []
 
         for impl_key, implanting in simulation.items():

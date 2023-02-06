@@ -8,6 +8,7 @@ import pandas as pd
 from olga import load_model
 from olga.generation_probability import GenerationProbabilityVJ, GenerationProbabilityVDJ
 from olga.sequence_generation import SequenceGenerationVJ, SequenceGenerationVDJ
+from pandas import DataFrame
 
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.IO.dataset_import.OLGAImport import OLGAImport
@@ -55,7 +56,8 @@ class OLGA(GenerativeModel):
         "humanIGH": "human_B_heavy", "humanIGK": "human_B_kappa", "humanIGL": "human_B_lambda",
         "mouseTRB": "mouse_T_beta", "mouseTRA": "mouse_T_alpha"
     }
-    MODEL_FILENAMES = {'marginals': 'model_marginals.txt', 'params': 'model_params.txt', 'v_gene_anchor': 'V_gene_CDR3_anchors.csv',
+    MODEL_FILENAMES = {'marginals': 'model_marginals.txt', 'params': 'model_params.txt',
+                       'v_gene_anchor': 'V_gene_CDR3_anchors.csv',
                        'j_gene_anchor': 'J_gene_CDR3_anchors.csv'}
     OUTPUT_COLUMNS = ["sequence", 'sequence_aa', 'v_call', 'j_call', 'region_type', "frame_type"]
 
@@ -64,7 +66,8 @@ class OLGA(GenerativeModel):
 
         location = OLGA.__name__
 
-        ParameterValidator.assert_keys_present(list(kwargs.keys()), ['model_path', 'default_model_name', 'use_only_productive'], location,
+        ParameterValidator.assert_keys_present(list(kwargs.keys()),
+                                               ['model_path', 'default_model_name', 'use_only_productive'], location,
                                                'OLGA generative model')
         ParameterValidator.assert_type_and_value(kwargs['use_only_productive'], bool, location, 'use_only_productive')
 
@@ -82,10 +85,12 @@ class OLGA(GenerativeModel):
                 f"{OLGA.__name__}: default_model_name must be None when model_path is set, but now it is {kwargs['default_model_name']}."
             chain = Chain.get_chain(kwargs['chain'])
         else:
-            ParameterValidator.assert_in_valid_list(kwargs['default_model_name'], list(OLGA.DEFAULT_MODEL_FOLDER_MAP.keys()), location,
+            ParameterValidator.assert_in_valid_list(kwargs['default_model_name'],
+                                                    list(OLGA.DEFAULT_MODEL_FOLDER_MAP.keys()), location,
                                                     'default_model_name')
             chain = Chain.get_chain(kwargs['default_model_name'][-3:])
-            kwargs['model_path'] = Path(load_model.__file__).parent / f"default_models/{OLGA.DEFAULT_MODEL_FOLDER_MAP[kwargs['default_model_name']]}"
+            kwargs['model_path'] = Path(
+                load_model.__file__).parent / f"default_models/{OLGA.DEFAULT_MODEL_FOLDER_MAP[kwargs['default_model_name']]}"
 
         return OLGA(**{**kwargs, **{'chain': chain}})
 
@@ -110,13 +115,15 @@ class OLGA(GenerativeModel):
             else SequenceGenerationVJ(olga_gen_model, genomic_data)
 
         if return_new_model:
-            return {"sequence_gen_model": sequence_gen_model, 'v_gene_mapping': v_gene_mapping, 'j_gene_mapping': j_gene_mapping,
+            return {"sequence_gen_model": sequence_gen_model, 'v_gene_mapping': v_gene_mapping,
+                    'j_gene_mapping': j_gene_mapping,
                     "genomic_data": genomic_data, "olga_gen_model": olga_gen_model}
         else:
             self._sequence_gen_model, self._v_gene_mapping, self._j_gene_mapping, self._genomic_data, self._olga_gen_model = \
                 sequence_gen_model, v_gene_mapping, j_gene_mapping, genomic_data, olga_gen_model
 
-    def generate_sequences(self, count: int, seed: int = 1, path: Path = None, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> Path:
+    def generate_sequences(self, count: int, seed: int = 1, path: Path = None,
+                           sequence_type: SequenceType = SequenceType.AMINO_ACID) -> Path:
 
         if not self._sequence_gen_model:
             self.load_model()
@@ -140,7 +147,8 @@ class OLGA(GenerativeModel):
         code = os.system(command)
 
         if code != 0:
-            raise RuntimeError(f"An error occurred while running the OLGA model with the following parameters: {vars(self)}.\nError code: {code}.")
+            raise RuntimeError(
+                f"An error occurred while running the OLGA model with the following parameters: {vars(self)}.\nError code: {code}.")
 
         df = pd.read_csv(path, sep='\t')
         df.columns = self.OUTPUT_COLUMNS[:4]
@@ -148,7 +156,8 @@ class OLGA(GenerativeModel):
         df['frame_type'] = None
         df.to_csv(path, sep='\t', index=False)
 
-    def _generate_productive_sequences(self, count: int, path: Path, seed: int, sequence_gen_model=None, v_gene_mapping=None, j_gene_mapping=None,
+    def _generate_productive_sequences(self, count: int, path: Path, seed: int, sequence_gen_model=None,
+                                       v_gene_mapping=None, j_gene_mapping=None,
                                        **kwargs):
         sequences = pd.DataFrame(index=np.arange(count), columns=OLGA.OUTPUT_COLUMNS)
         sequence_gen_model = self._sequence_gen_model if sequence_gen_model is None else sequence_gen_model
@@ -157,7 +166,8 @@ class OLGA(GenerativeModel):
 
         for i in range(count):
             seq_row = sequence_gen_model.gen_rnd_prod_CDR3()
-            sequences.loc[i] = (seq_row[0], seq_row[1], v_gene_mapping[seq_row[2]], j_gene_mapping[seq_row[3]], RegionType.IMGT_JUNCTION.name,
+            sequences.loc[i] = (seq_row[0], seq_row[1], v_gene_mapping[seq_row[2]], j_gene_mapping[seq_row[3]],
+                                RegionType.IMGT_JUNCTION.name,
                                 SequenceFrameType.IN.name)
 
         sequences.to_csv(path, index=False, sep='\t')
@@ -178,7 +188,8 @@ class OLGA(GenerativeModel):
     def can_generate_from_skewed_gene_models(self) -> bool:
         return True
 
-    def generate_from_skewed_gene_models(self, v_genes: list, j_genes: list, seed: int, path: Path, sequence_type: SequenceType, batch_size: int):
+    def generate_from_skewed_gene_models(self, v_genes: list, j_genes: list, seed: int, path: Path,
+                                         sequence_type: SequenceType, batch_size: int):
         if len(v_genes) > 0 or len(j_genes) > 0:
 
             skewed_model_path = PathBuilder.build(path.parent / "skewed_model/")
@@ -189,7 +200,8 @@ class OLGA(GenerativeModel):
                 model_dict = self.load_model(return_new_model=True, model_path=skewed_model_path)
                 self._generate_productive_sequences(count=batch_size, path=skewed_seqs_path, seed=seed, **model_dict)
             else:
-                self._generate_all_sequences(count=batch_size, path=skewed_seqs_path, seed=seed, model_path=skewed_model_path)
+                self._generate_all_sequences(count=batch_size, path=skewed_seqs_path, seed=seed,
+                                             model_path=skewed_model_path)
 
             if skewed_seqs_path.is_file():
                 pd.read_csv(skewed_seqs_path, sep='\t').to_csv(path, mode='a', sep='\t', index=False, header=False)
@@ -199,6 +211,18 @@ class OLGA(GenerativeModel):
         import_empty_nt_sequences = False if sequence_type == SequenceType.NUCLEOTIDE else True
 
         default_params = DefaultParamsLoader.load('datasets', 'olga')
-        params = DatasetImportParams.build_object(**{**default_params, **{'path': path, "import_empty_nt_sequences": import_empty_nt_sequences}})
+        params = DatasetImportParams.build_object(
+            **{**default_params, **{'path': path, "import_empty_nt_sequences": import_empty_nt_sequences}})
         sequences = ImportHelper.import_items(OLGAImport, path, params)
+        return sequences
+
+    def generate_sequence_dataframe(self, count: int) -> DataFrame:
+
+        sequences = pd.DataFrame(index=np.arange(count), columns=["sequence", 'sequence_aa', 'v_call', 'j_call'])
+
+        for i in range(count):
+            seq_row = self._sequence_gen_model.gen_rnd_prod_CDR3()
+            sequences.loc[i] = (
+                seq_row[0], seq_row[1], self._v_gene_mapping[seq_row[2]], self._j_gene_mapping[seq_row[3]])
+
         return sequences
