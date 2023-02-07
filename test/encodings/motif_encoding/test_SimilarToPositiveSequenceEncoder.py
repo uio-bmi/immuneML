@@ -23,17 +23,17 @@ class TestSimilarToPositiveSequenceEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def _prepare_dataset(self, path):
-        sequences = [ReceptorSequence(amino_acid_sequence="AACC", identifier="a",
+        sequences = [ReceptorSequence(amino_acid_sequence="AACC", identifier="5",
                                       metadata=SequenceMetadata(custom_params={"l1": "yes"})),
-                     ReceptorSequence(amino_acid_sequence="AGDD", identifier="b",
+                     ReceptorSequence(amino_acid_sequence="AGDD", identifier="3",
                                       metadata=SequenceMetadata(custom_params={"l1": "yes"})),
-                     ReceptorSequence(amino_acid_sequence="AAEE", identifier="d",
+                     ReceptorSequence(amino_acid_sequence="AAEE", identifier="4",
                                       metadata=SequenceMetadata(custom_params={"l1": "yes"})),
-                     ReceptorSequence(amino_acid_sequence="CCCC", identifier="e",
+                     ReceptorSequence(amino_acid_sequence="CCCC", identifier="1",
                                       metadata=SequenceMetadata(custom_params={"l1": "no"})),
-                     ReceptorSequence(amino_acid_sequence="AGDE", identifier="c",
+                     ReceptorSequence(amino_acid_sequence="AGDE", identifier="2",
                                       metadata=SequenceMetadata(custom_params={"l1": "no"})),
-                     ReceptorSequence(amino_acid_sequence="EEEE", identifier="f",
+                     ReceptorSequence(amino_acid_sequence="EEEE", identifier="6",
                                       metadata=SequenceMetadata(custom_params={"l1": "no"}))]
 
 
@@ -69,7 +69,7 @@ class TestSimilarToPositiveSequenceEncoder(TestCase):
 
         self.assertEqual(6, encoded_dataset.encoded_data.examples.shape[0])
         self.assertTrue(all(identifier in encoded_dataset.encoded_data.example_ids
-                            for identifier in ["a", "b", "c", "d", "e", "f"]))
+                            for identifier in ["1", "2", "3", "4", "5", "6"]))
 
         self.assertListEqual(["similar_to_positive_sequence"], encoded_dataset.encoded_data.feature_names)
 

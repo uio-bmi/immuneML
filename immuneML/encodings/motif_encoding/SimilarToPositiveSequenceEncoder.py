@@ -144,29 +144,48 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
             return self.get_sequence_matching_feature_with_compairr(dataset, params)
 
     def get_sequence_matching_feature_with_compairr(self, dataset, params: EncoderParams):
-        import subprocess
-        import shutil
-
         compairr_result_path = PathBuilder.build(params.result_path / "compairr_data")
+        compairr_params = self._get_compairr_params()
+
+        pos_sequences_path, all_sequences_path = self._write_compairr_input_files(dataset, compairr_result_path, compairr_params)
+        compairr_result = self._run_compairr(compairr_params, all_sequences_path, pos_sequences_path, compairr_result_path)
+        examples = self._parse_compairr_results(dataset, compairr_result, compairr_params, compairr_result_path)
+
+        if not self.keep_temporary_files:
+            import shutil
+            shutil.rmtree(compairr_result_path, ignore_errors=False, onerror=None)
+
+        return examples
+
+    def _write_compairr_input_files(self, dataset, compairr_result_path, compairr_params):
         pos_sequences_path = compairr_result_path / "positive_sequences.tsv"
         all_sequences_path = compairr_result_path / "all_sequences.tsv"
-
-        compairr_params = self._get_compairr_params()
 
         CompAIRRHelper.write_sequences_file(self.positive_sequences, pos_sequences_path, compairr_params, repertoire_id="positive_sequences")
         CompAIRRHelper.write_sequences_file(dataset, all_sequences_path, compairr_params, repertoire_id="all_sequences")
 
+        return pos_sequences_path, all_sequences_path
+
+    def _run_compairr(self, compairr_params, all_sequences_path, pos_sequences_path, compairr_result_path):
+        import subprocess
+
         args = CompAIRRHelper.get_cmd_args(compairr_params, [all_sequences_path, pos_sequences_path], compairr_result_path, mode="-x")
         logging.info(f"{SimilarToPositiveSequenceEncoder.__name__}: running CompAIRR with the following arguments: {' '.join(args)}")
-
         compairr_result = subprocess.run(args, capture_output=True, text=True)
+
+        return compairr_result
+
+    def _parse_compairr_results(self, dataset, compairr_result, compairr_params, compairr_result_path):
         result = CompAIRRHelper.process_compairr_output_file(compairr_result, compairr_params, compairr_result_path)
+        result.index = result.index.astype(str)
 
         if list(result.index) != dataset.get_example_ids():
-            result = result.reindex(dataset.get_example_ids())
+            if set(list(result.index)) != set(dataset.get_example_ids()):
+                logging.warning(f"{SimilarToPositiveSequenceEncoder.__name__}: CompAIRR index: {list(result.index)}")
+                logging.warning(f"{SimilarToPositiveSequenceEncoder.__name__}: Dataset identifiers: {dataset.get_example_ids()}")
+                assert False, f"{SimilarToPositiveSequenceEncoder.__name__}: error when reindexing CompAIRR results: CompAIRR index does not match dataset identfiers. See the log file for more information."
 
-        if not self.keep_temporary_files:
-            shutil.rmtree(compairr_result_path, ignore_errors=False, onerror=None)
+            result = result.reindex(dataset.get_example_ids())
 
         return np.array([result["positive_sequences"] > 0]).T
 
