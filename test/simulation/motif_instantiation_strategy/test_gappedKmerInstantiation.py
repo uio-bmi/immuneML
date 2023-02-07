@@ -39,6 +39,11 @@ class TestGappedKmerInstantiation(TestCase):
         self.assertTrue(instance.gap == 0)
         self.assertTrue(instance.instance[0] in ["C", "T", "F"])
 
+        strategy = GappedKmerInstantiation(hamming_distance_probabilities={0: 0.333, 1: 0.333, 2: 0.333},
+                                           position_weights=None, alphabet_weights=None)
+
+        strategy.instantiate_motif("CAS")
+
     def test_get_all_possible_motifs(self):
 
         strategy = GappedKmerInstantiation(hamming_distance_probabilities={0: 0.0, 1: 0.667, 2: 0.333}, max_gap=1, min_gap=0,
