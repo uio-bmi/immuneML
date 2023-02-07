@@ -1,6 +1,7 @@
 import logging
 import warnings
 from pathlib import Path
+import shutil
 
 import numpy as np
 
@@ -14,13 +15,11 @@ from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
-from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.util.ImportHelper import ImportHelper
 from immuneML.util.MotifPerformancePlotHelper import MotifPerformancePlotHelper
 from immuneML.util.ParameterValidator import ParameterValidator
-from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
@@ -62,11 +61,13 @@ class MotifTestSetPerformance(EncodingReport):
                  highlight_motifs_path: str = None, highlight_motifs_name: str = None,
                  min_points_in_window: int = None,
                  smoothing_constant1: float = None, smoothing_constant2: float = None,
+                 keep_test_dataset: bool = None,
                  number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.test_dataset_import_cls = test_dataset_import_cls
         self.test_dataset_import_params = test_dataset_import_params
 
+        self.keep_test_dataset = keep_test_dataset
         self.split_by_motif_size = split_by_motif_size
         self.training_set_name = training_set_name
         self.test_set_name = test_set_name
@@ -90,6 +91,7 @@ class MotifTestSetPerformance(EncodingReport):
         ParameterValidator.assert_type_and_value(kwargs["split_by_motif_size"], bool, location, "split_by_motif_size")
         ParameterValidator.assert_type_and_value(kwargs["training_set_name"], str, location, "training_set_name")
         ParameterValidator.assert_type_and_value(kwargs["test_set_name"], str, location, "test_set_name")
+        ParameterValidator.assert_type_and_value(kwargs["keep_test_dataset"], bool, location, "keep_test_dataset")
         ParameterValidator.assert_type_and_value(kwargs["min_points_in_window"], int, location, "min_points_in_window", min_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["smoothing_constant1"], (int, float), location, "smoothing_constant1", min_exclusive=0)
         ParameterValidator.assert_type_and_value(kwargs["smoothing_constant2"], (int, float), location, "smoothing_constant2", min_exclusive=0)
@@ -130,11 +132,9 @@ class MotifTestSetPerformance(EncodingReport):
 
         return import_cls, test_dataset_import_params
 
-
     def _generate(self) -> ReportResult:
         test_dataset = self._get_test_dataset()
         test_encoded_data = self._encode_test_data(test_dataset)
-
 
         training_plotting_data, test_plotting_data = MotifPerformancePlotHelper.get_plotting_data(self.dataset.encoded_data,
                                                                                                   test_encoded_data.encoded_data,
@@ -146,10 +146,14 @@ class MotifTestSetPerformance(EncodingReport):
 
         output_tables, output_plots = self._get_report_outputs(training_plotting_data, test_plotting_data)
 
+        if not self.keep_test_dataset:
+            shutil.rmtree(self.test_dataset_import_params.result_path)
+
         return ReportResult(name=self.name,
-                    info="Performance of motifs on an independent test set",
-                    output_figures=output_plots,
-                    output_tables=output_tables)
+                            info="Performance of motifs on an independent test set",
+                            output_figures=output_plots,
+                            output_tables=output_tables)
+
     def _get_report_outputs(self, training_plotting_data, test_plotting_data):
         if self.split_by_motif_size:
             return self._construct_and_plot_data_per_motif_size(training_plotting_data, test_plotting_data)

@@ -5,3 +5,4 @@ smoothing_constant2: 10
 training_set_name: training set
 test_set_name: test set
 split_by_motif_size: true
+keep_test_dataset: true
