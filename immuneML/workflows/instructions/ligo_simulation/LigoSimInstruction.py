@@ -1,6 +1,5 @@
 import copy
 import dataclasses
-import logging
 import math
 import os
 import random
@@ -28,6 +27,7 @@ from immuneML.simulation.util.util import get_bnp_data, make_receptor_sequence_o
     get_signal_sequence_count, check_sequence_count, make_repertoire_from_sequences, get_no_signal_sequences, get_signal_sequences, \
     annotate_sequences
 from immuneML.util.ExporterHelper import ExporterHelper
+from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
 
@@ -213,7 +213,7 @@ class LigoSimInstruction(Instruction):
         path = PathBuilder.build(base_path / sim_item.name)
         seqs_per_signal_count = get_sequence_per_signal_count(sim_item)
         seq_paths = make_sequence_paths(path, sim_item.signals)
-        iteration = 0
+        iteration = 1
 
         while sum(seqs_per_signal_count.values()) > 0 and iteration < self._max_iterations:
             sequences = self._make_background_sequences(path, iteration, sim_item, seqs_per_signal_count,
@@ -221,7 +221,7 @@ class LigoSimInstruction(Instruction):
 
             if self.state.simulation.keep_p_gen_dist and iteration == 0:
                 self._make_p_gen_histogram(sequences)
-                logging.info("Computed a histogram from the first batch of background sequences.")
+                print_log("Computed a histogram from the first batch of background sequences.", True)
 
             sequences = annotate_sequences(sequences, self.sequence_type == SequenceType.AMINO_ACID, self.state.signals, self._annotated_dataclass)
 
@@ -236,7 +236,7 @@ class LigoSimInstruction(Instruction):
             seqs_per_signal_count = update_seqs_with_signal(copy.deepcopy(seqs_per_signal_count), sequences, self.state.signals, sim_item.signals,
                                                             seq_paths)
 
-            logging.info(f"Iteration: {iteration} in {sim_item.name}: remaining sequence count per signal for {sim_item.name}: {seqs_per_signal_count}")
+            print_log(f"Iteration: {iteration} in {sim_item.name}: " + f"remaining sequence count per signal for {sim_item.name}: {seqs_per_signal_count}" if sum(seqs_per_signal_count.values()) > 0 else f"{sim_item.name} simulation finished", True)
             check_iteration_progress(iteration, self._max_iterations)
             iteration += 1
 
@@ -258,7 +258,7 @@ class LigoSimInstruction(Instruction):
             sim_item.generative_model.generate_sequences(self._sequence_batch_size, seed=sim_item.seed, path=sequence_path,
                                                          sequence_type=self.sequence_type, compute_p_gen=self._use_p_gens)
 
-            logging.info(f"Generated {self._sequence_batch_size} background sequences, stored at {sequence_path}.")
+            print_log(f"Generated {self._sequence_batch_size} background sequences, stored at {sequence_path}.", True)
 
         skew_model_for_signal = needs_seqs_with_signal(sequence_per_signal_count)
 
@@ -268,12 +268,12 @@ class LigoSimInstruction(Instruction):
                                                                        sequence_type=self.sequence_type, batch_size=self._sequence_batch_size,
                                                                        compute_p_gen=self._use_p_gens)
 
-            logging.info(f"Generated {self._sequence_batch_size} sequences from skewed model for given V/J genes at {sequence_path}.")
+            print_log(f"Generated {self._sequence_batch_size} sequences from skewed model for given V/J genes at {sequence_path}.", True)
 
         data = get_bnp_data(sequence_path, BackgroundSequences)
 
         os.remove(sequence_path)
-        logging.info(f"Prepared sequences for processing and removed temporary file {sequence_path}.")
+        print_log(f"Prepared sequences for processing and removed temporary file {sequence_path}.", True)
 
         return data
 
@@ -298,6 +298,6 @@ class LigoSimInstruction(Instruction):
         sequence_bins = np.digitize(p_gens, self.state.p_gen_bins) - 1
         keep_sequences = np.random.uniform(0, 1, len(sequences)) <= self.state.target_p_gen_histogram[sequence_bins]
 
-        logging.info(f"Removed {len(sequences) - sum(keep_sequences)} out of {len(sequences)} when filtering by p_gens.")
+        print_log(f"Removed {len(sequences) - sum(keep_sequences)} out of {len(sequences)} when filtering by p_gens.", True)
 
         return sequences[keep_sequences]

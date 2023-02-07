@@ -1,4 +1,3 @@
-import logging
 import random
 from dataclasses import fields as get_fields
 from typing import List
@@ -15,11 +14,11 @@ from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.simulation_strategy.SimulationStrategy import SimulationStrategy
 from immuneML.simulation.util.bnp_util import merge_dataclass_objects
 from immuneML.simulation.util.util import build_imgt_positions, choose_implant_position, filter_out_illegal_sequences, annotate_sequences
+from immuneML.util.Logger import print_log
 from immuneML.util.PositionHelper import PositionHelper
 
 
 class ImplantingStrategy(SimulationStrategy):
-
     MIN_RANGE_PROBABILITY = 1e-5
 
     def process_sequences(self, sequences: BNPDataClass, seqs_per_signal_count: dict, use_p_gens: bool, sequence_type: SequenceType,
@@ -67,8 +66,8 @@ class ImplantingStrategy(SimulationStrategy):
                         remaining_seq_mask[sequence_index] = False
                         seqs_per_signal_count[signal.id] -= 1
                     else:
-                        logging.warning(f"{ImplantingStrategy.__name__}: could not find a sequence to implant {instance} for signal {signal.id}, "
-                                        f"skipping for now.")
+                        print_log(f"{ImplantingStrategy.__name__}: could not find a sequence to implant {instance} for signal {signal.id}, "
+                                  f"skipping for now.", True, 'warning')
 
         return remaining_seq_mask, implanted_sequences
 
