@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import numpy as np
@@ -150,12 +151,14 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
         pos_sequences_path = compairr_result_path / "positive_sequences.tsv"
         all_sequences_path = compairr_result_path / "all_sequences.tsv"
 
-        compairr_params = self._get_compairr_params(compairr_result_path)
+        compairr_params = self._get_compairr_params()
 
-        CompAIRRHelper.write_sequences_file(self.positive_sequences, pos_sequences_path, compairr_params, repertoire_id="all_sequences")
-        CompAIRRHelper.write_sequences_file(dataset, all_sequences_path, compairr_params, repertoire_id="pos_sequences")
+        CompAIRRHelper.write_sequences_file(self.positive_sequences, pos_sequences_path, compairr_params, repertoire_id="positive_sequences")
+        CompAIRRHelper.write_sequences_file(dataset, all_sequences_path, compairr_params, repertoire_id="all_sequences")
 
         args = CompAIRRHelper.get_cmd_args(compairr_params, [all_sequences_path, pos_sequences_path], compairr_result_path, mode="-x")
+        logging.info(f"{SimilarToPositiveSequenceEncoder.__name__}: running CompAIRR with the following arguments: {' '.join(args)}")
+
         compairr_result = subprocess.run(args, capture_output=True, text=True)
         result = CompAIRRHelper.process_compairr_output_file(compairr_result, compairr_params, compairr_result_path)
 
@@ -165,9 +168,9 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
         if not self.keep_temporary_files:
             shutil.rmtree(compairr_result_path, ignore_errors=False, onerror=None)
 
-        return np.array([result["all_sequences"] > 0]).T
+        return np.array([result["positive_sequences"] > 0]).T
 
-    def _get_compairr_params(self, compairr_result_path):
+    def _get_compairr_params(self):
         return CompAIRRParams(compairr_path=self.compairr_path,
                               keep_compairr_input=self.keep_temporary_files,
                               differences=self.hamming_distance,
@@ -175,8 +178,8 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
                               ignore_counts=True,
                               ignore_genes=self.ignore_genes,
                               threads=self.threads,
-                              output_filename=compairr_result_path / "compairr_out.txt",
-                              log_filename=compairr_result_path / "compairr_log.txt")
+                              output_filename="compairr_out.txt",
+                              log_filename="compairr_log.txt")
 
     def get_sequence_matching_feature_without_compairr(self, dataset):
         matcher = SequenceMatcher()
