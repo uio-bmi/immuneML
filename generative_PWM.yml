@@ -3,8 +3,8 @@ definitions:
     d1:
       format: AIRR
       params:
-        path: random_generative_model_data/my_dataset_export_instruction/d1/AIRR
-        metadata_file: random_generative_model_data/my_dataset_export_instruction/d1/AIRR/metadata.csv
+        path: PWM_dataset/my_dataset_export_instruction/d1/AIRR
+        metadata_file: PWM_dataset/my_dataset_export_instruction/d1/AIRR/metadata.csv
         is_repertoire: True
   encodings:
     e1: TextAsInt
