@@ -144,7 +144,7 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
             return self.get_sequence_matching_feature_with_compairr(dataset, params)
 
     def get_sequence_matching_feature_with_compairr(self, dataset, params: EncoderParams):
-        compairr_result_path = PathBuilder.build(params.result_path / "compairr_data")
+        compairr_result_path = PathBuilder.build(params.result_path / f"compairr_data/learn_{params.learn_model}")
         compairr_params = self._get_compairr_params()
 
         pos_sequences_path, all_sequences_path = self._write_compairr_input_files(dataset, compairr_result_path, compairr_params)
