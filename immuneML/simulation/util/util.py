@@ -28,15 +28,15 @@ from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.PositionHelper import PositionHelper
 
 
-def get_signal_sequence_count(repertoire_count: int, sim_item) -> int:
-    return round(sim_item.receptors_in_repertoire_count * sim_item.repertoire_implanting_rate) * repertoire_count
+def get_signal_sequence_count(repertoire_count: int, signal_proportion: float, receptors_in_repertoire_count: int) -> int:
+    return round(receptors_in_repertoire_count * signal_proportion) * repertoire_count
 
 
-def get_sequence_per_signal_count(sim_item) -> dict:
+def get_sequence_per_signal_count(sim_item: SimConfigItem) -> dict:
     if sim_item.receptors_in_repertoire_count:
         sequence_count = sim_item.receptors_in_repertoire_count * sim_item.number_of_examples
-        seq_with_signal_count = {signal.id: get_signal_sequence_count(repertoire_count=sim_item.number_of_examples, sim_item=sim_item)
-                                 for signal in sim_item.signals}
+        seq_with_signal_count = {signal.id: get_signal_sequence_count(sim_item.number_of_examples, proportion, sim_item.receptors_in_repertoire_count)
+                                 for signal, proportion in sim_item.signal_proportions.items()}
         seq_without_signal_count = {'no_signal': sequence_count - sum(seq_with_signal_count.values())}
 
         return {**seq_with_signal_count, **seq_without_signal_count}
@@ -311,7 +311,7 @@ def get_signal_sequences(sequences, bnp_data_class, used_seq_count: dict, sim_it
     for signal in sim_item.signals:
 
         skip_rows = used_seq_count[signal.id]
-        n_rows = round(sim_item.receptors_in_repertoire_count * sim_item.repertoire_implanting_rate)
+        n_rows = round(sim_item.receptors_in_repertoire_count * sim_item.signal_proportions[signal])
 
         sequences_sig = get_bnp_data(sequence_paths[signal.id], bnp_data_class)[skip_rows:skip_rows + n_rows]
 

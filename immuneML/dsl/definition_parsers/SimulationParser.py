@@ -15,65 +15,6 @@ from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
 class SimulationParser:
-    """
-    YAML specification:
-
-    .. highlight:: yaml
-    .. code-block:: yaml
-
-    definitions:
-        dataset:
-            my_dataset:
-                ...
-
-        motifs:
-            m1:
-                seed: AAC # "/" character denotes the gap in the seed if present (e.g. AA/C)
-                instantiation:
-                    GappedKmer:
-                        # probability that when hamming distance is allowed a letter in the seed will be replaced by
-                        # other alphabet letters - alphabet_weights
-                        alphabet_weights:
-                            A: 0.2
-                            C: 0.2
-                            D: 0.4
-                            E: 0.2
-                        # Relative probabilities of choosing each position in the seed for hamming distance modification.
-                        # The probabilities will be scaled to sum to one - position_weights
-                        position_weights:
-                            0: 1
-                            1: 0
-                            2: 0
-                        hamming_distance_probabilities:
-                            0: 0.5 # Hamming distance of 0 (no change) with probability 0.5
-                            1: 0.5 # Hamming distance of 1 (one letter change) with probability 0.5
-                        min_gap: 0
-                        max_gap: 1
-        signals:
-            s1:
-                motifs: # list of all motifs for signal which will be uniformly sampled to get a motif instance for implanting
-                    - m1
-                sequence_position_weights: # likelihood of implanting at IMGT position of receptor sequence
-                    107: 0.5
-                implanting: HealthySequence # choose only sequences with no other signals for to implant one of the motifs
-        simulations:
-            sim1: # one SimConfig object consists of a dict of Implanting objects
-                i1:
-                    dataset_implanting_rate: 0.5 # percentage of repertoire where the signals will be implanted
-                    repertoire_implanting_rate: 0.01 # percentage of sequences within repertoire where the signals will be implanted
-                    signals:
-                        - s1
-
-    instructions:
-        my_simulation_instruction:
-            type: SimConfig
-            dataset: my_dataset
-            simulation: sim1
-            batch_size: 5 # number of repertoires that can be loaded at the same time
-                          # (only affects the speed)
-            export_formats: [AIRR, ImmuneML]
-
-    """
 
     keyword = "simulations"
 
@@ -123,20 +64,21 @@ class SimulationParser:
     @staticmethod
     def _parse_sim_config_item(simulation_item: dict, key: str, symbol_table: SymbolTable) -> Tuple[SimConfigItem, dict]:
         location = SimulationParser.__name__
-        valid_simulation_item_keys = ["number_of_examples", "repertoire_implanting_rate", "signals", "is_noise", "seed",
+        valid_simulation_item_keys = ["number_of_examples", "signals", "is_noise", "seed",
                                       "false_positive_prob_in_receptors", "false_negative_prob_in_receptors",
                                       "receptors_in_repertoire_count", "generative_model", "immune_events"]
 
         simulation_item = {**DefaultParamsLoader.load('simulation', 'ligo_sim_config_item'), **simulation_item}
 
         ParameterValidator.assert_keys(simulation_item.keys(), valid_simulation_item_keys, location, key, exclusive=True)
-        ParameterValidator.assert_keys(simulation_item["signals"], symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, key, False)
+
         ParameterValidator.assert_type_and_value(simulation_item['is_noise'], bool, location, 'is_noise')
+        SimulationParser._parse_signals(simulation_item, symbol_table, location, key)
 
         for k in ['number_of_examples', 'seed']:
             ParameterValidator.assert_type_and_value(simulation_item[k], int, location, k, min_inclusive=1)
 
-        for k, val_type in zip(['repertoire_implanting_rate', 'receptors_in_repertoire_count', 'immune_events'], [float, int, dict]):
+        for k, val_type in zip(['receptors_in_repertoire_count', 'immune_events'], [int, dict]):
             if simulation_item[k]:
                 ParameterValidator.assert_type_and_value(simulation_item[k], val_type, location, k)
 
@@ -148,11 +90,28 @@ class SimulationParser:
         gen_model = SimulationParser._parse_generative_model(simulation_item, location)
 
         params = copy.deepcopy(simulation_item)
-        params["signals"] = [symbol_table.get(signal) for signal in simulation_item["signals"]]
+        params["signal_proportions"] = {symbol_table.get(signal): proportion for signal, proportion in simulation_item["signals"].items()}
         params["name"] = key
         params['generative_model'] = gen_model
 
-        return SimConfigItem(**{key: val for key, val in params.items() if key != 'type'}), simulation_item
+        return SimConfigItem(**{key: val for key, val in params.items() if key not in ['signals', 'type']}), simulation_item
+
+    @staticmethod
+    def _parse_signals(sim_item: dict, symbol_table: SymbolTable, location: str, key: str) -> dict:
+        if isinstance(sim_item['signals'], dict):
+
+            ParameterValidator.assert_keys(list(sim_item["signals"].keys()), symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, key, False)
+            assert 0 <= sum(sim_item['signals'].values()) <= 1, sim_item['signals']
+
+        elif isinstance(sim_item['signals'], list):
+
+            assert len(sim_item['signals']) == 1 and sim_item['receptors_in_repertoire_count'] != 0, \
+                f'Multiple signals are not supported for receptor-level simulation for sim_item {key}.'
+            ParameterValidator.assert_keys(sim_item["signals"], symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, key, False)
+
+            sim_item['signals'] = {sim_item['signals'][0]: 1}
+
+        return sim_item
 
     @staticmethod
     def _parse_generative_model(simulation_item: dict, location: str):

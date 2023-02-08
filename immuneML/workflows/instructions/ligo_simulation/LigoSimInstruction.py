@@ -24,8 +24,8 @@ from immuneML.simulation.simulation_strategy.ImplantingStrategy import Implantin
 from immuneML.simulation.util.bnp_util import merge_dataclass_objects
 from immuneML.simulation.util.util import get_bnp_data, make_receptor_sequence_objects, make_annotated_dataclass, get_sequence_per_signal_count, \
     update_seqs_without_signal, update_seqs_with_signal, check_iteration_progress, make_sequence_paths, make_signal_metadata, needs_seqs_with_signal, \
-    get_signal_sequence_count, check_sequence_count, make_repertoire_from_sequences, get_no_signal_sequences, get_signal_sequences, \
-    annotate_sequences
+    check_sequence_count, make_repertoire_from_sequences, get_no_signal_sequences, get_signal_sequences, \
+    annotate_sequences, get_signal_sequence_count
 from immuneML.util.ExporterHelper import ExporterHelper
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
@@ -194,8 +194,8 @@ class LigoSimInstruction(Instruction):
         repertoires_path = PathBuilder.build(path / "repertoires")
 
         for i in range(item.number_of_examples):
-            seqs_no_signal_count = item.receptors_in_repertoire_count - get_signal_sequence_count(repertoire_count=1, sim_item=item) * len(
-                item.signals)
+            seqs_no_signal_count = item.receptors_in_repertoire_count - sum(get_signal_sequence_count(1, proportion, item.receptors_in_repertoire_count)
+                                                                            for _, proportion in item.signal_proportions.items())
 
             sequences, used_seq_count = get_no_signal_sequences(used_seq_count=used_seq_count, seqs_no_signal_count=seqs_no_signal_count,
                                                                 bnp_data_class=self._annotated_dataclass, sequence_paths=sequence_paths)
@@ -236,7 +236,7 @@ class LigoSimInstruction(Instruction):
             seqs_per_signal_count = update_seqs_with_signal(copy.deepcopy(seqs_per_signal_count), sequences, self.state.signals, sim_item.signals,
                                                             seq_paths)
 
-            print_log(f"Iteration: {iteration} in {sim_item.name}: " + f"remaining sequence count per signal for {sim_item.name}: {seqs_per_signal_count}" if sum(seqs_per_signal_count.values()) > 0 else f"{sim_item.name} simulation finished", True)
+            print_log(f"Finished iteration {iteration} in {sim_item.name}: " + f"remaining sequence count per signal for {sim_item.name}: {seqs_per_signal_count}" if sum(seqs_per_signal_count.values()) > 0 else f"{sim_item.name} simulation finished", True)
             check_iteration_progress(iteration, self._max_iterations)
             iteration += 1
 

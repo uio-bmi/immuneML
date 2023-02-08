@@ -56,6 +56,9 @@ class Signal:
     def make_motif_instances(self, count, sequence_type):
         return [motif.instantiate_motif(sequence_type=sequence_type) for motif in random.choices(self.motifs, k=count)]
 
+    def __hash__(self):
+        return hash(self.id)
+
     def __str__(self):
         return "Signal id: " + self.id + "; motifs: " + ", ".join([str(motif) for motif in self.motifs])
 
