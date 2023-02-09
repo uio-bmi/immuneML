@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
+import numpy as np
 
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -11,6 +12,7 @@ from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -23,6 +25,8 @@ class AminoAcidFrequencyDistribution(DataReport):
     """
     Generates a barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.
 
+    # todo: if split_by_label -> also plots logfold difference
+
     Arguments:
 
         imgt_positions (bool): Whether to use IMGT positional numbering or sequence index numbering. When imgt_positions is True, IMGT positions are used, meaning sequences of unequal length are aligned according to their IMGT positions. By default imgt_positions is True.
@@ -32,6 +36,8 @@ class AminoAcidFrequencyDistribution(DataReport):
         split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a single label, or alternatively the label of interest can be specified under 'label'. By default, split_by_label is False.
 
         label (str): if split_by_label is set to True, a label can be specified here.
+
+        pseudocount
 
     YAML specification:
 
@@ -60,29 +66,58 @@ class AminoAcidFrequencyDistribution(DataReport):
                 warnings.warn(f"{location}: label is set but split_by_label was False, setting split_by_label to True")
                 kwargs["split_by_label"] = True
 
+        if kwargs["split_by_label"]:
+            ParameterValidator.assert_type_and_value(kwargs["pseudocount"], (int, float), location, "pseudocount", min_exclusive=0)
+
         return AminoAcidFrequencyDistribution(**kwargs)
 
     def __init__(self, dataset: SequenceDataset = None, imgt_positions: bool = None, relative_frequency: bool = None,
-                 split_by_label: bool = None, label: str = None,
+                 split_by_label: bool = None, label: str = None, pseudocount: float = None,
                  result_path: Path = None, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.imgt_positions = imgt_positions
         self.relative_frequency = relative_frequency
         self.split_by_label = split_by_label
         self.label_name = label
+        self.pseudocount = pseudocount
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
 
         freq_dist = self._get_plotting_data()
 
-        results_table = self._write_results_table(freq_dist)
-        report_output_fig = self._safe_plot(freq_dist=freq_dist)
+        tables = []
+        figures = []
+
+
+        tables.append(self._write_output_table(freq_dist,
+                                                 self.result_path / "amino_acid_frequency_distribution.tsv",
+                                                 name="Table of amino acid frequencies"))
+
+        figures.append(self._safe_plot(freq_dist=freq_dist, plot_callable="_plot_distribution"))
+
+        if self.split_by_label:
+            logfold_change = self._compute_log_fold_change(freq_dist)
+
+            tables.append(self._write_output_table(logfold_change,
+                                                   self.result_path / f"log_fold_change.tsv",
+                                                   name=f"Log-fold change between classes"))
+            figures.append(self._safe_plot(logfold_change=logfold_change, plot_callable="_plot_logfold_change"))
+
+            # todo numpy log base 2??
+            # todo write these tables
+            # todo plot figure
+
+
+
+
+
+
 
         return ReportResult(name=self.name,
                             info="A barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.",
-                            output_figures=[] if report_output_fig is None else [report_output_fig],
-                            output_tables=[] if results_table is None else [results_table])
+                            output_figures=[fig for fig in figures if fig is not None],
+                            output_tables=[table for table in tables if table is not None])
 
     def _get_plotting_data(self):
         if isinstance(self.dataset, SequenceDataset):
@@ -211,21 +246,30 @@ class AminoAcidFrequencyDistribution(DataReport):
         return [str(pos) for pos in positions]
 
     def _write_results_table(self, results_table):
-        file_path = self.result_path / "amino_acid_frequency_distribution.csv"
+        file_path = self.result_path / "amino_acid_frequency_distribution.tsv"
 
         results_table.to_csv(file_path, index=False)
 
         return ReportOutput(path=file_path, name="Table of amino acid frequencies")
 
 
+    # def _get_colors(self):
+    #     return ['rgb(102, 197, 204)','rgb(179,222,105)', 'rgb(220, 176, 242)', 'rgb(217,217,217)',
+    #             'rgb(141,211,199)', 'rgb(251,128,114)', 'rgb(158, 185, 243)', 'rgb(248, 156, 116)',
+    #             'rgb(135, 197, 95)', 'rgb(254, 136, 177)', 'rgb(201, 219, 116)', 'rgb(255,237,111)',
+    #             'rgb(180, 151, 231)', 'rgb(246, 207, 113)', 'rgb(190,186,218)', 'rgb(128,177,211)',
+    #             'rgb(253,180,98)',  'rgb(252,205,229)', 'rgb(188,128,189)', 'rgb(204,235,197)', ]
+    #
     def _get_colors(self):
-        return ['rgb(102, 197, 204)','rgb(179,222,105)', 'rgb(220, 176, 242)', 'rgb(217,217,217)',
-                'rgb(141,211,199)', 'rgb(251,128,114)', 'rgb(158, 185, 243)', 'rgb(248, 156, 116)',
-                'rgb(135, 197, 95)', 'rgb(254, 136, 177)', 'rgb(201, 219, 116)', 'rgb(255,237,111)',
-                'rgb(180, 151, 231)', 'rgb(246, 207, 113)', 'rgb(190,186,218)', 'rgb(128,177,211)',
-                'rgb(253,180,98)',  'rgb(252,205,229)', 'rgb(188,128,189)', 'rgb(204,235,197)', ]
+        return {'Y': 'rgb(102, 197, 204)', 'W': 'rgb(179,222,105)', 'V': 'rgb(220, 176, 242)',
+                'T': 'rgb(217,217,217)', 'S': 'rgb(141,211,199)', 'R': 'rgb(251,128,114)',
+                'Q': 'rgb(158, 185, 243)', 'P': 'rgb(248, 156, 116)', 'N': 'rgb(135, 197, 95)',
+                'M': 'rgb(254, 136, 177)', 'L': 'rgb(201, 219, 116)', 'K': 'rgb(255,237,111)',
+                'I': 'rgb(180, 151, 231)', 'H': 'rgb(246, 207, 113)', 'G': 'rgb(190,186,218)',
+                'F': 'rgb(128,177,211)', 'E': 'rgb(253,180,98)',  'D': 'rgb(252,205,229)',
+                'C': 'rgb(188,128,189)', 'A': 'rgb(204,235,197)'}
 
-    def _plot(self, freq_dist):
+    def _plot_distribution(self, freq_dist):
         freq_dist.sort_values(by=["amino acid"], ascending=False, inplace=True)
         category_orders = None if "class" not in freq_dist.columns else {"class": sorted(set(freq_dist["class"]))}
 
@@ -234,7 +278,8 @@ class AminoAcidFrequencyDistribution(DataReport):
         figure = px.bar(freq_dist, x="position", y=y, color="amino acid", text="amino acid",
                         facet_col="class" if "class" in freq_dist.columns else None,
                         facet_row="chain" if "chain" in freq_dist.columns else None,
-                        color_discrete_sequence=self._get_colors(), category_orders=category_orders,
+                        color_discrete_map=PlotlyUtil.get_amino_acid_color_map(),
+                        category_orders=category_orders,
                         labels={"position": "IMGT position" if self.imgt_positions else "Position",
                                 "count": "Count",
                                 "relative frequency": "Relative frequency",
@@ -242,10 +287,8 @@ class AminoAcidFrequencyDistribution(DataReport):
         figure.update_xaxes(categoryorder='array', categoryarray=self._get_position_order(freq_dist["position"]))
         figure.update_layout(showlegend=False, yaxis={'categoryorder':'category ascending'})
 
-
         if self.relative_frequency:
             figure.update_yaxes(tickformat=",.0%", range=[0,1])
-
 
         file_path = self.result_path / "amino_acid_frequency_distribution.html"
         figure.write_html(str(file_path))
@@ -254,6 +297,53 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     def _get_position_order(self, positions):
         return [str(int(pos)) if pos.is_integer() else str(pos) for pos in sorted(set(positions.astype(float)))]
+
+    def _compute_log_fold_change(self, freq_dist):
+        classes = sorted(set(freq_dist["class"]))
+        assert len(classes) == 2, f"{AminoAcidFrequencyDistribution.__name__}: cannot compute log fold change when the number of classes is not 2: {classes}"
+
+        freq_dist["count"] += self.pseudocount
+        class_a_df = freq_dist[freq_dist["class"] == classes[0]]
+        class_b_df = freq_dist[freq_dist["class"] == classes[1]]
+
+        on = ["amino acid", "position"]
+        on = on + ["chain"] if "chain" in freq_dist.columns else on
+
+        merged_dfs = pd.merge(class_a_df, class_b_df, on=on, how="outer", suffixes=["_a", "_b"])
+
+        merged_dfs["log_fold_change"] = np.log2(merged_dfs["count_a"] / merged_dfs["count_b"])
+
+        pos_class_a = merged_dfs[merged_dfs["log_fold_change"] > 0]
+        pos_class_b = merged_dfs[merged_dfs["log_fold_change"] < 0]
+
+        pos_class_a["positive_class"] = classes[0]
+        pos_class_b["positive_class"] = classes[1]
+        pos_class_b["log_fold_change"] = 1 - pos_class_b["log_fold_change"]
+
+        keep_cols = on + ["log_fold_change", "positive_class"]
+        pos_class_a = pos_class_a[keep_cols]
+        pos_class_b = pos_class_b[keep_cols]
+
+        return pd.concat([pos_class_a, pos_class_b])
+
+    def _plot_logfold_change(self, logfold_change):
+        figure = px.bar(logfold_change, x="position", y="log_fold_change", color="amino acid", text="amino acid",
+                        facet_col="positive_class",
+                        facet_row="chain" if "chain" in logfold_change.columns else None,
+                        color_discrete_map=PlotlyUtil.get_amino_acid_color_map(),
+                        labels={"position": "IMGT position" if self.imgt_positions else "Position",
+                                "positive_class": "Class",
+                                "log_fold_change": "Log2 fold change",
+                                "amino acid": "Amino acid"}, template="plotly_white")
+
+        figure.update_xaxes(categoryorder='array', categoryarray=self._get_position_order(logfold_change["position"]))
+        figure.update_layout(showlegend=False, yaxis={'categoryorder':'category ascending'})
+
+        file_path = self.result_path / "log_fold_change.html"
+        figure.write_html(str(file_path))
+
+        return ReportOutput(path=file_path, name="Log fold difference between the two classes")
+
 
     def _get_label_name(self):
         if self.split_by_label:
@@ -276,3 +366,4 @@ class AminoAcidFrequencyDistribution(DataReport):
                     return False
 
         return True
+

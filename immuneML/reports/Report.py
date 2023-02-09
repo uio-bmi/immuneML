@@ -139,7 +139,7 @@ class Report(metaclass=abc.ABCMeta):
             logging.warning(warning_mssg)
 
     def _write_output_table(self, table, file_path, name=None):
-        sep = "," if file_path.suffix == "csv" else "\t"
+        sep = "," if file_path.suffix == ".csv" else "\t"
         table.to_csv(file_path, index=False, sep=sep)
 
         return ReportOutput(path=file_path, name=name)

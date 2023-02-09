@@ -11,6 +11,7 @@ from immuneML.encodings.motif_encoding.PositionalMotifHelper import (
 )
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
@@ -182,6 +183,10 @@ class PositionalMotifFrequencies(EncodingReport):
 
     def _plot_positional_aa_counts(self, positional_aa_counts_df):
         file_path = self.result_path / f"positional_motif_frequencies.html"
+
+        # reverse sort column names makes amino acids stack alphabetically in bar chart
+        positional_aa_counts_df = positional_aa_counts_df[sorted(positional_aa_counts_df.columns)[::-1]]
+
         positional_aa_counts_fig = px.bar(
             positional_aa_counts_df,
             labels={
@@ -189,7 +194,7 @@ class PositionalMotifFrequencies(EncodingReport):
                 "value": "Frequency across high-scoring motifs",
             },
             text="variable",
-            color_discrete_sequence=self._get_color_discrete_sequence(),
+            color_discrete_map=PlotlyUtil.get_amino_acid_color_map(),
             template="plotly_white",
         )
         positional_aa_counts_fig.update_layout(
