@@ -31,6 +31,7 @@ class PDBDataset(Dataset):
         self.list_of_PDB_Structures = self.generate_PDB_Structures()
 
 
+
     def check_if_PDB_file_has_IMGT_numbering(self, pdb_structure):
         for pdb_file in self.get_pdb_filepaths():
             if pdb_structure.header['idcode'].lower() in pdb_file:

@@ -8,13 +8,13 @@ from immuneML.data_model.receptor.RegionType import RegionType
 
 
 
-class PDBDistanceMatrixEncoder(DatasetEncoder):
+class DistanceToAntigenMatrixEncoder(DatasetEncoder):
 
 
 
     @staticmethod
     def build_object(dataset=None, **params):
-        return PDBDistanceMatrixEncoder(**params)
+        return DistanceToAntigenMatrixEncoder(**params)
 
     def __init__(self, name: str = None, region_type: RegionType = None):
 

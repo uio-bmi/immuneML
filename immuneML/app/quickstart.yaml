@@ -10,7 +10,7 @@ definitions:
         region_type: IMGT_CDR3
   encodings:
     my_encoding:
-      PDBDistanceMatrix:
+      DistanceBetweenStructures:
         name: Test
 instructions:
     my_expl_analysis_instruction: # user-defined instruction name
