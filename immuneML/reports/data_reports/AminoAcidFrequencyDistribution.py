@@ -302,7 +302,6 @@ class AminoAcidFrequencyDistribution(DataReport):
         classes = sorted(set(freq_dist["class"]))
         assert len(classes) == 2, f"{AminoAcidFrequencyDistribution.__name__}: cannot compute log fold change when the number of classes is not 2: {classes}"
 
-        freq_dist["count"] += self.pseudocount
         class_a_df = freq_dist[freq_dist["class"] == classes[0]]
         class_b_df = freq_dist[freq_dist["class"] == classes[1]]
 
@@ -310,8 +309,9 @@ class AminoAcidFrequencyDistribution(DataReport):
         on = on + ["chain"] if "chain" in freq_dist.columns else on
 
         merged_dfs = pd.merge(class_a_df, class_b_df, on=on, how="outer", suffixes=["_a", "_b"])
+        merged_dfs = merged_dfs[(merged_dfs["relative frequency_a"] + merged_dfs["relative frequency_b"]) > 0]
 
-        merged_dfs["log_fold_change"] = np.log2(merged_dfs["count_a"] / merged_dfs["count_b"])
+        merged_dfs["log_fold_change"] = np.log2(merged_dfs["relative frequency_a"] / merged_dfs["relative frequency_b"])
 
         pos_class_a = merged_dfs[merged_dfs["log_fold_change"] > 0]
         pos_class_b = merged_dfs[merged_dfs["log_fold_change"] < 0]
@@ -327,13 +327,14 @@ class AminoAcidFrequencyDistribution(DataReport):
         return pd.concat([pos_class_a, pos_class_b])
 
     def _plot_logfold_change(self, logfold_change):
+        logfold_change = logfold_change[logfold_change["log_fold_change"] < np.inf]
         figure = px.bar(logfold_change, x="position", y="log_fold_change", color="amino acid", text="amino acid",
                         facet_col="positive_class",
                         facet_row="chain" if "chain" in logfold_change.columns else None,
                         color_discrete_map=PlotlyUtil.get_amino_acid_color_map(),
                         labels={"position": "IMGT position" if self.imgt_positions else "Position",
                                 "positive_class": "Class",
-                                "log_fold_change": "Log2 fold change",
+                                "log_fold_change": "Log2 fold change in relative frequency",
                                 "amino acid": "Amino acid"}, template="plotly_white")
 
         figure.update_xaxes(categoryorder='array', categoryarray=self._get_position_order(logfold_change["position"]))
