@@ -24,8 +24,6 @@ class SequenceDispenser:
 
         model_name = SequenceDispenser.get_default_model_name(dataset)
 
-        print(f"{model_name=}")
-
         self.olga = OLGA.build_object(model_path=None, default_model_name=model_name, chain=None,
                                       use_only_productive=False)
         self.olga.load_model()

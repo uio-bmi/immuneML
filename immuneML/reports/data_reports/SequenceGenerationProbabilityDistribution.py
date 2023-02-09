@@ -177,7 +177,10 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
         dfs = []
 
-        label_names = list(self.dataset.get_label_names()) + [DecoyImplanting.__name__]
+        label_names = []
+        if self.mark_implanted_labels:
+            label_names = list(self.dataset.get_label_names()) + [DecoyImplanting.__name__]
+
         if not label_names:
             self.mark_implanted_labels = False
 

@@ -1,3 +1,4 @@
+import math
 import shutil
 from unittest import TestCase
 
@@ -18,10 +19,11 @@ class TestMutatedSequenceImplanting(TestCase):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "mutated_seq_implanting/")
 
         implanting_strategy = MutatedSequenceImplanting()
+        implanting_strategy.overwrite_sequences = False
+
         signal = Signal("sig1", [Motif("motif1", GappedKmerInstantiation(max_gap=0), "CASSLPSYQNTEAFF",
                                        v_call="TRBV5-1", j_call="TRBJ1-1",
-                                       mutation_position_possibilities={5: 0.25, 6: 0.25, 7: 0.25, 8: 0.25},
-                                       mutation_hamming_distance=2)],
+                                       mutation_position_possibilities={5: 0.25, 6: 0.25, 7: 0.25, 8: 0.25})],
                         implanting_strategy)
 
         repertoire = Repertoire.build(["CSAIGQGKGAFYGYTF", "CASSLDRVSASGANVLTF", "CASSVQPRSEVPNTGELFF"],
@@ -34,13 +36,15 @@ class TestMutatedSequenceImplanting(TestCase):
         dataset = RepertoireDataset(repertoires=[repertoire])
         implanting_strategy.set_sequence_dispenser(SequenceDispenser(dataset, occurrence_limit_pgen_range={1e-10: 2}))
 
-        new_repertoire = signal.implant_to_repertoire(repertoire, 0.33, path)
+        repertoire_implanting_rate = 0.33
+        new_repertoire = signal.implant_to_repertoire(repertoire, repertoire_implanting_rate, path)
 
-        self.assertEqual(len(repertoire.sequences), len(new_repertoire.sequences))
+        self.assertEqual(len(repertoire.sequences) + math.ceil(len(repertoire.sequences) * repertoire_implanting_rate),
+                         len(new_repertoire.sequences))
         self.assertEqual(1, len([seq for seq in new_repertoire.sequences if
                                  seq.amino_acid_sequence not in repertoire.get_sequence_aas()]))
-        self.assertEqual(2, len([seq for seq in new_repertoire.sequences if
-                                 seq.amino_acid_sequence in repertoire.get_sequence_aas()]))
+        self.assertEqual(len(repertoire.sequences), len([seq for seq in new_repertoire.sequences if
+                                                         seq.amino_acid_sequence in repertoire.get_sequence_aas()]))
         self.assertEqual(new_repertoire.get_region_type(), RegionType.IMGT_JUNCTION)
 
         shutil.rmtree(path)

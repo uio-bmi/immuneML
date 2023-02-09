@@ -1,3 +1,4 @@
+import math
 import shutil
 from unittest import TestCase
 
@@ -16,7 +17,14 @@ class TestDecoyImplanting(TestCase):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "decoy_implanting/")
 
         implanting_strategy = DecoyImplanting()
-        signal = Signal("sig1", [Motif("motif1", GappedKmerInstantiation(max_gap=0), "CASSLPSYQNTEAFF",
+        implanting_strategy.nr_of_decoys = 5
+        implanting_strategy.repertoire_implanting_rate_per_decoy = 0.33
+        implanting_strategy.dataset_implanting_rate_per_decoy = 1
+        implanting_strategy.overwrite_sequences = False
+        implanting_strategy.default_model_name = "humanTRB"
+
+        signal_sequence = "CASSLPSYQNTEAFF"
+        signal = Signal("sig1", [Motif("motif1", GappedKmerInstantiation(max_gap=0), signal_sequence,
                                        v_call="TRBV5-1", j_call="TRBJ1-1")],
                         implanting_strategy)
 
@@ -27,13 +35,17 @@ class TestDecoyImplanting(TestCase):
                                       counts=[1] * 3,
                                       path=path)
 
-        new_repertoire = signal.implant_to_repertoire(repertoire, 0.33, path)
+        repertoire_implanting_rate = 0.33
+        new_repertoire = signal.implant_to_repertoire(repertoire, repertoire_implanting_rate, path)
 
-        self.assertEqual(len(repertoire.sequences), len(new_repertoire.sequences))
-        self.assertEqual(1, len([seq for seq in new_repertoire.sequences if
-                                 seq.amino_acid_sequence not in repertoire.get_sequence_aas()]))
-        self.assertEqual(2, len([seq for seq in new_repertoire.sequences if
-                                 seq.amino_acid_sequence in repertoire.get_sequence_aas()]))
+        self.assertEqual(len(repertoire.sequences) +
+                         math.ceil(len(repertoire.sequences)*repertoire_implanting_rate) +
+                         math.ceil(len(repertoire.sequences)*implanting_strategy.repertoire_implanting_rate_per_decoy)*implanting_strategy.nr_of_decoys,
+                         len(new_repertoire.sequences))
+
+        for seq in list(repertoire.get_sequence_aas()) + [signal_sequence]:
+            self.assertIn(seq, new_repertoire.get_sequence_aas())
+
         self.assertEqual(new_repertoire.get_region_type(), RegionType.IMGT_JUNCTION)
 
         shutil.rmtree(path)
