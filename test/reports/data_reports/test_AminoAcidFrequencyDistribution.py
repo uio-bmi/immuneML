@@ -29,8 +29,8 @@ class TestAminoAcidFrequencyDistribution(TestCase):
 
         self.assertTrue(os.path.isfile(path / "result/amino_acid_frequency_distribution.tsv"))
         self.assertTrue(os.path.isfile(path / "result/amino_acid_frequency_distribution.html"))
-        self.assertTrue(os.path.isfile(path / "result/log_fold_change.html"))
-        self.assertTrue(os.path.isfile(path / "result/log_fold_change.html"))
+        self.assertTrue(os.path.isfile(path / "result/frequency_change.tsv"))
+        self.assertTrue(os.path.isfile(path / "result/frequency_change.html"))
 
         shutil.rmtree(path)
 
@@ -54,8 +54,8 @@ class TestAminoAcidFrequencyDistribution(TestCase):
 
         self.assertTrue(os.path.isfile(path / "result/amino_acid_frequency_distribution.tsv"))
         self.assertTrue(os.path.isfile(path / "result/amino_acid_frequency_distribution.html"))
-        self.assertTrue(os.path.isfile(path / "result/log_fold_change.tsv"))
-        self.assertTrue(os.path.isfile(path / "result/log_fold_change.html"))
+        self.assertTrue(os.path.isfile(path / "result/frequency_change.tsv"))
+        self.assertTrue(os.path.isfile(path / "result/frequency_change.html"))
 
         shutil.rmtree(path)
 
