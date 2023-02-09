@@ -251,6 +251,8 @@ class SequenceDispenser:
     def get_default_model_name(dataset: RepertoireDataset):
         """Extract generative model name (organism + chain, e.g. 'humanTRB') from dataset"""
 
+        # TODO check if set(get_attribute("chains")) contains only one chain type
+
         # TODO move get_model_name to some util-thing
         valid_chain_types = ("TRB", "TRA", "IGH", "IGL", "IGK")
 

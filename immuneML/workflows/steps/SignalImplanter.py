@@ -65,7 +65,7 @@ class SignalImplanter(Step):
     def _implant_signals_in_repertoires(simulation_state: SimulationState = None) -> Dataset:
 
         SignalImplanter._set_sequence_dispensers(simulation_state)
-        SignalImplanter._load_default_model_name(simulation_state)
+        SignalImplanter._prepare_decoy_implanting_parameters(simulation_state)
 
         repertoires_path = PathBuilder.build(simulation_state.result_path / "repertoires")
         processed_repertoires = SignalImplanter._implant_signals(simulation_state, SignalImplanter._process_repertoire,
@@ -192,7 +192,29 @@ class SignalImplanter(Step):
                                           signal.implanting_strategy.mutation_hamming_distance))
 
     @staticmethod
-    def _load_default_model_name(simulation_state):
+    def _prepare_decoy_implanting_parameters(simulation_state):
+        """Prepare implanting rates and default generative model name for DecoyImplanting"""
+        if not any([isinstance(signal.implanting_strategy, DecoyImplanting) for implanting in
+                    simulation_state.simulation.implantings for signal in implanting.signals]):
+            return
+
+        assert len([signal.implanting_strategy for implanting in
+                    simulation_state.simulation.implantings for signal in
+                    implanting.signals if isinstance(signal.implanting_strategy,
+                                                     DecoyImplanting)]) == 1, "Simulation cannot have more than one DecoyImplanting"
+
+        decoy_implanting_strategy = [signal.implanting_strategy for implanting in
+                                     simulation_state.simulation.implantings for signal in
+                                     implanting.signals if isinstance(signal.implanting_strategy, DecoyImplanting)][0]
+
+        if not decoy_implanting_strategy.repertoire_implanting_rate_per_decoy:
+            decoy_implanting_strategy.repertoire_implanting_rate_per_decoy = simulation_state.simulation.implantings[
+                0].repertoire_implanting_rate
+
+        if not decoy_implanting_strategy.dataset_implanting_rate_per_decoy:
+            decoy_implanting_strategy.dataset_implanting_rate_per_decoy = simulation_state.simulation.implantings[
+                0].dataset_implanting_rate
+
         DecoyImplanting.default_model_name = SequenceDispenser.get_default_model_name(simulation_state.dataset)
 
     @staticmethod

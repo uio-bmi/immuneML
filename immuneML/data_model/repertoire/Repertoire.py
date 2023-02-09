@@ -159,6 +159,14 @@ class Repertoire(DatasetItem):
                     custom_lists[param].append(sequence.metadata.custom_params[param] if param in sequence.metadata.custom_params else None)
             if sequence.annotation and sequence.annotation.implants and len(sequence.annotation.implants) > 0:
                 for implant in sequence.annotation.implants:
+
+                    # TODO problem fixed by loop: multiple implanting annotations gives different
+                    #  length signals-lists deletes all sequences after index=len(shortest signals-list)
+                    for signal in signals.keys():
+                        if signal == implant.signal_id:
+                            continue
+                        signals[signal].append(None)
+
                     if implant.signal_id in signals:
                         signals[implant.signal_id].append(str(implant))
                     else:

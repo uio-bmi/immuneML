@@ -1,18 +1,19 @@
 import logging
-import re
+import regex as re
 from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
 
-from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
+from immuneML.simulation.SequenceDispenser import SequenceDispenser
 from immuneML.simulation.generative_models.OLGA import OLGA
+from immuneML.simulation.signal_implanting_strategy.DecoyImplanting import DecoyImplanting
+from immuneML.util import Logger
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -40,7 +41,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
                 default_sequence_label: OLGA
     """
 
-    # TODO change code so that a dataframe is passed down instead of many dicts
+    # TODO add pgen occurrence dict output
     # TODO add different colors based on repertoire metadata (sick/healthy)
 
     @classmethod
@@ -53,10 +54,19 @@ class SequenceGenerationProbabilityDistribution(DataReport):
                  default_sequence_label: str = "dataset"):
         super().__init__(dataset=dataset, result_path=result_path, name=name)
 
-        #ParameterValidator.
-
+        ParameterValidator.assert_type_and_value(count_by_repertoire, bool,
+                                                 SequenceGenerationProbabilityDistribution.__name__,
+                                                 "count_by_repertoire")
         self.count_by_repertoire = count_by_repertoire
+
+        ParameterValidator.assert_type_and_value(mark_implanted_labels, bool,
+                                                 SequenceGenerationProbabilityDistribution.__name__,
+                                                 "mark_implanted_labels")
         self.mark_implanted_labels = mark_implanted_labels
+
+        ParameterValidator.assert_type_and_value(default_sequence_label, str,
+                                                 SequenceGenerationProbabilityDistribution.__name__,
+                                                 "default_sequence_label")
         self.default_sequence_label = default_sequence_label
 
     def check_prerequisites(
@@ -69,58 +79,24 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
     def _generate(self) -> ReportResult:  # the function that creates the report
 
-        if self.mark_implanted_labels:
-            sequence_labels = self._get_sequence_labels()
-        else:
-            sequence_labels = {}
-        sequence_count = self._get_sequence_count()
-        sequence_pgen = self._get_sequence_pgen()
+        dataset_df = self.load_dataset_dataframe()
 
-        report_output_fig = self._safe_plot(sequence_count=sequence_count, sequence_pgen=sequence_pgen,
-                                            sequence_labels=sequence_labels)
+        dataset_df = self._get_sequence_count(dataset_df)
+
+        Logger.print_log("Starting generation probability-calculation", include_datetime=True)
+        dataset_df = self._get_sequence_pgen(dataset_df)
+
+        report_output_fig = self._safe_plot(dataset_df=dataset_df)
         output_figures = None if report_output_fig is None else [report_output_fig]
 
-        # TODO dataframe as output table (df.to_csv(..., sep="\t"))
-        output_tables = None
+        table_path = self.result_path / f"processed_dataset_with_pgen.csv"
+        dataset_df.to_csv(table_path, index=False)
+        output_tables = None if dataset_df is None else [ReportOutput(table_path,
+                                                                      "Processed dataset with generation probability and implanted labels for each sequence")]
 
         return ReportResult(type(self).__name__, output_figures=output_figures, output_tables=output_tables)
 
-    def _get_sequence_labels(self):
-        """
-        Retrieves sequence labels from self.dataset. Label is taken from signal_id label from implanted
-        sequences. Sequences without ImplantAnnotation are assigned default sequence label
-
-        Returns:
-            dict: Dictionary where key is amino acid sequence (str) and value is sequence label (str)
-        """
-
-        label_names = list(self.dataset.get_label_names())
-        sequence_labels = {}
-
-        for repertoire in self.dataset.get_data():
-            rep_attributes = repertoire.get_attributes(["sequence_aas"] + label_names)
-
-            for i in range(len(rep_attributes["sequence_aas"])):
-                # TODO account for the fact that signal can show up naturally and implanted
-                if rep_attributes["sequence_aas"][i] in sequence_labels and sequence_labels[rep_attributes["sequence_aas"][i]] != "natural":
-                    continue
-
-                seq_label = None
-
-                for label in label_names:
-                    if label in rep_attributes:
-                        if rep_attributes[label][i]:
-                            seq_label = re.findall("signal_id='([^\"']+)", rep_attributes[label][i])[0]
-                            break
-
-                if not seq_label:
-                    seq_label = self.default_sequence_label
-
-                sequence_labels[rep_attributes["sequence_aas"][i]] = seq_label
-
-        return sequence_labels
-
-    def _get_sequence_pgen(self):
+    def _get_sequence_pgen(self, dataset_df):
         """
         Computes generation probability of each sequence from self.dataset.
 
@@ -128,11 +104,16 @@ class SequenceGenerationProbabilityDistribution(DataReport):
             np.ndarray: Generation probabilities of sequences
         """
 
-        # TODO get default_model_name from dataset (organism + chain type) (organism is not that important, focus on chain type)
-        # check if set(get_attribute("chains")) contains only one chain type
-        # at least support human TRB, TRA, IGH, IGL, IGK. If the chain type is unknown, raise an error
-        olga = OLGA.build_object(model_path=None, default_model_name="humanTRB", chain=None, use_only_productive=False)
+        olga = OLGA.build_object(model_path=None,
+                                 default_model_name=SequenceDispenser.get_default_model_name(self.dataset),
+                                 chain=None, use_only_productive=False)
         olga.load_model()
+
+        dataset_df["pgen"] = olga.compute_p_gens(dataset_df, SequenceType.AMINO_ACID)
+
+        return dataset_df
+
+        # TODO remove unused code when checked that everything works well
 
         df = pd.DataFrame()
 
@@ -144,7 +125,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
         return olga.compute_p_gens(df, SequenceType.AMINO_ACID)
 
-    def _get_sequence_count(self):
+    def _get_sequence_count(self, dataset_df):
         """
         Either counts number of duplicates of each sequence from dataset, or how many repertoires each sequence
         appears in. This is specified in yaml file.
@@ -152,84 +133,35 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         Returns:
             dict: Dictionary where key is amino acid sequence (str) and value is sequence count (int)
         """
-        sequence_count = {}
 
+        # count by repertoire occurrences: drop duplicates with same sequence, v/j-gene and repertoire before count
         if self.count_by_repertoire:
-            counting_func = self._get_repertoire_appearance_rate
-        else:
-            counting_func = self._get_total_sequence_count
+            dataset_df.drop_duplicates(inplace=True)
 
-        for repertoire in self.dataset.get_data():
-            print(f"Repertoire size: {len(repertoire.get_sequence_aas())}")
-            for seq, count in counting_func(repertoire).items():
-                sequence_count[seq] = sequence_count[seq] + count if seq in sequence_count else count
+        sequence_columns = ["sequence_aas", "v_genes", "j_genes"]
+        count_df = dataset_df.groupby(sequence_columns)["repertoire"].count().reset_index(name='count')
+        dataset_with_count = pd.merge(dataset_df, count_df, how="inner", on=sequence_columns).drop_duplicates(
+            ignore_index=True, subset=sequence_columns)
 
-        return sequence_count
+        return dataset_with_count
 
-    @staticmethod
-    def _get_total_sequence_count(repertoire: Repertoire) -> dict:
-        """
-        Counts number of duplicates of each sequence in repertoire.
-
-        Args:
-            repertoire (Repertoire): Repertoire
-
-        Returns:
-            dict: Dictionary where key is amino acid sequence (str) and value is sequence count (int)
-        """
-        sequence_count = {}
-
-        for seq, count in zip(repertoire.get_sequence_aas(), repertoire.get_counts()):
-            sequence_count[seq] = sequence_count[seq] + count if seq in sequence_count else count
-
-        return sequence_count
-
-    @staticmethod
-    def _get_repertoire_appearance_rate(repertoire: Repertoire) -> dict:
-        """
-        Marks sequences that appear in repertoire with 1.
-
-        Args:
-            repertoire (Repertoire): Repertoire
-
-        Returns:
-            dict: Dictionary where key is amino acid sequence (str) and value is 1.
-        """
-        sequence_count = {}
-
-        for seq in repertoire.get_sequence_aas():
-            sequence_count[seq] = 1
-
-        return sequence_count
-
-    def _plot(self, sequence_count, sequence_pgen, sequence_labels) -> ReportOutput:
+    def _plot(self, dataset_df) -> ReportOutput:
 
         if self.mark_implanted_labels:
-            df = pd.DataFrame({
-                "pgen": sequence_pgen,
-                "sequence_count": list(sequence_count.values()),
-                "sequence": list(sequence_count.keys()),
-                "sequence_labels": list(sequence_labels.values())
-            })
-
-            # jitter
-            figure = px.strip(df, x="sequence_count", y="pgen", hover_data=["sequence"], color="sequence_labels", stripmode="overlay")
+            figure = px.strip(dataset_df, x="count", y="pgen", hover_data=["sequence_aas"], color="label",
+                              stripmode="overlay")
         else:
-            df = pd.DataFrame({
-                "pgen": sequence_pgen,
-                "sequence_count": list(sequence_count.values()),
-                "sequence": list(sequence_count.keys())
-            })
-
             # jitter
-            figure = px.strip(df, x="sequence_count", y="pgen", hover_data=["sequence"])
+            figure = px.strip(dataset_df, x="count", y="pgen", hover_data=["sequence_aas"])
 
-        print(f"Number of single seqs: {len(df[df['sequence_count'] == 1])} / {len(df)} = {len(df[df['sequence_count'] == 1]) / len(df)}")
+        Logger.print_log(
+            f"Number of single seqs: {len(dataset_df[dataset_df['count'] == 1])} / {len(dataset_df)} = {len(dataset_df[dataset_df['count'] == 1]) / len(dataset_df)}",
+            include_datetime=True)
 
         xaxis_title = "nr. of repertoires the sequence appears in" if self.count_by_repertoire else "total sequence count"
 
         figure.update_layout(title="Sequence generation probability distribution", template="plotly_white",
-                             xaxis=dict(tickmode='array', tickvals=list(range(1, max(df["sequence_count"]) + 1))),
+                             xaxis=dict(tickmode='array', tickvals=list(range(1, max(dataset_df["count"]) + 1))),
                              yaxis=dict(showexponent='all', exponentformat='e', type="log"),
                              xaxis_title=xaxis_title)
 
@@ -240,3 +172,37 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         file_path = self.result_path / "pgen_scatter_plot.html"
         figure.write_html(str(file_path))
         return ReportOutput(path=file_path, name="sequence generation probability distribution plot")
+
+    def load_dataset_dataframe(self):
+
+        dfs = []
+
+        label_names = list(self.dataset.get_label_names()) + [DecoyImplanting.__name__]
+        if not label_names:
+            self.mark_implanted_labels = False
+
+        for repertoire in self.dataset.get_data():
+
+            rep_dict = {
+                "sequence_aas": repertoire.get_sequence_aas(),
+                "v_genes": repertoire.get_v_genes(),
+                "j_genes": repertoire.get_j_genes(),
+                "repertoire": repertoire.identifier,
+            }
+
+            for label in label_names:
+                rep_dict[label] = repertoire.get_attribute(label)
+
+            dfs.append(
+                pd.DataFrame(data=rep_dict)
+            )
+
+        full_dataset = pd.concat(dfs, ignore_index=True)
+
+        if label_names:
+            full_dataset["label"] = full_dataset[label_names].apply(lambda x: "".join([re.findall("signal_id='([^\"']+)", i)[0] for i in x if i]),
+                                                                    axis=1).replace([None, ""], self.default_sequence_label)
+
+        full_dataset.drop(label_names, axis=1, inplace=True)
+
+        return full_dataset

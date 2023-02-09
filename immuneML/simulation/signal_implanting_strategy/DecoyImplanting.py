@@ -132,17 +132,23 @@ class DecoyImplanting(SignalImplantingStrategy):
         decoys_to_implant_in_current_repertoire = []
 
         for index, row in self.decoy_sequences.iterrows():
-            if random.random() < self.repertoire_implanting_rate_per_decoy:
+            if random.random() < self.dataset_implanting_rate_per_decoy:
                 decoy = Motif(identifier=f"decoy_{row['sequence_aa']}", instantiation=GappedKmerInstantiation(),
                               seed=row["sequence_aa"],
                               v_call=row["v_call"],
                               j_call=row["j_call"])
 
-                decoy_implant_count = int(self.repertoire_implanting_rate_per_decoy * len(sequences))
+                count = int(self.repertoire_implanting_rate_per_decoy * len(sequences))
+                variance = count / 2
+
+                decoy_implant_count = round(random.gauss(count, variance))
+
+                if decoy_implant_count < 1:
+                    decoy_implant_count = 1
 
                 decoy_instance = decoy.instantiate_motif()
                 annotation = SequenceAnnotation(
-                    [ImplantAnnotation(signal_id="DecoyImplanting", motif_id=decoy.identifier,
+                    [ImplantAnnotation(signal_id=DecoyImplanting.__name__, motif_id=decoy.identifier,
                                        motif_instance=decoy_instance.instance, position=0)])
                 metadata = SequenceMetadata(v_gene=decoy.v_call, j_gene=decoy.j_call,
                                             count=decoy_implant_count,
@@ -168,11 +174,6 @@ class DecoyImplanting(SignalImplantingStrategy):
     @staticmethod
     def implant_decoys_in_repertoire(repertoire: Repertoire, simulation_state: SimulationState, metadata):
 
-        assert len([signal.implanting_strategy for implanting in
-                    simulation_state.simulation.implantings for signal in
-                    implanting.signals if isinstance(signal.implanting_strategy,
-                                                     DecoyImplanting)]) == 1, "Simulation cannot have more than one DecoyImplanting"
-
         decoy_implanting_strategy = [signal.implanting_strategy for implanting in
                                      simulation_state.simulation.implantings for signal in
                                      implanting.signals if isinstance(signal.implanting_strategy, DecoyImplanting)][0]
@@ -181,14 +182,6 @@ class DecoyImplanting(SignalImplantingStrategy):
         #  For now, only account for one decoy
 
         path = simulation_state.result_path / "repertoires/"
-
-        if not decoy_implanting_strategy.repertoire_implanting_rate_per_decoy:
-            decoy_implanting_strategy.repertoire_implanting_rate_per_decoy = simulation_state.simulation.implantings[
-                0].repertoire_implanting_rate
-
-        if not decoy_implanting_strategy.dataset_implanting_rate_per_decoy:
-            decoy_implanting_strategy.dataset_implanting_rate_per_decoy = simulation_state.simulation.implantings[
-                0].dataset_implanting_rate
 
         decoys = decoy_implanting_strategy._get_decoys_to_implant(repertoire.sequences)
 
