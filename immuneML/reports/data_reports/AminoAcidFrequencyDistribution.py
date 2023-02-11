@@ -328,7 +328,7 @@ class AminoAcidFrequencyDistribution(DataReport):
         return pd.concat([pos_class_a, pos_class_b])
 
     def _plot_logfold_change(self, logfold_change):
-        # logfold_change = logfold_change[logfold_change["frequency_change"] < np.inf]
+        # logfold_change = logfold_change[logfold_change["log_fold_change"] < np.inf]
         figure = px.bar(logfold_change, x="position", y="frequency_change", color="amino acid", text="amino acid",
                         facet_col="positive_class",
                         facet_row="chain" if "chain" in logfold_change.columns else None,
@@ -341,7 +341,7 @@ class AminoAcidFrequencyDistribution(DataReport):
         figure.update_xaxes(categoryorder='array', categoryarray=self._get_position_order(logfold_change["position"]))
         figure.update_layout(showlegend=False, yaxis={'categoryorder':'category ascending'})
 
-        figure.update_yaxes(tickformat=",.0%", range=[0, 1])
+        figure.update_yaxes(tickformat=",.0%")
 
         file_path = self.result_path / "frequency_change.html"
         figure.write_html(str(file_path))
