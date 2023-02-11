@@ -146,6 +146,9 @@ class PositionalMotifFrequencies(EncodingReport):
             :, (positional_aa_counts_df != 0).any(axis=0)
         ]
 
+        # start counting positions at 1
+        positional_aa_counts_df.index = [idx+1 for idx in list(positional_aa_counts_df.index)]
+
         return positional_aa_counts_df
 
     def _plot_gap_sizes(self, gap_size_df):
