@@ -14,7 +14,7 @@ definitions:
       LSTM:
         cores_for_training: 2
         rnn_units: 512
-        epochs: 20
+        epochs: 10
   reports:
     GeneratorReport: GeneratorReportLSTM
 instructions:
