@@ -6,7 +6,7 @@ import pandas as pd
 import tensorflow as tf
 
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
@@ -23,13 +23,13 @@ class TextAsIntEncoder(DatasetEncoder):
         return {"name": name}
 
     def build_object(dataset, **params):
-        if isinstance(dataset, RepertoireDataset):
+        if isinstance(dataset, SequenceDataset):
             prepared_params = TextAsIntEncoder._prepare_parameters(**params)
             return TextAsIntEncoder(**prepared_params)
         else:
-            raise ValueError("TextAsIntEncoder is not defined for dataset types which are not RepertoireDataset.")
+            raise ValueError("TextAsIntEncoder is not defined for dataset types which are not SequenceDataset.")
 
-    def encode(self, dataset, params: EncoderParams) -> RepertoireDataset:
+    def encode(self, dataset, params: EncoderParams) -> SequenceDataset:
 
         encoded_dataset = CacheHandler.memo_by_params(self._prepare_caching_params(dataset, params),
                                                       lambda: self._encode_new_dataset(dataset, params))
@@ -48,10 +48,8 @@ class TextAsIntEncoder(DatasetEncoder):
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         encoded_data = self._encode_data(dataset, params)
 
-        encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires,
-                                            encoded_data=encoded_data,
-                                            labels=dataset.labels,
-                                            metadata_file=dataset.metadata_file)
+        encoded_dataset = SequenceDataset(encoded_data=encoded_data,
+                                            labels=dataset.labels)
 
         return encoded_dataset
 
@@ -60,8 +58,8 @@ class TextAsIntEncoder(DatasetEncoder):
     def _encode_data(self, dataset, params: EncoderParams):
 
         #Creates one long string containing every single sequence
-        instances = ' '.join(
-            [(sequence.get_sequence()) for repertoire in dataset.get_data() for sequence in repertoire.sequences])
+        sequences = dataset.get_data()
+        instances = ' '.join([sequence.get_sequence() for sequence in sequences])
 
 
         length_of_sequence = 21 #hardcoded length of the sequence, consider making different

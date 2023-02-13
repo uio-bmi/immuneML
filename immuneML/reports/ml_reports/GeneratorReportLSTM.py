@@ -87,7 +87,7 @@ class GeneratorReportLSTM(UnsupervisedMLReport):
 
         if self.method.historydf is not None:
             fig = px.line(self.method.historydf['data'][0])
-            with loss_over_time.open("w") as file:
+            with loss_over_time.open("w", encoding="utf-8") as file:
                 fig.write_html(file)
             output_figures.append(ReportOutput(loss_over_time, name="Loss"))
 

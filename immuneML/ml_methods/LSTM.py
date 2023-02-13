@@ -235,7 +235,7 @@ class LSTM(GenerativeModel):
         temperature = 1.
         self.model.reset_states()
         count = 0
-        bar = pyprind.ProgBar(amount, bar_char="=", stream=sys.stdout, width=60)
+        bar = pyprind.ProgBar(amount, bar_char="=", stream=sys.stdout, width=100)
 
         while True:
             prediction = self.model(input_vect)

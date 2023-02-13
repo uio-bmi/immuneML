@@ -92,7 +92,7 @@ class GeneratorReportPWM(UnsupervisedMLReport):
             y=list(reversed(list(self.method._alphabet))),
             z=list(reversed(self.method.model.T,))))
         fig.update_xaxes(side="top", dtick=1)
-        with heatmap.open("w") as file:
+        with heatmap.open("w", encoding="utf-8") as file:
             fig.write_html(file)
 
         fullTable = self.result_path / f"{self.name}FullTable.html"
