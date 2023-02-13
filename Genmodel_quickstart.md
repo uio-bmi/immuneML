@@ -15,6 +15,7 @@ If any information in this document is out of date please inform us as soon as p
 In order to utilize the generative models download this branch of immuneML, either downloading as a zip, or cloning the 
 repository.
 
+
 ```bash
 git clone https://github.com/uio-bmi/immuneML
 ```
