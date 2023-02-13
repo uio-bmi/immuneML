@@ -1,11 +1,12 @@
 definitions:
   datasets:
     d1:
-      format: AIRR
+      format: Generic
       params:
-        path: PWM_dataset/my_dataset_export_instruction/d1/AIRR
-        metadata_file: PWM_dataset/my_dataset_export_instruction/d1/AIRR/metadata.csv
-        is_repertoire: True
+        path: PWM_dataset/my_dataset_export_instruction/d1/AIRR/repertoires/rep_0.tsv
+        is_repertoire: False
+        paired: False
+        region_type: FULL_SEQUENCE
   encodings:
     e1: TextAsInt
   ml_methods:

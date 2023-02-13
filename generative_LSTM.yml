@@ -1,19 +1,20 @@
 definitions:
   datasets:
     d1:
-      format: AIRR
+      format: Generic
       params:
-        path: LSTM_dataset/AIRR/repertoires
-        metadata_file: LSTM_dataset/AIRR/repertoires/metadata.csv
-        is_repertoire: True
+        path: LSTM_dataset/AIRR/repertoires/rep1.tsv
+        is_repertoire: False
+        paired: False
+        region_type: FULL_SEQUENCE
   encodings:
     e1: TextAsInt
   ml_methods:
     G1:
       LSTM:
         cores_for_training: 2
-        rnn_units: 32
-        epochs: 8
+        rnn_units: 512
+        epochs: 20
   reports:
     GeneratorReport: GeneratorReportLSTM
 instructions:
