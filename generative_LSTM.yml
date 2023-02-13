@@ -3,7 +3,7 @@ definitions:
     d1:
       format: Generic
       params:
-        path: LSTM_dataset/AIRR/repertoires/rep1.tsv
+        path: LSTM_dataset/sequences.tsv
         is_repertoire: False
         paired: False
         region_type: FULL_SEQUENCE
