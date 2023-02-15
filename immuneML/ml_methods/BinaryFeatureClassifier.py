@@ -138,7 +138,7 @@ class BinaryFeatureClassifier(MLMethod):
             logging.info(f"{BinaryFeatureClassifier.__name__}: no improvement on training set")
             return self._get_optimal_indices(prev_rule_indices, self._test_is_improvement(prev_val_scores, self.min_delta))
 
-        logging.info(f"{BinaryFeatureClassifier.__name__}: added rule {len(new_rule_indices)}/{min(self.max_features, encoded_train_data.examples.shape[1])}")
+        logging.info(f"{BinaryFeatureClassifier.__name__}: added rule {len(new_rule_indices)}/{min(self.max_features, encoded_train_data.examples.shape[1])} ({len(new_index_candidates)} candidates left)")
         logging.info(f"{BinaryFeatureClassifier.__name__}: computing new val score")
         new_val_predictions = np.logical_or(prev_val_predictions, encoded_val_data.examples[:, new_rule_indices[-1]])
         new_val_scores = prev_val_scores + [self._test_performance_predictions(encoded_val_data, pred=new_val_predictions)]
