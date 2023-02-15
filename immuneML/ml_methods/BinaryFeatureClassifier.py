@@ -262,7 +262,6 @@ class BinaryFeatureClassifier(MLMethod):
         new_predictions = np.logical_or(prev_predictions, new_rule_predictions)
 
         if np.array_equal(new_predictions, prev_predictions):
-            logging.info("eq")
             return prev_train_performance
         else:
             return optimization_scoring_fn(y_true=y_true_train,
