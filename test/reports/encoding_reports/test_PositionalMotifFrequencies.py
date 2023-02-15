@@ -128,4 +128,4 @@ class TestPositionalMotifFrequencies(TestCase):
         content = pd.read_csv(path / "positional_aa_counts.csv")
         self.assertEqual(list(content.index), [i for i in range(4)])
 
-        # shutil.rmtree(path)
+        shutil.rmtree(path)
