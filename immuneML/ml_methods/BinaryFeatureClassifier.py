@@ -120,15 +120,22 @@ class BinaryFeatureClassifier(MLMethod):
         return [feature_names[idx] for idx in rule_tree_indices]
 
     def _recursively_select_rules(self, encoded_train_data, encoded_val_data, prev_rule_indices, prev_train_predictions, prev_val_scores):
+        logging.info(f"{BinaryFeatureClassifier.__name__}: adding next best rule")
         new_rule_indices, new_train_predictions = self._add_next_best_rule(encoded_train_data, prev_rule_indices, prev_train_predictions)
+        logging.info(f"{BinaryFeatureClassifier.__name__}: next best rule added")
 
         if new_rule_indices == prev_rule_indices:
             logging.info(f"{BinaryFeatureClassifier.__name__}: no improvement on training set")
             return self._get_optimal_indices(prev_rule_indices, self._test_is_improvement(prev_val_scores, self.min_delta))
 
         logging.info(f"{BinaryFeatureClassifier.__name__}: added rule {len(new_rule_indices)}/{min(self.max_features, encoded_train_data.examples.shape[1])}")
+        logging.info(f"{BinaryFeatureClassifier.__name__}: computing new val score")
         new_val_scores = prev_val_scores + [self._test_performance_rule_tree(encoded_data=encoded_val_data, rule_indices=new_rule_indices)]
+        logging.info(f"{BinaryFeatureClassifier.__name__}: new val score computed")
+
+        logging.info(f"{BinaryFeatureClassifier.__name__}: computing is improvement")
         is_improvement = self._test_is_improvement(new_val_scores, self.min_delta)
+        logging.info(f"{BinaryFeatureClassifier.__name__}: is improvement computed")
 
         if len(new_rule_indices) >= self.max_features:
             logging.info(f"{BinaryFeatureClassifier.__name__}: max features reached")
@@ -144,6 +151,8 @@ class BinaryFeatureClassifier(MLMethod):
                                               prev_val_scores=new_val_scores)
 
     def _test_earlystopping(self, is_improvement):
+        logging.info(f"{BinaryFeatureClassifier.__name__}: test earlystopping")
+
         if self.learn_all:
             return False
 
@@ -154,6 +163,8 @@ class BinaryFeatureClassifier(MLMethod):
         # last few trees did not improve, stop training
         if not any(is_improvement[-self.patience:]):
             return True
+
+        logging.info(f"{BinaryFeatureClassifier.__name__}: earlystopping tested")
 
         return False
 
@@ -185,20 +196,41 @@ class BinaryFeatureClassifier(MLMethod):
             return rule_indices[:optimal_tree_idx + 1]
 
     def _add_next_best_rule(self, encoded_train_data, prev_rule_indices, prev_predictions):
+        logging.info(f"{BinaryFeatureClassifier.__name__}: getting unused indices")
         unused_indices = self._get_unused_rule_indices(encoded_train_data, prev_rule_indices)
+        logging.info(f"{BinaryFeatureClassifier.__name__}: unused indices gotten")
 
         if len(unused_indices) == 0:
             return prev_rule_indices, prev_predictions
 
-        prev_train_performance = self._test_performance_predictions(encoded_train_data, pred=prev_predictions)
+        # prev_train_performance = self._test_performance_predictions(encoded_train_data, pred=prev_predictions)
+        y_true_train = Util.map_to_new_class_values(encoded_train_data.labels[self.label.name], self.class_mapping)
+        optimization_scoring_fn = self._get_optimization_scoring_fn()
 
-        new_training_performances = self._get_new_performances(encoded_train_data, prev_predictions=prev_predictions, new_indices_to_test=unused_indices)
+        logging.info(f"{BinaryFeatureClassifier.__name__}: testing prev train performance")
+        prev_train_performance = optimization_scoring_fn(y_true=y_true_train, y_pred=prev_predictions, sample_weight=encoded_train_data.example_weights)
+        logging.info(f"{BinaryFeatureClassifier.__name__}: prev train performance tested")
+
+        logging.info(f"{BinaryFeatureClassifier.__name__}: testing new train performances")
+        # new_training_performances = self._get_new_performances(encoded_train_data, prev_predictions=prev_predictions, new_indices_to_test=unused_indices)
+
+        new_training_performances = [optimization_scoring_fn(y_true=y_true_train,
+                                                             y_pred=np.logical_or(prev_predictions, encoded_train_data.examples[:, idx]),
+                                                             sample_weight=encoded_train_data.example_weights)
+                                     for idx in unused_indices]
+
+        logging.info(f"{BinaryFeatureClassifier.__name__}: new train performances tested")
+
+        logging.info(f"{BinaryFeatureClassifier.__name__}: getting best index")
         best_new_performance = max(new_training_performances)
         best_new_index = unused_indices[new_training_performances.index(best_new_performance)]
+        logging.info(f"{BinaryFeatureClassifier.__name__}: best index gotten")
 
         if best_new_performance > prev_train_performance or self.learn_all:
             new_rule_indices = prev_rule_indices + [best_new_index]
+            logging.info(f"{BinaryFeatureClassifier.__name__}: getting new train predictions")
             new_predictions = np.logical_or(prev_predictions, encoded_train_data.examples[:, best_new_index])
+            logging.info(f"{BinaryFeatureClassifier.__name__}: new train predictions gotten")
 
             return new_rule_indices, new_predictions
         else:
