@@ -79,7 +79,7 @@ class BinaryFeatureClassifier(MLMethod):
         warnings.warn(f"{BinaryFeatureClassifier.__name__}: cannot predict probabilities.")
         return None
 
-    def fit(self, encoded_data: EncodedData, label: Label, optimization_metric: str, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, label: Label, optimization_metric: str, cores_for_training):
         self.feature_names = encoded_data.feature_names
         self.label = label
         self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name])
@@ -94,7 +94,7 @@ class BinaryFeatureClassifier(MLMethod):
     def _get_optimization_scoring_fn(self):
         return MetricUtil.get_metric_fn(Metric[self.optimization_metric.upper()])
 
-    def _build_rule_tree(self, encoded_data, cores_for_training: int = 2):
+    def _build_rule_tree(self, encoded_data, cores_for_training):
         if self.keep_all:
             rules = list(range(len(self.feature_names)))
             logging.info(f"{BinaryFeatureClassifier.__name__}: all {len(rules)} rules kept.")
@@ -109,7 +109,7 @@ class BinaryFeatureClassifier(MLMethod):
 
         return rules
 
-    def _start_recursive_search(self, encoded_train_data, encoded_val_data, cores_for_training: int = 2):
+    def _start_recursive_search(self, encoded_train_data, encoded_val_data, cores_for_training):
         old_recursion_limit = sys.getrecursionlimit()
         new_recursion_limit = old_recursion_limit + encoded_train_data.examples.shape[1]
         sys.setrecursionlimit(new_recursion_limit)
@@ -129,7 +129,7 @@ class BinaryFeatureClassifier(MLMethod):
     def _get_rule_tree_features_from_indices(self, rule_tree_indices, feature_names):
         return [feature_names[idx] for idx in rule_tree_indices]
 
-    def _recursively_select_rules(self, encoded_train_data, encoded_val_data, prev_rule_indices, prev_train_predictions, prev_val_predictions, prev_val_scores, cores_for_training: int = 2):
+    def _recursively_select_rules(self, encoded_train_data, encoded_val_data, prev_rule_indices, prev_train_predictions, prev_val_predictions, prev_val_scores, cores_for_training):
         logging.info(f"{BinaryFeatureClassifier.__name__}: adding next best rule")
         new_rule_indices, new_train_predictions = self._add_next_best_rule(encoded_train_data, prev_rule_indices, prev_train_predictions, cores_for_training)
         logging.info(f"{BinaryFeatureClassifier.__name__}: next best rule added")
@@ -203,7 +203,7 @@ class BinaryFeatureClassifier(MLMethod):
 
             return rule_indices[:optimal_tree_idx + 1]
 
-    def _add_next_best_rule(self, encoded_train_data, prev_rule_indices, prev_predictions, cores_for_training: int = 2):
+    def _add_next_best_rule(self, encoded_train_data, prev_rule_indices, prev_predictions, cores_for_training):
         logging.info(f"{BinaryFeatureClassifier.__name__}: getting unused indices")
         unused_indices = self._get_unused_rule_indices(encoded_train_data, prev_rule_indices)
         logging.info(f"{BinaryFeatureClassifier.__name__}: unused indices gotten")
@@ -239,7 +239,7 @@ class BinaryFeatureClassifier(MLMethod):
         else:
             return prev_rule_indices, prev_predictions
 
-    def _test_new_train_performances(self, encoded_train_data, prev_predictions, unused_indices, cores_for_training: int = 2):
+    def _test_new_train_performances(self, encoded_train_data, prev_predictions, unused_indices, cores_for_training):
         y_true_train = Util.map_to_new_class_values(encoded_train_data.labels[self.label.name], self.class_mapping)
         optimization_scoring_fn = self._get_optimization_scoring_fn()
 
