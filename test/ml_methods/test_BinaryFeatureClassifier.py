@@ -156,7 +156,8 @@ class TestBinaryFeatureClassifier(TestCase):
                                                                                        prev_val_scores=[1],
                                                                                        prev_rule_indices=[0],
                                                                                        prev_train_predictions=np.array([False, True, False, True]),
-                                                                                       prev_val_predictions=np.array([False, True, False, True]))
+                                                                                       prev_val_predictions=np.array([False, True, False, True]),
+                                                                                       cores_for_training=2)
 
         self.assertListEqual(result_no_improvement_on_training, [0])
 
@@ -171,17 +172,32 @@ class TestBinaryFeatureClassifier(TestCase):
 
         motif_classifier.feature_names = ["rule1", "rule2", "rule3"]
 
-        result_add_one_rule = motif_classifier._recursively_select_rules(enc_data, enc_data, prev_val_scores=[0], prev_rule_indices=[0], prev_train_predictions=np.array([True, False, False, False]), prev_val_predictions=np.array([True, False, False, False]))
+        result_add_one_rule = motif_classifier._recursively_select_rules(enc_data, enc_data,
+                                                                         prev_val_scores=[0],
+                                                                         prev_rule_indices=[0],
+                                                                         prev_train_predictions=np.array([True, False, False, False]),
+                                                                         prev_val_predictions=np.array([True, False, False, False]),
+                                                                         cores_for_training=2)
         self.assertListEqual(result_add_one_rule, [0, 1])
 
         motif_classifier.max_features = 1
 
-        result_max_motifs_reached = motif_classifier._recursively_select_rules(enc_data, enc_data, prev_val_scores=[], prev_rule_indices=[], prev_train_predictions=np.array([False, False, False, False]), prev_val_predictions=np.array([False, False, False, False]))
+        result_max_motifs_reached = motif_classifier._recursively_select_rules(enc_data, enc_data,
+                                                                               prev_val_scores=[],
+                                                                               prev_rule_indices=[],
+                                                                               prev_train_predictions=np.array([False, False, False, False]),
+                                                                               prev_val_predictions=np.array([False, False, False, False]),
+                                                                               cores_for_training=2)
         self.assertListEqual(result_max_motifs_reached, [0])
 
         motif_classifier.max_features = 2
 
-        result_max_motifs_reached = motif_classifier._recursively_select_rules(enc_data, enc_data, prev_val_scores=[], prev_rule_indices=[], prev_train_predictions=np.array([False, False, False, False]), prev_val_predictions=np.array([False, False, False, False]))
+        result_max_motifs_reached = motif_classifier._recursively_select_rules(enc_data, enc_data,
+                                                                               prev_val_scores=[],
+                                                                               prev_rule_indices=[],
+                                                                               prev_train_predictions=np.array([False, False, False, False]),
+                                                                               prev_val_predictions=np.array([False, False, False, False]),
+                                                                               cores_for_training=2)
         self.assertListEqual(result_max_motifs_reached, [0, 1])
 
 

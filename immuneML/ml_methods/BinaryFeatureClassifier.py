@@ -79,7 +79,7 @@ class BinaryFeatureClassifier(MLMethod):
         warnings.warn(f"{BinaryFeatureClassifier.__name__}: cannot predict probabilities.")
         return None
 
-    def fit(self, encoded_data: EncodedData, label: Label, optimization_metric: str, cores_for_training):
+    def fit(self, encoded_data: EncodedData, label: Label, optimization_metric: str, cores_for_training: int = 2):
         self.feature_names = encoded_data.feature_names
         self.label = label
         self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name])
@@ -160,7 +160,8 @@ class BinaryFeatureClassifier(MLMethod):
                                               prev_rule_indices=new_rule_indices,
                                               prev_train_predictions=new_train_predictions,
                                               prev_val_predictions=new_val_predictions,
-                                              prev_val_scores=new_val_scores)
+                                              prev_val_scores=new_val_scores,
+                                              cores_for_training=cores_for_training)
 
     def _test_earlystopping(self, is_improvement):
         if self.learn_all:
