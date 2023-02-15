@@ -100,26 +100,32 @@ class BinaryFeatureClassifier(MLMethod):
             if self.learn_all or self.max_features is None:
                 self.max_features = encoded_train_data.examples.shape[1]
 
-            old_recursion_limit = sys.getrecursionlimit()
-            new_recursion_limit = old_recursion_limit + encoded_train_data.examples.shape[1]
-            sys.setrecursionlimit(new_recursion_limit)
-
-            rules = self._recursively_select_rules(encoded_train_data=encoded_train_data,
-                                                   encoded_val_data=encoded_val_data,
-                                                   prev_rule_indices=[],
-                                                   prev_train_predictions=np.array([False] * encoded_train_data.examples.shape[0]),
-                                                   prev_val_scores=[])
-
-            sys.setrecursionlimit(old_recursion_limit)
+            rules = self._start_recursive_search(encoded_train_data, encoded_val_data)
 
             logging.info(f"{BinaryFeatureClassifier.__name__}: selected {len(rules)} out of {len(self.feature_names)} rules.")
+
+        return rules
+
+    def _start_recursive_search(self, encoded_train_data, encoded_val_data):
+        old_recursion_limit = sys.getrecursionlimit()
+        new_recursion_limit = old_recursion_limit + encoded_train_data.examples.shape[1]
+        sys.setrecursionlimit(new_recursion_limit)
+
+        rules = self._recursively_select_rules(encoded_train_data=encoded_train_data,
+                                               encoded_val_data=encoded_val_data,
+                                               prev_rule_indices=[],
+                                               prev_train_predictions=np.array([False] * encoded_train_data.examples.shape[0]),
+                                               prev_val_predictions=np.array([False] * encoded_val_data.examples.shape[0]),
+                                               prev_val_scores=[])
+
+        sys.setrecursionlimit(old_recursion_limit)
 
         return rules
 
     def _get_rule_tree_features_from_indices(self, rule_tree_indices, feature_names):
         return [feature_names[idx] for idx in rule_tree_indices]
 
-    def _recursively_select_rules(self, encoded_train_data, encoded_val_data, prev_rule_indices, prev_train_predictions, prev_val_scores):
+    def _recursively_select_rules(self, encoded_train_data, encoded_val_data, prev_rule_indices, prev_train_predictions, prev_val_predictions, prev_val_scores):
         logging.info(f"{BinaryFeatureClassifier.__name__}: adding next best rule")
         new_rule_indices, new_train_predictions = self._add_next_best_rule(encoded_train_data, prev_rule_indices, prev_train_predictions)
         logging.info(f"{BinaryFeatureClassifier.__name__}: next best rule added")
@@ -130,7 +136,8 @@ class BinaryFeatureClassifier(MLMethod):
 
         logging.info(f"{BinaryFeatureClassifier.__name__}: added rule {len(new_rule_indices)}/{min(self.max_features, encoded_train_data.examples.shape[1])}")
         logging.info(f"{BinaryFeatureClassifier.__name__}: computing new val score")
-        new_val_scores = prev_val_scores + [self._test_performance_rule_tree(encoded_data=encoded_val_data, rule_indices=new_rule_indices)]
+        new_val_predictions = np.logical_or(prev_val_predictions, encoded_val_data.examples[:, new_rule_indices[-1]])
+        new_val_scores = prev_val_scores + [self._test_performance_predictions(encoded_val_data, pred=new_val_predictions)]
         logging.info(f"{BinaryFeatureClassifier.__name__}: new val score computed")
 
         logging.info(f"{BinaryFeatureClassifier.__name__}: computing is improvement")
@@ -148,6 +155,7 @@ class BinaryFeatureClassifier(MLMethod):
         return self._recursively_select_rules(encoded_train_data, encoded_val_data,
                                               prev_rule_indices=new_rule_indices,
                                               prev_train_predictions=new_train_predictions,
+                                              prev_val_predictions=new_val_predictions,
                                               prev_val_scores=new_val_scores)
 
     def _test_earlystopping(self, is_improvement):
