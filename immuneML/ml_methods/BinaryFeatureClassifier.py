@@ -81,16 +81,15 @@ class BinaryFeatureClassifier(MLMethod):
         self.label = label
         self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name])
         self.optimization_metric = optimization_metric
-        
-        # todo deal with positive_class, what if it is not explicitly set?
-        # todo generalize with the positive class label stuff in MotifEncoder
-        # todo weights in immuneML general must also be recalculated here for specific training and validation sets!
 
         self.rule_tree_indices = self._build_rule_tree(encoded_data)
         self.rule_tree_features = self._get_rule_tree_features_from_indices(self.rule_tree_indices, self.feature_names)
         self._export_selected_features(self.result_path, self.rule_tree_features)
 
         logging.info(f"{BinaryFeatureClassifier.__name__}: finished training.")
+
+    def _get_optimization_scoring_fn(self):
+        return MetricUtil.get_metric_fn(Metric[self.optimization_metric.upper()])
 
     def _build_rule_tree(self, encoded_data):
         if self.keep_all:
@@ -106,8 +105,10 @@ class BinaryFeatureClassifier(MLMethod):
             sys.setrecursionlimit(new_recursion_limit)
 
             rules = self._recursively_select_rules(encoded_train_data=encoded_train_data,
-                                                  encoded_val_data=encoded_val_data,
-                                                  last_val_scores=[], prev_rule_indices=[])
+                                                   encoded_val_data=encoded_val_data,
+                                                   prev_rule_indices=[],
+                                                   prev_train_predictions=np.array([False] * encoded_train_data.examples.shape[0]),
+                                                   prev_val_scores=[])
 
             sys.setrecursionlimit(old_recursion_limit)
 
@@ -118,23 +119,29 @@ class BinaryFeatureClassifier(MLMethod):
     def _get_rule_tree_features_from_indices(self, rule_tree_indices, feature_names):
         return [feature_names[idx] for idx in rule_tree_indices]
 
-    def _recursively_select_rules(self, encoded_train_data, encoded_val_data, last_val_scores, prev_rule_indices):
-        new_rule_indices, val_scores = self._add_next_best_rule(encoded_train_data, encoded_val_data, prev_rule_indices, last_val_scores)
-        is_improvement = self._test_is_improvement(val_scores, self.min_delta)
+    def _recursively_select_rules(self, encoded_train_data, encoded_val_data, prev_rule_indices, prev_train_predictions, prev_val_scores):
+        new_rule_indices, new_train_predictions = self._add_next_best_rule(encoded_train_data, prev_rule_indices, prev_train_predictions)
+
+        if new_rule_indices == prev_rule_indices:
+            logging.info(f"{BinaryFeatureClassifier.__name__}: no improvement on training set")
+            return self._get_optimal_indices(prev_rule_indices, self._test_is_improvement(prev_val_scores, self.min_delta))
+
         logging.info(f"{BinaryFeatureClassifier.__name__}: added rule {len(new_rule_indices)}/{min(self.max_features, encoded_train_data.examples.shape[1])}")
+        new_val_scores = prev_val_scores + [self._test_performance_rule_tree(encoded_data=encoded_val_data, rule_indices=new_rule_indices)]
+        is_improvement = self._test_is_improvement(new_val_scores, self.min_delta)
 
-        if new_rule_indices == prev_rule_indices or len(new_rule_indices) >= self.max_features:
-            logging.info(f"{BinaryFeatureClassifier.__name__}: no improvement on training set or max features reached")
-
+        if len(new_rule_indices) >= self.max_features:
+            logging.info(f"{BinaryFeatureClassifier.__name__}: max features reached")
             return self._get_optimal_indices(new_rule_indices, is_improvement)
 
         if self._test_earlystopping(is_improvement):
-            logging.info(f"{BinaryFeatureClassifier.__name__}: reached earlystopping criterion")
-
+            logging.info(f"{BinaryFeatureClassifier.__name__}: earlystopping criterion reached")
             return self._get_optimal_indices(new_rule_indices, is_improvement)
 
         return self._recursively_select_rules(encoded_train_data, encoded_val_data,
-                                        last_val_scores=val_scores, prev_rule_indices=new_rule_indices)
+                                              prev_rule_indices=new_rule_indices,
+                                              prev_train_predictions=new_train_predictions,
+                                              prev_val_scores=new_val_scores)
 
     def _test_earlystopping(self, is_improvement):
         if self.learn_all:
@@ -177,46 +184,48 @@ class BinaryFeatureClassifier(MLMethod):
 
             return rule_indices[:optimal_tree_idx + 1]
 
-    def _add_next_best_rule(self, encoded_train_data, encoded_val_data, prev_rule_indices, last_val_scores):
-        prev_train_performance = self._get_prev_train_performance(encoded_train_data, prev_rule_indices)
-
+    def _add_next_best_rule(self, encoded_train_data, prev_rule_indices, prev_predictions):
         unused_indices = self._get_unused_rule_indices(encoded_train_data, prev_rule_indices)
 
         if len(unused_indices) == 0:
-            return prev_rule_indices, last_val_scores
+            return prev_rule_indices, prev_predictions
 
-        new_training_performances = self._get_new_performances(encoded_train_data, prev_rule_indices=prev_rule_indices, new_indices_to_test=unused_indices)
+        prev_train_performance = self._test_performance_predictions(encoded_train_data, pred=prev_predictions)
 
+        new_training_performances = self._get_new_performances(encoded_train_data, prev_predictions=prev_predictions, new_indices_to_test=unused_indices)
         best_new_performance = max(new_training_performances)
         best_new_index = unused_indices[new_training_performances.index(best_new_performance)]
 
         if best_new_performance > prev_train_performance or self.learn_all:
             new_rule_indices = prev_rule_indices + [best_new_index]
-            new_val_scores = last_val_scores + [self._test_performance_rule_tree(encoded_data=encoded_val_data, rule_indices=new_rule_indices)]
+            new_predictions = np.logical_or(prev_predictions, encoded_train_data.examples[:, best_new_index])
 
-            return new_rule_indices, new_val_scores
+            return new_rule_indices, new_predictions
         else:
-            return prev_rule_indices, last_val_scores
-
-    def _get_prev_train_performance(self, encoded_train_data, prev_rule_indices):
-        if not prev_rule_indices:
-            return 0
-        else:
-            return self._test_performance_rule_tree(encoded_train_data, rule_indices=prev_rule_indices)
+            return prev_rule_indices, prev_predictions
 
     def _get_unused_rule_indices(self, encoded_train_data, rule_indices):
         return [idx for idx in range(encoded_train_data.examples.shape[1]) if idx not in rule_indices]
 
-    def _get_new_performances(self, encoded_data, prev_rule_indices, new_indices_to_test):
-        return [self._test_performance_rule_tree(encoded_data, rule_indices=prev_rule_indices + [idx]) for idx in new_indices_to_test]
-
-    def _test_performance_rule_tree(self, encoded_data, rule_indices):
-        optimization_scoring_fn = MetricUtil.get_metric_fn(Metric[self.optimization_metric.upper()])
-        pred = self._get_rule_tree_predictions_bool(encoded_data, rule_indices)
-
+    def _test_performance_predictions(self, encoded_data, pred):
         y_true = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
+        optimization_scoring_fn = self._get_optimization_scoring_fn()
 
         return optimization_scoring_fn(y_true=y_true, y_pred=pred, sample_weight=encoded_data.example_weights)
+
+
+    def _get_new_performances(self, encoded_data, prev_predictions, new_indices_to_test):
+        return [self._test_performance_predictions(encoded_data=encoded_data,
+                                                   pred=np.logical_or(prev_predictions, encoded_data.examples[:, idx]))
+                for idx in new_indices_to_test]
+
+
+    # def _get_new_performances(self, encoded_data, prev_rule_indices, new_indices_to_test):
+    #     return [self._test_performance_rule_tree(encoded_data, rule_indices=prev_rule_indices + [idx]) for idx in new_indices_to_test]
+
+    def _test_performance_rule_tree(self, encoded_data, rule_indices):
+        pred = self._get_rule_tree_predictions_bool(encoded_data, rule_indices)
+        return self._test_performance_predictions(encoded_data, pred=pred)
 
     def _get_rule_tree_predictions_bool(self, encoded_data, rule_indices):
         return np.logical_or.reduce([encoded_data.examples[:, i] for i in rule_indices])
