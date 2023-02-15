@@ -24,7 +24,7 @@ class TestCoefficients(TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-    def _create_report(self, path):
+    def _create_report(self, path, keep_all):
         enc_data_train = EncodedData(encoding=MotifEncoder.__name__,
                                example_ids=["1", "2", "3", "4", "5", "6", "7", "8"],
                                feature_names=["useless_rule", "rule1", "rule2", "rule3"],
@@ -52,8 +52,7 @@ class TestCoefficients(TestCase):
                                                    max_features=100,
                                                    patience=10,
                                                    min_delta=0,
-                                                   keep_all=False,
-                                                   learn_all=True,
+                                                   keep_all=keep_all,
                                                    result_path=path)
 
         random.seed(1)
@@ -74,11 +73,11 @@ class TestCoefficients(TestCase):
         return report
 
 
-    def test_generate(self):
+    def test_generate_keep_all_false(self):
         path = EnvironmentSettings.root_path / "test/tmp/binary_feature_precision_recall"
         PathBuilder.build(path)
 
-        report = self._create_report(path)
+        report = self._create_report(path, keep_all=False)
 
         self.assertTrue(report.check_prerequisites())
 
@@ -91,6 +90,25 @@ class TestCoefficients(TestCase):
         self.assertTrue(os.path.isfile(path / "test_performance.tsv"))
         self.assertTrue(os.path.isfile(path / "training_precision_recall.html"))
         self.assertTrue(os.path.isfile(path / "validation_precision_recall.html"))
+        self.assertTrue(os.path.isfile(path / "test_precision_recall.html"))
+
+        shutil.rmtree(path)
+
+    def test_generate_keep_all_true(self):
+        path = EnvironmentSettings.root_path / "test/tmp/binary_feature_precision_recall_keep_all"
+        PathBuilder.build(path)
+
+        report = self._create_report(path, keep_all=True)
+
+        self.assertTrue(report.check_prerequisites())
+
+        result = report._generate()
+
+        self.assertIsInstance(result, ReportResult)
+
+        self.assertTrue(os.path.isfile(path / "training_performance.tsv"))
+        self.assertTrue(os.path.isfile(path / "test_performance.tsv"))
+        self.assertTrue(os.path.isfile(path / "training_precision_recall.html"))
         self.assertTrue(os.path.isfile(path / "test_precision_recall.html"))
 
         shutil.rmtree(path)

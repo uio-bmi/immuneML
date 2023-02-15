@@ -38,14 +38,13 @@ class TestBinaryFeatureClassifier(TestCase):
         label = Label("l1", values=[True, False], positive_class=True)
         return enc_data, label
 
-    def get_fitted_classifier(self, path, enc_data, label, learn_all=False, max_features=None):
+    def get_fitted_classifier(self, path, enc_data, label, max_features=None):
         motif_classifier = BinaryFeatureClassifier(training_percentage=0.7,
                                                    random_seed=1,
                                                    max_features=max_features,
                                                    patience=10,
                                                    min_delta=0,
                                                    keep_all=False,
-                                                   learn_all=learn_all,
                                                    result_path=path)
 
         random.seed(1)
@@ -74,27 +73,27 @@ class TestBinaryFeatureClassifier(TestCase):
 
         shutil.rmtree(path)
 
-    def test_learn_all(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "binary_feature_classifier_fit_learn_all")
-
-        enc_data, label = self.get_enc_data()
-        motif_classifier = self.get_fitted_classifier(path, enc_data, label, learn_all=True, max_features=2)
-
-        predictions = motif_classifier.predict(enc_data, label)
-
-        self.assertEqual(motif_classifier.max_features, 4)
-
-        self.assertListEqual(motif_classifier.rule_tree_features, ["rule1", "rule2", "rule3", "useless_rule"])
-        self.assertListEqual(motif_classifier.rule_tree_indices, [1, 2, 3, 0])
-
-        self.assertListEqual(list(predictions.keys()), ["l1"])
-        self.assertListEqual(list(predictions["l1"]), ["True", "True", "True", "True", "True", "True", "False", "True"])
-
-        with open(path / "selected_features.txt", "r") as file:
-            lines = file.readlines()
-            self.assertEqual(sorted(lines), ["rule1\n", "rule2\n", "rule3\n", "useless_rule\n"])
-
-        shutil.rmtree(path)
+    # def test_learn_all(self):
+    #     path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "binary_feature_classifier_fit_learn_all")
+    #
+    #     enc_data, label = self.get_enc_data()
+    #     motif_classifier = self.get_fitted_classifier(path, enc_data, label, learn_all=True, max_features=2)
+    #
+    #     predictions = motif_classifier.predict(enc_data, label)
+    #
+    #     self.assertEqual(motif_classifier.max_features, 4)
+    #
+    #     self.assertListEqual(motif_classifier.rule_tree_features, ["rule1", "rule2", "rule3", "useless_rule"])
+    #     self.assertListEqual(motif_classifier.rule_tree_indices, [1, 2, 3, 0])
+    #
+    #     self.assertListEqual(list(predictions.keys()), ["l1"])
+    #     self.assertListEqual(list(predictions["l1"]), ["True", "True", "True", "True", "True", "True", "False", "True"])
+    #
+    #     with open(path / "selected_features.txt", "r") as file:
+    #         lines = file.readlines()
+    #         self.assertEqual(sorted(lines), ["rule1\n", "rule2\n", "rule3\n", "useless_rule\n"])
+    #
+    #     shutil.rmtree(path)
 
     def test_load_store(self):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "binary_feature_classifier_load_store")
@@ -157,6 +156,7 @@ class TestBinaryFeatureClassifier(TestCase):
                                                                                        prev_rule_indices=[0],
                                                                                        prev_train_predictions=np.array([False, True, False, True]),
                                                                                        prev_val_predictions=np.array([False, True, False, True]),
+                                                                                       index_candidates=[0],
                                                                                        cores_for_training=2)
 
         self.assertListEqual(result_no_improvement_on_training, [0])
@@ -177,6 +177,7 @@ class TestBinaryFeatureClassifier(TestCase):
                                                                          prev_rule_indices=[0],
                                                                          prev_train_predictions=np.array([True, False, False, False]),
                                                                          prev_val_predictions=np.array([True, False, False, False]),
+                                                                         index_candidates=[0, 1, 2],
                                                                          cores_for_training=2)
         self.assertListEqual(result_add_one_rule, [0, 1])
 
@@ -187,6 +188,7 @@ class TestBinaryFeatureClassifier(TestCase):
                                                                                prev_rule_indices=[],
                                                                                prev_train_predictions=np.array([False, False, False, False]),
                                                                                prev_val_predictions=np.array([False, False, False, False]),
+                                                                               index_candidates=[0, 1, 2],
                                                                                cores_for_training=2)
         self.assertListEqual(result_max_motifs_reached, [0])
 
@@ -197,6 +199,7 @@ class TestBinaryFeatureClassifier(TestCase):
                                                                                prev_rule_indices=[],
                                                                                prev_train_predictions=np.array([False, False, False, False]),
                                                                                prev_val_predictions=np.array([False, False, False, False]),
+                                                                               index_candidates=[0, 1, 2],
                                                                                cores_for_training=2)
         self.assertListEqual(result_max_motifs_reached, [0, 1])
 

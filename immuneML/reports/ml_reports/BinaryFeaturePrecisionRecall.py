@@ -65,9 +65,9 @@ class BinaryFeaturePrecisionRecall(MLReport):
         # train_table = self._write_output_table(plotting_data_train, self.result_path / "training_performance.tsv", name="Training set performance of every subset of binary features")
         # test_table = self._write_output_table(plotting_data_test, self.result_path / "test_performance.tsv", name="Test set performance of every subset of binary features")
 
-        train_fig = self._plot(plotting_data_train, dataset_type="training")
-        val_fig = self._plot(plotting_data_val, dataset_type="validation")
-        test_fig = self._plot(plotting_data_test, dataset_type="test")
+        train_fig = self._safe_plot(plotting_data=plotting_data_train, dataset_type="training")
+        val_fig = self._safe_plot(plotting_data=plotting_data_val, dataset_type="validation")
+        test_fig = self._safe_plot(plotting_data=plotting_data_test, dataset_type="test")
 
         return ReportResult(self.name,
                             info="Precision and recall scores for each subset of learned binary motifs",
@@ -75,12 +75,19 @@ class BinaryFeaturePrecisionRecall(MLReport):
                             output_figures=[fig for fig in [train_fig, val_fig, test_fig] if fig is not None])
 
     def _split_train_val_data(self, encoded_train_val_data):
-        encoded_train_data = Util.subset_encoded_data(encoded_train_val_data, self.method.train_indices)
-        encoded_val_data = Util.subset_encoded_data(encoded_train_val_data, self.method.val_indices)
+        if self.method.train_indices and self.method.val_indices:
+            encoded_train_data = Util.subset_encoded_data(encoded_train_val_data, self.method.train_indices)
+            encoded_val_data = Util.subset_encoded_data(encoded_train_val_data, self.method.val_indices)
+        else:
+            encoded_train_data = encoded_train_val_data
+            encoded_val_data = None
 
         return encoded_train_data, encoded_val_data
 
     def _compute_plotting_data(self, encoded_data):
+        if encoded_data is None:
+            return None
+
         rule_tree_indices = self.method.rule_tree_indices
 
         data = {"n_rules": [],
@@ -91,7 +98,12 @@ class BinaryFeaturePrecisionRecall(MLReport):
 
         y_true_bool = np.array([cls == self.label.positive_class for cls in encoded_data.labels[self.label.name]])
 
-        for n_rules in range(1, len(rule_tree_indices) + 1):
+        if self.method.keep_all:
+            rules_range = range(len(rule_tree_indices), len(rule_tree_indices) + 1)
+        else:
+            rules_range = range(1, len(rule_tree_indices) + 1)
+
+        for n_rules in rules_range:
             rule_subtree = rule_tree_indices[:n_rules]
 
             y_pred_bool = self.method._get_rule_tree_predictions_bool(encoded_data, rule_subtree)
@@ -105,7 +117,8 @@ class BinaryFeaturePrecisionRecall(MLReport):
         return pd.DataFrame(data)
 
     def _write_plotting_data(self, plotting_data, dataset_type):
-        return self._write_output_table(plotting_data, self.result_path / f"{dataset_type}_performance.tsv", name=f"{dataset_type.title()} set performance of every subset of binary features")
+        if plotting_data is not None:
+            return self._write_output_table(plotting_data, self.result_path / f"{dataset_type}_performance.tsv", name=f"{dataset_type.title()} set performance of every subset of binary features")
 
     def _plot(self, plotting_data, dataset_type):
         fig = px.line(plotting_data, x="recall", y="precision",
@@ -138,8 +151,6 @@ class BinaryFeaturePrecisionRecall(MLReport):
             run_report = False
 
         if self.method.keep_all:
-            warnings.warn(f"{location}: motifs will not be displayed in the correct order due to using the parameter "
-                          f"keep_all = True for ML method {self.method.name}. To learn all motifs and display performances "
-                          f"in the correct order, use learn_all = True instead. ")
+            warnings.warn(f"{location}: keep_all was set to True for ML method {self.method.name}, only one data point will be plotted. ")
 
         return run_report
