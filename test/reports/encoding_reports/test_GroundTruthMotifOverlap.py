@@ -9,6 +9,7 @@ from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import Rece
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
+from immuneML.reports.encoding_reports.GroundTruthMotifOverlap import GroundTruthMotifOverlap
 from immuneML.reports.encoding_reports.PositionalMotifFrequencies import PositionalMotifFrequencies
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.Constants import Constants
@@ -17,7 +18,7 @@ from immuneML.reports.ReportResult import ReportResult
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class TestPositionalMotifFrequencies(TestCase):
+class TestGroundTruthMotifOverlap(TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
@@ -100,32 +101,44 @@ class TestPositionalMotifFrequencies(TestCase):
 
         return encoded_dataset
 
+    def write_groundtruth_motifs(self, path):
+        outfile_path = path / "groundtruth.tsv"
+
+        with open(outfile_path, "w") as file:
+            file.writelines(["indices\tamino_acids\tn_sequences\n",
+                             "0\tA\t5\n",
+                             "0&1\tA&A\t2\n"])
+
+        return outfile_path
+
     def test_generate(self):
         path = EnvironmentSettings.tmp_test_path / "positional_motif_frequencies/"
         PathBuilder.build(path)
 
         encoded_dataset = self._create_dummy_encoded_data(path)
+        groundtruth_path = self.write_groundtruth_motifs(path)
 
-        report = PositionalMotifFrequencies.build_object(
-            **{"dataset": encoded_dataset, "result_path": path, "max_gap_size_only": False}
+        report = GroundTruthMotifOverlap.build_object(
+            **{"dataset": encoded_dataset, "result_path": path,
+               "groundtruth_motifs_path": str(groundtruth_path)}
         )
 
         self.assertTrue(report.check_prerequisites())
 
         result = report._generate()
 
-        self.assertIsInstance(result, ReportResult)
+        # self.assertIsInstance(result, ReportResult)
+        #
+        # self.assertEqual(result.output_figures[0].path, path / "gap_size_for_motif_size_2.html")
+        # self.assertEqual(result.output_figures[1].path, path / "positional_motif_frequencies.html")
+        # self.assertEqual(result.output_tables[0].path, path / "gap_size_table_motif_size_2.csv")
+        # self.assertEqual(result.output_tables[1].path, path / "positional_aa_counts.csv")
+        #
+        # content = pd.read_csv(path / "gap_size_table_motif_size_2.csv")
+        # self.assertEqual((list(content.columns))[0], "gap size")
+        # self.assertEqual((list(content.columns))[1], "occurrence")
+        #
+        # content = pd.read_csv(path / "positional_aa_counts.csv")
+        # self.assertEqual(list(content.index), [i for i in range(4)])
 
-        self.assertEqual(result.output_figures[0].path, path / "gap_and_motif_size.html")
-        self.assertEqual(result.output_figures[1].path, path / "positional_motif_frequencies.html")
-        self.assertEqual(result.output_tables[0].path, path / "gap_size_table.csv")
-        self.assertEqual(result.output_tables[1].path, path / "positional_aa_counts.csv")
-
-        content = pd.read_csv(path / "gap_size_table.csv")
-        self.assertEqual((list(content.columns))[1], "gap_size")
-        self.assertEqual((list(content.columns))[2], "occurrence")
-
-        content = pd.read_csv(path / "positional_aa_counts.csv")
-        self.assertEqual(list(content.index), [i for i in range(4)])
-
-        # shutil.rmtree(path)
+        shutil.rmtree(path)

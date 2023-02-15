@@ -30,6 +30,7 @@ class TrainMLModelState:
     reports: dict = field(default_factory=dict)
     name: str = None
     refit_optimal_model: bool = None
+    export_all_ml_settings: bool = None
     example_weighting: ExampleWeightingStrategy = None
     optimal_hp_items: Dict[str, HPItem] = field(default_factory=dict)
     optimal_hp_item_paths: Dict[str, str] = field(default_factory=dict)

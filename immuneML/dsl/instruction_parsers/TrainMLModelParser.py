@@ -29,10 +29,11 @@ class TrainMLModelParser:
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> TrainMLModelInstruction:
 
         valid_keys = ["assessment", "selection", "dataset", "strategy", "labels", "metrics", "settings", "number_of_processes", "type", "reports",
-                      "optimization_metric", "refit_optimal_model", "example_weighting"]
+                      "optimization_metric", "refit_optimal_model", "example_weighting", "export_all_ml_settings"]
         ParameterValidator.assert_type_and_value(instruction['settings'], list, TrainMLModelParser.__name__, 'settings')
         ParameterValidator.assert_keys(list(instruction.keys()), valid_keys, TrainMLModelParser.__name__, "TrainMLModel")
         ParameterValidator.assert_type_and_value(instruction['refit_optimal_model'], bool, TrainMLModelParser.__name__, 'refit_optimal_model')
+        ParameterValidator.assert_type_and_value(instruction['export_all_ml_settings'], bool, TrainMLModelParser.__name__, 'export_all_ml_settings')
         ParameterValidator.assert_type_and_value(instruction['metrics'], list, TrainMLModelParser.__name__, 'metrics')
         ParameterValidator.assert_type_and_value(instruction['optimization_metric'], str, TrainMLModelParser.__name__, 'optimization_metric')
         ParameterValidator.assert_type_and_value(instruction['number_of_processes'], int, TrainMLModelParser.__name__, 'number_of_processes')
@@ -62,7 +63,9 @@ class TrainMLModelParser:
                                                  hp_settings=settings, assessment=assessment, selection=selection, metrics=metrics,
                                                  optimization_metric=optimization_metric, refit_optimal_model=instruction['refit_optimal_model'],
                                                  label_configuration=label_config, path=path, context=context,
-                                                 number_of_processes=instruction["number_of_processes"], reports=reports, example_weighting=example_weighting, name=key)
+                                                 number_of_processes=instruction["number_of_processes"], reports=reports,
+                                                 example_weighting=example_weighting, export_all_ml_settings=instruction['export_all_ml_settings'],
+                                                 name=key)
 
         return hp_instruction
 

@@ -1,6 +1,7 @@
 from collections import Counter
 from pathlib import Path
 
+import logging
 import pandas as pd
 
 from immuneML.IO.ml_method.MLExporter import MLExporter
@@ -70,6 +71,9 @@ class TrainMLModelInstruction(Instruction):
         refit_optimal_model (bool): if the final combination of preprocessing-encoding-ML model should be refitted on the full dataset thus providing
         the final model to be exported from instruction; alternatively, train combination from one of the assessment folds will be used
 
+        export_all_models (bool): if set to True, all trained models #todo (in the assessment/selection/all) split are exported as .zip files.
+        If False, only the optimal model is exported. By default, export_all_models is False.
+
     YAML specification:
 
     .. indent with spaces
@@ -119,25 +123,36 @@ class TrainMLModelInstruction(Instruction):
             number_of_processes: 4 # number of parallel processes to create (could speed up the computation)
             optimization_metric: balanced_accuracy # the metric to use for choosing the optimal model and during training
             refit_optimal_model: False # use trained model, do not refit on the full dataset
+            export_all_ml_settings: False # only export the optimal setting
 
     """
 
     def __init__(self, dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list, assessment: SplitConfig, selection: SplitConfig,
                  metrics: set, optimization_metric: Metric, label_configuration: LabelConfiguration, path: Path = None, context: dict = None,
                  number_of_processes: int = 1, reports: dict = None, name: str = None, refit_optimal_model: bool = False,
-                 example_weighting: ExampleWeightingStrategy = None):
+                 export_all_ml_settings: bool = False, example_weighting: ExampleWeightingStrategy = None):
         self.state = TrainMLModelState(dataset, hp_strategy, hp_settings, assessment, selection, metrics,
                                        optimization_metric, label_configuration, path, context, number_of_processes,
-                                       reports if reports is not None else {}, name, refit_optimal_model, example_weighting)
+                                       reports if reports is not None else {}, name, refit_optimal_model,
+                                       export_all_ml_settings, example_weighting)
 
     def run(self, result_path: Path):
         self.state.path = result_path
         self.state = HPAssessment.run_assessment(self.state)
+        self._export_all_ml_settings()
         self._compute_optimal_hp_item_per_label()
         self.state.report_results = HPUtil.run_hyperparameter_reports(self.state, self.state.path / "reports")
         self.print_performances(self.state)
         self._export_all_performances_to_csv()
         return self.state
+
+    def _export_all_ml_settings(self):
+        if self.state.export_all_ml_settings:
+            for label in self.state.label_configuration.get_label_objects():
+                for assessment_state in self.state.assessment_states:
+                    for name, hp_item in assessment_state.label_states[label.name].assessment_items.items():
+                        zip_path = MLExporter.export_zip(hp_item=hp_item, path=hp_item.ml_settings_export_path, label_name=label.name)
+                        logging.info(f"TrainMLModelInstruction: config for {name} for label {label.name} was exported to: {zip_path}")
 
     def _compute_optimal_hp_item_per_label(self):
         n_labels = self.state.label_configuration.get_label_count()

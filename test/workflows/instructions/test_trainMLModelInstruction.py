@@ -74,7 +74,8 @@ class TestTrainMLModelInstruction(TestCase):
         process = TrainMLModelInstruction(dataset, GridSearch(hp_settings), hp_settings,
                                           SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig(data_splits={"seqlen": report})),
                                           SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig(data_splits={"seqlen": report})),
-                                          {Metric.BALANCED_ACCURACY}, Metric.BALANCED_ACCURACY, label_config, path)
+                                          {Metric.BALANCED_ACCURACY}, Metric.BALANCED_ACCURACY, label_config, path,
+                                          export_all_ml_settings=True)
 
         state = process.run(result_path=path)
 

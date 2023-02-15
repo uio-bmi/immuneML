@@ -12,3 +12,4 @@ selection: # inner loop of nested CV
   split_count: 1 # how many fold to create
   training_percentage: 0.7
 example_weighting: null
+export_all_ml_settings: False # only export the optimal model
