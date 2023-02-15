@@ -7,6 +7,9 @@ from pathlib import Path
 import numpy as np
 import yaml
 
+from functools import partial
+from multiprocessing.pool import Pool
+
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Label import Label
 from immuneML.ml_methods.MLMethod import MLMethod
@@ -82,7 +85,7 @@ class BinaryFeatureClassifier(MLMethod):
         self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name])
         self.optimization_metric = optimization_metric
 
-        self.rule_tree_indices = self._build_rule_tree(encoded_data)
+        self.rule_tree_indices = self._build_rule_tree(encoded_data, cores_for_training)
         self.rule_tree_features = self._get_rule_tree_features_from_indices(self.rule_tree_indices, self.feature_names)
         self._export_selected_features(self.result_path, self.rule_tree_features)
 
@@ -91,7 +94,7 @@ class BinaryFeatureClassifier(MLMethod):
     def _get_optimization_scoring_fn(self):
         return MetricUtil.get_metric_fn(Metric[self.optimization_metric.upper()])
 
-    def _build_rule_tree(self, encoded_data):
+    def _build_rule_tree(self, encoded_data, cores_for_training: int = 2):
         if self.keep_all:
             rules = list(range(len(self.feature_names)))
             logging.info(f"{BinaryFeatureClassifier.__name__}: all {len(rules)} rules kept.")
@@ -100,13 +103,13 @@ class BinaryFeatureClassifier(MLMethod):
             if self.learn_all or self.max_features is None:
                 self.max_features = encoded_train_data.examples.shape[1]
 
-            rules = self._start_recursive_search(encoded_train_data, encoded_val_data)
+            rules = self._start_recursive_search(encoded_train_data, encoded_val_data, cores_for_training)
 
             logging.info(f"{BinaryFeatureClassifier.__name__}: selected {len(rules)} out of {len(self.feature_names)} rules.")
 
         return rules
 
-    def _start_recursive_search(self, encoded_train_data, encoded_val_data):
+    def _start_recursive_search(self, encoded_train_data, encoded_val_data, cores_for_training: int = 2):
         old_recursion_limit = sys.getrecursionlimit()
         new_recursion_limit = old_recursion_limit + encoded_train_data.examples.shape[1]
         sys.setrecursionlimit(new_recursion_limit)
@@ -116,7 +119,8 @@ class BinaryFeatureClassifier(MLMethod):
                                                prev_rule_indices=[],
                                                prev_train_predictions=np.array([False] * encoded_train_data.examples.shape[0]),
                                                prev_val_predictions=np.array([False] * encoded_val_data.examples.shape[0]),
-                                               prev_val_scores=[])
+                                               prev_val_scores=[],
+                                               cores_for_training=cores_for_training)
 
         sys.setrecursionlimit(old_recursion_limit)
 
@@ -125,9 +129,9 @@ class BinaryFeatureClassifier(MLMethod):
     def _get_rule_tree_features_from_indices(self, rule_tree_indices, feature_names):
         return [feature_names[idx] for idx in rule_tree_indices]
 
-    def _recursively_select_rules(self, encoded_train_data, encoded_val_data, prev_rule_indices, prev_train_predictions, prev_val_predictions, prev_val_scores):
+    def _recursively_select_rules(self, encoded_train_data, encoded_val_data, prev_rule_indices, prev_train_predictions, prev_val_predictions, prev_val_scores, cores_for_training: int = 2):
         logging.info(f"{BinaryFeatureClassifier.__name__}: adding next best rule")
-        new_rule_indices, new_train_predictions = self._add_next_best_rule(encoded_train_data, prev_rule_indices, prev_train_predictions)
+        new_rule_indices, new_train_predictions = self._add_next_best_rule(encoded_train_data, prev_rule_indices, prev_train_predictions, cores_for_training)
         logging.info(f"{BinaryFeatureClassifier.__name__}: next best rule added")
 
         if new_rule_indices == prev_rule_indices:
@@ -159,8 +163,6 @@ class BinaryFeatureClassifier(MLMethod):
                                               prev_val_scores=new_val_scores)
 
     def _test_earlystopping(self, is_improvement):
-        logging.info(f"{BinaryFeatureClassifier.__name__}: test earlystopping")
-
         if self.learn_all:
             return False
 
@@ -171,8 +173,6 @@ class BinaryFeatureClassifier(MLMethod):
         # last few trees did not improve, stop training
         if not any(is_improvement[-self.patience:]):
             return True
-
-        logging.info(f"{BinaryFeatureClassifier.__name__}: earlystopping tested")
 
         return False
 
@@ -203,7 +203,7 @@ class BinaryFeatureClassifier(MLMethod):
 
             return rule_indices[:optimal_tree_idx + 1]
 
-    def _add_next_best_rule(self, encoded_train_data, prev_rule_indices, prev_predictions):
+    def _add_next_best_rule(self, encoded_train_data, prev_rule_indices, prev_predictions, cores_for_training: int = 2):
         logging.info(f"{BinaryFeatureClassifier.__name__}: getting unused indices")
         unused_indices = self._get_unused_rule_indices(encoded_train_data, prev_rule_indices)
         logging.info(f"{BinaryFeatureClassifier.__name__}: unused indices gotten")
@@ -212,20 +212,15 @@ class BinaryFeatureClassifier(MLMethod):
             return prev_rule_indices, prev_predictions
 
         # prev_train_performance = self._test_performance_predictions(encoded_train_data, pred=prev_predictions)
-        y_true_train = Util.map_to_new_class_values(encoded_train_data.labels[self.label.name], self.class_mapping)
-        optimization_scoring_fn = self._get_optimization_scoring_fn()
 
         logging.info(f"{BinaryFeatureClassifier.__name__}: testing prev train performance")
-        prev_train_performance = optimization_scoring_fn(y_true=y_true_train, y_pred=prev_predictions, sample_weight=encoded_train_data.example_weights)
+        prev_train_performance = self._test_performance_predictions(encoded_train_data, pred=prev_predictions)
         logging.info(f"{BinaryFeatureClassifier.__name__}: prev train performance tested")
 
         logging.info(f"{BinaryFeatureClassifier.__name__}: testing new train performances")
         # new_training_performances = self._get_new_performances(encoded_train_data, prev_predictions=prev_predictions, new_indices_to_test=unused_indices)
 
-        new_training_performances = [optimization_scoring_fn(y_true=y_true_train,
-                                                             y_pred=np.logical_or(prev_predictions, encoded_train_data.examples[:, idx]),
-                                                             sample_weight=encoded_train_data.example_weights)
-                                     for idx in unused_indices]
+        new_training_performances = self._test_new_train_performances(encoded_train_data, prev_predictions, unused_indices, cores_for_training)
 
         logging.info(f"{BinaryFeatureClassifier.__name__}: new train performances tested")
 
@@ -243,6 +238,33 @@ class BinaryFeatureClassifier(MLMethod):
             return new_rule_indices, new_predictions
         else:
             return prev_rule_indices, prev_predictions
+
+    def _test_new_train_performances(self, encoded_train_data, prev_predictions, unused_indices, cores_for_training: int = 2):
+        y_true_train = Util.map_to_new_class_values(encoded_train_data.labels[self.label.name], self.class_mapping)
+        optimization_scoring_fn = self._get_optimization_scoring_fn()
+
+        example_weights = encoded_train_data.example_weights
+
+        with Pool(cores_for_training) as pool:
+            partial_func = partial(self._apply_optimization_fn_to_new_rule_combo,
+                                   optimization_scoring_fn=optimization_scoring_fn, y_true_train=y_true_train,
+                                   example_weights=example_weights, prev_predictions=prev_predictions)
+            scores = pool.map(partial_func, encoded_train_data.examples[:, unused_indices].T)
+        return scores
+
+    def _apply_optimization_fn_to_new_rule_combo(self, new_rule_predictions, optimization_scoring_fn, y_true_train, example_weights,
+                                                 prev_predictions):
+        return optimization_scoring_fn(y_true=y_true_train,
+                                         y_pred=np.logical_or(prev_predictions, new_rule_predictions),
+                                         sample_weight=example_weights)
+
+
+    # def _apply_optimization_fn_to_new_rule_combo(self, optimization_scoring_fn, examples, y_true_train,
+    #                                              example_weights, prev_predictions, new_rule_idx):
+    #     return optimization_scoring_fn(y_true=y_true_train,
+    #                                    y_pred=np.logical_or(prev_predictions, examples[:, new_rule_idx]),
+    #                                    sample_weight=example_weights)
+    #
 
     def _get_unused_rule_indices(self, encoded_train_data, rule_indices):
         return [idx for idx in range(encoded_train_data.examples.shape[1]) if idx not in rule_indices]
