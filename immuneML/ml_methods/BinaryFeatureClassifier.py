@@ -221,7 +221,8 @@ class BinaryFeatureClassifier(MLMethod):
         logging.info(f"{BinaryFeatureClassifier.__name__}: testing new train performances")
         # new_training_performances = self._get_new_performances(encoded_train_data, prev_predictions=prev_predictions, new_indices_to_test=unused_indices)
 
-        new_training_performances = self._test_new_train_performances(encoded_train_data, prev_predictions, unused_indices, cores_for_training)
+        new_training_performances = self._test_new_train_performances(encoded_train_data, prev_predictions,
+                                                                      unused_indices, prev_train_performance, cores_for_training)
 
         logging.info(f"{BinaryFeatureClassifier.__name__}: new train performances tested")
 
@@ -240,7 +241,8 @@ class BinaryFeatureClassifier(MLMethod):
         else:
             return prev_rule_indices, prev_predictions
 
-    def _test_new_train_performances(self, encoded_train_data, prev_predictions, unused_indices, cores_for_training):
+    def _test_new_train_performances(self, encoded_train_data, prev_predictions, unused_indices,
+                                     prev_train_performance, cores_for_training):
         y_true_train = Util.map_to_new_class_values(encoded_train_data.labels[self.label.name], self.class_mapping)
         optimization_scoring_fn = self._get_optimization_scoring_fn()
 
@@ -249,15 +251,23 @@ class BinaryFeatureClassifier(MLMethod):
         with Pool(cores_for_training) as pool:
             partial_func = partial(self._apply_optimization_fn_to_new_rule_combo,
                                    optimization_scoring_fn=optimization_scoring_fn, y_true_train=y_true_train,
-                                   example_weights=example_weights, prev_predictions=prev_predictions)
+                                   example_weights=example_weights, prev_predictions=prev_predictions,
+                                   prev_train_performance=prev_train_performance)
             scores = pool.map(partial_func, encoded_train_data.examples[:, unused_indices].T)
         return scores
 
-    def _apply_optimization_fn_to_new_rule_combo(self, new_rule_predictions, optimization_scoring_fn, y_true_train, example_weights,
-                                                 prev_predictions):
-        return optimization_scoring_fn(y_true=y_true_train,
-                                         y_pred=np.logical_or(prev_predictions, new_rule_predictions),
-                                         sample_weight=example_weights)
+    def _apply_optimization_fn_to_new_rule_combo(self, new_rule_predictions, optimization_scoring_fn,
+                                                 y_true_train, example_weights,
+                                                 prev_predictions, prev_train_performance):
+        new_predictions = np.logical_or(prev_predictions, new_rule_predictions)
+
+        if np.array_equal(new_predictions, prev_predictions):
+            logging.info("eq")
+            return prev_train_performance
+        else:
+            return optimization_scoring_fn(y_true=y_true_train,
+                                           y_pred=new_predictions,
+                                           sample_weight=example_weights)
 
 
     # def _apply_optimization_fn_to_new_rule_combo(self, optimization_scoring_fn, examples, y_true_train,
