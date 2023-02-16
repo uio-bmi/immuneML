@@ -36,9 +36,9 @@ class TestMLMethodAssessment(TestCase):
         )
 
         label_config = LabelConfiguration()
-        label_config.add_label("l1", [1, 3])
+        label_config.add_label("l1", [1, 3], positive_class=3)
 
-        label = Label(name='l1', values=[1, 3])
+        label = Label(name='l1', values=[1, 3], positive_class=3)
 
         method1 = LogisticRegression()
         method1.fit(dataset.encoded_data, label=label)
