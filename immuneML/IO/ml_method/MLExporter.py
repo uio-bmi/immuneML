@@ -27,9 +27,11 @@ class MLExporter:
         encoder_filename = MLExporter._store_encoder(hp_item.hp_setting.encoder, path).name
 
         hp_item.method.store(path, hp_item.method.get_feature_names())
-        labels_with_values = {hp_item.method.get_label_name(): hp_item.method.get_classes()}
 
-        method_config = MLMethodConfiguration(labels_with_values=labels_with_values, software_used=hp_item.method.get_package_info(),
+        method_config = MLMethodConfiguration(label_name=hp_item.method.get_label_name(),
+                                              label_positive_class=hp_item.method.get_positive_class(),
+                                              label_values=hp_item.method.get_classes(),
+                                              software_used=hp_item.method.get_package_info(),
                                               encoding_name=hp_item.hp_setting.encoder_name, encoding_parameters=hp_item.hp_setting.encoder_params,
                                               encoding_file=encoder_filename, encoding_class=type(hp_item.hp_setting.encoder).__name__,
                                               ml_method=type(hp_item.method).__name__, ml_method_name=hp_item.method.name,
