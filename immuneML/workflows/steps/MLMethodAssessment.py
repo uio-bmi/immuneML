@@ -12,6 +12,7 @@ from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.util.Util import Util
 from immuneML.ml_metrics import ml_metrics
 from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.MetricUtil import MetricUtil
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.steps.MLMethodAssessmentParams import MLMethodAssessmentParams
 from immuneML.workflows.steps.Step import Step
@@ -58,7 +59,7 @@ class MLMethodAssessment(Step):
         metrics_with_optim_metric = sorted(list(metrics_with_optim_metric), key=lambda metric: metric.name)
 
         for metric in metrics_with_optim_metric:
-            score = MLMethodAssessment._score_for_metric(metric=metric,
+            score = MetricUtil.score_for_metric(metric=metric,
                                                          predicted_y=predicted_y[label.name],
                                                          true_y=true_y[label.name],
                                                          example_weights=example_weights,
@@ -77,34 +78,6 @@ class MLMethodAssessment(Step):
             df.to_csv(ml_score_path, index=False)
 
         return scores
-
-    @staticmethod
-    def _score_for_metric(metric: Metric, predicted_y, predicted_proba_y, true_y, example_weights, classes):
-        fn = MetricUtil.get_metric_fn(metric)
-
-        true_y, predicted_y = Util.binarize_label_classes(true_y=true_y, predicted_y=predicted_y, classes=classes)
-
-        try:
-            if metric in Metric.get_probability_based_metric_types():
-                predictions = predicted_proba_y
-                if predicted_proba_y is None:
-                    warnings.warn(f"MLMethodAssessment: metric {metric} is specified, but the chosen ML method does not output "
-                                  f"class probabilities. Using predicted classes instead...")
-                    predictions = predicted_y
-            else:
-                predictions = predicted_y
-
-            if 'labels' in inspect.getfullargspec(fn).kwonlyargs or 'labels' in inspect.getfullargspec(fn).args:
-                score = fn(true_y, predictions, sample_weight=example_weights, labels=classes)
-            else:
-                score = fn(true_y, predictions, sample_weight=example_weights)
-
-        except ValueError as err:
-            warnings.warn(f"MLMethodAssessment: score for metric {metric.name} could not be calculated."
-                          f"\nPredicted values: {predicted_y}\nTrue values: {true_y}.\nMore details: {err}", RuntimeWarning)
-            score = "not computed"
-
-        return score
 
     @staticmethod
     def _store_predictions(method: MLMethod, true_y, predicted_y, predicted_proba_y_per_class, label: Label, predictions_path, summary_path=None,

@@ -14,5 +14,7 @@ class MLApplicationState:
     label_config: LabelConfiguration
     pool_size: int
     name: str
+    metrics: list = None
     path: Path = None
     predictions_path: Path = None
+    metrics_path: Path = None

@@ -56,13 +56,13 @@ class TestFeatureValueBarplot(TestCase):
         return dataset
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path / "test/tmp/featurevaluebarplot/"
+        path = EnvironmentSettings.tmp_test_path / "featurevaluebarplot/"
         PathBuilder.build(path)
 
         dataset = self._create_dummy_encoded_data(path)
 
-        report = FeatureValueBarplot.build_object(**{"dataset": dataset,
-                                                     "result_path": path,
+        report = FeatureValueBarplot.build_object(**{"dataset": dataset, 'plot_all_features': True,
+                                                     "result_path": path, 'plot_top_n': 10, 'plot_bottom_n': 5,
                                                      "column_grouping_label": "disease",
                                                      "row_grouping_label": "timepoint",
                                                      "color_grouping_label": "disease"})
@@ -73,8 +73,8 @@ class TestFeatureValueBarplot(TestCase):
 
         self.assertIsInstance(result, ReportResult)
 
-        self.assertEqual(result.output_figures[0].path, path / "feature_value_barplot.html")
-        self.assertEqual(result.output_tables[0].path, path / "feature_values.csv")
+        self.assertEqual(result.output_figures[0].path, path / "feature_value_barplot_all.html")
+        self.assertEqual(result.output_tables[0].path, path / "feature_value_barplot_all.csv")
 
         content = pd.read_csv(path / "feature_values.csv")
         self.assertListEqual(list(content.columns),

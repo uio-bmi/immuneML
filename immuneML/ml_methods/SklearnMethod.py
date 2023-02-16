@@ -261,7 +261,6 @@ class SklearnMethod(MLMethod):
         '''Returns the model parameters in a readable yaml-friendly way (consisting of lists, dictionaries and strings).'''
         pass
 
-
     def get_label_name(self):
         return self.label.name
 

@@ -4,10 +4,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
-from sklearn.preprocessing import label_binarize
 
 from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.environment.Constants import Constants
 from immuneML.hyperparameter_optimization import HPSetting
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_metrics.MetricUtil import MetricUtil
@@ -87,13 +85,13 @@ class TrainingPerformance(MLReport):
         }
 
         for metric in self.metrics_set:
-            _score = TrainingPerformance._compute_score(
-                Metric.get_metric(metric),
-                predicted_y,
-                predicted_proba_y,
-                true_y,
-                example_weights,
-                classes,
+            _score = MetricUtil.score_for_metric(
+                metric=Metric.get_metric(metric),
+                predicted_y=predicted_y,
+                predicted_proba_y=predicted_proba_y,
+                true_y=true_y,
+                example_weights=example_weights,
+                classes=classes,
             )
             if metric == 'CONFUSION_MATRIX':
                 self._generate_heatmap(classes, classes, _score, metric, output)
@@ -109,33 +107,6 @@ class TrainingPerformance(MLReport):
                             info="Plots the evaluation metrics for the performance given machine learning model and training dataset.",
                             output_tables=output['tables'],
                             output_figures=output['figures'])
-
-    @staticmethod
-    def _compute_score(metric: Metric, predicted_y, predicted_proba_y, true_y, example_weights, labels):
-        fn = MetricUtil.get_metric_fn(metric)
-
-        if hasattr(true_y, 'dtype') and true_y.dtype.type is np.str_ or isinstance(true_y, list) and any(isinstance(item, str) for item in true_y):
-            true_y = label_binarize(true_y, classes=labels)
-            predicted_y = label_binarize(predicted_y, classes=labels)
-
-        try:
-            if metric in Metric.get_probability_based_metric_types():
-                predictions = predicted_proba_y
-                if predicted_proba_y is None:
-                    warnings.warn(f"TrainingPerformance: metric {metric} is specified, but the chosen ML method does not output "
-                                  f"class probabilities. Using predicted classes instead...")
-                    predictions = predicted_y
-            else:
-                predictions = predicted_y
-            
-            score = fn(true_y, predictions, sample_weight=example_weights)
-
-        except ValueError as err:
-            warnings.warn(f"TrainingPerformance: score for metric {metric.name} could not be calculated."
-                          f"\nPredicted values: {predicted_y}\nTrue values: {true_y}.\nMore details: {err}", RuntimeWarning)
-            score = Constants.NOT_COMPUTED
-
-        return score
 
     def _generate_barplot(self, df, output):
         import plotly.express as px

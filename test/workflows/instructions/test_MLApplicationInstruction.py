@@ -32,6 +32,7 @@ class TestMLApplicationInstruction(TestCase):
         PathBuilder.build(path)
 
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(50, {5: 1}, {5: 1}, {"l1": {1: 0.5, 2: 0.5}}, path / 'dataset/')
+        test_dataset = RandomDatasetGenerator.generate_repertoire_dataset(20, {5: 1}, {5: 1}, {"l1": {1: 0.5, 2: 0.5}}, path / 'dataset/')
         ml_method = LogisticRegression()
         encoder = KmerFreqRepertoireEncoder(NormalizationType.RELATIVE_FREQUENCY, ReadsType.UNIQUE, SequenceEncodingType.CONTINUOUS_KMER, 3,
                                             scale_to_zero_mean=True, scale_to_unit_variance=True)
@@ -46,13 +47,19 @@ class TestMLApplicationInstruction(TestCase):
 
         PathBuilder.build(path / 'result/instr1/')
 
-        ml_app = MLApplicationInstruction(dataset, label_config, hp_setting, 4, "instr1")
+        ml_app = MLApplicationInstruction(test_dataset, label_config, hp_setting, ["accuracy", "precision", "recall", "auc"], 4, "instr1")
         ml_app.run(path / 'result/')
 
         predictions_path = path / "result/instr1/predictions.csv"
         self.assertTrue(os.path.isfile(predictions_path))
+        metrics_path = path / "result/instr1/metrics.csv"
+        self.assertTrue(os.path.isfile(predictions_path))
 
         df = pd.read_csv(predictions_path)
-        self.assertEqual(50, df.shape[0])
+        self.assertEqual(20, df.shape[0])
+
+        df = pd.read_csv(metrics_path)
+        self.assertEqual(sorted(df.columns), sorted(["accuracy", "precision", "recall", "auc"]))
+        self.assertEqual(1, df.shape[0])
 
         shutil.rmtree(path)
