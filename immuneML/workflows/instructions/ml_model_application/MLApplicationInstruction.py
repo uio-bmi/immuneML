@@ -173,10 +173,10 @@ class MLApplicationInstruction(Instruction):
 
     def _apply_metrics(self, label, predictions_df):
         result = {}
-        for metric_str in self.state.metrics:
+        for metric in self.state.metrics:
             predicted_proba_y = np.vstack([np.array(predictions_df[f'{label.name}_{cls}_proba']) for cls in label.values]).T
 
-            result[metric_str] = [MetricUtil.score_for_metric(metric=Metric.get_metric(metric_str),
+            result[metric.value] = [MetricUtil.score_for_metric(metric=metric,
                                                               predicted_y=predictions_df[f"{label.name}_predicted_class"],
                                                               predicted_proba_y=predicted_proba_y,
                                                               true_y=predictions_df[f"{label.name}_true_class"],
