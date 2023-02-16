@@ -130,23 +130,17 @@ class BinaryFeatureClassifier(MLMethod):
         return [feature_names[idx] for idx in rule_tree_indices]
 
     def _recursively_select_rules(self, encoded_train_data, encoded_val_data, index_candidates, prev_rule_indices, prev_train_predictions, prev_val_predictions, prev_val_scores, cores_for_training):
-        logging.info(f"{BinaryFeatureClassifier.__name__}: adding next best rule")
         new_rule_indices, new_train_predictions, new_index_candidates = self._add_next_best_rule(encoded_train_data, prev_rule_indices, prev_train_predictions, index_candidates, cores_for_training)
-        logging.info(f"{BinaryFeatureClassifier.__name__}: next best rule added")
 
         if new_rule_indices == prev_rule_indices:
             logging.info(f"{BinaryFeatureClassifier.__name__}: no improvement on training set")
             return self._get_optimal_indices(prev_rule_indices, self._test_is_improvement(prev_val_scores, self.min_delta))
 
         logging.info(f"{BinaryFeatureClassifier.__name__}: added rule {len(new_rule_indices)}/{min(self.max_features, encoded_train_data.examples.shape[1])} ({len(new_index_candidates)} candidates left)")
-        logging.info(f"{BinaryFeatureClassifier.__name__}: computing new val score")
+
         new_val_predictions = np.logical_or(prev_val_predictions, encoded_val_data.examples[:, new_rule_indices[-1]])
         new_val_scores = prev_val_scores + [self._test_performance_predictions(encoded_val_data, pred=new_val_predictions)]
-        logging.info(f"{BinaryFeatureClassifier.__name__}: new val score computed")
-
-        logging.info(f"{BinaryFeatureClassifier.__name__}: computing is improvement")
         is_improvement = self._test_is_improvement(new_val_scores, self.min_delta)
-        logging.info(f"{BinaryFeatureClassifier.__name__}: is improvement computed")
 
         if len(new_rule_indices) >= self.max_features:
             logging.info(f"{BinaryFeatureClassifier.__name__}: max features reached")
@@ -200,39 +194,20 @@ class BinaryFeatureClassifier(MLMethod):
         return rule_indices[:optimal_tree_idx + 1]
 
     def _add_next_best_rule(self, encoded_train_data, prev_rule_indices, prev_predictions, index_candidates, cores_for_training):
-        # logging.info(f"{BinaryFeatureClassifier.__name__}: getting unused indices")
-        # unused_indices = self._get_unused_rule_indices(encoded_train_data, prev_rule_indices)
-        # logging.info(f"{BinaryFeatureClassifier.__name__}: unused indices gotten")
-
-
         if len(index_candidates) == 0:
             return prev_rule_indices, prev_predictions, []
 
-        # prev_train_performance = self._test_performance_predictions(encoded_train_data, pred=prev_predictions)
-
-        logging.info(f"{BinaryFeatureClassifier.__name__}: testing prev train performance")
         prev_train_performance = self._test_performance_predictions(encoded_train_data, pred=prev_predictions)
-        logging.info(f"{BinaryFeatureClassifier.__name__}: prev train performance tested")
-
-        logging.info(f"{BinaryFeatureClassifier.__name__}: testing new train performances")
-        # new_training_performances = self._get_new_performances(encoded_train_data, prev_predictions=prev_predictions, new_indices_to_test=unused_indices)
-
         new_training_performances = self._test_new_train_performances(encoded_train_data, prev_predictions,
                                                                       index_candidates, prev_train_performance, cores_for_training)
 
-        logging.info(f"{BinaryFeatureClassifier.__name__}: new train performances tested")
-
-        logging.info(f"{BinaryFeatureClassifier.__name__}: getting best index")
         best_new_performance = max(new_training_performances)
         best_new_index = index_candidates[new_training_performances.index(best_new_performance)]
         new_index_candidates = [index_candidates[i] for i, new_performance in enumerate(new_training_performances) if new_performance > prev_train_performance]
-        logging.info(f"{BinaryFeatureClassifier.__name__}: best index gotten")
 
         if best_new_performance > prev_train_performance:
             new_rule_indices = prev_rule_indices + [best_new_index]
-            logging.info(f"{BinaryFeatureClassifier.__name__}: getting new train predictions")
             new_predictions = np.logical_or(prev_predictions, encoded_train_data.examples[:, best_new_index])
-            logging.info(f"{BinaryFeatureClassifier.__name__}: new train predictions gotten")
 
             return new_rule_indices, new_predictions, new_index_candidates
         else:
@@ -241,19 +216,17 @@ class BinaryFeatureClassifier(MLMethod):
     def _test_new_train_performances(self, encoded_train_data, prev_predictions, index_candidates,
                                      prev_train_performance, cores_for_training):
         y_true_train = Util.map_to_new_class_values(encoded_train_data.labels[self.label.name], self.class_mapping)
-        optimization_scoring_fn = self._get_optimization_scoring_fn()
 
         example_weights = encoded_train_data.example_weights
 
         with Pool(cores_for_training) as pool:
-            partial_func = partial(self._apply_optimization_fn_to_new_rule_combo,
-                                   optimization_scoring_fn=optimization_scoring_fn, y_true_train=y_true_train,
+            partial_func = partial(self._apply_optimization_fn_to_new_rule_combo, y_true_train=y_true_train,
                                    example_weights=example_weights, prev_predictions=prev_predictions,
                                    prev_train_performance=prev_train_performance)
             scores = pool.map(partial_func, encoded_train_data.examples[:, index_candidates].T)
         return scores
 
-    def _apply_optimization_fn_to_new_rule_combo(self, new_rule_predictions, optimization_scoring_fn,
+    def _apply_optimization_fn_to_new_rule_combo(self, new_rule_predictions,
                                                  y_true_train, example_weights,
                                                  prev_predictions, prev_train_performance):
         new_predictions = np.logical_or(prev_predictions, new_rule_predictions)
@@ -261,6 +234,7 @@ class BinaryFeatureClassifier(MLMethod):
         if np.array_equal(new_predictions, prev_predictions):
             return prev_train_performance
         else:
+            optimization_scoring_fn = self._get_optimization_scoring_fn()
             return optimization_scoring_fn(y_true=y_true_train,
                                            y_pred=new_predictions,
                                            sample_weight=example_weights)
