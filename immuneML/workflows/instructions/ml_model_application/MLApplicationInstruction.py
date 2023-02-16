@@ -106,7 +106,7 @@ class MLApplicationInstruction(Instruction):
 
     """
 
-    def __init__(self, dataset: Dataset, label_configuration: LabelConfiguration, hp_setting: HPSetting, metrics: List[str], number_of_processes: int, name: str):
+    def __init__(self, dataset: Dataset, label_configuration: LabelConfiguration, hp_setting: HPSetting, metrics: List[Metric], number_of_processes: int, name: str):
 
         self.state = MLApplicationState(dataset=dataset, hp_setting=hp_setting, label_config=label_configuration, metrics=metrics, pool_size=number_of_processes, name=name)
 
@@ -176,11 +176,11 @@ class MLApplicationInstruction(Instruction):
         for metric in self.state.metrics:
             predicted_proba_y = np.vstack([np.array(predictions_df[f'{label.name}_{cls}_proba']) for cls in label.values]).T
 
-            result[metric.value] = [MetricUtil.score_for_metric(metric=metric,
-                                                              predicted_y=predictions_df[f"{label.name}_predicted_class"],
-                                                              predicted_proba_y=predicted_proba_y,
-                                                              true_y=predictions_df[f"{label.name}_true_class"],
-                                                              classes=label.values)]
+            result[metric.name.lower()] = [MetricUtil.score_for_metric(metric=metric,
+                                                                        predicted_y=predictions_df[f"{label.name}_predicted_class"],
+                                                                        predicted_proba_y=predicted_proba_y,
+                                                                        true_y=predictions_df[f"{label.name}_true_class"],
+                                                                        classes=label.values)]
         return pd.DataFrame(result)
 
     @staticmethod
