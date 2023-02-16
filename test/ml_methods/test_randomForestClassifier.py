@@ -26,17 +26,17 @@ class TestRandomForestClassifier(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         rfc = RandomForestClassifier()
-        rfc.fit(EncodedData(sparse.csr_matrix(x), y), Label("default"))
+        rfc.fit(EncodedData(sparse.csr_matrix(x), y), Label("default", [1, 0, 2]))
 
     def test_predict(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"default": np.array([1, 0, 2, 0])}
 
         rfc = RandomForestClassifier()
-        rfc.fit(EncodedData(x, y), Label("default"))
+        rfc.fit(EncodedData(x, y), Label("default", [1, 0, 2]))
 
         test_x = np.array([[0, 1, 0], [1, 0, 0]])
-        y = rfc.predict(EncodedData(test_x), Label("default"))["default"]
+        y = rfc.predict(EncodedData(test_x), Label("default", [1, 0, 2]))["default"]
 
         self.assertTrue(len(y) == 2)
         self.assertTrue(y[0] in [0, 1, 2])
@@ -48,14 +48,14 @@ class TestRandomForestClassifier(TestCase):
             labels={"t1": [1, 0, 2, 0, 1, 0, 2, 0], "t2": [1, 0, 2, 0, 1, 0, 2, 0]})
 
         rfc = RandomForestClassifier()
-        rfc.fit_by_cross_validation(x, number_of_splits=2, label=Label("t2"))
+        rfc.fit_by_cross_validation(x, number_of_splits=2, label=Label("t2", [1, 0, 2]))
 
     def test_store(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"default": np.array([1, 0, 2, 0])}
 
         rfc = RandomForestClassifier()
-        rfc.fit(EncodedData(x, y), Label("default"))
+        rfc.fit(EncodedData(x, y), Label("default", [1, 0, 2]))
 
         path = EnvironmentSettings.root_path / "test/tmp/rfc/"
 
@@ -74,7 +74,7 @@ class TestRandomForestClassifier(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         rfc = RandomForestClassifier()
-        rfc.fit(EncodedData(x, y), Label("default"))
+        rfc.fit(EncodedData(x, y), Label("default", [1, 0, 2]))
 
         path = EnvironmentSettings.root_path / "test/tmp/rfc2/"
         PathBuilder.build(path)

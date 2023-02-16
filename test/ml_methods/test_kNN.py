@@ -26,17 +26,17 @@ class TestKNN(TestCase):
         y = {"test": np.array([1, 0, 2, 0])}
 
         knn = KNN()
-        knn.fit(EncodedData(examples=sparse.csr_matrix(x), labels=y), Label("test"))
+        knn.fit(EncodedData(examples=sparse.csr_matrix(x), labels=y), Label("test", [1, 0, 2]))
 
     def test_predict(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"test1": [1, 0, 2, 0], "test2": [1, 0, 2, 0]}
 
         knn = KNN(parameters={"n_neighbors": 2})
-        knn.fit(EncodedData(sparse.csr_matrix(x), labels=y), Label("test2"))
+        knn.fit(EncodedData(sparse.csr_matrix(x), labels=y), Label("test2", [1, 0, 2]))
 
         test_x = np.array([[0, 1, 0], [1, 0, 0]])
-        y = knn.predict(EncodedData(sparse.csr_matrix(test_x)), Label("test2"))
+        y = knn.predict(EncodedData(sparse.csr_matrix(test_x)), Label("test2", [1, 0, 2]))
 
         self.assertTrue(len(y["test2"]) == 2)
         self.assertTrue(y["test2"][1] in [0, 1, 2])
@@ -47,14 +47,14 @@ class TestKNN(TestCase):
             labels={"test1": [1, 0, 2, 0, 1, 0, 2, 0], "test2": [1, 0, 2, 0, 1, 0, 2, 0]})
 
         knn = KNN(parameters={"n_neighbors": 2})
-        knn.fit_by_cross_validation(x, number_of_splits=2, label=Label("test1"))
+        knn.fit_by_cross_validation(x, number_of_splits=2, label=Label("test1", [1, 0, 2]))
 
     def test_store(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"default": np.array([1, 0, 2, 0])}
 
         knn = KNN()
-        knn.fit(EncodedData(sparse.csr_matrix(x), y), Label("default"))
+        knn.fit(EncodedData(sparse.csr_matrix(x), y), Label("default", [1, 0, 2]))
 
         path = EnvironmentSettings.root_path / "test/tmp/knn/"
 
@@ -74,7 +74,7 @@ class TestKNN(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         knn = KNN()
-        knn.fit(EncodedData(sparse.csr_matrix(x), y), Label("default"))
+        knn.fit(EncodedData(sparse.csr_matrix(x), y), Label("default", [1, 0, 2]))
 
         path = EnvironmentSettings.root_path / "test/tmp/knn2/"
         PathBuilder.build(path)

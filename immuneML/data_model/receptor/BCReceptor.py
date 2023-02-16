@@ -34,13 +34,9 @@ class BCReceptor(Receptor):
 
     def __init__(self, heavy: ReceptorSequence = None, light: ReceptorSequence = None, metadata: dict = None,
                  identifier: str = None):
+        super().__init__(metadata, identifier)
         self.heavy = heavy
         self.light = light
-        self.metadata = metadata
-        self.identifier = uuid4().hex if identifier is None else identifier
 
     def get_chains(self):
         return ["heavy", "light"]
-
-    def get_attribute(self, name: str):
-        raise NotImplementedError

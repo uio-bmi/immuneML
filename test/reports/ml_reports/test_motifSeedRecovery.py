@@ -27,7 +27,7 @@ class TestMotifSeedRecovery(TestCase):
         # dummy logistic regression with 100 observations with 20 features belonging to 2 classes
         dummy_lr = LogisticRegression()
         dummy_lr.fit_by_cross_validation(EncodedData(np.random.rand(100, 5), {"l1": [i % 2 for i in range(0, 100)]}), number_of_splits=2,
-                                         label=Label("l1"))
+                                         label=Label("l1", [0, 1]))
 
         # Change coefficients to values 1-20
         dummy_lr.model.coef_ = np.array(list(range(0, 5))).reshape(1, -1)
@@ -45,7 +45,7 @@ class TestMotifSeedRecovery(TestCase):
                    "gap_sizes": [1]}}})
 
         report.method = self._create_dummy_lr_model(path)
-        report.label = Label("l1")
+        report.label = Label("l1", [0, 1])
         report.result_path = path
         report.train_dataset = Dataset()
         report.train_dataset.encoded_data = EncodedData(examples=np.zeros((1, 5)), labels={"l1": [1]}, encoding="KmerFrequencyEncoder",
@@ -86,7 +86,7 @@ class TestMotifSeedRecovery(TestCase):
             "l1": {"seeds": ["AAA", "A/AA"],
                    "hamming_distance": False,
                    "gap_sizes": [1]}}})
-        report.label = Label("l1")
+        report.label = Label("l1", [0, 1])
 
         self.assertEqual(report.identical_overlap(seed="AAA", feature="AAA"), 3)
         self.assertEqual(report.identical_overlap(seed="AAA", feature="AAx"), 0)
@@ -120,7 +120,7 @@ class TestMotifSeedRecovery(TestCase):
             "l1": {"seeds": ["AAA", "A/AA"],
                    "hamming_distance": False,
                    "gap_sizes": [0, 5]}}})
-        report.label = Label("l1")
+        report.label = Label("l1", [0, 1])
 
         self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAAx", overlap_fn=report.identical_overlap), 3)
         self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAxxxxxAx", overlap_fn=report.identical_overlap), 3)

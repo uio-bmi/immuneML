@@ -33,8 +33,8 @@ class LabelConfiguration:
             ParameterValidator.assert_in_valid_list(positive_class, vals, Label.__name__, 'positive_class')
         else:
             positive_class = self._get_default_positive_class(vals)
-            if positive_class:
-                logging.info(f"LabelConfiguration: set default positive class '{positive_class}' for label {label_name}")
+            logging.info(f"LabelConfiguration: No positive label class was set. "
+                         f"Setting default positive class '{positive_class}' for label {label_name}")
 
         self._labels[label_name] = Label(label_name, vals, auxiliary_labels, positive_class)
 
@@ -55,6 +55,8 @@ class LabelConfiguration:
                 return positive_str.upper()
             if set(classes) == {positive_str.title(), negative_str.title()}:
                 return positive_str.title()
+
+        return sorted(classes)[0]
 
     def get_labels_by_name(self):
         return sorted(list(self._labels.keys()))

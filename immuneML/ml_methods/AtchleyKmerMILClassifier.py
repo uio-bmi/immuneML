@@ -167,7 +167,7 @@ class AtchleyKmerMILClassifier(MLMethod):
 
     def predict(self, encoded_data: EncodedData, label: Label):
         predictions_proba = self.predict_proba(encoded_data, label)
-        return {label.name: [self.class_mapping[val] for val in (predictions_proba[label.name][:, 1] > 0.5).tolist()]}
+        return {label.name: [self.class_mapping[val] for val in (predictions_proba[label.name][label.positive_class] > 0.5).tolist()]}
 
     def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None, cores_for_training: int = -1,
                                 optimization_metric=None):
@@ -189,7 +189,7 @@ class AtchleyKmerMILClassifier(MLMethod):
         del custom_vars["label"]
 
         if self.label:
-            custom_vars["label"] = vars(self.label)
+            custom_vars["label"] = self.label.get_desc_for_storage()
 
         params_path = path / "custom_params.yaml"
         with params_path.open('w') as file:
@@ -225,7 +225,9 @@ class AtchleyKmerMILClassifier(MLMethod):
         with torch.no_grad():
             data = torch.from_numpy(encoded_data.examples).float()[torch.arange(example_count).long(), :, max_logit_indices]
             predictions = torch.sigmoid(self.logistic_regression(data)).numpy()
-        return {label.name: np.vstack([1 - np.array(predictions), predictions]).T}
+
+        return {label.name: {label.positive_class: predictions,
+                             label.get_binary_negative_class(): 1 - predictions}}
 
     def get_label_name(self):
         return self.label.name
