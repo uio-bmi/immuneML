@@ -36,5 +36,8 @@ class MLApplicationHTMLBuilder:
             "labels": [{"name": label_name, "values": str(state.label_config.get_label_values(label_name))[1:-1]}
                        for label_name in state.label_config.get_labels_by_name()],
             "predictions": Util.get_table_string_from_csv(state.predictions_path),
-            "predictions_download_link": os.path.relpath(state.predictions_path, base_path)
+            "predictions_download_link": os.path.relpath(state.predictions_path, base_path),
+            "show_metrics": state.metrics_path is not None,
+            "metrics": Util.get_table_string_from_csv(state.metrics_path),
+            "metrics_download_link": os.path.relpath(state.metrics_path, base_path)
         }
