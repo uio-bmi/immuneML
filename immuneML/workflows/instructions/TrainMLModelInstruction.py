@@ -71,7 +71,7 @@ class TrainMLModelInstruction(Instruction):
         refit_optimal_model (bool): if the final combination of preprocessing-encoding-ML model should be refitted on the full dataset thus providing
         the final model to be exported from instruction; alternatively, train combination from one of the assessment folds will be used
 
-        export_all_models (bool): if set to True, all trained models #todo (in the assessment/selection/all) split are exported as .zip files.
+        export_all_models (bool): if set to True, all trained models in the assessment split are exported as .zip files.
         If False, only the optimal model is exported. By default, export_all_models is False.
 
     YAML specification:
