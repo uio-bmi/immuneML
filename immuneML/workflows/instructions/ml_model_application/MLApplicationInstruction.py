@@ -134,8 +134,8 @@ class MLApplicationInstruction(Instruction):
 
         metrics_df = self._apply_metrics_with_warnings(dataset, label, predictions_df)
         if metrics_df is not None:
-            self.state.predictions_path = self.state.path / "metrics.csv"
-            metrics_df.to_csv(self.state.predictions_path, index=False)
+            self.state.metrics_path = self.state.path / "metrics.csv"
+            metrics_df.to_csv(self.state.metrics_path, index=False)
 
 
     def _make_predictions_df(self, dataset, label):
