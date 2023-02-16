@@ -12,7 +12,7 @@ from immuneML.environment.Constants import Constants
 class MetricUtil:
 
     @staticmethod
-    def get_metric_fn(metric):
+    def get_metric_fn(metric: Metric):
         if hasattr(ml_metrics, metric.value):
             fn = getattr(ml_metrics, metric.value)
         else:

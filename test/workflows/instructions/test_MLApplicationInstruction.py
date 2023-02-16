@@ -8,6 +8,7 @@ from immuneML.analysis.data_manipulation.NormalizationType import NormalizationT
 from immuneML.caching.CacheType import CacheType
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFreqRepertoireEncoder import KmerFreqRepertoireEncoder
+from immuneML.ml_metrics.Metric import Metric
 from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.environment.Constants import Constants
@@ -47,7 +48,8 @@ class TestMLApplicationInstruction(TestCase):
 
         PathBuilder.build(path / 'result/instr1/')
 
-        ml_app = MLApplicationInstruction(test_dataset, label_config, hp_setting, ["accuracy", "precision", "recall", "auc"], 4, "instr1")
+        ml_app = MLApplicationInstruction(test_dataset, label_config, hp_setting,
+                                          [Metric.get_metric("accuracy"), Metric.get_metric("precision"), Metric.get_metric("recall"), Metric.get_metric("auc")], 4, "instr1")
         ml_app.run(path / 'result/')
 
         predictions_path = path / "result/instr1/predictions.csv"
