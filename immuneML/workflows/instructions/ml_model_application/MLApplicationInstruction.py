@@ -174,7 +174,10 @@ class MLApplicationInstruction(Instruction):
     def _apply_metrics(self, label, predictions_df):
         result = {}
         for metric in self.state.metrics:
-            predicted_proba_y = np.vstack([np.array(predictions_df[f'{label.name}_{cls}_proba']) for cls in label.values]).T
+            if all([f'{label.name}_{cls}_proba' in predictions_df.columns for cls in label.values]):
+                predicted_proba_y = np.vstack([np.array(predictions_df[f'{label.name}_{cls}_proba']) for cls in label.values]).T
+            else:
+                predicted_proba_y = None
 
             result[metric.name.lower()] = [MetricUtil.score_for_metric(metric=metric,
                                                                         predicted_y=predictions_df[f"{label.name}_predicted_class"],
