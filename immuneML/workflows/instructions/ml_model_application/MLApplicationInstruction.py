@@ -151,9 +151,11 @@ class MLApplicationInstruction(Instruction):
 
             for cls in method.get_classes():
                 predictions_df[f'{label.name}_{cls}_proba'] = predictions_proba[cls]
+                predictions_df[f'{label.name}_{cls}_proba'] = predictions_df[f'{label.name}_{cls}_proba'].astype(str)
 
         if label.name in dataset.get_label_names():
             predictions_df[f"{label.name}_true_class"] = dataset.get_metadata([label.name])[label.name]
+            predictions_df[f"{label.name}_true_class"] = predictions_df[f"{label.name}_true_class"].astype(str)
 
         return predictions_df
 
@@ -180,7 +182,7 @@ class MLApplicationInstruction(Instruction):
                 predicted_proba_y = None
 
             result[metric.name.lower()] = [MetricUtil.score_for_metric(metric=metric,
-                                                                        predicted_y=predictions_df[f"{label.name}_predicted_class"],
+                                                                        predicted_y=np.array(predictions_df[f"{label.name}_predicted_class"]),
                                                                         predicted_proba_y=predicted_proba_y,
                                                                         true_y=predictions_df[f"{label.name}_true_class"],
                                                                         classes=label.values)]
