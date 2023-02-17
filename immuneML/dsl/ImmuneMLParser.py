@@ -7,6 +7,7 @@ import yaml
 from yaml import MarkedYAMLError
 
 from immuneML.dsl.InstructionParser import InstructionParser
+from immuneML.dsl.ToolController import get_dataset
 from immuneML.dsl.ToolParser import ToolParser
 from immuneML.dsl.OutputParser import OutputParser
 from immuneML.dsl.definition_parsers.DefinitionParser import DefinitionParser
@@ -115,7 +116,8 @@ class ImmuneMLParser:
             problem_description = "\n--------------------------------------------------------------------------------\n" \
                                   "There was a YAML formatting error in the supplied specification file. Please validate specification " \
                                   "(you can use https://jsonformatter.org/yaml-validator) and try again."
-            raise MarkedYAMLError(context=str(exc), problem=problem_description, problem_mark=f"The error was {exc.problem_mark}.")
+            raise MarkedYAMLError(context=str(exc), problem=problem_description,
+                                  problem_mark=f"The error was {exc.problem_mark}.")
 
         try:
             if parse_func is None:
@@ -123,8 +125,9 @@ class ImmuneMLParser:
             else:
                 symbol_table, path = parse_func(workflow_specification, file_path, result_path)
         except KeyError as key_error:
-            raise Exception(f"ImmuneMLParser: an error occurred during parsing the YAML specification. Missing key was '{key_error.args[0]}'. "
-                            f"For more details, refer to the log above and check the documentation.") from key_error
+            raise Exception(
+                f"ImmuneMLParser: an error occurred during parsing the YAML specification. Missing key was '{key_error.args[0]}'. "
+                f"For more details, refer to the log above and check the documentation.") from key_error
         return symbol_table, path
 
     @staticmethod
@@ -141,10 +144,13 @@ class ImmuneMLParser:
 
         symbol_table = SymbolTable()
 
-        symbol_table = ToolParser.parse(workflow_specification, symbol_table)
+        # parse tool section in YAML file
+        symbol_table, workflow_specification = ToolParser.parse(workflow_specification, symbol_table)
 
-        # temporary solution
+        # temporary solution. Adds tool folder to environment which is used when importing
+        # packages that is located outside the core
         EnvironmentSettings.set_tool_path(symbol_table.get_by_type(SymbolType.TOOL)[0].item["path"])
+        workflow_specification = get_dataset(symbol_table, workflow_specification)
 
         def_parser_output, specs_defs = DefinitionParser.parse(workflow_specification, symbol_table, result_path)
         symbol_table, specs_instructions = InstructionParser.parse(def_parser_output, result_path)
@@ -165,7 +171,8 @@ class ImmuneMLParser:
             return result_path / file_name
 
     @staticmethod
-    def _output_specs(file_path=None, result_path=None, definitions: dict = None, instructions: dict = None, output: dict = None) -> Path:
+    def _output_specs(file_path=None, result_path=None, definitions: dict = None, instructions: dict = None,
+                      output: dict = None) -> Path:
         filepath = ImmuneMLParser._get_full_specs_filepath(file_path, result_path)
 
         result = {"definitions": definitions, "instructions": instructions, "output": output}
@@ -188,4 +195,3 @@ class ImmuneMLParser:
             return [ImmuneMLParser._paths_to_strings_recursive(item) for item in specs]
         else:
             return specs
-

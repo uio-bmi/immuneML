@@ -1,7 +1,6 @@
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.util.ParameterValidator import ParameterValidator
-from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
 class ToolParser:
@@ -18,7 +17,7 @@ class ToolParser:
         else:
             specification[ToolParser.keyword] = {}
 
-        return symbol_table  # , specification[ToolParser.keyword]
+        return symbol_table, specification  # , specification[ToolParser.keyword]
 
     @staticmethod
     def _parse_tool(key: str, tool_item: dict, symbol_table: SymbolTable):
@@ -29,10 +28,11 @@ class ToolParser:
         # language - optional, default python
 
         # check that all required parameters are present
-        ParameterValidator.assert_keys_present(list(tool_item.keys()), ["type", "path", "name"], ToolParser.__name__, key)
+        ParameterValidator.assert_keys_present(list(tool_item.keys()), ["type", "path", "name"], ToolParser.__name__,
+                                               key)
 
         # check that the value of type is valid
-        valid_types = ["MLMethod"]
+        valid_types = ["MLMethod", "dataset"]
         ParameterValidator.assert_in_valid_list(tool_item["type"], valid_types, "ToolParser", "type")
 
         # set default values and create dict with tool_item
@@ -44,5 +44,7 @@ class ToolParser:
         #  - check that name of tool is key in definitions (MLMethod in first version)
 
         symbol_table.add(key, SymbolType.TOOL, tool_item)
+
+        #print(ToolParser.run_dataset_tool("blbla"))
 
         return symbol_table

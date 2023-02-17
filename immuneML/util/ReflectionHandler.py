@@ -74,7 +74,6 @@ class ReflectionHandler:
         filenames = list(EnvironmentSettings.root_path.glob(pattern))
         # append all python files located in tool directory to filenames
         for a in glob.glob(EnvironmentSettings.tool_path + f"/**/*{class_name}.py"):
-            print(a)
             filenames.append(Path(a))
         filenames = [f for f in filenames if subdirectory_name in "/".join(f.parts)]
 
