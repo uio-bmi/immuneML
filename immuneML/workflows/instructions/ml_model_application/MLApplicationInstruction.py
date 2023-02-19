@@ -141,7 +141,10 @@ class MLApplicationInstruction(Instruction):
     def _make_predictions_df(self, dataset, label):
         method = self.state.hp_setting.ml_method
         predictions = method.predict(dataset.encoded_data, label)
-        predictions_df = pd.DataFrame({"example_id": dataset.get_example_ids(), f"{label.name}_predicted_class": predictions[label.name]})
+        predictions_df = pd.DataFrame({"example_id": dataset.get_example_ids()})
+
+        predictions_df[f"{label.name}_predicted_class"] = predictions[label.name]
+        predictions_df[f"{label.name}_predicted_class"] = predictions_df[f"{label.name}_predicted_class"].astype(str)
 
         if type(dataset) == RepertoireDataset:
             predictions_df.insert(0, 'repertoire_file', [repertoire.data_filename.name for repertoire in dataset.get_data()])
@@ -151,7 +154,6 @@ class MLApplicationInstruction(Instruction):
 
             for cls in method.get_classes():
                 predictions_df[f'{label.name}_{cls}_proba'] = predictions_proba[cls]
-                predictions_df[f'{label.name}_{cls}_proba'] = predictions_df[f'{label.name}_{cls}_proba'].astype(str)
 
         if label.name in dataset.get_label_names():
             predictions_df[f"{label.name}_true_class"] = dataset.get_metadata([label.name])[label.name]
@@ -184,8 +186,8 @@ class MLApplicationInstruction(Instruction):
             result[metric.name.lower()] = [MetricUtil.score_for_metric(metric=metric,
                                                                         predicted_y=np.array(predictions_df[f"{label.name}_predicted_class"]),
                                                                         predicted_proba_y=predicted_proba_y,
-                                                                        true_y=predictions_df[f"{label.name}_true_class"],
-                                                                        classes=label.values)]
+                                                                        true_y=np.array(predictions_df[f"{label.name}_true_class"]),
+                                                                        classes=[str(val) for val in label.values])]
         return pd.DataFrame(result)
 
     @staticmethod

@@ -81,7 +81,8 @@ class Util:
 
         Necessary for some sklearn metrics, like roc_auc_score
         """
-        if hasattr(true_y, 'dtype') and true_y.dtype.type is np.str_ or isinstance(true_y, list) and any(isinstance(item, str) for item in true_y):
+        if hasattr(true_y, 'dtype') and (true_y.dtype.type is np.str_ or true_y.dtype.type is np.object_) \
+                or isinstance(true_y, list) and any(isinstance(item, str) for item in true_y):
             true_y = label_binarize(true_y, classes=classes)
             predicted_y = label_binarize(predicted_y, classes=classes)
 
