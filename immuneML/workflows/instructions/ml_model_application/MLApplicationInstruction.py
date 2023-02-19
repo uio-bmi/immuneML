@@ -184,8 +184,8 @@ class MLApplicationInstruction(Instruction):
             result[metric.name.lower()] = [MetricUtil.score_for_metric(metric=metric,
                                                                         predicted_y=np.array(predictions_df[f"{label.name}_predicted_class"]),
                                                                         predicted_proba_y=predicted_proba_y,
-                                                                        true_y=predictions_df[f"{label.name}_true_class"],
-                                                                        classes=label.values)]
+                                                                        true_y=np.array(predictions_df[f"{label.name}_true_class"]),
+                                                                        classes=[str(val) for val in label.values])]
         return pd.DataFrame(result)
 
     @staticmethod
