@@ -41,9 +41,6 @@ class SequenceGenerationProbabilityDistribution(DataReport):
                 default_sequence_label: OLGA
     """
 
-    # TODO add pgen occurrence dict output
-    # TODO add different colors based on repertoire metadata (sick/healthy)
-
     @classmethod
     def build_object(cls,
                      **kwargs):  # called when parsing YAML - all checks for parameters (if any) should be in this function
@@ -79,24 +76,30 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
     def _generate(self) -> ReportResult:  # the function that creates the report
 
-        dataset_df = self.load_dataset_dataframe()
+        dataset_df = self._load_dataset_dataframe()
 
         dataset_df = self._get_sequence_count(dataset_df)
+        dataset_df = dataset_df[dataset_df["count"] > 1]
 
-        Logger.print_log("Starting generation probability-calculation", include_datetime=True)
+        Logger.print_log(
+            f"Starting generation probability-calculation ({dataset_df.sequence_aas.unique().size} unique sequences)",
+            include_datetime=True)
         dataset_df = self._get_sequence_pgen(dataset_df)
 
         report_output_fig = self._safe_plot(dataset_df=dataset_df)
         output_figures = None if report_output_fig is None else [report_output_fig]
 
-        table_path = self.result_path / f"processed_dataset_with_pgen.csv"
-        dataset_df.to_csv(table_path, index=False)
-        output_tables = None if dataset_df is None else [ReportOutput(table_path,
-                                                                      "Processed dataset with generation probability and implanted labels for each sequence")]
+        dataset_df.to_csv(self.result_path / f"processed_dataset_with_pgen.csv", index=False)
+        dataset_output = ReportOutput(self.result_path / f"processed_dataset_with_pgen.csv",
+                                      "Processed dataset with generation probability and implanted labels for each sequence")
+        output_tables = None if dataset_df is None else [dataset_output,
+                                                         self._generate_occurrence_limit_pgen_range(dataset_df),
+                                                         *self._create_output_table_for_vdjRec(dataset_df,
+                                                                                               self._load_dataset_dataframe())]
 
         return ReportResult(type(self).__name__, output_figures=output_figures, output_tables=output_tables)
 
-    def _get_sequence_pgen(self, dataset_df):
+    def _get_sequence_pgen(self, dataset_df) -> pd.DataFrame:
         """
         Computes generation probability of each sequence from self.dataset.
 
@@ -113,19 +116,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
         return dataset_df
 
-        # TODO remove unused code when checked that everything works well
-
-        df = pd.DataFrame()
-
-        for repertoire in self.dataset.get_data():
-            attr = pd.DataFrame(data=repertoire.get_attributes(["sequence_aas", "v_genes", "j_genes"]))
-            df = pd.concat([df, attr], ignore_index=True)
-
-        df.drop_duplicates(subset=["sequence_aas"], inplace=True)
-
-        return olga.compute_p_gens(df, SequenceType.AMINO_ACID)
-
-    def _get_sequence_count(self, dataset_df):
+    def _get_sequence_count(self, dataset_df) -> pd.DataFrame:
         """
         Either counts number of duplicates of each sequence from dataset, or how many repertoires each sequence
         appears in. This is specified in yaml file.
@@ -154,10 +145,6 @@ class SequenceGenerationProbabilityDistribution(DataReport):
             # jitter
             figure = px.strip(dataset_df, x="count", y="pgen", hover_data=["sequence_aas"])
 
-        Logger.print_log(
-            f"Number of single seqs: {len(dataset_df[dataset_df['count'] == 1])} / {len(dataset_df)} = {len(dataset_df[dataset_df['count'] == 1]) / len(dataset_df)}",
-            include_datetime=True)
-
         xaxis_title = "nr. of repertoires the sequence appears in" if self.count_by_repertoire else "total sequence count"
 
         figure.update_layout(title="Sequence generation probability distribution", template="plotly_white",
@@ -173,7 +160,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         figure.write_html(str(file_path))
         return ReportOutput(path=file_path, name="sequence generation probability distribution plot")
 
-    def load_dataset_dataframe(self):
+    def _load_dataset_dataframe(self) -> pd.DataFrame:
 
         dfs = []
 
@@ -203,9 +190,92 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         full_dataset = pd.concat(dfs, ignore_index=True)
 
         if label_names:
-            full_dataset["label"] = full_dataset[label_names].apply(lambda x: "".join([re.findall("signal_id='([^\"']+)", i)[0] for i in x if i]),
-                                                                    axis=1).replace([None, ""], self.default_sequence_label)
+            full_dataset["label"] = full_dataset[label_names].apply(
+                lambda x: "".join([re.findall("signal_id='([^\"']+)", i)[0] for i in x if i]),
+                axis=1).replace([None, ""], self.default_sequence_label)
 
         full_dataset.drop(label_names, axis=1, inplace=True)
 
         return full_dataset
+
+    def _create_output_table_for_vdjRec(self, pgen_df, full_df):
+
+        path = self.result_path
+        name = "pgen_dataset_for_hacking"
+
+        df = pd.merge(full_df, pgen_df[["sequence_aas", "v_genes", "j_genes", "pgen", "count"]], how="inner",
+                      on=["sequence_aas", "v_genes", "j_genes"])
+
+        if self.mark_implanted_labels:
+            target_names = list(self.dataset.get_label_names())
+        else:
+            target_names = []
+
+        # MAKE SEQUENCE COUNT FILE:
+        repertoires = (full_df["repertoire"].unique())
+
+        sequence_df = pd.DataFrame()
+
+        sequence_df["CDR3.amino.acid.sequence"] = df["sequence_aas"]
+        # TODO find out what sim_num is!
+        sequence_df["sim_num"] = 0
+
+        for r in repertoires:
+            sequence_df[r] = 0
+
+        for index, row in df.iterrows():
+            sequence_df.at[index, row["repertoire"]] += 1
+
+        sequence_df["Sum"] = df["count"]
+        sequence_df["target"] = ["TRUE" if label in target_names else "FALSE" for label in df["label"]]
+        sequence_df["Pgen"] = df["pgen"]
+
+        sequence_df = pd.merge(sequence_df.groupby(["CDR3.amino.acid.sequence"])[repertoires].sum(),
+                               sequence_df[["sim_num", "CDR3.amino.acid.sequence", "Sum", "target", "Pgen"]],
+                               how="inner", on="CDR3.amino.acid.sequence").drop_duplicates().reset_index(drop=True)
+
+        # move sim_num to front
+        cols = sequence_df.columns.tolist()
+        cols = [cols[-4]] + cols[:-4] + cols[-3:]
+        sequence_df = sequence_df[cols]
+
+        sequence_df.to_csv(path / f"sequences_{name}.csv", sep=";")
+
+        # MAKE SAMPLES FILE:
+        samples_df = pd.DataFrame()
+
+        full_df = full_df[full_df["sequence_aas"].isin(pgen_df["sequence_aas"])]
+
+        samples_df["count"] = full_df.groupby(["repertoire"])["repertoire"].count()
+        samples_df.reset_index(inplace=True)
+        samples_df["analysis"] = "TRUE"
+        samples_df.rename(columns={"repertoire": "sample"}, inplace=True)
+
+        samples_df.to_csv(path / f"samples_{name}.csv", sep=";")
+
+        return [ReportOutput(path / f"sequences_{name}.csv", "Dataset with pgen and target for hacking: SEQUENCES"),
+                ReportOutput(path / f"samples_{name}.csv", "Dataset with pgen and target for hacking: SAMPLES")]
+
+    def _generate_occurrence_limit_pgen_range(self, dataset_df):
+        """
+        Generates occurrence limit pgen range for MutatedSequenceImplanting
+
+        Example:
+        occurrence_limit_pgen_range:
+                1e-10: 2
+                1e-7: 3
+                1e-6: 5
+        """
+
+        path = self.result_path / "occurrence_limit_pgen_range.csv"
+
+        occurrence_limit_df = dataset_df[dataset_df["count"] > 1].groupby(["count"])["pgen"].min().to_frame()
+
+        f = open(path, "w")
+        f.write("occurrence_limit_pgen_range:\n")
+
+        for count, row in occurrence_limit_df.iterrows():
+            f.write(f"  {row['pgen']}: {count}\n")
+        f.close()
+
+        return ReportOutput(path, "Occurrence limit pgen range")
