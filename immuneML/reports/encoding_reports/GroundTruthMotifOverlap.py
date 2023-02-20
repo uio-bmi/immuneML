@@ -75,55 +75,25 @@ class GroundTruthMotifOverlap(EncodingReport):
         return motif, implant_rate
 
     def _generate_overlap(self, learned_motifs, groundtruth_motifs, implant_rate_dict):
-        overlap_df = pd.DataFrame({"learned_motifs": learned_motifs})
+        motif_size_list = list()
+        implant_rate_list = list()
+        max_overlap_list = list()
 
-        for gt_motif in groundtruth_motifs:
-            overlap_df[gt_motif] = [
-                self._get_max_overlap(l_motif, gt_motif)
-                for l_motif in overlap_df["learned_motifs"]
-            ]
+        for learned_motif in learned_motifs:
+            motif_size = len(learned_motif.split("-")[0].replace("&", ""))
+            for groundtruth_motif in groundtruth_motifs:
+                max_overlap = self._get_max_overlap(learned_motif, groundtruth_motif)
+                if max_overlap != 0:
+                    motif_size_list.append(motif_size)
+                    implant_rate_list.append(implant_rate_dict[groundtruth_motif])
+                    max_overlap_list.append(max_overlap)
 
-        overlap_df["max_groundtruth_overlap"] = overlap_df.drop(
-            "learned_motifs", axis=1
-        ).max(axis=1)
+        lineplot_df = pd.DataFrame()
+        lineplot_df["implant_rate"] = implant_rate_list
+        lineplot_df["max_overlap"] = max_overlap_list
+        lineplot_df["motif_size"] = motif_size_list
 
-        overlap_df["learned_motifs"] = overlap_df["learned_motifs"].apply(
-            lambda x: len(x.split("-")[0].replace("&", ""))
-        )
-
-        implant_rates = [
-            implant_rate_dict[col_name]
-            for col_name in overlap_df.drop(
-                ["learned_motifs", "max_groundtruth_overlap"], axis=1
-            ).columns
-        ]
-
-        overlap_values = overlap_df.drop(
-            ["learned_motifs", "max_groundtruth_overlap"], axis=1
-        ).values
-
-        max_groundtruth_overlap_values = overlap_df["max_groundtruth_overlap"].values
-        motif_size_values = overlap_df["learned_motifs"].values
-
-        implant_rate = list()
-        max_groundtruth_overlap = list()
-        motif_size = list()
-        for row in range(overlap_values.shape[0]):
-            if max_groundtruth_overlap_values[row] != 0:
-                max_index = np.argwhere(
-                    overlap_values[row, :] == np.amax(overlap_values[row, :])
-                )
-                for ind in max_index:
-                    implant_rate.append(implant_rates[ind[0]])
-                    max_groundtruth_overlap.append(max_groundtruth_overlap_values[row])
-                    motif_size.append(motif_size_values[row])
-
-        barplot_df = pd.DataFrame()
-        barplot_df["implant_rate"] = implant_rate
-        barplot_df["max_groundtruth_overlap"] = max_groundtruth_overlap
-        barplot_df["motif_size"] = motif_size
-
-        return barplot_df
+        return lineplot_df
 
     def _get_max_overlap(self, learned_motif, groundtruth_motif):
         larger, smaller = groundtruth_motif, learned_motif
@@ -175,7 +145,7 @@ class GroundTruthMotifOverlap(EncodingReport):
                 "max_groundtruth_overlap": "Max groundtruth overlap",
                 "motif_size": "Motif size",
             },
-            facet_col="max_groundtruth_overlap",
+            facet_col="max_overlap",
             color_discrete_sequence=self._get_color_discrete_sequence(),
             category_orders=dict(implant_rate=categories),
             facet_col_spacing=0.05,
