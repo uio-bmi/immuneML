@@ -105,11 +105,18 @@ class SimulationParser:
 
         elif isinstance(sim_item['signals'], list):
 
-            assert len(sim_item['signals']) == 1 and sim_item['receptors_in_repertoire_count'] != 0, \
+            assert len(sim_item['signals']) <= 1 and sim_item['receptors_in_repertoire_count'] != 0, \
                 f'Multiple signals are not supported for receptor-level simulation for sim_item {key}.'
+
             ParameterValidator.assert_keys(sim_item["signals"], symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, key, False)
 
-            sim_item['signals'] = {sim_item['signals'][0]: 1}
+            if len(sim_item['signals']) == 1:
+                sim_item['signals'] = {sim_item['signals'][0]: 1}
+            else:
+                sim_item['signals'] = {}
+
+        else:
+            sim_item['signals'] = {}
 
         return sim_item
 
