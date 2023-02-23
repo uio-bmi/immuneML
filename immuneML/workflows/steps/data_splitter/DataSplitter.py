@@ -14,6 +14,7 @@ from immuneML.workflows.steps.data_splitter.Util import Util
 
 class DataSplitter(Step):
 
+
     @staticmethod
     def run(input_params: DataSplitterParams = None):
         cache_key = CacheHandler.generate_cache_key(DataSplitter._prepare_caching_params(input_params))

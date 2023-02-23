@@ -1,6 +1,7 @@
 from pathlib import Path
 from uuid import uuid4
 import pandas as pd
+import copy
 
 from immuneML.data_model.pdb_structure.PDBStructure import PDBStructure
 from immuneML.environment.Constants import Constants
@@ -37,8 +38,10 @@ class PDBDataset(Dataset):
             if pdb_structure.header['idcode'].lower() in pdb_file:
                 file = open(pdb_file, "r")
                 if "REMARK 410" in file.read():
+                    file.close()
                     return True
                 else:
+                    file.close()
                     return False
 
 
@@ -133,3 +136,39 @@ class PDBDataset(Dataset):
 
     def get_metadata_file(self):
         return self.metadata_file
+
+
+    def make_subset(self, example_indices, path: Path, dataset_type: str):
+        """
+        Creates a new dataset object with only those examples (repertoires) available which were given by index in example_indices argument.
+
+        Args:
+            example_indices (list): a list of indices of examples (repertoires) to use in the new dataset
+            path (Path): a path where to store the newly created dataset
+            dataset_type (str): a type of the dataset used as a part of the name of the resulting dataset; the values are defined as constants in :py:obj:`~immuneML.data_model.dataset.Dataset.Dataset`
+
+        Returns:
+
+            a new RepertoireDataset object which includes only the repertoires specified under example_indices
+
+        """
+
+        file_names = []
+        for index in example_indices:
+            file_names.append(self.file_names[index])
+
+
+        metadata_file = self._build_new_metadata(example_indices, path / f"{dataset_type}_metadata.csv")
+        new_dataset = PDBDataset(pdb_file_paths=[self.pdb_file_paths[i] for i in example_indices],file_names= file_names, labels=copy.deepcopy(self.labels),
+                                        metadata_file=metadata_file)
+
+        return new_dataset
+
+    def _build_new_metadata(self, indices, path: Path) -> Path:
+        if self.metadata_file:
+            df = pd.read_csv(self.metadata_file, comment=Constants.COMMENT_SIGN)
+            df = df.iloc[indices, :]
+            df.to_csv(path, index=False)
+            return path
+        else:
+            return None

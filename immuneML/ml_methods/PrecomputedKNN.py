@@ -61,8 +61,9 @@ class PrecomputedKNN(SklearnMethod):
     def get_compatible_encoders(self):
         from immuneML.encodings.distance_encoding.CompAIRRDistanceEncoder import CompAIRRDistanceEncoder
         from immuneML.encodings.distance_encoding.DistanceEncoder import DistanceEncoder
+        from immuneML.encodings.pdb.DistanceBetweenStructuresEncoder import DistanceBetweenStructuresEncoder
 
-        return [DistanceEncoder, CompAIRRDistanceEncoder]
+        return [DistanceEncoder, CompAIRRDistanceEncoder, DistanceBetweenStructuresEncoder]
 
     @staticmethod
     def get_documentation():

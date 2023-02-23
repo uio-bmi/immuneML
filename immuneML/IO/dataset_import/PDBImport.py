@@ -30,9 +30,10 @@ class PDBImport(DataImport):
 
         dataframe = pd.read_csv(params.get("metadata_file"))
         labels = list(dataframe.columns)
+     ##   labels = dict(zip(dataframe.filename, dataframe.sars))
 
 
-        return PDBDataset(pdb_file_paths=paths_to_pdb_structures, file_names=file_names,labels=labels, metadata_file=params.get("metadata_file"))
+        return PDBDataset(pdb_file_paths=paths_to_pdb_structures, file_names=file_names,labels={key: list(set(dataframe[key].values.tolist())) for key in labels}, metadata_file=params.get("metadata_file"))
 
     @staticmethod
     def get_documentation():
