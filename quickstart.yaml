@@ -55,4 +55,3 @@ tools:
     path: /test
     type: MLMethod
     name: my_logistic_regression
-    language: C
