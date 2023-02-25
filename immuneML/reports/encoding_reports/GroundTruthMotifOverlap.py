@@ -115,8 +115,8 @@ class GroundTruthMotifOverlap(EncodingReport):
         loop_counter = 0
         start = 0
 
+        score = 0
         while loop_counter < max_larger_index:
-            score = 0
 
             for larger_index, smaller_index in zip(
                 range(start, max_larger_index), range(max_smaller_index)
