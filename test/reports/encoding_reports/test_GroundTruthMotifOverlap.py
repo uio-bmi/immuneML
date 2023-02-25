@@ -23,7 +23,7 @@ class TestGroundTruthMotifOverlap(TestCase):
 
         encoder = MotifEncoder.build_object(dataset, **{
             "min_positions": 1,
-            "max_positions": 3,
+            "max_positions": 1,
             "min_precision": 0.1,
             "min_recall": 0,
             "min_true_positives": 1,
@@ -64,8 +64,8 @@ class TestGroundTruthMotifOverlap(TestCase):
         df = pd.read_csv(path / "result_path/ground_truth_motif_overlap.tsv", sep="\t")
 
         if len(df) > 0:
-            self.assertTrue(os.path.isfile(path / "result_path/ground_truth_motif_overlap.html"))
+            self.assertTrue(os.path.isfile(path / "result_path/motif_overlap.html"))
 
-        shutil.rmtree(path)
+        # shutil.rmtree(path)
 
 
