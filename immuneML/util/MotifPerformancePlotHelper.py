@@ -45,13 +45,44 @@ class MotifPerformancePlotHelper():
     @staticmethod
     def _get_highlight(feature_annotations, highlight_motifs_path, highlight_motifs_name):
         if highlight_motifs_path is not None:
-            highlight_motifs = [PositionalMotifHelper.motif_to_string(indices, amino_acids, motif_sep="-", newline=False)
-                                for indices, amino_acids in PositionalMotifHelper.read_motifs_from_file(highlight_motifs_path)]
+            # highlight_motifs = [PositionalMotifHelper.motif_to_string(indices, amino_acids, motif_sep="-", newline=False)
+            #                     for indices, amino_acids in PositionalMotifHelper.read_motifs_from_file(highlight_motifs_path)]
 
-            return [highlight_motifs_name if motif in highlight_motifs else "Motif" for motif in
-                    feature_annotations["feature_names"]]
+            highlight_motifs = PositionalMotifHelper.read_motifs_from_file(highlight_motifs_path)
+            motifs = [PositionalMotifHelper.string_to_motif(motif, value_sep="&", motif_sep="-") for motif in feature_annotations["feature_names"]]
+
+            return [highlight_motifs_name if MotifPerformancePlotHelper._is_highlight_motif(motif, highlight_motifs) else "Motif"
+                    for motif in motifs]
         else:
             return ["Motif"] * len(feature_annotations)
+
+    @staticmethod
+    def _is_highlight_motif(motif, highlight_motifs):
+        for highlight_motif in highlight_motifs:
+            if motif == highlight_motif:
+                return True
+
+            if len(motif[0]) > len(highlight_motif[0]):
+                if MotifPerformancePlotHelper.is_sub_motif(highlight_motif, motif):
+                    return True
+
+        return False
+
+    @staticmethod
+    def is_sub_motif(short_motif, long_motif):
+        assert len(long_motif[0]) > len(short_motif[0])
+
+        long_motif_dict = {long_motif[0][i]: long_motif[1][i] for i in range(len(long_motif[0]))}
+
+        for idx, aa in zip(short_motif[0], short_motif[1]):
+            if idx in long_motif_dict.keys():
+                if long_motif_dict[idx] != aa:
+                    return False
+            else:
+                return False
+
+        return True
+
 
     @staticmethod
     def merge_train_test_feature_annotations(training_feature_annotations, test_feature_annotations):

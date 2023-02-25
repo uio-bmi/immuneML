@@ -49,6 +49,13 @@ class TestMotifTestSetPerformance(TestCase):
 
         return encoded_dataset
 
+    def _write_highlight_motifs_file(self, path):
+        file_path = path / "highlight_motifs.tsv"
+        with open(file_path, "w") as file:
+            file.writelines(["indices\tamino_acids\n", "1\tI\n", "5\tN\n", "0\tA\n", "4&7\t0&1\n"])
+
+        return file_path
+
 
     def test_generate(self):
         path = EnvironmentSettings.tmp_test_path / "motif_test_set_performance/"
@@ -61,6 +68,7 @@ class TestMotifTestSetPerformance(TestCase):
                                   "params": {"path": str(test_dataset_path),
                                              "metadata_column_mapping": {"is_binder": "is_binder"}}}
         params["name"] = "motif_set_perf"
+        params["highlight_motifs_path"] = str(self._write_highlight_motifs_file(path))
 
         report = MotifTestSetPerformance.build_object(**params)
 
@@ -77,6 +85,6 @@ class TestMotifTestSetPerformance(TestCase):
         self.assertTrue(os.path.isfile(path / "result_path/training_precision_per_tp_motif_size=1.html"))
         self.assertTrue(os.path.isfile(path / "result_path/test_precision_per_tp_motif_size=1.html"))
 
-        shutil.rmtree(path)
+        # shutil.rmtree(path)
 
 

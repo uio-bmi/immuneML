@@ -52,6 +52,7 @@ class MotifGeneralizationAnalysis(DataReport):
 
         training_set_identifier_path (str): path to a file containing 'sequence_identifiers' of the sequences used for the training set. This file should have a single column named 'example_id' and have one sequence identifier per line. If training_set_identifier_path is not set, a random subset of the data (according to training_percentage) will be assigned to be the training set.
 
+        training_percentage ...
 
     YAML specification:
 

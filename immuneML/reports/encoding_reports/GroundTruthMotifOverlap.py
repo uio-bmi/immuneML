@@ -44,11 +44,13 @@ class GroundTruthMotifOverlap(EncodingReport):
         learned_motifs = self.dataset.encoded_data.feature_names
 
         overlap_df = self._generate_overlap(learned_motifs, groundtruth_motifs, implant_rate_dict)
+        output_table = self._write_output_table(overlap_df, self.result_path / "ground_truth_motif_overlap.tsv", name=None)
         output_figure = self._safe_plot(overlap_df=overlap_df)
 
         return ReportResult(
             name=self.name,
-            output_figures=[output_figure],
+            output_figures=[output_figure] if output_figure is not None else [],
+            output_tables=[output_table],
         )
 
     def _read_groundtruth_motifs(self, filepath):
@@ -88,12 +90,12 @@ class GroundTruthMotifOverlap(EncodingReport):
                     implant_rate_list.append(implant_rate_dict[groundtruth_motif])
                     max_overlap_list.append(max_overlap)
 
-        lineplot_df = pd.DataFrame()
-        lineplot_df["implant_rate"] = implant_rate_list
-        lineplot_df["max_overlap"] = max_overlap_list
-        lineplot_df["motif_size"] = motif_size_list
+        df = pd.DataFrame()
+        df["implant_rate"] = implant_rate_list
+        df["max_overlap"] = max_overlap_list
+        df["motif_size"] = motif_size_list
 
-        return lineplot_df
+        return df
 
     def _get_max_overlap(self, learned_motif, groundtruth_motif):
         larger, smaller = groundtruth_motif, learned_motif
