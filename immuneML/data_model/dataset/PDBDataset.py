@@ -100,6 +100,9 @@ class PDBDataset(Dataset):
     def set_filenames(self, filenames):
         self.file_names = filenames
 
+    def set_pdb_filepaths(self, filepaths):
+        self.pdb_file_paths = filepaths
+
     def get_example_count(self):
         return len(self.pdb_file_paths)
 

@@ -26,7 +26,7 @@ class PDBImport(DataImport):
 
         for pdb_file in pathlib.Path(str(current_path)).glob('*.pdb'):
             paths_to_pdb_structures.append(str(pdb_file))
-            file_names.append(str(pdb_file))
+            file_names.append(str(pdb_file.name))
 
         dataframe = pd.read_csv(params.get("metadata_file"))
         labels = list(dataframe.columns)

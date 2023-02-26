@@ -1,0 +1,70 @@
+definitions:
+  datasets:
+    my_dataset:
+      format: AIRR
+      params:
+        column_mapping:
+          duplicate_count: counts
+          j_call: j_alleles
+          junction: sequences
+          junction_aa: sequence_aas
+          locus: chains
+          sequence_id: sequence_identifiers
+          v_call: v_alleles
+        import_empty_aa_sequences: false
+        import_empty_nt_sequences: true
+        import_illegal_characters: false
+        import_out_of_frame: false
+        import_productive: true
+        import_with_stop_codon: false
+        is_repertoire: true
+        metadata_file: /Users/lonneke/Desktop/william_distance_test/quickstart_data/metadata.csv
+        paired: false
+        path: /Users/lonneke/Desktop/william_distance_test/quickstart_data/repertoires
+        region_type: IMGT_CDR3
+        result_path: ../../../../Desktop/william_distance_test/out/datasets/my_dataset
+        separator: "\t"
+  encodings:
+    my_distance_encoder: Distance
+  example_weightings: {}
+  ml_methods:
+    my_knn:
+      PrecomputedKNN: {}
+      model_selection_cv: false
+      model_selection_n_folds: -1
+  motifs: {}
+  preprocessing_sequences: {}
+  reports: {}
+  signals: {}
+  simulations: {}
+instructions:
+  my_training_instruction:
+    assessment:
+      split_count: 1
+      split_strategy: random
+      training_percentage: 0.7
+    dataset: my_dataset
+    example_weighting: null
+    export_all_ml_settings: false
+    labels:
+    - signal_disease
+    metrics:
+    - auc
+    - precision
+    - recall
+    number_of_processes: 4
+    optimization_metric: balanced_accuracy
+    refit_optimal_model: false
+    reports: []
+    selection:
+      split_count: 1
+      split_strategy: random
+      training_percentage: 1
+    settings:
+    - encoding: my_distance_encoder
+      ml_method: my_knn
+      preprocessing: null
+    strategy: GridSearch
+    type: TrainMLModel
+output:
+  format: HTML
