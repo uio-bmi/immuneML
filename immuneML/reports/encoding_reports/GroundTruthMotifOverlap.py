@@ -149,8 +149,8 @@ class GroundTruthMotifOverlap(EncodingReport):
             overlap_df,
             x="implant_rate",
             labels={
-                "implant_rate": "Implant rate of groundtruth motif",
-                "max_groundtruth_overlap": "Max groundtruth overlap",
+                "implant_rate": "Number of implanted ground truth motifs",
+                "max_overlap": "Ground truth motif overlap",
                 "motif_size": "Motif size",
             },
             facet_col="max_overlap",
@@ -165,8 +165,7 @@ class GroundTruthMotifOverlap(EncodingReport):
         )
         facet_barplot.update_yaxes(matches=None, showticklabels=True)
         facet_barplot.update_layout(
-            xaxis_title="Implant rate of groundtruth motif",
-            yaxis_title="Total overlapping learned motifs",
+            yaxis_title="Number of overlapping learned motifs",
         )
         facet_barplot.write_html(str(file_path))
 
