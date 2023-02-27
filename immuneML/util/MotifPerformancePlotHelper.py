@@ -185,14 +185,6 @@ class MotifPerformancePlotHelper():
                                  marker=dict(symbol="diamond", color=px.colors.diverging.Tealrose[0])),
                       secondary_y=False)
 
-        # add smoothed combined precision
-        if "smooth_combined_precision" in combined_precision:
-            fig.add_trace(go.Scatter(x=combined_precision["training_TP"], y=combined_precision["smooth_combined_precision"],
-                                     marker=dict(color=px.colors.diverging.Tealrose[-1]),
-                                     name="Combined precision, smoothed",
-                                     mode="lines", line_shape='spline', line={'smoothing': 1.3}),
-                          secondary_y=False, )
-
         # add highlighted motifs
         plotting_data_highlight = plotting_data[plotting_data["highlight"] != "Motif"]
         if len(plotting_data_highlight) > 0:
@@ -200,6 +192,14 @@ class MotifPerformancePlotHelper():
                                      mode='markers', name=f"{highlight_motifs_name} precision",
                                      marker=dict(symbol="circle", color="#F5C144")),
                           secondary_y=False)
+
+        # add smoothed combined precision
+        if "smooth_combined_precision" in combined_precision:
+            fig.add_trace(go.Scatter(x=combined_precision["training_TP"], y=combined_precision["smooth_combined_precision"],
+                                     marker=dict(color=px.colors.diverging.Tealrose[-1]),
+                                     name="Combined precision, smoothed",
+                                     mode="lines", line_shape='spline', line={'smoothing': 1.3}),
+                          secondary_y=False, )
 
         # add vertical TP cutoff line
         if tp_cutoff is not None:

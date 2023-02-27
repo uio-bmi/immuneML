@@ -80,17 +80,24 @@ class GroundTruthMotifOverlap(EncodingReport):
         motif_size_list = list()
         implant_rate_list = list()
         max_overlap_list = list()
+        learned_motif_list = list()
+        gt_motif_list = list()
 
         for learned_motif in learned_motifs:
             motif_size = len(learned_motif.split("-")[0].replace("&", ""))
             for groundtruth_motif in groundtruth_motifs:
                 max_overlap = self._get_max_overlap(learned_motif, groundtruth_motif)
+
                 if max_overlap != 0:
                     motif_size_list.append(motif_size)
                     implant_rate_list.append(implant_rate_dict[groundtruth_motif])
                     max_overlap_list.append(max_overlap)
+                    learned_motif_list.append(learned_motif)
+                    gt_motif_list.append(groundtruth_motif)
 
         df = pd.DataFrame()
+        df["learned_motif"] = learned_motif_list
+        df["ground_truth_motif"] = gt_motif_list
         df["implant_rate"] = implant_rate_list
         df["max_overlap"] = max_overlap_list
         df["motif_size"] = motif_size_list
@@ -138,7 +145,6 @@ class GroundTruthMotifOverlap(EncodingReport):
 
     def _plot(self, overlap_df) -> ReportOutput:
         file_path = self.result_path / f"motif_overlap.html"
-        categories = np.sort([int(cat) for cat in overlap_df["implant_rate"].unique()])
         facet_barplot = px.histogram(
             overlap_df,
             x="implant_rate",
@@ -149,7 +155,9 @@ class GroundTruthMotifOverlap(EncodingReport):
             },
             facet_col="max_overlap",
             color_discrete_sequence=self._get_color_discrete_sequence(),
-            category_orders=dict(implant_rate=categories),
+            category_orders=dict(implant_rate=sorted([int(rate) for rate in overlap_df["implant_rate"].unique()]),
+                                 motif_size=sorted([int(size) for size in overlap_df["motif_size"].unique()]),
+                                 max_overlap=sorted([int(overlap) for overlap in overlap_df["max_overlap"].unique()])),
             facet_col_spacing=0.05,
             color="motif_size",
             title="Amount of overlapping motifs per implant rate",
