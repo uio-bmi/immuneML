@@ -30,6 +30,7 @@ class PDBDataset(Dataset):
         self.file_names = file_names
         self.metadata_file = metadata_file
         self.list_of_PDB_Structures = self.generate_PDB_Structures()
+        self.distance_matrix = None
 
 
 
@@ -175,3 +176,9 @@ class PDBDataset(Dataset):
             return path
         else:
             return None
+
+    def set_distance_matrix(self, distance_matrix):
+        self.distance_matrix = distance_matrix
+
+    def get_distance_matrix(self):
+        return self.distance_matrix

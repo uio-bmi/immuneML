@@ -82,16 +82,21 @@ class DistanceBetweenStructuresEncoder(DatasetEncoder):
 
         entire_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
 
-        distance_dictionary = self.calculate_TM_Score_between_current_dataset_and_entire_dataset(entire_dataset, entire_dataset)
-
-        distance_matrix_dataframe = pd.DataFrame(distance_dictionary)
-        distance_matrix_dataframe.index = entire_dataset.get_pdb_filepaths()
-
         example_ids_with_correct_endings = self.add_file_endings(dataset.get_example_ids())
         training_data_ids_with_correct_endings = self.add_file_endings(training_data_ids)
 
-        distance_matrix_dataframe = distance_matrix_dataframe.loc[example_ids_with_correct_endings, training_data_ids_with_correct_endings]
+        if entire_dataset.distance_matrix is None:
+            distance_dictionary = self.calculate_TM_Score_between_current_dataset_and_entire_dataset(entire_dataset, entire_dataset)
 
+            distance_matrix_dataframe = pd.DataFrame(distance_dictionary)
+            distance_matrix_dataframe.index = entire_dataset.get_pdb_filepaths()
+
+            entire_dataset.set_distance_matrix(distance_matrix_dataframe)
+
+        else:
+            distance_matrix_dataframe = entire_dataset.get_distance_matrix()
+
+        distance_matrix_dataframe = distance_matrix_dataframe.loc[example_ids_with_correct_endings, training_data_ids_with_correct_endings]
 
         return distance_matrix_dataframe
 
@@ -133,13 +138,8 @@ class DistanceBetweenStructuresEncoder(DatasetEncoder):
 
     def build_labels(self, dataset: PDBDataset, params: EncoderParams) -> dict:
 
-      #  lbl = ["identifier"]
-     #   lbl.extend(params.label_config.get_labels_by_name())
-
         tmp_labels = dataset.get_metadata(params.label_config.get_labels_by_name(), return_df=True)
-     #   tmp_labels = tmp_labels.iloc[pd.Index(tmp_labels['identifier']).get_indexer(dataset.get_repertoire_ids())]
         tmp_labels = tmp_labels.to_dict("list")
-      #  del tmp_labels["identifier"]
 
         return tmp_labels
 

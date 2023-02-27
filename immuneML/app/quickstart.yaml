@@ -28,3 +28,6 @@ instructions:
       optimization_metric: balanced_accuracy # the metric to optimize during nested cross-validation when comparing multiple models
       metrics: # other metrics to compute for reference
         - auc
+        - precision
+        - recall
+
