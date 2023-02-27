@@ -128,6 +128,8 @@ class BinaryFeaturePrecisionRecall(MLReport):
                       color_discrete_sequence=px.colors.diverging.Tealrose,
                       markers=True)
 
+        fig.update_traces(marker={'size': 4})
+
         file_path = self.result_path / f"{dataset_type}_precision_recall.html"
 
         fig.write_html(str(file_path))
