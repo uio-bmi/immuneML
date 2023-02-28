@@ -58,7 +58,8 @@ class TestNonMotifSequenceSimilarity(TestCase):
         encoded_dataset = self._create_dummy_encoded_data(path)
 
         report = NonMotifSequenceSimilarity.build_object(
-            **{"dataset": encoded_dataset, "result_path": path}
+            **{"dataset": encoded_dataset, "result_path": path,
+               "motif_color_map": {1: "#66C5CC", 2: "#F6CF71", 3: "#F89C74"}}
         )
 
         self.assertTrue(report.check_prerequisites())

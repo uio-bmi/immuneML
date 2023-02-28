@@ -107,7 +107,8 @@ class TestPositionalMotifFrequencies(TestCase):
         encoded_dataset = self._create_dummy_encoded_data(path)
 
         report = PositionalMotifFrequencies.build_object(
-            **{"dataset": encoded_dataset, "result_path": path, "max_gap_size_only": False}
+            **{"dataset": encoded_dataset, "result_path": path,
+               "motif_color_map": {1: "#66C5CC", 2: "#F6CF71", 3: "#F89C74"}}
         )
 
         self.assertTrue(report.check_prerequisites())
@@ -116,13 +117,19 @@ class TestPositionalMotifFrequencies(TestCase):
 
         self.assertIsInstance(result, ReportResult)
 
-        self.assertEqual(result.output_figures[0].path, path / "gap_and_motif_size.html")
-        self.assertEqual(result.output_figures[1].path, path / "positional_motif_frequencies.html")
-        self.assertEqual(result.output_tables[0].path, path / "gap_size_table.csv")
-        self.assertEqual(result.output_tables[1].path, path / "positional_aa_counts.csv")
+        self.assertTrue(os.path.isfile(path / "max_gap_size.html"))
+        self.assertTrue(os.path.isfile(path / "total_gap_size.html"))
+        self.assertTrue(os.path.isfile(path / "positional_motif_frequencies.html"))
+        self.assertTrue(os.path.isfile(path / "max_gap_size_table.csv"))
+        self.assertTrue(os.path.isfile(path / "total_gap_size_table.csv"))
+        self.assertTrue(os.path.isfile(path / "positional_aa_counts.csv"))
 
-        content = pd.read_csv(path / "gap_size_table.csv")
-        self.assertEqual((list(content.columns))[1], "gap_size")
+        content = pd.read_csv(path / "max_gap_size_table.csv")
+        self.assertEqual((list(content.columns))[1], "max_gap_size")
+        self.assertEqual((list(content.columns))[2], "occurrence")
+
+        content = pd.read_csv(path / "total_gap_size_table.csv")
+        self.assertEqual((list(content.columns))[1], "total_gap_size")
         self.assertEqual((list(content.columns))[2], "occurrence")
 
         content = pd.read_csv(path / "positional_aa_counts.csv")

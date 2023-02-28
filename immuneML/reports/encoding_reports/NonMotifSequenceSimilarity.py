@@ -13,6 +13,7 @@ from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
+from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -28,6 +29,8 @@ class NonMotifSequenceSimilarity(EncodingReport):
     will lean towards small hamming distances. Likewise, for motifs occurring in a very diverse set of sequences, the
     distribution will lean towards containing more large hamming distances.
 
+    motif_color_map # todo
+
     YAML specification example:
 
     .. indent with spaces
@@ -39,12 +42,17 @@ class NonMotifSequenceSimilarity(EncodingReport):
 
     @classmethod
     def build_object(cls, **kwargs):
+        if "motif_color_map" in kwargs:
+            ParameterValidator.assert_type_and_value(kwargs["motif_color_map"], dict, NonMotifSequenceSimilarity.__name__, "motif_color_map")
+            kwargs["motif_color_map"] = {str(key): value for key, value in kwargs["motif_color_map"].items()}
+
         return NonMotifSequenceSimilarity(**kwargs)
 
-    def __init__(self, dataset: SequenceDataset = None, result_path: Path = None, name: str = None,
-                 number_of_processes: int = 1):
+    def __init__(self, dataset: SequenceDataset = None, result_path: Path = None,
+                 motif_color_map: dict = None, name: str = None, number_of_processes: int = 1):
         super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
         self.sequence_length = 0
+        self.motif_color_map = motif_color_map
 
     def _generate(self):
         PathBuilder.build(self.result_path)
@@ -111,12 +119,24 @@ class NonMotifSequenceSimilarity(EncodingReport):
         return plotting_data
 
     def _plot(self, plotting_data) -> ReportOutput:
+        if self.motif_color_map is not None:
+            color_discrete_map = self.motif_color_map
+            color_discrete_sequence = None
+        else:
+            color_discrete_map = None
+            color_discrete_sequence = px.colors.sequential.Sunsetdark
+
+        plotting_data["motif_size"] = plotting_data["motif_size"].astype(str)
+
         fig = px.line(plotting_data, x='Hamming', y='Percentage', markers=True, line_group='motif', color="motif_size",
-                      template='plotly_white', color_discrete_sequence=px.colors.sequential.Sunsetdark,
-                      labels={"Percentage": "Percentage of sequence pairs sharing the motif",
-                              "Hamming": "Hamming distance between pairs of sequences sharing the motif",
+                      template='plotly_white', color_discrete_sequence=color_discrete_sequence, color_discrete_map=color_discrete_map,
+                      labels={"Percentage": "Percentage of sequence pairs containing motif",
+                              "Hamming": "Hamming distance between sequences",
                               "motif_size": "Motif length<br>(number of<br>amino acids)"})
+
         fig.layout.yaxis.tickformat = ',.0%'
+
+        fig.update_traces(opacity=0.7)
 
         fig.update_layout(
             font=dict(

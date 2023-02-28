@@ -29,7 +29,6 @@ class PositionalMotifFrequencies(EncodingReport):
 
     Arguments:
 
-        max_gap_size_only (bool): When True, only the maximum gap size within each motif is plotted. When False, all gap sizes are plotted. By default, max_gap_size_only is True.
 
     YAML specification example:
 
@@ -42,26 +41,16 @@ class PositionalMotifFrequencies(EncodingReport):
 
     @classmethod
     def build_object(cls, **kwargs):
-        location = PositionalMotifFrequencies.__name__
-        ParameterValidator.assert_type_and_value(kwargs["max_gap_size_only"], bool, location, "max_gap_size_only")
+        if "motif_color_map" in kwargs:
+            ParameterValidator.assert_type_and_value(kwargs["motif_color_map"], dict, PositionalMotifFrequencies.__name__, "motif_color_map")
+            kwargs["motif_color_map"] = {str(key): value for key, value in kwargs["motif_color_map"].items()}
 
         return PositionalMotifFrequencies(**kwargs)
 
-    def __init__(
-        self,
-        dataset: SequenceDataset = None,
-        result_path: Path = None,
-        name: str = None,
-        number_of_processes: int = 1,
-        max_gap_size_only: bool = None,
-    ):
-        super().__init__(
-            dataset=dataset,
-            result_path=result_path,
-            name=name,
-            number_of_processes=number_of_processes,
-        )
-        self.max_gap_size_only = max_gap_size_only
+    def __init__(self, dataset: SequenceDataset = None, result_path: Path = None,
+                 motif_color_map: dict = None, name: str = None, number_of_processes: int = 1):
+        super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
+        self.motif_color_map = motif_color_map
 
     def get_sequence_length(self):
         my_sequence = next(self.dataset.get_data())
@@ -72,23 +61,58 @@ class PositionalMotifFrequencies(EncodingReport):
 
         motifs = self.dataset.encoded_data.feature_names
         positional_aa_counts_df = self._get_positional_aa_counts(motifs)
-        gap_size_df = self._get_gap_sizes(motifs)
+        max_gap_size_df = self._get_max_gap_sizes(motifs)
+        total_gap_size_df = self._get_total_gap_sizes(motifs)
 
-        positional_aa_counts_table = self._write_positional_aa_counts_table(
-            positional_aa_counts_df
-        )
-        gap_size_table = self._write_gap_size_table(gap_size_df)
 
-        output_figures = self._safe_plot(
-            positional_aa_counts_df=positional_aa_counts_df, gap_size_df=gap_size_df
-        )
+        positional_aa_counts_table = self._write_output_table(positional_aa_counts_df,
+                                                              file_path=self.result_path / f"positional_aa_counts.csv",
+                                                              name="Frequencies of amino acids found in the high-precision high-recall motifs")
+
+        max_gap_size_table = self._write_output_table(max_gap_size_df,
+                                                  file_path=self.result_path / f"max_gap_size_table.csv",
+                                                  name="Maximum gap sizes within motifs")
+
+        total_gap_size_table = self._write_output_table(total_gap_size_df,
+                                                  file_path=self.result_path / f"total_gap_size_table.csv",
+                                                  name="Total (summed) gap sizes within motifs")
+
+        output_figure1 = self._safe_plot(positional_aa_counts_df=positional_aa_counts_df, plot_callable="_plot_positional_aa_counts")
+        output_figure2 = self._safe_plot(gap_size_df=max_gap_size_df,  x="max_gap_size", plot_callable="_plot_gap_sizes")
+        output_figure3 = self._safe_plot(gap_size_df=total_gap_size_df,  x="total_gap_size", plot_callable="_plot_gap_sizes")
+
         return ReportResult(
             name=self.name,
-            output_figures=output_figures,
-            output_tables=[gap_size_table, positional_aa_counts_table],
+            output_figures=[fig for fig in [output_figure1, output_figure2, output_figure3] if fig is not None],
+            output_tables=[max_gap_size_table, total_gap_size_table, positional_aa_counts_table],
         )
 
-    def _get_gap_sizes(self, motifs):
+    def _get_total_gap_sizes(self, motifs):
+        data = {"motif_size": [],
+              "total_gap_size": [],
+              "occurrence": []}
+
+        gap_size_count = {}
+
+        for motif in motifs:
+            motif_indices, amino_acids = PositionalMotifHelper.string_to_motif(motif, "&", "-")
+            total_gap_size = (max(motif_indices) - min(motif_indices)) - len(motif_indices) + 1
+            motif_size = len(motif_indices)
+
+            if motif_size not in gap_size_count:
+                gap_size_count[motif_size] = {total_gap_size: 1}
+            else:
+                gap_size_count[motif_size][total_gap_size] += 1
+
+        for motif_size, counts in gap_size_count.items():
+            for total_gap_size, occurrence in counts.items():
+                data["motif_size"].append(motif_size)
+                data["total_gap_size"].append(total_gap_size)
+                data["occurrence"].append(occurrence)
+
+        return pd.DataFrame(data)
+
+    def _get_max_gap_sizes(self, motifs):
         gap_size_count = {
             motif_size: {
                 gap_size: 0 for gap_size in range(0, self.get_sequence_length() - 1)
@@ -97,32 +121,26 @@ class PositionalMotifFrequencies(EncodingReport):
         }
 
         for motif in motifs:
-            indices, amino_acids = PositionalMotifHelper.string_to_motif(
-                motif, "&", "-"
-            )
+            indices, amino_acids = PositionalMotifHelper.string_to_motif(motif, "&", "-")
             motif_size = len(indices)
 
-            if self.max_gap_size_only and motif_size-1 != 0:
+            if motif_size > 1:
                 gap_size = max([indices[i+1]-indices[i] -1 for i in range(motif_size-1)])
                 gap_size_count[motif_size][gap_size] += 1
-            else:
-                for i in range(motif_size - 1):
-                    gap_size = indices[i+1]-indices[i] -1
-                    gap_size_count[motif_size][gap_size] += 1
 
         motif_sizes = list()
-        gap_sizes = list()
+        max_gap_sizes = list()
         occurrence = list()
         for motif_size in gap_size_count:
             if sum(gap_size_count[motif_size].values()) != 0:
                 for gap_size in gap_size_count[motif_size]:
                     motif_sizes.append(str(motif_size))
-                    gap_sizes.append(gap_size)
+                    max_gap_sizes.append(gap_size)
                     occurrence.append(gap_size_count[motif_size][gap_size])
 
         gap_size_df = pd.DataFrame()
         gap_size_df["motif_size"] = motif_sizes
-        gap_size_df["gap_size"] = gap_sizes
+        gap_size_df["max_gap_size"] = max_gap_sizes
         gap_size_df["occurrence"] = occurrence
 
         return gap_size_df
@@ -151,30 +169,41 @@ class PositionalMotifFrequencies(EncodingReport):
 
         return positional_aa_counts_df
 
-    def _plot_gap_sizes(self, gap_size_df):
-        file_path = self.result_path / f"gap_and_motif_size.html"
+    def _plot_gap_sizes(self, gap_size_df, x):
+        file_path = self.result_path / f"{x}.html"
 
-        if self.max_gap_size_only:
-            title = "Maximum gap size in motif distribution"
-            x_label = "Max gap size"
+        gap_size_df["occurrence_total"] = gap_size_df.groupby("motif_size")["occurrence"].transform(sum)
+        gap_size_df["occurrence_percentage"] = gap_size_df["occurrence"] / gap_size_df["occurrence_total"]
+
+        title = "Maximum gap size in motif distribution"
+        x_label = x.replace("_", " ").title()
+
+        if self.motif_color_map is not None:
+            color_discrete_map = self.motif_color_map
+            color_discrete_sequence = None
         else:
-            title= "Distances between Amino Acids for all positions"
-            x_label = "Gap size"
+            color_discrete_map = None
+            color_discrete_sequence = self._get_color_discrete_sequence()
+
+        gap_size_df["motif_size"] = gap_size_df["motif_size"].astype(str)
 
         gap_size_fig = px.line(
             gap_size_df,
-            x="gap_size",
-            y="occurrence",
+            x=x,
+            y="occurrence_percentage",
             color="motif_size",
-            color_discrete_sequence=self._get_color_discrete_sequence(),
+            color_discrete_map=color_discrete_map,
+            color_discrete_sequence=color_discrete_sequence,
             template="plotly_white",
             title=title,
+            markers=True,
             labels={
-                "gap_size": x_label,
-                "occurrence": "Occurrence",
+                x: x_label,
+                "occurrence_percentage": "Percentage of motifs",
                 "motif_size": "Motif size",
             },
         )
+        gap_size_fig.layout.yaxis.tickformat = ',.0%'
 
         gap_size_fig.update_layout(font={"size": 14}, xaxis={"tickmode": "linear"})
         gap_size_fig.write_html(str(file_path))
@@ -194,7 +223,7 @@ class PositionalMotifFrequencies(EncodingReport):
             positional_aa_counts_df,
             labels={
                 "index": "Amino acid position",
-                "value": "Frequency across high-scoring motifs",
+                "value": "Frequency across motifs",
             },
             text="variable",
             color_discrete_map=PlotlyUtil.get_amino_acid_color_map(),
@@ -212,32 +241,6 @@ class PositionalMotifFrequencies(EncodingReport):
     def _get_color_discrete_sequence(self):
         return px.colors.qualitative.Pastel[:-1] + px.colors.qualitative.Set3
 
-    def _plot(self, positional_aa_counts_df, gap_size_df) -> List[ReportOutput]:
-        report_outputs = []
-        report_outputs.append(self._plot_gap_sizes(gap_size_df))
-        report_outputs.append(self._plot_positional_aa_counts(positional_aa_counts_df))
-
-        return report_outputs if len(report_outputs) != 0 else None
-
-    def _write_positional_aa_counts_table(
-        self, positional_aa_counts_df
-    ) -> ReportOutput:
-        table_path = self.result_path / f"positional_aa_counts.csv"
-        positional_aa_counts_df.to_csv(table_path, index=True)
-        return ReportOutput(
-            path=table_path,
-            name=f"Frequencies of amino acids found in the high-precision high-recall motifs",
-        )
-
-    def _write_gap_size_table(self, gap_size_df) -> ReportOutput:
-        table_path = self.result_path / f"gap_size_table.csv"
-        gap_size_df.to_csv(table_path, index=False, header=True)
-
-        return ReportOutput(
-            path=table_path,
-            name=f"Gap size between amino acids in high-precision high-recall motifs for all motif sizes",
-        )
-
     def check_prerequisites(self):
         valid_encodings = [MotifEncoder.__name__]
 
@@ -252,7 +255,5 @@ class PositionalMotifFrequencies(EncodingReport):
                 f"encodings ({valid_encodings}), skipping this report..."
             )
             return False
-        elif self.max_gap_size_only is None:
-            return False
-        else:
-            return True
+
+        return True
