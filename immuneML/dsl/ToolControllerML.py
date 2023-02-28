@@ -1,20 +1,26 @@
 import json
-import time
 import subprocess
 import zmq
-from prefect import flow, task, context
+import numpy as np
+
+tool_process = None
 
 
 class ToolControllerML:
-    def __init__(self):
-        self.port = '5555'
+    def __init__(self, tool_path):
+        self.tool_path = tool_path
+        self.port = "5555"
         self.socket = None
+        self.subprocess = None
+        self.pid = None
 
     def start_subprocess(self):
         # Start tool as subprocess
+        global tool_process
         tool_process = subprocess.Popen(
-            ["python", "/Users/oskar/Desktop/ML_tool/tabular_tool.py", "5555"],
+            ["python", self.tool_path, self.port],
             stdin=subprocess.PIPE)
+        self.pid = tool_process.pid
 
     def open_connection(self):
         context = zmq.Context()
@@ -29,7 +35,19 @@ class ToolControllerML:
         self.socket.close()
 
     def stop_subprocess(self):
-        pass
+        # self.subprocess.terminate()
+
+        # if self.subprocess.poll() is None:
+        #    print("subprocess not terminated")
+        # else:
+        #    print("subprocess stopped")
+        # print(self.subprocess.poll())
+        global tool_process
+        print("stopping tool process", self.pid)
+        if tool_process is not None and (self.pid is None or self.pid == self.pid):
+            tool_process.kill()
+            tool_process = None
+        print("tool process stopped")
 
     def run_fit(self, encoded_data):
         # x = {
@@ -39,8 +57,9 @@ class ToolControllerML:
         # my_data = json.dumps(x)
         # self.socket.send_json(my_data)
         self.socket.send_pyobj(encoded_data)
-        result = self.socket.recv_json()
-        print("result", result)
+        result = json.loads(self.socket.recv_json())
+        if result["data_received"] is True:
+            print("Tool received data")
 
         # run fit
         x = {
@@ -51,22 +70,34 @@ class ToolControllerML:
 
     def run_predict(self, encoded_data):
         self.socket.send_pyobj(encoded_data)
-        result = self.socket.recv_json()
-        print("result from run predict", result)
+        result = json.loads(self.socket.recv_json())
+        if result["data_received"] is True:
+            print("Tool received data")
 
         x = {
             'predict': 1,
         }
         self.socket.send_json(json.dumps(x))
-        print(self.socket.recv_json())
+        final_result = self.socket.recv_json()
+        print(json.loads(final_result))
+        final_json = json.loads(json.loads(final_result))
+        return final_json
 
     def run_predict_proba(self, encoded_data):
         self.socket.send_pyobj(encoded_data)
-        result = self.socket.recv_json()
-        print("result", result)
+        result = json.loads(self.socket.recv_json())
+        if result["data_received"] is True:
+            print("Tool received data")
 
         x = {
             'predict_proba': 1,
         }
+
         self.socket.send_json(json.dumps(x))
-        print(self.socket.recv_json())
+        final_result = self.socket.recv_json()
+        final_json = json.loads(final_result)
+        result_loads = json.loads(final_json)
+        final_results = {
+            "signal_disease": np.vstack([1 - np.array(result_loads["predictions"]), result_loads["predictions"]]).T}
+
+        return final_results

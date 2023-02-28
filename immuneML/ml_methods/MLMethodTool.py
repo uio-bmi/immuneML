@@ -1,30 +1,23 @@
 from pathlib import Path
-import json
-
-import pandas
 import pickle
 
 from immuneML.dsl.ToolControllerML import ToolControllerML
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Label import Label
-from scipy import sparse
 
 
 class MLMethodTool(MLMethod):
     def __init__(self):
         super().__init__()
-        self.tool = ToolControllerML()
+        # TODO: get path from symbol table
+        self.tool = ToolControllerML(
+            tool_path="/Users/oskar/Documents/Skole/Master/immuneml_forked/ML_tool/PytorchTabular_tool.py")
         self.tool.start_subprocess()
-        # self.tool.open_connection()
-        # self.tool.run_fit()
-        # self.tool.run_predict()
-        # print("fit is running in ml method")
 
     def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
-        # TODO: subprocess call fit
-        # self.tool.open_connection()
         """
+        # serialization of data
         encoding = json.dumps(encoded_data.encoding)
         example_ids = json.dumps(encoded_data.example_ids)
         examples = pickle.dumps(encoded_data.examples)
@@ -45,16 +38,16 @@ class MLMethodTool(MLMethod):
         }
         """
         encoded_data_pickle = pickle.dumps(encoded_data)
-        self.tool.open_connection()
+        if self.tool.socket is None:
+            self.tool.open_connection()
         self.tool.run_fit(encoded_data_pickle)
 
         print("fit is running in ml method")
 
     def predict(self, encoded_data: EncodedData, label: Label):
-        # TODO: subprocess call predict
-
         encoded_data_pickle = pickle.dumps(encoded_data)
-        self.tool.run_predict(encoded_data_pickle)
+        result = self.tool.run_predict(encoded_data_pickle)
+        return result
 
     def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None,
                                 cores_for_training: int = -1, optimization_metric=None):
@@ -63,7 +56,7 @@ class MLMethodTool(MLMethod):
     def store(self, path: Path, feature_names: list = None, details_path: Path = None):
         # TODO: subprocess call store
         # store(path, feature_names, details_path)
-        pass
+        print("TODO: store trained model in tool")
 
     def load(self, path: Path):
         pass
@@ -72,16 +65,15 @@ class MLMethodTool(MLMethod):
         pass
 
     def get_classes(self) -> list:
-        pass
+        return ["signal_disease"]
 
     def get_params(self):
         pass
 
     def predict_proba(self, encoded_data: EncodedData, Label: Label):
-        # TODO: subprocess call predict_proba
-
         encoded_data_pickle = pickle.dumps(encoded_data)
-        self.tool.run_predict_proba(encoded_data_pickle)
+        result = self.tool.run_predict_proba(encoded_data_pickle)
+        return result
 
     def get_label_name(self) -> str:
         pass
