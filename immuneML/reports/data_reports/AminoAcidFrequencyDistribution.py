@@ -1,5 +1,4 @@
 import warnings
-from collections import Counter
 from pathlib import Path
 
 import pandas as pd
@@ -9,7 +8,6 @@ from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.reports.ReportOutput import ReportOutput
@@ -76,7 +74,6 @@ class AminoAcidFrequencyDistribution(DataReport):
         PathBuilder.build(self.result_path)
 
         freq_dist = self._get_plotting_data()
-
 
         results_table = self._write_results_table(freq_dist)
         report_output_fig = self._safe_plot(freq_dist=freq_dist)
@@ -183,7 +180,7 @@ class AminoAcidFrequencyDistribution(DataReport):
             for aa, pos in zip(seq_str, seq_pos):
                 if pos not in raw_count_dict[class_name]:
                     raw_count_dict[class_name][pos] = {legal_aa: 0 for legal_aa in
-                                           EnvironmentSettings.get_sequence_alphabet(SequenceType.AMINO_ACID)}
+                                                       EnvironmentSettings.get_sequence_alphabet(SequenceType.AMINO_ACID)}
 
                 raw_count_dict[class_name][pos][aa] += 1
 
@@ -219,13 +216,12 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         return ReportOutput(path=file_path, name="Table of amino acid frequencies")
 
-
     def _get_colors(self):
-        return ['rgb(102, 197, 204)','rgb(179,222,105)', 'rgb(220, 176, 242)', 'rgb(217,217,217)',
+        return ['rgb(102, 197, 204)', 'rgb(179,222,105)', 'rgb(220, 176, 242)', 'rgb(217,217,217)',
                 'rgb(141,211,199)', 'rgb(251,128,114)', 'rgb(158, 185, 243)', 'rgb(248, 156, 116)',
                 'rgb(135, 197, 95)', 'rgb(254, 136, 177)', 'rgb(201, 219, 116)', 'rgb(255,237,111)',
                 'rgb(180, 151, 231)', 'rgb(246, 207, 113)', 'rgb(190,186,218)', 'rgb(128,177,211)',
-                'rgb(253,180,98)',  'rgb(252,205,229)', 'rgb(188,128,189)', 'rgb(204,235,197)', ]
+                'rgb(253,180,98)', 'rgb(252,205,229)', 'rgb(188,128,189)', 'rgb(204,235,197)', ]
 
     def _plot(self, freq_dist):
         freq_dist.sort_values(by=["amino acid"], ascending=False, inplace=True)
@@ -241,12 +237,10 @@ class AminoAcidFrequencyDistribution(DataReport):
                                 "relative frequency": "Relative frequency",
                                 "amino acid": "Amino acid"}, template="plotly_white")
         figure.update_xaxes(categoryorder='array', categoryarray=self._get_position_order(freq_dist["position"]))
-        figure.update_layout(showlegend=False, yaxis={'categoryorder':'category ascending'})
-
+        figure.update_layout(showlegend=False, yaxis={'categoryorder': 'category ascending'})
 
         if self.relative_frequency:
-            figure.update_yaxes(tickformat=",.0%", range=[0,1])
-
+            figure.update_yaxes(tickformat=",.0%", range=[0, 1])
 
         file_path = self.result_path / "amino_acid_frequency_distribution.html"
         figure.write_html(str(file_path))
@@ -269,11 +263,13 @@ class AminoAcidFrequencyDistribution(DataReport):
         if self.split_by_label:
             if self.label_name is None:
                 if len(self.dataset.get_label_names()) != 1:
-                    warnings.warn(f"{AminoAcidFrequencyDistribution.__name__}: ambiguous label: split_by_label was set to True but no label name was specified, and the number of available labels is {len(self.dataset.get_label_names())}: {self.dataset.get_label_names()}. Skipping this report...")
+                    warnings.warn(
+                        f"{AminoAcidFrequencyDistribution.__name__}: ambiguous label: split_by_label was set to True but no label name was specified, and the number of available labels is {len(self.dataset.get_label_names())}: {self.dataset.get_label_names()}. Skipping this report...")
                     return False
             else:
                 if self.label_name not in self.dataset.get_label_names():
-                    warnings.warn(f"{AminoAcidFrequencyDistribution.__name__}: the specified label name ({self.label_name}) was not available among the dataset labels: {self.dataset.get_label_names()}. Skipping this report...")
+                    warnings.warn(
+                        f"{AminoAcidFrequencyDistribution.__name__}: the specified label name ({self.label_name}) was not available among the dataset labels: {self.dataset.get_label_names()}. Skipping this report...")
                     return False
 
         return True
