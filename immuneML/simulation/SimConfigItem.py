@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Dict
 
 from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
 from immuneML.simulation.implants.Signal import Signal
@@ -19,13 +19,7 @@ class SimConfigItem:
 
     Arguments:
 
-        signals (list): The list of :ref:`Signal` objects to be implanted in a subset of the repertoires in a RepertoireDataset.
-        When multiple signals are specified, this means that all of these signals are implanted in
-        the same repertoires in a RepertoireDataset, although they may not be implanted in the same sequences
-        within those repertoires (this depends on the :py:obj:`~immuneML.simulation.signal_implanting.SignalImplantingStrategy.SignalImplantingStrategy`).
-
-        repertoire_implanting_rate (float): The proportion of sequences in a Repertoire where a motif associated
-        with one of the signals should be implanted.
+        signal_proportions (dict): signals for the simulation item and the proportion of sequences in the repertoire that will have the given signal. For receptor-level simulation, the proportion will always be 1.
 
         is_noise (bool): indicates whether the implanting should be regarded as noise; if it is True, the signals will be implanted as specified, but
         the repertoire/receptor in question will have negative class.
@@ -48,23 +42,22 @@ class SimConfigItem:
         simulations: # definitions of simulations should be under key simulations in the definitions part of the specification
             # one simulation with multiple implanting objects, a part of definition section
             my_simulation:
-                my_implanting_1:
+                sim_item1:
+                    number_of_examples: 10
+                    receptors_in_repertoire_count: 100
                     signals:
-                        - my_signal
-                    dataset_implanting_rate: 0.5
-                    repertoire_implanting_rate: 0.25
-                my_implanting_2:
+                        my_signal: 0.25
+                sim_item2:
+                    number_of_examples: 5
+                    receptors_in_repertoire_count: 150
                     signals:
-                        - my_signal
-                    dataset_implanting_rate: 0.2
-                    repertoire_implanting_rate: 0.75
+                        my_signal: 0.75
 
 
     """
 
-    signals: List[Signal]
+    signal_proportions: Dict[Signal, float]
     name: str = ""
-    repertoire_implanting_rate: float = None
     is_noise: bool = False
     seed: int = None
     generative_model: GenerativeModel = None
@@ -73,3 +66,7 @@ class SimConfigItem:
     false_positive_prob_in_receptors: float = 0.
     false_negative_prob_in_receptors: float = 0.
     immune_events: dict = field(default_factory=dict)
+
+    @property
+    def signals(self) -> List[Signal]:
+        return list(self.signal_proportions.keys())
