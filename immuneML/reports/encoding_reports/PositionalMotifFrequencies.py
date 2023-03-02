@@ -102,7 +102,10 @@ class PositionalMotifFrequencies(EncodingReport):
             if motif_size not in gap_size_count:
                 gap_size_count[motif_size] = {total_gap_size: 1}
             else:
-                gap_size_count[motif_size][total_gap_size] += 1
+                if total_gap_size not in gap_size_count[motif_size]:
+                    gap_size_count[motif_size][total_gap_size] = 1
+                else:
+                    gap_size_count[motif_size][total_gap_size] += 1
 
         for motif_size, counts in gap_size_count.items():
             for total_gap_size, occurrence in counts.items():

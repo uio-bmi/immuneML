@@ -78,7 +78,7 @@ class TestPositionalMotifFrequencies(TestCase):
             dataset,
             **{
                 "min_positions": 1,
-                "max_positions": 3,
+                "max_positions": 2,
                 "min_precision": 0.9,
                 "min_recall": 0.5,
                 "min_true_positives": 1,
