@@ -1,10 +1,12 @@
 from pathlib import Path
+from typing import List
 
-from bionumpy.io.motifs import read_motif, Motif
+from bionumpy.io.motifs import read_motif
 from bionumpy.sequence.position_weight_matrix import PWM as bnp_PWM
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.simulation.implants.Motif import Motif
 
 
 class PWM(Motif):
@@ -29,8 +31,9 @@ class PWM(Motif):
 
     """
 
-    def __init__(self, file_path: Path, pwm_matrix: bnp_PWM, threshold: float):
+    def __init__(self, identifier: str, file_path: Path, pwm_matrix: bnp_PWM, threshold: float):
 
+        Motif.__init__(identifier)
         self.file_path = file_path
         self.pwm_matrix = pwm_matrix
         self.threshold = threshold
@@ -38,11 +41,20 @@ class PWM(Motif):
         assert self.pwm_matrix is not None or self.file_path is not None, (file_path, pwm_matrix)
 
     @classmethod
-    def build(cls, file_path, threshold: float):
+    def build(cls, identifier: str, file_path, threshold: float):
         assert Path(file_path).is_file(), file_path
         pwm_matrix = read_motif(file_path)
-        return PWM(file_path, pwm_matrix, threshold)
+        return PWM(identifier, file_path, pwm_matrix, threshold)
 
-    def get_all_motif_instances(self, sequence_type: SequenceType):
+    def get_all_possible_instances(self, sequence_type: SequenceType):
         assert sorted(self.pwm_matrix.alphabet) == sorted(EnvironmentSettings.get_sequence_alphabet(sequence_type))
         return self
+
+    def get_max_length(self) -> int:
+        return self.pwm_matrix.window_size
+
+    def get_alphabet(self) -> List[str]:
+        return list(self.pwm_matrix.alphabet)
+
+    def instantiate_motif(self, sequence_type: SequenceType = SequenceType.AMINO_ACID):
+        pass

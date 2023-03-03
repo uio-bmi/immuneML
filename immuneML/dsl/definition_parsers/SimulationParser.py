@@ -138,7 +138,9 @@ class SimulationParser:
     def _signal_content_matches_seq_type(simulation: SimConfig):
         for sim_item in simulation.sim_items:
             for signal in sim_item.signals:
-                for motif in signal.motifs:
-                    ParameterValidator.assert_all_in_valid_list([letter for letter in motif.seed if letter != '/'],
-                                                                EnvironmentSettings.get_sequence_alphabet(simulation.sequence_type),
-                                                                SimulationParser.__name__, f"motif seed {motif.seed}")
+                for motif_group in signal.motifs:
+                    motifs = motif_group if isinstance(motif_group, list) else [motif_group]
+                    for motif in motifs:
+                        ParameterValidator.assert_all_in_valid_list(motif.get_alphabet(),
+                                                                    EnvironmentSettings.get_sequence_alphabet(simulation.sequence_type),
+                                                                    SimulationParser.__name__, motif.get_alphabet())

@@ -1,11 +1,10 @@
 import random
 from dataclasses import dataclass
-from itertools import chain
 from typing import List, Union
 
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.implants.Motif import Motif
-from immuneML.simulation.implants.PWM import PWM
+from immuneML.simulation.implants.MotifInstance import MotifInstanceGroup
 from immuneML.simulation.signal_implanting.SignalImplantingStrategy import SignalImplantingStrategy
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from scripts.specification_util import update_docs_per_mapping
@@ -24,7 +23,7 @@ class Signal:
 
     Arguments:
 
-        motifs (list): A list of the motifs associated with this signal, either defined by seed or by position weight matrix.
+        motifs (list): A list of the motifs associated with this signal, either defined by seed or by position weight matrix. Alternatively, it can be a list of a list of motifs, in which case the motifs in the same sublist (max 2 motifs) have to co-occur in the same sequence
 
         sequence_position_weights (dict): a dictionary specifying for each IMGT position in the sequence how likely it is for signal to be there. For positions not specified, the probability of having the signal there is 0.
 
@@ -51,15 +50,21 @@ class Signal:
 
     """
     id: str
-    motifs: List[Union[Motif, PWM]]
+    motifs: List[Union[Motif, List[Motif]]]
     sequence_position_weights: dict = None
     v_call: str = None
     j_call: str = None
 
     def get_all_motif_instances(self, sequence_type: SequenceType):
-        return chain(motif.get_all_possible_instances(sequence_type) for motif in self.motifs)
+        motif_instances = []
+        for motif_group in self.motifs:
+            if isinstance(motif_group, list):
+                motif_instances.append(MotifInstanceGroup([motif.get_all_possible_instances(sequence_type) for motif in motif_group]))
+            else:
+                motif_instances.append(motif_group.get_all_possible_instances(sequence_type))
+        return motif_instances
 
-    def make_motif_instances(self, count, sequence_type):
+    def make_motif_instances(self, count, sequence_type: SequenceType):
         return [motif.instantiate_motif(sequence_type=sequence_type) for motif in random.choices(self.motifs, k=count)]
 
     def __hash__(self):

@@ -12,3 +12,7 @@ class MotifInstance:
 
     def __len__(self):
         return len(self.instance) + max(self.gap - 1, 0)
+
+
+class MotifInstanceGroup(list):
+    pass

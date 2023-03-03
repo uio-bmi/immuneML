@@ -249,10 +249,8 @@ class LigoSimInstruction(Instruction):
     def _make_background_sequences(self, path, iteration: int, sim_item: SimConfigItem, sequence_per_signal_count: dict, need_background_seqs: bool) -> BackgroundSequences:
         sequence_path = PathBuilder.build(path / f"gen_model/") / f"tmp_{iteration}.tsv"
 
-        v_genes = sorted(
-            list(set(chain.from_iterable([[motif.v_call for motif in signal.motifs if motif.v_call] for signal in sim_item.signals]))))
-        j_genes = sorted(
-            list(set(chain.from_iterable([[motif.j_call for motif in signal.motifs if motif.j_call] for signal in sim_item.signals]))))
+        v_genes = sorted(list(set(signal.v_call for signal in sim_item.signals if signal.v_call is not None)))
+        j_genes = sorted(list(set(signal.j_call for signal in sim_item.signals if signal.j_call is not None)))
 
         if sequence_per_signal_count['no_signal'] > 0 or need_background_seqs or (len(v_genes) == 0 and len(j_genes) == 0):
             sim_item.generative_model.generate_sequences(self._sequence_batch_size, seed=sim_item.seed, path=sequence_path,

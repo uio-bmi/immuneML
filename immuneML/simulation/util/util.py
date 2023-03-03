@@ -21,7 +21,7 @@ from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.SimConfigItem import SimConfigItem
 from immuneML.simulation.generative_models.BackgroundSequences import BackgroundSequences
-from immuneML.simulation.implants.MotifInstance import MotifInstance
+from immuneML.simulation.implants.MotifInstance import MotifInstance, MotifInstanceGroup
 from immuneML.simulation.implants.PWM import PWM
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.util.bnp_util import merge_dataclass_objects
@@ -119,26 +119,22 @@ def get_region_type(sequences) -> RegionType:
 def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annotated_dc):
     encoding = AminoAcidEncoding if is_amino_acid else DNAEncoding
     sequence_array = sequences.sequence_aa if is_amino_acid else sequences.sequence
-    region_type = get_region_type(sequences)
 
     signal_matrix = np.zeros((len(sequence_array), len(all_signals)))
     signal_positions = {}
 
     for index, signal in enumerate(all_signals):
         signal_pos_col = None
-        allowed_positions = get_allowed_positions(signal, sequence_array, region_type)
+        allowed_positions = get_allowed_positions(signal, sequence_array, get_region_type(sequences))
         matches_gene = match_genes(signal.v_call, sequences.v_call, signal.j_call, sequences.j_call)
 
         for motifs in signal.get_all_motif_instances(SequenceType.AMINO_ACID if is_amino_acid else SequenceType.NUCLEOTIDE):
             matches = None
 
-            for motif in motifs:
-
-                matches_motif = match_motif(motif, encoding, sequence_array)
-                if matches is None:
-                    matches = np.logical_and(matches_motif, matches_gene)
-                else:
-                    matches = np.logical_or(matches, np.logical_and(matches_motif, matches_gene))
+            if isinstance(motifs, MotifInstanceGroup):
+                matches = match_motif_group(motifs, encoding, sequence_array, matches_gene, matches)
+            else:
+                matches = match_motif_regexes(motifs, encoding, sequence_array, matches_gene, matches)
 
             if allowed_positions is not None:
                 matches = np.logical_and(matches, allowed_positions)
@@ -155,6 +151,32 @@ def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annota
     logging.info(f"Annotated {len(sequences)} sequences with signal information.")
 
     return signal_matrix
+
+
+def match_motif_regexes(motifs, encoding, sequence_array, matches_gene, matches):
+    for motif in motifs:
+
+        matches_motif = match_motif(motif, encoding, sequence_array)
+        if matches is None:
+            matches = np.logical_and(matches_motif, matches_gene)
+        else:
+            matches = np.logical_or(matches, np.logical_and(matches_motif, matches_gene))
+
+    return matches
+
+
+def match_motif_group(motif_group: list, encoding, sequence_array, matches_gene, matches):
+    """Match if two motifs co-occur in the same sequence"""
+
+    assert len(motif_group) == 2, len(motif_group)
+
+    matches_motif_1 = match_motif_regexes(motif_group[0], encoding, sequence_array, matches_gene, None)
+    matches_motif_2 = match_motif_regexes(motif_group[1], encoding, sequence_array, matches_gene, None)
+    matches_motif = np.zeros_like(matches_motif_1)
+    selection = np.logical_and(matches_motif_1.any(axis=1), matches_motif_2.any(axis=1))
+    matches_motif[selection] = np.logical_or(matches_motif_1[selection], matches_motif_2[selection])
+
+    return np.logical_or(matches_motif, matches) if matches is not None else matches_motif
 
 
 def match_genes(v_call, v_call_array, j_call, j_call_array):
@@ -177,7 +199,7 @@ def match_motif(motif: Union[str, PWM], encoding, sequence_array):
         matcher = RegexMatcher(motif, encoding=encoding)
         matches = matcher.rolling_window(sequence_array, mode='same')
     else:
-        matches = get_motif_scores(sequence_array, motif.matrix) > motif.threshold
+        matches = get_motif_scores(sequence_array, motif.pwm_matrix) > motif.threshold
     return matches
 
 

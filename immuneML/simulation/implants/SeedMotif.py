@@ -1,9 +1,11 @@
 # quality: gold
 from dataclasses import dataclass
+from typing import List
 
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.implants.Motif import Motif
+from immuneML.simulation.implants.MotifInstance import MotifInstance
 from immuneML.simulation.motif_instantiation_strategy.MotifInstantiationStrategy import MotifInstantiationStrategy
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from scripts.specification_util import update_docs_per_mapping
@@ -49,33 +51,13 @@ class SeedMotif(Motif):
 
     """
 
-    identifier: str
     instantiation: MotifInstantiationStrategy
     seed: str = None
-    v_call: str = None
-    j_call: str = None
     all_possible_instances: list = None
 
-    def instantiate_motif(self, sequence_type: SequenceType = SequenceType.AMINO_ACID):
-        """
-        Creates a motif instance based on the seed; if seed parameter is defined for the motif, it is assumed that single chain data are used for
-        the analysis. If seed is None, then it is assumed that paired chain receptor data are required in which case this function will return a
-        motif instance per chain along with the names of the chains
-
-        Returns:
-             a motif instance if single chain immune receptor data are simulated or a dict where keys are chain names and values are motif instances
-             for the corresponding chains
-        """
+    def instantiate_motif(self, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> MotifInstance:
         assert self.instantiation is not None, "Motif: set instantiation strategy before instantiating a motif."
-
-        if self.seed is not None:
-            motif_instance = self.instantiation.instantiate_motif(self.seed, sequence_type=sequence_type)
-            if self.v_call or self.j_call:
-                return self.v_call, motif_instance, self.j_call
-            else:
-                return motif_instance
-        else:
-            raise NotImplementedError
+        return self.instantiation.instantiate_motif(self.seed, sequence_type=sequence_type)
 
     def get_max_length(self):
         return len(self.seed.replace("/", "")) + self.instantiation.get_max_gap()
@@ -88,6 +70,9 @@ class SeedMotif(Motif):
 
     def __str__(self):
         return str(vars(self))
+
+    def get_alphabet(self) -> List[str]:
+        return [letter for letter in list(self.seed) if letter != "/"]
 
     @staticmethod
     def get_documentation():
