@@ -188,7 +188,7 @@ class PositionalMotifFrequencies(EncodingReport):
             color_discrete_map = None
             color_discrete_sequence = self._get_color_discrete_sequence()
 
-        gap_size_df = gap_size_df.sort_values(by="motif_size")
+        gap_size_df = gap_size_df.sort_values(by=x)
         gap_size_df["motif_size"] = gap_size_df["motif_size"].astype(str)
 
         gap_size_fig = px.line(
