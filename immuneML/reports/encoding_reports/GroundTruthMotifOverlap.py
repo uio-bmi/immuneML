@@ -105,40 +105,25 @@ class GroundTruthMotifOverlap(EncodingReport):
         return df
 
     def _get_max_overlap(self, learned_motif, groundtruth_motif):
-        larger, smaller = groundtruth_motif, learned_motif
-        if len(groundtruth_motif) < len(learned_motif):
-            larger, smaller = learned_motif, groundtruth_motif
+        # assumes no duplicates will occur as is the case with motifs
 
-        larger_ind, larger_aa = PositionalMotifHelper.string_to_motif(
-            larger, value_sep="&", motif_sep="-"
-        )
-        smaller_ind, smaller_aa = PositionalMotifHelper.string_to_motif(
-            smaller, value_sep="&", motif_sep="-"
-        )
+        split_learned = learned_motif.replace("&", "").split("-")
+        split_groundtruth = groundtruth_motif.replace("&", "").split("-")
 
-        max_score = 0
-        max_larger_index = len(larger_ind)
-        max_smaller_index = len(smaller_ind)
-        loop_counter = 0
-        start = 0
+        learned_aa = split_learned[0]
+        learned_indices = split_learned[1]
+        groundtruth_aa = split_groundtruth[0]
+        groundtruth_indices = split_groundtruth[1]
+
+        learned_pairs = [learned_aa[i] + learned_indices[i] for i in range(len(learned_aa))]
+        groundtruth_pairs = [groundtruth_aa[i] + groundtruth_indices[i] for i in range(len(groundtruth_aa))]
 
         score = 0
-        while loop_counter < max_larger_index:
+        for pair in learned_pairs:
+            if pair in groundtruth_pairs:
+                score += 1
 
-            for larger_index, smaller_index in zip(
-                range(start, max_larger_index), range(max_smaller_index)
-            ):
-                if (
-                    larger_ind[larger_index] == smaller_ind[smaller_index]
-                    and larger_aa[larger_index] == smaller_aa[smaller_index]
-                ):
-                    score += 1
-
-            max_score = max(max_score, score)
-            loop_counter += 1
-            start = loop_counter
-
-        return max_score
+        return score
 
     def _get_color_discrete_sequence(self):
         return px.colors.qualitative.Pastel[:-1] + px.colors.qualitative.Set3
