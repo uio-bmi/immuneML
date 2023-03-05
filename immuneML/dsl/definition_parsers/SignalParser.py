@@ -15,6 +15,8 @@ class SignalParser:
     def parse(signals: dict, symbol_table: SymbolTable):
         for key, signal_spec in signals.items():
 
+            assert "__" not in key, f"{SignalParser.__name__}: '__' is not valid part of signal names, please rename the signal."
+
             ParameterValidator.assert_keys_present(signal_spec.keys(), SignalParser.VALID_KEYS, "SignalParser", key)
             valid_motif_keys = symbol_table.get_keys_by_type(SymbolType.MOTIF)
             signal_motifs = []
