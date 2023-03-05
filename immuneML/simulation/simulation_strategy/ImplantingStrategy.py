@@ -10,7 +10,7 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.SimConfigItem import SimConfigItem
 from immuneML.simulation.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.implants.MotifInstance import MotifInstance
-from immuneML.simulation.implants.Signal import Signal
+from immuneML.simulation.implants.Signal import Signal, SignalPair
 from immuneML.simulation.simulation_strategy.SimulationStrategy import SimulationStrategy
 from immuneML.simulation.util.bnp_util import merge_dataclass_objects
 from immuneML.simulation.util.util import build_imgt_positions, choose_implant_position, filter_out_illegal_sequences, annotate_sequences
@@ -23,6 +23,9 @@ class ImplantingStrategy(SimulationStrategy):
 
     def process_sequences(self, sequences: BNPDataClass, seqs_per_signal_count: dict, use_p_gens: bool, sequence_type: SequenceType,
                           sim_item: SimConfigItem, all_signals: List[Signal], remove_positives_first: bool) -> BNPDataClass:
+
+        assert all(not isinstance(signal, SignalPair) for signal in sim_item.signals), \
+            f"{ImplantingStrategy.__name__}: 2 signals per sequence are not supported with implanting strategy."
 
         filtered_sequences = filter_out_illegal_sequences(sequences, sim_item, all_signals,
                                                           max_signals_per_sequence=0 if remove_positives_first else -1)

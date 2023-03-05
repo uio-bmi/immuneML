@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import List, Dict, Union
 
 from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
-from immuneML.simulation.implants.Signal import Signal
+from immuneML.simulation.implants.Signal import Signal, SignalPair
 
 
 @dataclass
@@ -47,6 +47,8 @@ class SimConfigItem:
                     receptors_in_repertoire_count: 100
                     signals:
                         my_signal: 0.25
+                        my_signal2: 0.01
+                        my_signal__my_signal2: 0.02
                 sim_item2:
                     number_of_examples: 5
                     receptors_in_repertoire_count: 150
@@ -56,7 +58,7 @@ class SimConfigItem:
 
     """
 
-    signal_proportions: Dict[Signal, float]
+    signal_proportions: Dict[Union[Signal, SignalPair], float]
     name: str = ""
     is_noise: bool = False
     seed: int = None

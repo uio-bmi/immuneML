@@ -2,6 +2,7 @@ import dataclasses
 import logging
 import uuid
 from dataclasses import make_dataclass, fields as get_fields
+from itertools import chain
 from pathlib import Path
 from typing import List, Dict, Union
 
@@ -14,6 +15,7 @@ from bionumpy.io import delimited_buffers
 from bionumpy.sequence.string_matcher import RegexMatcher, StringMatcher
 from npstructures import RaggedArray
 
+from immuneML import Constants
 from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
@@ -23,7 +25,7 @@ from immuneML.simulation.SimConfigItem import SimConfigItem
 from immuneML.simulation.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.implants.MotifInstance import MotifInstance, MotifInstanceGroup
 from immuneML.simulation.implants.PWM import PWM
-from immuneML.simulation.implants.Signal import Signal
+from immuneML.simulation.implants.Signal import Signal, SignalPair
 from immuneML.simulation.util.bnp_util import merge_dataclass_objects
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.PositionHelper import PositionHelper
@@ -204,12 +206,12 @@ def match_motif(motif: Union[str, PWM], encoding, sequence_array):
 
 
 def filter_out_illegal_sequences(sequences, sim_item: SimConfigItem, all_signals: list, max_signals_per_sequence: int):
-    if max_signals_per_sequence > 1:
+    if max_signals_per_sequence > 2:
         raise NotImplementedError
     elif max_signals_per_sequence == -1 or all_signals is None or len(all_signals) == 0:
         return sequences
 
-    sim_signal_ids = [signal.id for signal in sim_item.signals]
+    sim_signal_ids = list(set(chain.from_iterable([signal.id.split(Constants.SIGNAL_DELIMITER) for signal in sim_item.signals])))
     other_signals = [signal.id not in sim_signal_ids for signal in all_signals]
     signal_matrix = sequences.get_signal_matrix()
     legal_indices = np.logical_and(signal_matrix.sum(axis=1) <= max_signals_per_sequence,
@@ -219,8 +221,15 @@ def filter_out_illegal_sequences(sequences, sim_item: SimConfigItem, all_signals
 
 
 def make_signal_metadata(sim_item, signals) -> Dict[str, bool]:
-    return {**{signal.id: True if not sim_item.is_noise else False for signal in sim_item.signals},
-            **{signal.id: False for signal in signals if signal not in sim_item.signals}}
+    metadata = {}
+    for signal in sim_item.signals:
+        if isinstance(signal, SignalPair):
+            metadata[signal.signal1.id] = True if not sim_item.is_noise else False
+            metadata[signal.signal2.id] = True if not sim_item.is_noise else False
+        else:
+            metadata[signal.id] = True if not sim_item.is_noise else False
+
+    return {**metadata, **{signal.id: False for signal in signals if signal.id not in metadata}}
 
 
 def make_repertoire_from_sequences(sequences: BNPDataClass, repertoires_path, sim_item: SimConfigItem, signals: List[Signal], custom_fields: list) \
@@ -324,7 +333,11 @@ def update_seqs_with_signal(max_counts: dict, annotated_sequences, all_signals, 
 
     for signal in sim_item_signals:
         if max_counts[signal.id] > 0:
-            selection = signal_matrix[:, all_signal_ids.index(signal.id)].astype(bool)
+            if isinstance(signal, SignalPair):
+                selection = signal_matrix[:, [all_signal_ids.index(sid) for sid in signal.id.split(Constants.SIGNAL_DELIMITER)]].astype(bool).all(axis=1)
+            else:
+                selection = signal_matrix[:, all_signal_ids.index(signal.id)].astype(bool)
+                selection = np.logical_and(selection, signal_matrix.sum(axis=1) == 1)
             data_to_write = annotated_sequences[selection][:max_counts[signal.id]]
             if len(data_to_write) > 0:
                 write_bnp_data(data=data_to_write, path=seqs_with_signal_path[signal.id])

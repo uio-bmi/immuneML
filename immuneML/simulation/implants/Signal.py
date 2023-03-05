@@ -2,6 +2,7 @@ import random
 from dataclasses import dataclass
 from typing import List, Union
 
+from immuneML import Constants
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.implants.Motif import Motif
 from immuneML.simulation.implants.MotifInstance import MotifInstanceGroup
@@ -88,3 +89,26 @@ class Signal:
 
         doc = update_docs_per_mapping(initial_doc, docs_mapping)
         return doc
+
+
+@dataclass
+class SignalPair:
+    signal1: Signal
+    signal2: Signal
+
+    @property
+    def id(self) -> str:
+        return Constants.SIGNAL_DELIMITER.join(sorted([self.signal1.id, self.signal2.id]))
+
+    @property
+    def v_call(self):
+        return [el for el in sorted(list({self.signal1.v_call, self.signal2.v_call})) if el is not None] \
+            if self.signal1.v_call is not None and self.signal2.v_call is not None else None
+
+    @property
+    def j_call(self):
+        return [el for el in sorted(list({self.signal1.j_call, self.signal2.j_call})) if el is not None] \
+            if self.signal1.j_call is not None and self.signal2.j_call is not None else None
+
+    def __hash__(self):
+        return hash(tuple(sorted([self.signal1.id, self.signal2.id])))

@@ -14,6 +14,7 @@ class Constants:
     CACHE_PATH = 'cache_path'
     COMMENT_SIGN = "#"
     NOT_COMPUTED = "not computed"
+    SIGNAL_DELIMITER = "__"
 
     # plotting constants
     PLOTLY_BLACK = "#2A3F5E"

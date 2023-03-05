@@ -167,8 +167,8 @@ class LigoSimInstruction(Instruction):
         if self.state.simulation.paired:
             raise NotImplementedError
 
-        assert len(sim_item.signals) in [0, 1], f"{LigoSimInstruction.__name__}: for sequence datasets, only 0 or 1 signal per sequence are " \
-                                                f"supported, but {len(sim_item.signals)} were specified."
+        assert len(sim_item.signals) in [0, 1], f"{LigoSimInstruction.__name__}: for sequence datasets, only 0 or 1 signal or a signal pair per " \
+                                                f"sequence are supported, but {len(sim_item.signals)} were specified."
 
         sequence_paths = self._gen_necessary_sequences(self.state.result_path, sim_item)
         sequences = None
@@ -221,7 +221,7 @@ class LigoSimInstruction(Instruction):
 
             if self.state.simulation.keep_p_gen_dist and iteration == 0:
                 self._make_p_gen_histogram(sequences)
-                print_log("Computed a histogram from the first batch of background sequences.", True)
+                print_log("Computed a histogram from the first batch of background sequences.", include_datetime=True)
 
             sequences = annotate_sequences(sequences, self.sequence_type == SequenceType.AMINO_ACID, self.state.signals, self._annotated_dataclass)
 
@@ -236,7 +236,8 @@ class LigoSimInstruction(Instruction):
             seqs_per_signal_count = update_seqs_with_signal(copy.deepcopy(seqs_per_signal_count), sequences, self.state.signals, sim_item.signals,
                                                             seq_paths)
 
-            print_log(f"Finished iteration {iteration} in {sim_item.name}: " + f"remaining sequence count per signal for {sim_item.name}: {seqs_per_signal_count}" if sum(seqs_per_signal_count.values()) > 0 else f"{sim_item.name} simulation finished", True)
+            print_log(f"Finished iteration {iteration} in {sim_item.name}: remaining sequence count per signal for {sim_item.name}: "
+                      f"{seqs_per_signal_count}" if sum(seqs_per_signal_count.values()) > 0 else f"{sim_item.name} simulation finished", True)
             check_iteration_progress(iteration, self._max_iterations)
             iteration += 1
 
@@ -249,8 +250,8 @@ class LigoSimInstruction(Instruction):
     def _make_background_sequences(self, path, iteration: int, sim_item: SimConfigItem, sequence_per_signal_count: dict, need_background_seqs: bool) -> BackgroundSequences:
         sequence_path = PathBuilder.build(path / f"gen_model/") / f"tmp_{iteration}.tsv"
 
-        v_genes = sorted(list(set(signal.v_call for signal in sim_item.signals if signal.v_call is not None)))
-        j_genes = sorted(list(set(signal.j_call for signal in sim_item.signals if signal.j_call is not None)))
+        v_genes = sorted(list(set(chain(signal.v_call for signal in sim_item.signals if signal.v_call is not None))))
+        j_genes = sorted(list(set(chain(signal.j_call for signal in sim_item.signals if signal.j_call is not None))))
 
         if sequence_per_signal_count['no_signal'] > 0 or need_background_seqs or (len(v_genes) == 0 and len(j_genes) == 0):
             sim_item.generative_model.generate_sequences(self._sequence_batch_size, seed=sim_item.seed, path=sequence_path,

@@ -12,9 +12,11 @@ from immuneML.util.Logger import print_log
 
 class RejectionSamplingStrategy(SimulationStrategy):
 
+    MAX_SIGNALS_PER_SEQUENCE = 2
+
     def process_sequences(self, sequences: BNPDataClass, seqs_per_signal_count: dict, use_p_gens: bool, sequence_type: SequenceType,
                           sim_item: SimConfigItem, all_signals: List[Signal], remove_positives_first: bool) -> BNPDataClass:
-        filtered_sequences = filter_out_illegal_sequences(sequences, sim_item, all_signals, 1)
+        filtered_sequences = filter_out_illegal_sequences(sequences, sim_item, all_signals, RejectionSamplingStrategy.MAX_SIGNALS_PER_SEQUENCE)
 
         removed_count = len(sequences) - len(filtered_sequences)
         if removed_count > 0:
