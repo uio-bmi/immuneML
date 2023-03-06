@@ -46,9 +46,11 @@ class MutatedSequenceImplanting(SignalImplantingStrategy):
                 9: 0.2
                 10: 0.1
               occurrence_limit_pgen_range:
-                1e-10: 1
-                1e-7: 2
-                1e-6: 5
+                1.9089281937226036e-19: 2
+                5.195320032534688e-11: 3
+                2.6884227778205535e-08: 4
+                4.545674565898525e-09: 10
+
 
 
         signals:
@@ -61,9 +63,12 @@ class MutatedSequenceImplanting(SignalImplantingStrategy):
 
     def __init__(self, implanting: SequenceImplantingStrategy = None, sequence_position_weights: dict = None,
                  implanting_computation: ImplantingComputation = None, mutation_hamming_distance: int = 1,
-                 occurrence_limit_pgen_range: dict = None, overwrite_sequences: bool = False):
-        super().__init__(implanting, sequence_position_weights, implanting_computation,
-                         mutation_hamming_distance, occurrence_limit_pgen_range, overwrite_sequences)
+                 occurrence_limit_pgen_range: dict = None, overwrite_sequences: bool = False,
+                 nr_of_decoys: int = None, dataset_implanting_rate_per_decoy: float = None,
+                 repertoire_implanting_rate_per_decoy: float = None):
+        super().__init__(implanting, sequence_position_weights, implanting_computation, mutation_hamming_distance,
+                         occurrence_limit_pgen_range, overwrite_sequences, nr_of_decoys,
+                         dataset_implanting_rate_per_decoy, repertoire_implanting_rate_per_decoy)
         self.sequence_dispenser = None
 
     def set_sequence_dispenser(self, sequence_dispenser: SequenceDispenser):

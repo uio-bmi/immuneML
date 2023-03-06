@@ -40,6 +40,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
                 mark_implanted_labels: True
                 default_sequence_label: OLGA
     """
+    # TODO account for sequence appearing both as target and not
 
     @classmethod
     def build_object(cls,
@@ -253,8 +254,8 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
         samples_df.to_csv(path / f"samples_{name}.csv", sep=";")
 
-        return [ReportOutput(path / f"sequences_{name}.csv", "Dataset with pgen and target for hacking: SEQUENCES"),
-                ReportOutput(path / f"samples_{name}.csv", "Dataset with pgen and target for hacking: SAMPLES")]
+        return [ReportOutput(path / f"sequences_{name}.csv", "Dataset with pgen and target for hacking method: SEQUENCES"),
+                ReportOutput(path / f"samples_{name}.csv", "Dataset with pgen and target for hacking method: SAMPLES")]
 
     def _generate_occurrence_limit_pgen_range(self, dataset_df):
         """
@@ -278,4 +279,4 @@ class SequenceGenerationProbabilityDistribution(DataReport):
             f.write(f"  {row['pgen']}: {count}\n")
         f.close()
 
-        return ReportOutput(path, "Occurrence limit pgen range")
+        return ReportOutput(path, "Occurrence limit pgen range for MutatedSequenceImplanting")

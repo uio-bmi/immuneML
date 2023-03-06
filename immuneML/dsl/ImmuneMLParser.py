@@ -128,7 +128,7 @@ class ImmuneMLParser:
     def check_keys(specs: dict):
         for key in specs.keys():
             key_to_check = str(key)
-            assert re.match(r'^[A-Za-z0-9_-]+$', key_to_check), \
+            assert re.match(r'^[A-Za-z0-9_.-]+$', key_to_check), \
                 f"ImmuneMLParser: the keys in the specification can contain only letters, numbers and underscore. Error with key: {key}"
             if isinstance(specs[key], dict) and key not in ["column_mapping", "metadata_column_mapping"]:
                 ImmuneMLParser.check_keys(specs[key])
