@@ -104,7 +104,6 @@ class AIRRExporter(DataExporter):
                   "sequence_aa": AIRRExporter.get_sequence_aa_field(region_type)}
 
         df = df.rename(mapper=mapper, axis="columns")
-
         df.drop(columns=['region_type'], inplace=True)
 
         return df
@@ -159,7 +158,6 @@ class AIRRExporter(DataExporter):
 
         df = pd.DataFrame({**attributes_dict, **main_data_dict})
 
-        # AIRRExporter.update_gene_columns(df, 'allele', 'gene')
         df.rename(columns={"chain": "locus"}, inplace=True)
 
         return df
@@ -169,7 +167,7 @@ class AIRRExporter(DataExporter):
         for index, row in df.iterrows():
             for gene in ['v', 'j']:
                 if NumpyHelper.is_nan_or_empty(row[f"{gene}_{allele_name}"]) and not NumpyHelper.is_nan_or_empty(row[f"{gene}_{gene_name}"]):
-                    df[f"{gene}_{allele_name}"][index] = row[f"{gene}_{gene_name}"]
+                    df.at[index, f"{gene}_{allele_name}"] = row[f"{gene}_{gene_name}"]
 
     @staticmethod
     def _postprocess_dataframe(df):

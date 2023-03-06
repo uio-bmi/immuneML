@@ -9,7 +9,9 @@ from immuneML.util.PathBuilder import PathBuilder
 @dataclass
 class MLMethodConfiguration:
 
-    labels_with_values: dict = None
+    label_name: str = None
+    label_values: list = None
+    label_positive_class: str = None
 
     encoding_name: str = None
     encoding_class: str = None

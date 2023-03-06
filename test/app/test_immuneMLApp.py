@@ -34,7 +34,7 @@ class TestImmuneMLApp(TestCase):
                                                           for i in range(4)]
                                                          for j in range(repertoire_count)])
 
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"CD": [True, False], "CMV": [True, False]}, name="d1")
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"CD": ["yes", "no"], "CMV": [True, False]}, name="d1")
         ImmuneMLExporter.export(dataset, path)
 
         return path / "d1.iml_dataset"
@@ -162,7 +162,7 @@ class TestImmuneMLApp(TestCase):
                     "labels": ["CD", "CMV"],
                     "dataset": "d1",
                     "strategy": "GridSearch",
-                    "metrics": ["accuracy", "auc"],
+                    "metrics": ["accuracy", "auc", "log_loss", "f1_micro", "f1_macro", "precision", "recall"],
                     "reports": ["rep2"],
                     "number_of_processes": 10,
                     "optimization_metric": "accuracy",

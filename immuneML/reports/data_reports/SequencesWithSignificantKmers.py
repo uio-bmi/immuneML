@@ -69,15 +69,13 @@ class SequencesWithSignificantKmers(DataReport):
 
     def __init__(self, dataset: RepertoireDataset = None, reference_sequences_path: Path = None,
                  p_values: List[float] = None, k_values: List[int] = None, label: dict = None,
-                 compairr_path: Path = None, result_path: Path = None, name: str = None,
-                 number_of_processes: int = 1):
+                 result_path: Path = None, name: str = None, number_of_processes: int = 1):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.reference_sequences_path = reference_sequences_path
         self.reference_sequences = SignificantFeaturesHelper.load_sequences(reference_sequences_path)
         self.p_values = p_values
         self.k_values = k_values
         self.label = label
-        self.compairr_path = compairr_path
 
     def check_prerequisites(self):
         if isinstance(self.dataset, RepertoireDataset):

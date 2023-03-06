@@ -29,6 +29,10 @@ class MLImport:
         return preprocessing_sequence
 
     @staticmethod
+    def import_label(config: MLMethodConfiguration) -> Label:
+        return Label(name=config.label_name, values=config.label_values, positive_class=config.label_positive_class)
+
+    @staticmethod
     def import_hp_setting(config_dir: Path) -> Tuple[HPSetting, Label]:
 
         config = MLMethodConfiguration()
@@ -40,10 +44,7 @@ class MLImport:
         encoder = MLImport.import_encoder(config, config_dir)
         preprocessing_sequence = MLImport.import_preprocessing_sequence(config, config_dir)
 
-        labels = list(config.labels_with_values.keys())
-        assert len(labels) == 1, "MLImport: Multiple labels set in a single ml_config file."
-
-        label = Label(labels[0], config.labels_with_values[labels[0]])
+        label = MLImport.import_label(config)
 
         return HPSetting(encoder=encoder, encoder_params=config.encoding_parameters, encoder_name=config.encoding_name,
                          ml_method=ml_method, ml_method_name=config.ml_method_name, ml_params={},

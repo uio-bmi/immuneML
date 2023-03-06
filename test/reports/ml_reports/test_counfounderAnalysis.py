@@ -86,7 +86,7 @@ class TestConfounderAnalysis(TestCase):
         report = ConfounderAnalysis.build_object(metadata_labels=["age", "HLA"], name='test')
 
         report.ml_details_path = path / "ml_details.yaml"
-        report.label = Label("disease")
+        report.label = Label("disease", [True, False])
         report.result_path = path
         encoder = KmerFrequencyEncoder.build_object(RepertoireDataset(), **{
             "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
@@ -97,7 +97,7 @@ class TestConfounderAnalysis(TestCase):
         })
         report.train_dataset = self._encode_dataset(encoder, self._make_dataset(path / "train", size=100), path)
         report.test_dataset = self._encode_dataset(encoder, self._make_dataset(path / "test", size=40), path, learn_model=False)
-        report.method = self._create_dummy_lr_model(path, report.train_dataset.encoded_data, Label("disease"))
+        report.method = self._create_dummy_lr_model(path, report.train_dataset.encoded_data, Label("disease", [True, False]))
 
         return report
 

@@ -10,8 +10,9 @@ class Receptor(DatasetItem):
 
     FIELDS = {}
 
-    def __init__(self, identifier):
-        self.identifier = identifier
+    def __init__(self,  identifier: str = None, metadata: dict = None):
+        self.metadata = metadata
+        self.identifier = identifier if identifier is not None else uuid4().hex
 
     @abc.abstractmethod
     def get_chains(self):
@@ -41,3 +42,11 @@ class Receptor(DatasetItem):
                  + [NumpyHelper.get_numpy_representation(getattr(self, name)) for name in self.FIELDS if name not in chains]
 
         return record
+
+    def get_attribute(self, name: str):
+        if hasattr(self, name):
+            return getattr(self, name)
+        if name in self.metadata.keys():
+            return self.metadata[name]
+        else:
+            raise KeyError(f"Receptor {self.identifier} does not have attribute {name}.")

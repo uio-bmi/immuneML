@@ -76,11 +76,11 @@ mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagc
                                                            "sequence_file_size": 50000,
                                                            "organism": "mouse"}, 'd1')
 
-        dataset = TCRdistEncoder(8).encode(dataset, EncoderParams(path / "result", LabelConfiguration([Label("epitope")])))
+        dataset = TCRdistEncoder(8).encode(dataset, EncoderParams(path / "result", LabelConfiguration([Label("epitope", None)])))
 
         report = TCRdistMotifDiscovery(train_dataset=dataset, test_dataset=dataset, result_path=path / "report", name="report name", cores=8,
                                        positive_class_name="PA", min_cluster_size=3)
-        report.label = Label("epitope")
+        report.label = Label("epitope", None)
         report._generate()
 
         shutil.rmtree(path)

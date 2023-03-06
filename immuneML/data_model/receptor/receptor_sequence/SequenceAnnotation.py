@@ -14,3 +14,6 @@ class SequenceAnnotation:
 
     def __str__(self):
         return str([str(implant) for implant in self.implants])
+
+    def __repr__(self):
+        return f"SequenceAnnotation(implants={self.implants})"
