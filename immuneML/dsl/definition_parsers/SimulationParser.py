@@ -107,25 +107,18 @@ def _parse_sim_config_item(simulation_item: dict, key: str, symbol_table: Symbol
 
 
 def _parse_signals(sim_item: dict, symbol_table: SymbolTable, location: str, key: str) -> dict:
-    if isinstance(sim_item['signals'], dict):
+
+    assert isinstance(sim_item['signals'], dict) or sim_item['signals'] is None, \
+        f"Signals under {key} have to be either null or a dictionary, got: {sim_item['signals']}."
+
+    if sim_item['signals'] is not None:
 
         signals = _extract_signals_from_potential_pairs(sim_item["signals"].keys())
         ParameterValidator.assert_keys(signals, symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, key, False)
         assert 0 <= sum(sim_item['signals'].values()) <= 1, sim_item['signals']
 
-    elif isinstance(sim_item['signals'], list):
-
-        assert len(sim_item['signals']) <= 1 and sim_item['receptors_in_repertoire_count'] != 0, \
-            f'Multiple signals are not supported for receptor-level simulation for sim_item {key}.'
-
-        ParameterValidator.assert_keys(sim_item["signals"], symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, key, False)
-
-        if len(sim_item['signals']) == 1:
-            sim_item['signals'] = {sim_item['signals'][0]: 1}
-        else:
-            sim_item['signals'] = {}
-
     else:
+
         sim_item['signals'] = {}
 
     return sim_item

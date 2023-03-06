@@ -234,7 +234,7 @@ def make_signal_metadata(sim_item, signals) -> Dict[str, bool]:
 
 def make_repertoire_from_sequences(sequences: BNPDataClass, repertoires_path, sim_item: SimConfigItem, signals: List[Signal], custom_fields: list) \
     -> Repertoire:
-    metadata = {**make_signal_metadata(sim_item, signals), **sim_item.immune_events}
+    metadata = {**make_signal_metadata(sim_item, signals), **sim_item.immune_events, 'sim_item': sim_item.name}
     rep_data = prepare_data_for_repertoire_obj(sequences, custom_fields)
     return Repertoire.build(**rep_data, path=repertoires_path, metadata=metadata)
 
