@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
@@ -9,15 +10,16 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.implants.Motif import Motif
 
 
-class PWM(Motif):
+@dataclass
+class LigoPWM(Motif):
     """
-    Class describing positional weight matrix and using bionumpy's PWM internally.
+    Class describing positional weight matrix and using bionumpy's LigoPWM internally.
 
     Arguments:
 
-        file_path: path to the file where the PWM is stored
+        file_path: path to the file where the LigoPWM is stored
 
-        threshold (float): when matching PWM to a sequence, this is the threshold to consider the sequence as containing the motif
+        threshold (float): when matching LigoPWM to a sequence, this is the threshold to consider the sequence as containing the motif
 
     YAML specification:
 
@@ -30,21 +32,15 @@ class PWM(Motif):
                 threshold: 2
 
     """
-
-    def __init__(self, identifier: str, file_path: Path, pwm_matrix: bnp_PWM, threshold: float):
-
-        Motif.__init__(identifier)
-        self.file_path = file_path
-        self.pwm_matrix = pwm_matrix
-        self.threshold = threshold
-
-        assert self.pwm_matrix is not None or self.file_path is not None, (file_path, pwm_matrix)
+    file_path: Path
+    pwm_matrix: bnp_PWM
+    threshold: float
 
     @classmethod
     def build(cls, identifier: str, file_path, threshold: float):
         assert Path(file_path).is_file(), file_path
         pwm_matrix = read_motif(file_path)
-        return PWM(identifier, file_path, pwm_matrix, threshold)
+        return LigoPWM(identifier, file_path, pwm_matrix, threshold)
 
     def get_all_possible_instances(self, sequence_type: SequenceType):
         assert sorted(self.pwm_matrix.alphabet) == sorted(EnvironmentSettings.get_sequence_alphabet(sequence_type))

@@ -31,8 +31,8 @@ class SignalParser:
                         ParameterValidator.assert_in_valid_list(motif, valid_motif_keys, SignalParser.__name__, f'{key}:motifs')
                     signal_motifs.append([symbol_table.get(motif_id) for motif_id in motif_group])
 
-            signal = Signal(key, signal_motifs,
-                            sequence_position_weights=signal_spec['sequence_position_weights'] if 'sequence_position_weights' in signal_spec else {})
+            signal = Signal(key, signal_motifs, v_call=signal_spec.get('v_call'), j_call=signal_spec.get('j_call'),
+                            sequence_position_weights=signal_spec.get('sequence_position_weights', {}))
             symbol_table.add(key, SymbolType.SIGNAL, signal)
 
         return symbol_table, signals

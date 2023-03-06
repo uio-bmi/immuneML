@@ -23,8 +23,8 @@ from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.SimConfigItem import SimConfigItem
 from immuneML.simulation.generative_models.BackgroundSequences import BackgroundSequences
+from immuneML.simulation.implants.LigoPWM import LigoPWM
 from immuneML.simulation.implants.MotifInstance import MotifInstance, MotifInstanceGroup
-from immuneML.simulation.implants.PWM import PWM
 from immuneML.simulation.implants.Signal import Signal, SignalPair
 from immuneML.simulation.util.bnp_util import merge_dataclass_objects
 from immuneML.util.PathBuilder import PathBuilder
@@ -156,13 +156,20 @@ def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annota
 
 
 def match_motif_regexes(motifs, encoding, sequence_array, matches_gene, matches):
-    for motif in motifs:
+    matches_motif = None
+    if isinstance(motifs, LigoPWM):
+        matches_motif = match_motif(motifs, encoding, sequence_array)
+    else:
+        for motif in motifs:
+            if matches_motif is None:
+                matches_motif = match_motif(motif, encoding, sequence_array)
+            else:
+                matches_motif = np.logical_or(matches_motif, match_motif(motif, encoding, sequence_array))
 
-        matches_motif = match_motif(motif, encoding, sequence_array)
-        if matches is None:
-            matches = np.logical_and(matches_motif, matches_gene)
-        else:
-            matches = np.logical_or(matches, np.logical_and(matches_motif, matches_gene))
+    if matches is None:
+        matches = np.logical_and(matches_motif, matches_gene)
+    else:
+        matches = np.logical_or(matches, np.logical_and(matches_motif, matches_gene))
 
     return matches
 
@@ -196,11 +203,13 @@ def match_genes(v_call, v_call_array, j_call, j_call_array):
     return matches_gene.astype(bool)
 
 
-def match_motif(motif: Union[str, PWM], encoding, sequence_array):
+def match_motif(motif: Union[str, LigoPWM], encoding, sequence_array):
     if isinstance(motif, str):
         matcher = RegexMatcher(motif, encoding=encoding)
         matches = matcher.rolling_window(sequence_array, mode='same')
     else:
+        print(type(motif))
+        print(motif)
         matches = get_motif_scores(sequence_array, motif.pwm_matrix) > motif.threshold
     return matches
 

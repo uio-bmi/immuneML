@@ -3,6 +3,7 @@ import copy
 from immuneML.dsl.ObjectParser import ObjectParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
+from immuneML.simulation.implants.LigoPWM import LigoPWM
 from immuneML.simulation.implants.Motif import Motif
 from immuneML.simulation.implants.SeedMotif import SeedMotif
 from immuneML.simulation.motif_instantiation_strategy.MotifInstantiationStrategy import MotifInstantiationStrategy
@@ -18,19 +19,23 @@ class MotifParser:
     @staticmethod
     def parse(motifs: dict, symbol_table: SymbolTable):
 
-        valid_motif_keys = ["seed", "instantiation"]
-        for key in motifs.keys():
+        for key, motif_dict in motifs.items():
 
-            ParameterValidator.assert_keys(motifs[key].keys(), valid_motif_keys, "MotifParser", key, exclusive=False)
+            motif_keys = list(motif_dict.keys())
+            if "seed" in motif_keys:
+                ParameterValidator.assert_keys(motif_keys, ['seed', 'instantiation'], "MotifParser", key, exclusive=False)
+                motif = MotifParser._parse_seed_motif(key, motif_dict)
+            else:
+                ParameterValidator.assert_keys(motif_keys, ['file_path', 'threshold'], "MotifParser", key)
+                motif = LigoPWM.build(identifier=key, file_path=motif_dict['file_path'], threshold=motif_dict['threshold'])
 
-            motif = MotifParser._parse_motif(key, motifs[key])
             symbol_table.add(key, SymbolType.MOTIF, motif)
 
         return symbol_table, motifs
 
     @staticmethod
     @log
-    def _parse_motif(key: str, motif_item: dict) -> Motif:
+    def _parse_seed_motif(key: str, motif_item: dict) -> Motif:
 
         motif_dict = copy.deepcopy(motif_item)
 
