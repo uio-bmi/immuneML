@@ -178,7 +178,6 @@ class PositionalMotifFrequencies(EncodingReport):
         gap_size_df["occurrence_total"] = gap_size_df.groupby("motif_size")["occurrence"].transform(sum)
         gap_size_df["occurrence_percentage"] = gap_size_df["occurrence"] / gap_size_df["occurrence_total"]
 
-        title = "Maximum gap size in motif distribution"
         x_label = x.replace("_", " ").capitalize()
 
         if self.motif_color_map is not None:
@@ -200,7 +199,6 @@ class PositionalMotifFrequencies(EncodingReport):
             color_discrete_sequence=color_discrete_sequence,
             category_orders=dict(motif_size=sorted([int(rate) for rate in gap_size_df["motif_size"].unique()])),
             template="plotly_white",
-            title=title,
             markers=True,
             labels={
                 x: x_label,
