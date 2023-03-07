@@ -83,7 +83,7 @@ class ElementGenerator:
             elements.extend(extracted_elements)
 
             if len(elements) >= self.file_size or len(elements) == len(example_indices):
-                self._store_elements_to_file(batch_filenames[file_count-1], elements[:self.file_size])
+                self._store_elements_to_file(batch_filenames[file_count - 1], elements[:self.file_size])
                 file_count += 1
                 elements = elements[self.file_size:]
 
@@ -95,7 +95,7 @@ class ElementGenerator:
     def _prepare_batch_filenames(self, example_count: int, path: Path, dataset_type: str, dataset_identifier: str):
         batch_count = math.ceil(example_count / self.file_size)
         digits_count = len(str(batch_count)) + 1
-        filenames = [path / f"{dataset_identifier}_{dataset_type}_batch{''.join(['0' for i in range(digits_count-len(str(index)))])}{index}.npy"
+        filenames = [path / f"{dataset_identifier}_{dataset_type}_batch{''.join(['0' for i in range(digits_count - len(str(index)))])}{index}.npy"
                      for index in range(batch_count)]
         return filenames
 
@@ -108,8 +108,21 @@ class ElementGenerator:
         upper_limit, lower_limit = (index + 1) * batch_size, index * batch_size
         batch_indices = [ind for ind in example_indices if lower_limit <= ind < upper_limit]
 
-        assert len(batch_indices) == 0  or max(batch_indices) - lower_limit < len(batch), f"ElementGenerator: Found batch of size {len(batch)}, but expected {batch_size}. " \
-                                                                                          f"Are the batch files sorted correctly? All files except the last file must have batch size {batch_size}."
+        assert len(batch_indices) == 0 or max(batch_indices) - lower_limit < len(
+            batch), f"ElementGenerator: Found batch of size {len(batch)}, but expected {batch_size}. " \
+                    f"Are the batch files sorted correctly? All files except the last file must have batch size {batch_size}."
 
         elements = [batch[i - lower_limit] for i in batch_indices]
+        return elements
+
+    def get_data_from_index_range(self, start_index: int, end_index: int):
+        elements = []
+        start_file_index = start_index // self.file_size
+        end_file_index = min(len(self.file_list) - 1, end_index // self.file_size)
+        for current_file_index in range(start_file_index, end_file_index + 1):
+            batch = self._load_batch(current_file_index)
+            i = start_index % self.file_size
+            while len(elements) < end_index - start_index + 1 and i < len(batch):
+                elements.append(batch[i])
+                i += 1
         return elements

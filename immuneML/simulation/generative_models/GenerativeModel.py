@@ -11,10 +11,6 @@ class GenerativeModel:
     OUTPUT_COLUMNS = []
 
     @abc.abstractmethod
-    def load_model(self):
-        pass
-
-    @abc.abstractmethod
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
         pass
 

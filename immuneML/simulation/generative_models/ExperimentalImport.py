@@ -6,8 +6,11 @@ import numpy as np
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.dsl.import_parsers.ImportParser import ImportParser
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.simulation.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
+from immuneML.simulation.util.util import write_bnp_data
 from immuneML.util.ParameterValidator import ParameterValidator
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class ExperimentalImport(GenerativeModel):
@@ -21,6 +24,7 @@ class ExperimentalImport(GenerativeModel):
 
         generative_model:
             import_format: AIRR
+            tmp_import_path: ./tmp/
             import_params:
                 path: path/to/files/
                 region_type: IMGT_CDR3 # what part of the sequence to import
@@ -29,35 +33,39 @@ class ExperimentalImport(GenerativeModel):
                     junction_aa: sequence_aa
                     locus: chain
             type: ExperimentalImport
+
     """
     def __init__(self, dataset: SequenceDataset):
         self._dataset = dataset
-        self._counter = -1
+        self._counter = 0
 
     @classmethod
     def build_object(cls, **kwargs):
-        ParameterValidator.assert_keys(kwargs.keys(), ['import_format', 'import_params'], ExperimentalImport.__name__,  'ExperimentalImport')
+        ParameterValidator.assert_keys(kwargs.keys(), ['import_format', 'import_params', "tmp_import_path"], ExperimentalImport.__name__,  'ExperimentalImport')
+        ParameterValidator.assert_type_and_value(kwargs['tmp_import_path'], str, cls.__name__, 'tmp_import_path')
+        tmp_import_path = Path(kwargs['tmp_import_path'])
+        assert not tmp_import_path.is_file(), \
+            f"{cls.__name__}: parameter 'tmp_import_path' has to point to a directory where temporary files can be stored."
 
-        if 'is_repertoire' in kwargs['import_params']:
-            assert kwargs['import_params']['is_repertoire'] is False, \
-                f"{ExperimentalImport.__name__}: repertoire datasets cannot be imported for the purpose of simulation. " \
-                f"Only sequence datasets are supported."
-        else:
-            kwargs['import_params']['is_repertoire'] = False
+        PathBuilder.build(tmp_import_path, False)
 
-        dataset = ImportParser.parse_dataset("experimental_dataset", {'format': kwargs['import_format'], 'params': kwargs['import_params']})
+        dataset = ImportParser.parse_dataset("experimental_dataset", {'format': kwargs['import_format'], 'params': kwargs['import_params']},
+                                             tmp_import_path)
+        print(f"Imported dataset with {dataset.get_example_count()} sequences.")
         return ExperimentalImport(dataset)
-
-    def load_model(self):
-        pass
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
         if compute_p_gen:
             logging.warning(f"{ExperimentalImport.__name__}: generation probabilities cannot be computed for experimental data, skipping...")
 
         if self._counter < self._dataset.get_example_count():
-            sequences = self._dataset.get_data(batch_size=count)
-        raise NotImplementedError
+            sequences = self._dataset.get_data_from_index_range(self._counter, self._counter + count - 1)
+            self._counter += len(sequences)
+            write_bnp_data(path, BackgroundSequences.build_from_receptor_sequences(sequences))
+        else:
+            raise RuntimeError(f"{ExperimentalImport.__name__}: all sequences provided to the generative model were already used in the simulation, "
+                               f"no more new sequences can be imported. Try increasing the number of sequences in the provided files or reduce the "
+                               f"number of sequences or repertoires to be generated.")
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         raise NotImplementedError

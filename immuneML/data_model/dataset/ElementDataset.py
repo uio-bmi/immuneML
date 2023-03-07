@@ -76,3 +76,6 @@ class ElementDataset(Dataset):
 
     def clone(self, keep_identifier: bool = False):
         raise NotImplementedError
+
+    def get_data_from_index_range(self, start_index: int, end_index: int):
+        return self.element_generator.get_data_from_index_range(start_index, end_index)

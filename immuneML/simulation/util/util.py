@@ -52,12 +52,13 @@ def get_sequence_per_signal_count(sim_item: SimConfigItem) -> dict:
 
 
 def get_bnp_data(sequence_path, bnp_data_class):
-    buff_type = delimited_buffers.get_bufferclass_for_datatype(bnp_data_class, delimiter='\t', has_header=True)
+    if sequence_path.is_file():
+        buff_type = delimited_buffers.get_bufferclass_for_datatype(bnp_data_class, delimiter='\t', has_header=True)
 
-    with bnp.open(sequence_path, buffer_type=buff_type) as file:
-        data = file.read()
+        with bnp.open(sequence_path, buffer_type=buff_type) as file:
+            data = file.read()
 
-    return data
+        return data
 
 
 def make_receptor_sequence_objects(sequences: BackgroundSequences, metadata, immune_events: dict, custom_params: list) -> List[ReceptorSequence]:
@@ -79,16 +80,17 @@ def construct_sequence_metadata_object(sequence, metadata: dict, custom_params, 
 
 
 def write_bnp_data(path: Path, data, append_if_exists: bool = True):
-    buff_type = delimited_buffers.get_bufferclass_for_datatype(type(data), delimiter="\t", has_header=True)
+    if len(data) > 0:
+        buff_type = delimited_buffers.get_bufferclass_for_datatype(type(data), delimiter="\t", has_header=True)
 
-    if path.is_file() and append_if_exists:
-        with bnp.open(path, buffer_type=buff_type, mode='a') as file:
-            file.write(data)
-    elif not path.is_file():
-        with bnp.open(path, buffer_type=buff_type, mode='w') as file:
-            file.write(data)
-    else:
-        raise RuntimeError(f"Tried writing to {path}, but it already exists and append_if_exists parameter is set to False.")
+        if path.is_file() and append_if_exists:
+            with bnp.open(path, buffer_type=buff_type, mode='a') as file:
+                file.write(data)
+        elif not path.is_file():
+            with bnp.open(path, buffer_type=buff_type, mode='w') as file:
+                file.write(data)
+        else:
+            raise RuntimeError(f"Tried writing to {path}, but it already exists and append_if_exists parameter is set to False.")
 
 
 def make_sequence_paths(path: Path, signals: List[Signal]) -> Dict[str, Path]:
@@ -208,8 +210,6 @@ def match_motif(motif: Union[str, LigoPWM], encoding, sequence_array):
         matcher = RegexMatcher(motif, encoding=encoding)
         matches = matcher.rolling_window(sequence_array, mode='same')
     else:
-        print(type(motif))
-        print(motif)
         matches = get_motif_scores(sequence_array, motif.pwm_matrix) > motif.threshold
     return matches
 

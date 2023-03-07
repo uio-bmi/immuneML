@@ -49,3 +49,7 @@ class Dataset:
     @abc.abstractmethod
     def get_metadata(self, field_names: list, return_df: bool = False):
         pass
+
+    @abc.abstractmethod
+    def get_data_from_index_range(self, start_index: int, end_index: int):
+        pass

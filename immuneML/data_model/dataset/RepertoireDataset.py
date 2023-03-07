@@ -174,3 +174,6 @@ class RepertoireDataset(Dataset):
     def get_subject_ids(self):
         """Returns a list of subject identifiers"""
         return self.get_metadata(["subject_id"])["subject_id"]
+
+    def get_data_from_index_range(self, start_index: int, end_index: int):
+        return self.repertoires[start_index:end_index+1]

@@ -219,7 +219,7 @@ class LigoSimInstruction(Instruction):
             sequences = self._make_background_sequences(path, iteration, sim_item, seqs_per_signal_count,
                                                         need_background_seqs=iteration == 0 and self.state.simulation.keep_p_gen_dist)
 
-            if self.state.simulation.keep_p_gen_dist and iteration == 0:
+            if self.state.simulation.keep_p_gen_dist and sim_item.generative_model.can_compute_p_gens() and iteration == 0:
                 self._make_p_gen_histogram(sequences)
                 print_log("Computed a histogram from the first batch of background sequences.", include_datetime=True)
 
@@ -229,7 +229,7 @@ class LigoSimInstruction(Instruction):
                                                                                     self.sequence_type, sim_item, self.state.signals,
                                                                                     self.state.simulation.remove_seqs_with_signals)
 
-            if self.state.simulation.keep_p_gen_dist:
+            if self.state.simulation.keep_p_gen_dist and sim_item.generative_model.can_compute_p_gens():
                 sequences = self._filter_using_p_gens(sequences, sim_item)
 
             seqs_per_signal_count['no_signal'] = update_seqs_without_signal(seqs_per_signal_count['no_signal'], sequences, seq_paths['no_signal'])
@@ -253,7 +253,8 @@ class LigoSimInstruction(Instruction):
         v_genes = sorted(list(set(chain(signal.v_call for signal in sim_item.signals if signal.v_call is not None))))
         j_genes = sorted(list(set(chain(signal.j_call for signal in sim_item.signals if signal.j_call is not None))))
 
-        if sequence_per_signal_count['no_signal'] > 0 or need_background_seqs or (len(v_genes) == 0 and len(j_genes) == 0):
+        if sequence_per_signal_count['no_signal'] > 0 or need_background_seqs or (len(v_genes) == 0 and len(j_genes) == 0) \
+            or not sim_item.generative_model.can_generate_from_skewed_gene_models():
             sim_item.generative_model.generate_sequences(self._sequence_batch_size, seed=sim_item.seed, path=sequence_path,
                                                          sequence_type=self.sequence_type, compute_p_gen=self._use_p_gens)
 
