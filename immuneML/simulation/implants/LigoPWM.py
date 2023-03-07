@@ -14,6 +14,8 @@ from immuneML.simulation.implants.Motif import Motif
 class LigoPWM(Motif):
     """
     Class describing positional weight matrix and using bionumpy's LigoPWM internally.
+    For more details on bionumpy's implementation of PWM, see the documentation at
+    https://bionumpy.github.io/bionumpy/tutorials/position_weight_matrix.html.
 
     Arguments:
 
