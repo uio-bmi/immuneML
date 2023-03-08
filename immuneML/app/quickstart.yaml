@@ -19,7 +19,7 @@ instructions:
 
       dataset: my_dataset
       labels:
-        - sars
+        - RBD
 
       settings:
       - encoding: my_encoding

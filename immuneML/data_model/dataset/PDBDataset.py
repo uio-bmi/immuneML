@@ -30,7 +30,6 @@ class PDBDataset(Dataset):
         self.file_names = file_names
         self.metadata_file = metadata_file
         self.list_of_PDB_Structures = self.generate_PDB_Structures()
-        self.distance_matrix = None
 
 
 

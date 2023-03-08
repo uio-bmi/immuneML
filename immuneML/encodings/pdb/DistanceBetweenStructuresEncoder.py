@@ -1,4 +1,3 @@
-import numpy
 from Bio.PDB import PDBParser
 
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
@@ -9,12 +8,13 @@ import numpy as np
 from immuneML.data_model.receptor.RegionType import RegionType
 from Bio.PDB.PDBIO import PDBIO
 from Bio.PDB.PDBIO import Select
-import numpy as np
+
 from tmtools import tm_align
 from tmtools.io import get_structure, get_residue_data
 import pandas as pd
 from immuneML.util.EncoderHelper import EncoderHelper
 from pathlib import Path
+from immuneML.caching.CacheHandler import CacheHandler
 
 
 class DistanceBetweenStructuresEncoder(DatasetEncoder):
@@ -29,6 +29,7 @@ class DistanceBetweenStructuresEncoder(DatasetEncoder):
         self.name = name
         self.region_type = region_type
         self.context = context
+        self.distance_fn = "TM_score"
 
     def set_context(self, context: dict):
         self.context = context
@@ -85,16 +86,10 @@ class DistanceBetweenStructuresEncoder(DatasetEncoder):
         example_ids_with_correct_endings = self.add_file_endings(dataset.get_example_ids())
         training_data_ids_with_correct_endings = self.add_file_endings(training_data_ids)
 
-        if entire_dataset.distance_matrix is None:
-            distance_dictionary = self.calculate_TM_Score_between_current_dataset_and_entire_dataset(entire_dataset, entire_dataset)
-
-            distance_matrix_dataframe = pd.DataFrame(distance_dictionary)
-            distance_matrix_dataframe.index = entire_dataset.get_pdb_filepaths()
-
-            entire_dataset.set_distance_matrix(distance_matrix_dataframe)
-
-        else:
-            distance_matrix_dataframe = entire_dataset.get_distance_matrix()
+        distance_matrix_dataframe = CacheHandler.memo_by_params((("dataset_identifier", dataset.identifier),
+                                            "pdb_dataset_comparison",
+                                            ("comparison_fn", self.distance_fn)),
+                                           lambda: self.calculate_TM_Score_between_current_dataset_and_entire_dataset(entire_dataset, entire_dataset))
 
         distance_matrix_dataframe = distance_matrix_dataframe.loc[example_ids_with_correct_endings, training_data_ids_with_correct_endings]
 
@@ -104,10 +99,7 @@ class DistanceBetweenStructuresEncoder(DatasetEncoder):
 
     def calculate_TM_Score_between_current_dataset_and_entire_dataset(self, current_PDB_structures, entire_dataset):
 
-
         entire_dataset.set_pdb_filepaths(self.create_new_pdb_file_without_antigen(entire_dataset))
-
-
         distance_dictionary = {}
 
 
@@ -119,7 +111,10 @@ class DistanceBetweenStructuresEncoder(DatasetEncoder):
 
             distance_dictionary[path_to_current_pdb_file] = current_structure_matrix
 
-        return distance_dictionary
+        distance_matrix_dataframe = pd.DataFrame(distance_dictionary)
+        distance_matrix_dataframe.index = entire_dataset.get_pdb_filepaths()
+
+        return distance_matrix_dataframe
 
 
     def calcualte_TM_Score_between_two_pdb_files(self, path_to_current_pdb_file, path_to_other_pdb_file):
