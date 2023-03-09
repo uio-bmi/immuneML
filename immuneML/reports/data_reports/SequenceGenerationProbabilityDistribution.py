@@ -1,9 +1,12 @@
 import logging
-import regex as re
+import multiprocessing as mp
+import time
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
+import regex as re
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.environment.SequenceType import SequenceType
@@ -40,6 +43,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
                 mark_implanted_labels: True
                 default_sequence_label: OLGA
     """
+
     # TODO account for sequence appearing both as target and not
 
     @classmethod
@@ -80,7 +84,6 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         dataset_df = self._load_dataset_dataframe()
 
         dataset_df = self._get_sequence_count(dataset_df)
-        dataset_df = dataset_df[dataset_df["count"] > 1]
 
         Logger.print_log(
             f"Starting generation probability-calculation ({dataset_df.sequence_aas.unique().size} unique sequences)",
@@ -112,10 +115,21 @@ class SequenceGenerationProbabilityDistribution(DataReport):
                                  default_model_name=SequenceDispenser.get_default_model_name(self.dataset),
                                  chain=None, use_only_productive=False)
         olga.load_model()
+        self.olga = olga
 
-        dataset_df["pgen"] = olga.compute_p_gens(dataset_df, SequenceType.AMINO_ACID)
+        thread_count = mp.cpu_count()
 
-        return dataset_df
+        dfs = np.array_split(dataset_df, thread_count)
+        pool = mp.Pool(thread_count)
+        results = pool.map(self._compute_pgen, [df for df in dfs])
+
+        pool.close()
+
+        return pd.concat(results)
+
+    def _compute_pgen(self, dataframe, sequence_type=SequenceType.AMINO_ACID):
+        dataframe["pgen"] = self.olga.compute_p_gens(dataframe, sequence_type)
+        return dataframe
 
     def _get_sequence_count(self, dataset_df) -> pd.DataFrame:
         """
@@ -254,8 +268,9 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
         samples_df.to_csv(path / f"samples_{name}.csv", sep=";")
 
-        return [ReportOutput(path / f"sequences_{name}.csv", "Dataset with pgen and target for hacking method: SEQUENCES"),
-                ReportOutput(path / f"samples_{name}.csv", "Dataset with pgen and target for hacking method: SAMPLES")]
+        return [
+            ReportOutput(path / f"sequences_{name}.csv", "Dataset with pgen and target for hacking method: SEQUENCES"),
+            ReportOutput(path / f"samples_{name}.csv", "Dataset with pgen and target for hacking method: SAMPLES")]
 
     def _generate_occurrence_limit_pgen_range(self, dataset_df):
         """
