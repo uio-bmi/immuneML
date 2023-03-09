@@ -44,8 +44,6 @@ class SequenceGenerationProbabilityDistribution(DataReport):
                 default_sequence_label: OLGA
     """
 
-    # TODO account for sequence appearing both as target and not
-
     @classmethod
     def build_object(cls,
                      **kwargs):  # called when parsing YAML - all checks for parameters (if any) should be in this function
