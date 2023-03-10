@@ -277,11 +277,12 @@ class ImportHelper:
             is_illegal_seq = [ImportHelper.is_illegal_sequence(sequence, legal_alphabet) for
                               sequence in dataframe[sequence_type.value]]
             n_illegal = sum(is_illegal_seq)
+            n_total = dataframe.shape[0]
 
             if n_illegal > 0:
                 dataframe.drop(dataframe.loc[is_illegal_seq].index, inplace=True)
-                warnings.warn(
-                    f"{ImportHelper.__name__}: {n_illegal} sequences were removed from the dataset because their {sequence_name} sequence contained illegal characters. ")
+                warnings.warn(f"{ImportHelper.__name__}: {n_illegal}/{n_total} sequences were removed from the dataset because their {sequence_name}"
+                              f" sequence contained illegal characters. ")
         return dataframe
 
     @staticmethod
