@@ -265,13 +265,13 @@ class ImportHelper:
         return dataframe
 
     @staticmethod
-    def drop_illegal_character_sequences(dataframe: pd.DataFrame, import_illegal_characters: bool) -> pd.DataFrame:
+    def drop_illegal_character_sequences(dataframe: pd.DataFrame, import_illegal_characters: bool, import_with_stop_codon: bool) -> pd.DataFrame:
         if not import_illegal_characters:
             sequence_type = EnvironmentSettings.get_sequence_type()
             sequence_name = sequence_type.name.lower().replace("_", " ")
 
             legal_alphabet = EnvironmentSettings.get_sequence_alphabet(sequence_type)
-            if sequence_type == SequenceType.AMINO_ACID:
+            if sequence_type == SequenceType.AMINO_ACID and import_with_stop_codon:
                 legal_alphabet.append(Constants.STOP_CODON)
 
             is_illegal_seq = [ImportHelper.is_illegal_sequence(sequence, legal_alphabet) for
