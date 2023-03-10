@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.CompAIRRParams import CompAIRRParams
 
 
 class CompAIRRHelper:
@@ -48,14 +49,16 @@ class CompAIRRHelper:
         return compairr_path
 
     @staticmethod
-    def get_cmd_args(compairr_params, input_file_list, result_path):
+    def get_cmd_args(compairr_params: CompAIRRParams, input_file_list, result_path):
         indels_args = ["-i"] if compairr_params.indels else []
         frequency_args = ["-f"] if compairr_params.ignore_counts else []
         ignore_genes = ["-g"] if compairr_params.ignore_genes else []
         output_args = ["-o", str(result_path / compairr_params.output_filename), "-l", str(result_path / compairr_params.log_filename)]
+        output_pairs = ['-p', str(result_path / compairr_params.pairs_filename)] if compairr_params.output_pairs else []
+        command = '-m' if compairr_params.do_repertoire_overlap and not compairr_params.do_sequence_matching else '-x'
 
-        return [str(compairr_params.compairr_path), "-m", "-d", str(compairr_params.differences), "-t", str(compairr_params.threads)] + \
-               indels_args + frequency_args + ignore_genes + output_args + input_file_list
+        return [str(compairr_params.compairr_path), command, "-d", str(compairr_params.differences), "-t", str(compairr_params.threads)] + \
+                indels_args + frequency_args + ignore_genes + output_args + input_file_list + output_pairs
 
     @staticmethod
     def write_repertoire_file(repertoire_dataset, filename, compairr_params):

@@ -2,6 +2,7 @@
 
 import errno
 import os
+import shutil
 import warnings
 from pathlib import Path
 
@@ -19,5 +20,15 @@ class PathBuilder:
             except OSError as e:
                 if e.errno != errno.EEXIST:
                     raise
+
+        return path
+
+    @staticmethod
+    def remove_old_and_build(path):
+        path = Path(path)
+        if path.is_dir():
+            shutil.rmtree(path)
+
+        path.mkdir()
 
         return path

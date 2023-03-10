@@ -9,7 +9,7 @@ from immuneML.data_model.receptor.Receptor import Receptor
 from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
 from immuneML.data_model.receptor.TCGDReceptor import TCGDReceptor
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 
 
 class ReceptorBuilder:
@@ -29,7 +29,7 @@ class ReceptorBuilder:
             return None
 
     @classmethod
-    def build_objects(cls, sequences: ReceptorSequenceList) -> List[Receptor]:
+    def build_objects(cls, sequences: List[ReceptorSequence]) -> List[Receptor]:
         receptors = []
         sequences_per_chain = {chain.value: [sequence for sequence in sequences if sequence.metadata.chain.value == chain.value]
                                for chain in Chain}

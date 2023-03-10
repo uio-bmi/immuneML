@@ -12,3 +12,7 @@ class CompAIRRParams:
     threads: int
     output_filename: str
     log_filename: str
+    output_pairs: bool
+    pairs_filename: str
+    do_repertoire_overlap: bool = True
+    do_sequence_matching: bool = False

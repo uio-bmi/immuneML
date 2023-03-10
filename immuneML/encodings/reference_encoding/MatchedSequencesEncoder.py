@@ -1,22 +1,20 @@
-from pathlib import Path
+from multiprocessing.pool import Pool
+from typing import List
 
 import numpy as np
 import pandas as pd
-from multiprocessing.pool import Pool
 
+from immuneML.analysis.SequenceMatcher import SequenceMatcher
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.reference_encoding.MatchedReferenceUtil import MatchedReferenceUtil
-from immuneML.util.CompAIRRHelper import CompAIRRHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReadsType import ReadsType
-from immuneML.analysis.SequenceMatcher import SequenceMatcher
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.data_model.repertoire.Repertoire import Repertoire
-
 
 
 class MatchedSequencesEncoder(DatasetEncoder):
@@ -55,11 +53,10 @@ class MatchedSequencesEncoder(DatasetEncoder):
                     params:
                         path: path/to/file.txt
                 max_edit_distance: 1
+
     """
 
-
-
-    def __init__(self, max_edit_distance: int, reference: ReceptorSequenceList, reads: ReadsType, sum_matches: bool, normalize: bool,
+    def __init__(self, max_edit_distance: int, reference: List[ReceptorSequence], reads: ReadsType, sum_matches: bool, normalize: bool,
                  name: str = None):
         self.max_edit_distance = max_edit_distance
         self.reference_sequences = reference
@@ -121,7 +118,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
                 ("labels", tuple(params.label_config.get_labels_by_name())),
                 ("encoding", MatchedSequencesEncoder.__name__),
                 ("learn_model", params.learn_model),
-                ("encoding_params", encoding_params_desc), )
+                ("encoding_params", encoding_params_desc),)
 
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires, labels=dataset.labels,
@@ -172,8 +169,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
                            sequence.get_attribute("v_gene"),
                            sequence.get_attribute("j_gene")]
 
-        features = pd.DataFrame(features,
-                                columns=["sequence_id", "chain", "sequence", "v_gene", "j_gene"])
+        features = pd.DataFrame(features, columns=["sequence_id", "chain", "sequence", "v_gene", "j_gene"])
 
         return features
 
@@ -190,15 +186,16 @@ class MatchedSequencesEncoder(DatasetEncoder):
         return encoded_repertories, labels
 
     def _get_repertoire_matches_to_reference(self, repertoire):
-         return CacheHandler.memo_by_params(
-             (("repertoire_identifier", repertoire.identifier),
-              ("encoding", MatchedSequencesEncoder.__name__),
-              ("readstype", self.reads.name),
-              ("sum_matches", self.sum_matches),
-              ("max_edit_distance", self.max_edit_distance),
-              ("reference_sequences", tuple([(seq.get_attribute("chain"), seq.get_sequence(), seq.get_attribute("v_gene"), seq.get_attribute("j_gene")) for seq in self.reference_sequences]))),
+        return CacheHandler.memo_by_params(
+            (("repertoire_identifier", repertoire.identifier),
+             ("encoding", MatchedSequencesEncoder.__name__),
+             ("readstype", self.reads.name),
+             ("sum_matches", self.sum_matches),
+             ("max_edit_distance", self.max_edit_distance),
+             ("reference_sequences", tuple(
+                 [(seq.get_attribute("chain"), seq.get_sequence(), seq.get_attribute("v_gene"), seq.get_attribute("j_gene")) for seq in
+                  self.reference_sequences]))),
             lambda: self._compute_matches_to_reference(repertoire))
-
 
     def _compute_matches_to_reference(self, repertoire: Repertoire):
         matcher = SequenceMatcher()

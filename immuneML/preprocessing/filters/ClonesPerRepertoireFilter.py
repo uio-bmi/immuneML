@@ -44,7 +44,7 @@ class ClonesPerRepertoireFilter(Filter):
     def keeps_example_count(self) -> bool:
         return False
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: Path = None):
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1):
         self.check_dataset_type(dataset, [RepertoireDataset], "ClonesPerRepertoireFilter")
         self.result_path = result_path if result_path is not None else self.result_path
 
