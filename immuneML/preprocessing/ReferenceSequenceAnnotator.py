@@ -33,6 +33,8 @@ class ReferenceSequenceAnnotator(Preprocessor):
 
         compairr_path (str): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR has been installed such that it can be called directly on the command line with the command 'compairr', or that it is located at /usr/local/bin/compairr.
 
+        threads (int): how many threads to be used by CompAIRR for sequence matching
+
         ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor chains have to match. If True, gene information is ignored. By default, ignore_genes is False.
 
         output_column_name (str): in case there are multiple annotations, it is possible here to define the name of the column in the output repertoire files for this specific annotation
@@ -54,6 +56,7 @@ class ReferenceSequenceAnnotator(Preprocessor):
                         ignore_genes: False
                         max_edit_distance: 0
                         output_column_name: matched
+                        threads: 4
 
     """
 
@@ -70,7 +73,8 @@ class ReferenceSequenceAnnotator(Preprocessor):
 
     @classmethod
     def build_object(cls, **kwargs):
-        ParameterValidator.assert_keys(list(kwargs.keys()), ['reference', 'max_edit_distance', 'compairr_path', 'ignore_genes', 'output_column_name'],
+        ParameterValidator.assert_keys(list(kwargs.keys()),
+                                       ['reference', 'max_edit_distance', 'compairr_path', 'ignore_genes', 'output_column_name', 'threads'],
                                        ReferenceSequenceAnnotator.__name__, ReferenceSequenceAnnotator.__name__)
         ref_seqs = MatchedReferenceUtil.prepare_reference(reference_params=kwargs['reference'], location=ReferenceSequenceAnnotator.__name__,
                                                           paired=False)
