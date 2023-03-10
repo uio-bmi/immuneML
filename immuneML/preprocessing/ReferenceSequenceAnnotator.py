@@ -48,8 +48,8 @@ class ReferenceSequenceAnnotator(Preprocessor):
                     ReferenceSequenceAnnotator:
                         reference:
                             format: VDJDB
-                                params:
-                                    path: path/to/file.csv
+                            params:
+                                path: path/to/file.csv
                         compairr_path: optional/path/to/compairr
                         ignore_genes: False
                         max_edit_distance: 0
@@ -70,9 +70,10 @@ class ReferenceSequenceAnnotator(Preprocessor):
 
     @classmethod
     def build_object(cls, **kwargs):
-        ParameterValidator.assert_in_valid_list(kwargs.keys(), ['reference', 'max_edit_distance', 'compairr_path', 'ignore_genes', 'output_column_name'],
-                                                ReferenceSequenceAnnotator.__name__, ReferenceSequenceAnnotator.__name__)
-        ref_seqs = MatchedReferenceUtil.prepare_reference(reference_params=kwargs['reference'], location=ReferenceSequenceAnnotator.__name__, paired=False)
+        ParameterValidator.assert_keys(list(kwargs.keys()), ['reference', 'max_edit_distance', 'compairr_path', 'ignore_genes', 'output_column_name'],
+                                       ReferenceSequenceAnnotator.__name__, ReferenceSequenceAnnotator.__name__)
+        ref_seqs = MatchedReferenceUtil.prepare_reference(reference_params=kwargs['reference'], location=ReferenceSequenceAnnotator.__name__,
+                                                          paired=False)
         return ReferenceSequenceAnnotator(**{**{k: v for k, v in kwargs.items() if k != 'reference'}, 'reference_sequences': ref_seqs})
 
     def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1) -> RepertoireDataset:
@@ -109,7 +110,8 @@ class ReferenceSequenceAnnotator(Preprocessor):
         for index, repertoire in enumerate(dataset.repertoires):
             if compairr_out_df[repertoire.identifier].any():
                 sequence_selection = compairr_out_df[repertoire.identifier]
-                matches = np.array([repertoire.get_sequence_aas() == seq.amino_acid_sequence for seq in np.array(self._reference_sequences)[sequence_selection.values]]).any(axis=0)
+                matches = np.array([repertoire.get_sequence_aas() == seq.amino_acid_sequence for seq in
+                                    np.array(self._reference_sequences)[sequence_selection.values]]).any(axis=0)
                 sequences = self._add_params_to_sequence_objects(repertoire.sequences, matches)
             else:
                 sequences = self._add_params_to_sequence_objects(repertoire.sequences, np.zeros(len(repertoire.sequences), dtype=bool))
