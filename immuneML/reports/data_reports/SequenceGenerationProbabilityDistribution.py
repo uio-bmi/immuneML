@@ -82,10 +82,6 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         dataset_df = self._load_dataset_dataframe()
 
         dataset_df = self._get_sequence_count(dataset_df)
-
-        Logger.print_log(
-            f"Starting generation probability-calculation ({dataset_df.sequence_aas.unique().size} unique sequences)",
-            include_datetime=True)
         dataset_df = self._get_sequence_pgen(dataset_df)
 
         report_output_fig = self._safe_plot(dataset_df=dataset_df)
@@ -116,6 +112,10 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         self.olga = olga
 
         thread_count = mp.cpu_count()
+
+        Logger.print_log(
+            f"Starting generation probability-calculation using {thread_count} threads ({dataset_df.sequence_aas.unique().size} unique sequences)",
+            include_datetime=True)
 
         dfs = np.array_split(dataset_df, thread_count)
         pool = mp.Pool(thread_count)
@@ -168,6 +168,9 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         figure.update_traces(jitter=1.0)
 
         PathBuilder.build(self.result_path)
+
+        img_path = self.result_path / "pgen_scatter_plot.png"
+        figure.write_image(img_path)
 
         file_path = self.result_path / "pgen_scatter_plot.html"
         figure.write_html(str(file_path))
