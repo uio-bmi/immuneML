@@ -365,6 +365,8 @@ def get_signal_sequences(sequences, bnp_data_class, used_seq_count: dict, sim_it
 
         used_seq_count[signal.id] += n_rows
 
+        # TODO: add counts here where signal for the group of seqs is known as well as the sim_item
+
         if sequences is None:
             sequences = sequences_sig
         else:

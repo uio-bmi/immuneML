@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from immuneML.dsl import Util
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.util.ParameterValidator import ParameterValidator
@@ -12,7 +11,7 @@ class LigoSimParser:
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> LigoSimInstruction:
 
         location = LigoSimParser.__name__
-        keys = ["simulation", "type", "export_formats", "store_signal_in_receptors", 'sequence_batch_size', "max_iterations", "export_p_gens",
+        keys = ["simulation", "type", "store_signal_in_receptors", 'sequence_batch_size', "max_iterations", "export_p_gens",
                 "number_of_processes"]
         ParameterValidator.assert_keys(instruction.keys(), keys, location, key)
 
@@ -28,9 +27,7 @@ class LigoSimParser:
                                                 location, 'simulation')
         simulation = symbol_table.get(instruction["simulation"])
 
-        exporters = Util.parse_exporters(instruction, location)
-
-        params = {**{key: value for key, value in instruction.items() if key not in ['type', 'export_formats']},
-                  **{'simulation': simulation, 'signals': signals, 'exporters': exporters, 'name': key}}
+        params = {**{key: value for key, value in instruction.items() if key != 'type'},
+                  **{'simulation': simulation, 'signals': signals, 'name': key}}
         instruction = LigoSimInstruction(**params)
         return instruction

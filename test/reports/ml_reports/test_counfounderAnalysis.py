@@ -2,6 +2,8 @@ import os
 import shutil
 from unittest import TestCase
 
+from immuneML.workflows.steps.SignalImplanter import SignalImplanter
+
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -15,9 +17,6 @@ from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
 from immuneML.reports.ml_reports.ConfounderAnalysis import ConfounderAnalysis
-from immuneML.simulation.Implanting import Implanting
-from immuneML.simulation.Simulation import Simulation
-from immuneML.simulation.SimulationState import SimulationState
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.simulation.implants.Motif import Motif
 from immuneML.simulation.implants.Signal import Signal
@@ -27,7 +26,6 @@ from immuneML.simulation.signal_implanting.HealthySequenceImplanting import Heal
 from immuneML.simulation.signal_implanting.ImplantingComputation import ImplantingComputation
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReadsType import ReadsType
-from immuneML.workflows.steps.SignalImplanter import SignalImplanter
 
 
 class TestConfounderAnalysis(TestCase):

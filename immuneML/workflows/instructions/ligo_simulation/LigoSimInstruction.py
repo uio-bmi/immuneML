@@ -11,7 +11,7 @@ from typing import List, Dict, Tuple
 import numpy as np
 from bionumpy.bnpdataclass import BNPDataClass
 
-from immuneML.IO.dataset_export.DataExporter import DataExporter
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.environment.SequenceType import SequenceType
@@ -52,10 +52,6 @@ class LigoSimInstruction(Instruction):
 
         number_of_processes (int): determines how many simulation items can be simulated in parallel
 
-        export_formats: in which formats to export the dataset after simulation. Valid formats are class names of any non-abstract class
-        inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`. Important note: Binary files in ImmuneML might not be compatible
-        between different immuneML versions.
-
     YAML specification:
 
     .. indent with spaces
@@ -69,19 +65,16 @@ class LigoSimInstruction(Instruction):
             max_iterations: 1000
             export_p_gens: False
             number_of_processes: 4
-            export_formats: [AIRR] # in which formats to export the dataset
 
     """
 
     def __init__(self, simulation: SimConfig, signals: List[Signal], name: str, store_signal_in_receptors: bool,
-                 sequence_batch_size: int, max_iterations: int, number_of_processes: int, exporters: List[DataExporter] = None,
-                 export_p_gens: bool = None):
+                 sequence_batch_size: int, max_iterations: int, number_of_processes: int, export_p_gens: bool = None):
 
         self.state = LigoSimState(simulation=simulation, signals=signals, name=name, store_signal_in_receptors=store_signal_in_receptors)
         self._number_of_processes = number_of_processes
         self._sequence_batch_size = sequence_batch_size
         self._max_iterations = max_iterations
-        self._exporters = exporters
         self._export_p_gens = export_p_gens
 
         self._use_p_gens = (self._export_p_gens or self.state.simulation.keep_p_gen_dist) and \
@@ -117,7 +110,8 @@ class LigoSimInstruction(Instruction):
         return self.state
 
     def _export_dataset(self):
-        exporter_output = ExporterHelper.export_dataset(self.state.resulting_dataset, self._exporters, self.state.result_path)
+
+        exporter_output = ExporterHelper.export_dataset(self.state.resulting_dataset, [AIRRExporter], self.state.result_path)
 
         self.state.formats = exporter_output['formats']
         self.state.paths = exporter_output['paths']
