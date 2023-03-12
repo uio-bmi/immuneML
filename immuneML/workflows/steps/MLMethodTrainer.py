@@ -3,6 +3,7 @@ import copy
 import pandas as pd
 
 from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.MLMethodTool import MLMethodTool
 from immuneML.util.Logger import print_log
 from immuneML.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
 from immuneML.workflows.steps.Step import Step
@@ -17,6 +18,10 @@ class MLMethodTrainer(Step):
 
         method = MLMethodTrainer._fit_method(input_params)
         MLMethodTrainer.store(method, input_params)
+
+        if isinstance(method, MLMethodTool):
+            print(method.tool.pid)
+            method.tool.stop_subprocess()
 
         print_log(f"ML model training finished.", include_datetime=True)
 
@@ -34,23 +39,28 @@ class MLMethodTrainer(Step):
                                            cores_for_training=input_params.cores_for_training,
                                            optimization_metric=input_params.optimization_metric)
         else:
-            method.fit(encoded_data=input_params.dataset.encoded_data, label=input_params.label, cores_for_training=input_params.cores_for_training)
+            method.fit(encoded_data=input_params.dataset.encoded_data, label=input_params.label,
+                       cores_for_training=input_params.cores_for_training)
 
         return method
 
     @staticmethod
     def store(method: MLMethod, input_params: MLMethodTrainerParams):
-        method.store(input_params.result_path, input_params.dataset.encoded_data.feature_names, input_params.ml_details_path)
+        method.store(input_params.result_path, input_params.dataset.encoded_data.feature_names,
+                     input_params.ml_details_path)
         train_predictions = method.predict(input_params.dataset.encoded_data, input_params.label)
         train_proba_predictions = method.predict_proba(input_params.dataset.encoded_data, input_params.label)
 
         df = pd.DataFrame({"example_ids": input_params.dataset.encoded_data.example_ids,
                            f"{input_params.label.name}_predicted_class": train_predictions[input_params.label.name],
-                           f"{input_params.label.name}_true_class": input_params.dataset.encoded_data.labels[input_params.label.name]})
+                           f"{input_params.label.name}_true_class": input_params.dataset.encoded_data.labels[
+                               input_params.label.name]})
 
         classes = method.get_classes()
         for cls_index, cls in enumerate(classes):
-            tmp = train_proba_predictions[input_params.label.name][:, cls_index] if train_proba_predictions is not None and train_proba_predictions[input_params.label.name] is not None else None
+            tmp = train_proba_predictions[input_params.label.name][:,
+                  cls_index] if train_proba_predictions is not None and train_proba_predictions[
+                input_params.label.name] is not None else None
             df[f"{input_params.label.name}_{cls}_proba"] = tmp
 
         df.to_csv(input_params.train_predictions_path, index=False)
