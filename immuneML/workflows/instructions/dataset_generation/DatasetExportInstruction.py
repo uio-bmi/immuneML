@@ -63,7 +63,7 @@ class DatasetExportInstruction(Instruction):
             if self.preprocessing_sequence is not None and len(self.preprocessing_sequence) > 0:
                 for index, preprocessing in enumerate(self.preprocessing_sequence):
                     print_log(f"For dataset {dataset_name}, started preprocessing step {index+1}/{len(self.preprocessing_sequence)} with {preprocessing.__class__.__name__}", include_datetime=True)
-                    dataset = preprocessing.process_dataset(dataset, result_path / f"step_{index+1}")
+                    dataset = preprocessing.process_dataset(dataset, self.result_path / f"step_{index+1}")
                     print_log(f"Preprocessed dataset {dataset_name} with {preprocessing.__class__.__name__}", include_datetime=True)
 
             paths[dataset_name] = {}
