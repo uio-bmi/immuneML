@@ -1,5 +1,4 @@
 import json
-import random
 import subprocess
 
 import numpy as np
@@ -11,9 +10,6 @@ tool_process = None
 class ToolControllerML:
     def __init__(self):
         self.tool_path = None
-        random_number = random.randint(1, 9)
-        self.port = "555" + str(random_number)
-        print(type(self.port))
         self.port = "5555"
         self.socket = None
         self.subprocess = None
