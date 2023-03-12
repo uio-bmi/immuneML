@@ -1,19 +1,21 @@
-from pathlib import Path
 import pickle
+from pathlib import Path
 
-from immuneML.dsl.ToolControllerML import ToolControllerML
-from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.dsl.ToolControllerML import ToolControllerML
 from immuneML.environment.Label import Label
+from immuneML.ml_methods.MLMethod import MLMethod
 
 
 class MLMethodTool(MLMethod):
-    def __init__(self):
+    def __init__(self, path: str):
         super().__init__()
-        # TODO: get path from symbol table
-        self.tool = ToolControllerML(
-            tool_path="/Users/oskar/Documents/Skole/Master/immuneml_forked/ML_tool/PytorchTabular_tool.py")
-        self.tool.start_subprocess()
+        self.tool = ToolControllerML()
+        self.tool_path = path
+
+    def _start_subprocess(self):
+        self.tool.start_subprocess(
+            tool_path=self.tool_path)
 
     def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
         """
@@ -37,6 +39,11 @@ class MLMethodTool(MLMethod):
 
         }
         """
+        if self.tool.pid is None:
+            self._start_subprocess()
+
+        print("Pid: ", self.tool.pid)
+
         encoded_data_pickle = pickle.dumps(encoded_data)
         if self.tool.socket is None:
             self.tool.open_connection()

@@ -1,20 +1,27 @@
 import json
+import random
 import subprocess
-import zmq
+
 import numpy as np
+import zmq
 
 tool_process = None
 
 
 class ToolControllerML:
-    def __init__(self, tool_path):
-        self.tool_path = tool_path
+    def __init__(self):
+        self.tool_path = None
+        random_number = random.randint(1, 9)
+        self.port = "555" + str(random_number)
+        print(type(self.port))
         self.port = "5555"
         self.socket = None
         self.subprocess = None
         self.pid = None
 
-    def start_subprocess(self):
+    def start_subprocess(self, tool_path):
+        # TODO set port here? Check if port is available.
+        self.tool_path = tool_path
         # Start tool as subprocess
         global tool_process
         tool_process = subprocess.Popen(

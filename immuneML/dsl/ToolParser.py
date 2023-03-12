@@ -14,6 +14,7 @@ class ToolParser:
         if ToolParser.keyword in specification:
             for key in specification[ToolParser.keyword]:
                 symbol_table = ToolParser._parse_tool(key, specification[ToolParser.keyword][key], symbol_table)
+                specification = ToolParser._add_specs_params(key, specification, symbol_table)
         else:
             specification[ToolParser.keyword] = {}
 
@@ -28,11 +29,11 @@ class ToolParser:
         # language - optional, default python
 
         # check that all required parameters are present
-        ParameterValidator.assert_keys_present(list(tool_item.keys()), ["type", "path", "name"], ToolParser.__name__,
+        ParameterValidator.assert_keys_present(list(tool_item.keys()), ["type", "path"], ToolParser.__name__,
                                                key)
 
         # check that the value of type is valid
-        valid_types = ["MLMethod", "dataset"]
+        valid_types = ["MLMethodTool", "dataset"]
         ParameterValidator.assert_in_valid_list(tool_item["type"], valid_types, "ToolParser", "type")
 
         # set default values and create dict with tool_item
@@ -45,6 +46,23 @@ class ToolParser:
 
         symbol_table.add(key, SymbolType.TOOL, tool_item)
 
-        #print(ToolParser.run_dataset_tool("blbla"))
+        # print(ToolParser.run_dataset_tool("blbla"))
 
         return symbol_table
+
+    @staticmethod
+    def _add_specs_params(key, specification, symbol_table: SymbolTable):
+        item = symbol_table.get(key)
+        specification["definitions"]["ml_methods"][key] = {item['type']: {'path': item['path']}}
+        return specification
+
+    @staticmethod
+    def get_related_parameters(symbol_table: SymbolTable, specs):
+        list_el = symbol_table.get_by_type(SymbolType.TOOL)
+        my_item = list(specs.items())[0]
+        my_name = my_item[0]
+        my_tool_type = my_item[1]
+
+        for el in list_el:
+            if el.item['type'] == my_tool_type and el.item['name'] == my_name:
+                return el.item
