@@ -22,10 +22,10 @@ def run_test(compairr_path):
 
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'ref_seq_annotator')
 
-    annotator = ReferenceSequenceAnnotator([ReceptorSequence("AAA", metadata=SequenceMetadata(region_type='IMGT_JUNCTION')),
-                                            ReceptorSequence("AAC", metadata=SequenceMetadata(region_type='IMGT_JUNCTION')),
-                                            ReceptorSequence("AAT", metadata=SequenceMetadata(region_type='IMGT_JUNCTION')),
-                                            ReceptorSequence("AAD", metadata=SequenceMetadata(region_type='IMGT_JUNCTION'))],
+    annotator = ReferenceSequenceAnnotator([ReceptorSequence("AAA", metadata=SequenceMetadata(region_type='FULL_SEQUENCE')),
+                                            ReceptorSequence("AAC", metadata=SequenceMetadata(region_type='FULL_SEQUENCE')),
+                                            ReceptorSequence("AAT", metadata=SequenceMetadata(region_type='FULL_SEQUENCE')),
+                                            ReceptorSequence("AAD", metadata=SequenceMetadata(region_type='FULL_SEQUENCE'))],
                                            0, compairr_path, ignore_genes=True, threads=4, output_column_name='match_test')
 
     dataset = RandomDatasetGenerator.generate_repertoire_dataset(5, {500: 1.}, {3: 1}, {}, path / 'input_dataset')

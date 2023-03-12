@@ -14,5 +14,6 @@ class CompAIRRParams:
     log_filename: str
     output_pairs: bool
     pairs_filename: str
+    is_cdr3: bool = False
     do_repertoire_overlap: bool = True
     do_sequence_matching: bool = False

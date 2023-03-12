@@ -11,6 +11,7 @@ import pandas as pd
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.reference_encoding.MatchedReferenceUtil import MatchedReferenceUtil
@@ -23,11 +24,11 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class ReferenceSequenceAnnotator(Preprocessor):
     """
-    Annotates each sequence in each repertoire if it matches any of the reference sequences provided as input parameter.
+    Annotates each sequence in each repertoire if it matches any of the reference sequences provided as input parameter. This report uses CompAIRR internally. To match CDR3 sequences (and not JUNCTION), CompAIRR v1.10 or later is needed.
 
     Arguments:
 
-        reference (dict): A dictionary describing the reference dataset file. Import should be specified the same way as regular dataset import. It is only allowed to import a receptor dataset here (i.e., is_repertoire is False and paired is True by default, and these are not allowed to be changed).
+        reference_sequences (dict): A dictionary describing the reference dataset file. Import should be specified the same way as regular dataset import. It is only allowed to import a receptor dataset here (i.e., is_repertoire is False and paired is True by default, and these are not allowed to be changed).
 
         max_edit_distance (int): The maximum edit distance between a target sequence (from the repertoire) and the reference sequence.
 
@@ -48,7 +49,7 @@ class ReferenceSequenceAnnotator(Preprocessor):
             my_preprocessing:
                 - step1:
                     ReferenceSequenceAnnotator:
-                        reference:
+                        reference_sequences:
                             format: VDJDB
                             params:
                                 path: path/to/file.csv
@@ -74,17 +75,19 @@ class ReferenceSequenceAnnotator(Preprocessor):
     @classmethod
     def build_object(cls, **kwargs):
         ParameterValidator.assert_keys(list(kwargs.keys()),
-                                       ['reference', 'max_edit_distance', 'compairr_path', 'ignore_genes', 'output_column_name', 'threads'],
+                                       ['reference_sequences', 'max_edit_distance', 'compairr_path', 'ignore_genes', 'output_column_name', 'threads'],
                                        ReferenceSequenceAnnotator.__name__, ReferenceSequenceAnnotator.__name__)
-        ref_seqs = MatchedReferenceUtil.prepare_reference(reference_params=kwargs['reference'], location=ReferenceSequenceAnnotator.__name__,
-                                                          paired=False)
-        return ReferenceSequenceAnnotator(**{**{k: v for k, v in kwargs.items() if k != 'reference'}, 'reference_sequences': ref_seqs})
+        ref_seqs = MatchedReferenceUtil.prepare_reference(reference_params=kwargs['reference_sequences'],
+                                                          location=ReferenceSequenceAnnotator.__name__, paired=False)
+        return ReferenceSequenceAnnotator(**{**kwargs, 'reference_sequences': ref_seqs})
 
     def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1) -> RepertoireDataset:
-        sequence_filepath = self._prepare_sequences_for_compairr(result_path / 'tmp')
+        region_type = self._get_region_type_from_dataset(dataset)
+        self._compairr_params.is_cdr3 = region_type == RegionType.IMGT_CDR3
+        sequence_filepath = self._prepare_sequences_for_compairr(result_path / 'tmp', region_type)
         repertoires_filepath = self._prepare_repertoires_for_compairr(dataset, result_path / 'tmp')
 
-        compairr_output_file = self._annotate_repertoires(sequence_filepath, repertoires_filepath, result_path / 'tmp')
+        compairr_output_file = self._annotate_repertoires(sequence_filepath, repertoires_filepath, result_path, region_type)
 
         processed_dataset = self._make_annotated_dataset(dataset, result_path, compairr_output_file)
 
@@ -92,10 +95,17 @@ class ReferenceSequenceAnnotator(Preprocessor):
 
         return processed_dataset
 
-    def _annotate_repertoires(self, sequences_filepath, repertoire_filepath: Path, result_path: Path):
-        args = CompAIRRHelper.get_cmd_args(self._compairr_params, [sequences_filepath, repertoire_filepath], result_path)
+    def _get_region_type_from_dataset(self, dataset: RepertoireDataset) -> RegionType:
+        region_types = [repertoire.get_region_type() for repertoire in dataset.repertoires]
+        assert all(region_types[0] == region_type for region_type in region_types), \
+            "Not all repertoires have the sequences with the same region type."
+        return region_types[0]
+
+    def _annotate_repertoires(self, sequences_filepath, repertoire_filepath: Path, result_path: Path, region_type: RegionType):
+        tmp_path = PathBuilder.build(result_path / 'tmp')
+        args = CompAIRRHelper.get_cmd_args(self._compairr_params, [sequences_filepath, repertoire_filepath], tmp_path)
         compairr_result = subprocess.run(args, capture_output=True, text=True)
-        output_file = CompAIRRHelper.verify_compairr_output_path(compairr_result, self._compairr_params, result_path)
+        output_file = CompAIRRHelper.verify_compairr_output_path(compairr_result, self._compairr_params, tmp_path)
 
         with open(output_file, 'r') as file:
             output_lines = file.readlines()
@@ -130,10 +140,17 @@ class ReferenceSequenceAnnotator(Preprocessor):
             seq.metadata.custom_params[self._output_column_name] = int(matches_reference[seq_index])
         return sequences
 
-    def _prepare_sequences_for_compairr(self, result_path: Path) -> Path:
-        PathBuilder.build(result_path)
-        path = result_path / 'reference_sequences.tsv'
-        AIRRExporter.export(SequenceDataset.build_from_objects(self._reference_sequences, len(self._reference_sequences),
+    def _prepare_sequences_for_compairr(self, result_path: Path, region_type: RegionType) -> Path:
+        path = PathBuilder.build(result_path) / 'reference_sequences.tsv'
+
+        # TODO: remove this when import is refactored, this now ensures that string matching is done on sequences as imported
+        reference_sequences = []
+        for seq in self._reference_sequences:
+            tmp_seq = copy.deepcopy(seq)
+            tmp_seq.metadata.region_type = region_type
+            reference_sequences.append(tmp_seq)
+
+        AIRRExporter.export(SequenceDataset.build_from_objects(reference_sequences, len(self._reference_sequences),
                                                                PathBuilder.build(result_path / 'tmp_seq_dataset')), result_path)
 
         result_files = glob.glob(str(result_path / "*.tsv"))
