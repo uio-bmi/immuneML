@@ -7,7 +7,10 @@ class ToolParser:
 
     @staticmethod
     def parse(workflow_specification: dict):
+        print("Running tool parser")
+
         if "tools" not in workflow_specification:
+            print("Tools not defined")
             return
 
         specs = workflow_specification["tools"]

@@ -9,4 +9,5 @@ class DatasetToolComponent(InterfaceComponent):
 
     @staticmethod
     def run_dataset_tool_component(ml_specs: dict):
+        print("Running dataset tool component")
         pass
