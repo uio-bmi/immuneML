@@ -25,6 +25,7 @@ class InterfaceComponent(ABC):
     def execution_animation(process: subprocess):
         """Function creates an animation to give user feedback while process in running
         """
+
         num_dots = 0
 
         while process.poll() is None:
@@ -40,6 +41,7 @@ class InterfaceComponent(ABC):
     def show_process_output(ml_specs: dict):
         """ Returns true or false for showing process output based on YAML spec file
         """
+
         show_output = False
         value = ml_specs.get("show_process_output")
 
