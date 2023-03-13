@@ -12,6 +12,7 @@ from immuneML.dsl.definition_parsers.DefinitionParser import DefinitionParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.dsl.tool_parser.ToolParser import ToolParser
 
 
 class ImmuneMLParser:
@@ -137,6 +138,9 @@ class ImmuneMLParser:
     def parse(workflow_specification: dict, file_path, result_path):
 
         symbol_table = SymbolTable()
+
+        # New parser
+        ToolParser.parse(workflow_specification)
 
         def_parser_output, specs_defs = DefinitionParser.parse(workflow_specification, symbol_table, result_path)
         symbol_table, specs_instructions = InstructionParser.parse(def_parser_output, result_path)
