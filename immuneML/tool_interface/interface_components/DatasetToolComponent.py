@@ -28,7 +28,7 @@ class DatasetToolComponent(InterfaceComponent):
         """ Creates a json string based on dictionary input. Also adds a port number
         """
         tool_arguments = specs["tool_arguments"]
-        json_str = json.dumps(tool_arguments, indent=4)  # indent for readability
+        json_str = json.dumps(tool_arguments)
 
         return json_str
 

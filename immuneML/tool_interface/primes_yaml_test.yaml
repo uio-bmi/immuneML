@@ -5,6 +5,7 @@ tools:
     tool_executable: ""
   dataset_tool:
     #tool_path: "/Users/jorgenskimmeland/Documents/aar5/Master/PrimesExamples/Cpp2"
+    #tool_executable: "immuneML_executable"
     tool_path: "/Users/jorgenskimmeland/Documents/aar5/Master/PrimesExamples/Python2"
     tool_executable: "immuneML_executable.py"
     show_process_output: "True"

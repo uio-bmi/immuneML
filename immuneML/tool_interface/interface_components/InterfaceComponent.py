@@ -18,11 +18,13 @@ class InterfaceComponent(metaclass=abc.ABCMeta):
 
     @classmethod
     def _get_interpreters(cls):
+        """ Returns the dictionary of interpreters. Not accessible by child classes
+        """
         return cls.interpreters
 
     @staticmethod
     def get_interpreter(executable: str):
-        """ Gets the correct ending for running subprocess
+        """ Returns the correct interpreter for executable input
         """
         interpreters = InterfaceComponent._get_interpreters()
         file_extension = os.path.splitext(executable)[1]
@@ -50,6 +52,7 @@ class InterfaceComponent(metaclass=abc.ABCMeta):
 
     @staticmethod
     def move_file_to_dir(file_path: str, target_path: str):
+        # TODO: does not handle the case where a file with the same name already exists
         shutil.move(file_path, target_path)
 
     @staticmethod
