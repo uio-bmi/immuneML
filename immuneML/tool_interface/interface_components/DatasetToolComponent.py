@@ -55,7 +55,6 @@ class DatasetToolComponent(InterfaceComponent):
 
         # Find available port
         port_nr = InterfaceComponent.find_available_port()
-        print(f"Found available port: {port_nr}")
 
         input_data = DatasetToolComponent._create_arguments(specs)
         subprocess_args = [executable_path, input_data, str(port_nr)]
