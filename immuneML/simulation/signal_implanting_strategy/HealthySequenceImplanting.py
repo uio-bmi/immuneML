@@ -61,8 +61,12 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
 
     """
     def __init__(self, implanting: SequenceImplantingStrategy = None, sequence_position_weights: dict = None,
-                 implanting_computation: ImplantingComputation = None):
-        super().__init__(implanting, sequence_position_weights)
+                 implanting_computation: ImplantingComputation = None, mutation_hamming_distance: int = 1,
+                 occurrence_limit_pgen_range: dict = None, overwrite_sequences: bool = False,
+                 nr_of_decoys: int = None, dataset_implanting_rate_per_decoy: float = None, repertoire_implanting_rate_per_decoy: float = None):
+        super().__init__(implanting, sequence_position_weights, implanting_computation, mutation_hamming_distance,
+                         occurrence_limit_pgen_range, overwrite_sequences, nr_of_decoys,
+                         dataset_implanting_rate_per_decoy, repertoire_implanting_rate_per_decoy)
         self.compute_implanting = get_implanting_function(implanting_computation)
 
     def implant_in_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, signal, path: Path) -> Repertoire:

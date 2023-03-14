@@ -1,6 +1,5 @@
 import logging
 import multiprocessing as mp
-import time
 from pathlib import Path
 
 import numpy as np
@@ -111,14 +110,12 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         olga.load_model()
         self.olga = olga
 
-        thread_count = mp.cpu_count()
-
         Logger.print_log(
-            f"Starting generation probability-calculation using {thread_count} threads ({dataset_df.sequence_aas.unique().size} unique sequences)",
+            f"Starting generation probability-calculation using {self.number_of_processes} threads ({dataset_df.sequence_aas.unique().size} unique sequences)",
             include_datetime=True)
 
-        dfs = np.array_split(dataset_df, thread_count)
-        pool = mp.Pool(thread_count)
+        dfs = np.array_split(dataset_df, self.number_of_processes)
+        pool = mp.Pool(self.number_of_processes)
         results = pool.map(self._compute_pgen, [df for df in dfs])
 
         pool.close()
@@ -127,6 +124,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
     def _compute_pgen(self, dataframe, sequence_type=SequenceType.AMINO_ACID):
         dataframe["pgen"] = self.olga.compute_p_gens(dataframe, sequence_type)
+        Logger.print_log("Finished pgen computation in a thread", include_datetime=True)
         return dataframe
 
     def _get_sequence_count(self, dataset_df) -> pd.DataFrame:
