@@ -1,11 +1,31 @@
 from abc import ABC
 import subprocess
+import socket
+import shutil
 import json
 import time
 import sys
 
 
 class InterfaceComponent(ABC):
+
+    @staticmethod
+    def find_available_port(start_port=5000, end_port=8000):
+        """ Finds an available port on the computer to send to subprocess
+        """
+        for port in range(start_port, end_port + 1):
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                try:
+                    sock.bind(("", port))
+                    return port
+                except OSError:
+                    pass
+
+        return None
+
+    @staticmethod
+    def move_file_to_dir(file_path: str, target_path: str):
+        shutil.move(file_path, target_path)
 
     @staticmethod
     def produce_JSON_object(**input_data):

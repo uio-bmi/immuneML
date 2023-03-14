@@ -4,11 +4,9 @@ tools:
     tool_path: ""
     tool_executable: ""
   dataset_tool:
-    tool_path: "/Users/jorgenskimmeland/Documents/aar5/Master/Absolut/Absolut-main/src"
+    #tool_path: "/Users/jorgenskimmeland/Documents/aar5/Master/Absolut/Absolut-main/src"
+    tool_path: "/Users/jorgenskimmeland/Documents/aar5/Master/PrimesExamples/Cpp2"
     tool_executable: "immuneML_executable"
     show_process_output: "True"
     tool_arguments:
-      option: "repertoire"
-      antigen: "1FBI"
-      filename: "miniSetCDR3-TESTING.txt"
-      threads: 3
+      n: 150
