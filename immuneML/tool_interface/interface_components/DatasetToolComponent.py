@@ -56,8 +56,14 @@ class DatasetToolComponent(InterfaceComponent):
         # Find available port
         port_nr = InterfaceComponent.find_available_port()
 
+        interpreter = InterfaceComponent.get_interpreter(executable_path)
+        print(f"Found interpreter: {interpreter}")
         input_data = DatasetToolComponent._create_arguments(specs)
-        subprocess_args = [executable_path, input_data, str(port_nr)]
+        if not interpreter:
+            # No interpreter found. Assuming the file is purely an executable.
+            subprocess_args = [executable_path, input_data, str(port_nr)]
+        else:
+            subprocess_args = [interpreter, executable_path, input_data, str(port_nr)]
         process = subprocess.Popen(subprocess_args,
                                    stdin=subprocess.PIPE,
                                    # stdout=subprocess.PIPE,

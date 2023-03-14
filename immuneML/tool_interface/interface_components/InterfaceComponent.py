@@ -1,3 +1,4 @@
+import abc
 from abc import ABC
 import subprocess
 import socket
@@ -5,9 +6,33 @@ import shutil
 import json
 import time
 import sys
+import os
 
 
-class InterfaceComponent(ABC):
+class InterfaceComponent(metaclass=abc.ABCMeta):
+
+    interpreters = {
+        ".py": "python",
+        ".class": "java"
+    }
+
+    @classmethod
+    def _get_interpreters(cls):
+        return cls.interpreters
+
+    @staticmethod
+    def get_interpreter(executable: str):
+        """ Gets the correct ending for running subprocess
+        """
+        interpreters = InterfaceComponent._get_interpreters()
+        file_extension = os.path.splitext(executable)[1]
+        if file_extension not in interpreters:
+            print(f"Interpreter not found for executable: {executable}")
+            return None
+
+        interpreter = interpreters.get(file_extension)
+
+        return interpreter
 
     @staticmethod
     def find_available_port(start_port=5000, end_port=8000):
