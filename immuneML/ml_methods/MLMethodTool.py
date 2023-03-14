@@ -2,15 +2,15 @@ import pickle
 from pathlib import Path
 
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.dsl.ToolControllerML import ToolControllerML
 from immuneML.environment.Label import Label
 from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.tool_interface.interface_components.MLToolComponent import MLToolComponent
 
 
 class MLMethodTool(MLMethod):
     def __init__(self, path: str):
         super().__init__()
-        self.tool = ToolControllerML()
+        self.tool = MLToolComponent("5555")
         self.tool_path = path
 
     def _start_subprocess(self):

@@ -1,5 +1,4 @@
 # quality: peripheral
-import datetime
 import re
 from pathlib import Path
 
@@ -7,15 +6,12 @@ import yaml
 from yaml import MarkedYAMLError
 
 from immuneML.dsl.InstructionParser import InstructionParser
-from immuneML.dsl.ToolController import get_dataset
-from immuneML.dsl.ToolParser import ToolParser
 from immuneML.dsl.OutputParser import OutputParser
+from immuneML.dsl.ToolParser import ToolParser
 from immuneML.dsl.definition_parsers.DefinitionParser import DefinitionParser
-from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
-from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 
 
 class ImmuneMLParser:
@@ -147,10 +143,12 @@ class ImmuneMLParser:
         # parse tool section in YAML file
         symbol_table, workflow_specification = ToolParser.parse(workflow_specification, symbol_table)
 
+        # TODO: run dataset tool.
+
         # temporary solution. Adds tool folder to environment which is used when importing
         # packages that is located outside the core
-        EnvironmentSettings.set_tool_path(symbol_table.get_by_type(SymbolType.TOOL)[0].item["path"])
-        #workflow_specification = get_dataset(symbol_table, workflow_specification)
+        # EnvironmentSettings.set_tool_path(symbol_table.get_by_type(SymbolType.TOOL)[0].item["path"])
+        # workflow_specification = get_dataset(symbol_table, workflow_specification)
 
         def_parser_output, specs_defs = DefinitionParser.parse(workflow_specification, symbol_table, result_path)
         symbol_table, specs_instructions = InstructionParser.parse(def_parser_output, result_path)
