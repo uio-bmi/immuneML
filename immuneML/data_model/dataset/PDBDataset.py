@@ -37,7 +37,7 @@ class PDBDataset(Dataset):
         for pdb_file in self.get_pdb_filepaths():
             if pdb_structure.header['idcode'].lower() in pdb_file:
                 file = open(pdb_file, "r")
-                if "REMARK 410" in file.read():
+                if "REMARK 410" in file.read() or "IMGT " in file.read():
                     file.close()
                     return True
                 else:
@@ -142,19 +142,6 @@ class PDBDataset(Dataset):
 
 
     def make_subset(self, example_indices, path: Path, dataset_type: str):
-        """
-        Creates a new dataset object with only those examples (repertoires) available which were given by index in example_indices argument.
-
-        Args:
-            example_indices (list): a list of indices of examples (repertoires) to use in the new dataset
-            path (Path): a path where to store the newly created dataset
-            dataset_type (str): a type of the dataset used as a part of the name of the resulting dataset; the values are defined as constants in :py:obj:`~immuneML.data_model.dataset.Dataset.Dataset`
-
-        Returns:
-
-            a new RepertoireDataset object which includes only the repertoires specified under example_indices
-
-        """
 
         file_names = []
         for index in example_indices:
@@ -175,9 +162,3 @@ class PDBDataset(Dataset):
             return path
         else:
             return None
-
-    def set_distance_matrix(self, distance_matrix):
-        self.distance_matrix = distance_matrix
-
-    def get_distance_matrix(self):
-        return self.distance_matrix
