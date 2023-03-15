@@ -15,7 +15,7 @@ setup(
     name="immuneML",
     version=Constants.VERSION,
     description="immuneML is a software platform for machine learning analysis of immune receptor repertoires.",
-    long_description=open("Genmodel_quickstart.md").read(),
+    long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="immuneML Team",
     author_email="milenpa@student.matnat.uio.no",

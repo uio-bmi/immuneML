@@ -43,11 +43,9 @@ class GenerativeModel(UnsupervisedMLMethod):
     def generate(self, amount=10, path_to_model: Path = None):
         pass
 
+    @abc.abstractmethod
     def _fit(self, X, cores_for_training: int = 1):
-
-        self.model = self._get_ml_model(X)
-
-        return self.model
+        pass
 
 
     def check_is_fitted(self, label_name: str):
@@ -111,7 +109,7 @@ class GenerativeModel(UnsupervisedMLMethod):
         return file_path.is_file()
 
     @abc.abstractmethod
-    def _get_ml_model(self, cores_for_training: int = 2, X=None):
+    def _get_ml_model(self):
         pass
 
     @abc.abstractmethod

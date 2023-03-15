@@ -26,7 +26,7 @@ class CharToIntEncoder(DatasetEncoder):
             prepared_params = CharToIntEncoder._prepare_parameters(**params)
             return CharToIntEncoder(**prepared_params)
         else:
-            raise ValueError("DeepRCEncoder is not defined for dataset types which are not RepertoireDataset.")
+            raise ValueError("ChartToInt is not defined for dataset types which are not SequenceDataset.")
 
     def encode(self, dataset, params: EncoderParams) -> RepertoireDataset:
 

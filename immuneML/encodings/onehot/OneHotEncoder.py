@@ -153,7 +153,7 @@ class OneHotEncoder(DatasetEncoder):
         return (("example_identifiers", tuple(dataset.get_example_ids())),
                 ("dataset_metadata", dataset.metadata_file if hasattr(dataset, "metadata_file") else None),
                 ("dataset_type", dataset.__class__.__name__),
-                ("labels", tuple(params.label_config.get_labels_by_name())),
+                ("labels", tuple(params.label_config.get_labels_by_name())) if params.label_config is not None else None,
                 ("encoding", OneHotEncoder.__name__),
                 ("learn_model", params.learn_model),
                 ("step", step),

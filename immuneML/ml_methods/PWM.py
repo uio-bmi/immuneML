@@ -22,7 +22,7 @@ class PWM(GenerativeModel):
         self.generated_sequences = []
         super(PWM, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
 
-    def _get_ml_model(self, cores_for_training: int = 2, dataset=None):
+    def _get_ml_model(self, dataset=None):
 
 
         sequences = dataset.split(" ")

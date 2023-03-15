@@ -47,7 +47,7 @@ class LSTM(GenerativeModel):
         target_seq = seq[1:]
         return input_seq, target_seq
 
-    def _get_ml_model(self, cores_for_training: int = 2, X=None, vocab_size=21, rnn_units=128, embedding_dim=256, batch_size=64):
+    def _get_ml_model(self, vocab_size=21, rnn_units=128, embedding_dim=256, batch_size=64):
 
         #put one hot
         self.model = tf.keras.Sequential([
