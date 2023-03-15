@@ -55,27 +55,27 @@ class VAE(GenerativeModel):
         # Encoder
         x = tf.keras.layers.Input(shape=(seq_length, vocab_size), name="encoder_input")
 
-        encoder_conv_layer1 = tf.keras.layers.Conv1D(filters=1, kernel_size=3, padding="same",
+        encoder_conv_layer1 = tf.keras.layers.Conv1D(filters=1, kernel_size=3, padding="same", strides=1,
                                                              name="encoder_conv_1")(x)
         encoder_norm_layer1 = tf.keras.layers.BatchNormalization(name="encoder_norm_1")(encoder_conv_layer1)
         encoder_activ_layer1 = tf.keras.layers.LeakyReLU(name="encoder_leakyrelu_1")(encoder_norm_layer1)
 
-        encoder_conv_layer2 = tf.keras.layers.Conv1D(filters=32, kernel_size=3, padding="same",
+        encoder_conv_layer2 = tf.keras.layers.Conv1D(filters=32, kernel_size=3, padding="same", strides=1,
                                                              name="encoder_conv_2")(encoder_activ_layer1)
         encoder_norm_layer2 = tf.keras.layers.BatchNormalization(name="encoder_norm_2")(encoder_conv_layer2)
         encoder_activ_layer2 = tf.keras.layers.LeakyReLU(name="encoder_activ_layer_2")(encoder_norm_layer2)
 
-        encoder_conv_layer3 = tf.keras.layers.Conv1D(filters=64, kernel_size=3, padding="same",
+        encoder_conv_layer3 = tf.keras.layers.Conv1D(filters=64, kernel_size=3, padding="same", strides=2,
                                                              name="encoder_conv_3")(encoder_activ_layer2)
         encoder_norm_layer3 = tf.keras.layers.BatchNormalization(name="encoder_norm_3")(encoder_conv_layer3)
         encoder_activ_layer3 = tf.keras.layers.LeakyReLU(name="encoder_activ_layer_3")(encoder_norm_layer3)
 
-        encoder_conv_layer4 = tf.keras.layers.Conv1D(filters=64, kernel_size=3, padding="same",
+        encoder_conv_layer4 = tf.keras.layers.Conv1D(filters=64, kernel_size=3, padding="same", strides=2,
                                                              name="encoder_conv_4")(encoder_activ_layer3)
         encoder_norm_layer4 = tf.keras.layers.BatchNormalization(name="encoder_norm_4")(encoder_conv_layer4)
         encoder_activ_layer4 = tf.keras.layers.LeakyReLU(name="encoder_activ_layer_4")(encoder_norm_layer4)
 
-        encoder_conv_layer5 = tf.keras.layers.Conv1D(filters=64, kernel_size=3, padding="same",
+        encoder_conv_layer5 = tf.keras.layers.Conv1D(filters=64, kernel_size=3, padding="same", strides=1,
                                                              name="encoder_conv_5")(encoder_activ_layer4)
         encoder_norm_layer5 = tf.keras.layers.BatchNormalization(name="encoder_norm_5")(encoder_conv_layer5)
         encoder_activ_layer5 = tf.keras.layers.LeakyReLU(name="encoder_activ_layer_5")(encoder_norm_layer5)
@@ -106,14 +106,14 @@ class VAE(GenerativeModel):
                                                              name="decoder_dense_1")(decoder_input)
         decoder_reshape = tf.keras.layers.Reshape(target_shape=shape_before_flatten)(decoder_dense_layer1)
         decoder_conv_tran_layer1 = tf.keras.layers.Conv1DTranspose(filters=64, kernel_size=3,
-                                                                           padding="same",
+                                                                           padding="same", strides=1,
                                                                            name="decoder_conv_tran_1")(decoder_reshape)
         decoder_norm_layer1 = tf.keras.layers.BatchNormalization(name="decoder_norm_1")(
             decoder_conv_tran_layer1)
         decoder_activ_layer1 = tf.keras.layers.LeakyReLU(name="decoder_leakyrelu_1")(decoder_norm_layer1)
 
         decoder_conv_tran_layer2 = tf.keras.layers.Conv1DTranspose(filters=64, kernel_size=3,
-                                                                           padding="same",
+                                                                           padding="same", strides=2,
                                                                            name="decoder_conv_tran_2")(
             decoder_activ_layer1)
         decoder_norm_layer2 = tf.keras.layers.BatchNormalization(name="decoder_norm_2")(
@@ -121,7 +121,7 @@ class VAE(GenerativeModel):
         decoder_activ_layer2 = tf.keras.layers.LeakyReLU(name="decoder_leakyrelu_2")(decoder_norm_layer2)
 
         decoder_conv_tran_layer3 = tf.keras.layers.Conv1DTranspose(filters=64, kernel_size=3,
-                                                                           padding="same",
+                                                                           padding="same", strides=2,
                                                                            name="decoder_conv_tran_3")(
             decoder_activ_layer2)
         decoder_norm_layer3 = tf.keras.layers.BatchNormalization(name="decoder_norm_3")(
@@ -129,7 +129,7 @@ class VAE(GenerativeModel):
         decoder_activ_layer3 = tf.keras.layers.LeakyReLU(name="decoder_leakyrelu_3")(decoder_norm_layer3)
 
         decoder_conv_tran_layer4 = tf.keras.layers.Conv1DTranspose(filters=1, kernel_size=3,
-                                                                           padding="same",
+                                                                           padding="same", strides=1,
                                                                            name="decoder_conv_tran_4")(
             decoder_activ_layer3)
         decoder_output = tf.keras.layers.LeakyReLU(name="decoder_output")(decoder_conv_tran_layer4)
@@ -211,7 +211,8 @@ class VAE(GenerativeModel):
         x_train = dataset[:train_len]
         x_test = dataset[train_len:]
 
-
+        enc = self.encoder(x_train[:2])
+        print(self.decoder(enc))
 
         self.model.fit(x_train, x_train, epochs=20, batch_size=32, shuffle=True, validation_data=(x_test, x_test))
 
