@@ -1,3 +1,6 @@
+from immuneML.environment.SequenceType import SequenceType
+
+
 class ParameterValidator:
 
     @staticmethod
@@ -40,7 +43,7 @@ class ParameterValidator:
 
         if exact_value is not None:
             assert value == exact_value, f"{location}: {value} is not a valid value for parameter {parameter_name}. " \
-                                           f"It has to be equal to {exact_value}."
+                                         f"It has to be equal to {exact_value}."
 
     @staticmethod
     def assert_keys(keys, valid_keys, location: str, parameter_name: str, exclusive: bool = True):
@@ -57,3 +60,10 @@ class ParameterValidator:
                 raise AssertionError(f"{location}: Missing parameters: {str(list(set(valid_keys) - set(keys)))[1:-1]} "
                                      f"under {parameter_name}. Valid parameters are: {str(valid_keys)[1:-1]}. "
                                      f"Please add missing parameters.")
+
+    @staticmethod
+    def assert_sequence_type(params, location: str = ""):
+        assert "sequence_type" in params, f"{location}: 'sequence_type' is missing: {params}."
+        assert params['sequence_type'].upper() in [st.name for st in
+                                                   SequenceType], f"{location}: {params['sequence_type']} is not a valid sequence type. " \
+                                                                  f"Valid sequence types are: {[st.name for st in SequenceType]}."

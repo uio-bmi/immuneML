@@ -111,7 +111,7 @@ class Repertoire(DatasetItem):
 
     @classmethod
     def build_like(cls, repertoire, indices_to_keep: list, result_path: Path, filename_base: str = None):
-        if indices_to_keep is not None and len(indices_to_keep) > 0:
+        if indices_to_keep is not None and len(indices_to_keep) > 0 and sum(indices_to_keep) > 0:
             PathBuilder.build(result_path)
 
             data = repertoire.load_data()
