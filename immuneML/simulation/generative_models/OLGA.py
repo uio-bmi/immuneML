@@ -180,7 +180,7 @@ class OLGA(GenerativeModel):
         p_gen_func = p_gen_model.compute_nt_CDR3_pgen if sequence_type == SequenceType.NUCLEOTIDE else p_gen_model.compute_aa_CDR3_pgen
         seq_col = 'sequence' if sequence_type == SequenceType.NUCLEOTIDE else 'sequence_aas'
 
-        return sequences.apply(lambda row: p_gen_func(row[seq_col], row['v_genes'], row['j_genes']), axis=1)
+        return sequences.apply(lambda row: p_gen_func(row[seq_col], row['v_genes'], row['j_genes'], print_warnings=False), axis=1)
 
     def can_compute_p_gens(self) -> bool:
         return True
