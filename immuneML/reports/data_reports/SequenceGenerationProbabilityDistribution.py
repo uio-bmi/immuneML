@@ -128,7 +128,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
     def _compute_pgen(self, dataframe, sequence_type=SequenceType.AMINO_ACID):
         Logger.print_log("Starting pgen computation in a thread", include_datetime=True)
-        dataframe["pgen"] = 1# self.olga.compute_p_gens(dataframe, sequence_type)
+        dataframe["pgen"] = self.olga.compute_p_gens(dataframe, sequence_type)
         Logger.print_log("Finished pgen computation in a thread", include_datetime=True)
         return dataframe
 
