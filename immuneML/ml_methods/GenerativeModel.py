@@ -6,6 +6,7 @@ from pathlib import Path
 import dill
 import pkg_resources
 import yaml
+import numpy as np
 from sklearn.utils.validation import check_is_fitted
 
 from immuneML.data_model.dataset.Dataset import Dataset
@@ -35,6 +36,9 @@ class GenerativeModel(UnsupervisedMLMethod):
         self.feature_names = None
         self.class_mapping = None
         self.label = None
+        self.alphabet = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+        self.char2idx = {u: i for i, u in enumerate(self.alphabet)}
+        self.idx2char = np.array(self.alphabet)
 
     def fit(self, encoded_data, cores_for_training: int = 2, result_path: Path = None):
         self._length_of_sequence = 21# if "length_of_sequence" not in encoded_data.info else encoded_data.info["length_of_sequence"]
