@@ -94,6 +94,10 @@ class SequenceGenerationProbabilityDistribution(DataReport):
                                                          *self._create_output_table_for_vdjRec(dataset_df,
                                                                                                self._load_dataset_dataframe())]
 
+        Logger.print_log(
+            f"Finished report",
+            include_datetime=True)
+
         return ReportResult(type(self).__name__, output_figures=output_figures, output_tables=output_tables)
 
     def _get_sequence_pgen(self, dataset_df) -> pd.DataFrame:
@@ -124,7 +128,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
     def _compute_pgen(self, dataframe, sequence_type=SequenceType.AMINO_ACID):
         Logger.print_log("Starting pgen computation in a thread", include_datetime=True)
-        dataframe["pgen"] = self.olga.compute_p_gens(dataframe, sequence_type)
+        dataframe["pgen"] = 1# self.olga.compute_p_gens(dataframe, sequence_type)
         Logger.print_log("Finished pgen computation in a thread", include_datetime=True)
         return dataframe
 
@@ -150,12 +154,20 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
     def _plot(self, dataset_df) -> ReportOutput:
 
+        Logger.print_log(
+            f"Starting plot generation",
+            include_datetime=True)
+
         if self.mark_implanted_labels:
             figure = px.strip(dataset_df, x="count", y="pgen", hover_data=["sequence_aas"], color="label",
                               stripmode="overlay")
         else:
             # jitter
             figure = px.strip(dataset_df, x="count", y="pgen", hover_data=["sequence_aas"])
+
+        Logger.print_log(
+            f"Finished plot generation",
+            include_datetime=True)
 
         xaxis_title = "nr. of repertoires the sequence appears in" if self.count_by_repertoire else "total sequence count"
 
@@ -168,14 +180,25 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
         PathBuilder.build(self.result_path)
 
+        Logger.print_log(
+            f"Exporting image",
+            include_datetime=True)
         img_path = self.result_path / "pgen_scatter_plot.png"
         figure.write_image(img_path)
+
+        Logger.print_log(
+            f"Exporting files",
+            include_datetime=True)
 
         file_path = self.result_path / "pgen_scatter_plot.html"
         figure.write_html(str(file_path))
         return ReportOutput(path=file_path, name="sequence generation probability distribution plot")
 
     def _load_dataset_dataframe(self) -> pd.DataFrame:
+
+        Logger.print_log(
+            f"Loading dataset",
+            include_datetime=True)
 
         dfs = []
 
@@ -215,6 +238,10 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
     def _create_output_table_for_vdjRec(self, pgen_df, full_df):
 
+        Logger.print_log(
+            f"Creating vdjRec output tables",
+            include_datetime=True)
+
         path = self.result_path
         name = "pgen_dataset_for_hacking"
 
@@ -238,8 +265,8 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         for r in repertoires:
             sequence_df[r] = 0
 
-        for index, row in df.iterrows():
-            sequence_df.at[index, row["repertoire"]] += 1
+        for row in df.itertuples():
+            sequence_df.at[row.Index, row.repertoire] += 1
 
         sequence_df["Sum"] = df["count"]
         sequence_df["target"] = ["TRUE" if label in target_names else "FALSE" for label in df["label"]]
@@ -282,6 +309,10 @@ class SequenceGenerationProbabilityDistribution(DataReport):
                 1e-7: 3
                 1e-6: 5
         """
+
+        Logger.print_log(
+            f"Creating occurrence limit pgen range",
+            include_datetime=True)
 
         path = self.result_path / "occurrence_limit_pgen_range.csv"
 
