@@ -3,20 +3,20 @@ import logging
 import pandas as pd
 
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.RegionType import RegionType
 
 
 class TCRdistHelper:
 
     @staticmethod
-    def compute_tcr_dist(dataset, label_names: list, cores: int = 1, chains: str = "TRA"):
+    def compute_tcr_dist(dataset, label_names: list, cores: int = 1, chains=list):
+        if chains is None:
+            chains = ["beta"]
         return CacheHandler.memo_by_params((('dataset_identifier', dataset.identifier), ("type", "TCRrep")),
                                            lambda: TCRdistHelper._compute_tcr_dist(dataset, label_names, cores, chains))
 
     @staticmethod
-    def _compute_tcr_dist(dataset, label_names: list, cores: int, chains: str):
+    def _compute_tcr_dist(dataset, label_names: list, cores: int, chains: []):
         """
         Computes the tcrdist distances by creating a TCRrep object and calling compute_distances() function.
 
@@ -33,25 +33,28 @@ class TCRdistHelper:
             an instance of TCRrep object with computed pairwise distances between all receptors in the dataset
 
         """
-        from tcrdist.repertoire import TCRrep
+        TCRdistHelper.check_label_names(label_names)
+        label_name = label_names[0]
 
+        df = TCRdistHelper.prepare_tcr_dist_dataframe(dataset, label_name, chains)
+
+        tcr_rep = TCRdistHelper.create_tcr_rep(df, dataset, cores, chains)
+
+        tcr_rep.compute_distances()
+
+        return tcr_rep
+
+    @staticmethod
+    def check_label_names(label_names):
         if len(label_names) > 1:
             raise NotImplementedError(f"TCRdist: multiple labels specified ({str(label_names)[1:-1]}), but only single label binary class "
                                       f"is currently supported in immuneML.")
         elif len(label_names) < 1:
             label_names.append('epitope')
-        label_name = label_names[0]
 
-        if chains == "TRA_TRB":
-            chains = ["alpha", "beta"]
-        elif chains == "TRA":
-            chains = ["alpha"]
-        elif chains == "TRB":
-            chains = ["beta"]
-        else:
-            raise NotImplementedError(f"TCRdist: {chains} not implemented. TCR distance currently only works for TRA_TRB, TRA or TRB chains")
-
-        df = TCRdistHelper.prepare_tcr_dist_dataframe(dataset, label_name, chains)
+    @staticmethod
+    def create_tcr_rep(df, dataset, cores, chains):
+        from tcrdist.repertoire import TCRrep
 
         tcr_rep = TCRrep(cell_df=df, chains=chains, organism=dataset.labels["organism"], cpus=cores, deduplicate=False,
                          compute_distances=False)
@@ -60,20 +63,22 @@ class TCRdistHelper:
             logging.warning(f"{TCRdistHelper.__name__}: Parameter 'region_type' was not set for dataset {dataset.name}, keeping default tcrdist "
                             f"values for parameters 'ntrim' and 'ctrim'. For more information, see tcrdist3 documentation. To avoid this warning, "
                             f"set the region type when importing the dataset.")
-        elif dataset.labels['region_type'] == RegionType.IMGT_CDR3 or dataset.labels['region_type'] == RegionType.IMGT_CDR3.value:
-            if "alpha" in chains:
-                tcr_rep.kargs_a['cdr3_a_aa']['ntrim'] = 2
-                tcr_rep.kargs_a['cdr3_a_aa']['ctrim'] = 1
-            if "beta" in chains:
-                tcr_rep.kargs_b['cdr3_b_aa']['ntrim'] = 2
-                tcr_rep.kargs_b['cdr3_b_aa']['ctrim'] = 1
-        elif dataset.labels['region_type'] != RegionType.IMGT_JUNCTION and dataset.labels['region_type'] != RegionType.IMGT_JUNCTION.value:
+        elif dataset.labels['region_type'] == RegionType.IMGT_CDR3:
+            TCRdistHelper.adjust_trim_parameters(tcr_rep, chains)
+        elif dataset.labels['region_type'] != RegionType.IMGT_JUNCTION:
             raise RuntimeError(f"{TCRdistHelper.__name__}: TCRdist metric can be computed only if IMGT_CDR3 or IMGT_JUNCTION are used as region "
                                f"types, but for dataset {dataset.name}, it is set to {dataset.labels['region_type']} instead.")
 
-        tcr_rep.compute_distances()
-
         return tcr_rep
+
+    @staticmethod
+    def adjust_trim_parameters(tcr_rep, chains):
+        if "alpha" in chains:
+            tcr_rep.kargs_a['cdr3_a_aa']['ntrim'] = 2
+            tcr_rep.kargs_a['cdr3_a_aa']['ctrim'] = 1
+        if "beta" in chains:
+            tcr_rep.kargs_b['cdr3_b_aa']['ntrim'] = 2
+            tcr_rep.kargs_b['cdr3_b_aa']['ctrim'] = 1
 
     @staticmethod
     def add_default_allele_to_v_gene(v_gene: str):
@@ -84,6 +89,70 @@ class TCRdistHelper:
 
     @staticmethod
     def prepare_tcr_dist_dataframe(dataset, label_name: str, chains: list) -> pd.DataFrame:
+        fields = TCRdistHelper.prepare_tcr_dist_fields(chains)
+
+        for receptor in dataset.get_data():
+            TCRdistHelper.process_receptor(receptor, label_name, fields, chains)
+
+        if "alpha" in chains and all(item is None or item == "" for item in fields["cdr3_a_nucseq"]):
+            fields.pop("cdr3_a_nucseq")
+        if "beta" in chains and all(item is None or item == "" for item in fields["cdr3_b_nucseq"]):
+            fields.pop("cdr3_b_nucseq")
+
+        return pd.DataFrame(fields)
+
+    @staticmethod
+    def process_receptor(receptor, label_name, fields, chains):
+        fields["subject"].append(receptor.metadata["subject"] if "subject" in receptor.metadata else "sub" + receptor.identifier)
+        fields["epitope"].append(receptor.metadata[label_name])
+
+        TCRdistHelper.process_receptor_count(receptor, fields, chains)
+
+        TCRdistHelper.process_receptor_alpha_chain(receptor, fields, chains)
+        TCRdistHelper.process_receptor_beta_chain(receptor, fields, chains)
+
+        fields["clone_id"].append(receptor.identifier)
+
+    @staticmethod
+    def process_receptor_count(receptor, fields, chains):
+        if type(receptor).__name__ == "TCABReceptor":
+            fields["count"].append(receptor.get_chain("alpha").metadata.count
+                                   if receptor.get_chain("alpha").metadata.count == receptor.get_chain("beta").metadata.count
+                                      and receptor.get_chain("beta").metadata.count is not None else 1)
+        elif type(receptor).__name__ == "ReceptorSequence":
+            if receptor.metadata.chain.name.lower() in chains:
+                fields["count"].append(receptor.metadata.count if receptor.metadata.count is not None else 1)
+
+    @staticmethod
+    def process_receptor_alpha_chain(receptor, fields, chains):
+        if "alpha" in chains:
+            if type(receptor).__name__ == "TCABReceptor":
+                fields["v_a_gene"].append(TCRdistHelper.add_default_allele_to_v_gene(receptor.get_chain('alpha').metadata.v_allele))
+                fields["j_a_gene"].append(receptor.get_chain('alpha').metadata.j_allele)
+                fields["cdr3_a_aa"].append(receptor.get_chain('alpha').amino_acid_sequence)
+                fields["cdr3_a_nucseq"].append(receptor.get_chain("alpha").nucleotide_sequence)
+            elif type(receptor).__name__ == "ReceptorSequence" and receptor.metadata.chain.value == "TRA":
+                fields["v_a_gene"].append(TCRdistHelper.add_default_allele_to_v_gene(receptor.metadata.v_allele))
+                fields["j_a_gene"].append(receptor.metadata.j_allele)
+                fields["cdr3_a_aa"].append(receptor.amino_acid_sequence)
+                fields["cdr3_a_nucseq"].append(receptor.nucleotide_sequence)
+
+    @staticmethod
+    def process_receptor_beta_chain(receptor, fields, chains):
+        if "beta" in chains:
+            if type(receptor).__name__ == "TCABReceptor":
+                fields["v_b_gene"].append(TCRdistHelper.add_default_allele_to_v_gene(receptor.get_chain('beta').metadata.v_allele))
+                fields["j_b_gene"].append(receptor.get_chain('beta').metadata.j_allele)
+                fields["cdr3_b_aa"].append(receptor.get_chain('beta').amino_acid_sequence)
+                fields["cdr3_b_nucseq"].append(receptor.get_chain("beta").nucleotide_sequence)
+            elif type(receptor).__name__ == "ReceptorSequence" and receptor.metadata.chain.value == "TRB":
+                fields["v_b_gene"].append(TCRdistHelper.add_default_allele_to_v_gene(receptor.metadata.v_allele))
+                fields["j_b_gene"].append(receptor.metadata.j_allele)
+                fields["cdr3_b_aa"].append(receptor.amino_acid_sequence)
+                fields["cdr3_b_nucseq"].append(receptor.nucleotide_sequence)
+
+    @staticmethod
+    def prepare_tcr_dist_fields(chains):
         fields = {
             "subject": [],
             "epitope": [],
@@ -100,48 +169,4 @@ class TCRdistHelper:
             fields["j_b_gene"] = []
             fields["cdr3_b_aa"] = []
             fields["cdr3_b_nucseq"] = []
-
-        for receptor in dataset.get_data():
-            if type(receptor).__name__ == "ReceptorSequence" and receptor.metadata.chain.name.lower() not in chains:
-                continue
-
-            fields["subject"].append(receptor.metadata["subject"] if "subject" in receptor.metadata else "sub" + receptor.identifier)
-            fields["epitope"].append(receptor.metadata[label_name])
-            if type(receptor).__name__ == "TCABReceptor":
-                fields["count"].append(receptor.get_chain("alpha").metadata.count
-                             if receptor.get_chain("alpha").metadata.count == receptor.get_chain("beta").metadata.count
-                                and receptor.get_chain("beta").metadata.count is not None else 1)
-            elif type(receptor).__name__ == "ReceptorSequence":
-                if receptor.metadata.chain.name.lower() in chains:
-                    fields["count"].append(receptor.metadata.count if receptor.metadata.count is not None else 1)
-
-            if "alpha" in chains:
-                if type(receptor).__name__ == "TCABReceptor":
-                    fields["v_a_gene"].append(TCRdistHelper.add_default_allele_to_v_gene(receptor.get_chain('alpha').metadata.v_allele))
-                    fields["j_a_gene"].append(receptor.get_chain('alpha').metadata.j_allele)
-                    fields["cdr3_a_aa"].append(receptor.get_chain('alpha').amino_acid_sequence)
-                    fields["cdr3_a_nucseq"].append(receptor.get_chain("alpha").nucleotide_sequence)
-                elif type(receptor).__name__ == "ReceptorSequence" and receptor.metadata.chain.value == "TRA":
-                    fields["v_a_gene"].append(TCRdistHelper.add_default_allele_to_v_gene(receptor.metadata.v_allele))
-                    fields["j_a_gene"].append(receptor.metadata.j_allele)
-                    fields["cdr3_a_aa"].append(receptor.amino_acid_sequence)
-                    fields["cdr3_a_nucseq"].append(receptor.nucleotide_sequence)
-            if "beta" in chains:
-                if type(receptor).__name__ == "TCABReceptor":
-                    fields["v_b_gene"].append(TCRdistHelper.add_default_allele_to_v_gene(receptor.get_chain('beta').metadata.v_allele))
-                    fields["j_b_gene"].append(receptor.get_chain('beta').metadata.j_allele)
-                    fields["cdr3_b_aa"].append(receptor.get_chain('beta').amino_acid_sequence)
-                    fields["cdr3_b_nucseq"].append(receptor.get_chain("beta").nucleotide_sequence)
-                elif type(receptor).__name__ == "ReceptorSequence" and receptor.metadata.chain.value == "TRB":
-                    fields["v_b_gene"].append(TCRdistHelper.add_default_allele_to_v_gene(receptor.metadata.v_allele))
-                    fields["j_b_gene"].append(receptor.metadata.j_allele)
-                    fields["cdr3_b_aa"].append(receptor.amino_acid_sequence)
-                    fields["cdr3_b_nucseq"].append(receptor.nucleotide_sequence)
-            fields["clone_id"].append(receptor.identifier)
-
-        if "alpha" in chains and all(item is None or item == "" for item in fields["cdr3_a_nucseq"]):
-            fields.pop("cdr3_a_nucseq")
-        if "beta" in chains and all(item is None or item == "" for item in fields["cdr3_b_nucseq"]):
-            fields.pop("cdr3_b_nucseq")
-
-        return pd.DataFrame(fields)
+        return fields

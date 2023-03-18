@@ -1,3 +1,5 @@
+import importlib
+
 from pathlib import Path
 from numpy import genfromtxt
 
@@ -16,6 +18,10 @@ from scipy.sparse import csr_matrix
 
 
 class ClusteringInstruction(Instruction):
+    """
+    Todo: add documentation here
+    """
+
     def __init__(self, clustering_units: dict, name: str = None):
         assert all(isinstance(unit, ClusteringUnit) for unit in clustering_units.values()), \
             "ClusteringInstruction: not all elements passed to init method are instances of ClusteringUnit."
@@ -42,16 +48,17 @@ class ClusteringInstruction(Instruction):
 
         unit.clustering_method.fit(encoded_dataset.encoded_data)
 
-        labels_true = None
-        if unit.true_labels_path is not None and unit.true_labels_path.is_file():
-            try:
-                labels_true = genfromtxt(unit.true_labels_path, dtype=int, delimiter=',')
-            except:
-                print_log("Problem getting true_labels_path file\nCheck the file is in the right format(CSV, 1 line)")
-        self.calculate_scores(key, encoded_dataset.encoded_data.examples, unit.clustering_method.model.labels_, labels_true)
-
         if not unit.dim_red_before_clustering:
             self._dim_reduce(unit, encoded_dataset)
+
+        if unit.eval_metrics is not None:
+            labels_true = None
+            if unit.true_labels_path is not None and unit.true_labels_path.is_file():
+                try:
+                    labels_true = genfromtxt(unit.true_labels_path, dtype=int, delimiter=',')
+                except:
+                    print_log("Problem getting true_labels_path file\nCheck the file is in the right format(CSV, 1 line)")
+            self.calculate_scores(key, encoded_dataset.encoded_data.examples, unit.clustering_method.model.labels_, labels_true, unit.eval_metrics)
 
         processed_dataset = self.add_label(encoded_dataset, unit.clustering_method.model.labels_, result_path / "dataset_clustered")
 
@@ -65,17 +72,19 @@ class ClusteringInstruction(Instruction):
         return report_result
 
     def encode(self, unit: ClusteringUnit, result_path: Path) -> Dataset:
-        if unit.encoder is not None:
-            encoded_dataset = DataEncoder.run(DataEncoderParams(dataset=unit.dataset, encoder=unit.encoder,
-                                                                encoder_params=EncoderParams(result_path=result_path,
-                                                                                             label_config=unit.label_config,
-                                                                                             pool_size=unit.number_of_processes,
-                                                                                             filename="encoded_dataset.pkl",
-                                                                                             learn_model=True,
-                                                                                             encode_labels=unit.label_config is not None),
-                                                                ))
-        else:
-            encoded_dataset = unit.dataset
+        encoded_dataset = DataEncoder.run(
+            DataEncoderParams(
+                dataset=unit.dataset,
+                encoder=unit.encoder,
+                encoder_params=EncoderParams(result_path=result_path,
+                                             label_config=unit.label_config,
+                                             pool_size=unit.number_of_processes,
+                                             filename="encoded_dataset.pkl",
+                                             learn_model=True,
+                                             encode_labels=unit.label_config is not None
+                                             )
+            )
+        )
         return encoded_dataset
 
     def _dim_reduce(self, unit: ClusteringUnit, dataset):
@@ -83,122 +92,137 @@ class ClusteringInstruction(Instruction):
             unit.dimensionality_reduction.fit(dataset.encoded_data)
             unit.dimensionality_reduction.transform(dataset.encoded_data)
 
-    def calculate_scores(self, key, data, labels_pred, labels_true):
+    def calculate_scores(self, key, data, labels_pred, labels_true, metrics):
         if self.state.clustering_scores is None:
-            self.state.clustering_scores = {}
+            self.state.clustering_scores = {"target_score": {}}
 
         if isinstance(data, csr_matrix):
             data = data.toarray()
 
+        scores = {}
+
         # Check if more than one cluster
         if max(labels_pred) <= 0:
-            scores = {
-                "Silhouette": "Only 1 cluster",
-                "Calinski-Harabasz": "Only 1 cluster",
-                "Davies-Bouldin": "Only 1 cluster"
-            }
+            for metric in metrics:
+                scores[metric] = "Only 1 cluster"
         else:
-            from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
-            scores = {
-                "Silhouette": silhouette_score(data, labels_pred),
-                "Calinski-Harabasz": calinski_harabasz_score(data, labels_pred),
-                "Davies-Bouldin": davies_bouldin_score(data, labels_pred)
+            from sklearn.metrics import (
+                silhouette_score,
+                calinski_harabasz_score,
+                davies_bouldin_score,
+                adjusted_rand_score,
+                adjusted_mutual_info_score,
+                homogeneity_score,
+                completeness_score,
+                v_measure_score,
+                fowlkes_mallows_score
+            )
+
+            metric_functions = {
+                "Silhouette": silhouette_score,
+                "Calinski-Harabasz": calinski_harabasz_score,
+                "Davies-Bouldin": davies_bouldin_score,
+                "Rand index": adjusted_rand_score,
+                "Mutual Information": adjusted_mutual_info_score,
+                "Homogeneity": homogeneity_score,
+                "Completeness": completeness_score,
+                "V-measure": v_measure_score,
+                "Fowlkes-Mallows": fowlkes_mallows_score
             }
 
-        if "target_score" not in self.state.clustering_scores.keys():
-            self.state.clustering_scores["target_score"] = {
-                "Silhouette": 1,
-                "Calinski-Harabasz": 999999,
-                "Davies-Bouldin": 0
-            }
+            for metric in metrics:
+                if metric in metric_functions:
+                    if labels_true is not None and metric in ["Rand index", "Mutual Information", "Homogeneity", "Completeness", "V-measure", "Fowlkes-Mallows"]:
+                        scores[metric] = metric_functions[metric](labels_true, labels_pred)
+                    else:
+                        scores[metric] = metric_functions[metric](data, labels_pred)
 
-        if labels_true is not None:
-            if max(labels_pred) <= 0:
-                labels_true_scores = {
-                    "Rand index": "Only 1 cluster",
-                    "Mutual Information": "Only 1 cluster",
-                    "Homogeneity": "Only 1 cluster",
-                    "Completeness": "Only 1 cluster",
-                    "V-measure": "Only 1 cluster",
-                    "Fowlkes-Mallows": "Only 1 cluster"
-                }
-            else:
-                from sklearn.metrics import adjusted_rand_score, adjusted_mutual_info_score, homogeneity_score, completeness_score, v_measure_score, fowlkes_mallows_score
-                labels_true_scores = {
-                    "Rand index": adjusted_rand_score(labels_true, labels_pred),
-                    "Mutual Information": adjusted_mutual_info_score(labels_true, labels_pred),
-                    "Homogeneity": homogeneity_score(labels_true, labels_pred),
-                    "Completeness": completeness_score(labels_true, labels_pred),
-                    "V-measure": v_measure_score(labels_true, labels_pred),
-                    "Fowlkes-Mallows": fowlkes_mallows_score(labels_true, labels_pred)
-                }
-            if "Rand index" not in self.state.clustering_scores["target_score"]:
-                labels_true_target_score = {
-                    "Rand index": 1,
-                    "Mutual Information": 1,
-                    "Homogeneity": 1,
-                    "Completeness": 1,
-                    "V-measure": 1,
-                    "Fowlkes-Mallows": 1
-                }
-                self.state.clustering_scores["target_score"].update(labels_true_target_score)
-            scores.update(labels_true_scores)
+        target_scores = {
+            "Silhouette": 1,
+            "Calinski-Harabasz": 0,
+            "Davies-Bouldin": 999999,
+            "Rand index": 1,
+            "Mutual Information": 1,
+            "Homogeneity": 1,
+            "Completeness": 1,
+            "V-measure": 1,
+            "Fowlkes-Mallows": 1
+        }
+        self.state.clustering_scores["target_score"].update({
+            metric: target_scores[metric] for metric in metrics
+        })
 
         self.state.clustering_scores[key] = scores
 
     def add_label(self, dataset: Dataset, labels: [str], path: Path):
         print_log("Started copying dataset...", include_datetime=True)
         PathBuilder.build(path)
+
         if type(dataset).__name__ == "RepertoireDataset":
-            from immuneML.data_model.repertoire.Repertoire import Repertoire
-            from immuneML.util.ImportHelper import ImportHelper
-            from yaml import dump
-            repertoiresPath = path / "repertoires"
-            PathBuilder.build(repertoiresPath)
-            dataset_name = dataset.name
-
-            repertoires = []
-            for index, x in enumerate(dataset.get_data()):
-                filename = x.data_filename.stem
-                newRepertoire = Repertoire.build_like(repertoire=x, indices_to_keep=list(range(x.get_element_count())), result_path=repertoiresPath, filename_base=filename)
-                newRepertoire.metadata["cluster_id"] = str(labels[index])
-                repertoires.append(newRepertoire)
-
-                metadata_filename = repertoiresPath / f"{filename}_metadata.yaml"
-                with metadata_filename.open("w") as file:
-                    dump(newRepertoire.metadata, file)
-
-            df = dataset.get_metadata(dataset.get_metadata_fields(), return_df=True)
-            df.insert(0, "cluster_id", labels.tolist(), True)
-
-            metadata_filename = ImportHelper.make_new_metadata_file(repertoires=repertoires, metadata=df, result_path=path, dataset_name=dataset_name)
-
-            processed_dataset = dataset
-            processed_dataset.repertoires = repertoires
-            processed_dataset.metadata_file = metadata_filename
-            processed_dataset.metadata_fields.append("cluster_id")
+            processed_dataset = self._process_repertoire_dataset(dataset, labels, path)
         elif type(dataset).__name__ == "ReceptorDataset":
-            from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-            processed_receptors = [x for x in dataset.get_data()]
-            for index, receptor in enumerate(processed_receptors):
-                for seq in receptor.get_chains():
-                    receptor.__dict__[seq].metadata.custom_params["cluster_id"] = str(labels[index])
-                receptor.metadata["cluster_id"] = str(labels[index])
-
-            processed_dataset = ReceptorDataset.build_from_objects(receptors=processed_receptors, file_size=dataset.file_size, name=dataset.name, path=path)
-            processed_dataset.encoded_data = dataset.encoded_data
-            processed_dataset.labels = dataset.labels
+            processed_dataset = self._process_receptor_dataset(dataset, labels, path)
         else:
-            from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-            processed_sequences = [x for x in dataset.get_data()]
-            for index, seq in enumerate(processed_sequences):
-                seq.metadata.custom_params["cluster_id"] = str(labels[index])
-
-            processed_dataset = SequenceDataset.build_from_objects(sequences=processed_sequences, file_size=dataset.file_size, name=dataset.name, path=path)
-            processed_dataset.encoded_data = dataset.encoded_data
-            processed_dataset.labels = dataset.labels
+            processed_dataset = self._process_sequence_dataset(dataset, labels, path)
 
         processed_dataset.encoded_data.labels["cluster_id"] = labels
         processed_dataset.labels["cluster_id"] = list(range(max(labels) + 1))
         print_log("Finished copying dataset.", include_datetime=True)
+        return processed_dataset
+
+    def _process_repertoire_dataset(self, dataset, labels, path):
+        from immuneML.data_model.repertoire.Repertoire import Repertoire
+        from immuneML.util.ImportHelper import ImportHelper
+        from yaml import dump
+
+        repertoires_path = path / "repertoires"
+        PathBuilder.build(repertoires_path)
+        dataset_name = dataset.name
+
+        repertoires = []
+        for index, x in enumerate(dataset.get_data()):
+            filename = x.data_filename.stem
+            new_repertoire = Repertoire.build_like(repertoire=x, indices_to_keep=list(range(x.get_element_count())), result_path=repertoires_path, filename_base=filename)
+            new_repertoire.metadata["cluster_id"] = str(labels[index])
+            repertoires.append(new_repertoire)
+
+            metadata_filename = repertoires_path / f"{filename}_metadata.yaml"
+            with metadata_filename.open("w") as file:
+                dump(new_repertoire.metadata, file)
+
+        df = dataset.get_metadata(dataset.get_metadata_fields(), return_df=True)
+        df.insert(0, "cluster_id", labels.tolist(), True)
+
+        metadata_filename = ImportHelper.make_new_metadata_file(repertoires=repertoires, metadata=df, result_path=path, dataset_name=dataset_name)
+
+        processed_dataset = dataset
+        processed_dataset.repertoires = repertoires
+        processed_dataset.metadata_file = metadata_filename
+        processed_dataset.metadata_fields.append("cluster_id")
+        return processed_dataset
+
+    def _process_receptor_dataset(self, dataset, labels, path):
+        from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
+
+        processed_receptors = [x for x in dataset.get_data()]
+        for index, receptor in enumerate(processed_receptors):
+            for seq in receptor.get_chains():
+                receptor.__dict__[seq].metadata.custom_params["cluster_id"] = str(labels[index])
+            receptor.metadata["cluster_id"] = str(labels[index])
+
+        processed_dataset = ReceptorDataset.build_from_objects(receptors=processed_receptors, file_size=dataset.file_size, name=dataset.name, path=path)
+        processed_dataset.encoded_data = dataset.encoded_data
+        processed_dataset.labels = dataset.labels
+        return processed_dataset
+
+    def _process_sequence_dataset(self, dataset, labels, path):
+        from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+
+        processed_sequences = [x for x in dataset.get_data()]
+        for index, seq in enumerate(processed_sequences):
+            seq.metadata.custom_params["cluster_id"] = str(labels[index])
+
+        processed_dataset = SequenceDataset.build_from_objects(sequences=processed_sequences, file_size=dataset.file_size, name=dataset.name, path=path)
+        processed_dataset.encoded_data = dataset.encoded_data
+        processed_dataset.labels = dataset.labels
         return processed_dataset

@@ -30,50 +30,80 @@ class ClusteringReport(UnsupervisedMLReport):
         self.labels = labels
 
     def _generate(self) -> ReportResult:
+        # Prepare the result path
         PathBuilder.build(self.result_path)
+
+        # Initialize figure and table paths
         fig_paths = []
         table_paths = []
-        data = self.dataset.encoded_data.examples
 
-        if isinstance(data, csr_matrix):
-            data = data.toarray()
-        if self.dataset.encoded_data.examples.shape[1] == 2:
-            fig_paths.append(self._2dplot(data, f'2d_{self.name}'))
-        elif self.dataset.encoded_data.examples.shape[1] == 3:
-            fig_paths.append(self._3dplot(data, f'3d_{self.name}'))
+        # Generate 2D or 3D plots based on dataset
+        fig_paths.extend(self._generate_plots())
 
-        for label in self.labels:
-            f, t = self._label_comparison(label, f'label_comaprison_{label}')
-            fig_paths.append(f)
-            # table_paths.append(t)
+        # Compare labels
+        fig_paths.extend(self._compare_labels())
 
-        datasetPath = PathBuilder.build(f'{self.result_path}/{self.dataset.name}_cluster_id')
-        AIRRExporter.export(self.dataset, datasetPath)
+        # Export dataset with cluster id
+        table_paths.extend(self._export_dataset_with_cluster_id())
 
-        shutil.make_archive(datasetPath, "zip", datasetPath)
-        table_paths.append(ReportOutput(self.result_path / f"{self.dataset.name}_cluster_id.zip", f"dataset with cluster id"))
-
+        # Filter out empty paths and return the report result
         return ReportResult(self.name,
                             output_figures=[p for p in fig_paths if p is not None],
                             output_tables=[p for p in table_paths if p is not None])
 
-    def _2dplot(self, plotting_data, output_name):
-        traces = []
-        filename = self.result_path / f"{output_name}.html"
+    def _generate_plots(self):
+        plots = []
+        data = self.dataset.encoded_data.examples
 
-        data_grouped_by_cluster = {}
-        for index, data in enumerate(plotting_data):
-            if self.method.model.labels_[index] not in data_grouped_by_cluster.keys():
-                data_grouped_by_cluster.update({self.method.model.labels_[index]: {}})
-            data_grouped_by_cluster[self.method.model.labels_[index]].update({self.dataset.encoded_data.example_ids[index]: data})
+        if isinstance(data, csr_matrix):
+            data = data.toarray()
+
+        if self.dataset.encoded_data.examples.shape[1] == 2:
+            plots.append(self._2dplot(data, f'2d_{self.name}'))
+        elif self.dataset.encoded_data.examples.shape[1] == 3:
+            plots.append(self._3dplot(data, f'3d_{self.name}'))
+
+        return plots
+
+    def _export_dataset_with_cluster_id(self):
+        dataset_path = PathBuilder.build(f'{self.result_path}/{self.dataset.name}_cluster_id')
+        AIRRExporter.export(self.dataset, dataset_path)
+
+        shutil.make_archive(dataset_path, "zip", dataset_path)
+        return [ReportOutput(self.result_path / f"{self.dataset.name}_cluster_id.zip", f"dataset with cluster id")]
+
+    def _2dplot(self, plotting_data, output_name):
+        traces = self._prepare_traces_2d(plotting_data)
+        layout = self._prepare_plot_layout("Clustering scatter plot")
+        figure = go.Figure(data=traces, layout=layout)
+
+        filename = self.result_path / f"{output_name}.html"
+        with filename.open("w") as file:
+            figure.write_html(file)
+
+        return ReportOutput(path=filename, name="2d scatter plot")
+
+    def _3dplot(self, plotting_data, output_name):
+        traces = self._prepare_traces_3d(plotting_data)
+        layout = go.Layout(title="Clustering scatter plot")
+        figure = go.Figure(data=traces, layout=layout)
+
+        filename = self.result_path / f"{output_name}.html"
+        with filename.open("w") as file:
+            figure.write_html(file)
+
+        return ReportOutput(path=filename, name="3d scatter plot")
+
+    def _prepare_traces_2d(self, plotting_data):
+        data_grouped_by_cluster = self._group_data_by_cluster(plotting_data)
+        traces = []
 
         for cluster_id in data_grouped_by_cluster:
             data = np.array(list(data_grouped_by_cluster[cluster_id].values()))
-            markerText = list("Cluster id: {}<br>Datapoint id: {}".format(cluster_id, list(data_grouped_by_cluster[cluster_id].keys())[i])
-                              for i in range(len(data)))
+            marker_text = self._generate_marker_text(data_grouped_by_cluster, cluster_id)
             trace = go.Scatter(x=data[:, 0],
                                y=data[:, 1],
-                               text=markerText,
+                               text=marker_text,
                                name=str(cluster_id),
                                mode='markers',
                                marker=go.scatter.Marker(opacity=1,
@@ -82,7 +112,45 @@ class ClusteringReport(UnsupervisedMLReport):
                                )
             traces.append(trace)
 
-        layout = go.Layout(
+        return traces
+
+    def _prepare_traces_3d(self, plotting_data):
+        data_grouped_by_cluster = self._group_data_by_cluster(plotting_data)
+        traces = []
+
+        for cluster_id in data_grouped_by_cluster:
+            data = np.array(list(data_grouped_by_cluster[cluster_id].values()))
+            marker_text = self._generate_marker_text(data_grouped_by_cluster, cluster_id)
+            trace = go.Scatter3d(x=data[:, 0],
+                                 y=data[:, 1],
+                                 z=data[:, 2],
+                                 text=marker_text,
+                                 name=str(cluster_id),
+                                 mode='markers',
+                                 marker=dict(opacity=1,
+                                             color=cluster_id),
+                                 showlegend=True
+                                 )
+            traces.append(trace)
+
+        return traces
+
+    def _group_data_by_cluster(self, plotting_data):
+        data_grouped_by_cluster = {}
+
+        for index, data in enumerate(plotting_data):
+            if self.method.model.labels_[index] not in data_grouped_by_cluster.keys():
+                data_grouped_by_cluster.update({self.method.model.labels_[index]: {}})
+            data_grouped_by_cluster[self.method.model.labels_[index]].update({self.dataset.encoded_data.example_ids[index]: data})
+
+        return data_grouped_by_cluster
+
+    def _generate_marker_text(self, data_grouped_by_cluster, cluster_id):
+        return [f"Cluster id: {cluster_id}<br>Datapoint id: {list(data_grouped_by_cluster[cluster_id].keys())[i]}"
+                for i in range(len(data_grouped_by_cluster[cluster_id]))]
+
+    def _prepare_plot_layout(self, title):
+        return go.Layout(
             xaxis=go.layout.XAxis(showgrid=False,
                                   zeroline=False,
                                   showline=True,
@@ -100,58 +168,45 @@ class ClusteringReport(UnsupervisedMLReport):
             legend_title_text="Cluster Id",
             hovermode='closest',
             template="ggplot2",
-            title=f"Clustering scatter plot"
-        )
-        figure = go.Figure(
-            data=traces,
-            layout=layout
+            title=title
         )
 
-        with filename.open("w") as file:
-            figure.write_html(file)
+    def _compare_labels(self):
+        fig_paths = []
 
-        return ReportOutput(path=filename, name="2d scatter plot")
+        for label in self.labels:
+            fig = self.compare_labels(label, f'compare_labels{label}')
+            fig_paths.append(fig)
 
-    def _3dplot(self, plotting_data, output_name):
-        traces = []
-        filename = self.result_path / f"{output_name}.html"
+        return fig_paths
 
-        data_grouped_by_cluster = {}
-        for index, data in enumerate(plotting_data):
-            if self.method.model.labels_[index] not in data_grouped_by_cluster.keys():
-                data_grouped_by_cluster.update({self.method.model.labels_[index]: {}})
-            data_grouped_by_cluster[self.method.model.labels_[index]].update({self.dataset.encoded_data.example_ids[index]: data})
+    def compare_labels(self, label, output_name):
+        clusters, total = self._prepare_cluster_and_total_counts(label)
+        percentage_data, fig_text = self._prepare_percentage_data_and_fig_text(clusters, total, label)
 
-        for cluster_id in data_grouped_by_cluster:
-            data = np.array(list(data_grouped_by_cluster[cluster_id].values()))
-            markerText = list("Cluster id: {}<br>Datapoint id: {}".format(cluster_id, list(data_grouped_by_cluster[cluster_id].keys())[i])
-                              for i in range(len(data)))
-            trace = go.Scatter3d(x=data[:, 0],
-                                 y=data[:, 1],
-                                 z=data[:, 2],
-                                 text=markerText,
-                                 name=str(cluster_id),
-                                 mode='markers',
-                                 marker=dict(opacity=1,
-                                             color=cluster_id),
-                                 showlegend=True
-                                 )
-            traces.append(trace)
+        fig = self._create_heatmap_figure(label, percentage_data, fig_text)
 
-        figure = go.Figure(
-            data=traces,
-            layout=go.Layout(title=f"Clustering scatter plot")
+        filename_fig = self.result_path / f"{output_name}.html"
+        with filename_fig.open("w") as file:
+            fig.write_html(file)
+
+        return ReportOutput(path=filename_fig, name=f"{label} to cluster_id label comparison")
+
+    def _create_heatmap_figure(self, label, percentage_data, fig_text):
+        return go.Figure(
+            data=go.Heatmap(
+                x=list(self.dataset.labels[label]),
+                y=[f'Cluster {str(id)}' for id in self.dataset.labels["cluster_id"]],
+                z=percentage_data,
+                text=fig_text
+            ),
+            layout=go.Layout(
+                title=f"{label} to cluster_id label comparison",
+                xaxis_title=f"{label}"
+            )
         )
 
-        with filename.open("w") as file:
-            figure.write_html(file)
-
-        return ReportOutput(path=filename, name="3d scatter plot")
-
-    def _label_comparison(self, label, output_name):
-        filenameFig = self.result_path / f"{output_name}.html"
-        filenameTbl = self.result_path / f"{output_name}.csv"
-
+    def _prepare_cluster_and_total_counts(self, label):
         clusters = {}
         total = {}
 
@@ -174,8 +229,12 @@ class ClusteringReport(UnsupervisedMLReport):
             else:
                 clusters[cluster_id][label_value] = 1
 
+        return clusters, total
+
+    def _prepare_percentage_data_and_fig_text(self, clusters, total, label):
         percentage_data = []
         fig_text = []
+
         for c_id in self.dataset.labels["cluster_id"]:
             percentages = []
             cluster_text = []
@@ -192,23 +251,4 @@ class ClusteringReport(UnsupervisedMLReport):
             percentage_data.append(percentages)
             fig_text.append(cluster_text)
 
-        fig = go.Figure(
-            data=go.Heatmap(
-                x=list(self.dataset.labels[label]),
-                y=[f'Cluster {str(id)}' for id in self.dataset.labels["cluster_id"]],
-                z=percentage_data,
-                text=fig_text
-            ),
-            layout=go.Layout(
-                title=f"{label} to cluster_id label comparison",
-                xaxis_title=f"{label}"
-            )
-        )
-
-        with filenameFig.open("w") as file:
-            fig.write_html(file)
-
-        # with filenameTbl.open("w") as file:
-        #     tbl.write_html(file)
-
-        return ReportOutput(path=filenameFig, name=f"{label} to cluster_id label comparison"), ReportOutput(filenameTbl)
+        return percentage_data, fig_text

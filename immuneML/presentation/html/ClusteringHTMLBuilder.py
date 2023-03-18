@@ -37,6 +37,35 @@ class ClusteringHTMLBuilder:
         return result_file
 
     @staticmethod
+    def get_best_analyses_scores(state: ClusteringState):
+        if state.clustering_scores is not None:
+            best_analyses_scores = []
+
+            for metric in state.clustering_scores["target_score"].keys():
+                target_score = state.clustering_scores["target_score"][metric]
+
+                # Prepare scores for comparison
+                scores = {}
+                for key, score_data in state.clustering_scores.items():
+                    if key != "target_score" and metric in score_data.keys():
+                        score = score_data[metric]
+                        if isinstance(score, str):
+                            score = -999999999 if target_score > 0 else 999999999
+                        scores.update({key: score})
+
+                # Find the best score
+                if target_score > 0:
+                    best_score = max(scores.items(), key=operator.itemgetter(1))[0]
+                else:
+                    best_score = min(scores.items(), key=operator.itemgetter(1))[0]
+
+                best_analyses_scores.append({"metric": metric, "best_score": best_score})
+
+            return best_analyses_scores
+        else:
+            return None
+
+    @staticmethod
     def make_html_map(state: ClusteringState, base_path: Path) -> dict:
         html_map = {
             "css_style": Util.get_css_content(ClusteringHTMLBuilder.CSS_PATH),
@@ -44,17 +73,11 @@ class ClusteringHTMLBuilder:
             'immuneML_version': MLUtil.get_immuneML_version(),
             "analyses_summary": len(state.clustering_units) > 1 and state.clustering_scores is not None,
             "evaluation_metrics": [metric for metric in list(state.clustering_scores["target_score"].keys())] if state.clustering_scores is not None else None,
-            "best_analyses_scores": [{
-                "metric": metric,
-                "best_score":
-                    max({key: x[metric] if metric in x.keys() and type(x[metric]) != str else 0 for key, x in state.clustering_scores.items() if key != "target_score"}.items(), key=operator.itemgetter(1))[0] if state.clustering_scores["target_score"][
-                                                                                                                                                               metric] > 0 else
-                    min({key: x[metric] if metric in x.keys() and type(x[metric]) != str else 0 for key, x in state.clustering_scores.items() if key != "target_score"}.items(), key=operator.itemgetter(1))[0] if state.clustering_scores is not None else None,
-            } for metric in list(state.clustering_scores["target_score"].keys()) if state.clustering_scores is not None],
+            "best_analyses_scores": ClusteringHTMLBuilder.get_best_analyses_scores(state),
             "analyses_scores": [{
                 "analyses_name": name,
                 "scores": [round(score, 3) if type(score) != str else score for score in analysis.values()]
-            } for name, analysis in state.clustering_scores.items()],
+            } for name, analysis in state.clustering_scores.items()] if state.clustering_scores is not None else None,
             "analyses": [{
                 "name": name,
                 "dataset_name": analysis.dataset.name if analysis.dataset.name is not None else analysis.dataset.identifier,
@@ -77,9 +100,9 @@ class ClusteringHTMLBuilder:
                 "dimRed_params": [{"param_name": key, "param_value": str(value)} for key, value in
                                   analysis.dimensionality_reduction.get_params().items()] if analysis.dimensionality_reduction is not None else None,
                 "show_dimRed": analysis.dimensionality_reduction is not None,
-                "show_evaluation_metrics": state.clustering_scores[name] is not None,
+                "show_evaluation_metrics": state.clustering_scores[name] is not None if state.clustering_scores is not None and name in state.clustering_scores else False,
                 "evaluation_scores": [{"metric": metric, "score": round(score, 3) if type(score) != str else score}
-                                      for metric, score in state.clustering_scores[name].items()] if state.clustering_scores is not None and state.clustering_scores[name] is not None else None,
+                                      for metric, score in state.clustering_scores[name].items()] if state.clustering_scores is not None and name in state.clustering_scores else None,
                 "report": Util.to_dict_recursive(Util.update_report_paths(analysis.report_result, base_path), base_path)
             } for name, analysis in state.clustering_units.items()]
         }

@@ -27,114 +27,134 @@ Useful links:
 
 
 
-# Clustering
-  This branch is a developer branch for clustering in immuneML. If you don't plan to use this 
-  feature use the master branch instead.
+## Installation
 
-  Before using clustering in immuneML make sure immuneML is installed correctly and working by 
-  following the official installation guide on https://docs.immuneml.uio.no/latest/installation.html.
-  
-  Additionally, if you want to use the KMedoids clustering method you have to install 
-  [scikit-learn-extra](https://github.com/scikit-learn-contrib/scikit-learn-extra) (0.2 or higher).
-  This can be done using PyPi with the command:
+immuneML can be installed directly [using pip](<https://pypi.org/project/immuneML/>).
+immuneML uses Python 3.7 or 3.8, we recommend installing immuneML inside a virtual environment 
+with one of these Python versions. 
 
-```bash 
-pip install scikit-learn-extra
+For more detailed instructions (virtual environment, troubleshooting, Docker, developer installation), please see the [installation documentation](https://docs.immuneml.uio.no/installation/install_with_package_manager.html).
+
+### Installation using pip
+
+
+To install the immuneML core package, run:
+
+```bash
+pip install immuneML
 ```
-  
 
-## Usage
+Alternatively, to use the TCRdistClassifier ML method and corresponding TCRdistMotifDiscovery report, install immuneML with the optional TCRdist extra:
+
+```bash
+pip install immuneML[TCRdist]
+```
+
+Optionally, if you want to use the DeepRC ML method and and corresponding DeepRCMotifDiscovery report, you also
+have to install DeepRC dependencies using the [requirements_DeepRC.txt](https://raw.githubusercontent.com/uio-bmi/immuneML/master/requirements_DeepRC.txt) file.
+Important note: DeepRC uses PyTorch functionalities that depend on GPU. Therefore, DeepRC does not work on a CPU.
+To install the DeepRC dependencies, run:
+
+```bash
+pip install -r requirements_DeepRC.txt --no-dependencies
+```
+
+### Validating the installation
+
+To validate the installation, run:
+
+```bash
+immune-ml -h
+```
+
+This should display a help message explaining immuneML usage.
+
+To quickly test out whether immuneML is able to run, try running the quickstart command:
+
+```bash
+immune-ml-quickstart ./quickstart_results/
+```
+
+This will generate a synthetic dataset and run a simple machine machine learning analysis 
+on the generated data. The results folder will contain two sub-folders: one for the generated dataset (`synthetic_dataset`) 
+and one for the results of the machine learning analysis (`machine_learning_analysis`). 
+The files named `specs.yaml` are the input files for immuneML that describe how to generate 
+the dataset and how to do the machine learning analysis. The `index.html` files can be used 
+to navigate through all the results that were produced.
+
+## Usage 
+
 ### Quickstart
-  Here is a quickstart guide on how to get started using clustering in immuneML. 
-  For now this can only be done using the command line interface.
-#### Command line usage
-  To run immuneML through the command line we need to specify what yaml file
-  to use as well as a path to the output folder:
-```bash 
-immune-ml .\clustering_quickstart.yaml .\output\
+
+The quickest way to familiarize yourself with immuneML usage is to follow
+one of the [Quickstart tutorials](https://docs.immuneml.uio.no/quickstart.html).
+These tutorials provide a step-by-step guide on how to use immuneML for a 
+simple machine learning analysis on an adaptive immune receptor repertoire (AIRR) dataset,
+using either the command line tool or the [Galaxy web interface](https://galaxy.immuneml.uiocloud.no). 
+
+
+### Overview of input, analyses and results
+
+The figure below shows an overview of immuneML usage. 
+All parameters for an immuneML analysis are defined in the a YAML specification file. 
+In this file, the settings of the analysis components are defined (also known as `definitions`, 
+shown in six different colors in the figure). 
+Additionally, the YAML file describes one or more `instructions`, which are workflows that are
+applied to the defined analysis components. 
+Each instruction uses at least a dataset component, and optionally additional components.
+AIRR datasets may either be [imported from files](https://docs.immuneml.uio.no/tutorials/how_to_import_the_data_to_immuneML.html), 
+or [generated synthetically](https://docs.immuneml.uio.no/tutorials/how_to_generate_a_random_repertoire_dataset.html) during runtime.
+
+Each instruction produces different types of results, including trained ML models, 
+ML model predictions on a given dataset, plots or other reports describing the 
+dataset or trained models, and modified datasets. 
+To navigate over the results, immuneML generates a summary HTML file. 
+
+
+![image info](https://docs.immuneml.uio.no/latest/_images/definitions_instructions_overview.png)
+
+For a detailed explanation of the YAML specification file, see the tutorial [How to specify an analysis with YAML](https://docs.immuneml.uio.no/tutorials/how_to_specify_an_analysis_with_yaml.html).
+
+See also the following tutorials for specific instructions:
+- [Training ML models](https://docs.immuneml.uio.no/tutorials/how_to_train_and_assess_a_receptor_or_repertoire_classifier.html) for repertoire classification (e.g., disease prediction) or receptor sequence classification (e.g., antigen binding prediction). In immuneML, the performance of different machine learning (ML) settings can be compared by nested cross-validation. These ML settings consist of data preprocessing steps, encodings and ML models and their hyperparameters.
+- [Exploratory analysis](https://docs.immuneml.uio.no/tutorials/how_to_perform_exploratory_analysis.html) of datasets by applying preprocessing and encoding, and plotting descriptive statistics without training ML models.
+- [Simulating](https://docs.immuneml.uio.no/tutorials/how_to_simulate_antigen_signals_in_airr_datasets.html) immune events, such as disease states, into experimental or synthetic repertoire datasets. By implanting known immune signals into a given dataset, a ground truth benchmarking dataset is created. Such a dataset can be used to test the performance of ML settings under known conditions.
+- [Applying trained ML models](https://docs.immuneml.uio.no/tutorials/how_to_apply_to_new_data.html) to new datasets with unknown class labels.
+- And [other tutorials](https://docs.immuneml.uio.no/tutorials.html)
+
+
+### Command line usage 
+
+The `immune-ml` command takes only two parameters: the YAML specification file and a result path. 
+An example is given here:
+
+```bash
+immune-ml path/to/specification.yaml result/folder/path/
 ```
-  The quickstart yaml contains instructions to do clustering on the EBV.tsv file. It will do 3 different analyses, 
-  one with the data reduced to 2 dimensions, one with the data reduced to 3 dimensions and 
-  a third one where we don't use dimensionality reduction at all.
-```yaml
-definitions:
-  datasets:
-    d1: # user-defined dataset name
-      format: VDJdb # dataset format
-      params:
-        path: EBV.tsv # path to the folder containing the receptor .tsv file
-        is_repertoire: False  # we are importing a receptor dataset
-        paired: True   # data is paired TRA to TRB
-        receptor_chains: TRA_TRB
-  encodings:
-    3mer_encoding:  # user-defined encoding name
-      KmerFrequency:  # encoding type
-        k: 3  # encoding parameters
-  dimensionality_reduction:
-    pca_2d: # user-defined dimensionality reduction name
-      PCA:  # dimensionality reduction type
-        n_components: 2 #number of dimensions to reduce to
-    pca_3d:
-      PCA:
-        n_components: 3
-  ml_methods:
-    kmeans: # user-defined ml method name
-      KMeans: # clustering method type
-        n_clusters: 5 # number of wanted clusters
-  reports:
-    clusteringReport:  # user-defined report name
-      ClusteringReport: # report type
-        labels: # labels in data to compare clustering to
-          - epitope
-instructions:
-  clustering_inst1: # user-defined instruction name
-    type: Clustering  # instruction type
-    analyses: # all analyses to run
-      kmeans_2d:  # user-defined analysis name
-        dataset: d1 # dataset to run this analysis on
-        encoding: 3mer_encoding # encoding to use for this analysis
-        dimensionality_reduction: pca_2d # dimensionality reduction to run before clustering (optional)
-        clustering_method: kmeans # clustering method to use for this analysis
-        report: clusteringReport # report name for this analysis
-      kmeans_3d:
-        dataset: d1
-        encoding: 3mer_encoding
-        dimensionality_reduction: pca_3d
-        clustering_method: kmeans
-        report: clusteringReport
-      kmeans_no_dim_reduction:
-        dataset: d1
-        encoding: 3mer_encoding
-        clustering_method: kmeans
-        report: clusteringReport
-    number_of_processes: 4  # processes for parallelization
-```
-  The example data the yaml refers to (EBV.tsv) as well as the yaml file can already be found on the branch.
 
-  For a detailed explanation of the YAML specification file, see the tutorial [How to specify an analysis with YAML](https://docs.immuneml.uio.no/tutorials/how_to_specify_an_analysis_with_yaml.html).
+For each instruction specified in the YAML specification file, a subfolder is created in the 
+`result/folder/path`. Each subfolder will contain:
+- An `index.html` file which shows an overview of the results produced by that instruction. Inspecting the results of an immuneML analysis typically starts here. 
+- A copy of the used YAML specification (`full_specification.yaml`) with all default parameters explicitly set.
+- A folder containing all raw results produced by the instruction.
+- A folder containing the imported dataset(s) in optimized binary (Pickle) format.
 
-### Expected result
-  In the output folder you will now have a file named index.html. This file will open the report 
-  created by the command ran above.
-  What you will see here is first a summary of the three analyses and what analyses scored best when looking at 
-  the [Silhouette Coefficient](https://en.wikipedia.org/wiki/Silhouette_(clustering)), 
-  [Calinski-Harabasz index](https://medium.com/@haataa/how-to-measure-clustering-performances-when-there-are-no-ground-truth-db027e9a871c#:~:text=complexity%3A%20O(n%C2%B2)-,Calinski%2DHarabasz%20Index,-The%20Calinski%2DHarabasz) and
-  [Davies-Bouldin index](https://en.wikipedia.org/wiki/Davies%E2%80%93Bouldin_index).
+## Support
 
-  After that all the analyses are presented. Here you have a some dropdowns with details of the dataset, encoding, 
-  clustering algorithm parameters, dimensionality reduction parameters (if used) and 
-  the scores talked about earlier for this particular analysis.
-  
-  If the data has been reduced to either two or three dimensions you will have a scatter plot next
-  showing all the different data points color coded for what cluster they are in. You can hover over a point to 
-  see what cluster they represent.
-  The next graph is a heatmap showing the comparison between the label specified in the yaml(epitope) 
-  and the cluster id they received. This is a representation of how many percent of the different 
-  available values for the specified label are placed in what cluster. This can be used to see if the data
-  has clustered based on something like epitope, MHC, or any other attribute that is represented in the data.
-  
-  Finally, the dataset can be downloaded in AIRR format with the cluster id added.
-  
+We will prioritize fixing important bugs, and try to answer any questions as soon as possible. We may implement suggested features and enhancements as time permits. 
+
+If you run into problems when using immuneML, please see [the documentation](https://docs.immuneml.uio.no/latest/). In particular, we recommend you check out:
+- The [Quickstart tutorial](https://docs.immuneml.uio.no/latest/quickstart.html) for new users
+- The [Troubleshooting](https://docs.immuneml.uio.no/latest/troubleshooting.html) page
+
+If this does not answer your question, you can contact us via:
+- Twitter [`@immuneml`](https://twitter.com/immuneml)
+- Email [`contact@immuneml.uio.no`](mailto:contact@immuneml.uio.no)
+
+To report a potential bug or suggest new features, please [submit an issue on GitHub](https://github.com/uio-bmi/immuneML/issues).
+
+If you would like to make contributions, for example by adding a new ML method, encoding, report or preprocessing, please [see our developer documentation](https://docs.immuneml.uio.no/latest/developer_docs.html) and [submit a pull request](https://github.com/uio-bmi/compairr/pulls).
+
 ## Requirements
 
 - [Python 3.7 or 3.8](https://www.python.org/)
@@ -167,8 +187,6 @@ instructions:
 - Optional dependencies when using TCRdist:
    - [parasail](https://pypi.org/project/parasail/) (1.2)
    - [tcrdist3](https://github.com/kmayerb/tcrdist3) (0.1.6 or higher)
-- Optional dependencies when using KMediods Clustering:
-   - [scikit-learn-extra](https://github.com/scikit-learn-contrib/scikit-learn-extra) (0.2.0 or higher)
 
 # Citing immuneML
 

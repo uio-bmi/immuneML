@@ -12,7 +12,3 @@ class BIRCH(Clustering):
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
         return SklearnBIRCH(**self._parameters)
-
-    def get_params(self):
-        params = self.model.get_params()
-        return params

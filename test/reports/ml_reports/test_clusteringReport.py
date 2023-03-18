@@ -43,7 +43,7 @@ class TestClusteringReport(unittest.TestCase):
         return report
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path / "test/tmp/roccurve/"
+        path = EnvironmentSettings.root_path / "test/tmp/clustering_report/"
 
         report = self._create_report(path)
 

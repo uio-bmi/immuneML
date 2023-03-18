@@ -31,13 +31,11 @@ class TCRdistEncoder(DatasetEncoder):
         my_tcr_dist_enc: # user-defined name
             TCRdist:
                 cores: 4
-                chains: TRA/TRB/TRA_TRB
 
     """
 
-    def __init__(self, cores: int, chains: str, name: str = None):
+    def __init__(self, cores: int, name: str = None):
         self.cores = cores
-        self.chains = chains
         self.name = name
         self.distance_matrix = None
         self.context = None
@@ -72,16 +70,29 @@ class TCRdistEncoder(DatasetEncoder):
         from immuneML.util.TCRdistHelper import TCRdistHelper
 
         current_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
-        tcr_rep = TCRdistHelper.compute_tcr_dist(current_dataset, label_names, self.cores, self.chains)
-        if self.chains == "TRA_TRB":
+
+        chains = self._define_chain(current_dataset)
+        tcr_rep = TCRdistHelper.compute_tcr_dist(current_dataset, label_names, self.cores, chains)
+        if chains == ["alpha", "beta"]:
             self.distance_matrix = pd.DataFrame(tcr_rep.pw_alpha + tcr_rep.pw_beta, index=tcr_rep.clone_df.clone_id.values,
                                                 columns=tcr_rep.clone_df.clone_id.values)
-        elif self.chains == "TRA":
+        elif chains == ["alpha"]:
             self.distance_matrix = pd.DataFrame(tcr_rep.pw_alpha, index=tcr_rep.clone_df.clone_id.values,
                                                 columns=tcr_rep.clone_df.clone_id.values)
-        elif self.chains == "TRB":
+        elif chains == ["beta"]:
             self.distance_matrix = pd.DataFrame(tcr_rep.pw_beta, index=tcr_rep.clone_df.clone_id.values,
                                                 columns=tcr_rep.clone_df.clone_id.values)
+
+    def _define_chain(self, dataset):
+        if type(dataset).__name__ == "ReceptorDataset":
+            if dataset.labels["receptor_chains"].name != "TRA_TRB":
+                raise ValueError("TCRdistEncoder is not defined for ReceptorDatasets with other chains then TRA_TRB.")
+            return ["alpha", "beta"]
+        else:
+            dataList = list(dataset.get_data())
+            if any([x.metadata["chain"] != dataList[0].metadata.chain for x in dataList]):
+                raise ValueError("TCRdistEncoder requires all chains in the SequenceDataset to be the same.")
+            return [dataList[0].metadata.chain.name.lower()]
 
     def _build_labels(self, dataset, params: EncoderParams, distance_matrix) -> dict:
         labels = {label: [] for label in params.label_config.get_labels_by_name()}

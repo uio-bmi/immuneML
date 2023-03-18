@@ -21,4 +21,5 @@ class ClusteringUnit:
     label_config: LabelConfiguration = None
     dim_red_before_clustering: bool = True
     true_labels_path: Path = None
+    eval_metrics: list = None
     number_of_processes: int = 1
