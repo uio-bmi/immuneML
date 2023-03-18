@@ -54,19 +54,7 @@ class PWM(GenerativeModel):
         return self.model
 
     def generate(self, length_of_sequences: int = None, amount=10, path_to_model: Path = None):
-        #
-        # if self.model is None:
-        #     model_as_array = []
-        #     print(f'{datetime.datetime.now()}: Fetching model...')
-        #     with open(path_to_model, 'r') as file:
-        #
-        #         reader = csv.reader(file)
-        #         self._alphabet = "".join(next(reader))
-        #         for row in reader:
-        #             model_as_array.append(row)
-        #     self.model = np.array(model_as_array)
 
-        # length_of_sequences = length_of_sequences if length_of_sequences is not None else self.model.shape[0]
         length_of_sequences = self.model.shape[0]
         generated_sequences = []
         for _ in range(amount):

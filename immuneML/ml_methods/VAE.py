@@ -203,7 +203,7 @@ class VAE(GenerativeModel):
 
     def generate(self, amount=10, path_to_model: Path = None):
 
-        #Consider different way of
+        #Consider different way of getting latent variables
         fake_latent = np.random.rand(amount, 1, 2)
 
         gens = []
@@ -231,11 +231,9 @@ class VAE(GenerativeModel):
 
     def load(self, path: Path, details_path: Path = None):
 
-        path = str(path)
-
-        self.model = tf.keras.models.load_model(path + "/VAE", custom_objects={"sampling":self.sampling}, compile=False)
-        self.encoder = tf.keras.models.load_model(path + "/VAE_encoder", custom_objects={"sampling":self.sampling})
-        self.decoder = tf.keras.models.load_model(path + "/VAE_decoder")
+        self.model = tf.keras.models.load_model(path / "VAE", custom_objects={"sampling":self.sampling}, compile=False)
+        self.encoder = tf.keras.models.load_model(path / "VAE_encoder", custom_objects={"sampling":self.sampling})
+        self.decoder = tf.keras.models.load_model(path / "VAE_decoder")
 
 
     def store(self, path: Path, feature_names=None, details_path: Path = None):
