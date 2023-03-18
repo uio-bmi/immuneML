@@ -31,6 +31,8 @@ class GeneratorReport(UnsupervisedMLReport):
 
     def _generate(self) -> ReportResult:
 
+        PathBuilder.build(self.result_path)
+
         generated_sequences = self.result_path / f"{self.name}GeneratedSequences.csv"
 
         data = pd.DataFrame(self.method.generated_sequences, columns=["Generated Sequences"])
