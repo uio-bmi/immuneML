@@ -141,15 +141,13 @@ class KerasSequenceCNN(MLMethod):
         opt = Adam(learning_rate=0.000075)
         self.model.compile(optimizer=opt, loss='binary_crossentropy', metrics=['accuracy'])
 
-        # Fit the CNN to the training set # todo return value?? to the log?
+        # Fit the CNN to the training set
         _ = self.model.fit(
             x=X_train, y=y_train, sample_weight=w_train, shuffle=True,
             validation_data=(X_val, y_val, w_val) if w_val is not None else (X_val, y_val),
             epochs=20, batch_size=16, verbose=0
         )
 
-        # print(_.history.keys())
-        # print(_.history['val_loss'])
 
     def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric: str = None,
                                 number_of_splits: int = 5, cores_for_training: int = -1):

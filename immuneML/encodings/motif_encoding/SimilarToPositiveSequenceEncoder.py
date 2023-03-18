@@ -21,7 +21,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class SimilarToPositiveSequenceEncoder(DatasetEncoder):
     """
-    A simple baseline encoding, to be used in combination with <todo add>
+    A simple baseline encoding, to be used in combination with :py:obj:`~immuneML.ml_methods.BinaryFeatureClassifier.BinaryFeatureClassifier`.
     This encoder keeps track of all positive sequences in the training set, and ignores the negative sequences.
     Any sequence within a given hamming distance from a positive training sequence will be classified positive,
     all other sequences will be classified negative.
