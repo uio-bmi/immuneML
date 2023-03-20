@@ -399,3 +399,13 @@ def get_no_signal_sequences(used_seq_count: dict, seqs_no_signal_count: int, bnp
 
 def needs_seqs_with_signal(sequence_per_signal_count: dict) -> bool:
     return (sum(sequence_per_signal_count.values()) - sequence_per_signal_count['no_signal']) > 0
+
+
+def filter_sequences_by_length(sequences, sim_item: SimConfigItem, sequence_type):
+    if sim_item.sequence_len_limits:
+        if sim_item.sequence_len_limits.get('max', -1) > -1:
+            sequences = sequences[getattr(sequences, sequence_type.value).lengths <= sim_item.sequence_len_limits['max']]
+        if sim_item.sequence_len_limits.get('min', -1) > -1:
+            sequences = sequences[getattr(sequences, sequence_type.value).lengths >= sim_item.sequence_len_limits['min']]
+
+    return sequences

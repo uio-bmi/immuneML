@@ -43,6 +43,14 @@ class SimConfigItem:
                     a: 2 # shape parameter of the distribution
                     loc: 0 # 0 by default but can be used to shift the distribution
 
+        sequence_len_limits (dict): allows for filtering the generated sequences by length, needs to have parameters min and max specified; if not used, min/max should be -1
+
+.           . indent with spaces
+            .. code-block:: yaml
+
+                sequence_len_limits:
+                    min: 4 # keep sequences of length 4 and longer
+                    max: -1 # no limit on the max length of the sequences
 
     YAML specification:
 
@@ -66,6 +74,8 @@ class SimConfigItem:
                         my_signal: 0.75
                     default_clonal_frequency:
                         a: 2
+                    sequence_len_limits:
+                        min: 3
 
 
     """
@@ -81,6 +91,7 @@ class SimConfigItem:
     false_negative_prob_in_receptors: float = 0.
     immune_events: dict = field(default_factory=dict)
     default_clonal_frequency: dict = None
+    sequence_len_limits: dict = None
 
     @property
     def signals(self) -> List[Signal]:

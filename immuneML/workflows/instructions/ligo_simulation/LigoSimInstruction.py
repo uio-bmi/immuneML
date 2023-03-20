@@ -25,7 +25,7 @@ from immuneML.simulation.util.bnp_util import merge_dataclass_objects
 from immuneML.simulation.util.util import get_bnp_data, make_receptor_sequence_objects, make_annotated_dataclass, get_sequence_per_signal_count, \
     update_seqs_without_signal, update_seqs_with_signal, check_iteration_progress, make_sequence_paths, make_signal_metadata, needs_seqs_with_signal, \
     check_sequence_count, make_repertoire_from_sequences, get_no_signal_sequences, get_signal_sequences, \
-    annotate_sequences, get_signal_sequence_count
+    annotate_sequences, get_signal_sequence_count, filter_sequences_by_length
 from immuneML.util.ExporterHelper import ExporterHelper
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
@@ -218,6 +218,8 @@ class LigoSimInstruction(Instruction):
             if self.state.simulation.keep_p_gen_dist and sim_item.generative_model.can_compute_p_gens() and iteration == 0:
                 self._make_p_gen_histogram(sequences)
                 print_log("Computed a histogram from the first batch of background sequences.", include_datetime=True)
+
+            sequences = filter_sequences_by_length(sequences, sim_item, self.sequence_type)
 
             sequences = annotate_sequences(sequences, self.sequence_type == SequenceType.AMINO_ACID, self.state.signals, self._annotated_dataclass)
 

@@ -76,7 +76,7 @@ def _check_if_supported(sim_item, sim_strategy_cls):
 def _parse_sim_config_item(simulation_item: dict, key: str, symbol_table: SymbolTable, is_repertoire: bool) -> Tuple[SimConfigItem, dict]:
     location = SimulationParser.__name__
     valid_simulation_item_keys = ["number_of_examples", "signals", "is_noise", "seed", "default_clonal_frequency",
-                                  "false_positive_prob_in_receptors", "false_negative_prob_in_receptors",
+                                  "false_positive_prob_in_receptors", "false_negative_prob_in_receptors", "sequence_len_limits",
                                   "receptors_in_repertoire_count", "generative_model", "immune_events"]
 
     simulation_item = {**DefaultParamsLoader.load('simulation', 'ligo_sim_config_item'), **simulation_item}
@@ -85,6 +85,8 @@ def _parse_sim_config_item(simulation_item: dict, key: str, symbol_table: Symbol
 
     ParameterValidator.assert_type_and_value(simulation_item['is_noise'], bool, location, 'is_noise')
     _parse_signals(simulation_item, symbol_table, location, key)
+
+    _validate_sequence_len_limits(simulation_item)
 
     for k in ['number_of_examples', 'seed']:
         ParameterValidator.assert_type_and_value(simulation_item[k], int, location, k, min_inclusive=1)
@@ -187,3 +189,12 @@ def _motif_content_matches_seq_type(motifs: list, seq_type):
             ParameterValidator.assert_all_in_valid_list(motif.get_alphabet(),
                                                         EnvironmentSettings.get_sequence_alphabet(seq_type),
                                                         SimulationParser.__name__, motif.get_alphabet())
+
+
+def _validate_sequence_len_limits(sim_item: dict):
+    ParameterValidator.assert_keys(sim_item['sequence_len_limits'].keys(), ['min', 'max'], SimulationParser.__name__, 'sequence_len_limits')
+    for key in ['min', 'max']:
+        ParameterValidator.assert_type_and_value(sim_item['sequence_len_limits'][key], int, SimulationParser.__name__, f'sequence_len_limits:{key}', -1)
+
+    assert sim_item['sequence_len_limits']['min'] <= sim_item['sequence_len_limits']['max'] or sim_item['sequence_len_limits']['max'] == -1, \
+        f"Under sequence_len_limits, min has to be less or equal to max value, if max is not -1 (max=-1 -> max is not used): {sim_item['sequence_len_limits']}"
