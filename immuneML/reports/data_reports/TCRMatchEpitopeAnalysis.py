@@ -90,8 +90,13 @@ class TCRMatchEpitopeAnalysis(DataReport):
 
     @staticmethod
     def check_tcrmatch_path(tcrmatch_path):
-        p = subprocess.run([str(tcrmatch_path)], shell=True, capture_output=True)
-        assert p.returncode != 127, f"{TCRMatchEpitopeAnalysis.__name__}: tcrmatch_path not found (exit code 127): {tcrmatch_path}"
+        try:
+            p = subprocess.run([str(tcrmatch_path)], shell=True, capture_output=True)
+            returncode = p.returncode
+        except Exception:
+            returncode = None
+
+        assert returncode != 127, f"{TCRMatchEpitopeAnalysis.__name__}: tcrmatch_path not found (exit code 127): {tcrmatch_path}"
 
     def _generate(self) -> ReportResult:
         print("printing tcrmatch path")
