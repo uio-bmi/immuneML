@@ -61,6 +61,7 @@ class TCRMatchEpitopeAnalysis(DataReport):
         self.threads = threads
         self.chunk_size = chunk_size
         self.keep_tmp_results = keep_tmp_results
+        #
 
     @classmethod
     def build_object(cls, **kwargs):
