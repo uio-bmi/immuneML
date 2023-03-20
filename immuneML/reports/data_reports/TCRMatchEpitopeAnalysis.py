@@ -250,5 +250,4 @@ class TCRMatchEpitopeAnalysis(DataReport):
                 output_file.write(content)
 
     def check_prerequisites(self):
-        # todo check if repertoire dataset
-        pass
+        return True
