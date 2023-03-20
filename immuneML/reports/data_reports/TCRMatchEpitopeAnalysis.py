@@ -16,6 +16,9 @@ from immuneML.util.PathBuilder import PathBuilder
 import subprocess
 import shutil
 
+
+print("inside file")
+
 class TCRMatchEpitopeAnalysis(DataReport):
     """
 
@@ -52,6 +55,7 @@ class TCRMatchEpitopeAnalysis(DataReport):
                  differences: int = None, indels: bool = None, threads: int = None, chunk_size: int = 100000,
                  threshold: float = None, keep_tmp_results: bool = None,
                  number_of_processes: int = 1, name: str = None):
+        print("inside init")
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.compairr_path = compairr_path
         self.tcrmatch_path = tcrmatch_path
@@ -67,6 +71,7 @@ class TCRMatchEpitopeAnalysis(DataReport):
     @classmethod
     def build_object(cls, **kwargs):
         location = TCRMatchEpitopeAnalysis.__name__
+        print("inside build object")
 
         assert "iedb_file" in kwargs, f"{location}: expected iedb_file to be set for {location} report"
         ParameterValidator.assert_type_and_value(kwargs["iedb_file"], str, location, "iedb_file")
