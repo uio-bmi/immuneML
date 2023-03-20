@@ -34,6 +34,16 @@ class SimConfigItem:
 
         immune_events (dict): a set of key-value pairs that will be added to the metadata (same values for all data generated in one simulation sim_item) and can be later used as labels
 
+        default_clonal_frequency (dict): clonal frequency in Ligo is simulated through `scipy's zeta distribution function for generating random numbers <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.zipf.html>`_, with parameters provided under default_clonal_frequency parameter. These parameters will be used to assign count values to sequences that do not contain any signals if they are required by the simulation. If clonal frequency shouldn't be used, this parameter can be None
+
+            .. indent with spaces
+            .. code-block:: yaml
+
+                clonal_frequency:
+                    a: 2 # shape parameter of the distribution
+                    loc: 0 # 0 by default but can be used to shift the distribution
+
+
     YAML specification:
 
     .. indent with spaces
@@ -54,6 +64,8 @@ class SimConfigItem:
                     receptors_in_repertoire_count: 150
                     signals:
                         my_signal: 0.75
+                    default_clonal_frequency:
+                        a: 2
 
 
     """
@@ -68,6 +80,7 @@ class SimConfigItem:
     false_positive_prob_in_receptors: float = 0.
     false_negative_prob_in_receptors: float = 0.
     immune_events: dict = field(default_factory=dict)
+    default_clonal_frequency: dict = None
 
     @property
     def signals(self) -> List[Signal]:

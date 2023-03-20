@@ -32,6 +32,15 @@ class Signal:
 
         j_call (str): J gene with allele if available that has to co-occur with one of the motifs for the signal to exist; can be used in combination with rejection sampling, or full sequence implanting, otherwise ignored; to match in a sequence for rejection sampling, it is checked if this value is contained in the same field of generated sequence;
 
+        clonal_frequency (dict): clonal frequency in Ligo is simulated through `scipy's zeta distribution function for generating random numbers <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.zipf.html>`_, with parameters provided under clonal_frequency parameter. If clonal frequency shouldn't be used, this parameter can be None
+
+            .. indent with spaces
+            .. code-block:: yaml
+
+                clonal_frequency:
+                    a: 2 # shape parameter of the distribution
+                    loc: 0 # 0 by default but can be used to shift the distribution
+
 
     YAML specification:
 
@@ -48,6 +57,9 @@ class Signal:
                     110: 0.5
                 v_call: TRBV1
                 j_call: TRBJ1
+                clonal_frequency:
+                    a: 2
+                    loc: 0
 
     """
     id: str
@@ -55,6 +67,7 @@ class Signal:
     sequence_position_weights: dict = None
     v_call: str = None
     j_call: str = None
+    clonal_frequency: dict = None
 
     def get_all_motif_instances(self, sequence_type: SequenceType):
         motif_instances = []
@@ -109,6 +122,10 @@ class SignalPair:
     def j_call(self):
         return [el for el in sorted(list({self.signal1.j_call, self.signal2.j_call})) if el is not None] \
             if self.signal1.j_call is not None and self.signal2.j_call is not None else None
+
+    @property
+    def clonal_frequency(self):
+        return random.choice([self.signal1, self.signal2]).clonal_frequency
 
     def __hash__(self):
         return hash(tuple(sorted([self.signal1.id, self.signal2.id])))

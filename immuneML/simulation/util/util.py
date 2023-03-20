@@ -14,6 +14,7 @@ from bionumpy.encodings import BaseEncoding
 from bionumpy.io import delimited_buffers
 from bionumpy.sequence.string_matcher import RegexMatcher, StringMatcher
 from npstructures import RaggedArray
+from scipy.stats import zipf
 
 from immuneML import Constants
 from immuneML.data_model.receptor.RegionType import RegionType
@@ -343,7 +344,8 @@ def update_seqs_with_signal(max_counts: dict, annotated_sequences, all_signals, 
     for signal in sim_item_signals:
         if max_counts[signal.id] > 0:
             if isinstance(signal, SignalPair):
-                selection = signal_matrix[:, [all_signal_ids.index(sid) for sid in signal.id.split(Constants.SIGNAL_DELIMITER)]].astype(bool).all(axis=1)
+                selection = signal_matrix[:, [all_signal_ids.index(sid) for sid in signal.id.split(Constants.SIGNAL_DELIMITER)]].astype(bool).all(
+                    axis=1)
             else:
                 selection = signal_matrix[:, all_signal_ids.index(signal.id)].astype(bool)
                 selection = np.logical_and(selection, signal_matrix.sum(axis=1) == 1)
@@ -365,7 +367,7 @@ def get_signal_sequences(sequences, bnp_data_class, used_seq_count: dict, sim_it
 
         used_seq_count[signal.id] += n_rows
 
-        # TODO: add counts here where signal for the group of seqs is known as well as the sim_item
+        sequences_sig = assign_duplicate_counts(sequences_sig, signal.clonal_frequency)
 
         if sequences is None:
             sequences = sequences_sig
@@ -375,11 +377,22 @@ def get_signal_sequences(sequences, bnp_data_class, used_seq_count: dict, sim_it
     return sequences, used_seq_count
 
 
-def get_no_signal_sequences(used_seq_count: dict, seqs_no_signal_count: int, bnp_data_class, sequence_paths: Dict[str, Path]):
+def assign_duplicate_counts(sequences, clonal_frequency_params: dict):
+    if clonal_frequency_params:
+        return sequences.add_fields(fields={'duplicate_count': zipf.rvs(**{**clonal_frequency_params, **{'size': len(sequences)}})},
+                                    field_type_map={'duplicate_count': int})
+    else:
+        return sequences
+
+
+def get_no_signal_sequences(used_seq_count: dict, seqs_no_signal_count: int, bnp_data_class, sequence_paths: Dict[str, Path],
+                            sim_item: SimConfigItem):
     if sequence_paths['no_signal'].is_file() and seqs_no_signal_count > 0:
         skip_rows = used_seq_count['no_signal']
         used_seq_count['no_signal'] = used_seq_count['no_signal'] + seqs_no_signal_count
-        return get_bnp_data(sequence_paths['no_signal'], bnp_data_class)[skip_rows:skip_rows + seqs_no_signal_count], used_seq_count
+        sequences = get_bnp_data(sequence_paths['no_signal'], bnp_data_class)[skip_rows:skip_rows + seqs_no_signal_count]
+        sequences = assign_duplicate_counts(sequences, sim_item.default_clonal_frequency)
+        return sequences, used_seq_count
     else:
         return None, used_seq_count
 

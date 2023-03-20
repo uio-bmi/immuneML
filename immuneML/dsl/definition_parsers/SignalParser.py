@@ -6,7 +6,6 @@ from immuneML.util.ParameterValidator import ParameterValidator
 
 
 class SignalParser:
-
     keyword = "signals"
     VALID_KEYS = ["motifs"]
 
@@ -26,13 +25,23 @@ class SignalParser:
                     ParameterValidator.assert_in_valid_list(motif_group, valid_motif_keys, SignalParser.__name__, f'{key}:motifs')
                     signal_motifs.append(symbol_table.get(motif_group))
                 elif isinstance(motif_group, list):
-                    assert len(motif_group) == 2, f"{SignalParser.__name__}: {len(motif_group)} motifs specified for signal {key}, but only 2 allowed."
+                    assert len(
+                        motif_group) == 2, f"{SignalParser.__name__}: {len(motif_group)} motifs specified for signal {key}, but only 2 allowed."
                     for motif in motif_group:
                         ParameterValidator.assert_in_valid_list(motif, valid_motif_keys, SignalParser.__name__, f'{key}:motifs')
                     signal_motifs.append([symbol_table.get(motif_id) for motif_id in motif_group])
 
+            check_clonal_frequency(signal_spec)
+
             signal = Signal(key, signal_motifs, v_call=signal_spec.get('v_call'), j_call=signal_spec.get('j_call'),
+                            clonal_frequency=signal_spec.get('clonal_frequency'),
                             sequence_position_weights=signal_spec.get('sequence_position_weights', {}))
             symbol_table.add(key, SymbolType.SIGNAL, signal)
 
         return symbol_table, signals
+
+
+def check_clonal_frequency(spec: dict, name: str = 'clonal_frequency', location: str = SignalParser.__name__):
+    if name in spec and spec[name] is not None:
+        ParameterValidator.assert_type_and_value(spec[name], dict, location, name)
+        ParameterValidator.assert_all_in_valid_list(spec[name].keys(), ['a', 'loc'], location, name)

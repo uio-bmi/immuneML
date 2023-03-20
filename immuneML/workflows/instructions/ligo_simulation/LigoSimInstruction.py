@@ -1,8 +1,8 @@
 import copy
-import dataclasses
 import math
 import os
 import random
+from dataclasses import fields
 from itertools import chain
 from multiprocessing import Pool
 from pathlib import Path
@@ -86,10 +86,11 @@ class LigoSimInstruction(Instruction):
         self._noise_fields = [(f"observed_{s.id}", int) for s in self.state.signals] if self._export_observed_signals else []
 
         self._annotation_fields = sorted([(signal.id, int) for signal in self.state.signals] +
-                                         [(f"{signal.id}_positions", str) for signal in self.state.signals] + self._noise_fields, key=lambda x: x[0])
+                                         [(f"{signal.id}_positions", str) for signal in self.state.signals] + self._noise_fields,
+                                         key=lambda x: x[0])
 
         self._custom_fields = self._annotation_fields + [('p_gen', float), ('from_default_model', int)]
-        self._background_fields = [(field.name, field.type) for field in dataclasses.fields(BackgroundSequences)]
+        self._background_fields = [(f.name, f.type) for f in fields(BackgroundSequences)]
 
     @property
     def sequence_type(self) -> SequenceType:
@@ -192,7 +193,8 @@ class LigoSimInstruction(Instruction):
                                                                             for _, proportion in item.signal_proportions.items())
 
             sequences, used_seq_count = get_no_signal_sequences(used_seq_count=used_seq_count, seqs_no_signal_count=seqs_no_signal_count,
-                                                                bnp_data_class=self._annotated_dataclass, sequence_paths=sequence_paths)
+                                                                bnp_data_class=self._annotated_dataclass, sequence_paths=sequence_paths,
+                                                                sim_item=item)
 
             sequences, used_seq_count = get_signal_sequences(sequences, self._annotated_dataclass, used_seq_count, item, sequence_paths)
 

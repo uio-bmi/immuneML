@@ -1,9 +1,11 @@
 import copy
+import logging
 from itertools import chain
 from typing import Tuple
 
 from immuneML import Constants
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
+from immuneML.dsl.definition_parsers.SignalParser import check_clonal_frequency
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -38,7 +40,7 @@ def _parse_ligo_simulation(simulation: dict, key: str, symbol_table: SymbolTable
 
     simulation = {**DefaultParamsLoader.load("simulation", "ligo_sim_config"), **simulation}
 
-    ParameterValidator.assert_keys(simulation.keys(), valid_keys.keys(), location, key, exclusive=True)
+    ParameterValidator.assert_keys(list(simulation.keys()), list(valid_keys.keys()), location, key, exclusive=True)
     for k, val_type in valid_keys.items():
         ParameterValidator.assert_type_and_value(simulation[k], val_type, location, k)
 
@@ -52,7 +54,7 @@ def _parse_ligo_simulation(simulation: dict, key: str, symbol_table: SymbolTable
 
     sim_items = []
     for sim_key, item in simulation['sim_items'].items():
-        sim_item, sim_item_dict = _parse_sim_config_item(item, sim_key, symbol_table)
+        sim_item, sim_item_dict = _parse_sim_config_item(item, sim_key, symbol_table, simulation['is_repertoire'])
         _check_if_supported(sim_item, sim_strategy_cls)
         sim_items.append(sim_item)
         simulation['sim_items'][sim_key] = sim_item_dict
@@ -71,9 +73,9 @@ def _check_if_supported(sim_item, sim_strategy_cls):
             "Implanting does not support having more than 1 signal per sequence. Please adjust the simulation specs."
 
 
-def _parse_sim_config_item(simulation_item: dict, key: str, symbol_table: SymbolTable) -> Tuple[SimConfigItem, dict]:
+def _parse_sim_config_item(simulation_item: dict, key: str, symbol_table: SymbolTable, is_repertoire: bool) -> Tuple[SimConfigItem, dict]:
     location = SimulationParser.__name__
-    valid_simulation_item_keys = ["number_of_examples", "signals", "is_noise", "seed",
+    valid_simulation_item_keys = ["number_of_examples", "signals", "is_noise", "seed", "default_clonal_frequency",
                                   "false_positive_prob_in_receptors", "false_negative_prob_in_receptors",
                                   "receptors_in_repertoire_count", "generative_model", "immune_events"]
 
@@ -102,6 +104,13 @@ def _parse_sim_config_item(simulation_item: dict, key: str, symbol_table: Symbol
     params["signal_proportions"] = _make_signal_proportions(symbol_table, simulation_item["signals"], key)
     params["name"] = key
     params['generative_model'] = gen_model
+
+    check_clonal_frequency(simulation_item, 'default_clonal_frequency', SimulationParser.__name__)
+    if not is_repertoire:
+        assert simulation_item['default_clonal_frequency'] is None, "Clonal frequency can be set only for repertoire simulation."
+    if not is_repertoire and any(signal.clonal_frequency is not None for signal in params['signal_proportions'].keys()):
+        logging.warning(f"Clonal frequency is set for some of the signals in {key}, but the simulation is not on repertoire level, "
+                        f"so clonal frequency parameters will not be used.")
 
     return SimConfigItem(**{key: val for key, val in params.items() if key not in ['signals', 'type']}), simulation_item
 
