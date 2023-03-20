@@ -1,4 +1,4 @@
-numpy>=1.18.5,<=1.21.0 # latest versions of numpy give AttributeError: module 'numpy' has no attribute 'typeDict' due to incompatibility with tensorfloe
+numpy==1.21.0 # latest versions of numpy give AttributeError: module 'numpy' has no attribute 'typeDict' due to incompatibility with tensorfloe
 pytest>=4
 pandas>=1
 PyYAML>=5.3
