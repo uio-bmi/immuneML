@@ -3,6 +3,7 @@ from pathlib import Path
 import os
 import numpy as np
 import pandas as pd
+import logging
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.repertoire.Repertoire import Repertoire
@@ -93,7 +94,9 @@ class TCRMatchEpitopeAnalysis(DataReport):
         assert p.returncode != 127, f"{TCRMatchEpitopeAnalysis.__name__}: tcrmatch_path not found (exit code 127): {tcrmatch_path}"
 
     def _generate(self) -> ReportResult:
+
         self.tcrmatch_files_path = PathBuilder.build(self.result_path / "tcrmatch_results_per_repertoire")
+        logging.info(f"built tcrmatch file path at {self.tcrmatch_files_path}")
 
         epitope_matches = self._run_tcrmatch_pipeline()
 
@@ -108,19 +111,31 @@ class TCRMatchEpitopeAnalysis(DataReport):
 
     def _run_tcrmatch_pipeline_for_repertoire(self, repertoire: Repertoire):
         # export something from the reprtoire: cdr3s without leading/trailing
+
+
+
         repertoire_result_path = PathBuilder.build(self.result_path / f"results_per_repertoire/{repertoire.identifier}")
-        tcrmatch_files_path = PathBuilder.build(repertoire_result_path / "tcrmatch_input_files")
+        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: made rep results path {repertoire_result_path}")
+
+        tcrmatch_input_files_path = PathBuilder.build(repertoire_result_path / "tcrmatch_input_files")
+        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: made tcrmatch results path {tcrmatch_input_files_path}")
+
         repertoire_output_file_path = self.tcrmatch_files_path / f"rep_{repertoire.identifier}.tsv"
 
         cdr3s_file = repertoire_result_path / "cdr3_aas.txt"
         self._export_repertoire_cdr3s(cdr3s_file, repertoire)
+        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: rep cdr3s exported to {cdr3s_file}")
 
         pairs_file = self._create_pairs_file_with_compairr(repertoire_result_path, cdr3s_file)
-        self._make_tcrmatch_input_files(pairs_file, tcrmatch_files_path)
-        self._run_tcrmatch_on_each_file(tcrmatch_files_path, repertoire_output_file_path)
+        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: pairs file at {pairs_file}")
+
+        self._make_tcrmatch_input_files(pairs_file, tcrmatch_input_files_path)
+
+        self._run_tcrmatch_on_each_file(tcrmatch_input_files_path, repertoire_output_file_path)
 
         if not self.keep_tmp_results:
             shutil.rmtree(repertoire_result_path)
+
     def _export_repertoire_cdr3s(self, filename, repertoire: Repertoire):
         np.savetxt(fname=filename, X=repertoire.get_sequence_aas(), header="cdr3_aa", comments="", fmt="%s")
 
@@ -185,17 +200,22 @@ class TCRMatchEpitopeAnalysis(DataReport):
 
     def _run_tcrmatch_on_each_file(self, tcrmatch_input_path, output_file_path):
         TCRMATCH_HEADER = "input_sequence\tmatch_sequence\tscore\treceptor_group\tepitope\tantigen\torganism\t"
+        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: inside run tcrmatch on each file ")
 
         with open(output_file_path, "w") as output_file:
             output_file.write(TCRMATCH_HEADER + "\n")
 
             for iedb_file in tcrmatch_input_path.glob("prefiltered_IEDB_*.tsv"):
+                logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: running with iedb file {iedb_file}")
+
                 id = iedb_file.stem.split("_")[-1]
                 user_file = tcrmatch_input_path / f"user_cdr3_{id}.tsv"
 
                 assert user_file.is_file(), f"Found iedb file {iedb_file} but not the matching user cdr3 file {user_file}."
 
                 cmd_args = [str(self.tcrmatch_path), "-i", str(user_file), "-t", "1", "-d", str(iedb_file), "-s", str(self.threshold)]
+
+                logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: running cmd args: {cmd_args}")
 
                 subprocess_result = subprocess.run(cmd_args, capture_output=True, text=True, check=True)
 
