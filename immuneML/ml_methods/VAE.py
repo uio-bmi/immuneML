@@ -45,27 +45,27 @@ class VAE(GenerativeModel):
         # Encoder
         x = tf.keras.layers.Input(shape=(seq_length, vocab_size), name="encoder_input")
 
-        encoder_conv_layer1 = tf.keras.layers.Dense(64)(x)
-        encoder_norm_layer1 = tf.keras.layers.BatchNormalization(name="encoder_norm_1")(encoder_conv_layer1)
+        encoder_dense_layer1 = tf.keras.layers.Dense(64)(x)
+        encoder_norm_layer1 = tf.keras.layers.BatchNormalization(name="encoder_norm_1")(encoder_dense_layer1)
         encoder_activ_layer1 = tf.keras.layers.LeakyReLU(name="encoder_leakyrelu_1")(encoder_norm_layer1)
 
-        encoder_conv_layer2 = tf.keras.layers.Dense(32)(encoder_activ_layer1)
-        encoder_norm_layer2 = tf.keras.layers.BatchNormalization(name="encoder_norm_2")(encoder_conv_layer2)
+        encoder_dense_layer2 = tf.keras.layers.Dense(32)(encoder_activ_layer1)
+        encoder_norm_layer2 = tf.keras.layers.BatchNormalization(name="encoder_norm_2")(encoder_dense_layer2)
         encoder_activ_layer2 = tf.keras.layers.LeakyReLU(name="encoder_activ_layer_2")(encoder_norm_layer2)
 
-        encoder_conv_layer3 = tf.keras.layers.Dense(16)(encoder_activ_layer2)
-        encoder_norm_layer3 = tf.keras.layers.BatchNormalization(name="encoder_norm_3")(encoder_conv_layer3)
+        encoder_dense_layer3 = tf.keras.layers.Dense(16)(encoder_activ_layer2)
+        encoder_norm_layer3 = tf.keras.layers.BatchNormalization(name="encoder_norm_3")(encoder_dense_layer3)
         encoder_activ_layer3 = tf.keras.layers.LeakyReLU(name="encoder_activ_layer_3")(encoder_norm_layer3)
 
-        encoder_conv_layer4 = tf.keras.layers.Dense(8)(encoder_activ_layer3)
-        encoder_norm_layer4 = tf.keras.layers.BatchNormalization(name="encoder_norm_4")(encoder_conv_layer4)
+        encoder_dense_layer4 = tf.keras.layers.Dense(8)(encoder_activ_layer3)
+        encoder_norm_layer4 = tf.keras.layers.BatchNormalization(name="encoder_norm_4")(encoder_dense_layer4)
         encoder_activ_layer4 = tf.keras.layers.LeakyReLU(name="encoder_activ_layer_4")(encoder_norm_layer4)
 
-        encoder_conv_layer5 = tf.keras.layers.Dense(8)(encoder_activ_layer4)
-        encoder_norm_layer5 = tf.keras.layers.BatchNormalization(name="encoder_norm_5")(encoder_conv_layer5)
-        encoder_activ_layer5 = tf.keras.layers.LeakyReLU(name="encoder_activ_layer_5")(encoder_norm_layer5)
+        # encoder_dense_layer5 = tf.keras.layers.Dense(8)(encoder_activ_layer4)
+        # encoder_norm_layer5 = tf.keras.layers.BatchNormalization(name="encoder_norm_5")(encoder_dense_layer5)
+        # encoder_activ_layer5 = tf.keras.layers.LeakyReLU(name="encoder_activ_layer_5")(encoder_norm_layer5)
 
-        encoder_flatten = tf.keras.layers.Flatten()(encoder_activ_layer5)
+        encoder_flatten = tf.keras.layers.Flatten()(encoder_activ_layer4)
 
         encoder_mu = tf.keras.layers.Dense(units=latent_space_dim, name="encoder_mu")(encoder_flatten)
         encoder_log_variance = tf.keras.layers.Dense(units=latent_space_dim, name="encoder_log_variance")(
