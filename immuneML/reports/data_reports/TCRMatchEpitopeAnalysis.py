@@ -114,7 +114,8 @@ class TCRMatchEpitopeAnalysis(DataReport):
         epitope_matches = self._run_tcrmatch_pipeline()
 
         return ReportResult(name=self.name,
-                            info="")
+                            info="test",
+                            output_text=[ReportOutput(self.tcrmatch_files_path, f"dafdaf")])
 
     def _run_tcrmatch_pipeline(self):
         with Pool(processes=self.number_of_processes) as pool:
@@ -148,6 +149,8 @@ class TCRMatchEpitopeAnalysis(DataReport):
 
         if not self.keep_tmp_results:
             shutil.rmtree(repertoire_result_path)
+
+        return repertoire_output_file_path
 
     def _export_repertoire_cdr3s(self, filename, repertoire: Repertoire):
         np.savetxt(fname=filename, X=repertoire.get_sequence_aas(), header="cdr3_aa", comments="", fmt="%s")
