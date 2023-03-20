@@ -94,9 +94,12 @@ class TCRMatchEpitopeAnalysis(DataReport):
         assert p.returncode != 127, f"{TCRMatchEpitopeAnalysis.__name__}: tcrmatch_path not found (exit code 127): {tcrmatch_path}"
 
     def _generate(self) -> ReportResult:
+        print("printing tcrmatch path")
 
         self.tcrmatch_files_path = PathBuilder.build(self.result_path / "tcrmatch_results_per_repertoire")
+        print(self.tcrmatch_files_path)
         logging.info(f"built tcrmatch file path at {self.tcrmatch_files_path}")
+
 
         epitope_matches = self._run_tcrmatch_pipeline()
 
