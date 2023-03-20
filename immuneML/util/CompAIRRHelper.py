@@ -11,23 +11,19 @@ from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 class CompAIRRHelper:
 
     @staticmethod
-    def determine_compairr_path(compairr_path):
+    def determine_compairr_path(compairr_path, required_major=1, required_minor=3, required_patch=2):
         if compairr_path is None:
             try:
-                compairr_path = CompAIRRHelper.check_compairr_path("compairr")
+                compairr_path = CompAIRRHelper.check_compairr_path("compairr", required_major=required_major, required_minor=required_minor, required_patch=required_patch)
             except Exception as e:
-                compairr_path = CompAIRRHelper.check_compairr_path("/usr/local/bin/compairr")
+                compairr_path = CompAIRRHelper.check_compairr_path("/usr/local/bin/compairr", required_major=required_major, required_minor=required_minor, required_patch=required_patch)
         else:
-            compairr_path = CompAIRRHelper.check_compairr_path(compairr_path)
+            compairr_path = CompAIRRHelper.check_compairr_path(compairr_path, required_major=required_major, required_minor=required_minor, required_patch=required_patch)
 
         return compairr_path
 
     @staticmethod
-    def check_compairr_path(compairr_path):
-        required_major = 1
-        required_minor = 3
-        required_patch = 2
-
+    def check_compairr_path(compairr_path, required_major=1, required_minor=3, required_patch=2):
         try:
             compairr_result = subprocess.run([str(Path(compairr_path)), "--version"], capture_output=True)
             assert compairr_result.returncode == 0, "exit code was non-zero."
@@ -39,7 +35,7 @@ class CompAIRRHelper:
             if major == 1:
                 assert int(minor) >= required_minor, mssg
                 if minor == 3:
-                    assert int(patch) >= {required_patch}, mssg
+                    assert int(patch) >= required_patch, mssg
         except Exception as e:
             raise Exception(f"CompAIRRHelper: failed to call CompAIRR: {e}\n"
                             f"Please ensure the correct version of CompAIRR has been installed (version {required_major}.{required_minor}.{required_patch} or later), "
