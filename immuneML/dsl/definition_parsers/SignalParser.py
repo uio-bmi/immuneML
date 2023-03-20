@@ -34,7 +34,7 @@ class SignalParser:
             check_clonal_frequency(signal_spec)
 
             signal = Signal(key, signal_motifs, v_call=signal_spec.get('v_call'), j_call=signal_spec.get('j_call'),
-                            clonal_frequency=signal_spec.get('clonal_frequency'),
+                            clonal_frequency=signal_spec.get('clonal_frequency', None),
                             sequence_position_weights=signal_spec.get('sequence_position_weights', {}))
             symbol_table.add(key, SymbolType.SIGNAL, signal)
 
