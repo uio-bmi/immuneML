@@ -8,13 +8,13 @@ definitions:
         paired: False
         region_type: FULL_SEQUENCE
   encodings:
-    e1: TextAsInt
+    e1: OneHot
   ml_methods:
     G1:
       LSTM:
-        cores_for_training: 8
-        rnn_units: 64
-        epochs: 4
+        cores_for_training: 2
+        rnn_units: 256
+        epochs: 5
   reports:
     GeneratorReport: GeneratorReportLSTM
 instructions:
