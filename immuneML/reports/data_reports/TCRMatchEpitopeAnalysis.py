@@ -4,8 +4,12 @@ import os
 import numpy as np
 import pandas as pd
 import logging
+import plotly.express as px
+import warnings
+
 
 from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -104,30 +108,46 @@ class TCRMatchEpitopeAnalysis(DataReport):
     def _generate(self) -> ReportResult:
         self.tcrmatch_files_path = PathBuilder.build(self.result_path / "tcrmatch_results_per_repertoire")
 
-        label_name = self._determine_dataset_label_name(self.dataset)
-
-
-
-
         tcrmatch_per_repertoire = self._run_tcrmatch_pipeline(self.dataset)
 
+        return self._generate_report_results(tcrmatch_per_repertoire)
+
+    def _generate_report_results(self, tcrmatch_per_repertoire):
         full_match_df = self._process_tcrmatch_output_files(tcrmatch_per_repertoire)
-        self._annotate_repertoire_info(full_match_df, self.dataset, label_name)
+        self._annotate_repertoire_info(full_match_df, self.dataset)
 
-        self._write_output_table(full_match_df, self.result_path / "tcrmatch_per_repertoire.tsv", name="Number of TCRMatch matches per repertoire")
+        output_tables = [self._write_output_table(full_match_df, self.result_path / "tcrmatch_per_repertoire.tsv", name="Number of TCRMatch matches per repertoire")]
+        summary_plots = []
+        feature_plots = []
 
-        summarized_match_df = self._summarize_matches(full_match_df)
+        for label_name in self.dataset.get_label_names():
+            summarized_match_df = self._summarize_matches(full_match_df, label_name)
 
-        self._write_output_table(full_match_df, self.result_path / "tcrmatch_summary.tsv", name="Summary of TCRMatch results")
+            output_tables.append(self._write_output_table(table=summarized_match_df,
+                                                          file_path=self.result_path / f"label={label_name}_tcrmatch_summary.tsv",
+                                                          name=f"Summary of TCRMatch results for different classes of label {label_name}"))
 
+            classes = list(set(full_match_df[label_name]))
 
-        # df[label_name] = repertoire_classes
+            if len(classes) == 2:
+                summary_plots.append(self._safe_plot(plot_callable="_plot_binary_class_summary",
+                                                    label_name=label_name,
+                                                    classes=classes,
+                                                    summary_df=summarized_match_df))
 
+            feature_plots.extend(self._safe_plot(plot_callable="_plot_violin_per_feature",
+                                                 match_df=full_match_df,
+                                                 label_name=label_name))
+
+        if len(self.dataset.get_label_names()) == 0:
+            feature_plots.extend(self._safe_plot(plot_callable="_plot_violin_per_feature",
+                                                 match_df=full_match_df,
+                                                 label_name=None))
 
         return ReportResult(name=self.name,
-                            info="test",
-                            output_tables=[ReportOutput(tcrmatch_outfile, f"TCRMatch output for repertoire {tcrmatch_outfile.stem}")
-                                           for tcrmatch_outfile in tcrmatch_per_repertoire])
+                            info="TCRMatch matches per repertoire",
+                            output_figures=[plot for plot in summary_plots + feature_plots if plot is not None],
+                            output_tables=[table for table in output_tables if table is not None])
 
     def _run_tcrmatch_pipeline(self, dataset):
         with Pool(processes=self.number_of_processes) as pool:
@@ -279,29 +299,25 @@ class TCRMatchEpitopeAnalysis(DataReport):
         df = pd.melt(df, id_vars=self.cols_of_interest, value_vars=repertoire_names, value_name="repertoire_matches")
         return df
 
-    def _annotate_repertoire_info(self, df, dataset, label_name):
+    def _annotate_repertoire_info(self, df, dataset):
         self._annotate_repertoire_sizes(df, dataset)
-        self._annotate_repertoire_classes(df, dataset, label_name)
+
+        for label_name in dataset.get_label_names():
+            self._annotate_repertoire_classes(df, dataset, label_name)
 
     def _annotate_repertoire_sizes(self, df, dataset):
         repertoire_sizes = {repertoire.identifier: repertoire.get_element_count() for repertoire in dataset.get_data()}
-        df["repertoire_sizes"] = df["repertoire"].replace(repertoire_sizes)
-        df["normalized_repertoire_matches"] = df["repertoire_matches"] / df["repertoire_sizes"]
+        df["repertoire_size"] = df["repertoire"].replace(repertoire_sizes)
+        df["normalized_repertoire_matches"] = df["repertoire_matches"] / df["repertoire_size"]
 
     def _annotate_repertoire_classes(self, df, dataset, label_name):
         repertoire_metadata = dataset.get_metadata([label_name, "identifier"])
         repertoire_classes = {identifier: label for identifier, label in
-                              zip(repertoire_metadata["identifier"], repertoire_metadata["CMV"])}
+                              zip(repertoire_metadata["identifier"], repertoire_metadata[label_name])}
 
         df[label_name] = df["repertoire"].replace(repertoire_classes)
 
-    def _determine_dataset_label_name(self, dataset):
-        # todo, maybe this should be called inb annotate rep classes or maybe not
-        return "CMV"
-
     def _summarize_matches(self, df, label_name):
-        # todo make it work if there is no label
-
         summary_stats = ["mean", "min", "max"]
         value_column = "normalized_repertoire_matches" if self.normalize_matches else "repertoire_matches"
         classes = set(df[label_name])
@@ -316,7 +332,71 @@ class TCRMatchEpitopeAnalysis(DataReport):
 
         return df
 
+    def _plot_violin_per_feature(self, match_df, label_name):
+        y_col = "normalized_repertoire_matches" if self.normalize_matches else "repertoire_matches"
+        y_col_name = "Normalized matches per repertoire" if self.normalize_matches else "Matches per repertoire"
+        filename_prefix = f"label={label_name}_" if label_name is not None else ""
+        report_output_name_suffix = f"label={label_name} and " if label_name is not None else ""
 
+        report_outputs = []
+
+        for features, feature_df in match_df.groupby(self.cols_of_interest):
+            feature_strings = [f"{name}={value}" for name, value in zip(self.cols_of_interest, features)]
+
+            fig = px.violin(feature_df, x=label_name, y=y_col, color=label_name, points='all', box=True,
+                            color_discrete_sequence=self._get_color_discrete_sequence(feature_df, label_name),
+                            labels={y_col: y_col_name}, title="<br>".join(feature_strings),
+                            hover_data=["repertoire", "repertoire_matches",
+                                        "normalized_repertoire_matches", "repertoire_size"])
+            fig.update_traces(meanline_visible=True)
+
+            figure_path = str(self.result_path / f"{filename_prefix}{'_'.join(feature_strings)}.html")
+            fig.write_html(figure_path)
+
+            report_outputs.append(ReportOutput(path=Path(figure_path),
+                                               name=f"Matches per repertoire for {report_output_name_suffix}{', '.join(feature_strings)}"))
+
+        return report_outputs
+
+    def _get_color_discrete_sequence(self, feature_df, label_name):
+        if label_name is not None and label_name in feature_df:
+            if len(set(feature_df[label_name])) == 2:
+                return [px.colors.diverging.Tealrose[0], px.colors.diverging.Tealrose[-1]]
+
+        return px.colors.diverging.Tealrose
+
+    def _plot_binary_class_summary(self, summary_df, label_name, classes):
+        matches_str = "Normalized matches" if self.normalize_matches else "Matches"
+
+        max_axis = max(max(summary_df[f"mean_{classes[0]}"] + summary_df[f"error_{classes[0]}_plus"]),
+                       max(summary_df[f"mean_{classes[1]}"] + summary_df[f"error_{classes[1]}_plus"]))
+
+        fig = px.scatter(summary_df, y=f"mean_{classes[0]}", x=f"mean_{classes[1]}",
+                         error_y=f"error_{classes[0]}_plus", error_y_minus=f"error_{classes[0]}_minus",
+                         error_x=f"error_{classes[1]}_plus", error_x_minus=f"error_{classes[1]}_minus",
+                         template='plotly_white',
+                         range_x=[0, max_axis], range_y=[0, max_axis],
+                         labels={f"mean_{classes[0]}": f"{matches_str} for {label_name}={classes[0]} repertoires",
+                                 f"mean_{classes[1]}": f"{matches_str} for {label_name}={classes[1]} repertoires"},
+                         hover_data=self.cols_of_interest)
+
+        fig.update_traces(marker_color="rgb(0, 147, 146)",
+                          error_x_color="rgba(114, 170, 161, 0.4)",
+                          error_y_color="rgba(114, 170, 161, 0.4)")
+
+        # add diagonal
+        fig.update_layout(shapes=[{'type': "line", 'line': dict(color="#B0C2C7", dash="dash"),
+                                   'yref': 'paper', 'xref': 'paper',
+                                   'y0': 0, 'y1': 1, 'x0': 0, 'x1': 1, 'layer': 'below'}])
+
+        figure_path = str(self.result_path / f"tcrmatch_summary_label={label_name}_{classes[0]}_vs_{classes[1]}.html")
+        fig.write_html(figure_path)
+
+        return ReportOutput(path=Path(figure_path), name=f"TCRMatch summary label={label_name}, {classes[0]} vs {classes[1]}")
 
     def check_prerequisites(self):
-        return True
+        if isinstance(self.dataset, RepertoireDataset):
+            return True
+        else:
+            warnings.warn(f"{TCRMatchEpitopeAnalysis.__name__}: report can be generated only for a RepertoireDataset. Skipping this report...")
+            return False
