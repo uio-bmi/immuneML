@@ -64,7 +64,7 @@ class TCRMatchEpitopeAnalysis(DataReport):
         self.chunk_size = chunk_size
         self.keep_tmp_results = keep_tmp_results
         self.cols_of_interest = ["organism", "antigen"] # todo make user setting
-        #
+        self.label_name = None # todo make this optional to choose
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -102,13 +102,18 @@ class TCRMatchEpitopeAnalysis(DataReport):
 
     def _generate(self) -> ReportResult:
         self.tcrmatch_files_path = PathBuilder.build(self.result_path / "tcrmatch_results_per_repertoire")
-        logging.info(f"built tcrmatch file path at {self.tcrmatch_files_path}")
 
-        # class_per_repertoire = self.dataset.get_metadata(["CMV"])["CMV"]
-        tcrmatch_per_repertoire = self._run_tcrmatch_pipeline()
+        label_name = self._determine_dataset_label_name(self.dataset)
 
 
-        # self._process_tcrmatch_output_files(tcrmatch_per_repertoire, class_per_repertoire)
+
+
+        tcrmatch_per_repertoire = self._run_tcrmatch_pipeline(self.dataset)
+
+        df = self._process_tcrmatch_output_files(tcrmatch_per_repertoire)
+        self._annotate_repertoire_info(df, self.dataset, label_name)
+
+        # df[label_name] = repertoire_classes
 
 
         return ReportResult(name=self.name,
@@ -116,9 +121,9 @@ class TCRMatchEpitopeAnalysis(DataReport):
                             output_tables=[ReportOutput(tcrmatch_outfile, f"TCRMatch output for repertoire {tcrmatch_outfile.stem}")
                                            for tcrmatch_outfile in tcrmatch_per_repertoire])
 
-    def _run_tcrmatch_pipeline(self):
+    def _run_tcrmatch_pipeline(self, dataset):
         with Pool(processes=self.number_of_processes) as pool:
-            tcrmatch_files = pool.map(self._run_tcrmatch_pipeline_for_repertoire, self.dataset.get_data())
+            tcrmatch_files = pool.map(self._run_tcrmatch_pipeline_for_repertoire, dataset.get_data())
 
         return tcrmatch_files
 
@@ -129,7 +134,7 @@ class TCRMatchEpitopeAnalysis(DataReport):
         tcrmatch_input_files_path = PathBuilder.build(tcrmatch_infiles_for_rep_path / "tcrmatch_input_files")
         logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: made tcrmatch results path {tcrmatch_input_files_path}")
 
-        repertoire_output_file_path = self.tcrmatch_files_path / f"rep_{repertoire.identifier}.tsv"
+        repertoire_output_file_path = self.tcrmatch_files_path / f"{repertoire.identifier}.tsv"
 
         cdr3s_file = tcrmatch_infiles_for_rep_path / "cdr3_aas.txt"
         self._export_repertoire_cdr3s(cdr3s_file, repertoire)
@@ -244,6 +249,7 @@ class TCRMatchEpitopeAnalysis(DataReport):
 
                 output_file.write(content)
 
+
     def _process_tcrmatch_output_files(self, tcrmatch_files):
         dfs = []
 
@@ -252,7 +258,7 @@ class TCRMatchEpitopeAnalysis(DataReport):
 
             rep_df = df[self.cols_of_interest].value_counts().reset_index()
 
-            rep_df.rename(columns={0: "matches_per_repertoire"}, inplace=True)
+            rep_df.rename(columns={0: "repertoire_matches"}, inplace=True)
             rep_df["repertoire"] = file.stem
 
             dfs.append(rep_df)
@@ -260,10 +266,33 @@ class TCRMatchEpitopeAnalysis(DataReport):
         df = pd.concat(dfs)
         repertoire_names = set(df["repertoire"])
 
-        df = pd.pivot(df, index=self.cols_of_interest, columns="repertoire", values="matches_per_repertoire").fillna(0)
+        df = pd.pivot(df, index=self.cols_of_interest, columns="repertoire", values="repertoire_matches").fillna(0)
         df.reset_index(inplace=True)
-        df = pd.melt(df, id_vars=self.cols_of_interest, value_vars=repertoire_names)
+        df = pd.melt(df, id_vars=self.cols_of_interest, value_vars=repertoire_names, value_name="repertoire_matches")
         return df
+
+    def _annotate_repertoire_info(self, df, dataset, label_name):
+        self._annotate_repertoire_sizes(df, dataset)
+        self._annotate_repertoire_classes(df, dataset, label_name)
+
+    def _annotate_repertoire_sizes(self, df, dataset):
+        repertoire_sizes = {repertoire.identifier: repertoire.get_element_count() for repertoire in dataset.get_data()}
+        df["repertoire_sizes"] = df["repertoire"].replace(repertoire_sizes)
+        df["normalized_repertoire_matches"] = df["repertoire_matches"] / df["repertoire_sizes"]
+
+    def _annotate_repertoire_classes(self, df, dataset, label_name):
+        repertoire_metadata = dataset.get_metadata([label_name, "identifier"])
+        repertoire_classes = {identifier: label for identifier, label in
+                              zip(repertoire_metadata["identifier"], repertoire_metadata["CMV"])}
+
+        df[label_name] = df["repertoire"].replace(repertoire_classes)
+
+    def _determine_dataset_label_name(self, dataset):
+        # todo, maybe this should be called inb annotate rep classes or maybe not
+        return "CMV"
+
+
+
 
     def check_prerequisites(self):
         return True
