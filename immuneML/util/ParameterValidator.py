@@ -1,3 +1,6 @@
+from pathlib import Path
+import pandas as pd
+
 from immuneML.environment.SequenceType import SequenceType
 
 
@@ -29,7 +32,9 @@ class ParameterValidator:
             ParameterValidator.assert_type_and_value(value, parameter_type, location, parameter_name, min_inclusive, max_inclusive)
 
     @staticmethod
-    def assert_type_and_value(value, parameter_type, location: str, parameter_name: str, min_inclusive=None, max_inclusive=None, exact_value=None):
+    def assert_type_and_value(value, parameter_type, location: str, parameter_name: str,
+                              min_inclusive=None, max_inclusive=None,
+                              min_exclusive=None, max_exclusive=None, exact_value=None):
         assert isinstance(value, parameter_type), f"{location}: {value} is not a valid value for parameter {parameter_name}. " \
                                                   f"It has to be of type {parameter_type.__name__}, but is now of type {type(value).__name__}."
 
@@ -40,6 +45,14 @@ class ParameterValidator:
         if max_inclusive is not None:
             assert value <= max_inclusive, f"{location}: {value} is not a valid value for parameter {parameter_name}. " \
                                            f"It has to be less or equal to {max_inclusive}."
+
+        if min_exclusive is not None:
+            assert value > min_exclusive, f"{location}: {value} is not a valid value for parameter {parameter_name}. " \
+                                           f"It has to be greater than {min_exclusive}."
+
+        if max_exclusive is not None:
+            assert value < max_exclusive, f"{location}: {value} is not a valid value for parameter {parameter_name}. " \
+                                           f"It has to be less than {max_exclusive}."
 
         if exact_value is not None:
             assert value == exact_value, f"{location}: {value} is not a valid value for parameter {parameter_name}. " \
@@ -60,6 +73,16 @@ class ParameterValidator:
                 raise AssertionError(f"{location}: Missing parameters: {str(list(set(valid_keys) - set(keys)))[1:-1]} "
                                      f"under {parameter_name}. Valid parameters are: {str(valid_keys)[1:-1]}. "
                                      f"Please add missing parameters.")
+
+    @staticmethod
+    def assert_valid_tabular_file(file_path, location: str, parameter_name: str, sep="\t", expected_columns: list=None):
+        assert Path(file_path).is_file(), f"{location}: {parameter_name} {str(file_path)} is not an existing file."
+
+        if expected_columns is not None:
+            columns = pd.read_csv(file_path, index_col=0, nrows=0, sep=sep).columns.tolist()
+            assert set(columns) == set(expected_columns), f"{location}: columns for {parameter_name} are not as expected.\n" \
+                                                          f"Expected: {expected_columns}\n" \
+                                                          f"Found: {columns}"
 
     @staticmethod
     def assert_sequence_type(params, location: str = ""):
