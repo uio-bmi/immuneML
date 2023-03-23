@@ -94,6 +94,9 @@ See also this question under 'Troubleshooting': :ref:`I get an error when instal
 Installing optional dependencies
 ----------------------------------
 
+DeepRC
+******
+
 Optionally, if you want to use the :ref:`DeepRC` ML method and and corresponding :ref:`DeepRCMotifDiscovery` report, you also
 have to install DeepRC dependencies using the :download:`requirements_DeepRC.txt <https://raw.githubusercontent.com/uio-bmi/immuneML/master/requirements_DeepRC.txt>` file.
 Important note: DeepRC uses PyTorch functionalities that depend on GPU. Therefore, DeepRC does not work on a CPU.
@@ -102,6 +105,9 @@ To install the DeepRC dependencies, run:
 .. code-block:: console
 
   pip install -r requirements_DeepRC.txt --no-dependencies
+
+CompAIRR
+********
 
 If you want to use the :ref:`CompAIRRDistance` or :ref:`CompAIRRSequenceAbundance` encoder, you have to install the C++ tool `CompAIRR <https://github.com/uio-bmi/compairr>`_.
 The easiest way to do this is by cloning CompAIRR from GitHub and installing it using :code:`make` in the main folder:
@@ -115,6 +121,23 @@ The easiest way to do this is by cloning CompAIRR from GitHub and installing it 
 If such installation is unsuccessful (for example if you do not have the rights to install CompAIRR via make),
 it is also possible to directly provide the path to a CompAIRR executable as a parameter
 to :ref:`CompAIRRDistance` or :ref:`CompAIRRSequenceAbundance` encoder.
+
+TCRMatch
+********
+
+If you want to use the :ref:`TCRMatchEpitopeAnalysis` report, you have to install CompAIRR (see above)
+as well as the C++ tool `TCRMatch <https://github.com/IEDB/TCRMatch>`_.
+Note that due to its dependencies, TCRMatch is only available for Linux OS (not macOS or Windows).
+The easiest way to install TCRMatch is by cloning the GitHub and installing it using :code:`make` in the main folder:
+
+.. code-block:: console
+
+  git clone https://github.com/IEDB/TCRMatch.git
+  cd TCRMatch
+  make install
+
+The paths to the CompAIRR and TCRMatch executables can be directly provided to the
+:ref:`TCRMatchEpitopeAnalysis` report as parameters.
 
 
 
