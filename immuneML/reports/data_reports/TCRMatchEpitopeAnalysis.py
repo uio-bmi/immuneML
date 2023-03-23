@@ -65,6 +65,7 @@ class TCRMatchEpitopeAnalysis(DataReport):
         self.keep_tmp_results = keep_tmp_results
         self.cols_of_interest = ["organism", "antigen"] # todo make user setting
         self.label_name = None # todo make this optional to choose
+        self.normalize_matches = True # todo make this optional
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -110,8 +111,15 @@ class TCRMatchEpitopeAnalysis(DataReport):
 
         tcrmatch_per_repertoire = self._run_tcrmatch_pipeline(self.dataset)
 
-        df = self._process_tcrmatch_output_files(tcrmatch_per_repertoire)
-        self._annotate_repertoire_info(df, self.dataset, label_name)
+        full_match_df = self._process_tcrmatch_output_files(tcrmatch_per_repertoire)
+        self._annotate_repertoire_info(full_match_df, self.dataset, label_name)
+
+        self._write_output_table(full_match_df, self.result_path / "tcrmatch_per_repertoire.tsv", name="Number of TCRMatch matches per repertoire")
+
+        summarized_match_df = self._summarize_matches(full_match_df)
+
+        self._write_output_table(full_match_df, self.result_path / "tcrmatch_summary.tsv", name="Summary of TCRMatch results")
+
 
         # df[label_name] = repertoire_classes
 
@@ -291,6 +299,22 @@ class TCRMatchEpitopeAnalysis(DataReport):
         # todo, maybe this should be called inb annotate rep classes or maybe not
         return "CMV"
 
+    def _summarize_matches(self, df, label_name):
+        # todo make it work if there is no label
+
+        summary_stats = ["mean", "min", "max"]
+        value_column = "normalized_repertoire_matches" if self.normalize_matches else "repertoire_matches"
+        classes = set(df[label_name])
+
+        df = df.groupby(self.cols_of_interest + [label_name])[value_column].aggregate(summary_stats).reset_index()
+        df = pd.pivot(df, index=self.cols_of_interest, columns=[label_name], values=summary_stats).reset_index()
+        df.columns = ["_".join(col).rstrip("_") for col in df.columns.values]
+
+        for label_class in classes:
+            df[f"error_{label_class}_plus"] = df[f"max_{label_class}"] - df[f"mean_{label_class}"]
+            df[f"error_{label_class}_minus"] = df[f"mean_{label_class}"] - df[f"min_{label_class}"]
+
+        return df
 
 
 

@@ -96,6 +96,7 @@ class TestSequenceLengthDistribution(TestCase):
         df = report._process_tcrmatch_output_files(tcrmatch_files)
         report._annotate_repertoire_info(df, dataset, "CMV")
 
+        df2 = report._summarize_matches(df, "CMV")
 
         # df["CMV"] = report._determine_dataset_label_name(self.dataset)
         # df["repertoire_size"] = report.dataset.get_metadata(["CMV"])["CMV"]
