@@ -17,8 +17,6 @@ import subprocess
 import shutil
 
 
-print("changed!!")
-
 class TCRMatchEpitopeAnalysis(DataReport):
     """
 
@@ -55,7 +53,6 @@ class TCRMatchEpitopeAnalysis(DataReport):
                  differences: int = None, indels: bool = None, threads: int = None, chunk_size: int = 100000,
                  threshold: float = None, keep_tmp_results: bool = None,
                  number_of_processes: int = 1, name: str = None):
-        print("inside init")
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.compairr_path = compairr_path
         self.tcrmatch_path = tcrmatch_path
@@ -66,12 +63,12 @@ class TCRMatchEpitopeAnalysis(DataReport):
         self.threads = threads
         self.chunk_size = chunk_size
         self.keep_tmp_results = keep_tmp_results
+        self.cols_of_interest = ["organism", "antigen"] # todo make user setting
         #
 
     @classmethod
     def build_object(cls, **kwargs):
         location = TCRMatchEpitopeAnalysis.__name__
-        print("inside build object")
 
         assert "iedb_file" in kwargs, f"{location}: expected iedb_file to be set for {location} report"
         ParameterValidator.assert_type_and_value(kwargs["iedb_file"], str, location, "iedb_file")
@@ -104,43 +101,41 @@ class TCRMatchEpitopeAnalysis(DataReport):
         assert returncode != 127, f"{TCRMatchEpitopeAnalysis.__name__}: tcrmatch_path not found (exit code 127): {tcrmatch_path}"
 
     def _generate(self) -> ReportResult:
-        print("printing tcrmatch path")
-
         self.tcrmatch_files_path = PathBuilder.build(self.result_path / "tcrmatch_results_per_repertoire")
-        print(self.tcrmatch_files_path)
         logging.info(f"built tcrmatch file path at {self.tcrmatch_files_path}")
 
+        # class_per_repertoire = self.dataset.get_metadata(["CMV"])["CMV"]
+        tcrmatch_per_repertoire = self._run_tcrmatch_pipeline()
 
-        epitope_matches = self._run_tcrmatch_pipeline()
+
+        # self._process_tcrmatch_output_files(tcrmatch_per_repertoire, class_per_repertoire)
+
 
         return ReportResult(name=self.name,
                             info="test",
-                            output_text=[ReportOutput(self.tcrmatch_files_path, f"dafdaf")])
+                            output_tables=[ReportOutput(tcrmatch_outfile, f"TCRMatch output for repertoire {tcrmatch_outfile.stem}")
+                                           for tcrmatch_outfile in tcrmatch_per_repertoire])
 
     def _run_tcrmatch_pipeline(self):
         with Pool(processes=self.number_of_processes) as pool:
-            epitope_matches = pool.map(self._run_tcrmatch_pipeline_for_repertoire, self.dataset.get_data())
+            tcrmatch_files = pool.map(self._run_tcrmatch_pipeline_for_repertoire, self.dataset.get_data())
 
-        return epitope_matches
+        return tcrmatch_files
 
     def _run_tcrmatch_pipeline_for_repertoire(self, repertoire: Repertoire):
-        # export something from the reprtoire: cdr3s without leading/trailing
+        tcrmatch_infiles_for_rep_path = PathBuilder.build(self.result_path / f"tcrmatch_infiles_per_repertoire/{repertoire.identifier}")
+        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: made rep results path {tcrmatch_infiles_for_rep_path}")
 
-
-
-        repertoire_result_path = PathBuilder.build(self.result_path / f"results_per_repertoire/{repertoire.identifier}")
-        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: made rep results path {repertoire_result_path}")
-
-        tcrmatch_input_files_path = PathBuilder.build(repertoire_result_path / "tcrmatch_input_files")
+        tcrmatch_input_files_path = PathBuilder.build(tcrmatch_infiles_for_rep_path / "tcrmatch_input_files")
         logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: made tcrmatch results path {tcrmatch_input_files_path}")
 
         repertoire_output_file_path = self.tcrmatch_files_path / f"rep_{repertoire.identifier}.tsv"
 
-        cdr3s_file = repertoire_result_path / "cdr3_aas.txt"
+        cdr3s_file = tcrmatch_infiles_for_rep_path / "cdr3_aas.txt"
         self._export_repertoire_cdr3s(cdr3s_file, repertoire)
         logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: rep cdr3s exported to {cdr3s_file}")
 
-        pairs_file = self._create_pairs_file_with_compairr(repertoire_result_path, cdr3s_file)
+        pairs_file = self._create_pairs_file_with_compairr(tcrmatch_infiles_for_rep_path, cdr3s_file)
         logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: pairs file at {pairs_file}")
 
         self._make_tcrmatch_input_files(pairs_file, tcrmatch_input_files_path)
@@ -148,7 +143,7 @@ class TCRMatchEpitopeAnalysis(DataReport):
         self._run_tcrmatch_on_each_file(tcrmatch_input_files_path, repertoire_output_file_path)
 
         if not self.keep_tmp_results:
-            shutil.rmtree(repertoire_result_path)
+            shutil.rmtree(tcrmatch_infiles_for_rep_path)
 
         return repertoire_output_file_path
 
@@ -248,6 +243,27 @@ class TCRMatchEpitopeAnalysis(DataReport):
                                                   f"The following arguments were used: {' '.join(cmd_args)}"
 
                 output_file.write(content)
+
+    def _process_tcrmatch_output_files(self, tcrmatch_files):
+        dfs = []
+
+        for file in tcrmatch_files:
+            df = pd.read_csv(file, usecols=self.cols_of_interest, sep="\t")
+
+            rep_df = df[self.cols_of_interest].value_counts().reset_index()
+
+            rep_df.rename(columns={0: "matches_per_repertoire"}, inplace=True)
+            rep_df["repertoire"] = file.stem
+
+            dfs.append(rep_df)
+
+        df = pd.concat(dfs)
+        repertoire_names = set(df["repertoire"])
+
+        df = pd.pivot(df, index=self.cols_of_interest, columns="repertoire", values="matches_per_repertoire").fillna(0)
+        df.reset_index(inplace=True)
+        df = pd.melt(df, id_vars=self.cols_of_interest, value_vars=repertoire_names)
+        return df
 
     def check_prerequisites(self):
         return True
