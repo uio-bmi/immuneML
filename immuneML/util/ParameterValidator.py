@@ -85,6 +85,16 @@ class ParameterValidator:
                                                           f"Expected: {expected_columns}\n" \
                                                           f"Found: {columns}"
     @staticmethod
+    def assert_valid_tabular_file(file_path, location: str, parameter_name: str, sep="\t", expected_columns: list=None):
+        assert Path(file_path).is_file(), f"{location}: {parameter_name} {str(file_path)} is not an existing file."
+
+        if expected_columns is not None:
+            columns = pd.read_csv(file_path, index_col=0, nrows=0, sep=sep).columns.tolist()
+            assert set(columns) == set(expected_columns), f"{location}: columns for {parameter_name} are not as expected.\n" \
+                                                          f"Expected: {expected_columns}\n" \
+                                                          f"Found: {columns}"
+
+    @staticmethod
     def assert_sequence_type(params, location: str = ""):
         assert "sequence_type" in params, f"{location}: 'sequence_type' is missing: {params}."
         assert params['sequence_type'].upper() in [st.name for st in
