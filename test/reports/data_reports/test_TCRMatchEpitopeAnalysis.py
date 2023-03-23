@@ -71,7 +71,8 @@ class TestSequenceLengthDistribution(TestCase):
                                                                                                     15: 0.33},
                                                                      labels={"HLA": {"A": 0.5, "B": 0.5},
                                                                              "CMV": {"+": 0.5, "-": 0.5}},
-                                                                     path=path)
+                                                                     path=path,
+                                                                     random_seed=2)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "tcr_match_epitope_analysis")
         params["keep_tmp_results"] = True
@@ -90,17 +91,10 @@ class TestSequenceLengthDistribution(TestCase):
 
         if compairr_path.exists() and tcrmatch_path.exists():
             result = report._generate()
+        else:
+            tcrmatch_files = self._prepare_tcrmatch_output_files(path / "tcrmatch_results",
+                                                                 identifiers=dataset.get_repertoire_ids())
 
-        tcrmatch_files = self._prepare_tcrmatch_output_files(path / "tcrmatch_results",
-                                                             identifiers=dataset.get_repertoire_ids())
-        df = report._process_tcrmatch_output_files(tcrmatch_files)
-        report._annotate_repertoire_info(df, dataset, "CMV")
-
-        df2 = report._summarize_matches(df, "CMV")
-
-        # df["CMV"] = report._determine_dataset_label_name(self.dataset)
-        # df["repertoire_size"] = report.dataset.get_metadata(["CMV"])["CMV"]
-
-        #["+", "+", "-", "-"]
+            result = report._generate_report_results(tcrmatch_files)
 
         shutil.rmtree(path)

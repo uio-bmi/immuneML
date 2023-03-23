@@ -53,7 +53,7 @@ class RandomDatasetGenerator:
 
     @staticmethod
     def generate_repertoire_dataset(repertoire_count: int, sequence_count_probabilities: dict, sequence_length_probabilities: dict,
-                                    labels: dict, path: Path) -> RepertoireDataset:
+                                    labels: dict, path: Path, random_seed=None) -> RepertoireDataset:
         """
         Creates repertoire_count repertoires where the number of sequences per repertoire is sampled from the probability distribution given
         in sequence_count_probabilities. The length of sequences is sampled independently for each sequence from
@@ -77,6 +77,7 @@ class RandomDatasetGenerator:
                 1: 0.3 # 30% of the generated repertoires will have class 1
                 0: 0.7 # 70% of the generated repertoires will have class 0
         """
+        random.seed(random_seed)
         RandomDatasetGenerator._check_rep_dataset_generation_params(repertoire_count, sequence_count_probabilities, sequence_length_probabilities,
                                                                     labels, path)
 
@@ -97,6 +98,8 @@ class RandomDatasetGenerator:
 
         repertoires, metadata = RepertoireBuilder.build(sequences=sequences, path=path, labels=processed_labels)
         dataset = RepertoireDataset(labels=dataset_params, repertoires=repertoires, metadata_file=metadata)
+
+        random.seed(None)
 
         return dataset
 
