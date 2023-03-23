@@ -182,9 +182,9 @@ class TestMatches(unittest.TestCase):
         chains = pd.read_csv(path / "report_results/sequence_info/all_chains.csv")
         unique_chains = pd.read_csv(path / "report_results/sequence_info/unique_chains.csv")
 
-        self.assertListEqual(list(matches["100_TRB"]), [10, 0])
-        self.assertListEqual(list(matches["101_TRB"]), [10, 0])
-        self.assertListEqual(list(matches["200_TRB"]), [10, 5])
+        self.assertListEqual(list(matches["TRBV1_AAAA_TRBJ1_100_TRB"]), [10, 0])
+        self.assertListEqual(list(matches["TRBV1_AAAA_TRBJ1_101_TRB"]), [10, 0])
+        self.assertListEqual(list(matches["TRBV1_TTTT_TRBJ1_200_TRB"]), [10, 5])
 
         self.assertListEqual(list(chains["sequence_id"]), ["100_TRB", "101_TRB", "200_TRB"])
         self.assertListEqual(list(unique_chains["sequence_id"]), ["100_TRB", "200_TRB"])
