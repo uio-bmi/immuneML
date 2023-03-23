@@ -32,7 +32,7 @@ class SubjectRepertoireCollector(Preprocessor):
     def __init__(self, result_path: Path = None):
         super().__init__(result_path)
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: Path = None):
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1):
         self.result_path = PathBuilder.build(result_path if result_path is not None else self.result_path)
         self.check_dataset_type(dataset, [RepertoireDataset], "SubjectRepertoireCollector")
 

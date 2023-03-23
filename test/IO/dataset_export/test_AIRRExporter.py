@@ -46,7 +46,7 @@ class TestAIRRExporter(TestCase):
                                                                                       "custom_test": "cust2"}))]
 
         repertoire = Repertoire.build_from_sequence_objects(sequence_objects=sequence_objects, path=path, metadata={"subject_id": "REP1"})
-        df = pd.DataFrame({"filename": [f"{repertoire.identifier}_data.npy"], "subject_id": ["1"],
+        df = pd.DataFrame({"filename": [f"{repertoire.identifier}_data.npy"], "subject_id": ["REP1"],
                            "repertoire_identifier": [repertoire.identifier]})
         df.to_csv(path / "metadata.csv", index=False)
 
@@ -61,7 +61,7 @@ class TestAIRRExporter(TestCase):
         path_exported = path / "exported"
         AIRRExporter.export(dataset, path_exported)
 
-        resulting_data = pd.read_csv(path_exported / f"repertoires/{repertoire.identifier}.tsv", sep="\t")
+        resulting_data = pd.read_csv(path_exported / f"repertoires/{repertoire.metadata['subject_id']}.tsv", sep="\t")
 
         self.assertListEqual(list(resulting_data["sequence_id"]), ["receptor_1", "receptor_2"])
         self.assertListEqual(list(resulting_data["cdr3"]), ["GCTGCTGCT", "GGTGGTGGT"])

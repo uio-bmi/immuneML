@@ -59,6 +59,12 @@
         <div class="table-container padded">
             {{{predictions}}}
         </div>
+        {{#show_metrics}}
+        <h3>Metrics <small>(<a href="{{metrics_download_link}}">download link</a>)</small></h3>
+        <div class="table-container padded">
+            {{{metrics}}}
+        </div>
+        {{/show_metrics}}
     </div>
 </body>
 </html>

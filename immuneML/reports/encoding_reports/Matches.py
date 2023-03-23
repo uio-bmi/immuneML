@@ -76,7 +76,8 @@ class Matches(EncodingReport):
                             output_tables=output_tables)
 
     def _write_match_table(self):
-        id_df = pd.DataFrame({"repertoire_id": self.dataset.encoded_data.example_ids})
+        id_df = pd.DataFrame({"repertoire_id": self.dataset.encoded_data.example_ids,
+                              'subject_id': self.dataset.get_subject_ids()})
         label_df = pd.DataFrame(self.dataset.encoded_data.labels)
         matches_df = pd.DataFrame(self.dataset.encoded_data.examples, columns=self.dataset.encoded_data.feature_names)
 
