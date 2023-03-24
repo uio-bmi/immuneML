@@ -165,17 +165,17 @@ class TCRMatchEpitopeAnalysis(DataReport):
         cdr3s_file = tcrmatch_infiles_for_rep_path / "cdr3_aas.txt"
         self._export_repertoire_cdr3s(cdr3s_file, repertoire)
 
-        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: Creating pairs file with CompAIRR...")
+        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: repertoire {repertoire.identifier}: Creating pairs file with CompAIRR...")
         pairs_file = self._create_pairs_file_with_compairr(tcrmatch_infiles_for_rep_path, cdr3s_file)
-        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: ...done")
+        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: repertoire {repertoire.identifier}: Pairs file done.")
 
-        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: Making TCRMatch input files...")
+        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: repertoire {repertoire.identifier}: Making TCRMatch input files...")
         self._make_tcrmatch_input_files(pairs_file, tcrmatch_input_files_path)
-        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: ...done")
+        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: repertoire {repertoire.identifier}: TCRMatch input files done.")
 
-        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: Running TCRMatch...")
+        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: repertoire {repertoire.identifier}: Running TCRMatch...")
         self._run_tcrmatch_on_each_file(tcrmatch_input_files_path, repertoire_output_file_path)
-        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: ...done")
+        logging.info(f"{TCRMatchEpitopeAnalysis.__name__}: repertoire {repertoire.identifier}: TCRMatch done.")
 
         if not self.keep_tmp_results:
             shutil.rmtree(tcrmatch_infiles_for_rep_path)
@@ -321,7 +321,7 @@ class TCRMatchEpitopeAnalysis(DataReport):
 
         df = df.groupby(self.cols_of_interest + [label_name])[value_column].aggregate(summary_stats).reset_index()
         df = pd.pivot(df, index=self.cols_of_interest, columns=[label_name], values=summary_stats).reset_index()
-        df.columns = ["_".join(col).rstrip("_") for col in df.columns.values]
+        df.columns = ["_".join([str(name) for name in col]).rstrip("_") for col in df.columns.values]
 
         for label_class in classes:
             df[f"error_{label_class}_plus"] = df[f"max_{label_class}"] - df[f"mean_{label_class}"]
