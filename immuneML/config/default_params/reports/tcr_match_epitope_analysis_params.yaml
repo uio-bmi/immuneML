@@ -5,3 +5,7 @@ indels: False
 threads: 1
 threshold: 0.97
 keep_tmp_results: False
+normalize_matches: True
+match_columns:
+  - organism
+  - antigen

@@ -70,7 +70,7 @@ class TestSequenceLengthDistribution(TestCase):
                                                                                                     14: 0.33,
                                                                                                     15: 0.33},
                                                                      labels={"HLA": {"A": 0.5, "B": 0.5},
-                                                                             "CMV": {"+": 0.5, "-": 0.5}},
+                                                                             "CMV": {"1": 0.5, "0": 0.5}},
                                                                      path=path,
                                                                      random_seed=2)
 
@@ -80,21 +80,28 @@ class TestSequenceLengthDistribution(TestCase):
         params["result_path"] = path
         params["iedb_file"] = str(iedb_file)
 
-        compairr_path = Path("/usr/local/bin/compairr")
-        tcrmatch_path = Path("/usr/local/bin/tcrmatch")
-        params["compairr_path"] = str(compairr_path)
-        params["tcrmatch_path"] = str(tcrmatch_path)
-
         report = TCRMatchEpitopeAnalysis(**params)
 
         # result = report._generate()
 
-        if compairr_path.exists() and tcrmatch_path.exists():
-            result = report._generate()
-        else:
-            tcrmatch_files = self._prepare_tcrmatch_output_files(path / "tcrmatch_results",
+        tcrmatch_files = self._prepare_tcrmatch_output_files(path / "tcrmatch_results",
                                                                  identifiers=dataset.get_repertoire_ids())
 
-            result = report._generate_report_results(tcrmatch_files)
+        result = report._generate_report_results(tcrmatch_files)
+
+        self.assertTrue(os.path.isfile(path / "tcrmatch_per_repertoire.tsv"))
+
+        self.assertTrue(os.path.isfile(path / "label=CMV_organism=SARS-CoV2_antigen=nucleocapsid phosphoprotein [Severe acute respiratory syndrome coronavirus 2].html"))
+        self.assertTrue(os.path.isfile(path / "label=CMV_organism=SARS-CoV2_antigen=orf1ab polyprotein [Severe acute respiratory syndrome coronavirus 2].html"))
+        self.assertTrue(os.path.isfile(path / "label=CMV_organism=SARS-CoV2_antigen=ORF7b [Severe acute respiratory syndrome coronavirus 2].html"))
+        self.assertTrue(os.path.isfile(path / "label=CMV_organism=SARS-CoV2_antigen=surface glycoprotein [Severe acute respiratory syndrome coronavirus 2].html"))
+        self.assertTrue(os.path.isfile(path / "label=CMV_tcrmatch_summary.tsv"))
+        self.assertTrue(os.path.isfile(path / "tcrmatch_summary_label=CMV_0_vs_1.html"))
+
+        self.assertTrue(os.path.isfile(path / "label=HLA_organism=SARS-CoV2_antigen=nucleocapsid phosphoprotein [Severe acute respiratory syndrome coronavirus 2].html"))
+        self.assertTrue(os.path.isfile(path / "label=HLA_organism=SARS-CoV2_antigen=orf1ab polyprotein [Severe acute respiratory syndrome coronavirus 2].html"))
+        self.assertTrue(os.path.isfile(path / "label=HLA_organism=SARS-CoV2_antigen=ORF7b [Severe acute respiratory syndrome coronavirus 2].html"))
+        self.assertTrue(os.path.isfile(path / "label=HLA_organism=SARS-CoV2_antigen=surface glycoprotein [Severe acute respiratory syndrome coronavirus 2].html"))
+        self.assertTrue(os.path.isfile(path / "label=HLA_tcrmatch_summary.tsv"))
 
         shutil.rmtree(path)

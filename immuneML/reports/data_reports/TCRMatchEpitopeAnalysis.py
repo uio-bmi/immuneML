@@ -23,23 +23,75 @@ import shutil
 
 class TCRMatchEpitopeAnalysis(DataReport):
     """
+    This report uses a pipeline with `CompAIRR <https://github.com/uio-bmi/compairr/>`_ and
+    `TCRMatch <https://github.com/IEDB/TCRMatch>`_ in order to match an entire RepertoireDataset to the IEDB.
+
+    First, CompAIRR is used as a pre-filter to keep only those sequences in the IEDB within a given distance from
+    the sequences in the repertoire. The parameters 'distance' and 'indels' can be used to regulate how many sequences
+    are kept during this pre-filtering step.
+    Subsequently, TCRMatch is used to compute a distance between the pre-filtered IEDB sequences and the repertoire
+    sequences. Only sequences with a TCRMatch score above the given 'threshold' are kept.
+
+    The individual TCRMatch results files per repertoire are returned as one of the report results.
+    Furthermore, a basic exploratory analysis is performed by counting how many IEDB matches were observed
+    for each repertoire. Matches are grouped by user-defined levels (see the 'match_columns' parameter for details).
+    The distribution of matches for each 'match_columns' value is plotted (e.g., plotting the distribution of matches
+    to all SARS-COV2 epitopes across all repertoires).
+
+    If a label is provided, these distributions will be separated according to the different classes.
+    Furthermore, the mean, min and max number of matches for the defined level
+    is computed for each label class. If the label is binary, these values are displayed in a plot.
+
+    References:
+
+        Rognes T, Scheffer L, Greiff V, Sandve GK (2021)
+        "CompAIRR: ultra-fast comparison of adaptive immune receptor repertoires by exact and approximate sequence matching."
+        Bioinformatics, btac505. doi:10.1093/bioinformatics/btac505
+
+        Chronister, William D. et al.
+        "Tcrmatch: Predicting T-Cell Receptor Specificity Based On Sequence Similarity To Previously Characterized Receptors".
+        Frontiers In Immunology, vol 12, 2021. Frontiers Media SA, doi:10.3389/fimmu.2021.640725.
+
 
     Arguments:
 
-        compairr_path (str):
+        compairr_path (str): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
+        has been installed such that it can be called directly on the command line with the command 'compairr',
+        or that it is located at /usr/local/bin/compairr.
 
-        tcrmatch_path (str):
+        tcrmatch_path (str): optional path to the TCRMatch executable. If not given, it is assumed that TCRMatch
+        has been installed such that it can be called directly on the command line with the command 'tcrmatch'.
 
         iedb_file (str):
 
-        differences (int):
+        differences (int): Number of differences allowed between the sequences of two immune receptor chains when running CompAIRR.
+        By default, differences is 0.
 
-        indels (bool):
+        indels (bool): Whether to allow an indel when running CompAIRR. This is only possible if differences is 1.
+        By default, indels is False.
 
-        threads (int):
+        threads (int): The number of threads to use for parallelization when running CompAIRR. Default is 1.
 
+        threshold (float): The TCRMatch score threshold. Only sequences with a score above the threshold are reported.
+        By default, the threshold is 0.97.
 
+        normalize_matches (bool): Whether to normalize the number of matches by dividing them by the total repertoire size.
+        Note: the result is not necessarily the exact same as a 'fraction of sequences in the repertoire matched', as the same
+        repertoire sequence can match with multiple different IEDB sequences. By default, normalize_matches is True.
 
+        keep_tmp_results (bool): Whether to keep temporary intermediate results such as TCRMatch input files.
+        By default, keep_tmp_results is False
+
+        match_columns (list): List of column names for which matches should be counted. The list may contain any
+        of the following values: organism, antigen, epitope, receptor_group.
+        The counted matches are aggregated according to the values of this list. For example, when specifying [organism, antigen],
+        this report will count how often a repertoire contains a match with any sequence with a given combination of
+        organism and antigen (e.g., 'SARS-COV2' and 'orf1ab polyprotein'), whereas when only [organism] is specified,
+        matches would only be aggregated at this level ('SARS-COV2').
+        It is highly recommended to include all 'higher' levels of matching in the query, i.e., when 'antigen' is specified,
+        one should also specify 'organism', otherwise matches to for example 'orf1ab polyprotein' in any organism are
+        aggregated together. Levels are ordered like: organism > antigen > epitope > receptor_group.
+        By default, match_columns is [organism, antigen]
 
 
     YAML specification:
@@ -54,8 +106,8 @@ class TCRMatchEpitopeAnalysis(DataReport):
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, iedb_file: Path = None,
                  compairr_path: Path = None, tcrmatch_path: Path = None,
-                 differences: int = None, indels: bool = None, threads: int = None, chunk_size: int = 100000,
-                 threshold: float = None, keep_tmp_results: bool = None,
+                 differences: int = None, indels: bool = None, threads: int = None, match_columns: list = None,
+                 threshold: float = None, normalize_matches: bool = None, keep_tmp_results: bool = None,
                  number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.compairr_path = compairr_path
@@ -65,11 +117,11 @@ class TCRMatchEpitopeAnalysis(DataReport):
         self.indels = indels
         self.threshold = threshold
         self.threads = threads
-        self.chunk_size = chunk_size
         self.keep_tmp_results = keep_tmp_results
-        self.cols_of_interest = ["organism", "antigen"] # todo make user setting
-        self.label_name = None # todo make this optional to choose
-        self.normalize_matches = True # todo make this optional
+        self.match_columns = match_columns
+        self.normalize_matches = normalize_matches
+
+        self.chunk_size = 100000
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -90,8 +142,11 @@ class TCRMatchEpitopeAnalysis(DataReport):
         ParameterValidator.assert_type_and_value(kwargs["differences"], int, location, "differences", min_inclusive=0)
         ParameterValidator.assert_type_and_value(kwargs["indels"], bool, location, "indels")
         ParameterValidator.assert_type_and_value(kwargs["keep_tmp_results"], bool, location, "keep_tmp_results")
+        ParameterValidator.assert_type_and_value(kwargs["normalize_matches"], bool, location, "normalize_matches")
         ParameterValidator.assert_type_and_value(kwargs["threads"], int, location, "threads", min_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["threshold"], float, location, "threshold", min_exclusive=0, max_exclusive=1)
+        ParameterValidator.assert_type_and_value(kwargs["match_columns"], list, location, "match_columns")
+        ParameterValidator.assert_all_in_valid_list(kwargs["match_columns"], ["organism", "antigen", "epitope", "receptor_group"], location, "match_columns")
 
         return TCRMatchEpitopeAnalysis(**kwargs)
 
@@ -279,9 +334,9 @@ class TCRMatchEpitopeAnalysis(DataReport):
         dfs = []
 
         for file in tcrmatch_files:
-            df = pd.read_csv(file, usecols=self.cols_of_interest, sep="\t")
+            df = pd.read_csv(file, usecols=self.match_columns, sep="\t")
 
-            rep_df = df[self.cols_of_interest].value_counts().reset_index()
+            rep_df = df[self.match_columns].value_counts().reset_index()
 
             rep_df.rename(columns={0: "repertoire_matches"}, inplace=True)
             rep_df["repertoire"] = file.stem
@@ -291,9 +346,9 @@ class TCRMatchEpitopeAnalysis(DataReport):
         df = pd.concat(dfs)
         repertoire_names = set(df["repertoire"])
 
-        df = pd.pivot(df, index=self.cols_of_interest, columns="repertoire", values="repertoire_matches").fillna(0)
+        df = pd.pivot(df, index=self.match_columns, columns="repertoire", values="repertoire_matches").fillna(0)
         df.reset_index(inplace=True)
-        df = pd.melt(df, id_vars=self.cols_of_interest, value_vars=repertoire_names, value_name="repertoire_matches")
+        df = pd.melt(df, id_vars=self.match_columns, value_vars=repertoire_names, value_name="repertoire_matches")
         return df
 
     def _annotate_repertoire_info(self, df, dataset):
@@ -319,8 +374,8 @@ class TCRMatchEpitopeAnalysis(DataReport):
         value_column = "normalized_repertoire_matches" if self.normalize_matches else "repertoire_matches"
         classes = set(df[label_name])
 
-        df = df.groupby(self.cols_of_interest + [label_name])[value_column].aggregate(summary_stats).reset_index()
-        df = pd.pivot(df, index=self.cols_of_interest, columns=[label_name], values=summary_stats).reset_index()
+        df = df.groupby(self.match_columns + [label_name])[value_column].aggregate(summary_stats).reset_index()
+        df = pd.pivot(df, index=self.match_columns, columns=[label_name], values=summary_stats).reset_index()
         df.columns = ["_".join([str(name) for name in col]).rstrip("_") for col in df.columns.values]
 
         for label_class in classes:
@@ -337,8 +392,8 @@ class TCRMatchEpitopeAnalysis(DataReport):
 
         report_outputs = []
 
-        for features, feature_df in match_df.groupby(self.cols_of_interest):
-            feature_strings = [f"{name}={value}" for name, value in zip(self.cols_of_interest, features)]
+        for features, feature_df in match_df.groupby(self.match_columns):
+            feature_strings = self._get_feature_strings(features)
 
             fig = px.violin(feature_df, x=label_name, y=y_col, color=label_name, points='all', box=True,
                             color_discrete_sequence=self._get_color_discrete_sequence(feature_df, label_name),
@@ -354,6 +409,12 @@ class TCRMatchEpitopeAnalysis(DataReport):
                                                name=f"Matches per repertoire for {report_output_name_suffix}{', '.join(feature_strings)}"))
 
         return report_outputs
+
+    def _get_feature_strings(self, features):
+        if type(features) is str and len(self.match_columns) == 1:
+            return [f"{self.match_columns[0]}={features}"]
+
+        return [f"{name}={value}" for name, value in zip(self.match_columns, features)]
 
     def _get_color_discrete_sequence(self, feature_df, label_name):
         if label_name is not None and label_name in feature_df:
@@ -375,7 +436,7 @@ class TCRMatchEpitopeAnalysis(DataReport):
                          range_x=[0, max_axis], range_y=[0, max_axis],
                          labels={f"mean_{classes[0]}": f"{matches_str} for {label_name}={classes[0]} repertoires",
                                  f"mean_{classes[1]}": f"{matches_str} for {label_name}={classes[1]} repertoires"},
-                         hover_data=self.cols_of_interest)
+                         hover_data=self.match_columns)
 
         fig.update_traces(marker_color="rgb(0, 147, 146)",
                           error_x_color="rgba(114, 170, 161, 0.4)",
