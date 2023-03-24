@@ -30,13 +30,16 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     the resulting p-values, and the significantly abundant sequences
     (use :py:obj:`~immuneML.reports.encoding_reports.RelevantSequenceExporter.RelevantSequenceExporter` to export these sequences in AIRR format).
 
-    Reference: Emerson, Ryan O. et al.
-    ‘Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire’.
-    Nature Genetics 49, no. 5 (May 2017): 659–65. `doi.org/10.1038/ng.3822 <https://doi.org/10.1038/ng.3822>`_.
-
     Note: to use this encoder, it is necessary to explicitly define the positive class for the label when defining the label
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
     For full example of using this encoder, see :ref:`Reproduction of the CMV status predictions study`.
+
+    References:
+
+        Emerson, Ryan O. et al.
+        "Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire"
+        Nature Genetics 49, no. 5 (May 2017): 659–65. `doi.org/10.1038/ng.3822 <https://doi.org/10.1038/ng.3822>`_.
+
 
     Arguments:
 

@@ -28,10 +28,16 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
     When mismatches (differences and indels) are allowed, the Morisita-Horn similarity may exceed 1. In this case, the
     Morisita-Horn distance (= similarity - 1) is set to 0 to avoid negative distance scores.
 
+    References:
+
+        Rognes T, Scheffer L, Greiff V, Sandve GK (2021)
+        "CompAIRR: ultra-fast comparison of adaptive immune receptor repertoires by exact and approximate sequence matching."
+        Bioinformatics, btac505. doi:10.1093/bioinformatics/btac505
+
 
     Arguments:
 
-        compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
+        compairr_path (str): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
         has been installed such that it can be called directly on the command line with the command 'compairr',
         or that it is located at /usr/local/bin/compairr.
 
