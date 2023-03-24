@@ -35,29 +35,13 @@ class ReflectionHandler:
         return ReflectionHandler._import_class(path, class_name)
 
     @staticmethod
-    def _import_tool_class(path: Path, class_name: str):
-        spec = util.spec_from_file_location(class_name, path)
-        foo = util.module_from_spec(spec)
-        spec.loader.exec_module(foo)
-        cls = getattr(foo, class_name)
+    def _import_class(path: Path, class_name: str):
+        module_path = ".".join(path.parts[len(list(path.parts)) - list(path.parts)[::-1].index("immuneML") - 1:])[
+                      :-3]
+        mod = import_module(module_path)
+        cls = getattr(mod, class_name)
 
         return cls
-
-    @staticmethod
-    def _import_class(path: Path, class_name: str):
-
-        # TODO: check that the index of "immuneML" in path is on the correct place. The user may have the tools in
-        #  another folder with the same name
-        if str(EnvironmentSettings.root_path) + "/immuneML/" not in str(path):
-            cls = ReflectionHandler._import_tool_class(path, class_name)
-            return cls
-        else:
-            module_path = ".".join(path.parts[len(list(path.parts)) - list(path.parts)[::-1].index("immuneML") - 1:])[
-                          :-3]
-            mod = import_module(module_path)
-            cls = getattr(mod, class_name)
-
-            return cls
 
     @staticmethod
     def get_class_by_name(class_name: str, subdirectory: str = ""):
@@ -72,9 +56,6 @@ class ReflectionHandler:
     def _get_filenames(class_name: str, subdirectory_name: str = "", partial=False):
         pattern = f"immuneML/**/*{class_name}.py" if partial else f"immuneML/**/{class_name}.py"
         filenames = list(EnvironmentSettings.root_path.glob(pattern))
-        # append all python files located in tool directory to filenames
-        for a in glob.glob(EnvironmentSettings.tool_path + f"/**/*{class_name}.py"):
-            filenames.append(Path(a))
         filenames = [f for f in filenames if subdirectory_name in "/".join(f.parts)]
 
         return filenames

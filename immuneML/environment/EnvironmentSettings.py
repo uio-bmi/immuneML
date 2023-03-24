@@ -21,7 +21,6 @@ class EnvironmentSettings:
     tmp_test_path = root_path / "test/tmp"
     default_analysis_path = root_path / "analysis_runs"
     cache_path = root_path / "cache"
-    tool_path = ""
     tmp_cache_path = tmp_test_path / "cache"
     html_templates_path = root_path / "immuneML/presentation/html/templates"
     specs_docs_path = root_path / "docs/specs"

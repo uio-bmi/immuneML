@@ -147,7 +147,6 @@ class ImmuneMLParser:
 
         # temporary solution. Adds tool folder to environment which is used when importing
         # packages that is located outside the core
-        # EnvironmentSettings.set_tool_path(symbol_table.get_by_type(SymbolType.TOOL)[0].item["path"])
         # workflow_specification = get_dataset(symbol_table, workflow_specification)
 
         def_parser_output, specs_defs = DefinitionParser.parse(workflow_specification, symbol_table, result_path)
