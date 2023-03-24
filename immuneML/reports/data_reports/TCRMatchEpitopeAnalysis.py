@@ -191,7 +191,6 @@ class TCRMatchEpitopeAnalysis(DataReport):
                                                     classes=classes,
                                                     summary_df=summarized_match_df))
 
-            self._plot_violin_per_feature(full_match_df, label_name)
             new_feature_plots = self._safe_plot(plot_callable="_plot_violin_per_feature",
                                                 match_df=full_match_df,
                                                 label_name=label_name)
