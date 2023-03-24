@@ -79,6 +79,7 @@ class TestSequenceLengthDistribution(TestCase):
         params["keep_tmp_results"] = True
         params["dataset"] = dataset
         params["result_path"] = path
+        # params["match_columns"] = ["organism"]
         params["iedb_file"] = str(iedb_file)
 
         report = TCRMatchEpitopeAnalysis(**params)
@@ -92,27 +93,19 @@ class TestSequenceLengthDistribution(TestCase):
 
         self.assertTrue(os.path.isfile(path / "tcrmatch_per_repertoire.tsv"))
 
-        # self.assertTrue(os.path.isfile(path / "label=CMV_organism=SARS-CoV2_antigen=nucleocapsid phosphoprotein [Severe acute respiratory syndrome coronavirus 2].html"))
-        # self.assertTrue(os.path.isfile(path / "label=CMV_organism=SARS-CoV2_antigen=orf1ab polyprotein [Severe acute respiratory syndrome coronavirus 2].html"))
-        # self.assertTrue(os.path.isfile(path / "label=CMV_organism=SARS-CoV2_antigen=ORF7b [Severe acute respiratory syndrome coronavirus 2].html"))
-        # self.assertTrue(os.path.isfile(path / "label=CMV_organism=SARS-CoV2_antigen=surface glycoprotein [Severe acute respiratory syndrome coronavirus 2].html"))
-        self.assertTrue(os.path.isfile(path / "label=CMV_1.html"))
-        self.assertTrue(os.path.isfile(path / "label=CMV_2.html"))
-        self.assertTrue(os.path.isfile(path / "label=CMV_3.html"))
-        self.assertTrue(os.path.isfile(path / "label=CMV_4.html"))
-        self.assertTrue(os.path.isfile(path / "label=CMV_5.html"))
+        self.assertTrue(os.path.isfile(path / "label=CMV_feature_id=1.html"))
+        self.assertTrue(os.path.isfile(path / "label=CMV_feature_id=2.html"))
+        self.assertTrue(os.path.isfile(path / "label=CMV_feature_id=3.html"))
+        self.assertTrue(os.path.isfile(path / "label=CMV_feature_id=4.html"))
+        self.assertTrue(os.path.isfile(path / "label=CMV_feature_id=5.html"))
         self.assertTrue(os.path.isfile(path / "label=CMV_tcrmatch_summary.tsv"))
         self.assertTrue(os.path.isfile(path / "tcrmatch_summary_label=CMV_0_vs_1.html"))
-        #
-        # self.assertTrue(os.path.isfile(path / "label=HLA_organism=SARS-CoV2_antigen=nucleocapsid phosphoprotein [Severe acute respiratory syndrome coronavirus 2].html"))
-        # self.assertTrue(os.path.isfile(path / "label=HLA_organism=SARS-CoV2_antigen=orf1ab polyprotein [Severe acute respiratory syndrome coronavirus 2].html"))
-        # self.assertTrue(os.path.isfile(path / "label=HLA_organism=SARS-CoV2_antigen=ORF7b [Severe acute respiratory syndrome coronavirus 2].html"))
-        # self.assertTrue(os.path.isfile(path / "label=HLA_organism=SARS-CoV2_antigen=surface glycoprotein [Severe acute respiratory syndrome coronavirus 2].html"))
-        self.assertTrue(os.path.isfile(path / "label=HLA_1.html"))
-        self.assertTrue(os.path.isfile(path / "label=HLA_2.html"))
-        self.assertTrue(os.path.isfile(path / "label=HLA_3.html"))
-        self.assertTrue(os.path.isfile(path / "label=HLA_4.html"))
-        self.assertTrue(os.path.isfile(path / "label=HLA_5.html"))
+
+        self.assertTrue(os.path.isfile(path / "label=HLA_feature_id=1.html"))
+        self.assertTrue(os.path.isfile(path / "label=HLA_feature_id=2.html"))
+        self.assertTrue(os.path.isfile(path / "label=HLA_feature_id=3.html"))
+        self.assertTrue(os.path.isfile(path / "label=HLA_feature_id=4.html"))
+        self.assertTrue(os.path.isfile(path / "label=HLA_feature_id=5.html"))
         self.assertTrue(os.path.isfile(path / "label=HLA_tcrmatch_summary.tsv"))
 
-        shutil.rmtree(path)
+        # shutil.rmtree(path)

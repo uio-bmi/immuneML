@@ -149,6 +149,8 @@ class TCRMatchEpitopeAnalysis(DataReport):
         ParameterValidator.assert_type_and_value(kwargs["match_columns"], list, location, "match_columns")
         ParameterValidator.assert_all_in_valid_list(kwargs["match_columns"], ["organism", "antigen", "epitope", "receptor_group"], location, "match_columns")
 
+        assert len(kwargs["match_columns"]) > 0, f"{location}: match_columns was an empty list, but should contain one or multiple of the following: organism, antigen, epitope, receptor_group"
+
         return TCRMatchEpitopeAnalysis(**kwargs)
 
     @staticmethod
@@ -202,6 +204,8 @@ class TCRMatchEpitopeAnalysis(DataReport):
             feature_plots.extend(self._safe_plot(plot_callable="_plot_violin_per_feature",
                                                  match_df=full_match_df,
                                                  label_name=None))
+
+        output_tables.append(self._export_features_dict())
 
         return ReportResult(name=self.name,
                             info="TCRMatch matches per repertoire",
@@ -357,6 +361,7 @@ class TCRMatchEpitopeAnalysis(DataReport):
 
     def _annotate_repertoire_info(self, df, dataset):
         self._annotate_repertoire_sizes(df, dataset)
+        self._annotate_subject_ids(df, dataset)
 
         for label_name in dataset.get_label_names():
             self._annotate_repertoire_classes(df, dataset, label_name)
@@ -364,7 +369,16 @@ class TCRMatchEpitopeAnalysis(DataReport):
     def _annotate_repertoire_sizes(self, df, dataset):
         repertoire_sizes = {repertoire.identifier: repertoire.get_element_count() for repertoire in dataset.get_data()}
         df["repertoire_size"] = df["repertoire"].replace(repertoire_sizes)
+
         df["normalized_repertoire_matches"] = df["repertoire_matches"] / df["repertoire_size"]
+
+    def _annotate_subject_ids(self, df, dataset):
+        repertoire_metadata = dataset.get_metadata(["subject_id", "identifier"])
+
+        subject_ids = {identifier: subject_id for identifier, subject_id in
+                       zip(repertoire_metadata["identifier"], repertoire_metadata["subject_id"])}
+
+        df["subject_id"] = df["repertoire"].replace(subject_ids)
 
     def _annotate_repertoire_classes(self, df, dataset, label_name):
         repertoire_metadata = dataset.get_metadata([label_name, "identifier"])
@@ -402,11 +416,11 @@ class TCRMatchEpitopeAnalysis(DataReport):
             fig = px.violin(feature_df, x=label_name, y=y_col, color=label_name, points='all', box=True,
                             color_discrete_sequence=self._get_color_discrete_sequence(feature_df, label_name),
                             labels={y_col: y_col_name}, title="<br>".join(feature_strings),
-                            hover_data=["repertoire", "repertoire_matches",
+                            hover_data=["repertoire", "repertoire_matches", "subject_id",
                                         "normalized_repertoire_matches", "repertoire_size"])
             fig.update_traces(meanline_visible=True)
 
-            filename = f"{filename_prefix}{self.features_to_id('_'.join(feature_strings))}.html"
+            filename = f"{filename_prefix}feature_id={self.features_to_id(features)}.html"
             figure_path = str(self.result_path / filename)
             fig.write_html(figure_path)
 
@@ -415,27 +429,17 @@ class TCRMatchEpitopeAnalysis(DataReport):
 
         return report_outputs
 
-    def features_to_id(self, feature_str):
-        # todo: need to also export a tsv file translating the IDs to the features
-        #   should be exported based on this dict
-
+    def features_to_id(self, features):
         if self.feature_dict is None:
-            self.feature_dict = {feature_str: 1}
+            self.feature_dict = {features: 1}
             return 1
 
-        if feature_str in self.feature_dict:
-            return self.feature_dict[feature_str]
+        if features in self.feature_dict:
+            return self.feature_dict[features]
         else:
             new_id = max(self.feature_dict.values()) + 1
-            self.feature_dict[feature_str] = new_id
+            self.feature_dict[features] = new_id
             return new_id
-
-    # def _get_feature_dict(self, features):
-    #     if type(features) is str and len(self.match_columns) == 1:
-    #         return {self.match_columns[0]: features}
-    #         # return [f"{self.match_columns[0]}={features}"]
-    #
-    #     return {name: value for name, value in zip(self.match_columns, features)}
 
     def _get_feature_strings(self, features):
         if type(features) is str and len(self.match_columns) == 1:
@@ -478,6 +482,27 @@ class TCRMatchEpitopeAnalysis(DataReport):
         fig.write_html(figure_path)
 
         return ReportOutput(path=Path(figure_path), name=f"TCRMatch summary label={label_name}, {classes[0]} vs {classes[1]}")
+
+    def _export_features_dict(self):
+        data = {"id": []}
+        for column in self.match_columns:
+            data[column] = []
+
+        if len(self.match_columns) == 1:
+            for feature, id in self.feature_dict.items():
+                data["id"].append(id)
+                data[self.match_columns[0]].append(feature)
+        else:
+            for features, id in self.feature_dict.items():
+                data["id"].append(id)
+
+                for i in range(len(self.match_columns)):
+                    data[self.match_columns[i]].append(features[i])
+
+        df = pd.DataFrame(data)
+
+        return self._write_output_table(df, self.result_path / "feature_identifiers.tsv", name=f"Mapping between features ({', '.join(self.match_columns)}) and their identifiers used in filenames.")
+
 
     def check_prerequisites(self):
         if isinstance(self.dataset, RepertoireDataset):
