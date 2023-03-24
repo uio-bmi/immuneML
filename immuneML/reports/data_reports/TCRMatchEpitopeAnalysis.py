@@ -120,6 +120,7 @@ class TCRMatchEpitopeAnalysis(DataReport):
         self.keep_tmp_results = keep_tmp_results
         self.match_columns = match_columns
         self.normalize_matches = normalize_matches
+        self.feature_dict = None
 
         self.chunk_size = 100000
 
@@ -190,9 +191,13 @@ class TCRMatchEpitopeAnalysis(DataReport):
                                                     classes=classes,
                                                     summary_df=summarized_match_df))
 
-            feature_plots.extend(self._safe_plot(plot_callable="_plot_violin_per_feature",
-                                                 match_df=full_match_df,
-                                                 label_name=label_name))
+            self._plot_violin_per_feature(full_match_df, label_name)
+            new_feature_plots = self._safe_plot(plot_callable="_plot_violin_per_feature",
+                                                match_df=full_match_df,
+                                                label_name=label_name)
+
+            if new_feature_plots is not None:
+                feature_plots.extend(new_feature_plots)
 
         if len(self.dataset.get_label_names()) == 0:
             feature_plots.extend(self._safe_plot(plot_callable="_plot_violin_per_feature",
@@ -402,13 +407,36 @@ class TCRMatchEpitopeAnalysis(DataReport):
                                         "normalized_repertoire_matches", "repertoire_size"])
             fig.update_traces(meanline_visible=True)
 
-            figure_path = str(self.result_path / f"{filename_prefix}{'_'.join(feature_strings)}.html")
+            filename = f"{filename_prefix}{self.features_to_id('_'.join(feature_strings))}.html"
+            figure_path = str(self.result_path / filename)
             fig.write_html(figure_path)
 
             report_outputs.append(ReportOutput(path=Path(figure_path),
                                                name=f"Matches per repertoire for {report_output_name_suffix}{', '.join(feature_strings)}"))
 
         return report_outputs
+
+    def features_to_id(self, feature_str):
+        # todo: need to also export a tsv file translating the IDs to the features
+        #   should be exported based on this dict
+
+        if self.feature_dict is None:
+            self.feature_dict = {feature_str: 1}
+            return 1
+
+        if feature_str in self.feature_dict:
+            return self.feature_dict[feature_str]
+        else:
+            new_id = max(self.feature_dict.values()) + 1
+            self.feature_dict[feature_str] = new_id
+            return new_id
+
+    # def _get_feature_dict(self, features):
+    #     if type(features) is str and len(self.match_columns) == 1:
+    #         return {self.match_columns[0]: features}
+    #         # return [f"{self.match_columns[0]}={features}"]
+    #
+    #     return {name: value for name, value in zip(self.match_columns, features)}
 
     def _get_feature_strings(self, features):
         if type(features) is str and len(self.match_columns) == 1:

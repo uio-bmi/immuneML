@@ -32,6 +32,7 @@ class TestSequenceLengthDistribution(TestCase):
 
         with open(filepaths[0], "w") as file:
             file.writelines(["input_sequence	match_sequence	score	receptor_group	epitope	antigen	organism\n",
+                             "ASSQEFGAGLQLETQY	ASSQEFGAGLQLETQY	1.0000	119379	HTTDPSFLGRY	nonstructural protein 3,Nonstructural protein NS3,Nonstructural protein NS3,polyprotein	Dengue virus 1 (dengue type 1 D1 virus),Dengue virus 3 (Dengue virus serotype 3),Dengue virus 2 Thailand/16681/84 (Dengue virus type 2 (strain 16681)),Dengue virus 2 (dengue 2 virus DEN-2)\n",
                              "ASSQEFGAGLQLETQY	ASSQEFGAGLQLETQY	1.0000	119379	HTTDPSFLGRY	orf1ab polyprotein [Severe acute respiratory syndrome coronavirus 2]	SARS-CoV2\n",
                              "ASSPPPGTYSYEQY	ASSPPPGTYSYEQY	1.0000	110991	MIELSLIDFYLCFLAFLLFLVLIML	ORF7b [Severe acute respiratory syndrome coronavirus 2]	SARS-CoV2\n",
                              "ASSDSGYSYNEQF	ASSDSGYSYNEQF	1.0000	80456	AELAKNVSLDNVL	orf1ab polyprotein [Severe acute respiratory syndrome coronavirus 2]	SARS-CoV2\n"])
@@ -91,17 +92,27 @@ class TestSequenceLengthDistribution(TestCase):
 
         self.assertTrue(os.path.isfile(path / "tcrmatch_per_repertoire.tsv"))
 
-        self.assertTrue(os.path.isfile(path / "label=CMV_organism=SARS-CoV2_antigen=nucleocapsid phosphoprotein [Severe acute respiratory syndrome coronavirus 2].html"))
-        self.assertTrue(os.path.isfile(path / "label=CMV_organism=SARS-CoV2_antigen=orf1ab polyprotein [Severe acute respiratory syndrome coronavirus 2].html"))
-        self.assertTrue(os.path.isfile(path / "label=CMV_organism=SARS-CoV2_antigen=ORF7b [Severe acute respiratory syndrome coronavirus 2].html"))
-        self.assertTrue(os.path.isfile(path / "label=CMV_organism=SARS-CoV2_antigen=surface glycoprotein [Severe acute respiratory syndrome coronavirus 2].html"))
+        # self.assertTrue(os.path.isfile(path / "label=CMV_organism=SARS-CoV2_antigen=nucleocapsid phosphoprotein [Severe acute respiratory syndrome coronavirus 2].html"))
+        # self.assertTrue(os.path.isfile(path / "label=CMV_organism=SARS-CoV2_antigen=orf1ab polyprotein [Severe acute respiratory syndrome coronavirus 2].html"))
+        # self.assertTrue(os.path.isfile(path / "label=CMV_organism=SARS-CoV2_antigen=ORF7b [Severe acute respiratory syndrome coronavirus 2].html"))
+        # self.assertTrue(os.path.isfile(path / "label=CMV_organism=SARS-CoV2_antigen=surface glycoprotein [Severe acute respiratory syndrome coronavirus 2].html"))
+        self.assertTrue(os.path.isfile(path / "label=CMV_1.html"))
+        self.assertTrue(os.path.isfile(path / "label=CMV_2.html"))
+        self.assertTrue(os.path.isfile(path / "label=CMV_3.html"))
+        self.assertTrue(os.path.isfile(path / "label=CMV_4.html"))
+        self.assertTrue(os.path.isfile(path / "label=CMV_5.html"))
         self.assertTrue(os.path.isfile(path / "label=CMV_tcrmatch_summary.tsv"))
         self.assertTrue(os.path.isfile(path / "tcrmatch_summary_label=CMV_0_vs_1.html"))
-
-        self.assertTrue(os.path.isfile(path / "label=HLA_organism=SARS-CoV2_antigen=nucleocapsid phosphoprotein [Severe acute respiratory syndrome coronavirus 2].html"))
-        self.assertTrue(os.path.isfile(path / "label=HLA_organism=SARS-CoV2_antigen=orf1ab polyprotein [Severe acute respiratory syndrome coronavirus 2].html"))
-        self.assertTrue(os.path.isfile(path / "label=HLA_organism=SARS-CoV2_antigen=ORF7b [Severe acute respiratory syndrome coronavirus 2].html"))
-        self.assertTrue(os.path.isfile(path / "label=HLA_organism=SARS-CoV2_antigen=surface glycoprotein [Severe acute respiratory syndrome coronavirus 2].html"))
+        #
+        # self.assertTrue(os.path.isfile(path / "label=HLA_organism=SARS-CoV2_antigen=nucleocapsid phosphoprotein [Severe acute respiratory syndrome coronavirus 2].html"))
+        # self.assertTrue(os.path.isfile(path / "label=HLA_organism=SARS-CoV2_antigen=orf1ab polyprotein [Severe acute respiratory syndrome coronavirus 2].html"))
+        # self.assertTrue(os.path.isfile(path / "label=HLA_organism=SARS-CoV2_antigen=ORF7b [Severe acute respiratory syndrome coronavirus 2].html"))
+        # self.assertTrue(os.path.isfile(path / "label=HLA_organism=SARS-CoV2_antigen=surface glycoprotein [Severe acute respiratory syndrome coronavirus 2].html"))
+        self.assertTrue(os.path.isfile(path / "label=HLA_1.html"))
+        self.assertTrue(os.path.isfile(path / "label=HLA_2.html"))
+        self.assertTrue(os.path.isfile(path / "label=HLA_3.html"))
+        self.assertTrue(os.path.isfile(path / "label=HLA_4.html"))
+        self.assertTrue(os.path.isfile(path / "label=HLA_5.html"))
         self.assertTrue(os.path.isfile(path / "label=HLA_tcrmatch_summary.tsv"))
 
         shutil.rmtree(path)
