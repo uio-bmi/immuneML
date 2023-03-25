@@ -56,6 +56,11 @@ class DatasetToolComponent(InterfaceComponent):
         # Find available port
         port_nr = InterfaceComponent.find_available_port()
 
+        # Set up socket communication with subprocess
+        socket = context.socket(zmq.REQ)
+        connect_str = "tcp://localhost:" + str(port_nr)  # Add the port number
+        socket.connect(connect_str)
+
         interpreter = InterfaceComponent.get_interpreter(executable_path)
         print(f"Found interpreter: {interpreter}")
         input_data = DatasetToolComponent._create_arguments(specs)
@@ -69,13 +74,8 @@ class DatasetToolComponent(InterfaceComponent):
                                    # stdout=subprocess.PIPE,
                                    cwd=specs.get("tool_path"))  # TODO: specs.get("tool_path") have must error check
 
-        # Set up socket communication with subprocess
-        socket = context.socket(zmq.REQ)
-        connect_str = "tcp://localhost:" + str(port_nr)  # Add the port number
-        socket.connect(connect_str)
-
         # Send the input data to the subprocess
-        socket.send_string(input_data)
+        # socket.send_string(input_data)
 
         # Wait for the response. This should be the data used further
         # We need to specify the requirements of the response. Could be as easy as the path to the new dataset
@@ -93,5 +93,6 @@ class DatasetToolComponent(InterfaceComponent):
         # Moves the dataset provided through path to a folder decided by immuneML
         InterfaceComponent.move_file_to_dir(message_response.decode(), DatasetToolComponent.DEFAULT_DATASET_FOLDER_PATH)
 
+        print("ENDING DATASET PROCESS")
 
 
