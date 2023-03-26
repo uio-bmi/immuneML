@@ -3,7 +3,6 @@ import copy
 import pandas as pd
 
 from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.ml_methods.MLMethodTool import MLMethodTool
 from immuneML.util.Logger import print_log
 from immuneML.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
 from immuneML.workflows.steps.Step import Step
@@ -18,9 +17,9 @@ class MLMethodTrainer(Step):
 
         method = MLMethodTrainer._fit_method(input_params)
         MLMethodTrainer.store(method, input_params)
-        if isinstance(method, MLMethodTool):
-            print("Stopping subprocess with pid: ", method.tool.pid)
-            method.tool.stop_subprocess()
+        # if isinstance(method, MLMethodTool):
+        #    print("Stopping subprocess with pid: ", method.tool.pid)
+        #    method.tool.stop_subprocess()
 
         print_log(f"ML model training finished.", include_datetime=True)
 
