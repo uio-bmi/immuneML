@@ -1,15 +1,23 @@
-import abc
-from abc import ABC
-import subprocess
-import socket
-import shutil
-import json
-import time
-import sys
 import os
+import shutil
+import socket
+import subprocess
+import sys
+import time
+from abc import ABC
+
+import zmq
+
+tool_process = None
 
 
-class InterfaceComponent(metaclass=abc.ABCMeta):
+class InterfaceComponent(ABC):
+    def __init__(self):
+        self.tool_path = None
+        self.port = None
+        self.socket = None
+        self.pid = None
+        self.programming_language = None
 
     interpreters = {
         ".py": "python",
@@ -55,19 +63,35 @@ class InterfaceComponent(metaclass=abc.ABCMeta):
         # TODO: does not handle the case where a file with the same name already exists
         shutil.move(file_path, target_path)
 
-    @staticmethod
-    def produce_JSON_object(**input_data):
-        """Produces a JSON object from input data
-        Returns JSON object on success, or None if error
-        """
+    def start_subprocess(self, tool_path):
+        # TODO set port here? Check if port is available.
+        self.tool_path = tool_path
+        # Start tool as subprocess
+        global tool_process
+        tool_process = subprocess.Popen(
+            ["python", self.tool_path, self.port],
+            stdin=subprocess.PIPE)
+        self.pid = tool_process.pid
 
-        try:
-            json_bytes = json.dumps(input_data)
-        except Exception as e:
-            print(f"Error: {e}")
-            return None
+    def stop_subprocess(self):
+        global tool_process
+        print("stopping tool process", self.pid)
+        if tool_process is not None and (self.pid is None or self.pid == self.pid):
+            tool_process.kill()
+            tool_process = None
+        print("tool process stopped")
 
-        return json_bytes
+    def open_connection(self):
+        context = zmq.Context()
+
+        #  Socket to talk to server
+        print("Connecting to tool…")
+        self.socket = context.socket(zmq.REQ)
+        self.socket.connect("tcp://localhost:" + self.port)
+        print("Connected to tool")
+
+    def close_connection(self):
+        self.socket.close()
 
     @staticmethod
     def execution_animation(process: subprocess):

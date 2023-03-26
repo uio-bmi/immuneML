@@ -1,6 +1,4 @@
 from immuneML.tool_interface.ToolType import ToolType
-from immuneML.tool_interface.interface_components.MLToolComponent import MLToolComponent
-from immuneML.tool_interface.interface_components.DatasetToolComponent import DatasetToolComponent
 
 
 class InterfaceController:
@@ -11,8 +9,10 @@ class InterfaceController:
         """
 
         if tool_type == ToolType.ML_TOOL:
-            MLToolComponent.run_ML_tool_component(specs)
+            # MLToolComponent.run_ML_tool_component(specs)
+            pass
         elif tool_type == ToolType.DATASET_TOOL:
-            DatasetToolComponent.run_dataset_tool_component(specs)
+            # DatasetToolComponent.run(specs)
+            pass
         else:
             print(f"Invalid input to InterfaceController.'{tool_type}' is not a valid tool definition")

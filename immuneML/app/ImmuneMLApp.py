@@ -1,10 +1,10 @@
 import argparse
 import logging
 import os
+import random
 import shutil
 import warnings
 from pathlib import Path
-import random
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
@@ -37,12 +37,12 @@ class ImmuneMLApp:
         del os.environ[Constants.CACHE_TYPE]
 
     def run(self):
-
         self.set_cache()
 
         print_log(f"ImmuneML: parsing the specification...\n", include_datetime=True)
 
-        symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path, self._result_path)
+        symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path,
+                                                                                self._result_path)
 
         print_log(f"ImmuneML: starting the analysis...\n", include_datetime=True)
 
@@ -60,16 +60,12 @@ class ImmuneMLApp:
 
 def run_immuneML(namespace: argparse.Namespace):
     if os.path.isdir(namespace.result_path) and len(os.listdir(namespace.result_path)) != 0:
-        # raise ValueError(f"Directory {namespace.result_path} already exists. Please specify a new output directory for the analysis.")
-        # --------------
-        # TODO: remove this temporary code that generates new name for output. Only meant to simplify testing
-        print_log(f"Directory {namespace.result_path} already exists. generating id", include_datetime=True)
-        namespace.result_path = Path(str(namespace.result_path) + "_" + str(random.randint(0, 100000)))
-        print_log(namespace.result_path)
-        # --------------
+        raise ValueError(
+            f"Directory {namespace.result_path} already exists. Please specify a new output directory for the analysis.")
     PathBuilder.build(namespace.result_path)
 
-    logging.basicConfig(filename=Path(namespace.result_path) / "log.txt", level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
+    logging.basicConfig(filename=Path(namespace.result_path) / "log.txt", level=logging.INFO,
+                        format='%(asctime)s %(levelname)s: %(message)s')
     warnings.showwarning = lambda message, category, filename, lineno, file=None, line=None: logging.warning(message)
 
     if namespace.tool is None:
@@ -83,15 +79,20 @@ def run_immuneML(namespace: argparse.Namespace):
 
 def main():
     parser = argparse.ArgumentParser(description="immuneML command line tool")
-    parser.add_argument("specification_path", help="Path to specification YAML file. Always used to define the analysis.")
+    parser.add_argument("specification_path",
+                        help="Path to specification YAML file. Always used to define the analysis.")
     parser.add_argument("result_path", help="Output directory path.")
-    parser.add_argument("--tool", help="Name of the tool which calls immuneML. This name will be used to invoke appropriate API call, "
-                                       "which will then do additional work in tool-dependent way before running standard immuneML.")
+    parser.add_argument("--tool",
+                        help="Name of the tool which calls immuneML. This name will be used to invoke appropriate API call, "
+                             "which will then do additional work in tool-dependent way before running standard immuneML.")
     parser.add_argument("--version", action="version", version=Constants.VERSION)
 
     namespace = parser.parse_args()
     namespace.specification_path = Path(namespace.specification_path)
-    namespace.result_path = Path(namespace.result_path)
+    # namespace.result_path = Path(namespace.result_path)
+
+    # TODO: remove. For testing, create unique result path everytime
+    namespace.result_path = "../../results/quickstart_results" + str(random.randint(0, 10000))
 
     run_immuneML(namespace)
 
