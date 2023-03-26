@@ -1,4 +1,3 @@
-import abc
 import subprocess
 import sys
 import time
@@ -16,10 +15,6 @@ class InterfaceComponent(ABC):
         self.socket = None
         self.pid = None
         self.programming_language = None
-
-    @abc.abstractmethod
-    def run(self, **args):
-        pass
 
     def start_subprocess(self, tool_path):
         # TODO set port here? Check if port is available.

@@ -1,12 +1,11 @@
 import json
-from abc import ABC
 
 import numpy as np
 
 from immuneML.tool_interface.interface_components.InterfaceComponent import InterfaceComponent
 
 
-class MLToolComponent(InterfaceComponent, ABC):
+class MLToolComponent(InterfaceComponent):
     def __init__(self, port):
         super().__init__()
         self.port = port

@@ -1,5 +1,6 @@
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
+from immuneML.tool_interface.interface_components.DatasetToolComponent import DatasetToolComponent
 from immuneML.util.ParameterValidator import ParameterValidator
 
 
@@ -14,7 +15,10 @@ class ToolParser:
         if ToolParser.keyword in specification:
             for key in specification[ToolParser.keyword]:
                 symbol_table = ToolParser._parse_tool(key, specification[ToolParser.keyword][key], symbol_table)
-                specification = ToolParser._add_specs_params(key, specification, symbol_table)
+                if specification[ToolParser.keyword][key]['type'] == 'MLMethodTool':
+                    specification = ToolParser._add_specs_params(key, specification, symbol_table)
+                elif specification[ToolParser.keyword][key]['type'] == 'DatasetTool':
+                    specification = ToolParser._get_dataset(key, specification, symbol_table)
         else:
             specification[ToolParser.keyword] = {}
 
@@ -52,6 +56,13 @@ class ToolParser:
     def _add_specs_params(key, specification, symbol_table: SymbolTable):
         item = symbol_table.get(key)
         specification["definitions"]["ml_methods"][key] = {item['type']: {'path': item['path']}}
+        return specification
+
+    @staticmethod
+    def _get_dataset(key, specification, symbol_table: SymbolTable):
+        item = symbol_table.get(key)
+        tool = DatasetToolComponent(item['path'])
+        specification = tool.get_dataset(specification)
         return specification
 
     @staticmethod
