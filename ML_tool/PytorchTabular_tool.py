@@ -1,13 +1,13 @@
 import json
-import zmq
-from pathlib import Path
+import pickle
+import sys
+
 import numpy as np
 import pandas as pd
-import pickle
-
+import zmq
 from pytorch_tabular import TabularModel
-from pytorch_tabular.models import CategoryEmbeddingModelConfig
 from pytorch_tabular.config import DataConfig, OptimizerConfig, TrainerConfig
+from pytorch_tabular.models import CategoryEmbeddingModelConfig
 
 
 def make_binary_class_mapping(y) -> dict:
@@ -20,8 +20,8 @@ def make_binary_class_mapping(y) -> dict:
     """
     unique_values = sorted(set(y))
     assert len(unique_values) == 2, f"MLMethod: there has two be exactly two classes to use this classifier," \
-        f" instead got {str(unique_values)[1:-1]}. For multi-class classification, " \
-        f"consider some of the other classifiers."
+                                    f" instead got {str(unique_values)[1:-1]}. For multi-class classification, " \
+                                    f"consider some of the other classifiers."
     return {0: unique_values[0], 1: unique_values[1]}
 
 
@@ -108,7 +108,7 @@ def fit(encoded_data):
     global model
     model = tabular_model
 
-    #result = tabular_model.evaluate(test)
+    # result = tabular_model.evaluate(test)
     pred_df = tabular_model.predict(data)
     my_rest = tabular_model.evaluate(data)
     print(my_rest)
@@ -128,7 +128,7 @@ def predict(encoded_data):
     class_mapping = make_class_mapping(encoded_data.labels['signal_disease'])
     predictions_proba = _predict_proba(encoded_data)
     predictions = {'signal_disease': [class_mapping[val] for val in (
-        predictions_proba['signal_disease'][:, 1] > 0.5).tolist()]}
+            predictions_proba['signal_disease'][:, 1] > 0.5).tolist()]}
 
     return json.dumps(predictions)
 
@@ -177,9 +177,14 @@ def store(model, feature_names, details_path):
 
 
 # COMMUNICATION WITH CORE
+# Get port from pipe
+port = sys.argv[1]
+address = "tcp://*:" + str(port)
+print("adress in tool", address)
+
 context = zmq.Context()
 socket = context.socket(zmq.REP)
-socket.bind("tcp://*:5555")
+socket.bind(address)
 
 while True:
 
