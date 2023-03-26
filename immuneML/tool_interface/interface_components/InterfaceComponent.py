@@ -1,3 +1,6 @@
+import os
+import shutil
+import socket
 import subprocess
 import sys
 import time
@@ -15,6 +18,50 @@ class InterfaceComponent(ABC):
         self.socket = None
         self.pid = None
         self.programming_language = None
+
+    interpreters = {
+        ".py": "python",
+        ".class": "java"
+    }
+
+    @classmethod
+    def _get_interpreters(cls):
+        """ Returns the dictionary of interpreters. Not accessible by child classes
+        """
+        return cls.interpreters
+
+    @staticmethod
+    def get_interpreter(executable: str):
+        """ Returns the correct interpreter for executable input
+        """
+        interpreters = InterfaceComponent._get_interpreters()
+        file_extension = os.path.splitext(executable)[1]
+        if file_extension not in interpreters:
+            print(f"Interpreter not found for executable: {executable}")
+            return None
+
+        interpreter = interpreters.get(file_extension)
+
+        return interpreter
+
+    @staticmethod
+    def find_available_port(start_port=5000, end_port=8000):
+        """ Finds an available port on the computer to send to subprocess
+        """
+        for port in range(start_port, end_port + 1):
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                try:
+                    sock.bind(("", port))
+                    return port
+                except OSError:
+                    pass
+
+        return None
+
+    @staticmethod
+    def move_file_to_dir(file_path: str, target_path: str):
+        # TODO: does not handle the case where a file with the same name already exists
+        shutil.move(file_path, target_path)
 
     def start_subprocess(self, tool_path):
         # TODO set port here? Check if port is available.
