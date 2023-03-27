@@ -6,9 +6,12 @@ from immuneML.tool_interface.interface_components.InterfaceComponent import Inte
 
 
 class MLToolComponent(InterfaceComponent):
-    def __init__(self, port):
+    def __init__(self, name: str, specs: dict):
         super().__init__()
-        self.port = port
+        self.name = name
+        self.tool_path = specs['path']
+        self.specs = specs
+        self.port = None
 
     def run_fit(self, encoded_data):
         self.socket.send_pyobj(encoded_data)

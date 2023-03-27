@@ -13,6 +13,7 @@ tool_process = None
 
 class InterfaceComponent(ABC):
     def __init__(self):
+        self.name = None
         self.tool_path = None
         self.port = None
         self.socket = None
@@ -63,10 +64,11 @@ class InterfaceComponent(ABC):
         # TODO: does not handle the case where a file with the same name already exists
         shutil.move(file_path, target_path)
 
-    def start_subprocess(self, tool_path):
-        # TODO set port here? Check if port is available.
-        self.tool_path = tool_path
-        # Start tool as subprocess
+    def start_subprocess(self):
+        # TODO: get interpreter
+
+        # TODO: find available interpreter
+
         global tool_process
         tool_process = subprocess.Popen(
             ["python", self.tool_path, self.port],
