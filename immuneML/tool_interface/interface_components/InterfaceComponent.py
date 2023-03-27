@@ -32,8 +32,8 @@ class InterfaceComponent(ABC):
         """
         return cls.interpreters
 
-    @staticmethod
-    def get_interpreter(executable: str):
+    # TODO: this must be rewritten to work with the full path instead of just the executable
+    def get_interpreter(self, executable: str):
         """ Returns the correct interpreter for executable input
         """
         interpreters = InterfaceComponent._get_interpreters()

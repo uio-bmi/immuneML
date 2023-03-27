@@ -15,6 +15,7 @@ class DatasetToolComponent(InterfaceComponent):
         self.tool_path = specs['path']
         self.specs = specs
         self.port = None
+        self.interpreter = self.get_interpreter(self.tool_path)
 
     current_directory = os.path.dirname(os.path.abspath(__file__))
     parent_directory = os.path.dirname(current_directory)
