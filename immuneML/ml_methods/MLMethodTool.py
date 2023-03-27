@@ -4,18 +4,15 @@ from pathlib import Path
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Label import Label
 from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.tool_interface.interface_components.MLToolComponent import MLToolComponent
+from immuneML.tool_interface import InterfaceController
 
 
 class MLMethodTool(MLMethod):
-    def __init__(self, path: str):
+    def __init__(self):
         super().__init__()
-        self.tool = MLToolComponent("5555")
-        self.tool_path = path
 
     def _start_subprocess(self):
-        self.tool.start_subprocess(
-            tool_path=self.tool_path)
+        InterfaceController.check_running(self.name)
 
     def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
         """
@@ -39,9 +36,8 @@ class MLMethodTool(MLMethod):
 
         }
         """
-        if self.tool.pid is None:
-            self._start_subprocess()
-
+        # self._start_subprocess()
+        InterfaceController.run_func(self.name, "run_fit")
         print("Pid: ", self.tool.pid)
 
         encoded_data_pickle = pickle.dumps(encoded_data)

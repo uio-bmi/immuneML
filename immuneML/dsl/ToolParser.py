@@ -1,6 +1,7 @@
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
-from immuneML.tool_interface.interface_components.DatasetToolComponent import DatasetToolComponent
+from immuneML.tool_interface import InterfaceController
+from immuneML.tool_interface.ToolType import ToolType
 from immuneML.util.ParameterValidator import ParameterValidator
 
 
@@ -15,10 +16,10 @@ class ToolParser:
         if ToolParser.keyword in specification:
             for key in specification[ToolParser.keyword]:
                 symbol_table = ToolParser._parse_tool(key, specification[ToolParser.keyword][key], symbol_table)
-                if specification[ToolParser.keyword][key]['type'] == 'MLMethodTool':
-                    specification = ToolParser._add_specs_params(key, specification, symbol_table)
-                elif specification[ToolParser.keyword][key]['type'] == 'DatasetTool':
-                    specification = ToolParser._get_dataset(key, specification, symbol_table)
+                # if specification[ToolParser.keyword][key]['type'] == 'MLMethodTool':
+                #    specification = ToolParser._add_specs_params(key, specification, symbol_table)
+                # elif specification[ToolParser.keyword][key]['type'] == 'DatasetTool':
+                #    specification = ToolParser._get_dataset(key, specification, symbol_table)
         else:
             specification[ToolParser.keyword] = {}
 
@@ -42,13 +43,14 @@ class ToolParser:
 
         # set default values and create dict with tool_item
         default_params = {'language': 'python'}
-        tool_item = {**default_params, **tool_item}
+        tool_specification = {**default_params, **tool_item}
 
         # TODO:
         #  - check that the tool is reachable on the specified path - reflection handler
         #  - check that name of tool is key in definitions (MLMethod in first version)
+        ToolParser.create_component_instance(tool_specification, key)
 
-        symbol_table.add(key, SymbolType.TOOL, tool_item)
+        symbol_table.add(key, SymbolType.TOOL, tool_specification)
 
         return symbol_table
 
@@ -58,12 +60,19 @@ class ToolParser:
         specification["definitions"]["ml_methods"][key] = {item['type']: {'path': item['path']}}
         return specification
 
+    """
     @staticmethod
     def _get_dataset(key, specification, symbol_table: SymbolTable):
         item = symbol_table.get(key)
         tool = DatasetToolComponent(item['path'])
         specification = tool.get_dataset(specification)
         return specification
+        
+    """
+
+    @staticmethod
+    def create_component_instance(tool_specifications: dict, name: str):
+        InterfaceController.create_component(ToolType.ML_TOOL, name, tool_specifications)
 
     @staticmethod
     def get_related_parameters(symbol_table: SymbolTable, specs):
