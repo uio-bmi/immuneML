@@ -15,7 +15,7 @@ class InterfaceComponent(ABC):
     def __init__(self):
         self.name = None
         self.tool_path = None
-        self.port = None
+        self.port = "5555"
         self.socket = None
         self.pid = None
         self.interpreter = None
@@ -68,7 +68,7 @@ class InterfaceComponent(ABC):
         # TODO: get interpreter
 
         # TODO: find available interpreter
-
+        # self.port = InterfaceComponent.find_available_port()
         global tool_process
         tool_process = subprocess.Popen(
             ["python", self.tool_path, self.port],
@@ -78,9 +78,10 @@ class InterfaceComponent(ABC):
     def stop_subprocess(self):
         global tool_process
         print("stopping tool process", self.pid)
-        if tool_process is not None and (self.pid is None or self.pid == self.pid):
+        if tool_process is not None and self.pid is not None:
             tool_process.kill()
             tool_process = None
+            self.pid = None
         print("tool process stopped")
 
     def open_connection(self):

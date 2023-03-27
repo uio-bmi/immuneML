@@ -1,3 +1,5 @@
+import psutil
+
 from immuneML.tool_interface.ToolTable import ToolTable
 from immuneML.tool_interface.ToolType import ToolType
 from immuneML.tool_interface.interface_components.MLToolComponent import MLToolComponent
@@ -5,7 +7,6 @@ from immuneML.tool_interface.interface_components.MLToolComponent import MLToolC
 toolTable = ToolTable()
 
 
-# name works as id
 def create_component(tool_type: ToolType, name: str, specs: dict):
     if tool_type == ToolType.ML_TOOL:
         new_component = MLToolComponent(name, specs)
@@ -16,25 +17,39 @@ def create_component(tool_type: ToolType, name: str, specs: dict):
         pass
 
 
-def run_func(name: str, func: str):
-    # TODO: check if tool is running, and start process if not
-    # TODO: call function in InterfaceComponent
-    a = toolTable
+def run_func(name: str, func: str, params=None):
+    # Get tool from toolTable
     tool = toolTable.get(name)
-    getattr(tool, func)("haha")
-    print(tool.tool_path)
 
-    pass
+    # Check if tool is running. If not, start subprocess and open connection
+    if not check_running(name):
+        tool.start_subprocess()
+        tool.open_connection()
+
+    # Run function in tool component
+    result = getattr(tool, func)(params)
+
+    return result
 
 
-def check_running(name: str):
-    # check if component has process running
+def check_running(name: str) -> bool:
+    # Check if component has process running
+
+    # Get tool from toolTable
     tool = toolTable.get(name)
-    print(tool.tool_path)
+
+    if tool.pid is not None:
+        if psutil.pid_exists(tool.pid):
+            print("Process is running")
+            return True
+        else:
+            print("Process stopped...")
+            return False
+    else:
+        return False
 
 
 def stop_tool(name: str):
-    # stop process
-    # TODO: run stop subprocess and close connection in component
-
-    pass
+    tool = toolTable.get(name)
+    tool.close_connection()
+    tool.stop_subprocess()
