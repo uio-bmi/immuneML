@@ -53,7 +53,7 @@ class OLGA(GenerativeModel):
     }
     MODEL_FILENAMES = {'marginals': 'model_marginals.txt', 'params': 'model_params.txt', 'v_gene_anchor': 'V_gene_CDR3_anchors.csv',
                        'j_gene_anchor': 'J_gene_CDR3_anchors.csv'}
-    OUTPUT_COLUMNS = ["sequence", 'sequence_aa', 'v_call', 'j_call', 'region_type', "frame_type", "p_gen", "from_default_model"]
+    OUTPUT_COLUMNS = ["sequence", 'sequence_aa', 'v_call', 'j_call', 'region_type', "frame_type", "p_gen", "from_default_model", 'duplicate_count']
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -126,7 +126,8 @@ class OLGA(GenerativeModel):
                                         'j_call': olga_model.j_gene_mapping[seq_row[3]]}, sequence_type) if compute_p_gen else -1.
 
             sequences.loc[i] = (seq_row[0], seq_row[1], olga_model.v_gene_mapping[seq_row[2]], olga_model.j_gene_mapping[seq_row[3]],
-                                RegionType.IMGT_JUNCTION.name, SequenceFrameType.IN.name, p_gen, int(olga_model == self._olga_model))
+                                RegionType.IMGT_JUNCTION.name, SequenceFrameType.IN.name, p_gen, int(olga_model == self._olga_model),
+                                -1)
 
         sequences.to_csv(path, index=False, sep='\t')
         return path
