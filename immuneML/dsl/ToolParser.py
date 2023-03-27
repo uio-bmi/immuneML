@@ -46,6 +46,12 @@ class ToolParser:
         tool_specification = {**default_params, **tool_item}
 
         # TODO:
+        #   - The parameters should be located under 'params'
+        tool_params = tool_item["params"]  # TODO: this must be error checked
+
+
+
+        # TODO:
         #  - check that the tool is reachable on the specified path - reflection handler
         #  - check that name of tool is key in definitions (MLMethod in first version)
         ToolParser.create_component_instance(tool_specification, key)

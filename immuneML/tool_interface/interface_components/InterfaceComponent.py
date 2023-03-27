@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 import socket
@@ -44,6 +45,14 @@ class InterfaceComponent(ABC):
         interpreter = interpreters.get(file_extension)
 
         return interpreter
+
+    def create_json_params(self, specs: dict) -> str:
+        """ Creates a json string from tool params specified in YAML
+        """
+        if 'params' in specs:
+            return json.dumps(specs['params'])
+        else:
+            return ""
 
     @staticmethod
     def find_available_port(start_port=5000, end_port=8000):
