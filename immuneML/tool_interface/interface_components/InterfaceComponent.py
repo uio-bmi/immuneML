@@ -18,7 +18,7 @@ class InterfaceComponent(ABC):
         self.port = None
         self.socket = None
         self.pid = None
-        self.programming_language = None
+        self.interpreter = None
 
     interpreters = {
         ".py": "python",

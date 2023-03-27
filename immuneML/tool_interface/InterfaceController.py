@@ -16,17 +16,21 @@ def create_component(tool_type: ToolType, name: str, specs: dict):
         pass
 
 
-def run_func():
+def run_func(name: str, func: str):
     # TODO: check if tool is running, and start process if not
-
     # TODO: call function in InterfaceComponent
+    a = toolTable
+    tool = toolTable.get(name)
+    getattr(tool, func)("haha")
+    print(tool.tool_path)
+
     pass
 
 
 def check_running(name: str):
     # check if component has process running
-    a = toolTable.get(name)
-    print(a.tool_path)
+    tool = toolTable.get(name)
+    print(tool.tool_path)
 
 
 def stop_tool(name: str):

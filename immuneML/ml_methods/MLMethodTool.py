@@ -36,8 +36,8 @@ class MLMethodTool(MLMethod):
 
         }
         """
-        self._start_subprocess()
-
+        # self._start_subprocess()
+        InterfaceController.run_func(self.name, "run_fit")
         print("Pid: ", self.tool.pid)
 
         encoded_data_pickle = pickle.dumps(encoded_data)
