@@ -13,13 +13,14 @@ tool_process = None
 
 
 class InterfaceComponent(ABC):
-    def __init__(self):
-        self.name = None
-        self.tool_path = None
-        self.port = None
+    def __init__(self, name: str, specs: dict):
+        self.name = name
+        self.specs = specs
+        self.tool_path = specs['path']
+        self.port = self.find_available_port()
         self.socket = None
         self.pid = None
-        self.interpreter = None
+        self.interpreter = self.get_interpreter(self.tool_path)
 
     interpreters = {
         ".py": "python",
@@ -32,14 +33,14 @@ class InterfaceComponent(ABC):
         """
         return cls.interpreters
 
-    # TODO: this must be rewritten to work with the full path instead of just the executable
-    def get_interpreter(self, executable: str):
-        """ Returns the correct interpreter for executable input
+    def get_interpreter(self, path: str):
+        """ Returns the correct interpreter for executable input. If no extension is found, it returns None and
+        assumes that no interpreter should be added to the subprocess module
         """
-        interpreters = InterfaceComponent._get_interpreters()
-        file_extension = os.path.splitext(executable)[1]
+        interpreters = self._get_interpreters()
+        file_extension = os.path.splitext(path)[-1]
         if file_extension not in interpreters:
-            print(f"Interpreter not found for executable: {executable}")
+            print(f"Interpreter not found for executable: {path}")
             return None
 
         interpreter = interpreters.get(file_extension)
@@ -67,11 +68,6 @@ class InterfaceComponent(ABC):
                     pass
 
         return None
-
-    @staticmethod
-    def move_file_to_dir(file_path: str, target_path: str):
-        # TODO: does not handle the case where a file with the same name already exists
-        shutil.move(file_path, target_path)
 
     def start_subprocess(self):
         # TODO: get interpreter

@@ -83,7 +83,7 @@ instructions:
     number_of_processes: 4 # processes for parallelization
 tools:
   my_dataset_method:
-    path: /Users/oskar/Documents/Skole/Master/immuneml_forked/ML_tool/PytorchTabular_tool.py
+    path: /Users/jorgenskimmeland/Documents/aar5/Master/PrimesExamples/Cpp2/immuneML_executable.py
     type: DatasetTool
     params:
       n: 150

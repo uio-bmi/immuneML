@@ -2,66 +2,57 @@ import json
 import os
 import shutil
 import subprocess
-
 import zmq
 
 from immuneML.tool_interface.interface_components.InterfaceComponent import InterfaceComponent
 
 
 class DatasetToolComponent(InterfaceComponent):
-    def __init__(self, name: str, specs: dict):
-        super().__init__()
-        self.name = name
-        self.tool_path = specs['path']
-        self.specs = specs
-        self.port = None
-        self.interpreter = self.get_interpreter(self.tool_path)
-
     current_directory = os.path.dirname(os.path.abspath(__file__))
     parent_directory = os.path.dirname(current_directory)
     DEFAULT_DATASET_FOLDER_PATH = os.path.join(parent_directory, "generated_datasets")
 
+    def __init__(self, name: str, specs: dict):
+        super().__init__(name, specs)
+        # super().__init__()
+        # self.name = name
+        # self.tool_path = specs['path']
+        # self.specs = specs
+        # self.interpreter = super().get_interpreter(self.tool_path)
 
     @staticmethod
     def run_dataset_tool_component(specs: dict):
         print("Running dataset tool component")
 
-        tool_args = DatasetToolComponent._create_arguments(specs)
+        tool_args = super().create_json_params(specs)
         DatasetToolComponent.start_sub_process(specs)
 
-    @staticmethod
-    def move_dataset_to_folder(current_path: str, target_path: str):
-        shutil.move(current_path, target_path)
-
-    @staticmethod
-    def _create_arguments(specs: dict) -> str:
-        """ Creates a json string based on dictionary input. Also adds a port number
+    def move_file_to_dir(self, file_path: str, target_path: str):
+        """ Moves a file to a target path
         """
-        tool_arguments = specs["tool_arguments"]
-        json_str = json.dumps(tool_arguments)
+        filename = os.path.basename(file_path)
 
-        return json_str
+        # If filename already exists in target path, change its name based on duplicates
+        if os.path.exists(target_path):
+            i = 1
+            while True:
+                new_target_path = os.path.join(target_path,
+                                               f"{os.path.splitext(filename)[0]}({i}){os.path.splitext(filename)[1]}")
+                if not os.path.exists(new_target_path):
+                    target_path = new_target_path
+                    break
+                i += 1
 
-    @staticmethod
-    def _get_executable_path(specs: dict) -> str:
-        if "tool_executable" not in specs or "tool_path" not in specs:
-            print("Did not find tool executable. Make sure to add this parameter in YAML spec file")
-            return ""
+        shutil.move(file_path, target_path)
 
-        executable_w_path = specs.get("tool_path") + "/" + specs.get("tool_executable")
-        return executable_w_path
-
-    @staticmethod
-    def start_sub_process(specs: dict):
+    def start_sub_process(self, specs: dict):
         print("Starting subprocess")
 
         # Using ZeroMQ
         context = zmq.Context()
 
         # Get executable
-        executable_path = DatasetToolComponent._get_executable_path(specs)
-        if executable_path == "":
-            return
+        executable_path = specs.get('path')
 
         # Find available port
         port_nr = InterfaceComponent.find_available_port()
@@ -71,9 +62,9 @@ class DatasetToolComponent(InterfaceComponent):
         connect_str = "tcp://localhost:" + str(port_nr)  # Add the port number
         socket.connect(connect_str)
 
-        interpreter = InterfaceComponent.get_interpreter(executable_path)
+        interpreter = super().get_interpreter(executable_path)
         print(f"Found interpreter: {interpreter}")
-        input_data = DatasetToolComponent._create_arguments(specs)
+        input_data = super().create_json_params(specs)
         if not interpreter:
             # No interpreter found. Assuming the file is purely an executable.
             subprocess_args = [executable_path, input_data, str(port_nr)]
@@ -82,7 +73,7 @@ class DatasetToolComponent(InterfaceComponent):
         process = subprocess.Popen(subprocess_args,
                                    stdin=subprocess.PIPE,
                                    # stdout=subprocess.PIPE,
-                                   cwd=specs.get("tool_path"))  # TODO: specs.get("tool_path") have must error check
+                                   cwd=os.path.dirname(specs.get("path")))
 
         # Send the input data to the subprocess
         # socket.send_string(input_data)
@@ -101,6 +92,6 @@ class DatasetToolComponent(InterfaceComponent):
 
         # TODO: should probably have some error check here
         # Moves the dataset provided through path to a folder decided by immuneML
-        InterfaceComponent.move_file_to_dir(message_response.decode(), DatasetToolComponent.DEFAULT_DATASET_FOLDER_PATH)
+        self.move_file_to_dir(message_response.decode(), DatasetToolComponent.DEFAULT_DATASET_FOLDER_PATH)
 
         print("ENDING DATASET PROCESS")

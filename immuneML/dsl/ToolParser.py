@@ -45,11 +45,6 @@ class ToolParser:
         default_params = {'language': 'python'}
         tool_specification = {**default_params, **tool_item}
 
-        # TODO:
-        #   - The parameters should be located under 'params'
-        tool_params = tool_item["params"]  # TODO: this must be error checked
-
-
 
         # TODO:
         #  - check that the tool is reachable on the specified path - reflection handler
@@ -77,8 +72,25 @@ class ToolParser:
     """
 
     @staticmethod
+    def get_tool_type(tool_specifications: dict) -> ToolType:
+        """ Returns the type of tool
+        """
+        type_str = tool_specifications['type']
+
+        if type_str == "DatasetTool":
+            return ToolType.DATASET_TOOL
+        elif type_str == "MLMethodTool":
+            return ToolType.ML_TOOL
+        else:
+            raise KeyError("Could not identify tool type. YAML file requires 'type' to be defined")
+
+    @staticmethod
     def create_component_instance(tool_specifications: dict, name: str):
-        InterfaceController.create_component(ToolType.ML_TOOL, name, tool_specifications)
+        """ TODO: needs docstring
+
+        """
+        tool_type = ToolParser.get_tool_type(tool_specifications)
+        InterfaceController.create_component(tool_type, name, tool_specifications)
 
     @staticmethod
     def get_related_parameters(symbol_table: SymbolTable, specs):
