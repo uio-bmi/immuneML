@@ -11,9 +11,6 @@ class MLMethodTool(MLMethod):
     def __init__(self):
         super().__init__()
 
-    def _start_subprocess(self):
-        InterfaceController.check_running(self.name)
-
     def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
         """
         # serialization of data
@@ -36,20 +33,15 @@ class MLMethodTool(MLMethod):
 
         }
         """
-        # self._start_subprocess()
-        InterfaceController.run_func(self.name, "run_fit")
-        print("Pid: ", self.tool.pid)
-
         encoded_data_pickle = pickle.dumps(encoded_data)
-        if self.tool.socket is None:
-            self.tool.open_connection()
-        self.tool.run_fit(encoded_data_pickle)
+        InterfaceController.run_func(self.name, "run_fit", encoded_data_pickle)
 
         print("fit is running in ml method")
 
     def predict(self, encoded_data: EncodedData, label: Label):
         encoded_data_pickle = pickle.dumps(encoded_data)
-        result = self.tool.run_predict(encoded_data_pickle)
+        result = InterfaceController.run_func(self.name, "run_predict", encoded_data_pickle)
+
         return result
 
     def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None,
@@ -75,7 +67,7 @@ class MLMethodTool(MLMethod):
 
     def predict_proba(self, encoded_data: EncodedData, Label: Label):
         encoded_data_pickle = pickle.dumps(encoded_data)
-        result = self.tool.run_predict_proba(encoded_data_pickle)
+        result = InterfaceController.run_func(self.name, "run_predict_proba", encoded_data_pickle)
         return result
 
     def get_label_name(self) -> str:

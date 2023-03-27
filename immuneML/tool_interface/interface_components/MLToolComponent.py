@@ -11,7 +11,6 @@ class MLToolComponent(InterfaceComponent):
         self.name = name
         self.tool_path = specs['path']
         self.specs = specs
-        self.port = None
 
     def run_fit(self, encoded_data):
         self.socket.send_pyobj(encoded_data)
