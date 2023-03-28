@@ -4,6 +4,7 @@ from immuneML.tool_interface import InterfaceController
 from immuneML.tool_interface.ToolType import ToolType
 from immuneML.util.ParameterValidator import ParameterValidator
 
+from immuneML.tool_interface.ToolTable import ToolTable
 
 class ToolParser:
     keyword = "tools"
@@ -50,6 +51,9 @@ class ToolParser:
         #  - check that the tool is reachable on the specified path - reflection handler
         #  - check that name of tool is key in definitions (MLMethod in first version)
         ToolParser.create_component_instance(tool_specification, key)
+
+        # TESTING
+        #InterfaceController.run_func(key, "run_dataset_tool_component")
 
         symbol_table.add(key, SymbolType.TOOL, tool_specification)
 

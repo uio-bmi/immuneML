@@ -17,7 +17,7 @@ class InterfaceComponent(ABC):
         self.name = name
         self.specs = specs
         self.tool_path = specs['path']
-        self.port = self.find_available_port()
+        self.port = None
         self.socket = None
         self.pid = None
         self.interpreter = self.get_interpreter(self.tool_path)
@@ -70,13 +70,11 @@ class InterfaceComponent(ABC):
         return None
 
     def start_subprocess(self):
-        # TODO: get interpreter
-
-        # TODO: find available interpreter
+        self.port = self.find_available_port()
 
         global tool_process
         tool_process = subprocess.Popen(
-            ["python", self.tool_path, self.port],
+            [self.interpreter, self.tool_path, self.port],
             stdin=subprocess.PIPE)
         self.pid = tool_process.pid
 
@@ -100,8 +98,7 @@ class InterfaceComponent(ABC):
     def close_connection(self):
         self.socket.close()
 
-    @staticmethod
-    def execution_animation(process: subprocess):
+    def execution_animation(self, process: subprocess):
         """Function creates an animation to give user feedback while process in running
         """
 
@@ -116,8 +113,7 @@ class InterfaceComponent(ABC):
         sys.stdout.flush()
         sys.stdout.write("\rSubprocess finished")
 
-    @staticmethod
-    def show_process_output(ml_specs: dict):
+    def show_process_output(self, ml_specs: dict):
         """ Returns true or false for showing process output based on YAML spec file
         """
 

@@ -15,13 +15,11 @@ class DatasetToolComponent(InterfaceComponent):
     def __init__(self, name: str, specs: dict):
         super().__init__(name, specs)
 
-
-    @staticmethod
-    def run_dataset_tool_component(specs: dict):
+    def run_dataset_tool_component(self):
         print("Running dataset tool component")
 
-        tool_args = super().create_json_params(specs)
-        DatasetToolComponent.start_sub_process(specs)
+        tool_args = super().create_json_params(self.specs)
+        DatasetToolComponent.start_sub_process(self.specs)
 
     def move_file_to_dir(self, file_path: str, target_path: str):
         """ Moves a file to a target path
