@@ -4,6 +4,7 @@ from immuneML.tool_interface import InterfaceController
 from immuneML.tool_interface.ToolType import ToolType
 from immuneML.util.ParameterValidator import ParameterValidator
 
+from immuneML.tool_interface.ToolTable import ToolTable
 
 class ToolParser:
     keyword = "tools"
@@ -45,10 +46,14 @@ class ToolParser:
         default_params = {'language': 'python'}
         tool_specification = {**default_params, **tool_item}
 
+
         # TODO:
         #  - check that the tool is reachable on the specified path - reflection handler
         #  - check that name of tool is key in definitions (MLMethod in first version)
         ToolParser.create_component_instance(tool_specification, key)
+
+        # TESTING
+        #InterfaceController.run_func(key, "run_dataset_tool_component")
 
         symbol_table.add(key, SymbolType.TOOL, tool_specification)
 
@@ -71,8 +76,25 @@ class ToolParser:
     """
 
     @staticmethod
+    def get_tool_type(tool_specifications: dict) -> ToolType:
+        """ Returns the type of tool
+        """
+        type_str = tool_specifications['type']
+
+        if type_str == "DatasetTool":
+            return ToolType.DATASET_TOOL
+        elif type_str == "MLMethodTool":
+            return ToolType.ML_TOOL
+        else:
+            raise KeyError("Could not identify tool type. YAML file requires 'type' to be defined")
+
+    @staticmethod
     def create_component_instance(tool_specifications: dict, name: str):
-        InterfaceController.create_component(ToolType.ML_TOOL, name, tool_specifications)
+        """ TODO: needs docstring
+
+        """
+        tool_type = ToolParser.get_tool_type(tool_specifications)
+        InterfaceController.create_component(tool_type, name, tool_specifications)
 
     @staticmethod
     def get_related_parameters(symbol_table: SymbolTable, specs):

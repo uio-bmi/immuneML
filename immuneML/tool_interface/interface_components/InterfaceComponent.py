@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 import socket
@@ -12,13 +13,14 @@ tool_process = None
 
 
 class InterfaceComponent(ABC):
-    def __init__(self):
-        self.name = None
-        self.tool_path = None
-        self.port = "5555"
+    def __init__(self, name: str, specs: dict):
+        self.name = name
+        self.specs = specs
+        self.tool_path = specs['path']
+        self.port = None
         self.socket = None
         self.pid = None
-        self.interpreter = None
+        self.interpreter = self.get_interpreter(self.tool_path)
 
     interpreters = {
         ".py": "python",
@@ -31,19 +33,27 @@ class InterfaceComponent(ABC):
         """
         return cls.interpreters
 
-    @staticmethod
-    def get_interpreter(executable: str):
-        """ Returns the correct interpreter for executable input
+    def get_interpreter(self, path: str):
+        """ Returns the correct interpreter for executable input. If no extension is found, it returns None and
+        assumes that no interpreter should be added to the subprocess module
         """
-        interpreters = InterfaceComponent._get_interpreters()
-        file_extension = os.path.splitext(executable)[1]
+        interpreters = self._get_interpreters()
+        file_extension = os.path.splitext(path)[-1]
         if file_extension not in interpreters:
-            print(f"Interpreter not found for executable: {executable}")
+            print(f"Interpreter not found for executable: {path}")
             return None
 
         interpreter = interpreters.get(file_extension)
 
         return interpreter
+
+    def create_json_params(self, specs: dict) -> str:
+        """ Creates a json string from tool params specified in YAML
+        """
+        if 'params' in specs:
+            return json.dumps(specs['params'])
+        else:
+            return ""
 
     @staticmethod
     def find_available_port(start_port=5000, end_port=8000):
@@ -53,35 +63,27 @@ class InterfaceComponent(ABC):
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 try:
                     sock.bind(("", port))
-                    return port
-                except OSError:
-                    pass
+                    return str(port)
+                except OSError as e:
+                    print(f"Error: {e}")
 
         return None
 
-    @staticmethod
-    def move_file_to_dir(file_path: str, target_path: str):
-        # TODO: does not handle the case where a file with the same name already exists
-        shutil.move(file_path, target_path)
-
     def start_subprocess(self):
-        # TODO: get interpreter
+        self.port = self.find_available_port()
 
-        # TODO: find available interpreter
-        # self.port = InterfaceComponent.find_available_port()
         global tool_process
         tool_process = subprocess.Popen(
-            ["python", self.tool_path, self.port],
+            [self.interpreter, self.tool_path, self.port],
             stdin=subprocess.PIPE)
         self.pid = tool_process.pid
 
     def stop_subprocess(self):
         global tool_process
         print("stopping tool process", self.pid)
-        if tool_process is not None and self.pid is not None:
+        if tool_process is not None and (self.pid is None or self.pid == self.pid):
             tool_process.kill()
             tool_process = None
-            self.pid = None
         print("tool process stopped")
 
     def open_connection(self):
@@ -96,8 +98,7 @@ class InterfaceComponent(ABC):
     def close_connection(self):
         self.socket.close()
 
-    @staticmethod
-    def execution_animation(process: subprocess):
+    def execution_animation(self, process: subprocess):
         """Function creates an animation to give user feedback while process in running
         """
 
@@ -112,8 +113,7 @@ class InterfaceComponent(ABC):
         sys.stdout.flush()
         sys.stdout.write("\rSubprocess finished")
 
-    @staticmethod
-    def show_process_output(ml_specs: dict):
+    def show_process_output(self, ml_specs: dict):
         """ Returns true or false for showing process output based on YAML spec file
         """
 
