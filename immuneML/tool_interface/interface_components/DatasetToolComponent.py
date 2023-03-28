@@ -14,11 +14,7 @@ class DatasetToolComponent(InterfaceComponent):
 
     def __init__(self, name: str, specs: dict):
         super().__init__(name, specs)
-        # super().__init__()
-        # self.name = name
-        # self.tool_path = specs['path']
-        # self.specs = specs
-        # self.interpreter = super().get_interpreter(self.tool_path)
+
 
     @staticmethod
     def run_dataset_tool_component(specs: dict):
@@ -59,7 +55,7 @@ class DatasetToolComponent(InterfaceComponent):
 
         # Set up socket communication with subprocess
         socket = context.socket(zmq.REQ)
-        connect_str = "tcp://localhost:" + str(port_nr)  # Add the port number
+        connect_str = "tcp://localhost:" + port_nr  # Add the port number
         socket.connect(connect_str)
 
         interpreter = super().get_interpreter(executable_path)
@@ -67,9 +63,9 @@ class DatasetToolComponent(InterfaceComponent):
         input_data = super().create_json_params(specs)
         if not interpreter:
             # No interpreter found. Assuming the file is purely an executable.
-            subprocess_args = [executable_path, input_data, str(port_nr)]
+            subprocess_args = [executable_path, input_data, port_nr]
         else:
-            subprocess_args = [interpreter, executable_path, input_data, str(port_nr)]
+            subprocess_args = [interpreter, executable_path, input_data, port_nr]
         process = subprocess.Popen(subprocess_args,
                                    stdin=subprocess.PIPE,
                                    # stdout=subprocess.PIPE,

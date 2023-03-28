@@ -63,9 +63,9 @@ class InterfaceComponent(ABC):
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 try:
                     sock.bind(("", port))
-                    return port
-                except OSError:
-                    pass
+                    return str(port)
+                except OSError as e:
+                    print(f"Error: {e}")
 
         return None
 
