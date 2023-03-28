@@ -1,6 +1,5 @@
 import json
 import os
-import shutil
 import socket
 import subprocess
 import sys
@@ -8,8 +7,6 @@ import time
 from abc import ABC
 
 import zmq
-
-tool_process = None
 
 
 class InterfaceComponent(ABC):
@@ -19,33 +16,26 @@ class InterfaceComponent(ABC):
         self.tool_path = specs['path']
         self.port = None
         self.socket = None
-        self.pid = None
-        self.interpreter = self.get_interpreter(self.tool_path)
+        self.process = None
+        self.interpreter = None
 
-    interpreters = {
-        ".py": "python",
-        ".class": "java"
-    }
+        self.set_interpreter()
 
-    @classmethod
-    def _get_interpreters(cls):
-        """ Returns the dictionary of interpreters. Not accessible by child classes
-        """
-        return cls.interpreters
-
-    def get_interpreter(self, path: str):
+    def set_interpreter(self):
         """ Returns the correct interpreter for executable input. If no extension is found, it returns None and
         assumes that no interpreter should be added to the subprocess module
         """
-        interpreters = self._get_interpreters()
-        file_extension = os.path.splitext(path)[-1]
+        interpreters = {
+            ".py": "python",
+            ".class": "java"
+        }
+
+        file_extension = os.path.splitext(self.tool_path)[-1]
         if file_extension not in interpreters:
-            print(f"Interpreter not found for executable: {path}")
+            print(f"Interpreter not found for executable: {self.tool_path}")
             return None
 
-        interpreter = interpreters.get(file_extension)
-
-        return interpreter
+        self.interpreter = interpreters.get(file_extension)
 
     def create_json_params(self, specs: dict) -> str:
         """ Creates a json string from tool params specified in YAML
@@ -55,35 +45,36 @@ class InterfaceComponent(ABC):
         else:
             return ""
 
-    @staticmethod
-    def find_available_port(start_port=5000, end_port=8000):
+    def set_port(self, start_port: int = 5000, end_port: int = 8000):
         """ Finds an available port on the computer to send to subprocess
         """
         for port in range(start_port, end_port + 1):
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 try:
                     sock.bind(("", port))
-                    return str(port)
+                    self.port = str(port)
                 except OSError as e:
                     print(f"Error: {e}")
 
-        return None
-
     def start_subprocess(self):
-        self.port = self.find_available_port()
+        self.set_port()
+        working_dir = os.path.dirname(self.tool_path)
 
-        global tool_process
-        tool_process = subprocess.Popen(
-            [self.interpreter, self.tool_path, self.port],
-            stdin=subprocess.PIPE)
-        self.pid = tool_process.pid
+        # Executable
+        if self.interpreter is None:
+            subprocess_args = [self.tool_path, self.port]
+        else:
+            subprocess_args = [self.interpreter, self.tool_path, self.port]
+
+        self.process = subprocess.Popen(subprocess_args, stdin=subprocess.PIPE, cwd=working_dir)
 
     def stop_subprocess(self):
-        global tool_process
-        print("stopping tool process", self.pid)
-        if tool_process is not None and (self.pid is None or self.pid == self.pid):
-            tool_process.kill()
-            tool_process = None
+
+        print("stopping tool process", self.process.pid)
+        if self.process is not None:
+            # TODO: should we use self.process.kill or terminate
+            self.process.kill()
+            self.process = None
         print("tool process stopped")
 
     def open_connection(self):
@@ -97,6 +88,8 @@ class InterfaceComponent(ABC):
 
     def close_connection(self):
         self.socket.close()
+
+        # TODO: should we use self.context.term() as well?
 
     def execution_animation(self, process: subprocess):
         """Function creates an animation to give user feedback while process in running
