@@ -1,10 +1,12 @@
 import logging
+import math
 import multiprocessing as mp
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import regex as re
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -143,12 +145,21 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
         # count by repertoire occurrences: drop duplicates with same sequence, v/j-gene and repertoire before count
         if self.count_by_repertoire:
-            dataset_df.drop_duplicates(inplace=True)
+            dataset_df.drop_duplicates(inplace=True, subset=["sequence_aas", "v_genes", "j_genes", "repertoire"])
 
         sequence_columns = ["sequence_aas", "v_genes", "j_genes"]
-        count_df = dataset_df.groupby(sequence_columns)["repertoire"].count().reset_index(name='count')
-        dataset_with_count = pd.merge(dataset_df, count_df, how="inner", on=sequence_columns).drop_duplicates(
-            ignore_index=True, subset=sequence_columns)
+        if self.count_by_repertoire:
+            count_df = dataset_df.groupby(sequence_columns)["repertoire"].count().reset_index(name="count")
+            dataset_with_count = pd.merge(dataset_df, count_df, how="inner", on=sequence_columns).drop_duplicates(
+                ignore_index=True, subset=sequence_columns)
+        else:
+            dataset_with_count = dataset_df.copy()
+            dataset_with_count["count"] = 0
+
+            for row in dataset_with_count.itertuples():
+                dataset_with_count.at[row.Index, "count"] += row.duplicate_count
+
+        dataset_with_count.drop(columns=["duplicate_count"])
 
         return dataset_with_count
 
@@ -158,38 +169,52 @@ class SequenceGenerationProbabilityDistribution(DataReport):
             f"Starting plot generation",
             include_datetime=True)
 
-        if self.mark_implanted_labels:
-            figure = px.strip(dataset_df, x="count", y="pgen", hover_data=["sequence_aas"], color="label",
+        # turn pgen into log10
+        df_log = dataset_df.copy()
+        df_log = df_log.loc[df_log["pgen"] != 0]
+        df_log["pgen"] = df_log["pgen"].apply(lambda x: math.log10(x))
+
+        figure = go.Figure()
+
+        # separate into violin and scatter by label
+        violin_df = df_log.loc[df_log["label"] == self.default_sequence_label]
+        figure.add_trace(
+            go.Violin(x=violin_df["count"], y=violin_df["pgen"],
+                      name=self.default_sequence_label, points=False, bandwidth=0.05))
+
+        line = violin_df.groupby(by=["count"])["pgen"].min().to_dict()
+        figure.add_trace(go.Scatter(x=list(line.keys()), y=list(line.values()),
+                                    name=self.default_sequence_label + " (lowest P<sub>gen</sub>)", mode="lines",
+                                    line_color="#a6c1ff"))
+
+        signal_df = df_log.loc[df_log["label"] != self.default_sequence_label]
+        for signal in signal_df["label"].unique():
+            label_df = signal_df.loc[df_log["label"] == signal]
+            figure.add_trace(go.Scatter(x=label_df["count"], y=label_df["pgen"], mode="markers", name=signal))
+
+        """if self.mark_implanted_labels:
+            figure = px.strip(df_log, x="count", y="pgen", hover_data=["sequence_aas"], color="label",
                               stripmode="overlay")
+
         else:
-            # jitter
-            figure = px.strip(dataset_df, x="count", y="pgen", hover_data=["sequence_aas"])
+            figure = px.strip(df_log, x="count", y="pgen", hover_data=["sequence_aas"])    
+        figure.update_traces(jitter=1.0)
+        """
+
+        xaxis_title = "Clone occurrences" if self.count_by_repertoire else "Count occurrences"
+        figure.update_layout(title="Sequence generation probability distribution", template="plotly_white",
+                             xaxis=dict(tickmode="linear",
+                                        tick0=0,
+                                        dtick=max(1, round(max(df_log["count"]) / 300) * 10)),
+                             xaxis_title=xaxis_title,
+                             yaxis_title="log<sub>10</sub> P<sub>gen</sub>")
+        figure.layout.legend.itemsizing = "constant"
 
         Logger.print_log(
-            f"Finished plot generation",
+            f"Exporting plot",
             include_datetime=True)
-
-        xaxis_title = "nr. of repertoires the sequence appears in" if self.count_by_repertoire else "total sequence count"
-
-        figure.update_layout(title="Sequence generation probability distribution", template="plotly_white",
-                             xaxis=dict(tickmode='array', tickvals=list(range(1, max(dataset_df["count"]) + 1))),
-                             yaxis=dict(showexponent='all', exponentformat='e', type="log"),
-                             xaxis_title=xaxis_title)
-
-        figure.update_traces(jitter=1.0)
 
         PathBuilder.build(self.result_path)
-
-        Logger.print_log(
-            f"Exporting image",
-            include_datetime=True)
-        img_path = self.result_path / "pgen_scatter_plot.png"
-        figure.write_image(img_path)
-
-        Logger.print_log(
-            f"Exporting files",
-            include_datetime=True)
-
         file_path = self.result_path / "pgen_scatter_plot.html"
         figure.write_html(str(file_path))
         return ReportOutput(path=file_path, name="sequence generation probability distribution plot")
@@ -206,9 +231,6 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         if self.mark_implanted_labels:
             label_names = list(self.dataset.get_label_names()) + [DecoyImplanting.__name__]
 
-        if not label_names:
-            self.mark_implanted_labels = False
-
         for repertoire in self.dataset.get_data():
 
             rep_dict = {
@@ -216,13 +238,16 @@ class SequenceGenerationProbabilityDistribution(DataReport):
                 "v_genes": repertoire.get_v_genes(),
                 "j_genes": repertoire.get_j_genes(),
                 "repertoire": repertoire.identifier,
+                "duplicate_count": repertoire.get_counts(),
             }
 
             for label in label_names:
                 rep_dict[label] = repertoire.get_attribute(label)
 
+            rep_df = pd.DataFrame(data=rep_dict)
+
             dfs.append(
-                pd.DataFrame(data=rep_dict)
+                rep_df
             )
 
         full_dataset = pd.concat(dfs, ignore_index=True)
@@ -231,8 +256,14 @@ class SequenceGenerationProbabilityDistribution(DataReport):
             full_dataset["label"] = full_dataset[label_names].apply(
                 lambda x: "".join([re.findall("signal_id='([^\"']+)", i)[0] for i in x if i]),
                 axis=1).replace([None, ""], self.default_sequence_label)
+        else:
+            full_dataset["label"] = self.default_sequence_label
 
         full_dataset.drop(label_names, axis=1, inplace=True)
+
+        # sum duplicate_count for identical rows
+        full_dataset = full_dataset.groupby(["sequence_aas", "v_genes", "j_genes", "repertoire", "label"]).sum()
+        full_dataset.reset_index(inplace=True)
 
         return full_dataset
 
@@ -265,6 +296,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         for r in repertoires:
             sequence_df[r] = 0
 
+        # TODO parallelize
         for row in df.itertuples():
             sequence_df.at[row.Index, row.repertoire] += 1
 
