@@ -2,8 +2,8 @@ import psutil
 
 from immuneML.tool_interface.ToolTable import ToolTable
 from immuneML.tool_interface.ToolType import ToolType
-from immuneML.tool_interface.interface_components.MLToolComponent import MLToolComponent
 from immuneML.tool_interface.interface_components.DatasetToolComponent import DatasetToolComponent
+from immuneML.tool_interface.interface_components.MLToolComponent import MLToolComponent
 
 toolTable = ToolTable()
 
@@ -38,8 +38,8 @@ def check_running(name: str) -> bool:
     # Get tool from toolTable
     tool = toolTable.get(name)
 
-    if tool.pid is not None:
-        if psutil.pid_exists(tool.pid):
+    if tool.process is not None:
+        if psutil.pid_exists(tool.process.pid):
             print("Process is running")
             return True
         else:
