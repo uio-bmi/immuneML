@@ -8,8 +8,6 @@ class DatasetToolComponent(InterfaceComponent):
     def __init__(self, name: str, specs: dict):
         super().__init__(name, specs)
 
-        # TODO: move this
-
     def run(self):
         # TODO: send request to tool with parameters
         tool_args = self.create_json_params(self.specs)
