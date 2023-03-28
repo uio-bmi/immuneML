@@ -8,9 +8,11 @@ from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
+from immuneML.ml_methods.MLMethodTool import MLMethodTool
 from immuneML.ml_metrics.Metric import Metric
 from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.reports.ml_reports.MLReport import MLReport
+from immuneML.tool_interface import InterfaceController
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -91,6 +93,9 @@ class MLProcess:
         hp_item = self._assess_on_test_dataset(encoded_train_dataset, encoding_train_results, method, split_index)
 
         print_log(f"Completed hyperparameter setting {self.hp_setting}.\n", include_datetime=True)
+
+        if isinstance(method, MLMethodTool):
+            InterfaceController.stop_tool(method.name)
 
         return hp_item
 
