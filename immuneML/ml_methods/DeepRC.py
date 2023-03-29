@@ -9,7 +9,6 @@ import torch
 import yaml
 from sklearn.exceptions import NotFittedError
 from sklearn.model_selection import train_test_split
-from tqdm import tqdm
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
@@ -329,6 +328,8 @@ class DeepRC(MLMethod):
 
     def _model_predict(self, model, dataloader):
         """Based on the DeepRC function evaluate (deeprc.deeprc_binary.training.evaluate)"""
+        from tqdm import tqdm
+
         with torch.no_grad():
             model.to(device=self.pytorch_device)
             scoring_predictions = []
