@@ -3,7 +3,6 @@ from pathlib import Path
 import pandas as pd
 
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.util.PathBuilder import PathBuilder
@@ -32,7 +31,7 @@ class RepertoireBuilder:
             subject_ids = []
 
         for rep_index, sequence_list in enumerate(sequences):
-            rep_sequences = ReceptorSequenceList()
+            rep_sequences = []
             if len(subject_ids) < len(sequences):
                 subject_ids.append("rep_" + str(rep_index))
             for seq_index, sequence in enumerate(sequence_list):

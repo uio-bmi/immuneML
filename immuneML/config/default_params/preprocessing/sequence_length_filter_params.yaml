@@ -1,0 +1,3 @@
+min_len: 5
+max_len: -1
+sequence_type: amino_acid

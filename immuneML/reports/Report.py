@@ -1,6 +1,7 @@
 import abc
 import logging
 
+from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 
 
@@ -107,7 +108,7 @@ class Report(metaclass=abc.ABCMeta):
             logging.warning(f"Report {self.name} encountered an error and could not be generated: {e}.")
             return ReportResult(name=f"{self.name} (failed)", info="This report failed, see the log file for more information")
 
-    def _safe_plot(self, output_written=True, **kwargs):
+    def _safe_plot(self, output_written=True, plot_callable="_plot", **kwargs):
         """
         A wrapper around the function _plot() which catches any error that may be thrown by this function (e.g. errors in R),
         and shows an informative warning message instead. This is to prevent immuneML from crashing when the analysis has been
@@ -130,8 +131,17 @@ class Report(metaclass=abc.ABCMeta):
         else:
             warning_mssg += "\nNo plot has been created."
         try:
-            if callable(getattr(self, '_plot', None)):
-                return self._plot(**kwargs)
+            plot = getattr(self, plot_callable, None)
+            if callable(plot):
+                return plot(**kwargs)
         except Exception as e:
             logging.exception(f"An exception occurred while plotting the data in report {self.name}. See the details below:")
             logging.warning(warning_mssg)
+
+    def _write_output_table(self, table, file_path, name=None):
+        sep = "," if file_path.suffix == ".csv" else "\t"
+        table.to_csv(file_path, index=False, sep=sep)
+
+        return ReportOutput(path=file_path, name=name)
+
+

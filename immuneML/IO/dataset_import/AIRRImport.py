@@ -136,7 +136,7 @@ class AIRRImport(DataImport):
         df.loc[:, "region_type"] = params.region_type.name
 
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
-        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
+        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters, import_with_stop_codon=params.import_with_stop_codon)
         ImportHelper.load_chains(df)
 
         return df

@@ -230,23 +230,25 @@ class ImportHelper:
         return dataframe
 
     @staticmethod
-    def drop_illegal_character_sequences(dataframe: pd.DataFrame, import_illegal_characters: bool) -> pd.DataFrame:
+    def drop_illegal_character_sequences(dataframe: pd.DataFrame, import_illegal_characters: bool, import_with_stop_codon: bool) -> pd.DataFrame:
         for sequence_type in SequenceType:
             if not import_illegal_characters:
                 sequence_name = sequence_type.name.lower().replace("_", " ")
 
                 legal_alphabet = EnvironmentSettings.get_sequence_alphabet(sequence_type)
-                if sequence_type == SequenceType.AMINO_ACID:
+                if sequence_type == SequenceType.AMINO_ACID and import_with_stop_codon:
                     legal_alphabet.append(Constants.STOP_CODON)
 
                 if sequence_type.value in dataframe.columns:
                     is_illegal_seq = [ImportHelper.is_illegal_sequence(sequence, legal_alphabet) for sequence in dataframe[sequence_type.value]]
                     n_illegal = sum(is_illegal_seq)
+                    n_total = dataframe.shape[0]
 
                     if n_illegal > 0:
                         dataframe.drop(dataframe.loc[is_illegal_seq].index, inplace=True)
                         warnings.warn(
-                            f"{ImportHelper.__name__}: {n_illegal} sequences were removed from the dataset because their {sequence_name} sequence contained illegal characters. ")
+                            f"{ImportHelper.__name__}: {n_illegal}/{n_total} sequences were removed from the dataset because their {sequence_name}"
+                            f" sequence contained illegal characters. ")
 
                 else:
                     logging.warning(f"{ImportHelper.__name__}: column {sequence_type.value} is missing, illegal characters were not checked.")

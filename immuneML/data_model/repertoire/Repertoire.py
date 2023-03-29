@@ -18,7 +18,6 @@ from immuneML.data_model.receptor.ReceptorBuilder import ReceptorBuilder
 from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from immuneML.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -113,7 +112,7 @@ class Repertoire(DatasetItem):
 
     @classmethod
     def build_like(cls, repertoire, indices_to_keep: list, result_path: Path, filename_base: str = None):
-        if indices_to_keep is not None and len(indices_to_keep) > 0:
+        if indices_to_keep is not None and len(indices_to_keep) > 0 and sum(indices_to_keep) > 0:
             PathBuilder.build(result_path)
 
             data = repertoire.load_data()
@@ -317,7 +316,7 @@ class Repertoire(DatasetItem):
         return same_cell_lists
 
     def _make_receptors(self, cell_content):
-        sequences = ReceptorSequenceList()
+        sequences = []
         for item in cell_content:
             sequences.append(self._make_sequence_object(item))
         return ReceptorBuilder.build_objects(sequences)

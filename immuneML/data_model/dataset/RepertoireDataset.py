@@ -16,6 +16,21 @@ from immuneML.util.PathBuilder import PathBuilder
 class RepertoireDataset(Dataset):
 
     @classmethod
+    def build_from_objects(cls, **kwargs):
+        ParameterValidator.assert_keys_present(list(kwargs.keys()), ['repertoires', 'path'], RepertoireDataset.__name__, RepertoireDataset.__name__)
+        ParameterValidator.assert_all_type_and_value(kwargs['repertoires'], Repertoire, RepertoireDataset.__name__, 'repertoires')
+
+        metadata_df = pd.DataFrame.from_records([rep.metadata for rep in kwargs['repertoires']])
+
+        if 'field_list' in metadata_df.columns:
+            metadata_df.drop(columns=['field_list'], inplace=True)
+
+        metadata_path = PathBuilder.build(kwargs['path']) / 'metadata.csv'
+        metadata_df.to_csv(metadata_path, index=False)
+
+        return RepertoireDataset(repertoires=kwargs['repertoires'], metadata_file=metadata_path)
+
+    @classmethod
     def build(cls, **kwargs):
         ParameterValidator.assert_keys_present(list(kwargs.keys()), ['metadata_file', 'name', 'repertoire_ids', 'metadata_fields'],
                                                RepertoireDataset.__name__, "repertoire dataset")

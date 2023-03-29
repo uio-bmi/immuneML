@@ -82,7 +82,7 @@ class DuplicateSequenceFilter(Filter):
         assert self.sequence_of_interest in Repertoire.FIELDS, f"{DuplicateSequenceFilter.__name__}: {self.sequence_of_interest} not in {Repertoire.FIELDS}"
         assert self.sequence_to_ignore in Repertoire.FIELDS, f"{DuplicateSequenceFilter.__name__}: {self.sequence_of_interest} not in {Repertoire.FIELDS}"
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: Path) -> RepertoireDataset:
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1) -> RepertoireDataset:
         self.result_path = result_path if result_path is not None else self.result_path
 
         self.check_dataset_type(dataset, [RepertoireDataset], "DuplicateSequenceFilter")
