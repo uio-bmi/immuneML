@@ -164,7 +164,6 @@ If you would like to make contributions, for example by adding a new ML method, 
    - [editdistance](https://pypi.org/project/editdistance/) (0.5.3 or higher)
    - [fishersapi](https://pypi.org/project/fishersapi/)
    - [gensim](https://pypi.org/project/gensim/) (3.8 or higher, < 4)
-   - [h5py](https://www.h5py.org/) (2.10.0 or lower when using the optional DeepRC dependency)
    - [logomaker](https://pypi.org/project/logomaker/) (0.8 or higher)
    - [matplotlib](https://matplotlib.org) (3.1 or higher)
    - [matplotlib-venn](https://pypi.org/project/matplotlib-venn/) (0.11 or higher)
@@ -183,6 +182,7 @@ If you would like to make contributions, for example by adding a new ML method, 
    - [DeepRC](https://github.com/ml-jku/DeepRC) (0.0.1)
    - [widis-lstm-tools](https://github.com/widmi/widis-lstm-tools) (0.4)
    - [tqdm](https://tqdm.github.io/) (0.24 or higher)
+   - [h5py](https://www.h5py.org/) (2.10.0 or lower when using DeepRC 0.0.1)
 - Optional dependencies when using TCRdist:
    - [parasail](https://pypi.org/project/parasail/) (1.2)
    - [tcrdist3](https://github.com/kmayerb/tcrdist3) (0.1.6 or higher)

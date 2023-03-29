@@ -12,7 +12,6 @@ airr>=1,<1.4
 fishersapi
 pystache
 torch>=1.5.1
-h5py<=2.10.0
 dill>=0.3
 tensorboard>=1.14.0
 plotly>=4
