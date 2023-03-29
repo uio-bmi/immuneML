@@ -197,7 +197,7 @@ class MotifGeneralizationAnalysis(DataReport):
         motifs_name = f"motifs of length {motif_size}" if motif_size is not None else "motifs"
 
         output_tables = MotifPerformancePlotHelper.write_output_tables(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, motifs_name=motifs_name, file_suffix=motif_size_suffix)
-        output_plots = MotifPerformancePlotHelper.write_plots(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, tp_cutoff, motifs_name=motifs_name, file_suffix=motif_size_suffix)
+        output_plots = MotifPerformancePlotHelper.write_plots(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, training_tp_cutoff=None, test_tp_cutoff=tp_cutoff, motifs_name=motifs_name, file_suffix=motif_size_suffix)
 
         return output_tables, output_plots, {motif_size: tp_cutoff}
 
@@ -339,7 +339,7 @@ class MotifGeneralizationAnalysis(DataReport):
             warnings.warn(f"{MotifGeneralizationAnalysis.__name__}: could not automatically determine optimal TP threshold{motif_size_warning} with precison differenc  based on {col}")
             return None
 
-    def _plot_precision_per_tp(self, file_path, plotting_data, combined_precision, dataset_type, tp_cutoff=None, motifs_name="motifs"):
+    def _plot_precision_per_tp(self, file_path, plotting_data, combined_precision, dataset_type, tp_cutoff, motifs_name="motifs"):
          return MotifPerformancePlotHelper.plot_precision_per_tp(file_path, plotting_data, combined_precision, dataset_type,
                                                                  training_set_name=self.training_set_name,
                                                                  tp_cutoff=tp_cutoff, motifs_name=motifs_name,

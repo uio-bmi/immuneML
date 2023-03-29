@@ -182,7 +182,7 @@ class MotifTestSetPerformance(EncodingReport):
         motifs_name = f"motifs of length {motif_size}" if motif_size is not None else "motifs"
 
         output_tables = MotifPerformancePlotHelper.write_output_tables(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, motifs_name=motifs_name, file_suffix=motif_size_suffix)
-        output_plots = MotifPerformancePlotHelper.write_plots(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, motifs_name=motifs_name, file_suffix=motif_size_suffix)
+        output_plots = MotifPerformancePlotHelper.write_plots(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, training_tp_cutoff="auto", test_tp_cutoff="auto", motifs_name=motifs_name, file_suffix=motif_size_suffix)
 
         return output_tables, output_plots
 
@@ -204,10 +204,11 @@ class MotifTestSetPerformance(EncodingReport):
         return [table for table in [train_results_table, test_results_table, training_combined_precision_table,
                                     test_combined_precision_table] if table is not None]
 
-    def _plot_precision_per_tp(self, file_path, plotting_data, combined_precision, dataset_type, tp_cutoff=None, motifs_name="motifs"):
+    def _plot_precision_per_tp(self, file_path, plotting_data, combined_precision, dataset_type, tp_cutoff, motifs_name="motifs"):
         return MotifPerformancePlotHelper.plot_precision_per_tp(file_path, plotting_data, combined_precision, dataset_type,
                                                                 training_set_name=self.training_set_name,
                                                                 motifs_name=motifs_name,
+                                                                tp_cutoff=tp_cutoff,
                                                                 highlight_motifs_name=self.highlight_motifs_name)
 
     def _plot_precision_recall(self, file_path, plotting_data, min_recall=None, min_precision=None, dataset_type=None, motifs_name="motifs"):

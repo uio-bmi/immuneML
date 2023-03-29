@@ -85,6 +85,6 @@ class TestMotifTestSetPerformance(TestCase):
         self.assertTrue(os.path.isfile(path / "result_path/training_precision_per_tp_motif_size=1.html"))
         self.assertTrue(os.path.isfile(path / "result_path/test_precision_per_tp_motif_size=1.html"))
 
-        # shutil.rmtree(path)
+        shutil.rmtree(path)
 
 

@@ -153,7 +153,7 @@ class MotifPerformancePlotHelper():
 
     @staticmethod
     def plot_precision_per_tp(file_path, plotting_data, combined_precision, dataset_type, training_set_name,
-                              tp_cutoff=None, motifs_name="motifs", highlight_motifs_name="highlight"):
+                              tp_cutoff, motifs_name="motifs", highlight_motifs_name="highlight"):
         # fig = px.scatter(plotting_data,
         #                y="precision", x="training_TP", hover_data=["feature_names"],
         #                range_y=[0, 1.01], color_discrete_sequence=["#74C4C4"],
@@ -203,6 +203,9 @@ class MotifPerformancePlotHelper():
 
         # add vertical TP cutoff line
         if tp_cutoff is not None:
+            if tp_cutoff == "auto":
+                tp_cutoff = min(plotting_data["training_TP"])
+
             fig.add_vline(x=tp_cutoff, line_dash="dash")
 
         tickvals = MotifPerformancePlotHelper._get_log_x_axis_ticks(plotting_data, tp_cutoff)
@@ -278,9 +281,9 @@ class MotifPerformancePlotHelper():
         return [table for table in [train_results_table, test_results_table, training_combined_precision_table, test_combined_precision_table] if table is not None]
 
     @staticmethod
-    def write_plots(report_obj, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, tp_cutoff=None, motifs_name="motifs", file_suffix=""):
-        training_tp_plot = report_obj._safe_plot(plot_callable="_plot_precision_per_tp", plotting_data=training_plotting_data, combined_precision=training_combined_precision, dataset_type=report_obj.training_set_name, file_path=report_obj.result_path / f"training_precision_per_tp{file_suffix}.html", motifs_name=motifs_name)
-        test_tp_plot = report_obj._safe_plot(plot_callable="_plot_precision_per_tp", plotting_data=test_plotting_data, combined_precision=test_combined_precision, dataset_type=report_obj.test_set_name, file_path=report_obj.result_path / f"test_precision_per_tp{file_suffix}.html", motifs_name=motifs_name, tp_cutoff=tp_cutoff)
+    def write_plots(report_obj, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, training_tp_cutoff, test_tp_cutoff, motifs_name="motifs", file_suffix=""):
+        training_tp_plot = report_obj._safe_plot(plot_callable="_plot_precision_per_tp", plotting_data=training_plotting_data, combined_precision=training_combined_precision, dataset_type=report_obj.training_set_name, file_path=report_obj.result_path / f"training_precision_per_tp{file_suffix}.html", motifs_name=motifs_name, tp_cutoff=training_tp_cutoff)
+        test_tp_plot = report_obj._safe_plot(plot_callable="_plot_precision_per_tp", plotting_data=test_plotting_data, combined_precision=test_combined_precision, dataset_type=report_obj.test_set_name, file_path=report_obj.result_path / f"test_precision_per_tp{file_suffix}.html", motifs_name=motifs_name, tp_cutoff=test_tp_cutoff)
         training_pr_plot = report_obj._safe_plot(plot_callable="_plot_precision_recall", plotting_data=training_plotting_data, dataset_type=report_obj.training_set_name, file_path=report_obj.result_path / f"training_precision_recall{file_suffix}.html", motifs_name=motifs_name)
         test_pr_plot = report_obj._safe_plot(plot_callable="_plot_precision_recall", plotting_data=test_plotting_data, dataset_type=report_obj.test_set_name, file_path=report_obj.result_path / f"test_precision_recall{file_suffix}.html", motifs_name=motifs_name)
 
