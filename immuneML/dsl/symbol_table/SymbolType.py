@@ -13,4 +13,3 @@ class SymbolType(Enum):
     PREPROCESSING = 7
     INSTRUCTION = 8
     OUTPUT = 9
-    TOOL = 10

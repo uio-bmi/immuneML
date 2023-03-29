@@ -10,7 +10,7 @@ regex
 tzlocal
 airr>=1,<1.4
 fishersapi
-pystache~=0.6.0
+pystache
 torch>=1.5.1
 h5py<=2.10.0
 dill>=0.3
@@ -20,12 +20,5 @@ requests>=2.21
 plotly>=4
 logomaker>=0.8
 matplotlib-venn>=0.11
-scipy~=1.9.3
+scipy
 Cython
-
-immuneml~=2.2.2
-yaml~=0.2.5
-pyzmq~=24.0.1
-prefect~=2.8.0
-fisher~=0.1.10
-setuptools~=65.6.3

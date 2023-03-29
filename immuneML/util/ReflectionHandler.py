@@ -1,13 +1,11 @@
-import pathlib
 from importlib import import_module, util
 from pathlib import Path
-import glob
-import sys
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 
 
 class ReflectionHandler:
+
     @staticmethod
     def import_function(function: str, module):
         return getattr(module, function)
@@ -36,25 +34,23 @@ class ReflectionHandler:
 
     @staticmethod
     def _import_class(path: Path, class_name: str):
-        module_path = ".".join(path.parts[len(list(path.parts)) - list(path.parts)[::-1].index("immuneML") - 1:])[
-                      :-3]
+        module_path = ".".join(path.parts[len(list(path.parts)) - list(path.parts)[::-1].index("immuneML") - 1:])[:-3]
         mod = import_module(module_path)
         cls = getattr(mod, class_name)
-
         return cls
 
     @staticmethod
     def get_class_by_name(class_name: str, subdirectory: str = ""):
         filenames = ReflectionHandler._get_filenames(class_name, subdirectory)
 
-        assert len(
-            filenames) == 1, f"ReflectionHandler could not find class named {class_name}. Check spelling and try again."
+        assert len(filenames) == 1, f"ReflectionHandler could not find class named {class_name}. Check spelling and try again."
 
         return ReflectionHandler._import_class(filenames[0], class_name)
 
     @staticmethod
     def _get_filenames(class_name: str, subdirectory_name: str = "", partial=False):
         pattern = f"immuneML/**/*{class_name}.py" if partial else f"immuneML/**/{class_name}.py"
+
         filenames = list(EnvironmentSettings.root_path.glob(pattern))
         filenames = [f for f in filenames if subdirectory_name in "/".join(f.parts)]
 
@@ -62,8 +58,7 @@ class ReflectionHandler:
 
     @staticmethod
     def all_subclasses(cls):
-        subclasses = set(cls.__subclasses__()).union(
-            [s for c in cls.__subclasses__() for s in ReflectionHandler.all_subclasses(c)])
+        subclasses = set(cls.__subclasses__()).union([s for c in cls.__subclasses__() for s in ReflectionHandler.all_subclasses(c)])
         return subclasses
 
     @staticmethod
@@ -72,18 +67,15 @@ class ReflectionHandler:
             classes = ReflectionHandler.get_classes_by_partial_name(drop_part, subdirectory)
         return [cl for cl in cls.__subclasses__()]
 
-    # used when getting methods, encodings etc.
     @staticmethod
     def all_nonabstract_subclass_basic_names(cls, drop_part: str, subdirectory: str = ""):
-        return [c.__name__.replace(drop_part, "") for c in
-                ReflectionHandler.all_nonabstract_subclasses(cls, drop_part, subdirectory)]
+        return [c.__name__.replace(drop_part, "") for c in ReflectionHandler.all_nonabstract_subclasses(cls, drop_part, subdirectory)]
 
     @staticmethod
     def all_nonabstract_subclasses(cls, drop_part=None, subdirectory=None):
         if drop_part is not None and subdirectory is not None:
             classes = ReflectionHandler.get_classes_by_partial_name(drop_part, subdirectory)
-        return [cl for cl in ReflectionHandler.all_subclasses(cls) if
-                not bool(getattr(cl, "__abstractmethods__", False))]
+        return [cl for cl in ReflectionHandler.all_subclasses(cls) if not bool(getattr(cl, "__abstractmethods__", False))]
 
     @staticmethod
     def exists(class_name: str, subdirectory: str = ""):
@@ -105,7 +97,6 @@ class ReflectionHandler:
     def get_classes_by_partial_name(class_name_ending: str, subdirectory: str = ""):
         filenames = ReflectionHandler._get_filenames(class_name_ending, subdirectory, partial=True)
         classes = [ReflectionHandler._import_class(filename, filename.stem) for filename in filenames]
-
         return classes
 
     @staticmethod
