@@ -62,7 +62,8 @@ class TCRMatchEpitopeAnalysis(DataReport):
         tcrmatch_path (str): optional path to the TCRMatch executable. If not given, it is assumed that TCRMatch
         has been installed such that it can be called directly on the command line with the command 'tcrmatch'.
 
-        iedb_file (str):
+        iedb_file (str): the IEDB file that will be used as a 'dataset' file for TCRMatch. Note: column name
+        'trimmed_seq' must be replaced with 'cdr3_aa'.
 
         differences (int): Number of differences allowed between the sequences of two immune receptor chains when running CompAIRR.
         By default, differences is 0.
