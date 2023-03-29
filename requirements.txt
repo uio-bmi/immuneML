@@ -9,7 +9,6 @@ editdistance==0.5.3
 regex
 tzlocal
 airr>=1,<1.4
-fishersapi
 pystache
 torch>=1.5.1
 h5py<=2.10.0
