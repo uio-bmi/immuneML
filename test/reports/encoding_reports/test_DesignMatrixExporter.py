@@ -74,13 +74,5 @@ class TestDesignMatrixExporter(TestCase):
         report._export_matrix()
         self.assertTrue(os.path.isfile(path / "design_matrix.npy.zip"))
 
-        # report.file_format = 'hdf5'
-        # report._export_matrix()
-        # self.assertTrue(os.path.isfile(path / "design_matrix.hdf5"))
-        # report.file_format = 'hdf5.zip'
-        # report._export_matrix()
-        # self.assertTrue(os.path.isfile(path / "design_matrix.hdf5.zip"))
-        # shutil.rmtree(path)
-
         with self.assertRaises(AssertionError):
             DesignMatrixExporter.build_object(**{'file_format': "random"})
