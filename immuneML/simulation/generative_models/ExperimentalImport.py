@@ -35,9 +35,11 @@ class ExperimentalImport(GenerativeModel):
             type: ExperimentalImport
 
     """
-    def __init__(self, dataset: SequenceDataset):
+
+    def __init__(self, dataset: SequenceDataset, original_input_file: Path = None):
         self._dataset = dataset
         self._counter = 0
+        self._original_input_file = original_input_file
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -52,7 +54,7 @@ class ExperimentalImport(GenerativeModel):
         dataset = ImportParser.parse_dataset("experimental_dataset", {'format': kwargs['import_format'], 'params': kwargs['import_params']},
                                              tmp_import_path)
         print(f"Imported dataset with {dataset.get_example_count()} sequences.")
-        return ExperimentalImport(dataset)
+        return ExperimentalImport(dataset, kwargs['import_params']['path'])
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
         if compute_p_gen:
@@ -82,3 +84,7 @@ class ExperimentalImport(GenerativeModel):
     def generate_from_skewed_gene_models(self, v_genes: list, j_genes: list, seed: int, path: Path, sequence_type: SequenceType, batch_size: int,
                                          compute_p_gen: bool):
         raise NotImplementedError
+
+    def is_same(self, model) -> bool:
+        return type(self) == type(model) and self._dataset.get_example_count() == model._dataset.get_example_count() \
+               and self._original_input_file == model._original_input_file
