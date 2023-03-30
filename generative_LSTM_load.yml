@@ -12,7 +12,7 @@ instructions:
       generator_1:
         ml_method: G1
         report: GeneratorReport
-        path: existing_LSTM_model/machine_learning_instruction/analysis_generator_1
-        amount: 100
+        path: save_out/LSTM_1024_64_native/machine_learning_instruction/analysis_generator_1
+        amount: 20000
 
 

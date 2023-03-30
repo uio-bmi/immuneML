@@ -30,7 +30,7 @@ class LSTM(GenerativeModel):
         self.checkpoint_dir = ""
         self.model_params = {}
         self.max_sequence_length = parameters["max_sequence_length"]
-        self.historydf = {}
+        self.historydf = None
         self.generated_sequences = []
         self.alphabet.append(" ")
         self.char2idx = {u: i for i, u in enumerate(self.alphabet)}

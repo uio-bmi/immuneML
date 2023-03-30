@@ -18,6 +18,7 @@ class PWM(GenerativeModel):
         parameters = parameters if parameters is not None else {}
         parameter_grid = parameter_grid if parameter_grid is not None else {}
         self.model_weight = []
+        self.model = []
         super(PWM, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
 
     def make_PWM(self, dataset, length):
@@ -78,6 +79,7 @@ class PWM(GenerativeModel):
     def load(self, path: Path, details_path: Path = None):
 
         csv_files = Path(path).glob('*.csv')
+
         for file in csv_files:
             df = pd.read_csv(file, index_col=False)
             # if alphabet is saved, it must be removed
