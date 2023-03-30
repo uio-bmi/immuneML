@@ -102,7 +102,7 @@ class ImplantingStrategy(SimulationStrategy):
         zero_mask = "m" + "".join(["0" for _ in range(len(new_sequence[sequence_type.value]))])
         new_sequence = {**{f"{s.id}_positions": zero_mask for s in all_signals}, **{s.id: 0 for s in all_signals if s.id != signal.id},
                         **new_sequence, f'observed_{signal.id}': int(random.uniform(0, 1) > sim_item.false_negative_prob_in_receptors),
-                        f'from_default_model': 0}
+                        f'from_default_model': 0, 'duplicate_count': -1, 'signals_aggregated': signal.id}
 
         return new_sequence
 

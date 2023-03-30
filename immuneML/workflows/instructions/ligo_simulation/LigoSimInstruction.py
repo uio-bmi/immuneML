@@ -85,7 +85,7 @@ class LigoSimInstruction(Instruction):
 
         self._noise_fields = [(f"observed_{s.id}", int) for s in self.state.signals] if self._export_observed_signals else []
 
-        self._annotation_fields = sorted([(signal.id, int) for signal in self.state.signals] +
+        self._annotation_fields = sorted([(signal.id, int) for signal in self.state.signals] + [('signals_aggregated', str)] +
                                          [(f"{signal.id}_positions", str) for signal in self.state.signals] + self._noise_fields,
                                          key=lambda x: x[0])
 

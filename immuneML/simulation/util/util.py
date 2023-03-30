@@ -71,7 +71,7 @@ def construct_sequence_metadata_object(sequence, metadata: dict, custom_params, 
     custom = {}
 
     for key, key_type in custom_params:
-        if 'position' in key:
+        if 'position' in key or 'signals_aggregated' in key:
             custom[key] = getattr(sequence, key).to_string()
         else:
             custom[key] = getattr(sequence, key).item()
@@ -260,6 +260,10 @@ def make_bnp_annotated_sequences(sequences: BackgroundSequences, bnp_data_class,
     if any([f'observed_{s.id}' in dc_fields for s in all_signals]):
         kwargs = {**kwargs,
                   **{f'observed_{s.id}': signal_matrix[:, ind].astype(int) for ind, s in enumerate(all_signals)}}
+
+    kwargs['signals_aggregated'] = [s if s != "" else "no_signal" for s in
+                                    ["_".join(s for index, s in enumerate([sig.id for sig in all_signals]) if el[index] == 1)
+                                     for el in signal_matrix]]
 
     return bnp_data_class(**kwargs)
 
