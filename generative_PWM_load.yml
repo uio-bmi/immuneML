@@ -12,6 +12,7 @@ instructions:
       generator_1:
         ml_method: G1
         report: GeneratorReport
-        path: existing_PWM_model/machine_learning_instruction/analysis_generator_1
+        path: PWM_native/machine_learning_instruction/analysis_generator_1
+        amount: 250
 
 

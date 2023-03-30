@@ -25,7 +25,6 @@ class GenerativeModelInstruction(Instruction):
         assert all(isinstance(unit, GenerativeModelUnit) for unit in generative_model_units.values()), \
             "GenerativeModelInstruction: not all elements passed to init method are instances of GenerativeModelUnit."
         self.state = GenerativeModelState(generative_model_units, name=name)
-
         self.name = name
 
     def run(self, result_path: Path):
@@ -45,10 +44,11 @@ class GenerativeModelInstruction(Instruction):
         unit.report.dataset = encoded_dataset
         unit.genModel.fit(encoded_dataset.encoded_data, result_path=result_path)
         unit.genModel.store(result_path)
-        sequences = unit.genModel.generate(amount=unit.amount)
+        unit.generated_sequences = unit.genModel.generate(unit.amount)
+        unit.report.sequences = unit.generated_sequences
+        unit.report.alphabet = unit.genModel.alphabet
         unit.report.method = unit.genModel
         unit.report.result_path = result_path / "report"
-        unit.generated_sequences = sequences
         report_result = unit.report.generate_report()
         return report_result
 

@@ -1,5 +1,4 @@
-import csv
-import yaml
+
 import datetime
 
 import numpy as np
@@ -18,76 +17,54 @@ class PWM(GenerativeModel):
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         parameters = parameters if parameters is not None else {}
         parameter_grid = parameter_grid if parameter_grid is not None else {}
-        self._alphabet = ""
-        self.generated_sequences = []
+        self.model_weight = []
         super(PWM, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
 
-    def _get_ml_model(self, dataset=None):
+    def make_PWM(self, dataset, length):
 
+        matrix = np.zeros(shape=(length, len(self.alphabet)))
 
-        sequences = dataset.split(" ")
-        self._length_of_sequence = len(sequences[0])
-        sequences_without_spaces = "".join(sequences)
-        dataset = np.array(list(sequences_without_spaces))
-        dataset = np.reshape(dataset, (len(sequences), self._length_of_sequence))
-        self._alphabet = sorted(set("".join(sequences)))
-        matrix = np.zeros(shape=(self._length_of_sequence, len(self._alphabet)))
-
-        instances = dataset.T
-        for x, pos in enumerate(instances):
-            for element in pos:
-                for y, char in enumerate(self._alphabet):
-                    if element == char:
-                        matrix[x][y] += 1
-                        break
+        for sequence in dataset:
+            for pos, hot in enumerate(sequence):
+                matrix[pos][np.argmax(hot)] += 1
 
         for ind, row in enumerate(matrix):
             matrix[ind] = matrix[ind] / sum(matrix[ind])
 
         return matrix
 
+    def _get_ml_model(self, cores_for_training, X):
+        sequences_by_length = {}
 
+        for sequence in X:
+            sequence_without_fill = sequence[np.any(sequence == 1, axis=1)]
+            if len(sequence_without_fill) not in sequences_by_length:
+                sequences_by_length[len(sequence_without_fill)] = [sequence_without_fill]
+            else:
+                sequences_by_length[len(sequence_without_fill)].append(sequence_without_fill)
+
+        self.model_weight = np.array([len(i) for i in sequences_by_length.values()]) / sum([len(i) for i in sequences_by_length.values()])
+
+        pwms = []
+        for length, sequences in sequences_by_length.items():
+            pwms.append(self.make_PWM(sequences, length))
+
+        return pwms
 
     def _fit(self, X, cores_for_training: int = 1, result_path: Path = None):
         self.model = self._get_ml_model(cores_for_training, X)
-
         return self.model
 
-    def generate(self, length_of_sequences: int = None, amount=10, path_to_model: Path = None):
-
-        length_of_sequences = self.model.shape[0]
+    def generate(self, amount=10, path_to_model: Path = None):
         generated_sequences = []
-        for _ in range(amount):
-            sequence = []
-            for i in range(length_of_sequences):
-                sequence.append(np.random.choice(self._alphabet, 1, p=self.model[i])[0])
+        for i in range(amount):
+            pwm = np.random.choice(self.model, p=self.model_weight)
+            sequence = ""
+            for j in range(pwm.shape[0]):
+                sequence = sequence + np.random.choice(self.alphabet, 1, p=pwm[j])[0]
             generated_sequences.append(sequence)
 
-        instances = np.array(generated_sequences)
-
-        matrix = np.zeros(shape=(instances.shape[1], len(self._alphabet)))
-
-        instances = instances.T
-
-        for x, pos in enumerate(instances):
-            for i, element in enumerate(pos):
-                for y, char in enumerate(self._alphabet):
-                    if element == char:
-                        matrix[x][y] += 1
-                        break
-
-        for ind, row in enumerate(matrix):
-            matrix[ind] = matrix[ind] / sum(matrix[ind]) * 100
-        matrix = np.around(matrix, 2)
-        return_sequences = []
-        instances = instances.T
-
-        for row in instances:
-            return_sequences.append("".join(row))
-
-        matrix = matrix.T
-        self.generated_sequences = ["".join(sequence) for sequence in generated_sequences]
-        return instances
+        return generated_sequences
 
     def get_params(self):
         return self._parameters
@@ -100,57 +77,30 @@ class PWM(GenerativeModel):
 
     def load(self, path: Path, details_path: Path = None):
 
-        name = f"{self._get_model_filename()}.csv"
-        file_path = path / name
-        if file_path.is_file():
-            dataframe = pd.read_csv(file_path, index_col=False)
-            self._alphabet = dataframe.pop('alphabet').values
-            self.model = np.array(dataframe.values).T
-        else:
-            raise FileNotFoundError(f"{self.__class__.__name__} model could not be loaded from {file_path}"
-                                    f". Check if the path to the {name} file is properly set.")
+        csv_files = Path(path).glob('*.csv')
+        for file in csv_files:
+            df = pd.read_csv(file, index_col=False)
+            # if alphabet is saved, it must be removed
+            #df.pop('alphabet')
 
-        if details_path is None:
-            params_path = path / f"{self._get_model_filename()}.yaml"
-        else:
-            params_path = details_path
+            self.model_weight.append(df.pop('weight')[0])
+            self.model.append(np.array(df.values).T)
 
-        if params_path.is_file():
-            with params_path.open("r") as file:
-                desc = yaml.safe_load(file)
-                for param in ["feature_names"]:
-                    if param in desc:
-                        setattr(self, param, desc[param])
 
     def store(self, path: Path, feature_names=None, details_path: Path = None):
 
         PathBuilder.build(path)
 
         print(f'{datetime.datetime.now()}: Writing to file...')
-        file_path = path / f"{self._get_model_filename()}.csv"
-        data = {str(ind + 1): numbers for ind, numbers in enumerate(self.model)}
+        for i, pwm in enumerate(self.model):
 
-        data["alphabet"] = list(self._alphabet)
-        dataframe = pd.DataFrame(data)
-        dataframe.to_csv(file_path, index=False)
-
-
-        if details_path is None:
-            params_path = path / f"{self._get_model_filename()}.yaml"
-        else:
-            params_path = details_path
-
-        with params_path.open("w") as file:
-            desc = {
-                **(self.get_params()),
-                "feature_names": feature_names,
-                "class_mapping": self.class_mapping,
-            }
-
-            if self.label is not None:
-                desc["label"] = vars(self.label)
-
-            yaml.dump(desc, file)
+            file_path = path / f"{self._get_model_filename()}_{pwm.shape[0]}.csv"
+            data = {str(ind + 1): numbers for ind, numbers in enumerate(pwm)}
+            data['weight'] = self.model_weight[i]
+            # should i inlcude alphabet in the saved csv file?
+            # data["alphabet"] = list(self._alphabet)
+            dataframe = pd.DataFrame(data)
+            dataframe.to_csv(file_path, index=False)
 
     @staticmethod
     def get_documentation():

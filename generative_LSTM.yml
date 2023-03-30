@@ -8,13 +8,9 @@ definitions:
         paired: False
         region_type: FULL_SEQUENCE
   encodings:
-    e1: OneHot
+    e1: CharToInt
   ml_methods:
-    G1:
-      LSTM:
-        cores_for_training: 2
-        rnn_units: 256
-        epochs: 5
+    G1: LSTM
   reports:
     GeneratorReport: GeneratorReportLSTM
 instructions:
@@ -26,5 +22,6 @@ instructions:
         encoding: e1
         ml_method: G1
         report: GeneratorReport
+        amount: 250
 
 

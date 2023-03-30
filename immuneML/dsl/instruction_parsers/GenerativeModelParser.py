@@ -59,27 +59,25 @@ class GenerativeModelParser:
 
         params = {"dataset": symbol_table.get(generator["dataset"]),
                   "report": copy.deepcopy(symbol_table.get(generator["report"])),
-                  "genModel": symbol_table.get(generator["ml_method"])}
+                  "genModel": symbol_table.get(generator["ml_method"]),
+                  "encoder": symbol_table.get(generator["encoding"]).build_object(
+                      symbol_table.get(generator["dataset"]),
+                      **symbol_table.get_config(generator["encoding"])["encoder_params"]
+                  )}
 
         optional_params = self._prepare_optional_params(generator, symbol_table, yaml_location)
         params = {**params, **optional_params}
+
         return params
 
     def _prepare_optional_params(self, generator: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
 
         params = {}
-        dataset = symbol_table.get(generator["dataset"])
-
 
         if "amount" in generator:
             params["amount"] = generator["amount"]
-        if "encoding" in generator:
-            params["encoder"] = symbol_table.get(generator["encoding"]).build_object(dataset, **symbol_table.get_config(generator["encoding"])["encoder_params"])
-        if "rnn_units" in generator:
-            params["rnn_units"] = generator["rnn_units"]
-        if "epochs" in generator:
-            params["epochs"] = generator["epochs"]
 
         return params
+
 
 

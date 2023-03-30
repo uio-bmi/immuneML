@@ -5,7 +5,7 @@ import numpy
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.environment.LabelConfiguration import LabelConfiguration
-from immuneML.reports.Report import Report
+from immuneML.reports.ml_reports.GeneratorReport import GeneratorReport
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.ml_methods.GenerativeModel import GenerativeModel
 
@@ -13,7 +13,7 @@ from immuneML.ml_methods.GenerativeModel import GenerativeModel
 @dataclass
 class GenerativeModelUnit:
 
-    report: Report
+    report: GeneratorReport
     genModel: GenerativeModel
     amount: int = 10
     dataset: Dataset = None

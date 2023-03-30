@@ -25,28 +25,24 @@ class LSTM(GenerativeModel):
         pass
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
-        parameters = parameters if parameters is not None else {}
-        parameter_grid = parameter_grid if parameter_grid is not None else {}
         super(LSTM, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
 
         self.checkpoint_dir = ""
         self.model_params = {}
-        self.historydf = None
-        self.initializer = None
+        self.max_sequence_length = parameters["max_sequence_length"]
+        self.historydf = {}
         self.generated_sequences = []
+        self.alphabet.append(" ")
+        self.char2idx = {u: i for i, u in enumerate(self.alphabet)}
 
-    def _get_ml_model(self, batch_size, vocab_size=20, rnn_units=128):
+        self.rnn_units = self._parameters["rnn_units"]
+        self.epochs = self._parameters["epochs"]
+        self.embedding_dim = self._parameters["embedding_dim"]
+        self.batch_size = self._parameters["batch_size"]
+        self.buffer_size = self._parameters["buffer_size"]
+        self.first_sequence = None
 
-        #This model is the same as Mat's, but the Embedding layer is replaced with a simple
-        #Input layer. The input shape and output shape are the same
-
-        x = tf.keras.layers.Input((None, vocab_size), batch_size=batch_size)
-        lstm = tf.keras.layers.LSTM(rnn_units,
-                                            return_sequences=True,
-                                            stateful=True,
-                                            recurrent_initializer='glorot_uniform')(x)
-        dense2 = tf.keras.layers.Dense(vocab_size)(lstm)
-        self.model = tf.keras.models.Model(x, dense2, name="model")
+        self.vocab_size = len(self.alphabet)
 
     def split_input_target(self, seq):
         '''
@@ -58,89 +54,57 @@ class LSTM(GenerativeModel):
         target_seq = seq[1:]
         return input_seq, target_seq
 
+    def _get_ml_model(self):
+
+        # put one hot
+        model = tf.keras.Sequential([
+            tf.keras.layers.Embedding(self.vocab_size,
+                                      self.embedding_dim,
+                                      batch_input_shape=[self.batch_size, None]),
+            tf.keras.layers.LSTM(self.rnn_units,
+                                 return_sequences=True,
+                                 stateful=True,
+                                 recurrent_initializer='glorot_uniform'),
+            tf.keras.layers.Dense(self.vocab_size)
+        ])
+
+        return model
+
     @staticmethod
-    def sample(preds, temperature=1.0):
-        # helper function to sample an index from a probability array
-        preds = np.asarray(preds).astype("float64")
-        preds = np.log(preds) / temperature
-        exp_preds = np.exp(preds)
-        preds = exp_preds / np.sum(exp_preds)
-        probas = np.random.multinomial(1, preds, 1)
-        return np.argmax(probas)
+    def loss(labels, logits):
+        '''
+        loss function for the net output
+        :param labels:
+        :param logits:
+        :return:
+        '''
+        loss = tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
+        return loss
 
     def _fit(self, dataset, cores_for_training: int = 1, result_path: Path = None):
 
-        """
-        Hard values made from previous testing with LSTM. These values may not be suitable for protein sequence
-        generation
-        """
-
         PathBuilder.build(result_path)
 
-
-        params = self._parameters
-        rnn_units = 128 if "rnn_units" not in params else params["rnn_units"]
-        epochs = 10 if "epochs" not in params else params["epochs"]
-
-
-
-        """
-        This snippit adds another dimension to the one_hot
-        The existing one_hot implementation ignores spaces, and simply returns each sequence
-        LSTM requires a data input of a bunch of sequences.
-        Here we add a 0 at the start of each one_hot value, and then insert a one_hot array representing
-        a space in intervals of "sequence length".
-        
-        In order to solve the mismatching lenght of sequences, we also remove every instance
-        of an array with no 1's.
-        """
-        dataset = np.insert(dataset, 0, 0, axis=2)
-        zero = np.zeros(dataset.shape[2])
-        zero[0] = 1
-        dataset = np.insert(dataset, dataset.shape[1], zero, axis=1)
-        dataset = np.reshape(dataset, (dataset.shape[0] * dataset.shape[1], dataset.shape[2]))
-        dataset = np.delete(dataset, dataset.shape[0]-1, axis=0)
-        dataset = dataset[np.any(dataset == 1, axis=1)]
-        batch_size = 32
-
-        """ LSTM requires lengths of sentences to process, hence, the data is split into chunks of
-        an arbitrary length.
-        We then map a function that splits the data for x and y input for the fitting.
-        The mapping ensures that the input of a chunk is compared to the following chunk.
-        This was the same as mat did.
-        """
-        batches = tf.data.Dataset.from_tensor_slices(tf.convert_to_tensor(dataset))
-        sentence_length = 42
-
-        batches = batches.batch(sentence_length, drop_remainder=True)
-        batches = batches.map(self.split_input_target)
-        batches = batches.batch(batch_size=batch_size, drop_remainder=True)
+        tensor_x = tf.data.Dataset.from_tensor_slices(dataset)
+        sequence_batches = tensor_x.batch(self.max_sequence_length, drop_remainder=True)
+        final_data = sequence_batches.map(self.split_input_target)
+        final_data = final_data.shuffle(self.buffer_size).batch(self.batch_size, drop_remainder=True)
+        self.first_sequence = final_data[0][0]  # used for generation with realistic initialization data
         dataset_size = 0
-        for _ in batches:
+        for _ in dataset:
             dataset_size += 1
         # split train, val, test
         train_size = int(0.7 * dataset_size)
         val_size = int(0.15 * dataset_size)
-        train_dataset = batches.take(train_size)
-        test_dataset = batches.skip(train_size)
+        train_dataset = final_data.take(train_size)
+        test_dataset = final_data.skip(train_size)
         val_dataset = test_dataset.skip(val_size)
-        self.alphabet.insert(0, ' ')
-        self.char2idx = {a: i for i, a in enumerate(self.alphabet)}
 
-        train_len = int(dataset.shape[0] * (2 / 3))
-        x_train = dataset[:train_len]
-        x_test = dataset[train_len:]
-        self.initializer = x_train[0]
+        model = self._get_ml_model()
 
-        vocab_size = len(self.alphabet)
-
-        self._get_ml_model(batch_size, vocab_size, rnn_units)
-
-        """
-        Mat applies sparse categorical crossentropy, but this is not possible with one_hot
-        """
-        self.model.compile(loss="categorical_crossentropy", optimizer="adam")
-
+        model.summary()
+        model.compile(loss=self.loss, optimizer='adam')
+        # Prep checkpoint paths
         self.checkpoint_dir = result_path / f"{self._get_model_filename()}_checkpoints"
         checkpoint_prefix = os.path.join(self.checkpoint_dir, 'ckpt_{epoch}')
         checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
@@ -150,11 +114,10 @@ class LSTM(GenerativeModel):
             save_best_only=False
         )
 
-        history = self.model.fit(train_dataset,
-                                 epochs=epochs,
+        history = model.fit(train_dataset,
+                                 epochs=self.epochs,
                                  callbacks=[checkpoint_callback],
-                                 validation_data=test_dataset,
-                                 workers=cores_for_training)
+                                 validation_data=val_dataset)
 
         history_contents = []
         for metric in history.history:
@@ -166,38 +129,45 @@ class LSTM(GenerativeModel):
         self.historydf = pd.DataFrame(history_contents, columns=['metric', 'data'])
 
         self.model_params = {
-            'epochs': epochs,
-            'vocab_size': vocab_size,
-            'rnn_units': rnn_units
+            'epochs': self.epochs,
+            'batch_size': self.batch_size,
+            'buffer_size': self.buffer_size,
+            'vocab_size': self.vocab_size,
+            'embedding_dim': self.embedding_dim,
+            'rnn_units': self.rnn_units,
+            'first_sequence': self.first_sequence
         }
 
-        return self.model
+        return model
 
     def generate(self, amount=10, path_to_model: Path = None):
 
-        self._get_ml_model(batch_size=1,
-                           vocab_size=self.model_params['vocab_size'],
-                           rnn_units=self.model_params['rnn_units'])
+        self.batch_size = 1  # When generating, we only generate one batches of size 1
+        model = self._get_ml_model()
 
-        self.model.load_weights(tf.train.latest_checkpoint(self.checkpoint_dir))
+        model.load_weights(tf.train.latest_checkpoint(self.checkpoint_dir))
 
-        init = [3]
-        hot = tf.one_hot(init, 21)
-        hot = tf.expand_dims(hot, 0)
+        input_vect = tf.expand_dims(self.first_sequence, 0)
+        generated_seq = ''
+        model.reset_states()
+        count = 0
+        bar = pyprind.ProgBar(amount, bar_char="=", stream=sys.stdout, width=100)
 
-        #Mat resets states, but this causes the values to become "nan"
-        #self.model.reset_states()
-        for i in range(amount):
-            sentence = ""
-            while self.alphabet[np.argmax(hot)] != " ":
-                hot = self.model(hot)
-                sentence = sentence + self.alphabet[np.argmax(hot)]
-                if len(sentence) > 42:
-                    break
-            print(sentence)
-            self.generated_sequences.append(sentence)
+        while True:
+            prediction = model(input_vect)
+            prediction = tf.squeeze(prediction, 0)
+            predicted_char = tf.random.categorical(prediction, num_samples=1)[-1, 0].numpy()
+            input_vect = tf.expand_dims([predicted_char], 0)
+            if self.alphabet[predicted_char] == ' ':
+                count += 1
+                bar.update()
+            if count == amount:
+                break
+            generated_seq += self.alphabet[predicted_char]
 
-        return self.generated_sequences
+        generated_sequences = np.array(generated_seq.split(' '))
+        return generated_sequences
+
     def get_params(self):
         return self._parameters
 
@@ -210,7 +180,14 @@ class LSTM(GenerativeModel):
     def load(self, path: Path, details_path: Path = None):
 
         self.model_params = json.load(open(path / f"{self._get_model_filename()}_model_params.json"))
-        self.initializer = np.loadtxt(path / f"{self._get_model_filename()}_init.csv")
+        self.rnn_units = self.model_params["rnn_units"]
+        self.embedding_dim = self.model_params["embedding_dim"]
+        self.first_sequence = self.model_params["first_sequence"]
+
+
+        self.vocab_size = len(self.alphabet)
+        self.char2idx = json.load(open(path / f"{self._get_model_filename()}_char2idx.json"))
+        self.alphabet = list(self.char2idx.keys())
         self.checkpoint_dir = path / f"{self._get_model_filename()}_checkpoints"
 
     def store(self, path: Path, feature_names=None, details_path: Path = None):
@@ -219,11 +196,12 @@ class LSTM(GenerativeModel):
 
         print(f'{datetime.datetime.now()}: Writing to file...')
         params_path = path / f"{self._get_model_filename()}_model_params.json"
-        init_path = path / f"{self._get_model_filename()}_init.csv"
+        char2idx_path = path / f"{self._get_model_filename()}_char2idx.json"
 
         model_params_outname = params_path
-        np.savetxt(init_path, self.initializer, delimiter=",")
+        char2idx_outname = char2idx_path
         json.dump(self.model_params, open(model_params_outname, 'w'))
+        json.dump(self.char2idx, open(char2idx_outname, 'w'))
 
     @staticmethod
     def get_documentation():
@@ -236,3 +214,5 @@ class LSTM(GenerativeModel):
 
         doc = update_docs_per_mapping(doc, mapping)
         return doc
+
+

@@ -1,18 +1,7 @@
-import csv
-import json
-import os
-import sys
-
-import datetime
-import random
-import time
-import pyprind
 
 import numpy as np
-import pandas as pd
 import tensorflow as tf
-import keras_tuner as kt
-
+import matplotlib.pyplot as plt
 
 from pathlib import Path
 from immuneML.ml_methods.GenerativeModel import GenerativeModel
@@ -40,24 +29,24 @@ class VAE(GenerativeModel):
         random_sample = mu + tf.keras.backend.exp(log_variance / 2) * epsilon
         return random_sample
 
-    def _get_ml_model(self, seq_length, vocab_size, latent_space_dim=2):
+    def _get_ml_model(self, seq_length, vocab_size, latent_space_dim=2, initial_units=256):
 
         # Encoder
         x = tf.keras.layers.Input(shape=(seq_length, vocab_size), name="encoder_input")
 
-        encoder_dense_layer1 = tf.keras.layers.Dense(64)(x)
+        encoder_dense_layer1 = tf.keras.layers.Dense(initial_units)(x)
         encoder_norm_layer1 = tf.keras.layers.BatchNormalization(name="encoder_norm_1")(encoder_dense_layer1)
         encoder_activ_layer1 = tf.keras.layers.LeakyReLU(name="encoder_leakyrelu_1")(encoder_norm_layer1)
 
-        encoder_dense_layer2 = tf.keras.layers.Dense(32)(encoder_activ_layer1)
+        encoder_dense_layer2 = tf.keras.layers.Dense(int(initial_units/2))(encoder_activ_layer1)
         encoder_norm_layer2 = tf.keras.layers.BatchNormalization(name="encoder_norm_2")(encoder_dense_layer2)
         encoder_activ_layer2 = tf.keras.layers.LeakyReLU(name="encoder_activ_layer_2")(encoder_norm_layer2)
 
-        encoder_dense_layer3 = tf.keras.layers.Dense(16)(encoder_activ_layer2)
+        encoder_dense_layer3 = tf.keras.layers.Dense(int(initial_units/4))(encoder_activ_layer2)
         encoder_norm_layer3 = tf.keras.layers.BatchNormalization(name="encoder_norm_3")(encoder_dense_layer3)
         encoder_activ_layer3 = tf.keras.layers.LeakyReLU(name="encoder_activ_layer_3")(encoder_norm_layer3)
 
-        encoder_dense_layer4 = tf.keras.layers.Dense(8)(encoder_activ_layer3)
+        encoder_dense_layer4 = tf.keras.layers.Dense(int(initial_units/8))(encoder_activ_layer3)
         encoder_norm_layer4 = tf.keras.layers.BatchNormalization(name="encoder_norm_4")(encoder_dense_layer4)
         encoder_activ_layer4 = tf.keras.layers.LeakyReLU(name="encoder_activ_layer_4")(encoder_norm_layer4)
 
@@ -79,45 +68,42 @@ class VAE(GenerativeModel):
         encoder_output = tf.keras.layers.Lambda(self.sampling, name="encoder_output")(
             [encoder_mu, encoder_log_variance])
 
-        encoder = tf.keras.models.Model(x, encoder_output, name="encoder_model")
+        output_normalized = tf.keras.layers.Normalization()(encoder_output)
+
+        encoder = tf.keras.models.Model(x, output_normalized, name="encoder_model")
 
 
         ##################################################################################################
         # Decoder
 
         decoder_input = tf.keras.layers.Input(shape=(latent_space_dim), name="decoder_input")
-        decoder_dense_layer1 = tf.keras.layers.Dense(units=np.prod((seq_length, 8)))(decoder_input)
+        decoder_dense_layer1 = tf.keras.layers.Dense(units=np.prod((seq_length, int(initial_units/8))))(decoder_input)
 
-        decoder_reshape = tf.keras.layers.Reshape(target_shape=(seq_length, 8))(decoder_dense_layer1)
+        decoder_reshape = tf.keras.layers.Reshape(target_shape=(seq_length, int(initial_units/8)))(decoder_dense_layer1)
         decoder_norm_layer1 = tf.keras.layers.BatchNormalization(name="decoder_norm_1")(
             decoder_reshape)
         decoder_activ_layer1 = tf.keras.layers.LeakyReLU(name="decoder_leakyrelu_1")(decoder_norm_layer1)
 
-        decoder_dense_layer2 = tf.keras.layers.Dense(16)(decoder_activ_layer1)
+        decoder_dense_layer2 = tf.keras.layers.Dense(int(initial_units/4))(decoder_activ_layer1)
         decoder_norm_layer2 = tf.keras.layers.BatchNormalization(name="decoder_norm_2")(
             decoder_dense_layer2)
         decoder_activ_layer2 = tf.keras.layers.LeakyReLU(name="decoder_leakyrelu_2")(decoder_norm_layer2)
 
-        decoder_dense_layer3 = tf.keras.layers.Dense(32)(decoder_activ_layer2)
+        decoder_dense_layer3 = tf.keras.layers.Dense(int(initial_units/2))(decoder_activ_layer2)
         decoder_norm_layer3 = tf.keras.layers.BatchNormalization(name="decoder_norm_3")(
             decoder_dense_layer3)
         decoder_activ_layer3 = tf.keras.layers.LeakyReLU(name="decoder_leakyrelu_3")(decoder_norm_layer3)
 
         flatten = tf.keras.layers.Flatten()(decoder_activ_layer3)
         decoder_dense_layer4 = tf.keras.layers.Dense(np.prod((seq_length, vocab_size)))(flatten)
-
         decoder_reshape_4 = tf.keras.layers.Reshape(target_shape=(seq_length, vocab_size))(decoder_dense_layer4)
-
         decoder_output = tf.keras.layers.Dense(vocab_size, activation="softmax", name="decoder_output")(decoder_reshape_4)
-
-
 
         decoder = tf.keras.models.Model(decoder_input, decoder_output, name="decoder_model")
 
         vae_input = tf.keras.layers.Input(shape=(seq_length, vocab_size), name="VAE_input")
         vae_encoder_output = encoder(vae_input)
         vae_decoder_output = decoder(vae_encoder_output)
-
 
         vae = tf.keras.models.Model(vae_input, vae_decoder_output, name="VAE")
 
@@ -132,7 +118,7 @@ class VAE(GenerativeModel):
         def vae_reconstruction_loss(y_true, y_predict):
             reconstruction_loss_factor = 1000
             reconstruction_loss = tf.keras.backend.mean(tf.keras.backend.square(y_true - y_predict))
-            return reconstruction_loss_factor #* reconstruction_loss
+            return reconstruction_loss_factor * reconstruction_loss
 
         def vae_kl_loss(encoder_mu, encoder_log_variance):
             kl_loss = -0.5 * tf.keras.backend.sum(
@@ -161,49 +147,57 @@ class VAE(GenerativeModel):
         Hard values made from previous testing with VAE. These values may not be suitable for protein sequence
         generation
         """
+        dataset = np.insert(dataset, 0, 0, axis=2)
 
-        sequences_dict = {}
-        output_figures = []
-        dataset = dataset.split(" ")
-        for sequence in dataset:
-            if len(sequence) not in sequences_dict.keys():
-                sequences_dict[len(sequence)] = [sequence]
-            else:
-                sequences_dict[len(sequence)].append(sequence)
+        new_data = []
+        for data in dataset:
+            index = 0
+            for i, hot in enumerate(data):
+                if sum(hot) == 0:
+                    index = i
+                    break
+            converted_data = data[:int(index/2)]
+            z = np.zeros((data.shape[1], (data.shape[0] - index)))
+            z[0] = np.ones((data.shape[0] - index))
+            converted_data = np.append(converted_data, z.T, axis=0)
+            converted_data = np.append(converted_data, data[int(index/2):index], axis=0)
+            new_data.append(converted_data)
 
-        new_sequences = []
-        for key in sequences_dict:
-            if len(sequences_dict[key]) > len(new_sequences):
-                new_sequences = sequences_dict[key]
-
-        one_hot = np.zeros((len(new_sequences), len(new_sequences[1]), len(self.alphabet)))
-
-        new_sequences_int = []
-        for sequence in new_sequences:
-            new_sequences_int.append([self.char2idx[i] for i in sequence])
-        #one_hot[np.arange((len(new_sequences), len(new_sequences[1])), new_sequences_int)] = 1
-
-        one_hot = tf.one_hot(new_sequences_int, len(self.alphabet))
-
-        PathBuilder.build(result_path)
+        one_hot = np.array(new_data)
 
         self._get_ml_model(one_hot.shape[1], one_hot.shape[2])
 
-        train_len = int(one_hot.shape[0] * (2/3))
+        train_len = int(one_hot.shape[0] / 2)
         x_train = one_hot[:train_len]
-        x_test = one_hot[train_len:]
+        x_test = one_hot[train_len:train_len + int((train_len / 2))]
+        x_val = one_hot[train_len + int((train_len / 2)):]
 
         self.encoder.summary()
         self.decoder.summary()
         self.model.summary()
 
-        self.model.fit(x_train, x_train, epochs=20, batch_size=32, shuffle=True, validation_data=(x_test, x_test), workers=cores_for_training)
+        self.model.fit(x_train,
+                       x_train,
+                       epochs=20,
+                       batch_size=64,
+                       shuffle=True,
+                       validation_data=(x_test,
+                                        x_test),
+                       workers=cores_for_training)
+
+        latent = tf.transpose(self.encoder(x_val))
+
+        x = latent[0]
+        y = latent[1]
+
+        plt.scatter(x, y)
+        plt.show()
 
         return self.model
 
     def generate(self, amount=10, path_to_model: Path = None):
 
-        #Consider different way of getting latent variables
+        # Consider different way of getting latent variables
         fake_latent = np.random.rand(amount, 1, 2)
 
         gens = []
@@ -213,7 +207,8 @@ class VAE(GenerativeModel):
             maxed = tf.math.argmax(decoded, axis=2)
             char_seq = ""
             for seq in maxed[0]:
-                char_seq = char_seq + self.idx2char[seq]
+                if seq != 0:
+                    char_seq = char_seq + self.alphabet[seq - 1]
             gens.append(char_seq)
         self.generated_sequences = gens
 
@@ -231,8 +226,8 @@ class VAE(GenerativeModel):
 
     def load(self, path: Path, details_path: Path = None):
 
-        self.model = tf.keras.models.load_model(path / "VAE", custom_objects={"sampling":self.sampling}, compile=False)
-        self.encoder = tf.keras.models.load_model(path / "VAE_encoder", custom_objects={"sampling":self.sampling})
+        self.model = tf.keras.models.load_model(path / "VAE", custom_objects={"sampling": self.sampling}, compile=False)
+        self.encoder = tf.keras.models.load_model(path / "VAE_encoder", custom_objects={"sampling": self.sampling})
         self.decoder = tf.keras.models.load_model(path / "VAE_decoder")
 
 
@@ -250,186 +245,6 @@ class VAE(GenerativeModel):
 
         mapping = {
             "For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.": GenerativeModel.get_usage_documentation("VAE"),
-        }
-
-        doc = update_docs_per_mapping(doc, mapping)
-        return doc
-
-import csv
-import json
-import os
-import sys
-
-import datetime
-import random
-import time
-import pyprind
-
-import numpy as np
-import pandas as pd
-import tensorflow as tf
-import keras_tuner as kt
-
-from pathlib import Path
-from immuneML.ml_methods.GenerativeModel import GenerativeModel
-from scripts.specification_util import update_docs_per_mapping
-from immuneML.util.PathBuilder import PathBuilder
-
-
-class LSTM(GenerativeModel):
-
-    def get_classes(self) -> list:
-        pass
-
-    def __init__(self, parameter_grid: dict = None, parameters: dict = None):
-        parameters = parameters if parameters is not None else {}
-        parameter_grid = parameter_grid if parameter_grid is not None else {}
-        super(LSTM, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
-
-        self.checkpoint_dir = ""
-        self.model_params = {}
-        self.historydf = None
-        self.initializer = None
-        self.generated_sequences = []
-
-    def _get_ml_model(self, batch_size, vocab_size=20, rnn_units=128):
-
-        x = tf.keras.layers.Input(vocab_size, batch_size=batch_size)
-        dense1 = tf.keras.layers.Dense(batch_size * vocab_size)(x)
-        reshaped = tf.keras.layers.Reshape(target_shape=(batch_size, vocab_size))(dense1)
-        lstm, _, _ = tf.keras.layers.LSTM(rnn_units,
-                                          return_sequences=True,
-                                          return_state=True,
-                                          stateful=True)(reshaped)
-        flat = tf.keras.layers.Flatten()(lstm)
-        dense2 = tf.keras.layers.Dense(vocab_size)(flat)
-        self.model = tf.keras.models.Model(x, dense2, name="model")
-
-    @staticmethod
-    def sample(preds, temperature=1.0):
-        # helper function to sample an index from a probability array
-        preds = np.asarray(preds).astype("float64")
-        preds = np.log(preds) / temperature
-        exp_preds = np.exp(preds)
-        preds = exp_preds / np.sum(exp_preds)
-        probas = np.random.multinomial(1, preds, 1)
-        return np.argmax(probas)
-
-    def _fit(self, dataset, cores_for_training: int = 1, result_path: Path = None):
-
-        """
-        Hard values made from previous testing with LSTM. These values may not be suitable for protein sequence
-        generation
-        """
-
-        PathBuilder.build(result_path)
-        params = self._parameters
-        rnn_units = 128 if "rnn_units" not in params else params["rnn_units"]
-        epochs = 10 if "epochs" not in params else params["epochs"]
-
-        dataset = np.insert(dataset, 0, 0, axis=2)
-        zero = np.zeros(dataset.shape[2])
-        zero[0] = 1
-        dataset = np.insert(dataset, dataset.shape[1], zero, axis=1)
-        dataset = np.reshape(dataset, (dataset.shape[0] * dataset.shape[1], dataset.shape[2]))
-        #dataset = np.delete(dataset, dataset.shape[0]-1, axis=0)
-
-        self.alphabet.insert(0, ' ')
-
-        train_len = int(dataset.shape[0] * (2 / 3))
-        x_train = dataset[:train_len]
-        x_test = dataset[train_len:]
-        self.initializer = x_train[0]
-
-        vocab_size = dataset.shape[1]
-        batch_size = 32
-        self._get_ml_model(batch_size, vocab_size, rnn_units)
-        self.model.compile(loss="categorical_crossentropy", optimizer="adam")
-
-        self.checkpoint_dir = result_path / f"{self._get_model_filename()}_checkpoints"
-        checkpoint_prefix = os.path.join(self.checkpoint_dir, 'ckpt_{epoch}')
-        checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-            filepath=checkpoint_prefix,
-            save_weights_only=True,
-            verbose=1,
-            save_best_only=False
-        )
-
-        history = self.model.fit(x_train, x_train,
-                                 epochs=epochs,
-                                 callbacks=[checkpoint_callback],
-                                 validation_data=(x_test, x_test),
-                                 workers=cores_for_training)
-
-        history_contents = []
-        for metric in history.history:
-            metric_contents = []
-            for i, val in enumerate(history.history[metric]):
-                history_content = [val]
-                metric_contents.append(history_content)
-            history_contents.append([metric, metric_contents])
-        self.historydf = pd.DataFrame(history_contents, columns=['metric', 'data'])
-
-        self.model_params = {
-            'epochs': epochs,
-            'vocab_size': vocab_size,
-            'rnn_units': rnn_units
-        }
-
-        return self.model
-
-    def generate(self, amount=10, path_to_model: Path = None):
-
-        self._get_ml_model(batch_size=1,
-                           vocab_size=self.model_params['vocab_size'],
-                           rnn_units=self.model_params['rnn_units'])
-
-        self.model.load_weights(tf.train.latest_checkpoint(self.checkpoint_dir))
-
-        init = [1, 2, 3]
-        hot_init = np.zeros(21)
-        hot_init[init] = 1
-
-        for i in amount:
-            while hot_init[0] != 1:
-                pred = self.model(init)
-                print(pred)
-
-        return self.generated_sequences
-    def get_params(self):
-        return self._parameters
-
-    def can_predict_proba(self) -> bool:
-        raise Exception("can_predict_proba has not been implemented")
-
-    def get_compatible_encoders(self):
-        raise Exception("get_compatible_encoders has not been implemented")
-
-    def load(self, path: Path, details_path: Path = None):
-
-        self.model_params = json.load(open(path / f"{self._get_model_filename()}_model_params.json"))
-        self.initializer = np.loadtxt(path / f"{self._get_model_filename()}_init.csv")
-        self.checkpoint_dir = path / f"{self._get_model_filename()}_checkpoints"
-
-    def store(self, path: Path, feature_names=None, details_path: Path = None):
-
-        PathBuilder.build(path)
-
-        print(f'{datetime.datetime.now()}: Writing to file...')
-        params_path = path / f"{self._get_model_filename()}_model_params.json"
-        init_path = path / f"{self._get_model_filename()}_init.csv"
-
-        model_params_outname = params_path
-        np.savetxt(init_path, self.initializer, delimiter=",")
-        json.dump(self.model_params, open(model_params_outname, 'w'))
-
-    @staticmethod
-    def get_documentation():
-        doc = str(LSTM.__doc__)
-
-        mapping = {
-            "For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.": GenerativeModel.get_usage_documentation(
-                "LSTM"),
         }
 
         doc = update_docs_per_mapping(doc, mapping)

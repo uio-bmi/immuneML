@@ -1,0 +1,7 @@
+batch_size: 64
+rnn_units: 1024
+embedding_dim: 256
+epochs: 20
+max_sequence_length: 42
+buffer_size: 1000
+sequence_type: sequence_aas # set as amino acids, alternative is "sequence" for nucleotide data

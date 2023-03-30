@@ -3,16 +3,14 @@ definitions:
     d1:
       format: Generic
       params:
-        path: PWM_dataset/sequences.tsv
+        path: LSTM_dataset/sequences.tsv
         is_repertoire: False
         paired: False
         region_type: FULL_SEQUENCE
   encodings:
-    e1: TextAsInt
+    e1: OneHot
   ml_methods:
-    G1:
-      PWM:
-        cores_for_training: 2
+    G1: PWM
   reports:
     GeneratorReport: GeneratorReportPWM
 instructions:
@@ -24,5 +22,6 @@ instructions:
         dataset: d1
         ml_method: G1
         report: GeneratorReport
+        amount: 250
 
 

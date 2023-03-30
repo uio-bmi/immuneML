@@ -1,4 +1,7 @@
 import abc
+
+from pathlib import Path
+import abc
 import os
 import warnings
 from pathlib import Path
@@ -12,16 +15,19 @@ from sklearn.utils.validation import check_is_fitted
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Label import Label
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.UnsupervisedMLMethod import UnsupervisedMLMethod
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.ml_methods.UnsupervisedMLMethod import UnsupervisedMLMethod
+from immuneML.util.FilenameHandler import FilenameHandler
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 
 
 class GenerativeModel(UnsupervisedMLMethod):
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         super(GenerativeModel, self).__init__()
-        self.model = None
 
         if parameter_grid is not None and "show_warnings" in parameter_grid:
             self.show_warnings = parameter_grid.pop("show_warnings")[0]
@@ -32,15 +38,12 @@ class GenerativeModel(UnsupervisedMLMethod):
 
         self._parameter_grid = parameter_grid
         self._parameters = parameters
-        self._length_of_sequence = 20 #Set as average, will be overwritten
-        self.feature_names = None
-        self.class_mapping = None
-        self.label = None
-        self.alphabet = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+
+        self.alphabet = EnvironmentSettings.get_sequence_alphabet(SequenceType(parameters["sequence_type"]))
         self.char2idx = {u: i for i, u in enumerate(self.alphabet)}
 
     def fit(self, encoded_data, cores_for_training: int = 2, result_path: Path = None):
-        self._length_of_sequence = 21# if "length_of_sequence" not in encoded_data.info else encoded_data.info["length_of_sequence"]
+        self._length_of_sequence = 21  # if "length_of_sequence" not in encoded_data.info else encoded_data.info["length_of_sequence"]
         self.model = self._fit(encoded_data.examples, cores_for_training, result_path)
 
     def generate(self, amount=10, path_to_model: Path = None):
@@ -50,11 +53,10 @@ class GenerativeModel(UnsupervisedMLMethod):
     def _fit(self, X, cores_for_training: int = 1):
         pass
 
-
     def check_is_fitted(self, label_name: str):
         if self.label.name == label_name or label_name is None:
-            return check_is_fitted(self.model, ["estimators_", "coef_", "estimator", "_fit_X", "dual_coef_"], all_or_any=any)
-
+            return check_is_fitted(self.model, ["estimators_", "coef_", "estimator", "_fit_X", "dual_coef_"],
+                                   all_or_any=any)
 
     def store(self, path: Path, feature_names=None, details_path: Path = None):
         PathBuilder.build(path)
@@ -148,25 +150,18 @@ class GenerativeModel(UnsupervisedMLMethod):
     @staticmethod
     def get_usage_documentation(model_name):
         return f"""
-        
+
         TODO
-        
+
         Following text does not relate to generative models
-
         Scikit-learn models can be trained in two modes: 
-
         1. Creating a model using a given set of hyperparameters, and relying on the selection and assessment loop in the
         TrainMLModel instruction to select the optimal model. 
-
         2. Passing a range of different hyperparameters to {model_name}, and using a third layer of nested cross-validation 
         to find the optimal hyperparameters through grid search. In this case, only the {model_name} model with the optimal 
         hyperparameter settings is further used in the inner selection loop of the TrainMLModel instruction. 
-
         By default, mode 1 is used. In order to use mode 2, model_selection_cv and model_selection_n_folds must be set. 
-
-
         Arguments:
-
             {model_name} (dict): Under this key, hyperparameters can be specified that will be passed to the scikit-learn class.
             Any scikit-learn hyperparameters can be specified here. In mode 1, a single value must be specified for each of the scikit-learn
             hyperparameters. In mode 2, it is possible to specify a range of different hyperparameters values in a list. It is also allowed
@@ -174,13 +169,8 @@ class GenerativeModel(UnsupervisedMLMethod):
             single-value hyperparameters will be fixed. 
             In addition to the scikit-learn hyperparameters, parameter show_warnings (True/False) can be specified here. This determines
             whether scikit-learn warnings, such as convergence warnings, should be printed. By default show_warnings is True.
-
             model_selection_cv (bool): If any of the hyperparameters under {model_name} is a list and model_selection_cv is True, 
             a grid search will be done over the given hyperparameters, using the number of folds specified in model_selection_n_folds.
             By default, model_selection_cv is False. 
-
             model_selection_n_folds (int): The number of folds that should be used for the cross validation grid search if model_selection_cv is True.
-
             """
-
-
