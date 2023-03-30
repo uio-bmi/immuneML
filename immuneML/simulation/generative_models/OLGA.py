@@ -182,3 +182,7 @@ class OLGA(GenerativeModel):
         params = DatasetImportParams.build_object(**{**default_params, **{'path': path, "import_empty_nt_sequences": import_empty_nt_sequences}})
         sequences = ImportHelper.import_items(OLGAImport, path, params)
         return sequences
+
+    def is_same(self, model) -> bool:
+        return type(model) == type(self) and self.chain == model.chain and self.model_path == model.model_path and \
+               self.default_model_name == model.default_model_name

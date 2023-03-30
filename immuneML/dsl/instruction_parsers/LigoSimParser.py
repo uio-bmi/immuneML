@@ -20,14 +20,16 @@ class LigoSimParser:
         for param_key in ['max_iterations', 'sequence_batch_size', 'number_of_processes']:
             ParameterValidator.assert_type_and_value(instruction[param_key], int, location, param_key, 1)
 
-        signals = [signal.item for signal in symbol_table.get_by_type(SymbolType.SIGNAL)]
-
-        ParameterValidator.assert_in_valid_list(instruction['simulation'],
-                                                [sim.item.identifier for sim in symbol_table.get_by_type(SymbolType.SIMULATION)],
-                                                location, 'simulation')
-        simulation = symbol_table.get(instruction["simulation"])
+        simulation = get_simulation_from_symbol_table(instruction['simulation'], symbol_table, location)
 
         params = {**{key: value for key, value in instruction.items() if key != 'type'},
-                  **{'simulation': simulation, 'signals': signals, 'name': key}}
+                  **{'simulation': simulation, 'signals': symbol_table.get_signals(), 'name': key}}
         instruction = LigoSimInstruction(**params)
         return instruction
+
+
+def get_simulation_from_symbol_table(sim_key, symbol_table, location):
+    ParameterValidator.assert_in_valid_list(sim_key,
+                                            [sim.item.identifier for sim in symbol_table.get_by_type(SymbolType.SIMULATION)],
+                                            location, 'simulation')
+    return symbol_table.get(sim_key)

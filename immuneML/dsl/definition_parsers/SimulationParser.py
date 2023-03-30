@@ -47,7 +47,7 @@ def _parse_ligo_simulation(simulation: dict, key: str, symbol_table: SymbolTable
     sim_strategies = ReflectionHandler.all_nonabstract_subclass_basic_names(SimulationStrategy, drop_part='Strategy',
                                                                             subdirectory='simulation/simulation_strategy')
 
-    ParameterValidator.assert_in_valid_list(simulation['sequence_type'].upper(), [st.name for st in SequenceType], location, 'sequence_type')
+    ParameterValidator.assert_sequence_type(simulation, location)
     ParameterValidator.assert_in_valid_list(simulation['simulation_strategy'], sim_strategies, location, 'simulation_strategy')
 
     sim_strategy_cls = ReflectionHandler.get_class_by_name(simulation['simulation_strategy'] + "Strategy", "simulation/simulation_strategy")

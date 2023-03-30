@@ -11,6 +11,10 @@ class GenerativeModel:
     OUTPUT_COLUMNS = []
 
     @abc.abstractmethod
+    def is_same(self, model) -> bool:
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
         pass
 
