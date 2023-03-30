@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LIgO: Simulation Feasibility Summary</title>
+    <style>
+        {{{css_style}}}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+    <div class="container">
+        <h1>Feasibility Summary of LIgO simulation</h1>
+        <div>Full specification is available <a href="{{{full_specs}}}">here</a>.</div>
+
+        <div>
+            <h2>Parameters for the feasibility study</h2>
+            <p><b>Sequence count:</b> {{{sequence_count}}}</p>
+            <p><b>Signals:</b> {{{signal_names}}}</p>
+        </div>
+
+        {{#gen_models}}
+        <h2>Generative model {{{name}}}</h2>
+        <div>
+            {{#sig_freq}}
+            <h3>Signal frequencies</h3>
+            <h4>Report {{name}}</h4>
+            <div>
+                {{#show_info}}
+                <p class="padded-bottom">{{info}}</p>
+                {{/show_info}}
+
+                {{#show_figures}}
+                {{#output_figures}}
+                <div class="center padded">
+                    {{#name}}<p>{{name}}</p>{{/name}}
+                    {{#is_embed}}
+                    <embed src="{{path}}">
+                    {{/is_embed}}
+                    {{^is_embed}}
+                    <img src="{{path}}">
+                    {{/is_embed}}
+                </div>
+                {{/output_figures}}
+                {{/show_figures}}
+
+                {{#show_tables}}
+                <p>Downloadable tables:</p>
+                {{#output_tables}}
+                <div>
+                    <ul>
+                    {{#is_download_link}}
+                    <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                    {{/is_download_link}}
+                    </ul>
+                </div>
+                {{/output_tables}}
+                {{/show_tables}}
+
+                {{#show_text}}
+                <p>Text reports:</p>
+                {{#output_text}}
+                <div>
+                    <ul>
+                    {{#is_download_link}}
+                    <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                    {{/is_download_link}}
+                    </ul>
+                </div>
+                {{/output_text}}
+                {{/show_text}}
+            </div>
+            {{/sig_freq}}
+            {{#sig_coocc}}
+            <h3>Signal co-occurrences</h3>
+            <h4>Report {{name}}</h4>
+            <div>
+                {{#show_info}}
+                <p class="padded-bottom">{{info}}</p>
+                {{/show_info}}
+
+                {{#output_figures}}
+                <div class="center padded">
+                    {{#name}}<p>{{name}}</p>{{/name}}
+                    {{#is_embed}}
+                    <embed src="{{path}}">
+                    {{/is_embed}}
+                    {{^is_embed}}
+                    <img src="{{path}}">
+                    {{/is_embed}}
+                </div>
+                {{/output_figures}}
+
+                {{#show_tables}}
+                <p>Downloadable tables:</p>
+                {{#output_tables}}
+                <div>
+                    <ul>
+                    {{#is_download_link}}
+                    <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                    {{/is_download_link}}
+                    </ul>
+                </div>
+                {{/output_tables}}
+                {{/show_tables}}
+
+                {{#show_text}}
+                <p>Text reports:</p>
+                {{#output_text}}
+                <div>
+                    <ul>
+                    {{#is_download_link}}
+                    <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                    {{/is_download_link}}
+                    </ul>
+                </div>
+                {{/output_text}}
+                {{/show_text}}
+            </div>
+            {{/sig_coocc}}
+            {{#p_gens}}
+            <h3>Generation probabilities</h3>
+            <h4>Report {{name}}</h4>
+            <div>
+                {{#show_info}}
+                <p class="padded-bottom">{{info}}</p>
+                {{/show_info}}
+
+                {{#output_figures}}
+                <div class="center padded">
+                    {{#name}}<p>{{name}}</p>{{/name}}
+                    {{#is_embed}}
+                    <embed src="{{path}}">
+                    {{/is_embed}}
+                    {{^is_embed}}
+                    <img src="{{path}}">
+                    {{/is_embed}}
+                </div>
+                {{/output_figures}}
+
+                {{#show_tables}}
+                <p>Downloadable tables:</p>
+                {{#output_tables}}
+                <div>
+                    <ul>
+                    {{#is_download_link}}
+                    <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                    {{/is_download_link}}
+                    </ul>
+                </div>
+                {{/output_tables}}
+                {{/show_tables}}
+
+                {{#show_text}}
+                <p>Text reports:</p>
+                {{#output_text}}
+                <div>
+                    <ul>
+                    {{#is_download_link}}
+                    <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                    {{/is_download_link}}
+                    </ul>
+                </div>
+                {{/output_text}}
+                {{/show_text}}
+            </div>
+            {{/p_gens}}
+            {{#seq_len}}
+            <h3>Sequence length distribution</h3>
+            <h4>Report {{name}}</h4>
+            <div>
+                {{#show_info}}
+                <p class="padded-bottom">{{info}}</p>
+                {{/show_info}}
+
+                {{#output_figures}}
+                <div class="center padded">
+                    {{#name}}<p>{{name}}</p>{{/name}}
+                    {{#is_embed}}
+                    <embed src="{{path}}">
+                    {{/is_embed}}
+                    {{^is_embed}}
+                    <img src="{{path}}">
+                    {{/is_embed}}
+                </div>
+                {{/output_figures}}
+
+                {{#show_tables}}
+                <p>Downloadable tables:</p>
+                {{#output_tables}}
+                <div>
+                    <ul>
+                    {{#is_download_link}}
+                    <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                    {{/is_download_link}}
+                    </ul>
+                </div>
+                {{/output_tables}}
+                {{/show_tables}}
+
+                {{#show_text}}
+                <p>Text reports:</p>
+                {{#output_text}}
+                <div>
+                    <ul>
+                    {{#is_download_link}}
+                    <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                    {{/is_download_link}}
+                    </ul>
+                </div>
+                {{/output_text}}
+                {{/show_text}}
+            </div>
+            {{/seq_len}}
+        </div>
+        {{/gen_models}}
+
+
+    </div>
+</body>
+</html>

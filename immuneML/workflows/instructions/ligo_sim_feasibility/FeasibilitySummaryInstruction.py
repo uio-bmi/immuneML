@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Dict
 
@@ -15,7 +16,7 @@ from immuneML.simulation.util.util import annotate_sequences, make_annotated_dat
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
 from immuneML.workflows.instructions.ligo_sim_feasibility.feasibility_reports import report_signal_frequencies, report_signal_cooccurrences, \
-    make_p_gen_histogram, report_p_gen_histogram
+    report_p_gen_histogram, report_seq_len_dist
 
 
 @dataclass
@@ -23,6 +24,7 @@ class FeasibilitySumReports:
     signal_frequencies: ReportResult = None
     signal_cooccurrences: ReportResult = None
     p_gen_histogram: ReportResult = None
+    seq_len_dist: ReportResult = None
 
 
 @dataclass
@@ -31,7 +33,8 @@ class FeasibilitySummaryState:
     sequence_count: int
     signals: List[Signal]
     name: str = None
-    reports: FeasibilitySumReports = field(default_factory=FeasibilitySumReports)
+    result_path: Path = None
+    reports: Dict[str, FeasibilitySumReports] = field(default_factory=dict)
 
 
 class FeasibilitySummaryInstruction(Instruction):
@@ -83,32 +86,39 @@ class FeasibilitySummaryInstruction(Instruction):
         for model_name, model in unique_models.items():
             self._make_summary(model, PathBuilder.build(self.state.result_path / model_name), model_name)
 
+        return self.state
+
     def _make_summary(self, model: GenerativeModel, summary_path: Path, model_name: str):
         sequences = self._make_sequences(model, summary_path / "receptors.tsv")
+        self.state.reports[model_name] = FeasibilitySumReports()
 
-        self._make_signal_frequencies(sequences, summary_path / 'signal_frequencies')
-        self._report_signal_co_occurrence(sequences, summary_path / 'signal_cooccurrence')
-        self._make_pgen_dist(sequences, summary_path / 'p_gen_distribution', model)
+        self._make_signal_frequencies(sequences, summary_path / 'signal_frequencies', model_name)
+        self._report_signal_co_occurrence(sequences, summary_path / 'signal_cooccurrence', model_name)
+        self._make_pgen_dist(sequences, summary_path / 'p_gen_distribution', model, model_name)
+        self._make_sequence_length_dist(sequences, summary_path / 'seq_length_distribution', model_name)
 
-    def _make_signal_frequencies(self, sequences: BackgroundSequences, path: Path):
+    def _make_sequence_length_dist(self, sequences: BackgroundSequences, path: Path, model_name: str):
+        PathBuilder.build(path)
+        self.state.reports[model_name].seq_len_dist = report_seq_len_dist(sequences, self.state.simulation.sequence_type, path)
+
+    def _make_signal_frequencies(self, sequences: BackgroundSequences, path: Path, model_name: str):
         if len(self.state.signals) > 0:
             frequencies = pd.DataFrame({'signal': [signal.id for signal in self.state.signals],
                                         'frequency': [round(getattr(sequences, signal.id).sum() / len(sequences), 2) for signal in
                                                       self.state.signals]})
 
-            self.state.reports.signal_frequencies = report_signal_frequencies(frequencies, PathBuilder.build(path))
+            self.state.reports[model_name].signal_frequencies = report_signal_frequencies(frequencies, PathBuilder.build(path))
 
-    def _report_signal_co_occurrence(self, sequences: BackgroundSequences, path: Path):
+    def _report_signal_co_occurrence(self, sequences: BackgroundSequences, path: Path, model_name: str):
         if len(self.state.signals) > 0:
             PathBuilder.build(path)
             unique_values, counts = np.unique(sequences.get_signal_matrix().sum(axis=1).reshape(-1, 1), return_counts=True)
-            self.state.reports.signal_cooccurrences = report_signal_cooccurrences(unique_values, counts, path)
+            self.state.reports[model_name].signal_cooccurrences = report_signal_cooccurrences(unique_values, counts, path)
 
-    def _make_pgen_dist(self, sequences: BackgroundSequences, path: Path, model: GenerativeModel):
+    def _make_pgen_dist(self, sequences: BackgroundSequences, path: Path, model: GenerativeModel, model_name: str):
         if self.state.simulation.keep_p_gen_dist and model.can_compute_p_gens() and self.state.simulation.p_gen_bin_count > 0:
             PathBuilder.build(path)
-            histogram, bins = make_p_gen_histogram(sequences, self.state.simulation.p_gen_bin_count)
-            self.state.reports.p_gen_histogram = report_p_gen_histogram(histogram, bins, path)
+            self.state.reports[model_name].p_gen_histogram = report_p_gen_histogram(sequences, self.state.simulation.p_gen_bin_count, path)
 
     def _make_sequences(self, model, path: Path) -> BackgroundSequences:
         seq_path = model.generate_sequences(self.state.sequence_count, seed=0, path=path, sequence_type=self.state.simulation.sequence_type,
