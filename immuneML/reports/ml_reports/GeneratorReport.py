@@ -83,7 +83,7 @@ class GeneratorReport(UnsupervisedMLReport):
         logo_path = self.result_path / f"{self.name}Logo.png"
         data_logo_path = self.result_path / f"{self.name}Data_Logo.png"
 
-        data = pd.DataFrame(enumerate(self.sequences), columns=["id", "sequence_aa"])
+        data = pd.DataFrame(enumerate(self.sequences), columns=["id", "sequence_aas"])
         data.to_csv(generated_sequences, index=False)
 
         self._make_generated_logo(logo_path)
