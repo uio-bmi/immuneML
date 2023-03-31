@@ -220,7 +220,7 @@ class SequenceDispenser:
         max_limit = self.occurrence_limit_pgen_range.get(pgen) or self.occurrence_limit_pgen_range[
             min(self.occurrence_limit_pgen_range.keys(), key=lambda key: abs(float(key) - float(pgen)))]
 
-        return random.choice(range(1, max_limit))
+        return random.choice(range(2, max_limit+1))
 
     def _random_occurrence_limit(self):
         """Draw a random occurrence limit calculated from dataset"""

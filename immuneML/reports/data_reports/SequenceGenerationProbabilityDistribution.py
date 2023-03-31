@@ -93,8 +93,9 @@ class SequenceGenerationProbabilityDistribution(DataReport):
                                       "Processed dataset with generation probability and implanted labels for each sequence")
         output_tables = None if dataset_df is None else [dataset_output,
                                                          self._generate_occurrence_limit_pgen_range(dataset_df),
-                                                         *self._create_output_table_for_vdjRec(dataset_df,
-                                                                                               self._load_dataset_dataframe())]
+                                                         #*self._create_output_table_for_vdjRec(dataset_df,
+                                                         #                                      self._load_dataset_dataframe())
+                                                         ]
 
         Logger.print_log(
             f"Finished report",
@@ -269,6 +270,8 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
     def _create_output_table_for_vdjRec(self, pgen_df, full_df):
 
+        #TODO FIX!
+
         Logger.print_log(
             f"Creating vdjRec output tables",
             include_datetime=True)
@@ -279,13 +282,18 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         df = pd.merge(full_df, pgen_df[["sequence_aas", "v_genes", "j_genes", "pgen", "count"]], how="inner",
                       on=["sequence_aas", "v_genes", "j_genes"])
 
+        #df = df.loc[df["count"] > 1]
+
         if self.mark_implanted_labels:
             target_names = list(self.dataset.get_label_names())
         else:
             target_names = []
 
+        Logger.print_log(
+            f"START SEQUENCE COUNT FILE",
+            include_datetime=True)
         # MAKE SEQUENCE COUNT FILE:
-        repertoires = (full_df["repertoire"].unique())
+        repertoires = full_df["repertoire"].unique()
 
         sequence_df = pd.DataFrame()
 
@@ -314,6 +322,10 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         sequence_df = sequence_df[cols]
 
         sequence_df.to_csv(path / f"sequences_{name}.csv", sep=";")
+
+        Logger.print_log(
+            f"START SAMPLES FILE",
+            include_datetime=True)
 
         # MAKE SAMPLES FILE:
         samples_df = pd.DataFrame()
