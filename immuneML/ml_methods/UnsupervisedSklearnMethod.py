@@ -44,6 +44,24 @@ class UnsupervisedSklearnMethod(UnsupervisedMLMethod):
         self.model = self._fit(encoded_data.examples, cores_for_training)
         print_log(f"Fitting finished.", include_datetime=True)
 
+    def fit_transform(self, encoded_data: EncodedData, cores_for_training: int = 2):
+        X = encoded_data.examples
+        if not self.show_warnings:
+            warnings.simplefilter("ignore")
+            os.environ["PYTHONWARNINGS"] = "ignore"
+
+        self.model = self._get_ml_model(cores_for_training, X)
+        if type(self.model).__name__ in ["AgglomerativeClustering", "PCA"]:
+            if isinstance(X, csr_matrix):
+                X = X.todense()
+        encoded_data.set_dim_reduction(self.model.fit_transform(X))
+
+        if not self.show_warnings:
+            del os.environ["PYTHONWARNINGS"]
+            warnings.simplefilter("always")
+
+        return self.model
+
     def _fit(self, X, cores_for_training: int = 1):
         if not self.show_warnings:
             warnings.simplefilter("ignore")
@@ -53,7 +71,7 @@ class UnsupervisedSklearnMethod(UnsupervisedMLMethod):
             if isinstance(X, csr_matrix):
                 X = X.toarray()
         self.model = self._get_ml_model(cores_for_training, X)
-        if type(self.model).__name__ in ["AgglomerativeClustering", "PCA"]:
+        if type(self.model).__name__ == ["AgglomerativeClustering", "PCA"]:
             if isinstance(X, csr_matrix):
                 X = X.toarray()
         self.model.fit(X)
@@ -65,7 +83,7 @@ class UnsupervisedSklearnMethod(UnsupervisedMLMethod):
         return self.model
 
     def check_is_fitted(self):
-        check_is_fitted(self.model, ["labels_", "components_"], all_or_any=any)
+        check_is_fitted(self.model, ["labels_", "components_", "embedding_"], all_or_any=any)
 
     def store(self, path: Path, feature_names=None, details_path: Path = None):
         PathBuilder.build(path)
