@@ -58,7 +58,8 @@ class ClusteringInstruction(Instruction):
                     labels_true = genfromtxt(unit.true_labels_path, dtype=int, delimiter=',')
                 except:
                     print_log("Problem getting true_labels_path file\nCheck the file is in the right format(CSV, 1 line)")
-            self.calculate_scores(key, encoded_dataset.encoded_data.examples, unit.clustering_method.model.labels_, labels_true, unit.eval_metrics)
+            distance_metric = unit.clustering_method.model.metric if hasattr(unit.clustering_method.model, "metric") else "euclidean"
+            self.calculate_scores(key, encoded_dataset.encoded_data.examples, unit.clustering_method.model.labels_, labels_true, unit.eval_metrics, distance_metric)
 
         processed_dataset = self.add_label(encoded_dataset, unit.clustering_method.model.labels_, result_path / "dataset_clustered")
 
@@ -92,7 +93,7 @@ class ClusteringInstruction(Instruction):
             unit.dimensionality_reduction.fit(dataset.encoded_data)
             unit.dimensionality_reduction.transform(dataset.encoded_data)
 
-    def calculate_scores(self, key, data, labels_pred, labels_true, metrics):
+    def calculate_scores(self, key, data, labels_pred, labels_true, metrics, distance_metric):
         if self.state.clustering_scores is None:
             self.state.clustering_scores = {"target_score": {}}
 
@@ -134,6 +135,8 @@ class ClusteringInstruction(Instruction):
                 if metric in metric_functions:
                     if labels_true is not None and metric in ["Rand index", "Mutual Information", "Homogeneity", "Completeness", "V-measure", "Fowlkes-Mallows"]:
                         scores[metric] = metric_functions[metric](labels_true, labels_pred)
+                    elif metric in ["Silhouette"]:
+                        scores[metric] = metric_functions[metric](data, labels_pred, metric=distance_metric)
                     else:
                         scores[metric] = metric_functions[metric](data, labels_pred)
 
