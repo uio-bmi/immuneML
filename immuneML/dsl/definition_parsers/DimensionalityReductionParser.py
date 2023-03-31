@@ -20,9 +20,9 @@ class DimensionalityReductionParser:
     @staticmethod
     @log
     def _parse_dim_reduction(key: str, params: dict, symbol_table: SymbolTable):
-        valid_values = ReflectionHandler.all_nonabstract_subclass_basic_names(UnsupervisedMLMethod, "", "ml_methods/")
+        valid_values = ReflectionHandler.all_nonabstract_subclass_basic_names(UnsupervisedMLMethod, "", "ml_methods/dimensionality_reduction")
         dim_reduction_object, params = ObjectParser.parse_object(params, valid_values, "", "ml_methods/", "DimensionalityReductionParser", key, builder=True,
                                                           return_params_dict=True)
         dim_reduction_object.name = key
-        symbol_table.add(key, SymbolType.DIMENSIONAL, dim_reduction_object)
+        symbol_table.add(key, SymbolType.DIMENSIONALREDUCTION, dim_reduction_object)
         return symbol_table, params

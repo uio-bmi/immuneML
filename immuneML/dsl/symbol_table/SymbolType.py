@@ -13,4 +13,4 @@ class SymbolType(Enum):
     PREPROCESSING = 7
     INSTRUCTION = 8
     OUTPUT = 9
-    DIMENSIONAL = 10
+    DIMENSIONALREDUCTION = 10

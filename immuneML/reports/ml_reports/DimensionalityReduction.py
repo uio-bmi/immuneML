@@ -69,7 +69,7 @@ class DimensionalityReduction(UnsupervisedMLReport):
                            )
         figure = go.Figure(data=traces, layout=layout)
 
-        with filename.open("w") as file:
+        with filename.open("w", encoding="utf-8") as file:
             figure.write_html(file)
 
         return ReportOutput(filename)
@@ -117,7 +117,7 @@ class DimensionalityReduction(UnsupervisedMLReport):
                            )
         figure = go.Figure(data=traces, layout=layout)
 
-        with filename.open("w") as file:
+        with filename.open("w", encoding="utf-8") as file:
             figure.write_html(file)
 
         return ReportOutput(filename)

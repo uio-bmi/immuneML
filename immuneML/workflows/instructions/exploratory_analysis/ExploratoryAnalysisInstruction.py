@@ -78,17 +78,10 @@ class ExploratoryAnalysisInstruction(Instruction):
     def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> ReportResult:
         unit.dataset = self.preprocess_dataset(unit, result_path / "preprocessed_dataset")
         encoded_dataset = self.encode(unit, result_path / "encoded_dataset")
-        if unit.dimensionality_reduction is not None:
-            #unit.dimensionality_reduction.fit(encoded_dataset.encoded_data)
-            unit.dimensionality_reduction.fit_transform(encoded_dataset.encoded_data)
-            unit.dimensionality_reduction.store(result_path)
-            #unit.dimensionality_reduction.transform(encoded_dataset.encoded_data)
-            unit.report.method = unit.dimensionality_reduction
-        unit.report.dataset = encoded_dataset
-        unit.report.result_path = result_path / "report"
-        unit.report.number_of_processes = unit.number_of_processes
-        report_result = unit.report.generate_report()
+        unit = self.perform_dimensionality_reduction(unit, encoded_dataset, result_path)
+        report_result = self.generate_report(unit, encoded_dataset, result_path)
         return report_result
+
 
     def preprocess_dataset(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> Dataset:
         if unit.preprocessing_sequence is not None and len(unit.preprocessing_sequence) > 0:
@@ -112,3 +105,17 @@ class ExploratoryAnalysisInstruction(Instruction):
         else:
             encoded_dataset = unit.dataset
         return encoded_dataset
+
+    def perform_dimensionality_reduction(self, unit: ExploratoryAnalysisUnit, encoded_dataset: Dataset, result_path: Path) -> ExploratoryAnalysisUnit:
+        if unit.dimensionality_reduction is not None:
+            unit.dimensionality_reduction.fit_transform(encoded_dataset.encoded_data)
+            unit.dimensionality_reduction.store(result_path)
+            unit.report.method = unit.dimensionality_reduction
+        return unit
+
+    def generate_report(self, unit: ExploratoryAnalysisUnit, encoded_dataset: Dataset, result_path: Path) -> ReportResult:
+        unit.report.dataset = encoded_dataset
+        unit.report.result_path = result_path / "report"
+        unit.report.number_of_processes = unit.number_of_processes
+        report_result = unit.report.generate_report()
+        return report_result
