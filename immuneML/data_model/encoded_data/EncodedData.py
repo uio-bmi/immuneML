@@ -16,7 +16,7 @@ class EncodedData:
 
     """
 
-    def __init__(self, examples, dim_reduction: dict = None, labels: dict = None, example_ids: list = None, feature_names: list = None,
+    def __init__(self, examples, dim_reduced_examples: dict = None, labels: dict = None, example_ids: list = None, feature_names: list = None,
                  feature_annotations: pd.DataFrame = None, encoding: str = None, info: dict = None):
 
         assert feature_names is None or examples.shape[1] == len(feature_names)
@@ -36,16 +36,16 @@ class EncodedData:
         self.example_ids = example_ids
         self.feature_names = feature_names
         self.feature_annotations = feature_annotations
-        self._dim_reduction = dim_reduction
+        self._dim_reduced_examples = dim_reduced_examples
         self.encoding = encoding
         self.info = info
 
     @property
     def examples(self):
-        if self._dim_reduction is not None:
-            return self._dim_reduction
+        if self._dim_reduced_examples is not None:
+            return self._dim_reduced_examples
         else:
             return self._examples
 
-    def set_dim_reduction(self, dim_reduction):
-        self._dim_reduction = dim_reduction
+    def set_dim_reduced_examples(self, dim_reduced_examples):
+        self._dim_reduced_examples = dim_reduced_examples

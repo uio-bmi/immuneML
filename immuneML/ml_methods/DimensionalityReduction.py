@@ -7,23 +7,28 @@ from scipy.sparse import csr_matrix
 
 
 class DimensionalityReduction(UnsupervisedSklearnMethod, ABC):
-    def __init__(self, parameter_grid: dict = None, parameters: dict = None):
-        _parameters = parameters if parameters is not None else {}
-        _parameter_grid = parameter_grid if parameter_grid is not None else {}
-
-        super().__init__(parameter_grid=_parameter_grid, parameters=_parameters)
-
-    def transform(self, encoded_data: EncodedData):
-        self.check_is_fitted()
-        data = encoded_data.examples
-        if type(self.model).__name__ in ["PCA"]:
-            if isinstance(data, csr_matrix):
-                data = data.toarray()
-        if type(self.model).__name__ in ["TSNE"]:
-            return
-        else:
-            encoded_data.set_dim_reduction(self.model.transform(data))
-
     def get_params(self):
         params = self.model.get_params()
         return params
+
+    @classmethod
+    def build_object(cls, **kwargs):
+        return cls(parameters=kwargs)
+
+    def __init__(self, parameters: dict = None):
+        _parameters = parameters if parameters is not None else {}
+        super().__init__(parameters=_parameters)
+
+    def _get_ml_model(self, cores_for_training: int = 2, X=None):
+        raise NotImplementedError
+
+    def fit_transform(self, encoded_data: EncodedData, cores_for_training: int = 2):
+        X = encoded_data.examples
+
+        self.model = self._get_ml_model(cores_for_training, X)
+        if type(self.model).__name__ in ["PCA"]:
+            if isinstance(X, csr_matrix):
+                X = X.todense()
+        encoded_data.set_dim_reduced_examples(self.model.fit_transform(X))
+
+        return self.model
