@@ -58,7 +58,7 @@ class SequenceLengthDistribution(DataReport):
 
     def _generate(self) -> ReportResult:
         sequence_lengths = self._get_sequence_lengths()
-
+        PathBuilder.build(self.result_path)
         df = pd.DataFrame({"counts": list(sequence_lengths.values()), 'sequence_lengths': list(sequence_lengths.keys())})
         df.to_csv(self.result_path / 'sequence_length_distribution.csv', index=False)
 
