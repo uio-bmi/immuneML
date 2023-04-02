@@ -13,6 +13,7 @@ from immuneML.ml_methods.UnsupervisedMLMethod import UnsupervisedMLMethod
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.Logger import print_log
+from immuneML.util.DistanceMetrics import levenshtein
 
 from scipy.sparse import csr_matrix
 from scipy.spatial import distance
@@ -49,9 +50,13 @@ class UnsupervisedSklearnMethod(UnsupervisedMLMethod):
             warnings.simplefilter("ignore")
             os.environ["PYTHONWARNINGS"] = "ignore"
 
-        if "metric" in self._parameters and self._parameters["metric"] in distance._METRICS_NAMES:
-            if isinstance(X, csr_matrix):
-                X = X.toarray()
+        if "metric" in self._parameters:
+            if self._parameters["metric"] in distance._METRICS_NAMES:
+                if isinstance(X, csr_matrix):
+                    X = X.toarray()
+            if self._parameters["metric"] == "levenshtein":
+                self._parameters["metric"] = levenshtein
+
         self.model = self._get_ml_model(cores_for_training, X)
         if type(self.model).__name__ == ["AgglomerativeClustering", "PCA"]:
             if isinstance(X, csr_matrix):

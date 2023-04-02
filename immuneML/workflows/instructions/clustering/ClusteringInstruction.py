@@ -90,8 +90,7 @@ class ClusteringInstruction(Instruction):
 
     def _dim_reduce(self, unit: ClusteringUnit, dataset):
         if unit.dimensionality_reduction is not None:
-            unit.dimensionality_reduction.fit(dataset.encoded_data)
-            unit.dimensionality_reduction.transform(dataset.encoded_data)
+            unit.dimensionality_reduction.fit_transform(dataset.encoded_data)
 
     def calculate_scores(self, key, data, labels_pred, labels_true, metrics, distance_metric):
         if self.state.clustering_scores is None:
