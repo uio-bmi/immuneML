@@ -10,7 +10,12 @@ definitions:
   encodings:
     e1: CharToInt
   ml_methods:
-    G1: LSTM
+    G1:
+      LSTM:
+        batch_size: 16
+        rnn_units: 256
+        embedding_dim: 64
+        epochs: 5
   reports:
     GeneratorReport: GeneratorReportLSTM
 instructions:
@@ -22,6 +27,6 @@ instructions:
         encoding: e1
         ml_method: G1
         report: GeneratorReport
-        amount: 250
+        amount: 20000
 
 

@@ -84,12 +84,17 @@ class LSTM(GenerativeModel):
     def _fit(self, dataset, cores_for_training: int = 1, result_path: Path = None):
 
         PathBuilder.build(result_path)
-
+        self.first_sequence = []
+        for i in dataset:
+            if i != 20:
+                self.first_sequence.append(i)
+            else:
+                self.first_sequence.append(i)
+                break
         tensor_x = tf.data.Dataset.from_tensor_slices(dataset)
         sequence_batches = tensor_x.batch(self.max_sequence_length, drop_remainder=True)
         final_data = sequence_batches.map(self.split_input_target)
         final_data = final_data.shuffle(self.buffer_size).batch(self.batch_size, drop_remainder=True)
-        self.first_sequence = final_data[0][0]  # used for generation with realistic initialization data
         dataset_size = 0
         for _ in dataset:
             dataset_size += 1
