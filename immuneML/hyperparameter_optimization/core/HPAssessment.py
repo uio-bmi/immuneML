@@ -1,3 +1,4 @@
+import copy
 from pathlib import Path
 
 from immuneML.data_model.dataset.Dataset import Dataset
@@ -9,6 +10,8 @@ from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
 from immuneML.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.SklearnMethod import SklearnMethod
+from immuneML.ml_metrics.Metric import Metric
 from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
@@ -50,7 +53,8 @@ class HPAssessment:
         state = HPAssessment.run_assessment_split_per_label(state, split_index)
 
         assessment_state.train_val_data_reports = ReportUtil.run_data_reports(train_val_dataset, state.assessment.reports.data_split_reports.values(),
-                                                                              current_path / "data_report_train", state.number_of_processes, state.context)
+                                                                              current_path / "data_report_train", state.number_of_processes,
+                                                                              state.context)
         assessment_state.test_data_reports = ReportUtil.run_data_reports(test_dataset, state.assessment.reports.data_split_reports.values(),
                                                                          current_path / "data_report_test", state.number_of_processes, state.context)
 
@@ -66,7 +70,7 @@ class HPAssessment:
         for idx, label in enumerate(state.label_configuration.get_label_objects()):
 
             print_log(f"Training ML model: running the inner loop of nested CV: "
-                  f"retrain models for label {label.name} (label {idx + 1} / {n_labels}).\n", include_datetime=True)
+                      f"retrain models for label {label.name} (label {idx + 1} / {n_labels}).\n", include_datetime=True)
 
             path = state.assessment_states[split_index].path
 
@@ -82,7 +86,7 @@ class HPAssessment:
                 state = HPAssessment.reeval_on_assessment_split(state, train_val_dataset, test_dataset, hp_setting, setting_path, label, split_index)
 
             print_log(f"Training ML model: running the inner loop of nested CV: completed retraining models "
-                  f"for label {label.name} (label {idx + 1} / {n_labels}).\n", include_datetime=True)
+                      f"for label {label.name} (label {idx + 1} / {n_labels}).\n", include_datetime=True)
 
         return state
 
@@ -91,15 +95,44 @@ class HPAssessment:
                                    split_index: int) -> MLMethod:
         """retrain model for specific label, assessment split and hp_setting"""
 
+        updated_hp_setting = HPAssessment.update_hp_setting_for_assessment(hp_setting, state, split_index, label.name)
+
         assessment_item = MLProcess(train_dataset=train_val_dataset, test_dataset=test_dataset, label=label, metrics=state.metrics,
-                                    optimization_metric=state.optimization_metric, path=path, hp_setting=hp_setting, report_context=state.context,
-                                    ml_reports=state.assessment.reports.model_reports.values(), number_of_processes=state.number_of_processes,
+                                    optimization_metric=state.optimization_metric, path=path, hp_setting=updated_hp_setting,
+                                    report_context=state.context, ml_reports=state.assessment.reports.model_reports.values(),
+                                    number_of_processes=state.number_of_processes,
                                     encoding_reports=state.assessment.reports.encoding_reports.values(),
                                     label_config=LabelConfiguration([label])).run(split_index)
 
         state.assessment_states[split_index].label_states[label.name].assessment_items[str(hp_setting)] = assessment_item
 
         return state
+
+    @staticmethod
+    def update_hp_setting_for_assessment(hp_setting: HPSetting, state: TrainMLModelState, split_index: int, label_name: str):
+
+        if isinstance(hp_setting.ml_method, SklearnMethod) and hp_setting.ml_params['model_selection_cv']:
+            updated_hp_setting = copy.deepcopy(hp_setting)
+            updated_hp_setting.ml_params['model_selection_cv'] = False
+            updated_hp_setting.ml_params['model_selection_n_folds'] = -1
+
+            comp_func = Metric.get_search_criterion(state.optimization_metric)
+            hp_items = state.assessment_states[split_index].label_states[label_name].selection_state.hp_items[hp_setting.get_key()]
+
+            optimal_params = {hp_item.performance[state.optimization_metric.name.lower()]:
+                                  HPAssessment._get_only_hyperparams(hp_item.method.get_params())
+                              for hp_item in hp_items}
+
+            updated_hp_setting.ml_params[updated_hp_setting.ml_method.__class__.__name__] = optimal_params[comp_func(optimal_params.keys())]
+
+            return updated_hp_setting
+
+        else:
+            return hp_setting
+
+    @staticmethod
+    def _get_only_hyperparams(params: dict):
+        return copy.deepcopy({k: v for k, v in params.items() if k not in ['intercept', 'coefficients']})
 
     @staticmethod
     def create_assessment_path(state, split_index):
