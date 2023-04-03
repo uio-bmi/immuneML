@@ -72,22 +72,6 @@ class HPUtil:
                 return dataset
 
     @staticmethod
-    def train_method(label: Label, dataset, hp_setting: HPSetting, path: Path, train_predictions_path, ml_details_path, cores_for_training, optimization_metric) -> MLMethod:
-        method = MLMethodTrainer.run(MLMethodTrainerParams(
-            method=copy.deepcopy(hp_setting.ml_method),
-            result_path=path / "ml_method",
-            dataset=dataset,
-            label=label,
-            train_predictions_path=train_predictions_path,
-            ml_details_path=ml_details_path,
-            model_selection_cv=hp_setting.ml_params["model_selection_cv"],
-            model_selection_n_folds=hp_setting.ml_params["model_selection_n_folds"],
-            cores_for_training=cores_for_training,
-            optimization_metric=optimization_metric.name.lower()
-        ))
-        return method
-
-    @staticmethod
     def weight_examples(dataset, weighting_strategy: ExampleWeightingStrategy, path: Path, learn_model: bool, number_of_processes: int):
         weighted_dataset = DataWeighter.run(DataWeighterParams(
             dataset=dataset,
