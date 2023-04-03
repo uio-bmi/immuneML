@@ -143,6 +143,7 @@ class UnsupervisedSklearnMethod(UnsupervisedMLMethod):
         from immuneML.encodings.reference_encoding.MatchedSequencesEncoder import MatchedSequencesEncoder
         from immuneML.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedReceptorsEncoder
         from immuneML.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
+        from immuneML.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
 
         return [KmerFrequencyEncoder, OneHotEncoder, Word2VecEncoder, EvennessProfileEncoder,
-                MatchedSequencesEncoder, MatchedReceptorsEncoder, MatchedRegexEncoder]
+                MatchedSequencesEncoder, MatchedReceptorsEncoder, MatchedRegexEncoder, TCRdistEncoder]

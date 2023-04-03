@@ -28,7 +28,7 @@ class DimensionalityReduction(UnsupervisedSklearnMethod, ABC):
         self.model = self._get_ml_model(cores_for_training, X)
         if type(self.model).__name__ in ["PCA"]:
             if isinstance(X, csr_matrix):
-                X = X.todense()
+                X = X.toarray()
         encoded_data.set_dim_reduced_examples(self.model.fit_transform(X))
 
         return self.model

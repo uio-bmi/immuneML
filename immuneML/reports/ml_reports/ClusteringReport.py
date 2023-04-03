@@ -203,7 +203,9 @@ class ClusteringReport(UnsupervisedMLReport):
                 x=list(self.dataset.labels[label]),
                 y=[f'Cluster {str(id)}' for id in self.dataset.labels["cluster_id"]],
                 z=percentage_data,
-                text=fig_text
+                text=fig_text,
+                zmin=0,
+                zmax=1
             ),
             layout=go.Layout(
                 title=f"{label} to cluster_id label comparison",

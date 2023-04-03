@@ -48,9 +48,6 @@ class ClusteringInstruction(Instruction):
 
         unit.clustering_method.fit(encoded_dataset.encoded_data)
 
-        if not unit.dim_red_before_clustering:
-            self._dim_reduce(unit, encoded_dataset)
-
         if unit.eval_metrics is not None:
             labels_true = None
             if unit.true_labels_path is not None and unit.true_labels_path.is_file():
@@ -62,6 +59,9 @@ class ClusteringInstruction(Instruction):
             self.calculate_scores(key, encoded_dataset.encoded_data.examples, unit.clustering_method.model.labels_, labels_true, unit.eval_metrics, distance_metric)
 
         processed_dataset = self.add_label(encoded_dataset, unit.clustering_method.model.labels_, result_path / "dataset_clustered")
+
+        if not unit.dim_red_before_clustering:
+            self._dim_reduce(unit, encoded_dataset)
 
         unit.report.dataset = processed_dataset
         unit.report.method = unit.clustering_method
@@ -141,8 +141,8 @@ class ClusteringInstruction(Instruction):
 
         target_scores = {
             "Silhouette": 1,
-            "Calinski-Harabasz": 0,
-            "Davies-Bouldin": 999999,
+            "Calinski-Harabasz": 999999,
+            "Davies-Bouldin": 0,
             "Rand index": 1,
             "Mutual Information": 1,
             "Homogeneity": 1,

@@ -12,7 +12,7 @@ class DBSCAN(Clustering):
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
         if self._parameters["eps"] == "auto":
-            self._calculate_auto_eps(X, cores_for_training)
+            self._parameters["eps"] = self._calculate_auto_eps(X, cores_for_training, self._parameters["min_samples"])
 
         if "S" in self._parameters:
             self._parameters.pop("S")
