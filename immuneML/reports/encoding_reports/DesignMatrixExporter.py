@@ -5,7 +5,6 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
-import h5py
 import numpy as np
 import pandas as pd
 import yaml
@@ -29,6 +28,7 @@ class DesignMatrixExporter(EncodingReport):
 
         file_format (str): the format and extension of the file to store the design matrix. The supported formats are:
         npy, csv, hdf5, npy.zip, csv.zip or hdf5.zip.
+        Note: when using hdf5 or hdf5.zip output formats, make sure the 'hdf5' dependency is installed.
 
 
     YAML specification:
@@ -72,7 +72,8 @@ class DesignMatrixExporter(EncodingReport):
         file_path = file_path.with_suffix('.' + ext)
 
         # Use h5py to create a hdf5 file.
-        if ext == "hdf5": 
+        if ext == "hdf5":
+            import h5py
             with h5py.File(str(file_path), 'w') as hf_object:
                 hf_object.create_dataset(str(file_path), data=data)
         # Use numpy to create a csv or npy file.
