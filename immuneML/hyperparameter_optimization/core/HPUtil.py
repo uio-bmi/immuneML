@@ -13,7 +13,6 @@ from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
-from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.util.PathBuilder import PathBuilder
@@ -23,8 +22,6 @@ from immuneML.workflows.steps.DataEncoderParams import DataEncoderParams
 from immuneML.workflows.steps.DataWeighterParams import DataWeighterParams
 from immuneML.workflows.steps.MLMethodAssessment import MLMethodAssessment
 from immuneML.workflows.steps.MLMethodAssessmentParams import MLMethodAssessmentParams
-from immuneML.workflows.steps.MLMethodTrainer import MLMethodTrainer
-from immuneML.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
 from immuneML.workflows.steps.data_splitter.DataSplitter import DataSplitter
 from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
 

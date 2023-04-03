@@ -33,7 +33,7 @@ class HPSelection:
         for idx, label in enumerate(state.label_configuration.get_label_objects()):
 
             print_log(f"Hyperparameter optimization: running the inner loop of nested CV: selection for label {label.name} "
-                  f"(label {idx + 1} / {n_labels}).\n", include_datetime=True)
+                      f"(label {idx + 1} / {n_labels}).\n", include_datetime=True)
 
             selection_state = HPSelectionState(train_datasets, val_datasets, path, state.hp_strategy)
             state.assessment_states[split_index].label_states[label.name].selection_state = selection_state
@@ -47,7 +47,7 @@ class HPSelection:
             HPUtil.run_selection_reports(state, train_val_dataset, train_datasets, val_datasets, selection_state)
 
             print_log(f"Hyperparameter optimization: running the inner loop of nested CV: completed selection for "
-                  f"label {label.name} (label {idx + 1} / {n_labels}).\n", include_datetime=True)
+                      f"label {label.name} (label {idx + 1} / {n_labels}).\n", include_datetime=True)
 
         return state
 

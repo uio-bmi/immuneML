@@ -9,11 +9,14 @@ from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeighting
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
+from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_metrics.Metric import Metric
 from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.reports.ml_reports.MLReport import MLReport
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.workflows.steps.MLMethodTrainer import MLMethodTrainer
+from immuneML.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
 
 
 class MLProcess:
@@ -46,7 +49,6 @@ class MLProcess:
         assert all([isinstance(metric, Metric) for metric in metrics]), \
             "MLProcess: metrics are not set to be an instance of Metric."
         self.metrics = metrics
-        self.metrics.add(Metric.BALANCED_ACCURACY)
         self.optimization_metric = optimization_metric
         self.ml_reports = ml_reports if ml_reports is not None else []
         self.encoding_reports = encoding_reports if encoding_reports is not None else []
@@ -82,7 +84,7 @@ class MLProcess:
                                                       context=self.report_context, number_of_processes=self.number_of_processes,
                                                       label_configuration=self.label_config)
 
-        method = HPUtil.train_method(self.label, encoded_train_dataset, self.hp_setting, self.path, self.train_predictions_path, self.ml_details_path, self.number_of_processes, self.optimization_metric)
+        method = self._train_method(encoded_train_dataset)
 
         encoding_train_results = ReportUtil.run_encoding_reports(encoded_train_dataset, self.encoding_reports, self.report_path / "encoding_train", self.number_of_processes)
 
@@ -91,6 +93,21 @@ class MLProcess:
         print_log(f"Completed hyperparameter setting {self.hp_setting}.\n", include_datetime=True)
 
         return hp_item
+
+    def _train_method(self, dataset) -> MLMethod:
+        method = MLMethodTrainer.run(MLMethodTrainerParams(
+            method=copy.deepcopy(self.hp_setting.ml_method),
+            result_path=self.path / "ml_method",
+            dataset=dataset,
+            label=self.label,
+            train_predictions_path=self.train_predictions_path,
+            ml_details_path=self.ml_details_path,
+            model_selection_cv=self.hp_setting.ml_params["model_selection_cv"],
+            model_selection_n_folds=self.hp_setting.ml_params["model_selection_n_folds"],
+            cores_for_training=self.number_of_processes,
+            optimization_metric=self.optimization_metric.name.lower()
+        ))
+        return method
 
     def _assess_on_test_dataset(self, encoded_train_dataset, encoding_train_results, method, split_index) -> HPItem:
         if self.test_dataset is not None and self.test_dataset.get_example_count() > 0:
