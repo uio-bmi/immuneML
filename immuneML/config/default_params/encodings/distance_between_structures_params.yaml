@@ -1,1 +1,2 @@
 region_type: IMGT_CDR3
+distance_metric: TM_SCORE

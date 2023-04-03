@@ -25,7 +25,7 @@ class PDBDataset(Dataset):
         self.encoded_data = encoded_data
         self.labels = labels
         self.identifier = identifier if identifier is not None else uuid4().hex
-        self.name = name
+        self.name = name if name is not None else self.identifier
         self.pdb_file_paths = pdb_file_paths
         self.file_names = file_names
         self.metadata_file = metadata_file
@@ -55,11 +55,14 @@ class PDBDataset(Dataset):
 
             else:
                 id_of_file = self.get_id_by_pdb_structure(structure.header['idcode'].lower())
-                start_position_from_meta_file = self.get_start_and_stop_position_from_metafile(id_of_file)
-                stop_position_from_meta_file = self.get_start_and_stop_position_from_metafile(id_of_file)
-                list_of_PDBStructures.append(PDBStructure(structure, contains_antigen=False, receptor_type="TCR",
-                                                          has_imgt_numbering=False, start_position=start_position_from_meta_file[0],
-                                                          stop_position=stop_position_from_meta_file[1]))
+                try:
+                    start_position_from_meta_file = self.get_start_and_stop_position_from_metafile(id_of_file)
+                    stop_position_from_meta_file = self.get_start_and_stop_position_from_metafile(id_of_file)
+                    list_of_PDBStructures.append(PDBStructure(structure, contains_antigen=False, receptor_type="TCR",
+                                                              has_imgt_numbering=False, start_position=start_position_from_meta_file[0],
+                                                              stop_position=stop_position_from_meta_file[1]))
+                except:
+                    print("No start or stop position column in metadata file")
 
         return list_of_PDBStructures
 
@@ -105,7 +108,6 @@ class PDBDataset(Dataset):
 
     def get_example_count(self):
         return len(self.pdb_file_paths)
-
 
     def get_example_ids(self):
         example_ids =[]

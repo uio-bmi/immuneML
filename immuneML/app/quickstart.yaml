@@ -10,6 +10,7 @@ definitions:
     my_encoding:
       DistanceBetweenStructures:
         name: Test
+        distance_metric: TM_score
   ml_methods:
     my_precomputedKNN: PrecomputedKNN
 

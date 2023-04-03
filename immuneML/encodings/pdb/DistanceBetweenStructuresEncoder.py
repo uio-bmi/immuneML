@@ -1,4 +1,5 @@
 from Bio.PDB import PDBParser
+from immuneML.encodings.distance_encoding.DistanceMetricType import DistanceMetricType
 
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.dataset.PDBDataset import PDBDataset
@@ -19,17 +20,17 @@ from immuneML.caching.CacheHandler import CacheHandler
 
 class DistanceBetweenStructuresEncoder(DatasetEncoder):
 
-
     @staticmethod
     def build_object(dataset=None, **params):
         return DistanceBetweenStructuresEncoder(**params)
 
-    def __init__(self, name: str = None, region_type: RegionType = None, context: dict = None):
+    def __init__(self, distance_metric: DistanceMetricType, name: str = None, region_type: RegionType = None, context: dict = None):
 
         self.name = name
         self.region_type = region_type
         self.context = context
-        self.distance_fn = "TM_score"
+        self.distance_fn = distance_metric
+
 
     def set_context(self, context: dict):
         self.context = context
@@ -129,7 +130,7 @@ class DistanceBetweenStructuresEncoder(DatasetEncoder):
 
         tm_score = tm_align(coords_from_current_pdb_structure, coords_from_other_pdb_structure, seq_of_current_pdb_structure, seq_of_other_pdb_structure)
 
-        return tm_score.tm_norm_chain1
+        return max(tm_score.tm_norm_chain1,tm_score.tm_norm_chain2)
 
     def build_labels(self, dataset: PDBDataset, params: EncoderParams) -> dict:
 
