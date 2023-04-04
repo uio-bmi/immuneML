@@ -106,7 +106,7 @@ class SklearnMethod(MLMethod):
             probabilities = self.model.predict_proba(encoded_data.examples)
             class_names = Util.map_to_old_class_values(self.model.classes_, self.class_mapping)
 
-            return {label.name: {class_name: probabilities[:,i] for i, class_name in enumerate(class_names)}}
+            return {label.name: {class_name: probabilities[:, i] for i, class_name in enumerate(class_names)}}
         else:
             return None
 
@@ -140,7 +140,7 @@ class SklearnMethod(MLMethod):
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
         self.model = self._fit_by_cross_validation(encoded_data.examples, mapped_y, number_of_splits, label, cores_for_training,
-                                                  optimization_metric)
+                                                   optimization_metric)
 
     def _fit_by_cross_validation(self, X, y, number_of_splits: int = 5, label: Label = None, cores_for_training: int = 1,
                                  optimization_metric: str = "balanced_accuracy"):
@@ -230,7 +230,7 @@ class SklearnMethod(MLMethod):
 
     @abc.abstractmethod
     def get_params(self):
-        '''Returns the model parameters in a readable yaml-friendly way (consisting of lists, dictionaries and strings).'''
+        """Returns the model parameters in a readable yaml-friendly way (consisting of lists, dictionaries and strings)."""
         pass
 
     def get_label_name(self):
