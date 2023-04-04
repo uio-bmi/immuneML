@@ -63,11 +63,14 @@ class CompAIRRHelper:
                 indels_args + frequency_args + ignore_genes + output_args + input_file_list + output_pairs + cdr3_indicator
 
     @staticmethod
-    def write_repertoire_file(repertoire_dataset, filename, compairr_params):
+    def write_repertoire_file(repertoire_dataset=None, filename=None, compairr_params=None, repertoires: list = None):
         mode = "w"
         header = True
 
-        for repertoire in repertoire_dataset.get_data():
+        if repertoire_dataset is not None and repertoires is None:
+            repertoires = repertoire_dataset.get_data()
+
+        for repertoire in repertoires:
             repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, compairr_params)
             repertoire_contents.to_csv(filename, mode=mode, header=header, index=False, sep="\t")
 

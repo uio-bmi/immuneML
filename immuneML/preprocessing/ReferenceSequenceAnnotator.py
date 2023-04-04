@@ -1,5 +1,6 @@
 import copy
 import glob
+import math
 import shutil
 import subprocess
 from pathlib import Path
@@ -40,6 +41,9 @@ class ReferenceSequenceAnnotator(Preprocessor):
 
         output_column_name (str): in case there are multiple annotations, it is possible here to define the name of the column in the output repertoire files for this specific annotation
 
+        repertoire_batch_size (int): how many repertoires to process simultaneously; depending on the repertoire size, this parameter might be use to limit the memory usage
+
+
     YAML specification:
 
     .. indent with spaces
@@ -58,15 +62,17 @@ class ReferenceSequenceAnnotator(Preprocessor):
                         max_edit_distance: 0
                         output_column_name: matched
                         threads: 4
+                        repertoire_batch_size: 5
 
     """
 
     def __init__(self, reference_sequences: List[ReceptorSequence], max_edit_distance: int, compairr_path: str, ignore_genes: bool, threads: int,
-                 output_column_name: str):
+                 output_column_name: str, repertoire_batch_size: int):
         super().__init__()
         self._reference_sequences = reference_sequences
         self._max_edit_distance = max_edit_distance
         self._output_column_name = output_column_name
+        self._repertoire_batch_size = repertoire_batch_size
         self._compairr_params = CompAIRRParams(compairr_path=CompAIRRHelper.determine_compairr_path(compairr_path), keep_compairr_input=True,
                                                differences=max_edit_distance, indels=False, ignore_counts=True, ignore_genes=ignore_genes,
                                                threads=threads, output_filename="compairr_out.tsv", log_filename="compairr_log.txt",
@@ -75,7 +81,8 @@ class ReferenceSequenceAnnotator(Preprocessor):
     @classmethod
     def build_object(cls, **kwargs):
         ParameterValidator.assert_keys(list(kwargs.keys()),
-                                       ['reference_sequences', 'max_edit_distance', 'compairr_path', 'ignore_genes', 'output_column_name', 'threads'],
+                                       ['reference_sequences', 'max_edit_distance', 'compairr_path', 'ignore_genes', 'output_column_name', 'threads',
+                                        'repertoire_batch_size'],
                                        ReferenceSequenceAnnotator.__name__, ReferenceSequenceAnnotator.__name__)
         ref_seqs = MatchedReferenceUtil.prepare_reference(reference_params=kwargs['reference_sequences'],
                                                           location=ReferenceSequenceAnnotator.__name__, paired=False)
@@ -85,11 +92,11 @@ class ReferenceSequenceAnnotator(Preprocessor):
         region_type = self._get_region_type_from_dataset(dataset)
         self._compairr_params.is_cdr3 = region_type == RegionType.IMGT_CDR3
         sequence_filepath = self._prepare_sequences_for_compairr(result_path / 'tmp', region_type)
-        repertoires_filepath = self._prepare_repertoires_for_compairr(dataset, result_path / 'tmp')
+        repertoires_filepaths = self._prepare_repertoires_for_compairr(dataset, result_path / 'tmp')
 
-        compairr_output_file = self._annotate_repertoires(sequence_filepath, repertoires_filepath, result_path, region_type)
+        compairr_output_files = self._annotate_repertoires(sequence_filepath, repertoires_filepaths, result_path, region_type)
 
-        processed_dataset = self._make_annotated_dataset(dataset, result_path, compairr_output_file)
+        processed_dataset = self._make_annotated_dataset(dataset, result_path, compairr_output_files)
 
         shutil.rmtree(result_path / 'tmp')
 
@@ -101,27 +108,38 @@ class ReferenceSequenceAnnotator(Preprocessor):
             "Not all repertoires have the sequences with the same region type."
         return region_types[0]
 
-    def _annotate_repertoires(self, sequences_filepath, repertoire_filepath: Path, result_path: Path, region_type: RegionType):
+    def _annotate_repertoires(self, sequences_filepath, repertoire_filepaths: List[Path], result_path: Path, region_type: RegionType):
         tmp_path = PathBuilder.build(result_path / 'tmp')
-        args = CompAIRRHelper.get_cmd_args(self._compairr_params, [sequences_filepath, repertoire_filepath], tmp_path)
-        compairr_result = subprocess.run(args, capture_output=True, text=True)
-        output_file = CompAIRRHelper.verify_compairr_output_path(compairr_result, self._compairr_params, tmp_path)
+        updated_output_files = []
 
-        with open(output_file, 'r') as file:
-            output_lines = file.readlines()
+        for index, rep_file in enumerate(repertoire_filepaths):
+            batch_tmp_path = PathBuilder.build(tmp_path / str(index))
+            args = CompAIRRHelper.get_cmd_args(self._compairr_params, [sequences_filepath, rep_file], batch_tmp_path)
+            compairr_result = subprocess.run(args, capture_output=True, text=True)
+            output_file = CompAIRRHelper.verify_compairr_output_path(compairr_result, self._compairr_params, batch_tmp_path)
+            updated_output_file = result_path / f'updated_compairr_output_{index}.tsv'
 
-        with open(result_path / 'updated_compairr_output.tsv', 'w') as file:
-            output_lines[0] = output_lines[0].replace("#", '')
-            file.writelines(output_lines)
+            with open(output_file, 'r') as file:
+                output_lines = file.readlines()
 
-        return result_path / 'updated_compairr_output.tsv'
+            with updated_output_file.open(mode='w') as file:
+                output_lines[0] = output_lines[0].replace("#", '')
+                file.writelines(output_lines)
 
-    def _make_annotated_dataset(self, dataset: RepertoireDataset, result_path: Path, compairr_output_file) -> RepertoireDataset:
+            updated_output_files.append(updated_output_file)
+
+        return updated_output_files
+
+    def _make_annotated_dataset(self, dataset: RepertoireDataset, result_path: Path, compairr_output_files: List[Path]) -> RepertoireDataset:
         repertoires = []
         repertoire_path = PathBuilder.build(result_path / 'repertoires')
-        compairr_out_df = pd.read_csv(compairr_output_file, sep='\t')
+        compairr_out_df = None
 
         for index, repertoire in enumerate(dataset.repertoires):
+
+            if index % self._repertoire_batch_size == 0:
+                compairr_out_df = pd.read_csv(compairr_output_files[index // self._repertoire_batch_size], sep='\t')
+
             if compairr_out_df[repertoire.identifier].any():
                 sequence_selection = compairr_out_df[repertoire.identifier]
                 matches = np.array([repertoire.get_sequence_aas() == seq.amino_acid_sequence for seq in
@@ -159,11 +177,15 @@ class ReferenceSequenceAnnotator(Preprocessor):
 
         return path
 
-    def _prepare_repertoires_for_compairr(self, dataset: RepertoireDataset, result_path: Path) -> Path:
+    def _prepare_repertoires_for_compairr(self, dataset: RepertoireDataset, result_path: Path) -> List[Path]:
         PathBuilder.build(result_path)
-        path = result_path / 'repertoires.tsv'
-        CompAIRRHelper.write_repertoire_file(dataset, path, self._compairr_params)
-        return path
+        paths = []
+        for i in range(math.ceil(dataset.get_example_count() / self._repertoire_batch_size)):
+            path = result_path / f'repertoires_{i}.tsv'
+            CompAIRRHelper.write_repertoire_file(repertoires=dataset.repertoires[i*self._repertoire_batch_size: (i+1)*self._repertoire_batch_size],
+                                                 filename=path, compairr_params=self._compairr_params)
+            paths.append(path)
+        return paths
 
     def _check_column_name(self, dataset):
         for repertoire in dataset.repertoires:
