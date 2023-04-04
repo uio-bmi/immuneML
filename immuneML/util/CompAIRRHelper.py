@@ -67,12 +67,18 @@ class CompAIRRHelper:
         mode = "w"
         header = True
 
+        columns_in_order = []
+
         if repertoire_dataset is not None and repertoires is None:
             repertoires = repertoire_dataset.get_data()
 
-        for repertoire in repertoires:
+        for ind, repertoire in enumerate(repertoires):
             repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, compairr_params)
-            repertoire_contents.to_csv(filename, mode=mode, header=header, index=False, sep="\t")
+
+            if ind == 0:
+                columns_in_order = sorted(repertoire_contents.columns)
+
+            repertoire_contents[columns_in_order].to_csv(filename, mode=mode, header=header, index=False, sep="\t")
 
             mode = "a"
             header = False
