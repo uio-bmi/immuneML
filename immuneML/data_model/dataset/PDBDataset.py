@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from uuid import uuid4
 import pandas as pd
@@ -33,36 +34,43 @@ class PDBDataset(Dataset):
 
 
 
-    def check_if_PDB_file_has_IMGT_numbering(self, pdb_structure):
-        for pdb_file in self.get_pdb_filepaths():
-            if pdb_structure.header['idcode'].lower() in pdb_file:
-                file = open(pdb_file, "r")
-                if "REMARK 410" in file.read() or "IMGT " in file.read():
-                    file.close()
-                    return True
-                else:
-                    file.close()
-                    return False
+    def check_if_PDB_file_has_IMGT_numbering(self, checked_pdb_filepath):
+        #checked_pdb_filepath = os.path.basename(checked_pdb_filepath).split('/')[-1]
+        file = open(checked_pdb_filepath, "r")
+
+        for line in file:
+            if "REMARK 410" in line or "IMGT " in line:
+                file.close()
+                return True
+
+            elif "ATOM      1" in line:
+                file.close()
+                return False
+
+        file.close()
+        return False
 
 
     def generate_PDB_Structures(self):
         list_of_PDBStructures = []
 
-        for structure in self.get_PDB_Parser():
-            if self.check_if_PDB_file_has_IMGT_numbering(structure):
-                list_of_PDBStructures.append(PDBStructure(structure, contains_antigen=False, receptor_type="TCR",
+        for pdb_filepath in self.get_pdb_filepaths():
+            if self.check_if_PDB_file_has_IMGT_numbering(pdb_filepath):
+                list_of_PDBStructures.append(PDBStructure(pdb_filepath, contains_antigen=False, receptor_type="TCR",
                                                           has_imgt_numbering=True))
 
             else:
-                id_of_file = self.get_id_by_pdb_structure(structure.header['idcode'].lower())
+                id_of_file = self.pdb_file_paths.index(pdb_filepath)
+
                 try:
                     start_position_from_meta_file = self.get_start_and_stop_position_from_metafile(id_of_file)
                     stop_position_from_meta_file = self.get_start_and_stop_position_from_metafile(id_of_file)
-                    list_of_PDBStructures.append(PDBStructure(structure, contains_antigen=False, receptor_type="TCR",
+                    list_of_PDBStructures.append(PDBStructure(pdb_filepath, contains_antigen=False, receptor_type="TCR",
                                                               has_imgt_numbering=False, start_position=start_position_from_meta_file[0],
                                                               stop_position=stop_position_from_meta_file[1]))
                 except:
-                    print("No start or stop position column in metadata file")
+
+                    print("Start and stop position column are required in the metadata file for non imgt-numbered PDB files")
 
         return list_of_PDBStructures
 
@@ -152,7 +160,7 @@ class PDBDataset(Dataset):
 
         metadata_file = self._build_new_metadata(example_indices, path / f"{dataset_type}_metadata.csv")
         new_dataset = PDBDataset(pdb_file_paths=[self.pdb_file_paths[i] for i in example_indices],file_names= file_names, labels=copy.deepcopy(self.labels),
-                                        metadata_file=metadata_file)
+                                 metadata_file=metadata_file)
 
         return new_dataset
 
