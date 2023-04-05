@@ -93,8 +93,8 @@ class SequenceGenerationProbabilityDistribution(DataReport):
                                       "Processed dataset with generation probability and implanted labels for each sequence")
         output_tables = None if dataset_df is None else [dataset_output,
                                                          self._generate_occurrence_limit_pgen_range(dataset_df),
-                                                         #*self._create_output_table_for_vdjRec(dataset_df,
-                                                         #                                      self._load_dataset_dataframe())
+                                                         *self._create_output_table_for_vdjRec(dataset_df,
+                                                                                               self._load_dataset_dataframe())
                                                          ]
 
         Logger.print_log(
@@ -270,8 +270,6 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
     def _create_output_table_for_vdjRec(self, pgen_df, full_df):
 
-        #TODO FIX!
-
         Logger.print_log(
             f"Creating vdjRec output tables",
             include_datetime=True)
@@ -282,7 +280,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         df = pd.merge(full_df, pgen_df[["sequence_aas", "v_genes", "j_genes", "pgen", "count"]], how="inner",
                       on=["sequence_aas", "v_genes", "j_genes"])
 
-        #df = df.loc[df["count"] > 1]
+        df = df.loc[df["count"] > 1]
 
         if self.mark_implanted_labels:
             target_names = list(self.dataset.get_label_names())
@@ -330,7 +328,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         # MAKE SAMPLES FILE:
         samples_df = pd.DataFrame()
 
-        full_df = full_df[full_df["sequence_aas"].isin(pgen_df["sequence_aas"])]
+        full_df = full_df[full_df["sequence_aas"].isin(df["sequence_aas"])]
 
         samples_df["count"] = full_df.groupby(["repertoire"])["repertoire"].count()
         samples_df.reset_index(inplace=True)
@@ -360,7 +358,14 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
         path = self.result_path / "occurrence_limit_pgen_range.csv"
 
-        occurrence_limit_df = dataset_df[dataset_df["count"] > 1].groupby(["count"])["pgen"].min().to_frame()
+        occurrence_limit_df = dataset_df.loc[dataset_df["pgen"] > 0][dataset_df["count"] > 1].groupby(["count"])["pgen"].min().to_frame()
+
+        lowest_pgen = None
+        for count, row in occurrence_limit_df.iloc[::-1].iterrows():
+            if lowest_pgen is None or row["pgen"] < lowest_pgen:
+                lowest_pgen = row["pgen"]
+            else:
+                occurrence_limit_df.drop(count, inplace=True)
 
         f = open(path, "w")
         f.write("occurrence_limit_pgen_range:\n")
