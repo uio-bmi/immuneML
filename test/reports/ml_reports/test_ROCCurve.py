@@ -26,14 +26,14 @@ class TestROCCurve(unittest.TestCase):
                                  {"l1": [i % 2 for i in range(0, 100)]})
 
         dummy_lr.fit_by_cross_validation(encoded_tr, number_of_splits=2,
-                                         label=Label("l1"))
+                                         label=Label("l1", [0, 1], positive_class=1))
         return dummy_lr
 
     def _create_report(self, path):
         report = ROCCurve.build_object(name='testcase')
 
         report.method = self._create_dummy_lr_model()
-        report.label = Label("l1")
+        report.label = Label("l1", [0, 1], positive_class=1)
         report.result_path = path
         report.test_dataset = Dataset()
         encoded_te = EncodedData(np.random.rand(100, 20),

@@ -74,7 +74,7 @@ class TrainingPerformance(MLReport):
         
         X = self.train_dataset.encoded_data
         predicted_y = self.method.predict(X, self.label)[self.label.name]
-        predicted_proba_y = self.method.predict_proba(X, self.label)[self.label.name]
+        predicted_proba_y = self.method.predict_proba(X, self.label)[self.label.name][self.label.positive_class]
         true_y = self.train_dataset.encoded_data.labels[self.label.name]
         classes = self.method.get_classes()
 
@@ -88,7 +88,7 @@ class TrainingPerformance(MLReport):
 
         for metric in self.metrics_set:
             _score = TrainingPerformance._compute_score(
-                Metric[metric],
+                Metric.get_metric(metric),
                 predicted_y,
                 predicted_proba_y,
                 true_y,

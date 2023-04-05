@@ -4,7 +4,6 @@ from pathlib import Path
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
-from tqdm import tqdm
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
@@ -129,6 +128,8 @@ class DeepRCMotifDiscovery(MLReport):
         path_kernels : Path
             path for kernels integrated gradients plot
         """
+        from tqdm import tqdm
+
         intgrds_set = intgrds_set_loader.dataset
 
         #
