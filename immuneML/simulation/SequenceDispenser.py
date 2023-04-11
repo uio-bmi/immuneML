@@ -261,7 +261,7 @@ class SequenceDispenser:
             organism = "human"
 
         if dataset.repertoires[0].get_attribute("chains") is not None:
-            chain_type = dataset.repertoires[0].get_attrbibute("chains")[0]
+            chain_type = dataset.repertoires[0].get_attribute("chains")[0]
         else:
             v_gene = dataset.get_repertoire(index=0).get_v_genes()[0]
             if v_gene[0]+v_gene[2:4] in valid_chain_types:
@@ -269,7 +269,7 @@ class SequenceDispenser:
             else:
                 chain_type = v_gene[:3]
 
-        chain_type = Chain.get_chain(chain_type)
+        chain_type = str(Chain.get_chain(chain_type))
 
         if chain_type not in valid_chain_types:
             raise Exception(f"No OLGA model with chain type: {chain_type}")
