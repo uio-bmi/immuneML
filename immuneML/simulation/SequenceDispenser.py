@@ -269,7 +269,7 @@ class SequenceDispenser:
             else:
                 chain_type = v_gene[:3]
 
-        chain_type = str(Chain.get_chain(chain_type))
+        chain_type = Chain.get_chain(chain_type).value
 
         if chain_type not in valid_chain_types:
             raise Exception(f"No OLGA model with chain type: {chain_type}")
