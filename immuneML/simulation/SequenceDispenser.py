@@ -5,6 +5,7 @@ from collections import defaultdict
 import pandas as pd
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.generative_models.OLGA import OLGA
@@ -141,7 +142,6 @@ class SequenceDispenser:
 
                 return self.generate_mutation(repertoire_id)
 
-        print(f"      Mutation: {mutation}")
         return Motif(identifier=f"mutation_{mutation}", instantiation=GappedKmerInstantiation(), seed=mutation,
                      v_call=v_call,
                      j_call=j_call)
@@ -261,13 +261,15 @@ class SequenceDispenser:
             organism = "human"
 
         if dataset.repertoires[0].get_attribute("chains") is not None:
-            chain_type = dataset.repertoires[0].get_attribute("chains")[0]
+            chain_type = dataset.repertoires[0].get_attrbibute("chains")[0]
         else:
             v_gene = dataset.get_repertoire(index=0).get_v_genes()[0]
             if v_gene[0]+v_gene[2:4] in valid_chain_types:
                 chain_type = v_gene[0]+v_gene[2:4]
             else:
                 chain_type = v_gene[:3]
+
+        chain_type = Chain.get_chain(chain_type)
 
         if chain_type not in valid_chain_types:
             raise Exception(f"No OLGA model with chain type: {chain_type}")

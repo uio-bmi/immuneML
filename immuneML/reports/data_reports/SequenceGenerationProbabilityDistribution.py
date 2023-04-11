@@ -216,7 +216,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
             include_datetime=True)
 
         PathBuilder.build(self.result_path)
-        file_path = self.result_path / "pgen_scatter_plot.html"
+        file_path = self.result_path / "pgen_distribution_plot.html"
         figure.write_html(str(file_path))
         return ReportOutput(path=file_path, name="sequence generation probability distribution plot")
 
