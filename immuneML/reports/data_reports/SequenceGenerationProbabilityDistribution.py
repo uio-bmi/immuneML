@@ -1,6 +1,7 @@
 import logging
 import math
 import multiprocessing as mp
+from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
@@ -154,11 +155,15 @@ class SequenceGenerationProbabilityDistribution(DataReport):
             dataset_with_count = pd.merge(dataset_df, count_df, how="inner", on=sequence_columns).drop_duplicates(
                 ignore_index=True, subset=sequence_columns)
         else:
-            dataset_with_count = dataset_df.copy()
-            dataset_with_count["count"] = 0
 
-            for row in dataset_with_count.itertuples():
-                dataset_with_count.at[row.Index, "count"] += row.duplicate_count
+            count = defaultdict(int)
+
+            for row in dataset_df.itertuples():
+                count[row.sequence_aas] += row.duplicate_count
+
+            count_df = pd.DataFrame(data={"sequence_aas": count.keys(), "count": count.values()})
+            dataset_with_count = pd.merge(dataset_df, count_df, how="inner", on="sequence_aas").drop_duplicates(
+                ignore_index=True, subset=sequence_columns)
 
         dataset_with_count.drop(columns=["duplicate_count"])
 
@@ -358,7 +363,8 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
         path = self.result_path / "occurrence_limit_pgen_range.csv"
 
-        occurrence_limit_df = dataset_df.loc[dataset_df["pgen"] > 0][dataset_df["count"] > 1].groupby(["count"])["pgen"].min().to_frame()
+        occurrence_limit_df = dataset_df.loc[dataset_df["pgen"] > 0][dataset_df["count"] > 1].groupby(["count"])[
+            "pgen"].min().to_frame()
 
         lowest_pgen = None
         for count, row in occurrence_limit_df.iloc[::-1].iterrows():
