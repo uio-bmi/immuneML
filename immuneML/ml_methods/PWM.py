@@ -71,10 +71,10 @@ class PWM(GenerativeModel):
         return self._parameters
 
     def can_predict_proba(self) -> bool:
-        raise Exception("can_predict_proba has not been implemented")
+        raise NotImplementedError
 
     def get_compatible_encoders(self):
-        raise Exception("get_compatible_encoders has not been implemented")
+        raise NotImplementedError
 
     def load(self, path: Path, details_path: Path = None):
 

@@ -13,6 +13,7 @@ from immuneML.dsl.semantic_model.SemanticModel import SemanticModel
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
@@ -40,11 +41,12 @@ class ImmuneMLApp:
 
         self.set_cache()
 
-        print(f"{datetime.datetime.now()}: ImmuneML: parsing the specification...\n", flush=True)
+        print_log(f"ImmuneML: parsing the specification...\n", include_datetime=True)
 
-        symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path, self._result_path)
+        symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path,
+                                                                                self._result_path)
 
-        print(f"{datetime.datetime.now()}: ImmuneML: starting the analysis...\n", flush=True)
+        print_log(f"ImmuneML: starting the analysis...\n", include_datetime=True)
 
         instructions = symbol_table.get_by_type(SymbolType.INSTRUCTION)
         output = symbol_table.get("output")
@@ -53,19 +55,15 @@ class ImmuneMLApp:
 
         self.clear_cache()
 
-        print(f"{datetime.datetime.now()}: ImmuneML: finished analysis.\n", flush=True)
+        print_log(f"ImmuneML: finished analysis.\n", include_datetime=True)
 
         return result
 
 
 def run_immuneML(namespace: argparse.Namespace):
     if os.path.isdir(namespace.result_path) and len(os.listdir(namespace.result_path)) != 0:
-        delete = input(f"Directory {namespace.result_path} already exists. Would you like to replace it?\n")
-        if delete.lower() == "yes" or delete.lower() == "y":
-            shutil.rmtree(namespace.result_path, ignore_errors=False)
-            print(f"Directory {namespace.result_path} was deleted successfully.")
-        else:
-            raise ValueError(f"Directory {namespace.result_path} already exists. Please specify a new output directory for the analysis.")
+        raise ValueError(
+            f"Directory {namespace.result_path} already exists. Please specify a new output directory for the analysis.")
     PathBuilder.build(namespace.result_path)
 
     logging.basicConfig(filename=Path(namespace.result_path) / "log.txt", level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')

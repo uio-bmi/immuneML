@@ -150,7 +150,7 @@ class GenerativeModel(UnsupervisedMLMethod):
     @staticmethod
     def get_usage_documentation(model_name):
         return f"""
-
+        
         TODO
 
         Following text does not relate to generative models
