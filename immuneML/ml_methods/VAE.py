@@ -64,13 +64,10 @@ class VAE(GenerativeModel):
                                                                       name="encoder_mu_log_variance_model")
 
 
-
         encoder_output = tf.keras.layers.Lambda(self.sampling, name="encoder_output")(
             [encoder_mu, encoder_log_variance])
 
-        output_normalized = tf.keras.layers.Normalization()(encoder_output)
-
-        encoder = tf.keras.models.Model(x, output_normalized, name="encoder_model")
+        encoder = tf.keras.models.Model(x, encoder_output, name="encoder_model")
 
 
         ##################################################################################################
@@ -143,10 +140,6 @@ class VAE(GenerativeModel):
 
     def _fit(self, dataset, cores_for_training: int = 1, result_path: Path = None):
 
-        """
-        Hard values made from previous testing with VAE. These values may not be suitable for protein sequence
-        generation
-        """
         dataset = np.insert(dataset, 0, 0, axis=2)
 
         new_data = []
@@ -178,8 +171,8 @@ class VAE(GenerativeModel):
 
         self.model.fit(x_train,
                        x_train,
-                       epochs=20,
-                       batch_size=64,
+                       epochs=5,
+                       batch_size=128,
                        shuffle=True,
                        validation_data=(x_test,
                                         x_test),
@@ -203,7 +196,7 @@ class VAE(GenerativeModel):
         gens = []
 
         for i in fake_latent:
-            decoded = self.decoder([i])
+            decoded = self.decoder(i)
             maxed = tf.math.argmax(decoded, axis=2)
             char_seq = ""
             for seq in maxed[0]:
