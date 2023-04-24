@@ -3,7 +3,7 @@ definitions:
     d1:
       format: Generic
       params:
-        path: LSTM_dataset/sequences.tsv
+        path: LSTM_dataset/sequences_under_30.tsv
         is_repertoire: False
         paired: False
         region_type: FULL_SEQUENCE
@@ -15,7 +15,7 @@ definitions:
         batch_size: 16
         rnn_units: 256
         embedding_dim: 64
-        epochs: 5
+        epochs: 20
   reports:
     GeneratorReport: GeneratorReportLSTM
 instructions:
