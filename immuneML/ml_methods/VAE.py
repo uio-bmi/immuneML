@@ -63,9 +63,10 @@ class VAE(GenerativeModel):
         encoder_mu_log_variance_model = tf.keras.models.Model(x, (encoder_mu, encoder_log_variance),
                                                                       name="encoder_mu_log_variance_model")
 
-
         encoder_output = tf.keras.layers.Lambda(self.sampling, name="encoder_output")(
             [encoder_mu, encoder_log_variance])
+
+        encoder_normalized_out = tf.keras.layers.BatchNormalization(encoder_output)
 
         encoder = tf.keras.models.Model(x, encoder_output, name="encoder_model")
 
@@ -158,7 +159,7 @@ class VAE(GenerativeModel):
 
         one_hot = np.array(new_data)
 
-        self._get_ml_model(one_hot.shape[1], one_hot.shape[2])
+        self._get_ml_model(one_hot.shape[1], one_hot.shape[2], initial_units=32)
 
         train_len = int(one_hot.shape[0] / 2)
         x_train = one_hot[:train_len]
@@ -180,8 +181,18 @@ class VAE(GenerativeModel):
 
         latent = tf.transpose(self.encoder(x_val))
 
+
         x = latent[0]
         y = latent[1]
+        print("Xs")
+        for item in x:
+
+            if abs(item) < 100:
+                print(item)
+        print("Ys")
+        for item in y:
+            if abs(item) < 100:
+                print(item)
 
         plt.scatter(x, y)
         plt.show()
