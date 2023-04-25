@@ -3,7 +3,7 @@ definitions:
     d1:
       format: Generic
       params:
-        path: LSTM_dataset/sequences.tsv
+        path: LSTM_dataset/sequences_under_30.tsv
         is_repertoire: False
         paired: False
         region_type: FULL_SEQUENCE
@@ -22,6 +22,6 @@ instructions:
         dataset: d1
         ml_method: G1
         report: GeneratorReport
-        amount: 250
+        amount: 20000
 
 
