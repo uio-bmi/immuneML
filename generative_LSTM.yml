@@ -12,10 +12,10 @@ definitions:
   ml_methods:
     G1:
       LSTM:
-        batch_size: 16
-        rnn_units: 256
-        embedding_dim: 64
-        epochs: 20
+        batch_size: 8
+        rnn_units: 128
+        embedding_dim: 32
+        epochs: 5
   reports:
     GeneratorReport: GeneratorReportLSTM
 instructions:
