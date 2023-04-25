@@ -1,5 +1,4 @@
 import json
-from uuid import uuid4
 
 from immuneML.data_model.receptor.Receptor import Receptor
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
@@ -34,7 +33,7 @@ class BCReceptor(Receptor):
 
     def __init__(self, heavy: ReceptorSequence = None, light: ReceptorSequence = None, metadata: dict = None,
                  identifier: str = None):
-        super().__init__(metadata, identifier)
+        super().__init__(metadata=metadata, identifier=identifier)
         self.heavy = heavy
         self.light = light
 
