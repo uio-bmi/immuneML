@@ -18,7 +18,7 @@ class ElementDataset(Dataset):
         self.labels = labels
         self.encoded_data = encoded_data
         self.identifier = identifier if identifier is not None else uuid4().hex
-        self.filenames = sorted(filenames) if filenames is not None else []
+        self.filenames = filenames if filenames is not None else []
         self.filenames = [Path(filename) for filename in self.filenames]
         self.element_generator = ElementGenerator(self.filenames, file_size, element_class_name)
         self.file_size = file_size
@@ -27,12 +27,10 @@ class ElementDataset(Dataset):
         self.element_class_name = element_class_name
 
     def get_data(self, batch_size: int = 10000):
-        self.filenames.sort()
         self.element_generator.file_list = self.filenames
         return self.element_generator.build_element_generator()
 
     def get_batch(self, batch_size: int = 10000):
-        self.filenames.sort()
         self.element_generator.file_list = self.filenames
         return self.element_generator.build_batch_generator()
 
@@ -78,3 +76,6 @@ class ElementDataset(Dataset):
 
     def clone(self, keep_identifier: bool = False):
         raise NotImplementedError
+
+    def get_data_from_index_range(self, start_index: int, end_index: int):
+        return self.element_generator.get_data_from_index_range(start_index, end_index)

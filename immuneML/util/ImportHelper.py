@@ -1,3 +1,4 @@
+import logging
 import warnings
 from multiprocessing.pool import Pool
 from pathlib import Path
@@ -103,43 +104,6 @@ class ImportHelper:
         ImmuneMLExporter.export(dataset, params.result_path)
 
         return dataset
-
-    @staticmethod
-    def update_gene_info(df: pd.DataFrame):
-        """
-        Updates gene info in 2 steps:
-
-        - First, columns are added if they were not present. This is done by going from the highest level of information (alleles)
-        towards the lowest level of information (subgroups) by stripping away suffixes. If gene and subgroup columns were already
-        present, suffixes are still stripped away just in case.
-        - Next, if there are None values present, the highest possible level of information is copied in from the lower level information fields.
-        This is done by moving from subgroups towards alleles. So if for one particular receptor only the subgroup was present, the subgroup
-        will be copied into the genes and alleles column.
-        """
-        for gene in ['v', 'j']:
-            # step 1: create all columns
-            if f"{gene}_alleles" in df.columns and not f"{gene}_genes" in df.columns:
-                df.loc[:, f"{gene}_genes"] = ImportHelper.strip_alleles(df, f"{gene}_alleles")
-
-            if f"{gene}_genes" in df.columns:
-                df.loc[:, f"{gene}_genes"] = ImportHelper.strip_alleles(df, f"{gene}_genes")
-                if not f"{gene}_subgroups" in df.columns:
-                    df.loc[:, f"{gene}_subgroups"] = ImportHelper.strip_genes(df, f"{gene}_genes")
-            elif f"{gene}_subgroups" in df.columns:
-                df.loc[:, f"{gene}_subgroups"] = ImportHelper.strip_genes(df, f"{gene}_subgroups")
-
-            for type in ["alleles", "genes", "subgroups"]:
-                if f"{gene}_{type}" not in df.columns:
-                    df[f"{gene}_{type}"] = None
-
-            # step 2: fill in missing info
-            missing_gene = df[f"{gene}_genes"].isnull()
-            missing_allele = df[f"{gene}_alleles"].isnull()
-
-            df.loc[missing_gene, f"{gene}_genes"] = df.loc[missing_gene, f"{gene}_subgroups"]
-            df.loc[missing_allele, f"{gene}_alleles"] = df.loc[missing_allele, f"{gene}_genes"]
-
-        return df
 
     @staticmethod
     def make_new_metadata_file(repertoires: list, metadata: pd.DataFrame, result_path: Path, dataset_name: str) -> Path:
@@ -260,28 +224,35 @@ class ImportHelper:
                         f"{ImportHelper.__name__}: {n_empty} sequences were removed from the dataset because they contained an empty {sequence_name} "
                         f"sequence after preprocessing. ")
             else:
-                warnings.warn(f"{ImportHelper.__name__}: column {sequence_colname} was not set, but is required for filtering. Skipping this filtering...")
+                warnings.warn(
+                    f"{ImportHelper.__name__}: column {sequence_colname} was not set, but is required for filtering. Skipping this filtering...")
 
         return dataframe
 
     @staticmethod
-    def drop_illegal_character_sequences(dataframe: pd.DataFrame, import_illegal_characters: bool) -> pd.DataFrame:
-        if not import_illegal_characters:
-            sequence_type = EnvironmentSettings.get_sequence_type()
-            sequence_name = sequence_type.name.lower().replace("_", " ")
+    def drop_illegal_character_sequences(dataframe: pd.DataFrame, import_illegal_characters: bool, import_with_stop_codon: bool) -> pd.DataFrame:
+        for sequence_type in SequenceType:
+            if not import_illegal_characters:
+                sequence_name = sequence_type.name.lower().replace("_", " ")
 
-            legal_alphabet = EnvironmentSettings.get_sequence_alphabet(sequence_type)
-            if sequence_type == SequenceType.AMINO_ACID:
-                legal_alphabet.append(Constants.STOP_CODON)
+                legal_alphabet = EnvironmentSettings.get_sequence_alphabet(sequence_type)
+                if sequence_type == SequenceType.AMINO_ACID and import_with_stop_codon:
+                    legal_alphabet.append(Constants.STOP_CODON)
 
-            is_illegal_seq = [ImportHelper.is_illegal_sequence(sequence, legal_alphabet) for
-                              sequence in dataframe[sequence_type.value]]
-            n_illegal = sum(is_illegal_seq)
+                if sequence_type.value in dataframe.columns:
+                    is_illegal_seq = [ImportHelper.is_illegal_sequence(sequence, legal_alphabet) for sequence in dataframe[sequence_type.value]]
+                    n_illegal = sum(is_illegal_seq)
+                    n_total = dataframe.shape[0]
 
-            if n_illegal > 0:
-                dataframe.drop(dataframe.loc[is_illegal_seq].index, inplace=True)
-                warnings.warn(
-                    f"{ImportHelper.__name__}: {n_illegal} sequences were removed from the dataset because their {sequence_name} sequence contained illegal characters. ")
+                    if n_illegal > 0:
+                        dataframe.drop(dataframe.loc[is_illegal_seq].index, inplace=True)
+                        warnings.warn(
+                            f"{ImportHelper.__name__}: {n_illegal}/{n_total} sequences were removed from the dataset because their {sequence_name}"
+                            f" sequence contained illegal characters. ")
+
+                else:
+                    logging.warning(f"{ImportHelper.__name__}: column {sequence_type.value} is missing, illegal characters were not checked.")
+
         return dataframe
 
     @staticmethod
@@ -304,14 +275,14 @@ class ImportHelper:
 
     @staticmethod
     def load_chains(df: pd.DataFrame):
-        if "chains" in df.columns:
-            df.loc[:, "chains"] = ImportHelper.load_chains_from_chains(df)
+        if "chain" in df.columns:
+            df.loc[:, "chain"] = ImportHelper.load_chains_from_chains(df)
         else:
-            df.loc[:, "chains"] = ImportHelper.load_chains_from_genes(df)
+            df.loc[:, "chain"] = ImportHelper.load_chains_from_genes(df)
 
     @staticmethod
     def load_chains_from_chains(df: pd.DataFrame) -> list:
-        return [Chain.get_chain(chain_str).value if chain_str is not None else None for chain_str in df["chains"]]
+        return [Chain.get_chain(chain_str).value if chain_str is not None else None for chain_str in df["chain"]]
 
     @staticmethod
     def load_chains_from_genes(df: pd.DataFrame) -> list:
@@ -319,7 +290,7 @@ class ImportHelper:
 
     @staticmethod
     def get_chain_for_row(row):
-        for col in ["v_subgroup", "j_subgroup", "v_genes", "j_genes", "v_alleles", "j_alleles"]:
+        for col in ["v_call", "j_call"]:
             if col in row and row[col] is not None:
                 chain = Chain.get_chain(str(row[col])[0:3])
                 return chain.value if chain is not None else None
@@ -333,11 +304,11 @@ class ImportHelper:
         """
 
         if region_type == RegionType.IMGT_CDR3:
-            if "sequence_aas" in df:
-                df.loc[:, "sequence_aas"] = df["sequence_aas"].str[1:-1]
-            if "sequences" in df:
-                df.loc[:, "sequences"] = df["sequences"].str[3:-3]
-            df.loc[:, "region_types"] = region_type.name
+            if "sequence_aa" in df:
+                df.loc[:, "sequence_aa"] = df["sequence_aa"].str[1:-1]
+            if "sequence" in df:
+                df.loc[:, "sequence"] = df["sequence"].str[3:-3]
+            df.loc[:, "region_type"] = region_type.name
 
     @staticmethod
     def strip_alleles(df: pd.DataFrame, column_name):
@@ -450,31 +421,30 @@ class ImportHelper:
     def import_sequence(row, metadata_columns=None) -> ReceptorSequence:
         if metadata_columns is None:
             metadata_columns = []
-        metadata = SequenceMetadata(v_gene=str(row["v_genes"]) if "v_genes" in row and row["v_genes"] is not None else None,
-                                    v_allele=str(row["v_alleles"]) if "v_alleles" in row and row["v_alleles"] is not None else None,
-                                    j_gene=str(row["j_genes"]) if "j_genes" in row and row["j_genes"] is not None else None,
-                                    j_allele=str(row["j_alleles"]) if "j_alleles" in row and row["j_alleles"] is not None else None,
-                                    chain=row["chains"] if "chains" in row and row["chains"] is not None else None,
-                                    region_type=row["region_types"] if "region_types" in row and row["region_types"] is not None else None,
-                                    count=int(row["counts"]) if "counts" in row and row["counts"] is not None else None,
-                                    frame_type=row["frame_types"] if "frame_types" in row and row["frame_types"] is not None else None,
+        metadata = SequenceMetadata(v_call=str(row["v_call"]) if "v_call" in row and row["v_call"] is not None else None,
+                                    j_call=str(row["j_call"]) if "j_call" in row and row["j_call"] is not None else None,
+                                    chain=row["chain"] if "chain" in row and row["chain"] is not None else None,
+                                    region_type=row["region_type"] if "region_type" in row and row["region_type"] is not None else None,
+                                    duplicate_count=int(row["duplicate_count"]) if "duplicate_count" in row and row[
+                                        "duplicate_count"] is not None else None,
+                                    frame_type=row["frame_type"] if "frame_type" in row and row["frame_type"] is not None else None,
                                     custom_params={custom_col: row[custom_col] for custom_col in metadata_columns if
                                                    custom_col in row} if metadata_columns is not None else {})
         sequence = ReceptorSequence(
-            amino_acid_sequence=str(row["sequence_aas"]) if "sequence_aas" in row and row["sequence_aas"] is not None else None,
-            nucleotide_sequence=str(row["sequences"]) if "sequences" in row and row["sequences"] is not None else None,
-            identifier=str(row["sequence_identifiers"]) if "sequence_identifiers" in row and row["sequence_identifiers"] is not None else None,
+            amino_acid_sequence=str(row["sequence_aa"]) if "sequence_aa" in row and row["sequence_aa"] is not None else None,
+            nucleotide_sequence=str(row["sequence"]) if "sequence" in row and row["sequence"] is not None else None,
+            identifier=str(row["sequence_id"]) if "sequence_id" in row and row["sequence_id"] is not None else None,
             metadata=metadata)
 
         return sequence
 
     @staticmethod
     def import_receptors(df, params) -> List[Receptor]:
-        identifiers = df["receptor_identifiers"].unique()
+        identifiers = df["receptor_id"].unique()
 
         chain_pair = params.receptor_chains
         if chain_pair is None:
-            chains = [Chain.get_chain(chain) for chain in df["chains"].unique()]
+            chains = [Chain.get_chain(chain) for chain in df["chain"].unique()]
             chain_pair = ChainPair.get_chain_pair(chains)
 
         metadata_columns = list(params.metadata_column_mapping.values()) if params.metadata_column_mapping else None
@@ -489,8 +459,8 @@ class ImportHelper:
 
     @staticmethod
     def import_receptors_by_id(df, identifier, chain_pair, metadata_columns) -> List[Receptor]:
-        first_row = df.loc[(df["receptor_identifiers"] == identifier) & (df["chains"] == chain_pair.value[0])]
-        second_row = df.loc[(df["receptor_identifiers"] == identifier) & (df["chains"] == chain_pair.value[1])]
+        first_row = df.loc[(df["receptor_id"] == identifier) & (df["chain"] == chain_pair.value[0])]
+        second_row = df.loc[(df["receptor_id"] == identifier) & (df["chain"] == chain_pair.value[1])]
 
         for i, row in enumerate([first_row, second_row]):
             if row.shape[0] > 1:

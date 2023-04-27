@@ -39,9 +39,9 @@ class MiXCRImport(DataImport):
             .. indent with spaces
             .. code-block:: yaml
 
-                    cloneCount: counts
-                    allVHitsWithScore: v_alleles
-                    allJHitsWithScore: j_alleles
+                    cloneCount: duplicate_count
+                    allVHitsWithScore: v_call
+                    allJHitsWithScore: j_call
 
         column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For MiXCR format, there is no default column_mapping_synonyms.
 
@@ -79,9 +79,9 @@ class MiXCRImport(DataImport):
                 - aaSeqCDR3
                 - nSeqCDR3
                 column_mapping: # column mapping MiXCR: immuneML
-                    cloneCount: counts
-                    allVHitsWithScore: v_genes
-                    allJHitsWithScore: j_genes
+                    cloneCount: duplicate_count
+                    allVHitsWithScore: v_call
+                    allJHitsWithScore: j_call
 
     """
 
@@ -125,30 +125,28 @@ class MiXCRImport(DataImport):
         ParameterValidator.assert_any_value_present(params.columns_to_load, [aa_column, nt_column], MiXCRImport.__name__, 'columns_to_load')
 
         if aa_column in params.columns_to_load:
-            df["sequence_aas"] = df[aa_column]
+            df["sequence_aa"] = df[aa_column]
         if nt_column in params.columns_to_load:
-            df["sequences"] = df[nt_column]
+            df["sequence"] = df[nt_column]
 
         ImportHelper.junction_to_cdr3(df, params.region_type)
-        df.loc[:, "region_types"] = params.region_type.name
+        df.loc[:, "region_type"] = params.region_type.name
 
-        df["counts"] = df["counts"].astype(float).astype(int)
+        df["duplicate_count"] = df["duplicate_count"].astype(float).astype(int)
 
-        df["v_alleles"] = MiXCRImport._load_alleles(df, "v_alleles")
-        df["j_alleles"] = MiXCRImport._load_alleles(df, "j_alleles")
+        df["v_call"] = MiXCRImport._load_alleles(df, "v_call")
+        df["j_call"] = MiXCRImport._load_alleles(df, "j_call")
 
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
-        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
-        ImportHelper.update_gene_info(df)
+        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters, params.import_with_stop_codon)
         ImportHelper.load_chains(df)
 
         return df
 
     @staticmethod
     def _load_alleles(df: pd.DataFrame, column_name):
-        # note: MiXCR omits the '/' for 'TRA.../DV' genes
-        tmp_df = df.apply(lambda row: row[column_name].split(",")[0].split("(")[0].replace("DV", "/DV").replace("//", "/"), axis=1)
-
+        # note: MiXCR omits the '/' for 'TRA.../DV' genes, and remove "*00" for allele if set
+        tmp_df = df.apply(lambda row: row[column_name].split(",")[0].split("(")[0].replace("DV", "/DV").replace("//", "/").replace(r'*00', ''), axis=1)
         return tmp_df
 
     @staticmethod
@@ -157,7 +155,7 @@ class MiXCRImport(DataImport):
 
         region_type_values = str([region_type.name for region_type in MiXCRImport.SEQUENCE_NAME_MAP.keys()])[1:-1].replace("'", "`")
         repertoire_fields = list(Repertoire.FIELDS)
-        repertoire_fields.remove("region_types")
+        repertoire_fields.remove("region_type")
 
         mapping = {
             "Valid values for region_type are defined in MiXCRImport.SEQUENCE_NAME_MAP.": f"Valid values are {region_type_values}.",

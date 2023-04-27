@@ -15,12 +15,14 @@ class SequenceDataset(ElementDataset):
     """A dataset class for sequence datasets (single chain). All the functionality is implemented in ElementDataset class, except creating a new
     dataset and obtaining metadata."""
 
+    DEFAULT_FILE_SIZE = 100000
+
     @classmethod
     def build(cls, **kwargs):
         return SequenceDataset(**kwargs)
 
     @classmethod
-    def build_from_objects(cls, sequences: List[ReceptorSequence], file_size: int, path: Path, name: str = None):
+    def build_from_objects(cls, sequences: List[ReceptorSequence], file_size: int, path: Path, name: str = None, labels: dict = None):
 
         file_count = math.ceil(len(sequences) / file_size)
         file_names = [path / f"batch{''.join(['0' for i in range(1, len(str(file_count)) - len(str(index)) + 1)])}{index}.npy"
@@ -31,7 +33,7 @@ class SequenceDataset(ElementDataset):
                                                           names=type(sequences[0]).get_record_names())
             np.save(str(file_names[index]), sequence_matrix, allow_pickle=False)
 
-        return SequenceDataset(filenames=file_names, file_size=file_size, name=name)
+        return SequenceDataset(filenames=file_names, file_size=file_size, name=name, labels=labels)
 
     def __init__(self, **kwargs):
 

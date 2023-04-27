@@ -76,7 +76,8 @@ class Matches(EncodingReport):
                             output_tables=output_tables)
 
     def _write_match_table(self):
-        id_df = pd.DataFrame({"repertoire_id": self.dataset.encoded_data.example_ids})
+        id_df = pd.DataFrame({"repertoire_id": self.dataset.encoded_data.example_ids,
+                              'subject_id': self.dataset.get_subject_ids()})
         label_df = pd.DataFrame(self.dataset.encoded_data.labels)
         matches_df = pd.DataFrame(self.dataset.encoded_data.examples, columns=self.dataset.encoded_data.feature_names)
 
@@ -89,7 +90,7 @@ class Matches(EncodingReport):
         PathBuilder.build(paired_matches_path)
 
         report_outputs = []
-        for i in range(0, len(self.dataset.encoded_data.example_ids)): # todo don't mention subject in the name twice
+        for i in range(0, len(self.dataset.encoded_data.example_ids)):
             file_name = "example_{}_".format(self.dataset.encoded_data.example_ids[i])
             file_name += "_".join(["{label}_{value}".format(label=label, value=values[i]) for
                                   label, values in self.dataset.encoded_data.labels.items()])
@@ -148,7 +149,7 @@ class Matches(EncodingReport):
         """
         Writes the repertoire sizes (# clones & # reads) per subject, per chain.
         """
-        all_subjects = self.dataset.encoded_data.example_ids
+        all_subjects = sorted(set(self.dataset.get_subject_ids()))
         all_chains = sorted(set(self.dataset.encoded_data.feature_annotations["chain"]))
 
         results_df = pd.DataFrame(list(itertools.product(all_subjects, all_chains)),

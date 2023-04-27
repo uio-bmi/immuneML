@@ -1,0 +1,4 @@
+store_signal_in_receptors: True
+max_iterations: 100
+sequence_batch_size: 10000
+number_of_processes: 4

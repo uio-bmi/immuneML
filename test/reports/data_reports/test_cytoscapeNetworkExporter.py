@@ -17,13 +17,13 @@ class TestCytoscapeNetworkExporter(TestCase):
         PathBuilder.build(path)
         dataset = None
 
-        test_repertoire = Repertoire.build(sequence_aas=["DUPDUP", "AILUDGYF", "DFJKHJ", "DIUYUAG", "CTGTCGH"],
-                                           v_genes=["V1-1" for i in range(5)],
-                                           j_genes=["J1-1" for i in range(5)],
-                                           chains=[Chain.ALPHA, Chain.BETA, Chain.BETA, Chain.ALPHA, Chain.BETA],
+        test_repertoire = Repertoire.build(sequence_aa=["DUPDUP", "AILUDGYF", "DFJKHJ", "DIUYUAG", "CTGTCGH"],
+                                           v_call=["V1-1" for i in range(5)],
+                                           j_call=["J1-1" for i in range(5)],
+                                           chain=[Chain.ALPHA, Chain.BETA, Chain.BETA, Chain.ALPHA, Chain.BETA],
                                            custom_lists={"custom_1": [f"CUST-{i}" for i in range(5)],
                                                          "custom_2": [f"CUST-A" for i in range(3)] + [f"CUST-B" for i in range(2)]},
-                                           cell_ids=["1", "1", "1", "2", '2'],
+                                           cell_id=["1", "1", "1", "2", '2'],
                                            path=path)
 
         if dataset_type == "receptor":

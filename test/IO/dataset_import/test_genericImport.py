@@ -38,14 +38,14 @@ rep1.tsv,TRA,1234e,no"""
                 )
 
     def test_import_repertoire_dataset(self):
-        path = EnvironmentSettings.root_path / "test/tmp/generic/"
+        path = EnvironmentSettings.tmp_test_path / "generic_rep"
         self.make_dummy_dataset(path, True)
 
         dataset = GenericImport.import_dataset({"is_repertoire": True, "result_path": path, "path": path,
                                                 "region_type": "IMGT_CDR3", "separator": "\t", "import_empty_aa_sequences": False,
                                                 "import_empty_nt_sequences": True,
-                                                "column_mapping": {"CDR3B AA Sequence": "sequence_aas", "import_illegal_characters": False,
-                                                                   "TRBV Gene": "v_genes", "TRBJ Gene": "j_genes", "Counts": "counts"},
+                                                "column_mapping": {"CDR3B AA Sequence": "sequence_aa", "import_illegal_characters": False,
+                                                                   "TRBV Gene": "v_call", "TRBJ Gene": "j_call", "Counts": "duplicate_count"},
                                                 "metadata_file": path / "metadata.csv", "number_of_processes": 4}, "generic_dataset")
 
         self.assertEqual(1, dataset.get_example_count())
@@ -63,14 +63,14 @@ rep1.tsv,TRA,1234e,no"""
         shutil.rmtree(path)
 
     def test_import_sequence_dataset(self):
-        path = EnvironmentSettings.root_path / "test/tmp/generic/"
+        path = EnvironmentSettings.tmp_test_path / "generic_seq"
         self.make_dummy_dataset(path, False)
 
         dataset = GenericImport.import_dataset({"is_repertoire": False, "paired": False,
                                                 "result_path": path, "path": path, "import_illegal_characters": False,
                                                 "region_type": "IMGT_CDR3", "separator": "\t", "import_empty_nt_sequences": True,
-                                                "column_mapping": {"CDR3B AA Sequence": "sequence_aas",
-                                                                   "TRBV Gene": "v_genes", "TRBJ Gene": "j_genes"},
+                                                "column_mapping": {"CDR3B AA Sequence": "sequence_aa",
+                                                                   "TRBV Gene": "v_call", "TRBJ Gene": "j_call"},
                                                 "metadata_file": path / "metadata.csv", "number_of_processes": 4}, "generic_dataset")
 
         self.assertEqual(15, dataset.get_example_count())

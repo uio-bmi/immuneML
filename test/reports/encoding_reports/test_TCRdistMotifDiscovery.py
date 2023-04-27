@@ -64,22 +64,23 @@ mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagc
                                                                "cdr3_b_aa": "beta_amino_acid_sequence",
                                                                "cdr3_a_nucseq": "alpha_nucleotide_sequence",
                                                                "cdr3_b_nucseq": "beta_nucleotide_sequence",
-                                                               "v_a_gene": "alpha_v_gene",
-                                                               "v_b_gene": "beta_v_gene",
-                                                               "j_a_gene": "alpha_j_gene",
-                                                               "j_b_gene": "beta_j_gene",
-                                                               "clone_id": "identifier"
+                                                               "v_a_gene": "alpha_v_call",
+                                                               "v_b_gene": "beta_v_call",
+                                                               "j_a_gene": "alpha_j_call",
+                                                               "j_b_gene": "beta_j_call",
+                                                               "clone_id": "identifier",
+                                                               "count": "duplicate_count"
                                                            },
                                                            "receptor_chains": "TRA_TRB",
                                                            "region_type": "IMGT_CDR3",
                                                            "sequence_file_size": 50000,
                                                            "organism": "mouse"}, 'd1')
 
-        dataset = TCRdistEncoder(8).encode(dataset, EncoderParams(path / "result", LabelConfiguration([Label("epitope")])))
+        dataset = TCRdistEncoder(8).encode(dataset, EncoderParams(path / "result", LabelConfiguration([Label("epitope", None)])))
 
         report = TCRdistMotifDiscovery(train_dataset=dataset, test_dataset=dataset, result_path=path / "report", name="report name", cores=8,
                                        positive_class_name="PA", min_cluster_size=3)
-        report.label = Label("epitope")
+        report.label = Label("epitope", None)
         report._generate()
 
         shutil.rmtree(path)

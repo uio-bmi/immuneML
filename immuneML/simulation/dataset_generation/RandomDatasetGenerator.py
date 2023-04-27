@@ -145,16 +145,11 @@ class RandomDatasetGenerator:
 
         get_random_sequence = lambda proba, chain, id: ReceptorSequence("".join(random.choices(alphabet, k=random.choices(list(proba.keys()),
                                                                                                                           proba.values())[0])),
-                                                                        metadata=SequenceMetadata(count=1,
-                                                                                                  v_subgroup=chain + "V1",
-                                                                                                  v_gene=chain + "V1-1",
-                                                                                                  v_allele=chain + "V1-1*01",
-                                                                                                  j_subgroup=chain + "J1",
-                                                                                                  j_gene=chain + "J1-1",
-                                                                                                  j_allele=chain + "J1-1*01",
+                                                                        metadata=SequenceMetadata(duplicate_count=1, region_type='IMGT_CDR3',
+                                                                                                  v_call=chain + "V1-1*01",
+                                                                                                  j_call=chain + "J1-1*01",
                                                                                                   chain=chain,
-                                                                                                  cell_id=id,
-                                                                                                  region_type="IMGT_CDR3"))
+                                                                                                  cell_id=id))
 
         receptors = [TCABReceptor(alpha=get_random_sequence(chain_1_length_probabilities, "TRA", i),
                                   beta=get_random_sequence(chain_2_length_probabilities, "TRB", i),
@@ -208,13 +203,9 @@ class RandomDatasetGenerator:
 
         sequences = [
             ReceptorSequence("".join(random.choices(alphabet, k=random.choices(list(length_probabilities.keys()), length_probabilities.values())[0])),
-                             metadata=SequenceMetadata(count=1,
-                                                       v_subgroup=chain + "V1",
-                                                       v_gene=chain + "V1-1",
-                                                       v_allele=chain + "V1-1*01",
-                                                       j_subgroup=chain + "J1",
-                                                       j_gene=chain + "J1-1",
-                                                       j_allele=chain + "J1-1*01",
+                             metadata=SequenceMetadata(duplicate_count=1,
+                                                       v_call=chain + "V1-1*01",
+                                                       j_call=chain + "J1-1*01",
                                                        chain=chain,
                                                        region_type="IMGT_CDR3",
                                                        custom_params={**{label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]

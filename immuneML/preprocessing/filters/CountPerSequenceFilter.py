@@ -53,7 +53,7 @@ class CountPerSequenceFilter(Filter):
     def keeps_example_count(self) -> bool:
         return not self.remove_empty_repertoires
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: Path) -> RepertoireDataset:
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1) -> RepertoireDataset:
         self.check_dataset_type(dataset, [RepertoireDataset], "CountPerSequenceFilter")
         self.result_path = result_path if result_path is not None else self.result_path
 

@@ -89,7 +89,7 @@ class SklearnMethod(MLMethod):
     def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
 
         self.label = label
-        self.class_mapping = Util.make_class_mapping(encoded_data.labels[self.label.name])
+        self.class_mapping = Util.make_class_mapping(encoded_data.labels[self.label.name], self.label.positive_class)
         self.feature_names = encoded_data.feature_names
 
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
@@ -103,8 +103,10 @@ class SklearnMethod(MLMethod):
 
     def predict_proba(self, encoded_data: EncodedData, label: Label):
         if self.can_predict_proba():
-            predictions = {label.name: self.model.predict_proba(encoded_data.examples)}
-            return predictions
+            probabilities = self.model.predict_proba(encoded_data.examples)
+            class_names = Util.map_to_old_class_values(self.model.classes_, self.class_mapping)
+
+            return {label.name: {class_name: probabilities[:,i] for i, class_name in enumerate(class_names)}}
         else:
             return None
 
@@ -132,7 +134,7 @@ class SklearnMethod(MLMethod):
     def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None, cores_for_training: int = -1,
                                 optimization_metric='balanced_accuracy'):
 
-        self.class_mapping = Util.make_class_mapping(encoded_data.labels[label.name])
+        self.class_mapping = Util.make_class_mapping(encoded_data.labels[label.name], label.positive_class)
         self.feature_names = encoded_data.feature_names
         self.label = label
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
@@ -144,7 +146,7 @@ class SklearnMethod(MLMethod):
                                  optimization_metric: str = "balanced_accuracy"):
 
         model = self._get_ml_model()
-        scoring = Metric.get_sklearn_score_name(Metric[optimization_metric.upper()])
+        scoring = Metric.get_sklearn_score_name(Metric.get_metric(optimization_metric.upper()))
 
         if scoring not in SCORERS.keys():
             scoring = "balanced_accuracy"
@@ -187,7 +189,7 @@ class SklearnMethod(MLMethod):
             }
 
             if self.label is not None:
-                desc["label"] = vars(self.label)
+                desc["label"] = self.label.get_desc_for_storage()
 
             yaml.dump(desc, file)
 

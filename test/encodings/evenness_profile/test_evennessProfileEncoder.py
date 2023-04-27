@@ -26,13 +26,13 @@ class TestEvennessEncoder(TestCase):
         PathBuilder.build(path)
 
         rep1 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence("AAA", metadata=SequenceMetadata(count=10)) for i in range(1000)] +
-                             [ReceptorSequence("AAA", metadata=SequenceMetadata(count=100)) for i in range(1000)] +
-                             [ReceptorSequence("AAA", metadata=SequenceMetadata(count=1)) for i in range(1000)],
+            sequence_objects=[ReceptorSequence("AAA", metadata=SequenceMetadata(duplicate_count=10)) for i in range(1000)] +
+                             [ReceptorSequence("AAA", metadata=SequenceMetadata(duplicate_count=100)) for i in range(1000)] +
+                             [ReceptorSequence("AAA", metadata=SequenceMetadata(duplicate_count=1)) for i in range(1000)],
             metadata={"l1": "test_1", "l2": 2}, path=path)
 
         rep2 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence("AAA", metadata=SequenceMetadata(count=10)) for i in range(1000)],
+            sequence_objects=[ReceptorSequence("AAA", metadata=SequenceMetadata(duplicate_count=10)) for i in range(1000)],
             metadata={"l1": "test_2", "l2": 3}, path=path)
 
         lc = LabelConfiguration()

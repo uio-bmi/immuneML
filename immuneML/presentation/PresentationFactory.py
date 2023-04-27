@@ -4,10 +4,10 @@ from immuneML.presentation.html.DatasetExportHTMLBuilder import DatasetExportHTM
 from immuneML.presentation.html.ExploratoryAnalysisHTMLBuilder import ExploratoryAnalysisHTMLBuilder
 from immuneML.presentation.html.ClusteringHTMLBuilder import ClusteringHTMLBuilder
 from immuneML.presentation.html.HPHTMLBuilder import HPHTMLBuilder
+from immuneML.presentation.html.LIgOSimulationHTMLBuilder import LIgOSimulationHTMLBuilder
 from immuneML.presentation.html.MLApplicationHTMLBuilder import MLApplicationHTMLBuilder
-from immuneML.presentation.html.SimulationHTMLBuilder import SimulationHTMLBuilder
 from immuneML.presentation.html.SubsamplingHTMLBuilder import SubsamplingHTMLBuilder
-from immuneML.simulation.SimulationState import SimulationState
+from immuneML.simulation.LigoSimState import LigoSimState
 from immuneML.workflows.instructions.dataset_generation.DatasetExportState import DatasetExportState
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisState import ExploratoryAnalysisState
 from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringState
@@ -33,6 +33,10 @@ class PresentationFactory:
             return MLApplicationHTMLBuilder
         elif isinstance(state, SubsamplingState) and presentation_format == PresentationFormat.HTML:
             return SubsamplingHTMLBuilder
+        elif isinstance(state, LigoSimState) and presentation_format == PresentationFormat.HTML:
+            return LIgOSimulationHTMLBuilder
+        elif isinstance(state, FeasibilitySummaryState) and presentation_format == PresentationFormat.HTML:
+            return FeasibilitySummaryHTMLBuilder
         else:
             raise ValueError(f"PresentationFactory: state and format combination ({type(state).__name__}, {presentation_format.name}) "
                              f"is not supported.")

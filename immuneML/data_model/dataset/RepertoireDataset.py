@@ -10,9 +10,25 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.Constants import Constants
 from immuneML.util.ParameterValidator import ParameterValidator
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class RepertoireDataset(Dataset):
+
+    @classmethod
+    def build_from_objects(cls, **kwargs):
+        ParameterValidator.assert_keys_present(list(kwargs.keys()), ['repertoires', 'path'], RepertoireDataset.__name__, RepertoireDataset.__name__)
+        ParameterValidator.assert_all_type_and_value(kwargs['repertoires'], Repertoire, RepertoireDataset.__name__, 'repertoires')
+
+        metadata_df = pd.DataFrame.from_records([rep.metadata for rep in kwargs['repertoires']])
+
+        if 'field_list' in metadata_df.columns:
+            metadata_df.drop(columns=['field_list'], inplace=True)
+
+        metadata_path = PathBuilder.build(kwargs['path']) / 'metadata.csv'
+        metadata_df.to_csv(metadata_path, index=False)
+
+        return RepertoireDataset(repertoires=kwargs['repertoires'], metadata_file=metadata_path)
 
     @classmethod
     def build(cls, **kwargs):
@@ -29,12 +45,30 @@ class RepertoireDataset(Dataset):
                                     identifier=row['identifier'])
             repertoires.append(repertoire)
 
-        if "repertoire_ids" in kwargs.keys() and "repertoires" not in kwargs.keys() and kwargs['repertoire_ids'] is not None:
-            assert all(rep.identifier == kwargs['repertoire_ids'][i] for i, rep in enumerate(repertoires)), \
+        if "repertoire_id" in kwargs.keys() and "repertoires" not in kwargs.keys() and kwargs['repertoire_id'] is not None:
+            assert all(rep.identifier == kwargs['repertoire_id'][i] for i, rep in enumerate(repertoires)), \
                 f"{RepertoireDataset.__name__}: repertoire ids from the iml_dataset file and metadata file don't match for the dataset " \
                 f"{kwargs['name']} with identifier {kwargs['identifier']}."
 
         return RepertoireDataset(**{**kwargs, **{"repertoires": repertoires}})
+
+    @classmethod
+    def build_from_objects(cls, **kwargs):
+        location = RepertoireDataset.__name__
+        ParameterValidator.assert_keys(kwargs.keys(), ['repertoires', 'labels', 'name', 'metadata_path'], location, 'RepertoireDataset')
+        ParameterValidator.assert_all_type_and_value(kwargs['repertoires'], Repertoire, location, 'repertoires')
+        ParameterValidator.assert_type_and_value(kwargs['metadata_path'], Path, location, 'metadata_path')
+        ParameterValidator.assert_type_and_value(kwargs['name'], str, location, 'name')
+        ParameterValidator.assert_type_and_value(kwargs['labels'], dict, location, 'labels')
+
+        PathBuilder.build(kwargs['metadata_path'].parent)
+        pd.DataFrame([{**{"subject_id": f"subject_{index}", "filename": repertoire.data_filename, 'repertoire_id': repertoire.identifier},
+                       **repertoire.metadata}
+                      for index, repertoire in enumerate(kwargs['repertoires'])]).drop(columns=['field_list'])\
+            .to_csv(kwargs['metadata_path'], index=False)
+
+        return RepertoireDataset(labels=kwargs['labels'], repertoires=kwargs['repertoires'], metadata_file=kwargs['metadata_path'],
+                                 name=kwargs['name'])
 
     def __init__(self, labels: dict = None, encoded_data: EncodedData = None, repertoires: list = None, identifier: str = None,
                  metadata_file: Path = None, name: str = None, metadata_fields: list = None, repertoire_ids: list = None):
@@ -78,7 +112,7 @@ class RepertoireDataset(Dataset):
     def get_label_names(self, refresh=False):
         """Returns the list of metadata fields which can be used as labels; if refresh=True, it reloads the fields from disk"""
         all_metadata_fields = set(self.get_metadata_fields(refresh))
-        for non_label in ["subject_id", "filename", "repertoire_identifier", "identifier"]:
+        for non_label in ["subject_id", "filename", "repertoire_id", "identifier"]:
             if non_label in all_metadata_fields:
                 all_metadata_fields.remove(non_label)
 
@@ -151,3 +185,10 @@ class RepertoireDataset(Dataset):
     def get_example_ids(self):
         """Returns a list of example identifiers"""
         return self.get_repertoire_ids()
+
+    def get_subject_ids(self):
+        """Returns a list of subject identifiers"""
+        return self.get_metadata(["subject_id"])["subject_id"]
+
+    def get_data_from_index_range(self, start_index: int, end_index: int):
+        return self.repertoires[start_index:end_index+1]

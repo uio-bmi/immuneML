@@ -47,11 +47,11 @@ class VDJdbImport(DataImport):
             .. indent with spaces
             .. code-block:: yaml
 
-                    V: v_alleles
-                    J: j_alleles
-                    CDR3: sequence_aas
-                    complex.id: sequence_identifiers
-                    Gene: chains
+                    V: v_call
+                    J: j_call
+                    CDR3: sequence_aa
+                    complex.id: sequence_id
+                    Gene: chain
 
         column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For VDJdb format, there is no default column_mapping_synonyms.
 
@@ -86,11 +86,11 @@ metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDat
                 separator: "\\t" # column separator
                 region_type: IMGT_CDR3 # what part of the sequence to import
                 column_mapping: # column mapping VDJdb: immuneML
-                    V: v_genes
-                    J: j_genes
-                    CDR3: sequence_aas
-                    complex.id: sequence_identifiers
-                    Gene: chains
+                    V: v_call
+                    J: j_call
+                    CDR3: sequence_aa
+                    complex.id: sequence_id
+                    Gene: chain
                 metadata_column_mapping: # metadata column mapping VDJdb: immuneML
                     Epitope: epitope
                     Epitope gene: epitope_gene
@@ -108,26 +108,25 @@ metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDat
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        df["frame_types"] = SequenceFrameType.IN.name
+        df["frame_type"] = SequenceFrameType.IN.name
         ImportHelper.junction_to_cdr3(df, params.region_type)
-        df.loc[:, "region_types"] = params.region_type.name
+        df.loc[:, "region_type"] = params.region_type.name
 
         if not params.is_repertoire and params.paired:
-            n_single_chains = sum(df["sequence_identifiers"] == "0")
+            n_single_chains = sum(df["sequence_id"] == "0")
             if n_single_chains > 0:
-                df.drop(df.loc[df["sequence_identifiers"] == "0"].index, inplace=True)
+                df.drop(df.loc[df["sequence_id"] == "0"].index, inplace=True)
                 warnings.warn(f"VDJdbImport: {n_single_chains} single chains were removed when trying to create a ReceptorDataset.\n"
                               f"To import all chains as a SequenceDataset, use paired = False")
         else:
-            df.loc[df["sequence_identifiers"] == "0", "sequence_identifiers"] = None
+            df.loc[df["sequence_id"] == "0", "sequence_id"] = None
 
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
-        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
-        ImportHelper.update_gene_info(df)
+        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters, params.import_with_stop_codon)
         ImportHelper.load_chains(df)
 
-        df["receptor_identifiers"] = df["sequence_identifiers"]
-        df["sequence_identifiers"] = VDJdbImport.get_sequence_identifiers(df["sequence_identifiers"], df["chains"])
+        df["receptor_id"] = df["sequence_id"]
+        df["sequence_id"] = VDJdbImport.get_sequence_identifiers(df["sequence_id"], df["chain"])
 
         df = VDJdbImport.extract_meta_columns(df, params)
 

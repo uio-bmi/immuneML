@@ -1,3 +1,4 @@
+import math
 import shutil
 from unittest import TestCase
 
@@ -49,21 +50,24 @@ class TestElementGenerator(TestCase):
 
         shutil.rmtree(path)
 
-    def test_make_subset(self):
+    def make_seq_dataset(self, path, seq_count: int = 100, file_size: int = 10):
         sequences = []
-        for i in range(100):
+        for i in range(seq_count):
             sequences.append(ReceptorSequence(amino_acid_sequence="AAA", identifier=str(i)))
 
-        path = EnvironmentSettings.tmp_test_path / "element_generator_subset/"
-        PathBuilder.build(path)
-
-        for i in range(10):
+        for i in range(math.ceil(seq_count / file_size)):
             filepath = path / f"batch{i}.npy"
-            sequences_to_pickle = sequences[i * 10:(i + 1) * 10]
-            sequence_matrix = np.core.records.fromrecords([seq.get_record() for seq in sequences_to_pickle], names=ReceptorSequence.get_record_names())
+            sequences_to_pickle = sequences[i * file_size:(i + 1) * file_size]
+            sequence_matrix = np.core.records.fromrecords([seq.get_record() for seq in sequences_to_pickle],
+                                                          names=ReceptorSequence.get_record_names())
             np.save(str(filepath), sequence_matrix, allow_pickle=False)
 
-        d = SequenceDataset(filenames=[path / f"batch{i}.npy" for i in range(10)], file_size=10)
+        return SequenceDataset(filenames=[path / f"batch{i}.npy" for i in range(math.ceil(seq_count / file_size))], file_size=file_size)
+
+    def test_make_subset(self):
+
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "element_generator_subset/")
+        d = self.make_seq_dataset(path)
 
         indices = [1, 20, 21, 22, 23, 24, 25, 50, 52, 60, 70, 77, 78, 90, 92]
 
@@ -77,4 +81,13 @@ class TestElementGenerator(TestCase):
 
         shutil.rmtree(path)
 
+    def test_get_data_from_index_range(self):
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "el_gen_index_range/")
+
+        dataset = self.make_seq_dataset(path, 18, 5)
+        seqs = dataset.get_data_from_index_range(7, 13)
+        print([seq.identifier for seq in seqs])
+        assert len(seqs) == 7
+
+        shutil.rmtree(path)
 

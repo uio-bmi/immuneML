@@ -3,6 +3,7 @@ from typing import Tuple
 
 from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.IO.dataset_import.IReceptorImport import IReceptorImport
+from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.receptor.ChainPair import ChainPair
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
@@ -18,18 +19,17 @@ class ImportParser:
     valid_keys = ["format", "params"]
 
     @staticmethod
-    def parse(workflow_specification: dict, symbol_table: SymbolTable, result_path: Path) -> Tuple[SymbolTable, dict]:
-        assert ImportParser.keyword in workflow_specification and isinstance(workflow_specification[ImportParser.keyword], dict), \
-            "ImmuneMLParser: datasets are not defined."
+    def parse(workflow_specification: dict, symbol_table: SymbolTable, path: Path) -> Tuple[SymbolTable, dict]:
 
-        for key in workflow_specification[ImportParser.keyword].keys():
-            symbol_table = ImportParser._parse_dataset(key, workflow_specification[ImportParser.keyword][key], symbol_table, result_path)
+        for key in workflow_specification.keys():
+            dataset = ImportParser.parse_dataset(key, workflow_specification[key], path)
+            symbol_table.add(key, SymbolType.DATASET, dataset)
 
-        return symbol_table, workflow_specification[ImportParser.keyword]
+        return symbol_table, workflow_specification
 
     @staticmethod
     @log
-    def _parse_dataset(key: str, dataset_specs: dict, symbol_table: SymbolTable, result_path: Path) -> SymbolTable:
+    def parse_dataset(key: str, dataset_specs: dict, result_path: Path) -> Dataset:
         location = "ImportParser"
 
         ParameterValidator.assert_keys(list(dataset_specs.keys()), ImportParser.valid_keys, location, f"datasets:{key}", False)
@@ -58,7 +58,7 @@ class ImportParser:
         try:
             dataset = import_cls.import_dataset(params, key)
             dataset.name = key
-            symbol_table.add(key, SymbolType.DATASET, dataset)
+
         except KeyError as key_error:
             raise KeyError(f"{key_error}\n\nAn error occurred during parsing of dataset {key}. "
                            f"The keyword {key_error.args[0]} was missing. This either means this argument was "
@@ -67,7 +67,7 @@ class ImportParser:
         except Exception as ex:
             raise Exception(f"{ex}\n\nAn error occurred while parsing the dataset {key}. See the log above for more details.")
 
-        return symbol_table
+        return dataset
 
     @staticmethod
     def _prepare_params(dataset_specs: dict, result_path: Path, dataset_name: str):

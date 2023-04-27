@@ -12,6 +12,7 @@ from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.util.Logger import print_log
 from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
+from immuneML.util.ReadsType import ReadsType
 
 
 class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
@@ -67,9 +68,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
 
     def _encode_repertoires(self, dataset: RepertoireDataset, params: EncoderParams):
         # Rows = repertoires, Columns = regex matches (one chain per column)
-        encoded_repertoires = np.zeros((dataset.get_example_count(),
-                                        self.feature_count),
-                                       dtype=int)
+        encoded_repertoires = np.zeros((dataset.get_example_count(), self.feature_count), dtype=int)
         labels = {label: [] for label in params.label_config.get_labels_by_name()} if params.encode_labels else None
 
         n_repertoires = dataset.get_example_count()
@@ -101,7 +100,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
                         if rep_seq.metadata.chain is not None:
                             if rep_seq.metadata.chain.value == chain_type:
                                 if self._matches(rep_seq, regex, v_gene):
-                                    n_matches = 1 if self.reads == ReadsType.UNIQUE else rep_seq.metadata.count
+                                    n_matches = 1 if self.reads == ReadsType.UNIQUE else rep_seq.metadata.duplicate_count
                                     if n_matches is None:
                                         warnings.warn(f"MatchedRegexRepertoireEncoder: count not defined for sequence with id {rep_seq.identifier} in repertoire {repertoire.identifier}, ignoring sequence...")
                                         n_matches = 0

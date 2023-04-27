@@ -15,6 +15,13 @@ class Metric(Enum):
     LOG_LOSS = "log_loss"
 
     @staticmethod
+    def get_metric(metric_name: str):
+        try:
+            return Metric[metric_name.upper()]
+        except KeyError:
+            raise KeyError(f"'{metric_name}' is not a valid performance metric. Valid metrics are: {', '.join([m.name for m in Metric])}")
+
+    @staticmethod
     def get_search_criterion(metric):
         if metric in [Metric.LOG_LOSS]:
             return min

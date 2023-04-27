@@ -35,15 +35,13 @@ class TestImportParser(TestCase):
             file.writelines(file_content)
 
         st, desc = ImportParser.parse({
-            "datasets": {
-                "d1": {
-                    "format": "VDJdb",
-                    "params": {
-                        "is_repertoire": False,
-                        "paired": True,
-                        "receptor_chains": "TRA_TRB",
-                        "path": data_path
-                    }
+            "d1": {
+                "format": "VDJdb",
+                "params": {
+                    "is_repertoire": False,
+                    "paired": True,
+                    "receptor_chains": "TRA_TRB",
+                    "path": data_path
                 }
             }
         }, SymbolTable(), path)
@@ -55,7 +53,7 @@ class TestImportParser(TestCase):
         shutil.rmtree(path)
 
     def test_parse(self):
-        path = EnvironmentSettings.root_path / "test/tmp/parser/"
+        path = EnvironmentSettings.tmp_test_path / "parser/"
 
         PathBuilder.build(path / "tmp_input/")
         with open(path / "tmp_input/CD1_clones_TRA.csv", "w") as file:
@@ -153,15 +151,13 @@ class TestImportParser(TestCase):
         metadata = pd.DataFrame({"filename": ["HC2_clones_TRB.csv", "CD1_clones_TRA.csv"], "subject_id": ["HC2", "CD1"], "CD": [False, True]})
         metadata.to_csv(path / "metadata.csv")
         specs = {
-            "datasets": {
-                "d1": {
-                    "format": "MiXCR",
-                    "params": {
-                        "is_repertoire": True,
-                        "path": path / "tmp_input/",
-                        "metadata_file": path / "metadata.csv",
-                        "number_of_processes": 2,
-                    }
+            "d1": {
+                "format": "MiXCR",
+                "params": {
+                    "is_repertoire": True,
+                    "path": path / "tmp_input/",
+                    "metadata_file": path / "metadata.csv",
+                    "number_of_processes": 2,
                 }
             }
         }

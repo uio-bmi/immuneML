@@ -9,16 +9,16 @@ region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing
 separator: "\t"
 columns_to_load: [nucleotide, aminoAcid, count (templates/reads), vFamilyName, vGeneName, vGeneAllele, jFamilyName, jGeneName, jGeneAllele, sequenceStatus] # columns from the original file that will be imported
 column_mapping: # immunoSEQ column names -> immuneML repertoire fields
-  nucleotide: sequences # nucleotide is the immunoSEQ name, which will be mapped to sequences in immuneML
-  aminoAcid: sequence_aas
-  vGeneName: v_genes
-  jGeneName: j_genes
-  sequenceStatus: frame_types
-  vFamilyName: v_subgroups
-  jFamilyName: j_subgroups
-  vGeneAllele: v_alleles
-  jGeneAllele: j_alleles
-  count (templates/reads): counts
+  nucleotide: sequence # nucleotide is the immunoSEQ name, which will be mapped to sequence in immuneML
+  aminoAcid: sequence_aa
+  vGeneName: v_call
+  jGeneName: j_call
+  sequenceStatus: frame_type
+  vFamilyName: v_family
+  jFamilyName: j_family
+  vGeneAllele: v_allele
+  jGeneAllele: j_allele
+  count (templates/reads): duplicate_count
 import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
 import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
 organism: human

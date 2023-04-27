@@ -35,6 +35,8 @@ class OLGAImport(DataImport):
 
         separator (str): Column separator, for OLGA this is by default "\\t".
 
+        column_mapping (dict): defines which columns to import from olga format: keys are the number of the columns and values are the names of the columns to be mapped to
+
 
     YAML specification:
 
@@ -53,34 +55,41 @@ class OLGAImport(DataImport):
                 # Optional fields with OLGA-specific defaults, only change when different behavior is required:
                 separator: "\\t" # column separator
                 region_type: IMGT_CDR3 # what part of the sequence to import
+                columns_to_load: [0, 1, 2, 3]
+                column_mapping:
+                    0: sequences
+                    1: sequence_aas
+                    2: v_genes
+                    3: j_genes
 
     """
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
+
+        assert sorted(params["columns_to_load"]) == sorted(list(params["column_mapping"].keys()))
+
         return ImportHelper.import_dataset(OLGAImport, params, dataset_name)
 
     @staticmethod
     def alternative_load_func(filepath, params):
-        df = pd.read_csv(filepath, sep=params.separator, iterator=False, dtype=str, header=None)
-        df.columns = ["sequences", "sequence_aas", "v_genes", "j_genes"]
-        return df
+        return pd.read_csv(filepath, sep=params.separator, iterator=False, dtype=str, header=None, usecols=list(params.column_mapping.keys()),
+                           names=list(params.column_mapping.values()))
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        if "sequences" not in df.columns and "sequence_aas" not in df.columns:
-            raise IOError("OLGAImport: Columns should contain at least 'sequences' or 'sequence_aas'.")
+        if "sequence" not in df.columns and "sequence_aa" not in df.columns:
+            raise IOError("OLGAImport: Columns should contain at least 'sequence' or 'sequence_aa'.")
 
-        if "counts" not in df.columns:
-            df["counts"] = 1
+        if "duplicate_count" not in df.columns:
+            df["duplicate_count"] = 1
 
-        df["sequence_identifiers"] = None
+        df["sequence_id"] = None
 
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
-        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
+        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters, params.import_with_stop_codon)
         ImportHelper.junction_to_cdr3(df, params.region_type)
-        df.loc[:, "region_types"] = params.region_type.name
-        ImportHelper.update_gene_info(df)
+        df.loc[:, "region_type"] = params.region_type.name
         ImportHelper.load_chains(df)
 
         return df

@@ -19,7 +19,7 @@ class SplitConfig:
 
         - manual (train and test dataset are explicitly specified by providing metadata files for the two datasets)
 
-        - leave_one_out_stratification (leave-one-out CV where one refers to a specific parameter, e.g. if subject is known in a receptor dataset, it is possible to have leave-subject-out CV - currently only available for receptor datasets).
+        - leave_one_out_stratification (leave-one-out CV where one refers to a specific parameter, e.g. if subject is known in a receptor dataset, it is possible to have leave-subject-out CV - currently only available for receptor and sequence datasets).
 
     Arguments:
 
@@ -43,7 +43,7 @@ class SplitConfig:
         combinations in which in the test set there are examples with only one value of the specified parameter. `leave_one_out_config` argument
         accepts two inputs: `parameter` which is the name of the parameter to use for stratification and `min_count` which defines the minimum
         number of examples that can be present in the test dataset. This type of generating train and test datasets is only supported for receptor
-        datasets so far. If split strategy is anything else, this field has no effect and can be omitted.
+        and sequence datasets so far. If split strategy is anything else, this field has no effect and can be omitted.
 
     YAML specification:
 

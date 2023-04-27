@@ -55,13 +55,9 @@ class AIRRImport(DataImport):
             .. indent with spaces
             .. code-block:: yaml
 
-                    junction: sequences
-                    junction_aa: sequence_aas
-                    v_call: v_alleles
-                    j_call: j_alleles
-                    locus: chains
-                    duplicate_count: counts
-                    sequence_id: sequence_identifiers
+                junction: sequence
+                junction_aa: sequence_aa
+                locus: chain
 
         column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For AIRR format, there is no default column_mapping_synonyms.
 
@@ -89,18 +85,14 @@ class AIRRImport(DataImport):
                 import_out_of_frame: False # whether to include out of frame sequences in the dataset
                 import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
                 import_empty_nt_sequences: True # keep sequences even if the `sequences` column is empty (provided that other fields are as specified here)
-                import_empty_aa_sequences: False # remove all sequences with empty `sequence_aas` column
+                import_empty_aa_sequences: False # remove all sequences with empty `sequence_aa` column
                 # Optional fields with AIRR-specific defaults, only change when different behavior is required:
                 separator: "\\t" # column separator
                 region_type: IMGT_CDR3 # what part of the sequence to import
                 column_mapping: # column mapping AIRR: immuneML
-                    junction: sequences
-                    junction_aa: sequence_aas
-                    v_call: v_alleles
-                    j_call: j_alleles
-                    locus: chains
-                    duplicate_count: counts
-                    sequence_id: sequence_identifiers
+                    junction: sequence
+                    junction_aa: sequence_aa
+                    locus: chain
 
     """
 
@@ -118,36 +110,33 @@ class AIRRImport(DataImport):
             - the allele information is removed from the V and J genes
         """
         if "productive" in df.columns:
-            df["frame_types"] = SequenceFrameType.OUT.name
-            df.loc[df["productive"] == True, "frame_types"] = SequenceFrameType.IN.name
+            df["frame_type"] = SequenceFrameType.OUT.name
+            df.loc[df["productive"], "frame_type"] = SequenceFrameType.IN.name
         else:
-            df["frame_types"] = None
+            df["frame_type"] = None
 
         if "vj_in_frame" in df.columns:
-            df.loc[df["vj_in_frame"] == True, "frame_types"] = SequenceFrameType.IN.name
+            df.loc[df["vj_in_frame"], "frame_type"] = SequenceFrameType.IN.name
         if "stop_codon" in df.columns:
-            df.loc[df["stop_codon"] == True, "frame_types"] = SequenceFrameType.STOP.name
+            df.loc[df["stop_codon"], "frame_type"] = SequenceFrameType.STOP.name
 
         if "productive" in df.columns:
             frame_type_list = ImportHelper.prepare_frame_type_list(params)
-            df = df[df["frame_types"].isin(frame_type_list)]
+            df = df[df["frame_type"].isin(frame_type_list)]
 
         if params.region_type == RegionType.IMGT_CDR3:
-            if "sequence_aas" not in df.columns and "sequences" not in df.columns:
-                if "cdr3" in df.columns:
-                    df.rename(columns={"cdr3": "sequences"}, inplace=True)
-                if "cdr3_aa" in df.columns:
-                    df.rename(columns={"cdr3_aa": "sequence_aas"}, inplace=True)
-                df.loc[:, "region_types"] = params.region_type.name
-            elif "junction" in params.column_mapping or "junction_aa" in params.column_mapping:
+            if 'sequence' in df.columns:
+                df.drop(['sequence'], axis=1, inplace=True)
+            if "cdr3" in df.columns or "cdr3_aa" in df.columns:
+                df.rename(columns={"cdr3": "sequence", "cdr3_aa": "sequence_aa"}, inplace=True)
+            elif "junction" in df.columns or "junction_aa" in df.columns:
+                df.rename(columns={'junction': 'sequence', 'junction_aa': 'sequence_aa'}, inplace=True)
                 ImportHelper.junction_to_cdr3(df, params.region_type)
-        else:
-            df.loc[:, "region_types"] = params.region_type.name
-        # todo else: support "full_sequence" import through regiontype?
+
+        df.loc[:, "region_type"] = params.region_type.name
 
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
-        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
-        ImportHelper.update_gene_info(df)
+        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters, import_with_stop_codon=params.import_with_stop_codon)
         ImportHelper.load_chains(df)
 
         return df
@@ -161,7 +150,7 @@ class AIRRImport(DataImport):
 
     @staticmethod
     def import_receptors(df, params):
-        df["receptor_identifiers"] = df["cell_id"]
+        df["receptor_id"] = df["cell_id"]
         return ImportHelper.import_receptors(df, params)
 
     @staticmethod
@@ -171,7 +160,7 @@ class AIRRImport(DataImport):
         chain_pair_values = str([chain_pair.name for chain_pair in ChainPair])[1:-1].replace("'", "`")
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
         repertoire_fields = list(Repertoire.FIELDS)
-        repertoire_fields.remove("region_types")
+        repertoire_fields.remove("region_type")
 
         mapping = {
             "Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum.": f"Valid values are {chain_pair_values}.",

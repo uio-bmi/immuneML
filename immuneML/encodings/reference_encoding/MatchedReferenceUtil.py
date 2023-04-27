@@ -1,6 +1,6 @@
+import logging
 import os
 from pathlib import Path
-import logging
 
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
@@ -18,8 +18,7 @@ class MatchedReferenceUtil:
 
     @staticmethod
     def prepare_reference(reference_params: dict, location: str, paired: bool):
-        ParameterValidator.assert_keys(list(reference_params.keys()), ["format", "params"], location,
-                                       "reference")
+        ParameterValidator.assert_keys(list(reference_params.keys()), ["format", "params"], location, "reference")
 
         seq_import_params = reference_params["params"] if "params" in reference_params else {}
 

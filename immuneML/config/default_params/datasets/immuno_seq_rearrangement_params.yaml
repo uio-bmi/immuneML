@@ -7,22 +7,17 @@ import_out_of_frame: False
 import_illegal_characters: False
 region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing first and last amino acid as Adaptive uses IMGT junction as CDR3
 separator: "\t"
-columns_to_load: [rearrangement, v_family, v_gene, v_allele, j_family, j_gene, j_allele, amino_acid, templates, frame_type, locus]
+columns_to_load: [rearrangement,v_resolved, j_resolved, amino_acid, templates, frame_type, locus]
 column_mapping: # adaptive column names -> immuneML repertoire fields
-  rearrangement: sequences # 'rearrangement' is the adaptive name, which will be mapped to 'sequences' in immuneML
-  amino_acid: sequence_aas
-  v_gene: v_genes
-  j_gene: j_genes
-  frame_type: frame_types
-  v_family: v_subgroups
-  j_family: j_subgroups
-  v_allele: v_alleles
-  j_allele: j_alleles
-  templates: counts
-  locus: chains
+  rearrangement: sequence # 'rearrangement' is the adaptive name, which will be mapped to 'sequences' in immuneML
+  amino_acid: sequence_aa
+  v_resolved: v_call
+  j_resolved: j_call
+  templates: duplicate_count
+  locus: chain
 column_mapping_synonyms: # adaptive column names -> immuneML repertoire fields
-  v_resolved: v_alleles  # alternative columns to use when v_allele and j_allele are not present
-  j_resolved: j_alleles
+  v_gene: v_call  # alternative columns to use when v_resolved and j_resolved are not present
+  j_gene: j_call
 import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
 import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
 organism: human

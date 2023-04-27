@@ -43,7 +43,7 @@ class SequenceLengthDistribution(DataReport):
 
     def _generate(self) -> ReportResult:
         sequence_lengths = self._get_sequence_lengths()
-        report_output_fig = self._safe_plot(sequence_lengths=sequence_lengths)
+        report_output_fig = self._safe_plot(sequence_lengths=sequence_lengths, output_written=False)
         output_figures = None if report_output_fig is None else [report_output_fig]
         return ReportResult(name=self.name,
                             info="A histogram of the lengths of the sequences in a RepertoireDataset.",

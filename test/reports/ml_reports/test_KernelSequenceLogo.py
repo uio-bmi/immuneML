@@ -30,7 +30,7 @@ class TestKernelSequenceLogo(TestCase):
         cnn = ReceptorCNN(kernel_count=2, kernel_size=[3], positional_channels=3, sequence_type="amino_acid", device="cpu",
                           number_of_threads=4, random_seed=1, learning_rate=0.01, iteration_count=10, l1_weight_decay=0.1, evaluate_at=5,
                           batch_size=100, training_percentage=0.8, l2_weight_decay=0.0)
-        cnn.fit(enc_dataset.encoded_data, Label("CMV"))
+        cnn.fit(enc_dataset.encoded_data, Label("CMV", [True, False]))
 
         report = KernelSequenceLogo(method=cnn, result_path=path / "logos/")
         report.generate_report()

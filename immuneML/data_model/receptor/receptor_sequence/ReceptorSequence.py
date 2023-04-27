@@ -1,5 +1,6 @@
 # quality: gold
 import json
+from uuid import uuid4
 
 import numpy as np
 
@@ -14,6 +15,17 @@ from immuneML.util.NumpyHelper import NumpyHelper
 class ReceptorSequence(DatasetItem):
     FIELDS = {'amino_acid_sequence': str, 'nucleotide_sequence': str, 'identifier': str, 'metadata': dict, 'annotation': dict, 'version': str}
     version = "1"
+
+    nt_to_aa_map = {
+        "AAA": "K", "AAC": "N", "AAG": "K", "AAT": "N", "ACA": "T", "ACC": "T", "ACG": "T", 'ACT': 'T',
+        'AGA': 'R', "AGC": "S", "AGG": "R", "AGT": "S", "ATA": "I", "ATC": "I", 'ATG': "M", "ATT": "I",
+        "CAA": "Q", "CAC": "H", "CAG": "Q", 'CAT': "H", "CCA": "P", "CCC": "P", "CCG": "P", 'CCT': "P",
+        "CGA": "R", "CGC": "R", "CGG": "R", "CGT": "R", "CTA": "L", "CTC": "L", "CTG": "L", "CTT": "L",
+        "GAA": "E", "GAC": "D", "GAG": "E", 'GAT': "D", "GCA": "A", "GCC": "A", 'GCG': "A", "GCT": "A",
+        "GGA": "G", "GGC": "G", "GGG": "G", "GGT": "G", "GTA": "V", "GTC": "V", "GTG": "V", "GTT": "V",
+        "TAA": None, "TAC": "Y", "TAG": None, "TAT": "Y", "TCA": "S", "TCC": 'S', "TCG": "S", "TCT": "S",
+        "TGA": None, "TGC": "C", "TGG": "W", "TGT": "C", "TTA": "L", "TTC": "F", "TTG": "L", "TTT": "F"
+    }
 
     @classmethod
     def create_from_record(cls, record: np.void):
@@ -36,11 +48,16 @@ class ReceptorSequence(DatasetItem):
                  identifier: str = None,
                  annotation: SequenceAnnotation = None,
                  metadata: SequenceMetadata = SequenceMetadata()):
-        self.identifier = identifier
+        self.identifier = identifier if identifier is not None and identifier != "" else uuid4().hex
         self.amino_acid_sequence = amino_acid_sequence
         self.nucleotide_sequence = nucleotide_sequence
         self.annotation = annotation
         self.metadata = metadata
+
+    def __repr__(self):
+        return f"ReceptorSequence(sequence_aa={self.amino_acid_sequence}, sequence={self.nucleotide_sequence}, " \
+               f"annotation={vars(self.annotation) if self.annotation is not None else '{}'}, " \
+               f"metadata={vars(self.metadata) if self.metadata is not None else '{}'})"
 
     def set_metadata(self, metadata: SequenceMetadata):
         self.metadata = metadata
@@ -63,6 +80,16 @@ class ReceptorSequence(DatasetItem):
             self.amino_acid_sequence = sequence
         else:
             self.nucleotide_sequence = sequence
+            self.amino_acid_sequence = self._convert_to_aa(sequence)
+
+    def _convert_to_aa(self, nt_sequence: str) -> str:
+        return ReceptorSequence.nt_to_aa(nt_sequence)
+
+    @classmethod
+    def nt_to_aa(cls, nt_sequence: str):
+        kmer_length = 3
+        kmers = [nt_sequence[i:i + kmer_length] for i in range(0, len(nt_sequence), kmer_length)]
+        return "".join([ReceptorSequence.nt_to_aa_map[kmer] for kmer in kmers])
 
     def get_record(self):
         """exports the sequence object as a numpy record"""

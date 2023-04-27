@@ -57,7 +57,7 @@ class EvennessProfileRepertoireEncoder(EvennessProfileEncoder):
 
         alphas = np.linspace(start=params.model["min_alpha"], stop=params.model["max_alpha"], num=params.model["dimension"])
 
-        counts = [sequence.metadata.count for sequence in repertoire.sequences if sequence.metadata.frame_type == SequenceFrameType.IN]
+        counts = [sequence.metadata.duplicate_count for sequence in repertoire.sequences if sequence.metadata.frame_type == SequenceFrameType.IN]
         freqs = np.array(counts)
         freqs = freqs[np.nonzero(freqs)]
 

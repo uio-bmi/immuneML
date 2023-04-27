@@ -58,13 +58,27 @@
                 <div class="col-container">
                     <div>
                         <h3>Simulation details</h3>
-                        {{#implantings}}
+                        {{#simulation_items}}
                         <div>
                             <h5>{{name}}</h5>
+                            {{#dataset_implanting_rate}}
                             <div class="padded-md">Dataset implanting rate: {{dataset_implanting_rate}}</div>
+                            {{/dataset_implanting_rate}}
+                            {{#number_of_examples}}
+                            <div class="padded-md">Number of examples: {{number_of_examples}}</div>
+                            {{/number_of_examples}}
                             {{#repertoire_implanting_rate}}
                             <div class="padded-md">Repertoire implanting rate: {{repertoire_implanting_rate}}</div>
                             {{/repertoire_implanting_rate}}
+                            {{#simulation_strategy}}
+                            <div class="padded-md">Simulation strategy: {{simulation_strategy}}</div>
+                            {{/simulation_strategy}}
+                            {{#use_generation_probabilities}}
+                            <div class="padded-md">Use generation probabilities: {{use_generation_probabilities}}</div>
+                            {{/use_generation_probabilities}}
+                            {{#paired}}
+                            <div class="padded-md">Simulate paired chain receptors: {{paired}}</div>
+                            {{/paired}}
                             <div class="padded-md">Signals:
                                 {{#signals}}
                                 <div class="padded-md">
@@ -95,7 +109,7 @@
                                 {{/signals}}
                             </div>
                         </div>
-                        {{/implantings}}
+                        {{/simulation_items}}
                     </div>
                 </div>
             </div>

@@ -1,5 +1,6 @@
 import os
 import shutil
+from pathlib import Path
 from unittest import TestCase
 
 import numpy as np
@@ -22,7 +23,7 @@ class TestDistanceEncoder(TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-    def create_dataset(self, path: str) -> RepertoireDataset:
+    def create_dataset(self, path: Path) -> RepertoireDataset:
         repertoires, metadata = RepertoireBuilder.build([["A", "B"], ["B", "C"], ["D"], ["E", "F"],
                                                        ["A", "B"], ["B", "C"], ["D"], ["E", "F"]], path,
                                                       {"l1": [1, 0, 1, 0, 1, 0, 1, 0], "l2": [2, 3, 2, 3, 2, 3, 3, 3]})
@@ -36,7 +37,7 @@ class TestDistanceEncoder(TestCase):
         dataset = self.create_dataset(path)
 
         enc = DistanceEncoder.build_object(dataset, **{"distance_metric": DistanceMetricType.JACCARD.name,
-                                                       "attributes_to_match": ["sequence_aas"],
+                                                       "attributes_to_match": ["sequence_aa"],
                                                        "sequence_batch_size": 20})
 
         enc.set_context({"dataset": dataset})

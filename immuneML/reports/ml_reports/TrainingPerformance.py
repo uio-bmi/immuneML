@@ -13,6 +13,7 @@ from immuneML.hyperparameter_optimization import HPSetting
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_metrics import ml_metrics
 from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.MetricUtil import MetricUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
@@ -74,7 +75,7 @@ class TrainingPerformance(MLReport):
         
         X = self.train_dataset.encoded_data
         predicted_y = self.method.predict(X, self.label)[self.label.name]
-        predicted_proba_y = self.method.predict_proba(X, self.label)[self.label.name]
+        predicted_proba_y = self.method.predict_proba(X, self.label)[self.label.name][self.label.positive_class]
         true_y = self.train_dataset.encoded_data.labels[self.label.name]
         classes = self.method.get_classes()
 
@@ -87,13 +88,10 @@ class TrainingPerformance(MLReport):
         }
 
         for metric in self.metrics_set:
-            _score = TrainingPerformance._compute_score(
-                Metric[metric],
-                predicted_y,
-                predicted_proba_y,
-                true_y,
-                classes,
-            )
+            _score = MetricUtil.score_for_metric(metric=Metric.get_metric(metric),
+                                                 predicted_y=predicted_y, predicted_proba_y=predicted_proba_y,
+                                                 true_y=true_y, classes=classes)
+
             if metric == 'CONFUSION_MATRIX':
                 self._generate_heatmap(classes, classes, _score, metric, output)
             else:
@@ -108,36 +106,6 @@ class TrainingPerformance(MLReport):
                             info="Plots the evaluation metrics for the performance given machine learning model and training dataset.",
                             output_tables=output['tables'],
                             output_figures=output['figures'])
-
-    @staticmethod
-    def _compute_score(metric: Metric, predicted_y, predicted_proba_y, true_y, labels):
-        if hasattr(ml_metrics, metric.value):
-            fn = getattr(ml_metrics, metric.value)
-        else:
-            fn = getattr(sklearn_metrics, metric.value)
-
-        if hasattr(true_y, 'dtype') and true_y.dtype.type is np.str_ or isinstance(true_y, list) and any(isinstance(item, str) for item in true_y):
-            true_y = label_binarize(true_y, classes=labels)
-            predicted_y = label_binarize(predicted_y, classes=labels)
-
-        try:
-            if metric in Metric.get_probability_based_metric_types():
-                predictions = predicted_proba_y
-                if predicted_proba_y is None:
-                    warnings.warn(f"TrainingPerformance: metric {metric} is specified, but the chosen ML method does not output "
-                                  f"class probabilities. Using predicted classes instead...")
-                    predictions = predicted_y
-            else:
-                predictions = predicted_y
-            
-            score = fn(true_y, predictions)
-
-        except ValueError as err:
-            warnings.warn(f"TrainingPerformance: score for metric {metric.name} could not be calculated."
-                          f"\nPredicted values: {predicted_y}\nTrue values: {true_y}.\nMore details: {err}", RuntimeWarning)
-            score = Constants.NOT_COMPUTED
-
-        return score
 
     def _generate_barplot(self, df, output):
         import plotly.express as px

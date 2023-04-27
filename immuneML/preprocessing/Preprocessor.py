@@ -10,7 +10,7 @@ class Preprocessor(metaclass=abc.ABCMeta):
         self.result_path = result_path
 
     @abc.abstractmethod
-    def process_dataset(self, dataset: RepertoireDataset, result_path: Path) -> RepertoireDataset:
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes: int = 1) -> RepertoireDataset:
         pass
 
     def check_dataset_type(self, dataset, valid_dataset_types: list, location: str):

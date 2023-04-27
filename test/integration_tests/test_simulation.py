@@ -63,16 +63,21 @@ class TestSimulation(TestCase):
                 },
                 "simulations": {
                     "sim1": {
-                        "var1": {
-                            "signals": ["signal1", "signal2"],
-                            "dataset_implanting_rate": 0.5,
-                            "repertoire_implanting_rate": 0.33
-                        },
-                        "var2": {
-                            "signals": ["signal1", "signal2"],
-                            "dataset_implanting_rate": 0.5,
-                            "is_noise": True,
-                            "repertoire_implanting_rate": 0.33
+                        "type": "Implanting",
+                        "sim_items": {
+                            "var1": {
+                                "type": "Implanting",
+                                "signals": ["signal1", "signal2"],
+                                "dataset_implanting_rate": 0.5,
+                                "repertoire_implanting_rate": 0.33
+                            },
+                            "var2": {
+                                "type": "Implanting",
+                                "signals": ["signal1", "signal2"],
+                                "dataset_implanting_rate": 0.5,
+                                "is_noise": True,
+                                "repertoire_implanting_rate": 0.33
+                            }
                         }
                     }
                 },
@@ -82,7 +87,8 @@ class TestSimulation(TestCase):
                     "type": "Simulation",
                     "dataset": "d1",
                     "simulation": "sim1",
-                    "export_formats": ["AIRR", "ImmuneML"]
+                    "export_formats": ["AIRR", 'ImmuneML'],
+                    "store_signal_in_receptors": False
                 }
             },
             "output": {
@@ -144,7 +150,7 @@ class TestSimulation(TestCase):
         shutil.rmtree(path)
 
     def test_simulation_receptors(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "integration_simulation_receptor/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "integration_simulation_receptor/")
         specs = {
             "definitions": {
                 "datasets": {
@@ -195,13 +201,18 @@ class TestSimulation(TestCase):
                 },
                 "simulations": {
                     "sim1": {
-                        "var1": {
-                            "signals": ["signal1"],
-                            "dataset_implanting_rate": 0.5
-                        },
-                        "var2": {
-                            "signals": ["signal2"],
-                            "dataset_implanting_rate": 0.5
+                        "type": "Implanting",
+                        "sim_items": {
+                            "var1": {
+                                "type": "Implanting",
+                                "signals": ["signal1"],
+                                "dataset_implanting_rate": 0.5
+                            },
+                            "var2": {
+                                "type": "Implanting",
+                                "signals": ["signal2"],
+                                "dataset_implanting_rate": 0.5
+                            }
                         }
                     }
                 }

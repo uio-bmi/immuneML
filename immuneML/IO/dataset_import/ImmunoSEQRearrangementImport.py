@@ -52,17 +52,12 @@ class ImmunoSEQRearrangementImport(DataImport):
             .. indent with spaces
             .. code-block:: yaml
 
-                    rearrangement: sequences
-                    amino_acid: sequence_aas
-                    v_gene: v_genes
-                    j_gene: j_genes
-                    frame_type: frame_types
-                    v_family: v_subgroups
-                    j_family: j_subgroups
-                    v_allele: v_alleles
-                    j_allele: j_alleles
-                    templates: counts
-                    locus: chains
+                rearrangement: sequence
+                amino_acid: sequence_aa
+                v_resolved: v_call
+                j_resolved: j_call
+                templates: duplicate_count
+                locus: chain
 
         column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For immunoSEQ rearrangement-level files, this is by default set to:
 
@@ -109,27 +104,22 @@ class ImmunoSEQRearrangementImport(DataImport):
                 - rearrangement
                 - v_family
                 - v_gene
-                - v_allele
+                - v_resolved
                 - j_family
                 - j_gene
-                - j_allele
+                - j_resolved
                 - amino_acid
                 - templates
                 - frame_type
                 - locus
                 region_type: IMGT_CDR3 # what part of the sequence to import
                 column_mapping: # column mapping immunoSEQ: immuneML
-                    rearrangement: sequences
-                    amino_acid: sequence_aas
-                    v_gene: v_genes
-                    j_gene: j_genes
-                    frame_type: frame_types
-                    v_family: v_subgroups
-                    j_family: j_subgroups
-                    v_allele: v_alleles
-                    j_allele: j_alleles
-                    templates: counts
-                    locus: chains
+                    rearrangement: sequence
+                    amino_acid: sequence_aa
+                    v_resolved: v_call
+                    j_resolved: j_call
+                    templates: duplicate_count
+                    locus: chain
 
     """
 
@@ -147,7 +137,7 @@ class ImmunoSEQRearrangementImport(DataImport):
 
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
         repertoire_fields = list(Repertoire.FIELDS)
-        repertoire_fields.remove("region_types")
+        repertoire_fields.remove("region_type")
 
         mapping = {
             "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",

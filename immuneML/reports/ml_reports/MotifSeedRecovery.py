@@ -279,23 +279,23 @@ class MotifSeedRecovery(MLReport):
 
         if not any([isinstance(self.method, legal_method) for legal_method in (RandomForestClassifier, LogisticRegression, SVM, SVC)]):
             logging.warning(f"{location} report can only be created for RandomForestClassifier, LogisticRegression, SVC, or SVM, but got "
-                            f"{type(self.method).__name__} instead. {location} report will not be created.")
+                            f"{type(self.method).__name__} instead. Report {self.name} will not be created.")
             run_report = False
 
         if self.label.name not in self.implanted_motifs_per_label.keys():
             warnings.warn(
                 f"{location}: no implanted motifs were specified for the label '{self.label}'. "
-                f"These motifs should be specified under 'implanted_motifs_per_label'. {location} report will not be created.")
+                f"These motifs should be specified under 'implanted_motifs_per_label'. Report {self.name} will not be created.")
             run_report = False
 
         if self.train_dataset.encoded_data is None or self.train_dataset.encoded_data.examples is None or self.train_dataset.encoded_data.feature_names is None:
             warnings.warn(
-                f"{location}: this report can only be created for an encoded dataset with specified feature names. {location} report will not be created.")
+                f"{location}: this report can only be created for an encoded dataset with specified feature names. Report {self.name} will not be created.")
             run_report = False
 
         if self.train_dataset.encoded_data.encoding != "KmerFrequencyEncoder":
             warnings.warn(
-                f"{location}: this report can only be created for a dataset encoded with the KmerFrequencyEncoder. {location} report will not be created.")
+                f"{location}: this report can only be created for a dataset encoded with the KmerFrequencyEncoder. Report {self.name} will not be created.")
             run_report = False
 
         return run_report

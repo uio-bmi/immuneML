@@ -2,12 +2,13 @@ import os
 import shutil
 from unittest import TestCase
 
+from immuneML.workflows.steps.SignalImplanter import SignalImplanter
+
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
-from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -16,18 +17,15 @@ from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
 from immuneML.reports.ml_reports.ConfounderAnalysis import ConfounderAnalysis
-from immuneML.simulation.Implanting import Implanting
-from immuneML.simulation.Simulation import Simulation
-from immuneML.simulation.SimulationState import SimulationState
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.simulation.implants.Motif import Motif
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
 from immuneML.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
-from immuneML.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
-from immuneML.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
+from immuneML.simulation.signal_implanting.HealthySequenceImplanting import HealthySequenceImplanting
+from immuneML.simulation.signal_implanting.ImplantingComputation import ImplantingComputation
 from immuneML.util.PathBuilder import PathBuilder
-from immuneML.workflows.steps.SignalImplanter import SignalImplanter
+from immuneML.util.ReadsType import ReadsType
 
 
 class TestConfounderAnalysis(TestCase):
@@ -48,13 +46,13 @@ class TestConfounderAnalysis(TestCase):
         random_dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=size, sequence_count_probabilities={100: 1.},
                                                                             sequence_length_probabilities={5: 1.}, labels={}, path=path)
 
-        signals = [Signal(identifier="disease", motifs=[Motif(identifier="m1", instantiation=GappedKmerInstantiation(), seed="AAA")],
+        signals = [Signal(id="disease", motifs=[Motif(identifier="m1", instantiation=GappedKmerInstantiation(), seed="AAA")],
                           implanting_strategy=HealthySequenceImplanting(implanting_computation=ImplantingComputation.ROUND,
                                                                         implanting=GappedMotifImplanting())),
-                   Signal(identifier="HLA", motifs=[Motif(identifier="m2", instantiation=GappedKmerInstantiation(), seed="CCC")],
+                   Signal(id="HLA", motifs=[Motif(identifier="m2", instantiation=GappedKmerInstantiation(), seed="CCC")],
                           implanting_strategy=HealthySequenceImplanting(implanting_computation=ImplantingComputation.ROUND,
                                                                         implanting=GappedMotifImplanting())),
-                   Signal(identifier="age", motifs=[Motif(identifier="m3", instantiation=GappedKmerInstantiation(), seed="GGG")],
+                   Signal(id="age", motifs=[Motif(identifier="m3", instantiation=GappedKmerInstantiation(), seed="GGG")],
                           implanting_strategy=HealthySequenceImplanting(implanting_computation=ImplantingComputation.ROUND,
                                                                         implanting=GappedMotifImplanting()))]
 
@@ -66,7 +64,7 @@ class TestConfounderAnalysis(TestCase):
                                  ])
 
         dataset = SignalImplanter.run(SimulationState(signals=signals, dataset=random_dataset, formats=['ImmuneML'], result_path=path,
-                                                      name='my_synthetic_dataset', simulation=simulation))
+                                                      name='my_synthetic_dataset', simulation=simulation, store_signal_in_receptors=True))
 
         return dataset
 
@@ -86,7 +84,7 @@ class TestConfounderAnalysis(TestCase):
         report = ConfounderAnalysis.build_object(metadata_labels=["age", "HLA"], name='test')
 
         report.ml_details_path = path / "ml_details.yaml"
-        report.label = Label("disease")
+        report.label = Label("disease", [True, False])
         report.result_path = path
         encoder = KmerFrequencyEncoder.build_object(RepertoireDataset(), **{
             "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
@@ -97,7 +95,7 @@ class TestConfounderAnalysis(TestCase):
         })
         report.train_dataset = self._encode_dataset(encoder, self._make_dataset(path / "train", size=100), path)
         report.test_dataset = self._encode_dataset(encoder, self._make_dataset(path / "test", size=40), path, learn_model=False)
-        report.method = self._create_dummy_lr_model(path, report.train_dataset.encoded_data, Label("disease"))
+        report.method = self._create_dummy_lr_model(path, report.train_dataset.encoded_data, Label("disease", [True, False]))
 
         return report
 

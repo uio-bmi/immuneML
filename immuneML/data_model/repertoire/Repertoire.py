@@ -18,7 +18,6 @@ from immuneML.data_model.receptor.ReceptorBuilder import ReceptorBuilder
 from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from immuneML.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -33,19 +32,21 @@ class Repertoire(DatasetItem):
     loaded separately. Internally, this class relies on numpy to store/import_dataset the data.
     """
 
-    FIELDS = tuple(
-        "sequence_aas,sequences,v_genes,j_genes,v_subgroups,j_subgroups,v_alleles,j_alleles,chains,counts,region_types,frame_types,"
-        "sequence_identifiers,cell_ids".split(","))
+    FIELDS = ("sequence_aa", "sequence", "v_call", "j_call", "chain", "duplicate_count", "region_type", "frame_type", "sequence_id", "cell_id")
 
     @staticmethod
     def process_custom_lists(custom_lists):
-        if custom_lists:
-            field_list = list(custom_lists.keys())
-            values = [[NumpyHelper.get_numpy_representation(el) for el in custom_lists[field]] for field in custom_lists.keys()]
-            dtype = [(field, np.array(values[index]).dtype) for index, field in enumerate(custom_lists.keys())]
-        else:
-            field_list, values, dtype = [], [], []
-        return field_list, values, dtype
+        try:
+            if custom_lists:
+                field_list = list(custom_lists.keys())
+                values = [[NumpyHelper.get_numpy_representation(el) for el in custom_lists[field]] for field in custom_lists.keys()]
+                dtype = [(field, np.array(values[index]).dtype) for index, field in enumerate(custom_lists.keys())]
+            else:
+                field_list, values, dtype = [], [], []
+            return field_list, values, dtype
+        except Exception as e:
+            print(f"Error occurred when processing custom lists to create a repertoire, custom lists: {custom_lists}.")
+            raise e
 
     @staticmethod
     def check_count(sequence_aas: list = None, sequences: list = None, custom_lists: dict = None) -> int:
@@ -57,24 +58,23 @@ class Repertoire(DatasetItem):
                 f"sequences ({len(sequence_aas)})."
 
         assert all(len(custom_lists[key]) == sequence_count for key in custom_lists) if custom_lists else True, \
-            f"Repertoire: there is a mismatch between the number of sequences and the number of attributes listed in " \
+            f"Repertoire: there is a mismatch between the number of sequences ({sequence_count}) and the number of attributes listed in " \
             f"{str(list(custom_lists.keys()))[1:-1]}"
 
         return sequence_count
 
     @classmethod
-    def build(cls, sequence_aas: list = None, sequences: list = None, v_genes: list = None, j_genes: list = None,
-              v_subgroups: list = None, j_subgroups: list = None, v_alleles: list = None, j_alleles: list = None,
-              chains: list = None, counts: list = None, region_types: list = None, frame_types: list = None,
-              custom_lists: dict = None, sequence_identifiers: list = None, path: Path = None, metadata: dict = None,
-              signals: dict = None, cell_ids: List[str] = None, filename_base: str = None):
+    def build(cls, sequence_aa: list = None, sequence: list = None, v_call: list = None, j_call: list = None,
+              chain: list = None, duplicate_count: list = None, region_type: list = None, frame_type: list = None,
+              custom_lists: dict = None, sequence_id: list = None, path: Path = None, metadata: dict = None,
+              signals: dict = None, cell_id: List[str] = None, filename_base: str = None, identifier: str = None):
 
-        sequence_count = Repertoire.check_count(sequence_aas, sequences, custom_lists)
+        sequence_count = Repertoire.check_count(sequence_aa, sequence, custom_lists)
 
-        if sequence_identifiers is None or len(sequence_identifiers) == 0 or any(identifier is None for identifier in sequence_identifiers):
-            sequence_identifiers = np.arange(sequence_count).astype(str)
+        if sequence_id is None or len(sequence_id) == 0 or any(identifier is None for identifier in sequence_id):
+            sequence_id = np.arange(sequence_count).astype(str)
 
-        identifier = uuid4().hex
+        identifier = uuid4().hex if identifier is None else identifier
 
         filename_base = filename_base if filename_base is not None else identifier
 
@@ -83,12 +83,14 @@ class Repertoire(DatasetItem):
         field_list, values, dtype = Repertoire.process_custom_lists(custom_lists)
 
         if signals:
-            signals_filtered = {signal: signals[signal] for signal in signals if signal not in metadata["field_list"]}
+            signals_filtered = {f'{signal}_info': signals[signal] for signal in signals if signal not in Repertoire.FIELDS}
             field_list_signals, values_signals, dtype_signals = Repertoire.process_custom_lists(signals_filtered)
 
-            field_list.extend(field_list_signals)
-            values.extend(values_signals)
-            dtype.extend(dtype_signals)
+            for index, field_name in enumerate(field_list_signals):
+                if field_name not in field_list:
+                    field_list.append(field_name)
+                    values.append(values_signals[index])
+                    dtype.append(dtype_signals[index])
 
         for field in Repertoire.FIELDS:
             if eval(field) is not None and not all(el is None for el in eval(field)):
@@ -110,7 +112,7 @@ class Repertoire(DatasetItem):
 
     @classmethod
     def build_like(cls, repertoire, indices_to_keep: list, result_path: Path, filename_base: str = None):
-        if indices_to_keep is not None and len(indices_to_keep) > 0:
+        if indices_to_keep is not None and len(indices_to_keep) > 0 and sum(indices_to_keep) > 0:
             PathBuilder.build(result_path)
 
             data = repertoire.load_data()
@@ -130,44 +132,51 @@ class Repertoire(DatasetItem):
             return None
 
     @classmethod
-    def build_from_sequence_objects(cls, sequence_objects: list, path: Path, metadata: dict, filename_base: str = None):
+    def build_from_sequence_objects(cls, sequence_objects: list, path: Path, metadata: dict, filename_base: str = None, repertoire_id: str = None):
 
         assert all(isinstance(sequence, ReceptorSequence) for sequence in sequence_objects), \
             "Repertoire: all sequences have to be instances of ReceptorSequence class."
 
-        sequence_aas, sequences, v_genes, j_genes, v_subgroups, j_subgroups, v_alleles, j_alleles, chains, counts, region_types, frame_types, sequence_identifiers, cell_ids = [], [], [], [], [], [], [], [], [], [], [], [], [], []
+        sequence_aa, sequence, v_call, j_call, chain, duplicate_count, region_type, frame_type, sequence_id, cell_id = [], [], [], [], [], [], [], [], [], []
         custom_lists = {key: [] for key in sequence_objects[0].metadata.custom_params} if sequence_objects[0].metadata else {}
         signals = {}
 
-        for index, sequence in enumerate(sequence_objects):
-            sequence_identifiers.append(sequence.identifier)
-            sequence_aas.append(sequence.amino_acid_sequence)
-            sequences.append(sequence.nucleotide_sequence)
-            if sequence.metadata:
-                v_genes.append(sequence.metadata.v_gene)
-                j_genes.append(sequence.metadata.j_gene)
-                v_subgroups.append(sequence.metadata.v_subgroup)
-                j_subgroups.append(sequence.metadata.j_subgroup)
-                v_alleles.append(sequence.metadata.v_allele)
-                j_alleles.append(sequence.metadata.j_allele)
-                chains.append(sequence.metadata.chain)
-                counts.append(sequence.metadata.count)
-                region_types.append(sequence.metadata.region_type)
-                frame_types.append(sequence.metadata.frame_type)
-                cell_ids.append(sequence.metadata.cell_id)
-                for param in sequence.metadata.custom_params.keys():
-                    custom_lists[param].append(sequence.metadata.custom_params[param] if param in sequence.metadata.custom_params else None)
-            if sequence.annotation and sequence.annotation.implants and len(sequence.annotation.implants) > 0:
-                for implant in sequence.annotation.implants:
-                    if implant.signal_id in signals:
-                        signals[implant.signal_id].append(str(implant))
+        for index, seq in enumerate(sequence_objects):
+            sequence_id.append(seq.identifier)
+            sequence_aa.append(seq.amino_acid_sequence)
+            sequence.append(seq.nucleotide_sequence)
+            if seq.metadata:
+                v_call.append(seq.metadata.v_call)
+                j_call.append(seq.metadata.j_call)
+                chain.append(seq.metadata.chain)
+                duplicate_count.append(seq.metadata.duplicate_count)
+                region_type.append(seq.metadata.region_type)
+                frame_type.append(seq.metadata.frame_type)
+                cell_id.append(seq.metadata.cell_id)
+                for param in seq.metadata.custom_params.keys():
+                    current_value = seq.metadata.custom_params[param] if param in seq.metadata.custom_params else None
+                    if param in custom_lists:
+                        custom_lists[param].append(current_value)
                     else:
-                        signals[implant.signal_id] = [None for _ in range(index)] + [str(implant)]
+                        custom_lists[param] = [None for _ in range(index)]
+                        custom_lists[param].append(current_value)
+            if seq.annotation and seq.annotation.implants and len(seq.annotation.implants) > 0:
+                for implant in seq.annotation.implants:
+                    if implant.signal_id in signals:
+                        signals[implant.signal_id].append(str(vars(implant)))
+                    else:
+                        signals[implant.signal_id] = [None for _ in range(index)] + [str(vars(implant))]
 
-        return cls.build(sequence_aas=sequence_aas, sequences=sequences, v_genes=v_genes, j_genes=j_genes, v_subgroups=v_subgroups,
-                         j_subgroups=j_subgroups, v_alleles=v_alleles, j_alleles=j_alleles, chains=chains, counts=counts, region_types=region_types,
-                         frame_types=frame_types, custom_lists=custom_lists, sequence_identifiers=sequence_identifiers, path=path, metadata=metadata,
-                         signals=signals, cell_ids=cell_ids, filename_base=filename_base)
+        sequence_count = len(sequence)
+
+        for signal in signals.keys():
+            signal_info_count = len(signals[signal])
+            if signal_info_count < sequence_count:
+                signals[signal].extend([None for _ in range(sequence_count - signal_info_count)])
+
+        return cls.build(sequence_aa=sequence_aa, sequence=sequence, v_call=v_call, j_call=j_call, chain=chain, duplicate_count=duplicate_count,
+                         region_type=region_type, frame_type=frame_type, custom_lists=custom_lists, sequence_id=sequence_id, path=path,
+                         metadata=metadata, signals=signals, cell_id=cell_id, filename_base=filename_base, identifier=repertoire_id)
 
     def __init__(self, data_filename: Path, metadata_filename: Path, identifier: str):
         data_filename = Path(data_filename)
@@ -189,25 +198,25 @@ class Repertoire(DatasetItem):
         self.element_count = None
 
     def get_sequence_aas(self):
-        return self.get_attribute("sequence_aas")
+        return self.get_attribute("sequence_aa")
 
     def get_sequence_identifiers(self):
-        return self.get_attribute("sequence_identifiers")
+        return self.get_attribute("sequence_id")
 
     def get_v_genes(self):
-        return self.get_attribute("v_genes")
+        return self.get_attribute("v_call")
 
     def get_j_genes(self):
-        return self.get_attribute("j_genes")
+        return self.get_attribute("j_call")
 
     def get_counts(self):
-        counts = self.get_attribute("counts")
+        counts = self.get_attribute("duplicate_count")
         if counts is not None:
             counts = np.array([int(count) if not NumpyHelper.is_nan_or_empty(count) else None for count in counts])
         return counts
 
     def get_chains(self):
-        chains = self.get_attribute("chains")
+        chains = self.get_attribute("chain")
         if chains is not None:
             chains = np.array([Chain.get_chain(chain_str) if chain_str is not None else None for chain_str in chains])
         return chains
@@ -239,7 +248,11 @@ class Repertoire(DatasetItem):
         return result
 
     def get_region_type(self):
-        region_types = set(self.get_attribute("region_types"))
+        region_types = set(self.get_attribute("region_type"))
+
+        if 'nan' in region_types:
+            region_types.remove('nan')
+
         assert len(region_types) == 1, f"Repertoire: expected one region_type, found: {region_types}"
 
         return RegionType(region_types.pop())
@@ -274,22 +287,18 @@ class Repertoire(DatasetItem):
                     try:
                         implants.append(ImplantAnnotation(**ast.literal_eval(value_dict)))
                     except (SyntaxError, ValueError, TypeError) as e:
-                        pass
+                        implants.append(ImplantAnnotation(signal_id=key))
 
-        seq = ReceptorSequence(amino_acid_sequence=row["sequence_aas"] if "sequence_aas" in fields else None,
-                               nucleotide_sequence=row["sequences"] if "sequences" in fields else None,
-                               identifier=row["sequence_identifiers"] if "sequence_identifiers" in fields else None,
-                               metadata=SequenceMetadata(v_gene=row["v_genes"] if "v_genes" in fields else None,
-                                                         j_gene=row["j_genes"] if "j_genes" in fields else None,
-                                                         v_subgroup=row["v_subgroups"] if "v_subgroups" in fields else None,
-                                                         j_subgroup=row["j_subgroups"] if "j_subgroups" in fields else None,
-                                                         v_allele=row["v_alleles"] if "v_alleles" in fields else None,
-                                                         j_allele=row["j_alleles"] if "j_alleles" in fields else None,
-                                                         chain=row["chains"] if "chains" in fields else None,
-                                                         count=row["counts"] if "counts" in fields and not NumpyHelper.is_nan_or_empty(row['counts']) else None,
-                                                         region_type=row["region_types"] if "region_types" in fields else None,
-                                                         frame_type=row["frame_types"] if "frame_types" in fields else "IN",
-                                                         cell_id=row["cell_ids"] if "cell_ids" in fields else None,
+        seq = ReceptorSequence(amino_acid_sequence=row["sequence_aa"] if "sequence_aa" in fields else None,
+                               nucleotide_sequence=row["sequence"] if "sequence" in fields else None,
+                               identifier=row["sequence_id"] if "sequence_id" in fields else None,
+                               metadata=SequenceMetadata(v_call=row["v_call"] if "v_call" in fields else None,
+                                                         j_call=row["j_call"] if "j_call" in fields else None,
+                                                         chain=row["chain"] if "chain" in fields else None,
+                                                         duplicate_count=row["duplicate_count"] if "duplicate_count" in fields and not NumpyHelper.is_nan_or_empty(row['duplicate_count']) else None,
+                                                         region_type=row["region_type"] if "region_type" in fields else None,
+                                                         frame_type=row["frame_type"] if "frame_type" in fields else "IN",
+                                                         cell_id=row["cell_id"] if "cell_id" in fields else None,
                                                          custom_params={key: row[key] if key in fields else None
                                                                         for key in set(self.fields) - set(Repertoire.FIELDS)}),
                                annotation=SequenceAnnotation(implants=implants))
@@ -299,20 +308,20 @@ class Repertoire(DatasetItem):
     def _prepare_cell_lists(self):
         data = self.load_data()
 
-        assert "cell_ids" in data.dtype.names and data["cell_ids"] is not None, \
+        assert "cell_id" in data.dtype.names and data["cell_id"] is not None, \
             f"Repertoire: cannot return receptor objects in repertoire {self.identifier} since cell_ids are not specified. " \
             f"Existing fields are: {str(data.dtype.names)[1:-1]}"
 
-        same_cell_lists = NumpyHelper.group_structured_array_by(data, "cell_ids")
+        same_cell_lists = NumpyHelper.group_structured_array_by(data, "cell_id")
         return same_cell_lists
 
     def _make_receptors(self, cell_content):
-        sequences = ReceptorSequenceList()
+        sequences = []
         for item in cell_content:
             sequences.append(self._make_sequence_object(item))
         return ReceptorBuilder.build_objects(sequences)
 
-    def get_sequence_objects(self, load_implants: bool = False) -> List[ReceptorSequence]:
+    def get_sequence_objects(self, load_implants: bool = True) -> List[ReceptorSequence]:
         """
         Lazily loads sequences from disk to reduce RAM consumption
 
@@ -334,7 +343,7 @@ class Repertoire(DatasetItem):
 
     @property
     def sequences(self):
-        return self.get_sequence_objects(False)
+        return self.get_sequence_objects(True)
 
     @property
     def receptors(self) -> List[Receptor]:

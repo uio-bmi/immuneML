@@ -45,9 +45,9 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
         "separator": "\t",
         "columns_to_load": ["cloneCount", "allVHitsWithScore", "allJHitsWithScore", "aaSeqCDR3", "nSeqCDR3"],
         "column_mapping": {
-            "cloneCount": "counts",
-            "allVHitsWithScore": "v_alleles",
-            "allJHitsWithScore": "j_alleles"
+            "cloneCount": "duplicate_count",
+            "allVHitsWithScore": "v_call",
+            "allJHitsWithScore": "j_call"
         },
     }, "mixcr_dataset")
 

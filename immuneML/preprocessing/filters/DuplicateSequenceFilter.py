@@ -76,13 +76,13 @@ class DuplicateSequenceFilter(Filter):
         self.count_agg = count_agg
         self.batch_size = batch_size
 
-        self.sequence_of_interest = "sequence_aas" if filter_sequence_type == SequenceType.AMINO_ACID else "sequences"
-        self.sequence_to_ignore = "sequences" if self.sequence_of_interest == "sequence_aas" else "sequence_aas"
+        self.sequence_of_interest = "sequence_aa" if filter_sequence_type == SequenceType.AMINO_ACID else "sequence"
+        self.sequence_to_ignore = "sequence" if self.sequence_of_interest == "sequence_aa" else "sequence_aa"
 
-        assert self.sequence_of_interest in Repertoire.FIELDS
-        assert self.sequence_to_ignore in Repertoire.FIELDS
+        assert self.sequence_of_interest in Repertoire.FIELDS, f"{DuplicateSequenceFilter.__name__}: {self.sequence_of_interest} not in {Repertoire.FIELDS}"
+        assert self.sequence_to_ignore in Repertoire.FIELDS, f"{DuplicateSequenceFilter.__name__}: {self.sequence_of_interest} not in {Repertoire.FIELDS}"
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: Path) -> RepertoireDataset:
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1) -> RepertoireDataset:
         self.result_path = result_path if result_path is not None else self.result_path
 
         self.check_dataset_type(dataset, [RepertoireDataset], "DuplicateSequenceFilter")
@@ -99,10 +99,10 @@ class DuplicateSequenceFilter(Filter):
     def _prepare_group_by_field(self, columns):
         groupby_fields = copy.deepcopy(list(Repertoire.FIELDS))
         groupby_fields.remove(self.sequence_to_ignore)
-        groupby_fields.remove("counts")
-        groupby_fields.remove("sequence_identifiers")
-        groupby_fields.remove("cell_ids")
-        groupby_fields.remove("frame_types")
+        groupby_fields.remove("duplicate_count")
+        groupby_fields.remove("sequence_id")
+        groupby_fields.remove("cell_id")
+        groupby_fields.remove("frame_type")
 
         for field in set(Repertoire.FIELDS).difference(set(columns)):
             if field in groupby_fields:
@@ -112,16 +112,16 @@ class DuplicateSequenceFilter(Filter):
 
     def _prepare_agg_dict(self, columns, custom_lists):
 
-        agg_dict = {"sequence_identifiers": "first"}
+        agg_dict = {"sequence_id": "first"}
 
         if self.sequence_to_ignore in columns:
             agg_dict[self.sequence_to_ignore] = "first"
 
-        if "counts" in columns:
-            agg_dict["counts"] = self.count_agg.value
+        if "duplicate_count" in columns:
+            agg_dict["duplicate_count"] = self.count_agg.value
 
-        if "cell_ids" in columns:
-            agg_dict["cell_ids"] = "first"
+        if "cell_id" in columns:
+            agg_dict["cell_id"] = "first"
 
         for key in custom_lists:
             agg_dict[key] = "first"
@@ -136,23 +136,23 @@ class DuplicateSequenceFilter(Filter):
         agg_dict = self._prepare_agg_dict(data.columns, custom_lists)
 
         # Chain objects can not be aggregated, convert to strings
-        if "chains" in data.columns:
-            data["chains"] = [chain.value if isinstance(chain, Chain) else chain for chain in data["chains"]]
+        if "chain" in data.columns:
+            data["chain"] = [chain.value if isinstance(chain, Chain) else chain for chain in data["chain"]]
         else:
-            data["chains"] = None
+            data["chain"] = None
 
         no_duplicates = data.groupby(groupby_fields).agg(agg_dict).reset_index()
 
-        processed_repertoire = Repertoire.build(sequence_aas=list(no_duplicates["sequence_aas"]) if "sequence_aas" in no_duplicates.columns else None,
-                                                sequences=list(no_duplicates["sequences"]) if "sequences" in no_duplicates.columns else None,
-                                                v_genes=list(no_duplicates["v_genes"]) if "v_genes" in no_duplicates.columns else None,
-                                                j_genes=list(no_duplicates["j_genes"]) if 'j_genes' in no_duplicates.columns else None,
-                                                chains=[Chain.get_chain(key) for key in
-                                                        list(no_duplicates["chains"])] if "chains" in no_duplicates.columns else None,
-                                                counts=list(no_duplicates["counts"]) if "counts" in no_duplicates else None,
-                                                region_types=list(no_duplicates["region_types"]) if "region_types" in no_duplicates else None,
+        processed_repertoire = Repertoire.build(sequence_aa=list(no_duplicates["sequence_aa"]) if "sequence_aa" in no_duplicates.columns else None,
+                                                sequence=list(no_duplicates["sequence"]) if "sequence" in no_duplicates.columns else None,
+                                                v_call=list(no_duplicates["v_call"]) if "v_call" in no_duplicates.columns else None,
+                                                j_call=list(no_duplicates["j_call"]) if 'j_call' in no_duplicates.columns else None,
+                                                chain=[Chain.get_chain(key) for key in
+                                                        list(no_duplicates["chain"])] if "chain" in no_duplicates.columns else None,
+                                                duplicate_count=list(no_duplicates["duplicate_count"]) if "duplicate_count" in no_duplicates else None,
+                                                region_type=list(no_duplicates["region_type"]) if "region_type" in no_duplicates else None,
                                                 custom_lists={key: list(no_duplicates[key]) for key in custom_lists},
-                                                sequence_identifiers=list(no_duplicates["sequence_identifiers"]),
+                                                sequence_id=list(no_duplicates["sequence_id"]),
                                                 metadata=copy.deepcopy(repertoire.metadata),
                                                 path=self.result_path,
                                                 filename_base=f"{repertoire.data_filename.stem}_filtered")

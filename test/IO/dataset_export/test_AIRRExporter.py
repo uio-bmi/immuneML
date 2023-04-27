@@ -11,9 +11,11 @@ from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.simulation.implants.ImplantAnnotation import ImplantAnnotation
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -22,10 +24,10 @@ class TestAIRRExporter(TestCase):
         sequence_objects = [ReceptorSequence(amino_acid_sequence="AAA",
                                              nucleotide_sequence="GCTGCTGCT",
                                              identifier="receptor_1",
-                                             metadata=SequenceMetadata(v_gene="TRBV1",
-                                                                       j_gene="TRBJ1",
+                                             metadata=SequenceMetadata(v_call="TRBV1",
+                                                                       j_call="TRBJ1",
                                                                        chain=Chain.BETA,
-                                                                       count=5,
+                                                                       duplicate_count=5,
                                                                        region_type="IMGT_CDR3",
                                                                        frame_type="IN",
                                                                        custom_params={"d_call": "TRBD1",
@@ -33,25 +35,25 @@ class TestAIRRExporter(TestCase):
                             ReceptorSequence(amino_acid_sequence="GGG",
                                              nucleotide_sequence="GGTGGTGGT",
                                              identifier="receptor_2",
-                                             metadata=SequenceMetadata(v_gene="TRAV2", v_allele="TRAV2*01",
-                                                                       j_gene="TRAJ2",
+                                             annotation=SequenceAnnotation(implants=[ImplantAnnotation('sig1', 'm1', "G", 1)]),
+                                             metadata=SequenceMetadata(v_call="TRAV2*01",
+                                                                       j_call="TRAJ2",
                                                                        chain=Chain.ALPHA,
-                                                                       count=15,
+                                                                       duplicate_count=15,
                                                                        frame_type=None,
                                                                        region_type="IMGT_CDR3",
                                                                        custom_params={"d_call": "TRAD2",
                                                                                       "custom_test": "cust2"}))]
 
         repertoire = Repertoire.build_from_sequence_objects(sequence_objects=sequence_objects, path=path, metadata={"subject_id": "REP1"})
-        df = pd.DataFrame({"filename": [f"{repertoire.identifier}_data.npy"], "subject_id": ["1"],
+        df = pd.DataFrame({"filename": [f"{repertoire.identifier}_data.npy"], "subject_id": ["REP1"],
                            "repertoire_identifier": [repertoire.identifier]})
         df.to_csv(path / "metadata.csv", index=False)
 
         return repertoire, path / "metadata.csv"
 
     def test_repertoire_export(self):
-        path = EnvironmentSettings.tmp_test_path / "airr_exporter_repertoire/"
-        PathBuilder.build(path)
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "airr_exporter_repertoire/")
 
         repertoire, metadata_path = self.create_dummy_repertoire(path)
         dataset = RepertoireDataset(repertoires=[repertoire], metadata_file=metadata_path)
@@ -59,7 +61,7 @@ class TestAIRRExporter(TestCase):
         path_exported = path / "exported"
         AIRRExporter.export(dataset, path_exported)
 
-        resulting_data = pd.read_csv(path_exported / f"repertoires/{repertoire.identifier}.tsv", sep="\t")
+        resulting_data = pd.read_csv(path_exported / f"repertoires/{repertoire.metadata['subject_id']}.tsv", sep="\t")
 
         self.assertListEqual(list(resulting_data["sequence_id"]), ["receptor_1", "receptor_2"])
         self.assertListEqual(list(resulting_data["cdr3"]), ["GCTGCTGCT", "GGTGGTGGT"])
@@ -72,20 +74,21 @@ class TestAIRRExporter(TestCase):
         self.assertListEqual(list(resulting_data["custom_test"]), ["cust1", "cust2"])
         self.assertListEqual(list(resulting_data["productive"]), ['T', 'F'])
         self.assertListEqual(list(resulting_data["stop_codon"]), ['F', 'F'])
+        self.assertListEqual(list(resulting_data['sig1']), [False, True])
 
         shutil.rmtree(path)
 
     def create_dummy_receptordataset(self, path):
         receptors = [TCABReceptor(identifier="1",
                                   alpha=ReceptorSequence(amino_acid_sequence="AAATTT", identifier="1a",
-                                                         metadata=SequenceMetadata(v_gene="TRAV1", j_gene="TRAJ1",
+                                                         metadata=SequenceMetadata(v_call="TRAV1", j_call="TRAJ1",
                                                                                    chain=Chain.ALPHA,
                                                                                    frame_type="IN",
                                                                                    region_type="IMGT_CDR3",
                                                                                    custom_params={"d_call": "TRAD1",
                                                                                                   "custom1": "cust1"})),
                                   beta=ReceptorSequence(amino_acid_sequence="ATATAT", identifier="1b",
-                                                        metadata=SequenceMetadata(v_gene="TRBV1", j_gene="TRBJ1",
+                                                        metadata=SequenceMetadata(v_call="TRBV1", j_call="TRBJ1",
                                                                                   chain=Chain.BETA,
                                                                                   frame_type="IN",
                                                                                   region_type="IMGT_CDR3",
@@ -93,14 +96,14 @@ class TestAIRRExporter(TestCase):
                                                                                                  "custom1": "cust1"}))),
                      TCABReceptor(identifier="2",
                                   alpha=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2a",
-                                                         metadata=SequenceMetadata(v_gene="TRAV1", j_gene="TRAJ1",
+                                                         metadata=SequenceMetadata(v_call="TRAV1", j_call="TRAJ1",
                                                                                    chain=Chain.ALPHA,
                                                                                    frame_type="IN",
                                                                                    region_type="IMGT_CDR3",
                                                                                    custom_params={"d_call": "TRAD1",
                                                                                                   "custom2": "cust1"})),
                                   beta=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2b",
-                                                        metadata=SequenceMetadata(v_gene="TRBV1", j_gene="TRBJ1",
+                                                        metadata=SequenceMetadata(v_call="TRBV1", j_call="TRBJ1",
                                                                                   chain=Chain.BETA,
                                                                                   frame_type="IN",
                                                                                   region_type="IMGT_CDR3",
@@ -112,8 +115,7 @@ class TestAIRRExporter(TestCase):
         return ReceptorDataset.build_from_objects(receptors, 2, receptors_path)
 
     def test_receptor_export(self):
-        path = EnvironmentSettings.tmp_test_path / "airr_exporter_receptor/"
-        PathBuilder.build(path)
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "airr_exporter_receptor/")
 
         dataset = self.create_dummy_receptordataset(path)
 
@@ -138,17 +140,17 @@ class TestAIRRExporter(TestCase):
 
     def create_dummy_sequencedataset(self, path):
         sequences = [ReceptorSequence(amino_acid_sequence="AAATTT", identifier="1a",
-                                      metadata=SequenceMetadata(v_gene="TRAV1", j_gene="TRAJ1", chain=Chain.ALPHA, frame_type="IN",
+                                      metadata=SequenceMetadata(v_call="TRAV1", j_call="TRAJ1", chain=Chain.ALPHA, frame_type="IN",
                                                                 region_type="IMGT_CDR3",
                                                                 custom_params={"d_call": "TRAD1",
                                                                                "custom1": "cust1"})),
                      ReceptorSequence(amino_acid_sequence="ATATAT", identifier="1b",
-                                      metadata=SequenceMetadata(v_gene="TRBV1", j_gene="TRBJ1", chain=Chain.BETA, frame_type="IN",
+                                      metadata=SequenceMetadata(v_call="TRBV1", j_call="TRBJ1", chain=Chain.BETA, frame_type="IN",
                                                                 region_type="IMGT_CDR3",
                                                                 custom_params={"d_call": "TRBD1",
                                                                                "custom2": "cust1"})),
                      ReceptorSequence(amino_acid_sequence="ATATAT", identifier="2b",
-                                      metadata=SequenceMetadata(v_gene="TRBV1", j_gene="TRBJ1", chain=Chain.BETA, frame_type="IN",
+                                      metadata=SequenceMetadata(v_call="TRBV1", j_call="TRBJ1", chain=Chain.BETA, frame_type="IN",
                                                                 region_type="IMGT_CDR3",
                                                                 custom_params={"d_call": "TRBD1",
                                                                                "custom2": "cust1"}))]
@@ -157,8 +159,7 @@ class TestAIRRExporter(TestCase):
         return SequenceDataset.build_from_objects(sequences, 2, sequences_path)
 
     def test_sequence_export(self):
-        path = EnvironmentSettings.tmp_test_path / "airr_exporter_receptor/"
-        PathBuilder.build(path)
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "airr_exporter_sequence/")
 
         dataset = self.create_dummy_sequencedataset(path)
 

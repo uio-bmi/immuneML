@@ -50,7 +50,7 @@ class TestTCRdistEncoder(TestCase):
         dataset = VDJdbImport.import_dataset(params, "vdjdb_receptor_dataset")
 
         encoder = TCRdistEncoder.build_object(dataset, **{"cores": 2})
-        encoded_dataset = encoder.encode(dataset, EncoderParams(path / "result/", LabelConfiguration([Label("epitope")])))
+        encoded_dataset = encoder.encode(dataset, EncoderParams(path / "result/", LabelConfiguration([Label("epitope", None)])))
 
         self.assertTrue(encoded_dataset.encoded_data.examples.shape[0] == encoded_dataset.encoded_data.examples.shape[1]
                         and encoded_dataset.encoded_data.examples.shape[0] == dataset.get_example_count())

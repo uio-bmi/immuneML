@@ -11,7 +11,7 @@ from immuneML.workflows.instructions.quickstart import Quickstart
 class TestQuickstart(TestCase):
     def test(self):
         path = EnvironmentSettings.tmp_test_path / "quickstart_test/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         quickstart = Quickstart()
         quickstart.run(path)

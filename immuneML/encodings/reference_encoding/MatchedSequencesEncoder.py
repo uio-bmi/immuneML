@@ -1,14 +1,20 @@
-import abc
+from multiprocessing.pool import Pool
+from typing import List
 
+import numpy as np
+import pandas as pd
+
+from immuneML.analysis.SequenceMatcher import SequenceMatcher
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.reference_encoding.MatchedReferenceUtil import MatchedReferenceUtil
-from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReadsType import ReadsType
-from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
 class MatchedSequencesEncoder(DatasetEncoder):
@@ -49,11 +55,8 @@ class MatchedSequencesEncoder(DatasetEncoder):
                 max_edit_distance: 1
     """
 
-    dataset_mapping = {
-        "RepertoireDataset": "MatchedSequencesRepertoireEncoder"
-    }
-
-    def __init__(self, max_edit_distance: int, reference: ReceptorSequenceList, reads: ReadsType, sum_matches: bool, normalize: bool, name: str = None):
+    def __init__(self, max_edit_distance: int, reference: List[ReceptorSequence], reads: ReadsType, sum_matches: bool, normalize: bool,
+                 name: str = None):
         self.max_edit_distance = max_edit_distance
         self.reference_sequences = reference
         self.reads = reads
@@ -63,7 +66,8 @@ class MatchedSequencesEncoder(DatasetEncoder):
         self.name = name
 
     @staticmethod
-    def _prepare_parameters(max_edit_distance: int, reference: dict, reads: str, sum_matches: bool, normalize: bool, name: str = None):
+    def _prepare_parameters(max_edit_distance: int, reference: dict, reads: str, sum_matches: bool, normalize: bool,
+                            name: str = None):
         location = "MatchedSequencesEncoder"
 
         ParameterValidator.assert_type_and_value(max_edit_distance, int, location, "max_edit_distance", min_inclusive=0)
@@ -84,13 +88,11 @@ class MatchedSequencesEncoder(DatasetEncoder):
 
     @staticmethod
     def build_object(dataset=None, **params):
-        EncoderHelper.check_dataset_type_available_in_mapping(dataset, MatchedSequencesEncoder)
-
-        prepared_parameters = MatchedSequencesEncoder._prepare_parameters(**params)
-        encoder = ReflectionHandler.get_class_by_name(MatchedSequencesEncoder.dataset_mapping[dataset.__class__.__name__],
-                                                          "reference_encoding/")(**prepared_parameters)
-
-        return encoder
+        if isinstance(dataset, RepertoireDataset):
+            prepared_parameters = MatchedSequencesEncoder._prepare_parameters(**params)
+            return MatchedSequencesEncoder(**prepared_parameters)
+        else:
+            raise ValueError("MatchedSequencesEncoder is not defined for dataset types which are not RepertoireDataset.")
 
     def encode(self, dataset, params: EncoderParams):
 
@@ -115,8 +117,111 @@ class MatchedSequencesEncoder(DatasetEncoder):
                 ("labels", tuple(params.label_config.get_labels_by_name())),
                 ("encoding", MatchedSequencesEncoder.__name__),
                 ("learn_model", params.learn_model),
-                ("encoding_params", encoding_params_desc), )
+                ("encoding_params", encoding_params_desc),)
 
-    @abc.abstractmethod
     def _encode_new_dataset(self, dataset, params: EncoderParams):
-        pass
+        encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires, labels=dataset.labels,
+                                            metadata_file=dataset.metadata_file)
+
+        encoded_repertoires, labels = self._encode_repertoires(dataset, params)
+
+        encoded_repertoires = self._normalize(dataset, encoded_repertoires) if self.normalize else encoded_repertoires
+
+        feature_annotations = None if self.sum_matches else self._get_feature_info()
+        feature_names = [f"sum_of_{self.reads.value}_reads"] if self.sum_matches else list(feature_annotations["sequence_desc"])
+
+        encoded_dataset.add_encoded_data(EncodedData(
+            examples=encoded_repertoires,
+            labels=labels,
+            feature_names=feature_names,
+            feature_annotations=feature_annotations,
+            example_ids=[repertoire.identifier for repertoire in dataset.get_data()],
+            encoding=MatchedSequencesEncoder.__name__
+        ))
+
+        return encoded_dataset
+
+    def _normalize(self, dataset, encoded_repertoires):
+        if self.reads == ReadsType.UNIQUE:
+            repertoire_totals = np.asarray([[repertoire.get_element_count() for repertoire in dataset.get_data()]]).T
+        else:
+            repertoire_totals = np.asarray([[sum(repertoire.get_counts()) for repertoire in dataset.get_data()]]).T
+
+        return encoded_repertoires / repertoire_totals
+
+    def _get_feature_info(self):
+        """
+        returns a pandas dataframe containing:
+         - sequence id
+         - chain
+         - amino acid sequence
+         - v gene
+         - j gene
+        """
+
+        features = [[] for i in range(0, self.feature_count)]
+
+        for i, sequence in enumerate(self.reference_sequences):
+            features[i] = [sequence.identifier,
+                           sequence.get_attribute("chain").name.lower(),
+                           sequence.get_sequence(),
+                           sequence.get_attribute("v_gene"),
+                           sequence.get_attribute("j_gene"),
+                           self._get_sequence_desc(sequence)]
+
+        features = pd.DataFrame(features, columns=["sequence_id", "chain", "sequence", "v_gene", "j_gene", "sequence_desc"])
+        if features['sequence_desc'].unique().shape[0] < features.shape[0]:
+            features.loc[:, 'sequence_desc'] = [row['sequence_desc'] + "_" + row['sequence_id'] for ind, row in features.iterrows()]
+
+        return features
+
+    def _get_sequence_desc(self, sequence: ReceptorSequence) -> str:
+        desc = ""
+        if sequence.get_attribute('v_gene') not in [None, ""]:
+            desc += f"{sequence.get_attribute('v_gene')}_"
+
+        desc += sequence.get_sequence()
+
+        if sequence.get_attribute('j_gene') not in ["", None]:
+            desc += f"_{sequence.get_attribute('j_gene')}"
+
+        return desc
+
+    def _encode_repertoires(self, dataset: RepertoireDataset, params):
+        labels = {label: [] for label in params.label_config.get_labels_by_name()} if params.encode_labels else None
+
+        with Pool(params.pool_size) as pool:
+            encoded_repertories = np.array(pool.map(self._get_repertoire_matches_to_reference, dataset.repertoires))
+
+        for repertoire in dataset.repertoires:
+            for label_name in params.label_config.get_labels_by_name():
+                labels[label_name].append(repertoire.metadata[label_name])
+
+        return encoded_repertories, labels
+
+    def _get_repertoire_matches_to_reference(self, repertoire):
+        return CacheHandler.memo_by_params(
+            (("repertoire_identifier", repertoire.identifier),
+             ("encoding", MatchedSequencesEncoder.__name__),
+             ("readstype", self.reads.name),
+             ("sum_matches", self.sum_matches),
+             ("max_edit_distance", self.max_edit_distance),
+             ("reference_sequences", tuple(
+                 [(seq.get_attribute("chain"), seq.get_sequence(), seq.get_attribute("v_gene"), seq.get_attribute("j_gene")) for seq in
+                  self.reference_sequences]))),
+            lambda: self._compute_matches_to_reference(repertoire))
+
+    def _compute_matches_to_reference(self, repertoire: Repertoire):
+        matcher = SequenceMatcher()
+        matches = np.zeros(self.feature_count, dtype=int)
+        rep_seqs = repertoire.sequences
+
+        for i, reference_seq in enumerate(self.reference_sequences):
+
+            for repertoire_seq in rep_seqs:
+                if matcher.matches_sequence(reference_seq, repertoire_seq, max_distance=self.max_edit_distance):
+                    matches_idx = 0 if self.sum_matches else i
+                    match_count = 1 if self.reads == ReadsType.UNIQUE else repertoire_seq.metadata.count
+                    matches[matches_idx] += match_count
+
+        return matches
