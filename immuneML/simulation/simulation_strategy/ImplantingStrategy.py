@@ -28,7 +28,8 @@ class ImplantingStrategy(SimulationStrategy):
             f"{ImplantingStrategy.__name__}: 2 signals per sequence are not supported with implanting strategy."
 
         filtered_sequences = filter_out_illegal_sequences(sequences, sim_item, all_signals,
-                                                          max_signals_per_sequence=0 if remove_positives_first else -1)
+                                                          max_signals_per_sequence=0 if remove_positives_first else -1,
+                                                          max_motifs_per_sequence=1)
 
         remaining_seq_mask, implanted_sequences = self._implant_in_sequences(filtered_sequences, sequence_type, sim_item, seqs_per_signal_count,
                                                                              all_signals, use_p_gens)
@@ -43,7 +44,7 @@ class ImplantingStrategy(SimulationStrategy):
 
     def _remove_invalid(self, processed_seqs, sequence_type, sim_item, all_signals, annotated_dc):
         processed_seqs = annotate_sequences(processed_seqs, sequence_type == SequenceType.AMINO_ACID, all_signals, annotated_dc)
-        return filter_out_illegal_sequences(processed_seqs, sim_item, all_signals, 1)
+        return filter_out_illegal_sequences(processed_seqs, sim_item, all_signals, max_signals_per_sequence=1, max_motifs_per_sequence=1)
 
     def _implant_in_sequences(self, filtered_sequences, sequence_type: SequenceType, sim_item: SimConfigItem, seqs_per_signal_count: dict,
                               all_signals: list, use_p_gens: bool):

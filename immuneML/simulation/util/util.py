@@ -215,8 +215,8 @@ def match_motif(motif: Union[str, LigoPWM], encoding, sequence_array):
     return matches
 
 
-def filter_out_illegal_sequences(sequences, sim_item: SimConfigItem, all_signals: list, max_signals_per_sequence: int):
-    if max_signals_per_sequence > 2:
+def filter_out_illegal_sequences(sequences, sim_item: SimConfigItem, all_signals: list, max_signals_per_sequence: int, max_motifs_per_sequence: int):
+    if max_signals_per_sequence > 2 or max_motifs_per_sequence > 1:
         raise NotImplementedError
     elif max_signals_per_sequence == -1 or all_signals is None or len(all_signals) == 0:
         return sequences
@@ -226,6 +226,8 @@ def filter_out_illegal_sequences(sequences, sim_item: SimConfigItem, all_signals
     signal_matrix = sequences.get_signal_matrix()
     legal_indices = np.logical_and(signal_matrix.sum(axis=1) <= max_signals_per_sequence,
                                    np.array(signal_matrix[:, other_signals] == 0).all(axis=1) if any(other_signals) else 1)
+
+    legal_indices &= np.array([(getattr(sequences, f'{s.id}_positions')[:, 1:] == '1').sum(axis=1) <= max_motifs_per_sequence for s in all_signals]).all(axis=0)
 
     return sequences[legal_indices]
 
