@@ -25,7 +25,27 @@ class GeneratorReport(UnsupervisedMLReport):
         self.sequences = None
         self.alphabet = []
 
-    def _make_dataset_logo(self, data_logo_path):
+    def _make_CharToInt_logo(self, data_logo_path):
+        sequences = self.dataset.encoded_data.examples
+        sequences_alpha = "".join([self.alphabet[i] for i in sequences]).split(" ")
+
+        sequences_by_length = {}
+        for sequence in sequences_alpha:
+            if len(sequence) not in sequences_by_length:
+                sequences_by_length[len(sequence)] = [sequence]
+            else:
+                sequences_by_length[len(sequence)].append(sequence)
+
+        new_sequences = []
+        for sequences in sequences_by_length.values():
+            if len(sequences) > len(new_sequences):
+                new_sequences = sequences
+
+        data_counts = logomaker.alignment_to_matrix(sequences=new_sequences, to_type='counts')
+        logomaker.Logo(data_counts, color_scheme="dmslogo_funcgroup")
+        plt.grid(False)
+        plt.savefig(data_logo_path)
+    def _make_OneHot_logo(self, data_logo_path):
         sequences_by_length = {}
 
         for sequence in self.dataset.encoded_data.examples:
@@ -44,7 +64,7 @@ class GeneratorReport(UnsupervisedMLReport):
 
         alpha_sequences = []
         for sequence in sequences:
-            alpha_sequences.append([self.method.alphabet[i] for i in sequence])
+            alpha_sequences.append([self.alphabet[i] for i in sequence])
 
         sequences = []
         for sequence in alpha_sequences:
@@ -74,25 +94,32 @@ class GeneratorReport(UnsupervisedMLReport):
         plt.grid(False)
         plt.savefig(logo_path)
 
-    def _generate(self) -> ReportResult:
-
+    def _make_report(self) -> ReportResult:
         PathBuilder.build(self.result_path)
         output_figures = []
 
-        generated_sequences = self.result_path / f"{self.name}GeneratedSequences.csv"
-        logo_path = self.result_path / f"{self.name}Logo.png"
-        data_logo_path = self.result_path / f"{self.name}Data_Logo.png"
+        generated_sequences = self.result_path / f"{self.name}_GeneratedSequences.tsv"
+        logo_path = self.result_path / f"{self.name}_GeneratedData_Logo.png"
+        data_logo_path = self.result_path / f"{self.name}_InputData_Logo.png"
 
         data = pd.DataFrame(enumerate(self.sequences), columns=["id", "sequence_aas"])
-        data.to_csv(generated_sequences, index=False)
+        data.to_csv(generated_sequences, index=False, sep='\t')
 
         self._make_generated_logo(logo_path)
         output_figures.append(ReportOutput(logo_path, name="Generated Logo"))
 
         if self.dataset:
-            self._make_dataset_logo(data_logo_path)
-            output_figures.append(ReportOutput(data_logo_path, name="Dataset Logo"))
+            if self.dataset.encoded_data.encoding == "OneHotEncoder":
+                self._make_OneHot_logo(data_logo_path)
+                output_figures.append(ReportOutput(data_logo_path, name="Dataset Logo"))
+            elif self.dataset.encoded_data.encoding == "CharToIntEncoder":
+                self._make_CharToInt_logo(data_logo_path)
+                output_figures.append(ReportOutput(data_logo_path, name="Dataset Logo"))
 
         sequences_to_output = ReportOutput(generated_sequences, name="Generated Sequences")
 
         return ReportResult(self.name, output_figures=output_figures, output_tables=[sequences_to_output])
+
+    def _generate(self) -> ReportResult:
+        return self._make_report()
+

@@ -1,4 +1,4 @@
-numpy>=1.18.5
+numpy>=1.18.5,<=1.23.5
 pytest>=4
 pandas>=1
 PyYAML>=5.3
@@ -12,16 +12,10 @@ airr>=1,<1.4
 fishersapi
 pystache
 torch>=1.5.1
-h5py<=2.10.0
 dill>=0.3
-tqdm>=0.24
 tensorboard>=1.14.0
-requests>=2.21
 plotly>=4
 logomaker>=0.8
 matplotlib-venn>=0.11
 scipy
 Cython
-tensorflow
-pyprind
-keras-tuner

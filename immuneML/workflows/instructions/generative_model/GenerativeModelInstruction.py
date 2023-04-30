@@ -4,6 +4,7 @@ from pathlib import Path
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.reports.ReportResult import ReportResult
+from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
 from immuneML.workflows.instructions.generative_model.GenerativeModelState import GenerativeModelState
@@ -43,8 +44,10 @@ class GenerativeModelInstruction(Instruction):
         encoded_dataset = self.encode(unit, result_path / "encoded_dataset")
         unit.report.dataset = encoded_dataset
         unit.genModel.fit(encoded_dataset.encoded_data, result_path=result_path)
+        print_log(f"Finished training", include_datetime=True)
         unit.genModel.store(result_path)
         unit.generated_sequences = unit.genModel.generate(unit.amount)
+        print_log(f"Finished generation", include_datetime=True)
         unit.report.sequences = unit.generated_sequences
         unit.report.alphabet = unit.genModel.alphabet
         unit.report.method = unit.genModel

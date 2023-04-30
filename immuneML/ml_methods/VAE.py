@@ -2,11 +2,14 @@
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from keras import backend as K
 
 from pathlib import Path
 from immuneML.ml_methods.GenerativeModel import GenerativeModel
 from scripts.specification_util import update_docs_per_mapping
 from immuneML.util.PathBuilder import PathBuilder
+from tensorflow.python.framework.ops import disable_eager_execution
+
 
 class VAE(GenerativeModel):
 
@@ -17,129 +20,106 @@ class VAE(GenerativeModel):
         parameters = parameters if parameters is not None else {}
         parameter_grid = parameter_grid if parameter_grid is not None else {}
         super(VAE, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
-
+        disable_eager_execution()
         self.encoder = None
         self.decoder = None
         self.generated_sequences = []
 
-    def sampling(self, mu_log_variance):
-        mu, log_variance = mu_log_variance
-        epsilon = tf.keras.backend.random_normal(shape=tf.keras.backend.shape(mu), mean=0.0,
-                                                 stddev=1.0)
-        random_sample = mu + tf.keras.backend.exp(log_variance / 2) * epsilon
-        return random_sample
+    def upsampler(self, latent_vector, low_res_dim, min_deconv_dim=21,
+                  n_deconv=3, kernel_size=2, BN=True, dropout=None,
+                  activation='relu', max_filters=336, aim=28):
 
-    def _get_ml_model(self, seq_length, vocab_size, latent_space_dim=2, initial_units=256):
+        low_res_features = min(min_deconv_dim * (2 ** n_deconv), max_filters)
+        h = tf.keras.layers.Dense(low_res_dim * low_res_features, name='upsampler_mlp')(latent_vector)
+        h = tf.keras.layers.Reshape((low_res_dim, low_res_features))(h)
 
-        # Encoder
-        x = tf.keras.layers.Input(shape=(seq_length, vocab_size), name="encoder_input")
+        for i in range(n_deconv):
+            shape = list(h.shape[1:])
+            assert len(shape) == 2, "The input should have a width and a depth dimensions (plus the batch dimensions)"
+            new_shape = shape[:-1] + [1] + [shape[-1]]
+            h = tf.keras.layers.Reshape(new_shape)(h)
+            filters = min(min_deconv_dim * 2 ** (n_deconv - (i + 1)), max_filters)
+            h = tf.keras.layers.Conv2DTranspose(filters,
+                                kernel_size,
+                                strides=(2, 1),
+                                padding='same',
+                                dilation_rate=1,
+                                activation=None,
+                                use_bias=False,
+                                )(h)
+            h = tf.keras.layers.BatchNormalization(momentum=0.9)(h)
 
-        encoder_dense_layer1 = tf.keras.layers.Dense(initial_units)(x)
-        encoder_norm_layer1 = tf.keras.layers.BatchNormalization(name="encoder_norm_1")(encoder_dense_layer1)
-        encoder_activ_layer1 = tf.keras.layers.LeakyReLU(name="encoder_leakyrelu_1")(encoder_norm_layer1)
+            shape = list(h.shape[1:])
+            new_shape = shape[:-2] + [filters]
+            h = tf.keras.layers.Reshape(new_shape)(h)
 
-        encoder_dense_layer2 = tf.keras.layers.Dense(int(initial_units/2))(encoder_activ_layer1)
-        encoder_norm_layer2 = tf.keras.layers.BatchNormalization(name="encoder_norm_2")(encoder_dense_layer2)
-        encoder_activ_layer2 = tf.keras.layers.LeakyReLU(name="encoder_activ_layer_2")(encoder_norm_layer2)
+            h = tf.keras.layers.Dense(h.shape[2], activation='PReLU')(h)
+        h = tf.keras.layers.Flatten()(h)
+        h = tf.keras.layers.Dense(aim * new_shape[1])(h)
+        h = tf.keras.layers.Reshape((aim, new_shape[1]))(h)
+        return h
 
-        encoder_dense_layer3 = tf.keras.layers.Dense(int(initial_units/4))(encoder_activ_layer2)
-        encoder_norm_layer3 = tf.keras.layers.BatchNormalization(name="encoder_norm_3")(encoder_dense_layer3)
-        encoder_activ_layer3 = tf.keras.layers.LeakyReLU(name="encoder_activ_layer_3")(encoder_norm_layer3)
+    def _get_encoder(self, seq_length, vocab_size, latent_space=2, initial_units=256, layers=4, num_filters=21,
+                     max_filters=10000, kernel_size=2, activation='PReLU'):
 
-        encoder_dense_layer4 = tf.keras.layers.Dense(int(initial_units/8))(encoder_activ_layer3)
-        encoder_norm_layer4 = tf.keras.layers.BatchNormalization(name="encoder_norm_4")(encoder_dense_layer4)
-        encoder_activ_layer4 = tf.keras.layers.LeakyReLU(name="encoder_activ_layer_4")(encoder_norm_layer4)
+        x = tf.keras.layers.Input((seq_length, vocab_size), name="encoder_input")
+        for i in range(layers):
+            h = tf.keras.layers.Conv1D(min(num_filters*(2**i), max_filters), kernel_size,
+                                       strides=1 if i==0 else 2)(x)
+            h = tf.keras.layers.BatchNormalization(momentum=0.9)(h)
+            h = tf.keras.layers.Dense(h.shape[2], activation='PReLU')(h)
 
-        # encoder_dense_layer5 = tf.keras.layers.Dense(8)(encoder_activ_layer4)
-        # encoder_norm_layer5 = tf.keras.layers.BatchNormalization(name="encoder_norm_5")(encoder_dense_layer5)
-        # encoder_activ_layer5 = tf.keras.layers.LeakyReLU(name="encoder_activ_layer_5")(encoder_norm_layer5)
+        h = tf.keras.layers.Flatten()(h)
+        z_mean = tf.keras.layers.Dense(latent_space)(h)
+        z_var = tf.keras.layers.Dense(latent_space, activation='softplus')(h)
 
-        encoder_flatten = tf.keras.layers.Flatten()(encoder_activ_layer4)
+        encoder = tf.keras.models.Model(x, [z_mean, z_var])
 
-        encoder_mu = tf.keras.layers.Dense(units=latent_space_dim, name="encoder_mu")(encoder_flatten)
-        encoder_log_variance = tf.keras.layers.Dense(units=latent_space_dim, name="encoder_log_variance")(
-            encoder_flatten)
+        return encoder
 
-        encoder_mu_log_variance_model = tf.keras.models.Model(x, (encoder_mu, encoder_log_variance),
-                                                                      name="encoder_mu_log_variance_model")
+    def _get_decoder(self, seq_length, vocab_size, latent_space=2, ncell=512, project_x=True,
+                               upsample=True, min_deconv_dim=42,
+                               input_dropout=0.45, intermediate_dim=63,
+                               max_filters=336, n_conditions=0,
+                               cond_concat_each_timestep=False):
+        latent_vector = tf.keras.layers.Input((latent_space,))
 
-        encoder_output = tf.keras.layers.Lambda(self.sampling, name="encoder_output")(
-            [encoder_mu, encoder_log_variance])
+        prot_oh = tf.keras.layers.Input((seq_length, vocab_size))
+        input_x = tf.keras.layers.ZeroPadding1D(padding=(1,0))(prot_oh)
+        input_x = tf.keras.layers.Lambda(lambda x_: x_[:,:-1,:])(input_x)
 
-        encoder_normalized_out = tf.keras.layers.BatchNormalization(encoder_output)
+        if input_dropout is not None:
+            input_x = tf.keras.layers.Dropout(input_dropout, noise_shape=(None, seq_length, 1))(input_x)
+        if project_x:
+            input_x = tf.keras.layers.Conv1D(vocab_size, 1, activation=None, name='decoder_x_embed')(input_x)
 
-        encoder = tf.keras.models.Model(x, encoder_output, name="encoder_model")
+        rnn = tf.keras.layers.GRU(ncell, return_sequences=True)
+        if upsample:
+            z_seq = self.upsampler(latent_vector, intermediate_dim, min_deconv_dim=min_deconv_dim,
+                              n_deconv=3, activation='prelu', max_filters=max_filters)
+        else:
+            z_seq = tf.keras.layers.RepeatVector(seq_length)(latent_vector)
 
+        xz_seq = tf.keras.layers.Concatenate(axis=-1)([z_seq, input_x])
+        rnn_out = rnn(xz_seq)
 
-        ##################################################################################################
-        # Decoder
+        processed_x = tf.keras.layers.Conv1D(vocab_size, 1, activation=None, use_bias=True)(rnn_out)
+        output = tf.keras.layers.Activation('softmax')(processed_x)
 
-        decoder_input = tf.keras.layers.Input(shape=(latent_space_dim), name="decoder_input")
-        decoder_dense_layer1 = tf.keras.layers.Dense(units=np.prod((seq_length, int(initial_units/8))))(decoder_input)
+        decoder = tf.keras.models.Model([latent_vector, prot_oh], output)
+        return decoder
 
-        decoder_reshape = tf.keras.layers.Reshape(target_shape=(seq_length, int(initial_units/8)))(decoder_dense_layer1)
-        decoder_norm_layer1 = tf.keras.layers.BatchNormalization(name="decoder_norm_1")(
-            decoder_reshape)
-        decoder_activ_layer1 = tf.keras.layers.LeakyReLU(name="decoder_leakyrelu_1")(decoder_norm_layer1)
+    def _get_ml_model(self):
+        pass
 
-        decoder_dense_layer2 = tf.keras.layers.Dense(int(initial_units/4))(decoder_activ_layer1)
-        decoder_norm_layer2 = tf.keras.layers.BatchNormalization(name="decoder_norm_2")(
-            decoder_dense_layer2)
-        decoder_activ_layer2 = tf.keras.layers.LeakyReLU(name="decoder_leakyrelu_2")(decoder_norm_layer2)
+    def sampler(self, latent_dim, epsilon_std=1):
+        _sampling = lambda z_args: (z_args[0] + K.sqrt(tf.convert_to_tensor(z_args[1] + 1e-8, np.float32)) *
+                                    K.random_normal(shape=K.shape(z_args[0]), mean=0., stddev=epsilon_std))
 
-        decoder_dense_layer3 = tf.keras.layers.Dense(int(initial_units/2))(decoder_activ_layer2)
-        decoder_norm_layer3 = tf.keras.layers.BatchNormalization(name="decoder_norm_3")(
-            decoder_dense_layer3)
-        decoder_activ_layer3 = tf.keras.layers.LeakyReLU(name="decoder_leakyrelu_3")(decoder_norm_layer3)
-
-        flatten = tf.keras.layers.Flatten()(decoder_activ_layer3)
-        decoder_dense_layer4 = tf.keras.layers.Dense(np.prod((seq_length, vocab_size)))(flatten)
-        decoder_reshape_4 = tf.keras.layers.Reshape(target_shape=(seq_length, vocab_size))(decoder_dense_layer4)
-        decoder_output = tf.keras.layers.Dense(vocab_size, activation="softmax", name="decoder_output")(decoder_reshape_4)
-
-        decoder = tf.keras.models.Model(decoder_input, decoder_output, name="decoder_model")
-
-        vae_input = tf.keras.layers.Input(shape=(seq_length, vocab_size), name="VAE_input")
-        vae_encoder_output = encoder(vae_input)
-        vae_decoder_output = decoder(vae_encoder_output)
-
-        vae = tf.keras.models.Model(vae_input, vae_decoder_output, name="VAE")
-
-        self.encoder = encoder
-        self.decoder = decoder
-        self.model = vae
-
-        self.model.compile(optimizer=tf.keras.optimizers.Adam(lr=0.0005),
-                           loss=self.loss_func(encoder_mu, encoder_log_variance))
-
-    def loss_func(self, encoder_mu, encoder_log_variance):
-        def vae_reconstruction_loss(y_true, y_predict):
-            reconstruction_loss_factor = 1000
-            reconstruction_loss = tf.keras.backend.mean(tf.keras.backend.square(y_true - y_predict))
-            return reconstruction_loss_factor * reconstruction_loss
-
-        def vae_kl_loss(encoder_mu, encoder_log_variance):
-            kl_loss = -0.5 * tf.keras.backend.sum(
-                1.0 + encoder_log_variance - tf.keras.backend.square(encoder_mu) - tf.keras.backend.exp(
-                    encoder_log_variance))
-            return kl_loss
-
-        def vae_kl_loss_metric(y_true, y_predict):
-            kl_loss = -0.5 * tf.keras.backend.sum(
-                1.0 + encoder_log_variance - tf.keras.backend.square(encoder_mu) - tf.keras.backend.exp(
-                    encoder_log_variance), axis=1)
-            return kl_loss
-
-        def vae_loss(y_true, y_predict):
-            reconstruction_loss = vae_reconstruction_loss(y_true, y_predict)
-            kl_loss = vae_kl_loss(y_true, y_predict)
-
-            loss = reconstruction_loss + kl_loss
-            return loss
-
-        return vae_loss
+        return tf.keras.layers.Lambda(_sampling, output_shape=(latent_dim,))
 
     def _fit(self, dataset, cores_for_training: int = 1, result_path: Path = None):
+        latent_dim = 2
 
         dataset = np.insert(dataset, 0, 0, axis=2)
 
@@ -159,7 +139,35 @@ class VAE(GenerativeModel):
 
         one_hot = np.array(new_data)
 
-        self._get_ml_model(one_hot.shape[1], one_hot.shape[2], initial_units=32)
+        sampler = self.sampler(latent_dim)
+        self.encoder = self._get_encoder(one_hot.shape[1], one_hot.shape[2])
+        self.decoder = self._get_decoder(one_hot.shape[1], one_hot.shape[2])
+        prot = self.encoder.inputs[0]
+        encoder_inp = [prot]
+        vae_inp = [prot]
+
+        z_mean, z_var = self.encoder(encoder_inp)
+        z = sampler([z_mean, z_var])
+
+        decoder_inp = [z, prot]
+
+        decoded = self.decoder(decoder_inp)
+
+        self.model = tf.keras.models.Model(inputs=vae_inp, outputs=decoded)
+
+        def xent_loss(x, x_d_m):
+            return K.sum(tf.keras.losses.categorical_crossentropy(x, x_d_m), -1)
+
+        def kl_loss(x, x_d_m):
+            return - 0.5 * K.sum(1 + K.log(z_var + 1e-8) - K.square(z_mean) - z_var, axis=-1)
+
+        def vae_loss(x, x_d_m):
+            return xent_loss(x, x_d_m) + kl_loss(x, x_d_m)
+
+        self.model.compile(loss=vae_loss, optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=0.001))
+        print('Protein VAE initialized !')
+
+        #self._get_ml_model(one_hot.shape[1], one_hot.shape[2], initial_units=32)
 
         train_len = int(one_hot.shape[0] / 2)
         x_train = one_hot[:train_len]
@@ -172,51 +180,45 @@ class VAE(GenerativeModel):
 
         self.model.fit(x_train,
                        x_train,
-                       epochs=5,
-                       batch_size=128,
+                       epochs=1,
+                       batch_size=32,
                        shuffle=True,
                        validation_data=(x_test,
                                         x_test),
                        workers=cores_for_training)
 
-        latent = tf.transpose(self.encoder(x_val))
-
-
-        x = latent[0]
-        y = latent[1]
-        print("Xs")
-        for item in x:
-
-            if abs(item) < 100:
-                print(item)
-        print("Ys")
-        for item in y:
-            if abs(item) < 100:
-                print(item)
-
-        plt.scatter(x, y)
-        plt.show()
 
         return self.model
 
-    def generate(self, amount=10, path_to_model: Path = None):
+    def generate(self, amount=10, mean=0, stddev=1, path_to_model: Path = None):
 
-        # Consider different way of getting latent variables
-        fake_latent = np.random.rand(amount, 1, 2)
+        z = mean + stddev * np.random.randn(amount, 2)
+        x, y = z.transpose()
+        plt.scatter(x, y)
+        plt.show()
 
-        gens = []
+        original_dim, alphabet_size = self.decoder.output_shape[1], self.decoder.output_shape[-1]
+        x = np.zeros((z.shape[0], original_dim, alphabet_size))
+        start = 0
+        seqs = ""
 
-        for i in fake_latent:
-            decoded = self.decoder(i)
-            maxed = tf.math.argmax(decoded, axis=2)
-            char_seq = ""
-            for seq in maxed[0]:
-                if seq != 0:
-                    char_seq = char_seq + self.alphabet[seq - 1]
-            gens.append(char_seq)
-        self.generated_sequences = gens
+        for i in range(start, original_dim):
+            # iteration is over positions in sequence, which can't be parallelized
+            pred = self.decoder.predict([z, x])
+            pos_pred = pred[:, i, :]
+            pred_ind = pos_pred.argmax(-1)  # convert probability to index
+            for j, p in enumerate(pred_ind):
+                x[j, i, p] = 1
 
-        return gens
+        sequences = []
+        for sequence in x:
+            char_sequence = ""
+            for position in sequence:
+                if position.argmax() != 0:
+                    char_sequence += self.alphabet[position.argmax()-1]
+            sequences.append(char_sequence)
+
+        return sequences
 
     def get_params(self):
         return self._parameters

@@ -8,25 +8,46 @@ definitions:
         paired: False
         region_type: FULL_SEQUENCE
   encodings:
-    e1: CharToInt
+    cti: CharToInt
+    one_hot: OneHot
   ml_methods:
-    G1:
+    PWM: PWM
+    LSTM_1:
+      LSTM:
+        batch_size: 64
+        rnn_units: 1024
+        embedding_dim: 256
+        epochs: 20
+    LSTM_2:
       LSTM:
         batch_size: 8
         rnn_units: 128
         embedding_dim: 32
         epochs: 5
   reports:
-    GeneratorReport: GeneratorReportLSTM
+    PWM_report: GeneratorReport
+    LSTM_report: GeneratorReportLSTM
 instructions:
-  machine_learning_instruction:
+  generative_instruction:
     type: GenerativeModel
     generators:
-      generator_1:
+      PWM:
         dataset: d1
-        encoding: e1
-        ml_method: G1
-        report: GeneratorReport
+        encoding: one_hot
+        ml_method: PWM
+        report: PWM_report
+        amount: 20000
+      LSTM_1:
+        dataset: d1
+        encoding: cti
+        ml_method: LSTM_1
+        report: LSTM_report
+        amount: 20000
+      LSTM_2:
+        dataset: d1
+        encoding: cti
+        ml_method: LSTM_2
+        report: LSTM_report
         amount: 20000
 
 

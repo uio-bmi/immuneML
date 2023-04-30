@@ -11,7 +11,6 @@ import pyprind
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-import keras_tuner as kt
 
 from pathlib import Path
 from immuneML.ml_methods.GenerativeModel import GenerativeModel
