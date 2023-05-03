@@ -1,0 +1,1 @@
+This is run with a quite large dataset of PDB files. It took 8 hours on my computer to finish.

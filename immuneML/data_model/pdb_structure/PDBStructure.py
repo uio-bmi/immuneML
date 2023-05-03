@@ -21,6 +21,11 @@ class PDBStructure(DatasetItem):
         self.has_imgt_numbering = has_imgt_numbering
         self.start_position = start_position
         self.stop_position = stop_position
+        self.amino_acid_sequence = None
+
+
+    def get_amino_acid_sequence(self):
+        return None
 
     def get_pdb_structure(self):
         return self.pdb_structure

@@ -9,6 +9,7 @@ from immuneML.data_model.dataset.PDBDataset import PDBDataset
 from immuneML.data_model.pdb_structure.PDBStructure import PDBStructure
 from immuneML.data_model.receptor.RegionType import RegionType
 from scripts.specification_util import update_docs_per_mapping
+from immuneML.data_model.receptor.RegionType import RegionType
 
 
 class PDBImport(DataImport):
@@ -33,7 +34,8 @@ class PDBImport(DataImport):
      ##   labels = dict(zip(dataframe.filename, dataframe.sars))
 
 
-        return PDBDataset(pdb_file_paths=paths_to_pdb_structures, file_names=file_names,labels={key: list(set(dataframe[key].values.tolist())) for key in labels}, metadata_file=params.get("metadata_file"))
+        return PDBDataset(pdb_file_paths=paths_to_pdb_structures, file_names=file_names,labels={key: list(set(dataframe[key].values.tolist())) for key in labels}, metadata_file=params.get("metadata_file"), region_type=params.get("region_type"))
+
 
     @staticmethod
     def get_documentation():

@@ -4,10 +4,13 @@ from uuid import uuid4
 import pandas as pd
 import copy
 
+from immuneML.data_model.receptor.ElementGenerator import ElementGenerator
+
 from immuneML.data_model.pdb_structure.PDBStructure import PDBStructure
 from immuneML.environment.Constants import Constants
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.receptor.RegionType import RegionType
 from Bio.PDB import *
 from typing import List
 
@@ -19,9 +22,8 @@ class PDBDataset(Dataset):
     """
 
 
-
     def __init__(self, pdb_file_paths: List= None, file_names: list = None, labels: dict = None, metadata_file: Path = None, encoded_data: EncodedData = None, identifier: str = None,
-                 name: str = None, list_of_PDB_Structures: list = None, element_ids: list = None):
+                 name: str = None, region_type: RegionType = RegionType.FULL_SEQUENCE, list_of_PDB_Structures: list = None, element_ids: list = None):
         super().__init__()
         self.encoded_data = encoded_data
         self.labels = labels
@@ -30,7 +32,9 @@ class PDBDataset(Dataset):
         self.pdb_file_paths = pdb_file_paths
         self.file_names = file_names
         self.metadata_file = metadata_file
+        self.region_type = region_type
         self.list_of_PDB_Structures = self.generate_PDB_Structures()
+
 
 
 
@@ -55,9 +59,14 @@ class PDBDataset(Dataset):
         list_of_PDBStructures = []
 
         for pdb_filepath in self.get_pdb_filepaths():
+            pdb_Parser = PDBParser(
+                PERMISSIVE=True
+            )
+
+            structure = pdb_Parser.get_structure("pdbStructure", pdb_filepath)
             if self.check_if_PDB_file_has_IMGT_numbering(pdb_filepath):
-                list_of_PDBStructures.append(PDBStructure(pdb_filepath, contains_antigen=False, receptor_type="TCR",
-                                                          has_imgt_numbering=True))
+                list_of_PDBStructures.append(PDBStructure(structure, contains_antigen=False, receptor_type="BCR",
+                                                          has_imgt_numbering=True, region_type=self.region_type))
 
             else:
                 id_of_file = self.pdb_file_paths.index(pdb_filepath)
@@ -65,14 +74,15 @@ class PDBDataset(Dataset):
                 try:
                     start_position_from_meta_file = self.get_start_and_stop_position_from_metafile(id_of_file)
                     stop_position_from_meta_file = self.get_start_and_stop_position_from_metafile(id_of_file)
-                    list_of_PDBStructures.append(PDBStructure(pdb_filepath, contains_antigen=False, receptor_type="TCR",
+                    list_of_PDBStructures.append(PDBStructure(structure, contains_antigen=False, receptor_type="BCR",
                                                               has_imgt_numbering=False, start_position=start_position_from_meta_file[0],
-                                                              stop_position=stop_position_from_meta_file[1]))
+                                                              stop_position=stop_position_from_meta_file[1], region_type=self.region_type))
                 except:
 
                     print("Start and stop position column are required in the metadata file for non imgt-numbered PDB files")
 
         return list_of_PDBStructures
+
 
     def get_start_and_stop_position_from_metafile(self,id_of_file):
         start_position = self.get_metadata(["start_position"]).get("start_position")[id_of_file]
@@ -94,6 +104,10 @@ class PDBDataset(Dataset):
             )
             pdb_structure = pdb_parser.get_structure("pdbStructure", current_file)
             yield pdb_structure
+
+    def get_data(self):
+        for files in self.list_of_PDB_Structures:
+            yield files
 
 
     def get_list_of_PDB_structures(self):

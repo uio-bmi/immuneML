@@ -1,9 +1,0 @@
-filename,subject_id,start_position,stop_position,signal_disease
-1u80.pdb,1, 0,0,TRUE
-2p8l.pdb,2, 0,0,TRUE
-2p8m.pdb,3, 0,0, TRUE
-5vic.pdb,4, 0,0, FALSE
-6b0e.pdb,5, 0,0, FALSE
-6phd.pdb,6, 0,0, FALSE
-6xqw.pdb,7, 10,15, FALSE
-6ym0.pdb,8,0,0, TRUE

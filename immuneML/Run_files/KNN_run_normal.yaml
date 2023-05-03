@@ -1,0 +1,34 @@
+definitions:
+  datasets:
+    my_dataset:
+      format: PDB
+      params:
+        path: C:\Users\Wii\Documents\UiO\Master\immuneMLReal\immuneML\Run_files\quickstart_data\KNN_run_normal\pdb_files      # path to the folder containing the repertoire .tsv files
+        metadata_file: C:\Users\Wii\Documents\UiO\Master\immuneMLReal\immuneML\Run_files\quickstart_data\KNN_run_normal\metadata.csv
+        region_type: IMGT_CDR3
+  encodings:
+    my_encoding:
+      DistanceBetweenStructures:
+        name: TM_Score_Distance
+        distance_metric: TM_score
+  ml_methods:
+    my_precomputedKNN: PrecomputedKNN
+
+instructions:
+    my_expl_analysis_instruction: # user-defined instruction name
+      type: TrainMLModel # which instruction to execute
+
+      dataset: my_dataset
+      labels:
+        - RBD
+
+      settings:
+      - encoding: my_encoding
+        ml_method: my_precomputedKNN
+
+      optimization_metric: balanced_accuracy # the metric to optimize during nested cross-validation when comparing multiple models
+      metrics: # other metrics to compute for reference
+        - auc
+        - precision
+        - recall
+

@@ -1,2 +1,0 @@
-immuneML_version: 2.2.3
-Python_version: 3.8.15

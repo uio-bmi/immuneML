@@ -91,7 +91,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
     dataset_mapping = {
         "RepertoireDataset": "KmerFreqRepertoireEncoder",
         "SequenceDataset": "KmerFreqSequenceEncoder",
-        "ReceptorDataset": "KmerFreqReceptorEncoder"
+        "ReceptorDataset": "KmerFreqReceptorEncoder",
+        "PDBDataset": "KmerFreqPDBEncoder"
     }
 
     def __init__(self, normalization_type: NormalizationType, reads: ReadsType, sequence_encoding: SequenceEncodingType, k: int = 0,
