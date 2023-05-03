@@ -143,7 +143,7 @@ class SignificantFeatures(DataReport):
     def _get_positive_negative_classes(self):
         label = self.label_config.get_label_objects()[0]
         positive_class = label.positive_class
-        negative_class = [value for value in label.values if value != positive_class][0]
+        negative_class = label.get_binary_negative_class()
 
         return positive_class, negative_class
 

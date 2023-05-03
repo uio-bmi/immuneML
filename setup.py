@@ -20,10 +20,9 @@ setup(
     author="immuneML Team",
     author_email="milenpa@student.matnat.uio.no",
     url="https://github.com/uio-bmi/immuneML",
-    install_requires=["numpy>=1.18.5", "pytest>=4", "pandas>=1", "PyYAML>=5.3", "scikit-learn>=0.23", "gensim>=3.8,<4", "matplotlib>=3.1",
-                      "editdistance==0.5.3", "regex", "tzlocal", "airr>=1", "pystache", "torch>=1.5.1", "Cython", "h5py<=2.10.0", "dill>=0.3",
-                      "tqdm>=0.24",  # Note: h5py v3 does not work with DeepRC, but works with everything else
-                      "tensorboard>=1.14.0", "requests>=2.21", "plotly>=4", "logomaker>=0.8", "fishersapi", "matplotlib-venn>=0.11", "scipy"],
+    install_requires=["numpy>=1.18.5,<=1.23.5", "pytest>=4", "pandas>=1", "PyYAML>=5.3", "scikit-learn>=0.23", "gensim>=3.8,<4", "matplotlib>=3.1",
+                      "editdistance==0.5.3", "regex", "tzlocal", "airr>=1,<1.4", "fishersapi", "pystache", "torch>=1.5.1", "dill>=0.3",
+                      "tensorboard>=1.14.0", "plotly>=4", "logomaker>=0.8",  "matplotlib-venn>=0.11", "scipy", "Cython"],
     extras_require={
         "TCRdist": ["parasail==1.2", "tcrdist3>=0.1.6"]
     },

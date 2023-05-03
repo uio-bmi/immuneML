@@ -47,7 +47,7 @@ class TestMLMethodTrainer(TestCase):
             optimization_metric="balanced_accuracy"
         ))
 
-        method.predict(EncodedData(np.array([1, 2, 3]).reshape(1, -1)), Label("l1"))
+        method.predict(EncodedData(np.array([1, 2, 3]).reshape(1, -1)), Label("l1", [0, 1]))
         self.assertTrue(os.path.isfile(path / "predictions.csv"))
         self.assertTrue(os.path.isfile(path / "details.yaml"))
 

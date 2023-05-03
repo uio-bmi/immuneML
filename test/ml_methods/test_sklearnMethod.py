@@ -23,7 +23,7 @@ class TestSklearnMethod(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         knn = KNN()
-        knn.fit(EncodedData(examples=sparse.csr_matrix(x), labels=y), Label("default"))
+        knn.fit(EncodedData(examples=sparse.csr_matrix(x), labels=y), Label("default", [1, 0, 2]))
 
         path = EnvironmentSettings.root_path / "test/tmp/loadtestsklearn/"
         PathBuilder.build(path)

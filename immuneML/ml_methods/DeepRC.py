@@ -2,14 +2,12 @@ import hashlib
 import warnings
 from pathlib import Path
 
-import h5py
 import numpy as np
 import pkg_resources
 import torch
 import yaml
 from sklearn.exceptions import NotFittedError
 from sklearn.model_selection import train_test_split
-from tqdm import tqdm
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
@@ -168,6 +166,8 @@ class DeepRC(MLMethod):
         return hdf5_filepath
 
     def _load_dataset_in_ram(self, hdf5_filepath: Path):
+        import h5py
+
         with h5py.File(str(hdf5_filepath), 'r') as hf:
             pre_loaded_hdf5_file = dict()
             pre_loaded_hdf5_file['seq_lens'] = hf['sampledata']['seq_lens'][:]
@@ -307,21 +307,14 @@ class DeepRC(MLMethod):
 
     def predict(self, encoded_data: EncodedData, label: Label):
         probabilities = self.predict_proba(encoded_data, label)
-        predictions = dict()
 
-        classes = self.get_classes()
-        pos_class_probs = probabilities[label.name][:, 0]
-        predictions[label.name] = [classes[0] if probability > 0.5 else classes[1] for probability in pos_class_probs]
+        pos_class_probs = probabilities[label.name][label.positive_class]
+        negative_class = label.get_binary_negative_class()
 
-        if label.positive_class is not None:
-            predictions[label.name] = [pred_class == label.positive_class for pred_class in predictions[label.name]]
-
-        return predictions
+        return {label.name: [label.positive_class if probability > 0.5 else negative_class for probability in pos_class_probs]}
 
     def predict_proba(self, encoded_data: EncodedData, label: Label):
         self.check_is_fitted(label.name)
-
-        probabilities = {}
 
         hdf5_filepath = self._metadata_to_hdf5(encoded_data.info["metadata_filepath"], label.name)
         pre_loaded_hdf5_file = self._load_dataset_in_ram(hdf5_filepath) if self.keep_dataset_in_ram else None
@@ -329,12 +322,15 @@ class DeepRC(MLMethod):
         test_dataloader = self.make_data_loader(hdf5_filepath, pre_loaded_hdf5_file, indices=None, label_name=label.name, eval_only=True, is_train=False)
 
         probs_pos_class = self._model_predict(self.model, test_dataloader)
-        probabilities[label.name] = np.vstack((probs_pos_class, 1 - probs_pos_class)).T
 
-        return probabilities
+        return {label.name: {label.positive_class: probs_pos_class,
+                             label.get_binary_negative_class(): 1 - probs_pos_class}}
+
 
     def _model_predict(self, model, dataloader):
         """Based on the DeepRC function evaluate (deeprc.deeprc_binary.training.evaluate)"""
+        from tqdm import tqdm
+
         with torch.no_grad():
             model.to(device=self.pytorch_device)
             scoring_predictions = []
@@ -398,7 +394,8 @@ class DeepRC(MLMethod):
                 "classes": self.get_classes()
             }
             if self.label is not None:
-                desc["label"] = vars(self.label)
+                desc["label"] = self.label.get_desc_for_storage()
+
             yaml.dump(desc, file)
 
     def check_if_exists(self, path):
