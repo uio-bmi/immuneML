@@ -104,15 +104,11 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         self.context = None
         self.compairr_sequence_presence = None
 
-        self.compairr_params = CompAIRRParams(compairr_path=Path(compairr_path),
-                                              keep_compairr_input=True,
-                                              differences=0,
-                                              indels=False,
-                                              ignore_counts=True,
-                                              ignore_genes=ignore_genes,
-                                              threads=threads,
-                                              output_filename=None,
-                                              log_filename=None)
+        self.compairr_params = CompAIRRParams(compairr_path=Path(compairr_path), keep_compairr_input=True,
+                                              differences=0, indels=False,
+                                              ignore_counts=True, ignore_genes=ignore_genes,
+                                              threads=threads, output_filename=None,
+                                              log_filename=None, output_pairs=False, pairs_filename=None)
 
     @staticmethod
     def _prepare_parameters(p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, keep_temporary_files: bool,  threads: int,
