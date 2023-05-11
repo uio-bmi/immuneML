@@ -13,6 +13,6 @@ instructions:
       generator_1:
         ml_method: G1
         report: GeneratorReport
-        path: LSTM_out_1024/machine_learning_instruction/analysis_generator_1
+        path: LSTM_out/machine_learning_instruction/analysis_generator_1
 
 

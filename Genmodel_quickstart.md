@@ -8,8 +8,7 @@ classification of adaptive immune receptors and repertoires (AIRR).
 
 This branch of immuneML focuses on Generative Models and their use within immunology.
 Following is an introduciton to the Generative Models that have been included and how 
-to utilize them. As this is a WIP this document will continually be updated as it is developed.
-If any information in this document is out of date please inform us as soon as possible.
+to utilize them.
 
 In order to utilize the generative models download this branch of immuneML, either downloading as a zip, or cloning the 
 repository.
@@ -19,7 +18,7 @@ repository.
 git clone https://github.com/uio-bmi/immuneML
 ```
 
-Then checkout to the correct branch (name is also WIP):
+Then checkout to the correct branch:
 
 ```bash
 git checkout GenerativeModelsWUnsupervisedLearning
@@ -39,7 +38,7 @@ immuneML as a whole has many unique usages, most of which is not touched upon wi
 you wish to know more about these see the README.md in the master branch: https://github.com/uio-bmi/immuneML
 
 There are two main usages of Generative Models in immuneML, training and generation.
-Both generates as many sequences as specified, or 10 if not specified.
+Both generates as many sequences as specified, or 100 if not specified.
 The difference in the two is one requires a dataset in order to train the model first, while the other can take a finished
 model as input.
 
@@ -47,32 +46,31 @@ model as input.
 
 Within the Generative Models branch are a few files and directories, not found elsewhere in immuneML which can be
 used to run a quickstart.<br/>
-There are four YAML specifications, two for PWM and two for LSTM, one for training and one for generation.
-There are also some directories containing previously trained models, and dataset containing repertoires inteded for training new models.
+There are six YAML specifications, two for each type of generative model implemented, one for training and one for generation.
+In order to execute the YAML files for loading, models first need to be trained and then referenced in the yaml.
 
-The files generative_LSTM and generative_PWM are to be run for training, and the files with the added _load are used for loaing existing models.
+The files generative_LSTM, generative_VAE, and generative_PWM are to be run for training, and the files with the added _load are used for loading existing models.
 Within the training yamls there is little room for variation. They only work using the given encoding, and using repertoires.
 The LSTM can be modified using the optional parameters of rnn_units and epochs. Moreover, every generative model can produce a requested amount of sequences
-using the amount parameter in the instruction part of the yaml. If left unspecified, 10 is set as standard.
+using the amount parameter in the instruction part of the yaml. If left unspecified, 100 is set as standard.
 
 #### generative_PWM.yml
 ```yaml
 definitions:
   datasets:
     d1:
-      format: AIRR
+      format: Generic
       params:
-        path: PWM_dataset/my_dataset_export_instruction/d1/AIRR
-        metadata_file: PWM_dataset/my_dataset_export_instruction/d1/AIRR/metadata.csv
-        is_repertoire: True
+        path: datasets/sequences_under_30.tsv
+        is_repertoire: False
+        paired: False
+        region_type: FULL_SEQUENCE
   encodings:
-    e1: TextAsInt
+    e1: OneHot
   ml_methods:
-    G1:
-      PWM:
-        cores_for_training: 2
+    G1: PWM
   reports:
-    GeneratorReport: GeneratorReportPWM
+    GeneratorReport: GeneratorReport
 instructions:
   machine_learning_instruction:
     type: GenerativeModel
@@ -87,13 +85,15 @@ instructions:
 Furthemore, the specification for only generation, using an existing model looks like this.
 #### generative_load_quickstart.yml
 ```yaml
+
 definitions:
   ml_methods:
     G1:
-      PWM:
+      LSTM:
         cores_for_training: 2
+        amount: 200
   reports:
-    GeneratorReport: GeneratorReportPWM
+    GeneratorReport: GeneratorReportLSTM
 instructions:
   machine_learning_instruction:
     type: GenerativeModelLoad
@@ -101,15 +101,15 @@ instructions:
       generator_1:
         ml_method: G1
         report: GeneratorReport
-        path: existing_PWM_model/machine_learning_instruction/analysis_generator_1
+        path: LSTM_out/machine_learning_instruction/analysis_generator_1
 ```
 
 #### Report
 
-So far there are three different reports that can be used on the genrative models, GeneratorReport, GeneratorReportLSTM and GeneratorReportPWM.
-GeneratorReport can be used on all generative models but relays little information. While GeneratorReportPWM is tailored 
-for the PWM and displayes useful graphics. These reports can be found in the output directory specified when running the
-program. The LSTM report also contains a loss graph showing the improvements of the models over each epoch.
+So far there are two different reports that can be used on the genrative models, GeneratorReport and NeuralNetGeneratorReport.
+GeneratorReport can be used on all generative models but relays little information. While NeuralNetGeneratorReport is tailored 
+for the generative models that produce loss values. These reports can be found in the output directory specified when running the
+program.
 
 ### Overview of input, analyses and results
 
