@@ -1,0 +1,16 @@
+field_list:
+- sequence_aas
+- sequences
+- v_genes
+- j_genes
+- v_subgroups
+- j_subgroups
+- v_alleles
+- j_alleles
+- chains
+- counts
+- region_types
+- sequence_identifiers
+filename: repertoires/rep33.tsv
+identifier: rep33
+subject_id: rep33

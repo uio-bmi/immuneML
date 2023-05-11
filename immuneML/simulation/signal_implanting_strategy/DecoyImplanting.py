@@ -22,15 +22,23 @@ from immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy imp
 class DecoyImplanting(SignalImplantingStrategy):
     """
     This class represents a :py:obj:`~immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`
-    where signals will be implanted in the repertoire by replacing `repertoire_implanting_rate` percent of the sequences with sequences
-    generated from the motifs of the signal. Motifs here cannot include gaps and the motif instances are the full sequences and will be
-    a part of the repertoire.
+    where signals will be implanted in the repertoire by appending or replacing `repertoire_implanting_rate` percent of the sequences with sequences
+    generated from the motifs of the signal. Decoy sequences are implanted along with these signal sequences in both healthy and diseased repertoires.
 
-    Note: when providing the sequence to be implanted, check if the import setting regarding the sequence type (CDR3 vs IMGT junction) matches
-    the sequence to be implanted. For example, if importing would convert junction sequences to CDR3, but the sequence specified here for implanting
-    would be the junction, the results of the simulation could be inconsistent.
+    Notes:
+        - The sequence type must be IMGT junction
 
-    Arguments: this signal implanting strategy has no arguments.
+    Arguments:
+
+        implanting: name of the implanting strategy, here Decoy
+
+        nr_of_decoys (int): The number of distinct decoy sequences to generate
+
+        dataset_implanting_rate_per_decoy (float): The percent of repertoires in the dataset to implant each decoy in
+
+        repertoire_implanting_rate_per_decoy (float): Each decoy is implanted `repertoire_implanting_rate_per_decoy` percent of the sequences
+        in each repertoire
+
 
     YAML specification:
 
@@ -45,7 +53,11 @@ class DecoyImplanting(SignalImplantingStrategy):
             my_signal:
                 motifs:
                     - my_motif
-                implanting: FullSequence
+                implanting :
+                    Decoy :
+                        nr_of_decoys : 100
+                        dataset_implanting_rate_per_decoy: 0.5
+                        repertoire_implanting_rate_per_decoy: 0.001
 
     """
 

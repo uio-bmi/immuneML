@@ -1,0 +1,42 @@
+definitions:
+  datasets:
+    my_dataset: # user-defined dataset name
+      format: OLGA
+      params:
+        region_type: IMGT_JUNCTION # we use the full sequence
+        is_repertoire: true # we are importing a repertoire dataset
+        path: . # path to the repertoires-directory
+        metadata_file: metadata.csv # path to metadata
+  motifs :
+    seq_with_low_pgen:
+      seed : CAPTALDRATWKRSPLQEQYF
+      v_call : TRBV7-2
+      j_call : TRBJ2-7
+      instantiation : GappedKmer
+  signals:
+    signal_with_pgen_outlier:
+      motifs:
+        - seq_with_low_pgen
+      implanting: 
+        Decoy:
+          nr_of_decoys: 100
+          overwrite_sequences: False
+          dataset_implanting_rate_per_decoy: 0.05
+          repertoire_implanting_rate_per_decoy: 0.001
+      sequence_position_weights:
+        0: 1
+
+  simulations:
+    my_simulation:
+      my_implanting:
+        signals:
+          - signal_with_pgen_outlier
+        dataset_implanting_rate: 0.05 # implanting in 5 percent of the repertoires
+        repertoire_implanting_rate: 0.001
+
+instructions:
+  my_simulation_instruction:
+    type: Simulation
+    dataset: my_dataset
+    simulation: my_simulation
+    export_formats: [AIRR] # export the simulated dataset to these formats

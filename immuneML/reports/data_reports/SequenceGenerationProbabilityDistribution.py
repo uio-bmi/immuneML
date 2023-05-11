@@ -25,7 +25,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class SequenceGenerationProbabilityDistribution(DataReport):
     """
-    Generates a plot of the distribution of generation probability and appearance rate of the sequences in a RepertoireDataset.
+    Generates a plot of the distribution of generation probability and number of occurrences of the sequences in a RepertoireDataset.
 
     Arguments:
         count_by_repertoire (bool): Whether to have the appearance rate of a sequence be decided by how many repertoires it
@@ -363,7 +363,8 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
         path = self.result_path / "occurrence_limit_pgen_range.csv"
 
-        occurrence_limit_df = dataset_df.loc[dataset_df["pgen"] > 0][dataset_df["count"] > 1].groupby(["count"])[
+        non_implanted_df = dataset_df.loc[dataset_df["label"] == self.default_sequence_label]
+        occurrence_limit_df = non_implanted_df.loc[non_implanted_df["pgen"] > 0][non_implanted_df["count"] > 1].groupby(["count"])[
             "pgen"].min().to_frame()
 
         lowest_pgen = None

@@ -1,0 +1,22 @@
+field_list:
+- stop_codon
+- productive
+- DecoyImplanting
+- vj_in_frame
+- sequence_aas
+- sequences
+- v_genes
+- j_genes
+- v_subgroups
+- j_subgroups
+- v_alleles
+- j_alleles
+- chains
+- counts
+- region_types
+- frame_types
+- sequence_identifiers
+filename: repertoires\4c7d8a7f466d42129e3626d6336f64bf.tsv
+identifier: 4c7d8a7f466d42129e3626d6336f64bf
+signal_with_pgen_outlier: false
+subject_id: rep65

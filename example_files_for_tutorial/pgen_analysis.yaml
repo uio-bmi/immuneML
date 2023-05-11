@@ -1,0 +1,22 @@
+definitions:
+  datasets:
+    my_dataset: # user-defined dataset name
+      format: AIRR
+      params:
+        region_type: IMGT_JUNCTION
+        is_repertoire: true # we are importing a repertoire dataset
+        path: C:\Users\Olav\Desktop\OLGA_DATA_FOR_THESIS\dataset_with_mutated_implant\my_simulation_instruction\exported_dataset\airr
+        metadata_file: C:\Users\Olav\Desktop\OLGA_DATA_FOR_THESIS\dataset_with_mutated_implant\my_simulation_instruction\exported_dataset\airr\metadata.csv
+  reports:
+    my_data_report:
+      SequenceGenerationProbabilityDistribution:
+        default_sequence_label: OLGA
+
+instructions:
+  my_expl_analysis_instruction: # user-defined instruction name
+    type: ExploratoryAnalysis # which instruction to execute
+    analyses: # analyses to perform
+      my_analysis: # user-defined name of the analysis
+        dataset: my_dataset
+        report: my_data_report
+    number_of_processes: 4 # number of processes to use

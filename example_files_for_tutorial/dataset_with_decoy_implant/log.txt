@@ -1,0 +1,34 @@
+2023-05-11 17:44:23,418 INFO: Setting temporary cache path to dataset_with_decoy_implant\cache
+2023-05-11 17:44:23,418 INFO: ImmuneML: parsing the specification...
+
+2023-05-11 17:44:23,434 INFO: --- Entering: _parse_motif with parameters ('seq_with_low_pgen', {'seed': 'CAPTALDRATWKRSPLQEQYF', 'v_call': 'TRBV7-2', 'j_call': 'TRBJ2-7', 'instantiation': 'GappedKmer'})
+2023-05-11 17:44:23,497 INFO: --- Exiting: _parse_motif
+2023-05-11 17:44:23,497 INFO: --- Entering: parse_signals with parameters ({'signal_with_pgen_outlier': {'motifs': ['seq_with_low_pgen'], 'implanting': {'Decoy': {'nr_of_decoys': 100, 'overwrite_sequences': False, 'dataset_implanting_rate_per_decoy': 0.05, 'repertoire_implanting_rate_per_decoy': 0.001}}, 'sequence_position_weights': {0: 1}}}, SymbolTable())
+2023-05-11 17:44:23,519 INFO: DefaultParams: no default parameters were found for DecoyImplanting. Proceeding...
+2023-05-11 17:44:23,566 INFO: --- Exiting: parse_signals
+2023-05-11 17:44:23,566 INFO: --- Entering: _parse_simulation with parameters ('my_simulation', {'my_implanting': {'signals': ['signal_with_pgen_outlier'], 'dataset_implanting_rate': 0.05, 'repertoire_implanting_rate': 0.001}}, SymbolTable())
+2023-05-11 17:44:23,566 INFO: --- Exiting: _parse_simulation
+2023-05-11 17:44:23,566 INFO: --- Entering: _parse_dataset with parameters ('my_dataset', {'format': 'OLGA', 'params': {'region_type': 'IMGT_JUNCTION', 'is_repertoire': True, 'path': '.', 'metadata_file': 'metadata.csv'}}, SymbolTable(), WindowsPath('dataset_with_decoy_implant'))
+2023-05-11 17:44:55,001 INFO: --- Exiting: _parse_dataset
+2023-05-11 17:44:55,001 INFO: --- Entering: parse_instruction with parameters ('my_simulation_instruction', {'type': 'Simulation', 'dataset': 'my_dataset', 'simulation': 'my_simulation', 'export_formats': ['AIRR']}, SymbolTable(), WindowsPath('dataset_with_decoy_implant'))
+2023-05-11 17:44:55,355 INFO: --- Exiting: parse_instruction
+2023-05-11 17:44:55,416 INFO: Full specification is available at dataset_with_decoy_implant\full_decoy_implanting.yaml.
+
+2023-05-11 17:44:55,416 INFO: ImmuneML: starting the analysis...
+
+2023-05-11 17:44:55,416 INFO: Instruction 1/1 has started.
+2023-05-11 17:44:55,440 INFO: Processing rep 1 of 5
+2023-05-11 17:44:55,440 INFO: Processing dbe9b092eb944374a0676bcd886689ef. Signal: signal_with_pgen_outlier
+2023-05-11 17:44:55,618 INFO: Processing rep 2 of 5
+2023-05-11 17:44:55,618 INFO: Processing f2a367b396bf4114915b995af17f1495. Signal: signal_with_pgen_outlier
+2023-05-11 17:44:55,687 INFO: Processing rep 3 of 5
+2023-05-11 17:44:55,687 INFO: Processing 14b91b145b814d0a9d724cb246be1721. Signal: signal_with_pgen_outlier
+2023-05-11 17:44:55,819 INFO: Processing rep 4 of 5
+2023-05-11 17:44:55,819 INFO: Processing 80889097445647bb99698448eb5c0f25. Signal: signal_with_pgen_outlier
+2023-05-11 17:44:55,957 INFO: Processing rep 5 of 5
+2023-05-11 17:44:55,957 INFO: Processing be14b37b9948443aaae678d18037c9f9. Signal: signal_with_pgen_outlier
+2023-05-11 17:45:36,221 INFO: Instruction 1/1 has finished.
+2023-05-11 17:45:36,252 INFO: Generating HTML reports...
+2023-05-11 17:45:39,198 INFO: HTML reports are generated.
+2023-05-11 17:45:39,198 INFO: ImmuneML: finished analysis.
+

@@ -1,0 +1,22 @@
+field_list:
+- vj_in_frame
+- stop_codon
+- productive
+- signal_with_pgen_outlier
+- sequence_aas
+- sequences
+- v_genes
+- j_genes
+- v_subgroups
+- j_subgroups
+- v_alleles
+- j_alleles
+- chains
+- counts
+- region_types
+- frame_types
+- sequence_identifiers
+filename: repertoires\e950b9af3fe54dd38139f6371c81ac47.tsv
+identifier: e950b9af3fe54dd38139f6371c81ac47
+signal_with_pgen_outlier: true
+subject_id: rep3

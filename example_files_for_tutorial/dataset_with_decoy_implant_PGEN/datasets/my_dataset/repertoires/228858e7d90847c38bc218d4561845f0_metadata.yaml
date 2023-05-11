@@ -1,0 +1,22 @@
+field_list:
+- stop_codon
+- productive
+- DecoyImplanting
+- vj_in_frame
+- sequence_aas
+- sequences
+- v_genes
+- j_genes
+- v_subgroups
+- j_subgroups
+- v_alleles
+- j_alleles
+- chains
+- counts
+- region_types
+- frame_types
+- sequence_identifiers
+filename: repertoires\228858e7d90847c38bc218d4561845f0.tsv
+identifier: 228858e7d90847c38bc218d4561845f0
+signal_with_pgen_outlier: false
+subject_id: rep29

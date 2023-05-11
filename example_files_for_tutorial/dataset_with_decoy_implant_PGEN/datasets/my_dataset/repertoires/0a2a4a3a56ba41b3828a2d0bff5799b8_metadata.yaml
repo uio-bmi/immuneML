@@ -1,0 +1,22 @@
+field_list:
+- stop_codon
+- productive
+- DecoyImplanting
+- vj_in_frame
+- sequence_aas
+- sequences
+- v_genes
+- j_genes
+- v_subgroups
+- j_subgroups
+- v_alleles
+- j_alleles
+- chains
+- counts
+- region_types
+- frame_types
+- sequence_identifiers
+filename: repertoires\0a2a4a3a56ba41b3828a2d0bff5799b8.tsv
+identifier: 0a2a4a3a56ba41b3828a2d0bff5799b8
+signal_with_pgen_outlier: false
+subject_id: rep22

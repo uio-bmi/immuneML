@@ -1,0 +1,22 @@
+field_list:
+- stop_codon
+- productive
+- DecoyImplanting
+- vj_in_frame
+- sequence_aas
+- sequences
+- v_genes
+- j_genes
+- v_subgroups
+- j_subgroups
+- v_alleles
+- j_alleles
+- chains
+- counts
+- region_types
+- frame_types
+- sequence_identifiers
+filename: repertoires\5e1f8274b50f4901836c22e8ff7ae62c.tsv
+identifier: 5e1f8274b50f4901836c22e8ff7ae62c
+signal_with_pgen_outlier: false
+subject_id: rep18

@@ -1,0 +1,34 @@
+2023-05-11 18:34:28,845 INFO: Setting temporary cache path to dataset_with_mutated_implant\cache
+2023-05-11 18:34:28,860 INFO: ImmuneML: parsing the specification...
+
+2023-05-11 18:34:28,898 INFO: --- Entering: _parse_motif with parameters ('seq_with_low_pgen', {'seed': 'CAPTALDRATWKRSPLQEQYF', 'v_call': 'TRBV7-2', 'j_call': 'TRBJ2-7', 'mutation_position_possibilities': {4: 0.1, 5: 0.1, 6: 0.1, 7: 0.1, 8: 0.1, 9: 0.1, 10: 0.1, 11: 0.1, 12: 0.1, 13: 0.1}, 'instantiation': 'GappedKmer'})
+2023-05-11 18:34:30,185 INFO: --- Exiting: _parse_motif
+2023-05-11 18:34:30,185 INFO: --- Entering: parse_signals with parameters ({'signal_with_pgen_outlier': {'motifs': ['seq_with_low_pgen'], 'implanting': {'MutatedSequence': {'mutation_hamming_distance': 2, 'occurrence_limit_pgen_range': {1.0167556408918248e-11: 2, 1.671167468445542e-09: 4, 1.7699642495296634e-08: 5, 2.3559356353530645e-08: 6}, 'overwrite_sequences': False}}, 'sequence_position_weights': {0: 1}}}, SymbolTable())
+2023-05-11 18:34:30,216 INFO: DefaultParams: no default parameters were found for MutatedSequenceImplanting. Proceeding...
+2023-05-11 18:34:31,218 INFO: --- Exiting: parse_signals
+2023-05-11 18:34:31,218 INFO: --- Entering: _parse_simulation with parameters ('my_simulation', {'my_implanting': {'signals': ['signal_with_pgen_outlier'], 'dataset_implanting_rate': 0.05, 'repertoire_implanting_rate': 0.001}}, SymbolTable())
+2023-05-11 18:34:31,218 INFO: --- Exiting: _parse_simulation
+2023-05-11 18:34:31,218 INFO: --- Entering: _parse_dataset with parameters ('my_dataset', {'format': 'OLGA', 'params': {'region_type': 'IMGT_JUNCTION', 'is_repertoire': True, 'path': '.', 'metadata_file': 'metadata.csv'}}, SymbolTable(), WindowsPath('dataset_with_mutated_implant'))
+2023-05-11 18:34:48,923 INFO: --- Exiting: _parse_dataset
+2023-05-11 18:34:48,923 INFO: --- Entering: parse_instruction with parameters ('my_simulation_instruction', {'type': 'Simulation', 'dataset': 'my_dataset', 'simulation': 'my_simulation', 'export_formats': ['AIRR']}, SymbolTable(), WindowsPath('dataset_with_mutated_implant'))
+2023-05-11 18:34:49,301 INFO: --- Exiting: parse_instruction
+2023-05-11 18:34:49,317 INFO: Full specification is available at dataset_with_mutated_implant\full_mutated_seq_implanting.yaml.
+
+2023-05-11 18:34:49,323 INFO: ImmuneML: starting the analysis...
+
+2023-05-11 18:34:49,323 INFO: Instruction 1/1 has started.
+2023-05-11 18:34:49,771 INFO: Processing rep 1 of 5
+2023-05-11 18:34:49,771 INFO: Processing d8890eecb5e549b99b04c4d056cda9ec. Signal: signal_with_pgen_outlier
+2023-05-11 18:34:50,225 INFO: Processing rep 2 of 5
+2023-05-11 18:34:50,225 INFO: Processing 53562618f29940c8b4b9643cef6261cb. Signal: signal_with_pgen_outlier
+2023-05-11 18:34:50,419 INFO: Processing rep 3 of 5
+2023-05-11 18:34:50,419 INFO: Processing f62cdadf1bc14a3eb8684f95725126d5. Signal: signal_with_pgen_outlier
+2023-05-11 18:34:50,601 INFO: Processing rep 4 of 5
+2023-05-11 18:34:50,601 INFO: Processing dcd6128f0df5439398900b744e5644ca. Signal: signal_with_pgen_outlier
+2023-05-11 18:34:50,805 INFO: Processing rep 5 of 5
+2023-05-11 18:34:50,805 INFO: Processing 0317cd6651894dc2a6a75c08b643dd64. Signal: signal_with_pgen_outlier
+2023-05-11 18:35:21,758 INFO: Instruction 1/1 has finished.
+2023-05-11 18:35:21,780 INFO: Generating HTML reports...
+2023-05-11 18:35:23,933 INFO: HTML reports are generated.
+2023-05-11 18:35:23,964 INFO: ImmuneML: finished analysis.
+

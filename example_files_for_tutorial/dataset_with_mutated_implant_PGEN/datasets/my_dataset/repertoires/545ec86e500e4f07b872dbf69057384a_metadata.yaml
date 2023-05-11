@@ -1,0 +1,21 @@
+field_list:
+- vj_in_frame
+- stop_codon
+- productive
+- sequence_aas
+- sequences
+- v_genes
+- j_genes
+- v_subgroups
+- j_subgroups
+- v_alleles
+- j_alleles
+- chains
+- counts
+- region_types
+- frame_types
+- sequence_identifiers
+filename: repertoires\545ec86e500e4f07b872dbf69057384a.tsv
+identifier: 545ec86e500e4f07b872dbf69057384a
+signal_with_pgen_outlier: false
+subject_id: rep47

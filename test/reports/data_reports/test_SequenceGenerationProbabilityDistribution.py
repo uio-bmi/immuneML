@@ -84,7 +84,28 @@ class TestSequenceGenerationProbabilityDistribution(TestCase):
             self.assertLess(pgen, 1)
 
     def test_count_sequences(self):
+
+        repertoire = Repertoire.build(self.sequences,
+                                      v_genes=self.v_genes,
+                                      j_genes=self.j_genes,
+                                      region_types=[RegionType.IMGT_JUNCTION for _ in range(3)],
+                                      counts=self.counts,
+                                      path=self.path)
+
+        repertoire2 = Repertoire.build(self.sequences,
+                                      v_genes=self.v_genes,
+                                      j_genes=self.j_genes,
+                                      region_types=[RegionType.IMGT_JUNCTION for _ in range(3)],
+                                      counts=self.counts,
+                                      path=self.path)
+
+        self.repertoire_dataset = RepertoireDataset(repertoires=[repertoire, repertoire2])
+
+        self.sgpd = SequenceGenerationProbabilityDistribution(self.repertoire_dataset, self.path,
+                                                              default_sequence_label=self.label,
+                                                              mark_implanted_labels=False)
+
         df = self.sgpd._load_dataset_dataframe()
         df = self.sgpd._get_sequence_count(df)
 
-        self.assertCountEqual(df["count"], self.counts)
+        self.assertCountEqual(df["count"], [x*2 for x in self.counts])

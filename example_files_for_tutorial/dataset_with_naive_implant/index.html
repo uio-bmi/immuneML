@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>immuneML: Simulation Overview</title>
+
+    <style>
+
+        /**
+
+
+
+*** SIMPLE GRID
+
+
+
+*** (C) ZACH COLE 2016
+
+
+
+**/
+
+
+
+
+
+
+
+@import url(https://fonts.googleapis.com/css?family=Lato:400,300,300italic,400italic,700,700italic);
+
+
+
+
+
+
+
+/* UNIVERSAL */
+
+
+
+
+
+
+
+html,
+
+
+
+body {
+
+
+
+  height: 100%;
+
+
+
+  width: 100%;
+
+
+
+  margin: 0;
+
+
+
+  padding: 0;
+
+
+
+  left: 0;
+
+
+
+  top: 0;
+
+
+
+  font-size: 100%;
+
+
+
+  font-family: 'Lato', Helvetica, sans-serif;
+
+
+
+  color: #333447;
+
+
+
+  line-height: 1.2;
+
+
+
+}
+
+
+
+
+
+
+
+/* TYPOGRAPHY */
+
+
+
+
+
+
+
+h1 {
+
+
+
+  font-size: 2.5rem;
+
+
+
+}
+
+
+
+
+
+
+
+h2 {
+
+
+
+  font-size: 2rem;
+
+
+
+}
+
+
+
+
+
+
+
+h3 {
+
+
+
+  font-size: 1.375rem;
+
+
+
+}
+
+
+
+
+
+
+
+h4 {
+
+
+
+  font-size: 1.125rem;
+
+
+
+}
+
+
+
+
+
+
+
+h5 {
+
+
+
+  font-size: 1rem;
+
+
+
+}
+
+
+
+
+
+
+
+h6 {
+
+
+
+  font-size: 0.875rem;
+
+
+
+}
+
+
+
+
+
+
+
+h1, h2, h3, h4, h5, h6 {
+
+
+
+    font-weight: normal;
+
+
+
+}
+
+
+
+
+
+
+
+p {
+
+
+
+  font-size: 1.125rem;
+
+
+
+  font-weight: 200;
+
+
+
+  line-height: 1.8;
+
+
+
+}
+
+
+
+
+
+
+
+a {
+
+
+
+    color: #25537b;
+
+
+
+    text-decoration: none;
+
+
+
+    background-color: transparent;
+
+
+
+}
+
+
+
+
+
+
+
+a:hover {
+
+
+
+    text-decoration: underline;
+
+
+
+}
+
+
+
+
+
+
+
+.center {
+
+
+
+  text-align: center;
+
+
+
+  margin-left: auto;
+
+
+
+  margin-right: auto;
+
+
+
+}
+
+
+
+
+
+
+
+.container {
+
+
+
+  max-width: 1200px;
+
+
+
+  margin-left: auto;
+
+
+
+  margin-right: auto;
+
+
+
+  padding: 1em;
+
+
+
+}
+
+
+
+
+
+
+
+/* immuneML custom */
+
+
+
+
+
+
+
+table, td, th {
+
+
+
+    border: 1px solid #cccccc;
+
+
+
+}
+
+
+
+
+
+
+
+table {
+
+
+
+    border-collapse: collapse;
+
+
+
+}
+
+
+
+
+
+
+
+td, th {
+
+
+
+    padding: 0.4em;
+
+
+
+    text-align: center;
+
+
+
+}
+
+
+
+
+
+
+
+img {
+
+
+
+    max-height: 100%;
+
+
+
+    max-width: 100%;
+
+
+
+}
+
+
+
+
+
+
+
+details {
+
+
+
+    margin: 0.7em 0;
+
+
+
+}
+
+
+
+
+
+
+
+details > summary {
+
+
+
+    cursor: pointer;
+
+
+
+}
+
+
+
+
+
+
+
+details > summary > h3 {
+
+
+
+    display: inline-block;
+
+
+
+}
+
+
+
+
+
+
+
+details > summary:focus{
+
+
+
+    outline: none;
+
+
+
+}
+
+
+
+
+
+
+
+details > table {
+
+
+
+    margin: 1.5em;
+
+
+
+}
+
+
+
+
+
+
+
+embed {
+
+
+
+    width: 100%;
+
+
+
+    min-height: 650px;
+
+
+
+}
+
+
+
+
+
+
+
+.grid-container {
+
+
+
+    display: grid;
+
+
+
+    grid-template-columns: 1fr 1fr;
+
+
+
+    grid-gap: 10px;
+
+
+
+    text-align: center;
+
+
+
+}
+
+
+
+
+
+
+
+.grid-item-full-width {
+
+
+
+    grid-column: span 2;
+
+
+
+}
+
+
+
+
+
+
+
+ul > li {
+
+
+
+    text-align: left;
+
+
+
+}
+
+
+
+
+
+
+
+@media screen and (max-width: 960px) {
+
+
+
+  .grid-container{
+
+
+
+    display: grid;
+
+
+
+    grid-template-columns: auto;
+
+
+
+    grid-gap: 10px;
+
+
+
+    text-align: center;
+
+
+
+  }
+
+
+
+}
+
+
+
+
+
+
+
+.padded {
+
+
+
+    padding: 1em 2em;
+
+
+
+}
+
+
+
+
+
+
+
+.padded-bottom{
+
+
+
+    padding-bottom: 1em;
+
+
+
+}
+
+
+
+
+
+
+
+.padded-left {
+
+
+
+    padding-left: 2em;
+
+
+
+}
+
+
+
+
+
+
+
+.padded-md {
+
+
+
+    padding: 0.75em 2em;
+
+
+
+}
+
+
+
+
+
+
+
+.padded-sm {
+
+
+
+    padding: 0.5em 2em;
+
+
+
+}
+
+
+
+
+
+
+
+.padded-xs {
+
+
+
+    padding: 0.25em 2em;
+
+
+
+}
+
+
+
+
+
+
+
+.padded-top {
+
+
+
+    padding-top: 1em;
+
+
+
+}
+
+
+
+
+
+
+
+.table-container{
+
+
+
+    width: 100%;
+
+
+
+    overflow-x: auto;
+
+
+
+}
+
+
+
+
+
+
+
+.table-container table thead {
+
+
+
+    font-weight: bold;
+
+
+
+}
+
+
+
+
+
+
+
+@media only screen and (max-width: 600px) {
+
+
+
+  .col {
+
+
+
+    display: block;
+
+
+
+    width: 100%;
+
+
+
+  }
+
+
+
+}
+
+
+
+
+
+
+
+@media print {
+
+
+
+    .card {
+
+
+
+        box-shadow: none;
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+code {
+
+
+
+    max-width: 100%;
+
+
+
+    white-space: pre-wrap;
+
+
+
+}
+
+    </style>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div>
+
+            <h1>Simulation my_simulation_instruction</h1>
+
+            <div>Full specification is available <a href="./HTML_output/..\full_naive_implanting.yaml">here</a>.</div>
+
+            <div class="padded-bottom padded-top">immuneML version: immuneML 2.2.2</div>
+
+            <div class="card">
+
+                <div class="col-container">
+
+                    <div class="col">
+
+                        <h3>Dataset information</h3>
+
+                        <h4>General information</h4>
+
+                        <div class="table-container">
+
+                            <table>
+
+                            <tr>
+
+                                <td><b>Name</b></td>
+
+                                <td>my_dataset</td>
+
+                            </tr>
+
+                            <tr>
+
+                                <td><b>Type</b></td>
+
+                                <td>Repertoire Dataset</td>
+
+                            </tr>
+
+                            <tr>
+
+                                <td><b>Dataset size</b></td>
+
+                                <td>100 repertoires</td>
+
+                            </tr>
+
+                        </table>
+
+                        </div>
+
+                        <h4>Dataset labels</h4>
+
+                        The following labels may be used for classification:
+
+                        <div>
+
+                            <ul>
+
+                                <li>signal_with_pgen_outlier</li>
+
+                            </ul>
+
+                        </div>
+
+                        <h4>Download formats</h4>
+
+                        <div>
+
+                            <ul>
+
+                                <li><a href="./HTML_output/..\my_simulation_instruction\zip\exported_dataset_airr.zip" download>AIRR</a></li>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-container">
+
+                    <div>
+
+                        <h3>Simulation details</h3>
+
+                        <div>
+
+                            <h5>my_implanting</h5>
+
+                            <div class="padded-md">Dataset implanting rate: 0.05</div>
+
+                            <div class="padded-md">Repertoire implanting rate: 0.001</div>
+
+                            <div class="padded-md">Signals:
+
+                                <div class="padded-md">
+
+                                    <div>Signal id: signal_with_pgen_outlier</div>
+
+                                    <div class="padded-top">Motifs: </div>
+
+                                    <div class="padded-md">
+
+                                        <div>Motif id: seq_with_low_pgen</div>
+
+                                        <div>Seed: CAPTALDRATWKRSPLQEQYF</div>
+
+                                        <div>Instantiation: <pre><code>{&#x27;_hamming_distance_probabilities&#x27;: &#x27;&#x27;, &#x27;position_weights&#x27;: {0: 0.047619047619047616, 1: 0.047619047619047616, 2: 0.047619047619047616, 3: 0.047619047619047616, 4: 0.047619047619047616, 5: 0.047619047619047616, 6: 0.047619047619047616, 7: 0.047619047619047616, 8: 0.047619047619047616, 9: 0.047619047619047616, 10: 0.047619047619047616, 11: 0.047619047619047616, 12: 0.047619047619047616, 13: 0.047619047619047616, 14: 0.047619047619047616, 15: 0.047619047619047616, 16: 0.047619047619047616, 17: 0.047619047619047616, 18: 0.047619047619047616, 19: 0.047619047619047616, 20: 0.047619047619047616}, &#x27;alphabet_weights&#x27;: {&#x27;A&#x27;: 0.05, &#x27;C&#x27;: 0.05, &#x27;D&#x27;: 0.05, &#x27;E&#x27;: 0.05, &#x27;F&#x27;: 0.05, &#x27;G&#x27;: 0.05, &#x27;H&#x27;: 0.05, &#x27;I&#x27;: 0.05, &#x27;K&#x27;: 0.05, &#x27;L&#x27;: 0.05, &#x27;M&#x27;: 0.05, &#x27;N&#x27;: 0.05, &#x27;P&#x27;: 0.05, &#x27;Q&#x27;: 0.05, &#x27;R&#x27;: 0.05, &#x27;S&#x27;: 0.05, &#x27;T&#x27;: 0.05, &#x27;V&#x27;: 0.05, &#x27;W&#x27;: 0.05, &#x27;Y&#x27;: 0.05}, &#x27;_min_gap&#x27;: 0, &#x27;_max_gap&#x27;: 0}</code></pre></div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

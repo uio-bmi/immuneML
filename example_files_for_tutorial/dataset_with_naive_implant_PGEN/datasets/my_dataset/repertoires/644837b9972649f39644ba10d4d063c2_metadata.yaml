@@ -1,0 +1,21 @@
+field_list:
+- vj_in_frame
+- stop_codon
+- productive
+- sequence_aas
+- sequences
+- v_genes
+- j_genes
+- v_subgroups
+- j_subgroups
+- v_alleles
+- j_alleles
+- chains
+- counts
+- region_types
+- frame_types
+- sequence_identifiers
+filename: repertoires\644837b9972649f39644ba10d4d063c2.tsv
+identifier: 644837b9972649f39644ba10d4d063c2
+signal_with_pgen_outlier: false
+subject_id: rep88

@@ -1,0 +1,39 @@
+2023-05-11 18:00:19,122 INFO: Setting temporary cache path to dataset_with_decoy_implant_PGEN\cache
+2023-05-11 18:00:19,154 INFO: ImmuneML: parsing the specification...
+
+2023-05-11 18:00:19,238 INFO: --- Entering: _parse_report with parameters ('my_data_report', {'SequenceGenerationProbabilityDistribution': {'default_sequence_label': 'OLGA'}}, SymbolTable())
+2023-05-11 18:00:49,753 WARNING: Matplotlib is building the font cache; this may take a moment.
+2023-05-11 18:01:13,125 INFO: DefaultParams: no default parameters were found for SequenceGenerationProbabilityDistribution. Proceeding...
+2023-05-11 18:01:13,125 INFO: --- Exiting: _parse_report
+2023-05-11 18:01:13,125 INFO: --- Entering: _parse_dataset with parameters ('my_dataset', {'format': 'AIRR', 'params': {'region_type': 'IMGT_JUNCTION', 'is_repertoire': True, 'path': 'C:\\Users\\Olav\\Desktop\\OLGA_DATA_FOR_THESIS\\dataset_with_decoy_implant\\my_simulation_instruction\\exported_dataset\\airr', 'metadata_file': 'C:\\Users\\Olav\\Desktop\\OLGA_DATA_FOR_THESIS\\dataset_with_decoy_implant\\my_simulation_instruction\\exported_dataset\\airr\\metadata.csv'}}, SymbolTable(), WindowsPath('dataset_with_decoy_implant_PGEN'))
+2023-05-11 18:01:44,253 INFO: --- Exiting: _parse_dataset
+2023-05-11 18:01:44,253 INFO: --- Entering: parse_instruction with parameters ('my_expl_analysis_instruction', {'type': 'ExploratoryAnalysis', 'analyses': {'my_analysis': {'dataset': 'my_dataset', 'report': 'my_data_report'}}, 'number_of_processes': 4}, SymbolTable(), WindowsPath('dataset_with_decoy_implant_PGEN'))
+2023-05-11 18:01:44,522 INFO: --- Exiting: parse_instruction
+2023-05-11 18:01:44,554 INFO: Full specification is available at dataset_with_decoy_implant_PGEN\full_pgen_analysis.yaml.
+
+2023-05-11 18:01:44,560 INFO: ImmuneML: starting the analysis...
+
+2023-05-11 18:01:44,560 INFO: Instruction 1/1 has started.
+2023-05-11 18:01:44,560 INFO: Started analysis my_analysis (1/1).
+2023-05-11 18:01:44,575 INFO: Loading dataset
+2023-05-11 18:01:48,532 INFO: Starting generation probability-calculation using 4 threads (99447 unique sequences)
+2023-05-11 18:14:04,603 INFO: Starting plot generation
+2023-05-11 18:14:21,643 INFO: Exporting plot
+2023-05-11 18:14:23,459 INFO: Creating occurrence limit pgen range
+2023-05-11 18:14:23,490 INFO: Loading dataset
+2023-05-11 18:14:25,051 INFO: Creating vdjRec output tables
+2023-05-11 18:14:25,236 INFO: START SEQUENCE COUNT FILE
+2023-05-11 18:14:25,298 WARNING: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+2023-05-11 18:14:25,298 WARNING: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+2023-05-11 18:14:25,465 WARNING: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+2023-05-11 18:14:25,465 WARNING: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+2023-05-11 18:14:25,465 WARNING: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+2023-05-11 18:14:25,668 INFO: START SAMPLES FILE
+2023-05-11 18:14:25,737 INFO: Finished report
+2023-05-11 18:14:25,737 INFO: Finished analysis my_analysis (1/1).
+
+2023-05-11 18:14:25,737 INFO: Instruction 1/1 has finished.
+2023-05-11 18:14:25,768 INFO: Generating HTML reports...
+2023-05-11 18:14:26,771 INFO: HTML reports are generated.
+2023-05-11 18:14:26,771 INFO: ImmuneML: finished analysis.
+

@@ -1,0 +1,55 @@
+definitions:
+  datasets:
+    my_dataset:
+      format: OLGA
+      params:
+        column_mapping: null
+        columns_to_load: null
+        import_empty_aa_sequences: false
+        import_empty_nt_sequences: true
+        import_illegal_characters: false
+        is_repertoire: true
+        metadata_file: metadata.csv
+        paired: false
+        path: .
+        region_type: IMGT_JUNCTION
+        result_path: dataset_with_decoy_implant/datasets/my_dataset
+        separator: "\t"
+  encodings: {}
+  ml_methods: {}
+  motifs:
+    seq_with_low_pgen:
+      instantiation: GappedKmer
+      j_call: TRBJ2-7
+      seed: CAPTALDRATWKRSPLQEQYF
+      v_call: TRBV7-2
+  preprocessing_sequences: {}
+  reports: {}
+  signals:
+    signal_with_pgen_outlier:
+      implanting:
+        Decoy:
+          dataset_implanting_rate_per_decoy: 0.05
+          nr_of_decoys: 100
+          overwrite_sequences: false
+          repertoire_implanting_rate_per_decoy: 0.001
+      motifs:
+      - seq_with_low_pgen
+      sequence_position_weights:
+        0: 1
+  simulations:
+    my_simulation:
+      my_implanting:
+        dataset_implanting_rate: 0.05
+        repertoire_implanting_rate: 0.001
+        signals:
+        - signal_with_pgen_outlier
+instructions:
+  my_simulation_instruction:
+    dataset: my_dataset
+    export_formats:
+    - AIRR
+    simulation: my_simulation
+    type: Simulation
+output:
+  format: HTML

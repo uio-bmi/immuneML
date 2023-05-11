@@ -1,0 +1,21 @@
+field_list:
+- vj_in_frame
+- stop_codon
+- productive
+- sequence_aas
+- sequences
+- v_genes
+- j_genes
+- v_subgroups
+- j_subgroups
+- v_alleles
+- j_alleles
+- chains
+- counts
+- region_types
+- frame_types
+- sequence_identifiers
+filename: repertoires\e50d517aa7174ea38799bab1871da2b0.tsv
+identifier: e50d517aa7174ea38799bab1871da2b0
+signal_with_pgen_outlier: false
+subject_id: rep67

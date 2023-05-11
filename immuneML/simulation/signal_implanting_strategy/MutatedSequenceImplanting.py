@@ -19,15 +19,20 @@ from immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy imp
 class MutatedSequenceImplanting(SignalImplantingStrategy):
     """
     This class represents a :py:obj:`~immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`
-    where signals will be implanted in the repertoire by replacing `repertoire_implanting_rate` percent of the sequences with sequences
-    generated from the motifs of the signal. Motifs here cannot include gaps and the motif instances are the full sequences and will be
-    a part of the repertoire.
+    where signals will be implanted in the repertoire by appending or replacing `repertoire_implanting_rate` percent of the sequences with mutated
+    sequences that are generated from the full sequences from the signal.
 
     Notes:
         - The sequence type must be IMGT junction
         - All Motifs must include V- and J-calls, and mutation position probabilities
 
-    Arguments: this signal implanting strategy has no arguments.
+    Arguments:
+
+        implanting: name of the implanting strategy, here Decoy
+
+        mutation_hamming_distance (int): The number of positions to mutate
+
+        occurrence_limit_pgen_range (dict): The max limit of occurrences for implanted mutated sequences based on their generation probability
 
     YAML specification:
 
@@ -45,11 +50,6 @@ class MutatedSequenceImplanting(SignalImplantingStrategy):
                 8: 0.4
                 9: 0.2
                 10: 0.1
-              occurrence_limit_pgen_range:
-                1.9089281937226036e-19: 2
-                5.195320032534688e-11: 3
-                2.6884227778205535e-08: 4
-                4.545674565898525e-09: 10
 
 
 
@@ -58,6 +58,12 @@ class MutatedSequenceImplanting(SignalImplantingStrategy):
                 motifs:
                     - my_motif
                 implanting: MutatedSequence
+                    mutation_hamming_distance: 2
+                    occurrence_limit_pgen_range:
+                        1.01e-11: 2
+                        1.67e-09: 4
+                        1.76e-08: 5
+                        2.35e-08: 6
 
     """
 

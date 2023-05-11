@@ -1,0 +1,47 @@
+definitions:
+  datasets:
+    my_dataset:
+      format: AIRR
+      params:
+        column_mapping:
+          duplicate_count: counts
+          j_call: j_alleles
+          junction: sequences
+          junction_aa: sequence_aas
+          locus: chains
+          sequence_id: sequence_identifiers
+          v_call: v_alleles
+        import_empty_aa_sequences: false
+        import_empty_nt_sequences: true
+        import_illegal_characters: false
+        import_out_of_frame: false
+        import_productive: true
+        import_with_stop_codon: false
+        is_repertoire: true
+        metadata_file: C:/Users/Olav/Desktop/OLGA_DATA_FOR_THESIS/dataset_with_decoy_implant/my_simulation_instruction/exported_dataset/airr/metadata.csv
+        paired: false
+        path: C:/Users/Olav/Desktop/OLGA_DATA_FOR_THESIS/dataset_with_decoy_implant/my_simulation_instruction/exported_dataset/airr
+        region_type: IMGT_JUNCTION
+        result_path: dataset_with_decoy_implant_PGEN/datasets/my_dataset
+        separator: "\t"
+  encodings: {}
+  ml_methods: {}
+  motifs: {}
+  preprocessing_sequences: {}
+  reports:
+    my_data_report:
+      SequenceGenerationProbabilityDistribution:
+        default_sequence_label: OLGA
+        name: my_data_report
+  signals: {}
+  simulations: {}
+instructions:
+  my_expl_analysis_instruction:
+    analyses:
+      my_analysis:
+        dataset: my_dataset
+        report: my_data_report
+    number_of_processes: 4
+    type: ExploratoryAnalysis
+output:
+  format: HTML

@@ -1,0 +1,22 @@
+field_list:
+- stop_codon
+- productive
+- DecoyImplanting
+- vj_in_frame
+- sequence_aas
+- sequences
+- v_genes
+- j_genes
+- v_subgroups
+- j_subgroups
+- v_alleles
+- j_alleles
+- chains
+- counts
+- region_types
+- frame_types
+- sequence_identifiers
+filename: repertoires\a25fa1a95efa4a7f8944ae635a14b268.tsv
+identifier: a25fa1a95efa4a7f8944ae635a14b268
+signal_with_pgen_outlier: false
+subject_id: rep34
