@@ -1,11 +1,7 @@
-import csv
 import json
-import os
 import sys
 
 import datetime
-import random
-import time
 import pyprind
 
 import numpy as np
@@ -19,81 +15,106 @@ from immuneML.util.PathBuilder import PathBuilder
 
 
 class LSTM(GenerativeModel):
+    """
+    This is an implementation of Long Short-Term Memory as a generative model.
+    This ML method applies the Keras LSTM module to develop a neural network for training. The model is based on the
+    paper by Akbar et al. (2021) https://www.biorxiv.org/content/10.1101/2021.07.08.451480v1
+
+    For usage instructions, check :py:obj:`~immuneML.ml_methods.GenerativeModel.GenerativeModel`.
+
+    Arguments specific for LSTM:
+
+        batch_size: size of batches trained on at a time
+        rnn_units: number of units in the LSTM neural net
+        embedding_dim: Dimensionality of the embedding layer in the model, encoding the data
+        epochs: number of epochs to train the model
+        max_sequence_length: data preprocessing sequence limiter
+        buffer_size: data preprocessing buffer
+
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_lstm:
+            LSTM:
+                # params
+                amount: 100 # defaults to 100
+                sequence_type: sequence_aas # specify according to dataset applied
+                rnn_units: 512
+                epochs: 10
+                batch_size: 32
+        # alternative way to define ML method with default values:
+        my_default_lstm: LSTM
+
+    """
 
     def get_classes(self) -> list:
         pass
 
-    def __init__(self, parameter_grid: dict = None, parameters: dict = None):
-        super(LSTM, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
+    def __init__(self, **parameters):
+        parameters = parameters if parameters is not None else {}
+        super(LSTM, self).__init__(parameters=parameters)
 
-        self.checkpoint_dir = ""
+        self._checkpoint_dir = ""
         self.model_params = {}
-        self.max_sequence_length = parameters["max_sequence_length"]
+
         self.historydf = None
         self.generated_sequences = []
         self.alphabet.append(" ")
-        self.char2idx = {u: i for i, u in enumerate(self.alphabet)}
 
-        self.rnn_units = self._parameters["rnn_units"]
-        self.epochs = self._parameters["epochs"]
-        self.embedding_dim = self._parameters["embedding_dim"]
-        self.batch_size = self._parameters["batch_size"]
-        self.buffer_size = self._parameters["buffer_size"]
-        self.first_sequence = None
+        self._max_sequence_length = parameters["max_sequence_length"]
+        self._rnn_units = parameters["rnn_units"]
+        self._epochs = parameters["epochs"]
+        self._embedding_dim = parameters["embedding_dim"]
+        self._batch_size = parameters["batch_size"]
+        self._buffer_size = parameters["buffer_size"]
+        self._first_sequence = None
 
-        self.vocab_size = len(self.alphabet)
+        self._vocab_size = len(self.alphabet)
 
-    def split_input_target(self, seq):
-        '''
-        split input output, return input-output pairs
-        :param seq:
-        :return:
-        '''
+    @staticmethod
+    def _split_input_target(seq):
+
         input_seq = seq[:-1]
         target_seq = seq[1:]
         return input_seq, target_seq
 
     def _get_ml_model(self):
 
-        # put one hot
         model = tf.keras.Sequential([
-            tf.keras.layers.Embedding(self.vocab_size,
-                                      self.embedding_dim,
-                                      batch_input_shape=[self.batch_size, None]),
-            tf.keras.layers.LSTM(self.rnn_units,
+            tf.keras.layers.Embedding(self._vocab_size,
+                                      self._embedding_dim,
+                                      batch_input_shape=[self._batch_size, None]),
+            tf.keras.layers.LSTM(self._rnn_units,
                                  return_sequences=True,
                                  stateful=True,
                                  recurrent_initializer='glorot_uniform'),
-            tf.keras.layers.Dense(self.vocab_size)
+            tf.keras.layers.Dense(self._vocab_size)
         ])
 
         return model
 
     @staticmethod
     def loss(labels, logits):
-        '''
-        loss function for the net output
-        :param labels:
-        :param logits:
-        :return:
-        '''
+
         loss = tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
         return loss
 
-    def _fit(self, dataset, cores_for_training: int = 1, result_path: Path = None):
+    def _fit(self, dataset, cores_for_training: int = 1):
 
-        PathBuilder.build(result_path)
-        self.first_sequence = []
+        self._first_sequence = []
         for i in dataset:
             if i != 20:
-                self.first_sequence.append(i)
+                self._first_sequence.append(i)
             else:
-                self.first_sequence.append(i)
+                self._first_sequence.append(i)
                 break
         tensor_x = tf.data.Dataset.from_tensor_slices(dataset)
-        sequence_batches = tensor_x.batch(self.max_sequence_length, drop_remainder=True)
-        final_data = sequence_batches.map(self.split_input_target)
-        final_data = final_data.shuffle(self.buffer_size).batch(self.batch_size, drop_remainder=True)
+        sequence_batches = tensor_x.batch(self._max_sequence_length, drop_remainder=True)
+        final_data = sequence_batches.map(self._split_input_target)
+        final_data = final_data.shuffle(self._buffer_size).batch(self._batch_size, drop_remainder=True)
         dataset_size = 0
         for _ in dataset:
             dataset_size += 1
@@ -109,18 +130,9 @@ class LSTM(GenerativeModel):
         model.summary()
         model.compile(loss=self.loss, optimizer='adam')
         # Prep checkpoint paths
-        self.checkpoint_dir = result_path / f"{self._get_model_filename()}_checkpoints"
-        checkpoint_prefix = os.path.join(self.checkpoint_dir, 'ckpt_{epoch}')
-        checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-            filepath=checkpoint_prefix,
-            save_weights_only=True,
-            verbose=1,
-            save_best_only=False
-        )
 
         history = model.fit(train_dataset,
-                                 epochs=self.epochs,
-                                 callbacks=[checkpoint_callback],
+                                 epochs=self._epochs,
                                  validation_data=val_dataset)
 
         history_contents = []
@@ -133,29 +145,29 @@ class LSTM(GenerativeModel):
         self.historydf = pd.DataFrame(history_contents, columns=['metric', 'data'])
 
         self.model_params = {
-            'epochs': self.epochs,
-            'batch_size': self.batch_size,
-            'buffer_size': self.buffer_size,
-            'vocab_size': self.vocab_size,
-            'embedding_dim': self.embedding_dim,
-            'rnn_units': self.rnn_units,
-            'first_sequence': self.first_sequence
+            'epochs': self._epochs,
+            'batch_size': self._batch_size,
+            'buffer_size': self._buffer_size,
+            'vocab_size': self._vocab_size,
+            'embedding_dim': self._embedding_dim,
+            'rnn_units': self._rnn_units,
+            'first_sequence': self._first_sequence
         }
 
         return model
 
-    def generate(self, amount=10, path_to_model: Path = None):
+    def generate(self):
 
-        self.batch_size = 1  # When generating, we only generate one batches of size 1
+        self._batch_size = 1  # When generating, we only generate one batches of size 1
         model = self._get_ml_model()
 
-        model.load_weights(tf.train.latest_checkpoint(self.checkpoint_dir))
+        model.load_weights(self._checkpoint_dir)
 
-        input_vect = tf.expand_dims(self.first_sequence, 0)
+        input_vect = tf.expand_dims(self._first_sequence, 0)
         generated_seq = ''
         model.reset_states()
         count = 0
-        bar = pyprind.ProgBar(amount, bar_char="=", stream=sys.stdout, width=100)
+        bar = pyprind.ProgBar(self._amount, bar_char="=", stream=sys.stdout, width=100)
 
         while True:
             prediction = model(input_vect)
@@ -165,7 +177,7 @@ class LSTM(GenerativeModel):
             if self.alphabet[predicted_char] == ' ':
                 count += 1
                 bar.update()
-            if count == amount:
+            if count == self._amount:
                 break
             generated_seq += self.alphabet[predicted_char]
 
@@ -179,24 +191,29 @@ class LSTM(GenerativeModel):
         raise Exception("can_predict_proba has not been implemented")
 
     def get_compatible_encoders(self):
-        raise Exception("get_compatible_encoders has not been implemented")
+        from immuneML.encodings.char_to_int.CharToIntEncoder import CharToIntEncoder
+
+        return [CharToIntEncoder]
 
     def load(self, path: Path, details_path: Path = None):
 
         self.model_params = json.load(open(path / f"{self._get_model_filename()}_model_params.json"))
-        self.rnn_units = self.model_params["rnn_units"]
-        self.embedding_dim = self.model_params["embedding_dim"]
-        self.first_sequence = self.model_params["first_sequence"]
+        self._rnn_units = self.model_params["rnn_units"]
+        self._embedding_dim = self.model_params["embedding_dim"]
+        self._first_sequence = self.model_params["first_sequence"]
 
 
-        self.vocab_size = len(self.alphabet)
+        self._vocab_size = len(self.alphabet)
         self.char2idx = json.load(open(path / f"{self._get_model_filename()}_char2idx.json"))
         self.alphabet = list(self.char2idx.keys())
-        self.checkpoint_dir = path / f"{self._get_model_filename()}_checkpoints"
+        self._checkpoint_dir = path / f"{self._get_model_filename()}_weights"
 
     def store(self, path: Path, feature_names=None, details_path: Path = None):
 
         PathBuilder.build(path)
+
+        self._checkpoint_dir = path / f"{self._get_model_filename()}_weights"
+        self.model.save_weights(self._checkpoint_dir)
 
         print(f'{datetime.datetime.now()}: Writing to file...')
         params_path = path / f"{self._get_model_filename()}_model_params.json"
@@ -212,7 +229,7 @@ class LSTM(GenerativeModel):
         doc = str(LSTM.__doc__)
 
         mapping = {
-            "For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.": GenerativeModel.get_usage_documentation(
+            "For usage instructions, check :py:obj:`~immuneML.ml_methods.GenerativeModel.GenerativeModel`.": GenerativeModel.get_usage_documentation(
                 "LSTM"),
         }
 

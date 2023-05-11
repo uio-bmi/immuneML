@@ -11,11 +11,31 @@ from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
-from immuneML.util.PathBuilder import PathBuilder
 
 
 class CharToIntEncoder(DatasetEncoder):
+    """
+        CharToInt encoding for sequences. In this encoding, all characters in the sequences are replaced by whole
+        integers. The integer they are replaced with is determined by their alphabetical position. In addition, spaces
+        are added between each sequence.
 
+        Arguments:
+            sequence_type: whether to use nucleotide or amino acid sequence for encoding. Valid values are 'nucleotide'
+            and 'amino_acid'. Default value is amino_acid.
+
+
+        YAML specification:
+
+        .. indent with spaces
+        .. code-block:: yaml
+
+            char_to_int_aa: CharToInt
+
+            char_to_int_nt:
+                CharToInt:
+                    sequence_type: nucleotide
+
+        """
     def __init__(self, sequence_type: SequenceType, name: str = None):
         self.name = name
         self.sequence_type = sequence_type

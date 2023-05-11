@@ -13,6 +13,26 @@ import logomaker
 
 
 class GeneratorReport(UnsupervisedMLReport):
+    """
+    A report simple report for generative models. Produces a table of all sequences produced and a sequence logo,
+    based on the length of sequences with the highest frequency, of the sequences produced. If a dataset is supplied
+    a sequence logo is made of this as well. This class is intended as the base of all future generative model reports.
+    Also produces a link to download the sequences produced.
+
+    This report helps visualize the data, both raw and sequence logos, and compare to the original dataset if supplied.
+
+    Arguments:
+
+        None
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_confounder_report: GeneratorReport
+
+    """
     @classmethod
     def build_object(cls, **kwargs):
         name = kwargs["name"] if "name" in kwargs else "GeneratorReport"

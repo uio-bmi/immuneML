@@ -1,22 +1,37 @@
-import matplotlib.pyplot as plt
+
 from pathlib import Path
 from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.LSTM import LSTM
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.GeneratorReport import GeneratorReport
-from immuneML.util.PathBuilder import PathBuilder
-import pandas as pd
+
 import plotly.express as px
-import logomaker
 
 
-class GeneratorReportLSTM(GeneratorReport):
+class NeuralNetGeneratorReport(GeneratorReport):
+    """
+    A subclass of the GeneratorReport that works on neural nets that produce loss values.
+    Initially runs the regular GeneratorReport and then appends the loss value graph.
+
+    Arguments:
+
+        name: Name of the report
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_neural_net_report:
+            NeuralNetGeneratorReport:
+                name: nnReport
+    """
+
     @classmethod
     def build_object(cls, **kwargs):
-        name = kwargs["name"] if "name" in kwargs else "GeneratorReportLSTM"
-        return GeneratorReportLSTM(name=name)
+        name = kwargs["name"] if "name" in kwargs else "NeuralNetGeneratorReport"
+        return NeuralNetGeneratorReport(name=name)
 
     def __init__(self, dataset: Dataset = None, method: LSTM = None, result_path: Path = None,
                  name: str = None, number_of_processes: int = 1):

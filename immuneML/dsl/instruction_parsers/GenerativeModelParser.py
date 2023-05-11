@@ -23,6 +23,9 @@ class GenerativeModelParser:
 
     Specification example for GenerativeModel instruction
 
+    Each generator requires a GenerativeModel method, encoding, dataset, and optionally a report.
+
+    DSL example for GenerativeModelInstruction assuming that m1, m2, d1, d2, r1, r2, e1, e2 are defined previously in definitions section:
     .. highlight:: yaml
     .. code-block:: yaml
 
@@ -30,13 +33,16 @@ class GenerativeModelParser:
             type: GenerativeModel
             generators:
                 generator_1:
+                    ml_method: m1
                     encoding: e1
                     dataset: d1
                     report: r1
                 generator_2:
+                    ml_method: m2
                     encoding: e2
                     dataset: d2
                     report: r2
+
     """
 
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> GenerativeModelInstruction:
@@ -53,7 +59,7 @@ class GenerativeModelParser:
         return process
 
     def _prepare_params(self, generator: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
-        valid_keys = ["dataset", "report", "ml_method", "labels", "encoding", "number_of_processes", "amount"]
+        valid_keys = ["dataset", "report", "ml_method", "labels", "encoding", "number_of_processes"]
         ParameterValidator.assert_keys(list(generator.keys()), valid_keys, "GenerativeModelParser", "generator",
                                        False)
 
@@ -64,18 +70,6 @@ class GenerativeModelParser:
                       symbol_table.get(generator["dataset"]),
                       **symbol_table.get_config(generator["encoding"])["encoder_params"]
                   )}
-
-        optional_params = self._prepare_optional_params(generator, symbol_table, yaml_location)
-        params = {**params, **optional_params}
-
-        return params
-
-    def _prepare_optional_params(self, generator: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
-
-        params = {}
-
-        if "amount" in generator:
-            params["amount"] = generator["amount"]
 
         return params
 

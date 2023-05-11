@@ -10,16 +10,39 @@ from scripts.specification_util import update_docs_per_mapping
 from immuneML.util.PathBuilder import PathBuilder
 
 class PWM(GenerativeModel):
+    """
+    This is an implementation of Position Weight Matrices as generative models.
+    This ML method creates N number og matrices, where N is equal to the number og unique lengths of sequences found
+    in the dataset supplied. If load is specified as the instruction rather than training, a previously produced model
+    of matrices is loaded.
+    Independent of loading or training, this model is then used to generate a user-specified number of sequences.
+    Please see thesis regarding the introduction of generative models to immuneML for more information.
+
+    For usage instructions, check :py:obj:`~immuneML.ml_methods.GenerativeModel.GenerativeModel`.
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_pwm:
+            PWM:
+                # params
+                amount: 100 # defaults to 100
+                sequence_type: nucleotide # specify according to dataset applied
+        # alternative way to define ML method with default values:
+        my_default_pwm: PWM
+
+    """
 
     def get_classes(self) -> list:
         pass
 
-    def __init__(self, parameter_grid: dict = None, parameters: dict = None):
+    def __init__(self, **parameters):
         parameters = parameters if parameters is not None else {}
-        parameter_grid = parameter_grid if parameter_grid is not None else {}
         self.model_weight = []
         self.model = []
-        super(PWM, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
+        super(PWM, self).__init__(parameters=parameters)
 
     def make_PWM(self, dataset, length):
 
@@ -34,7 +57,7 @@ class PWM(GenerativeModel):
 
         return matrix
 
-    def _get_ml_model(self, cores_for_training, X):
+    def _get_ml_model(self, X):
         sequences_by_length = {}
 
         for sequence in X:
@@ -53,12 +76,12 @@ class PWM(GenerativeModel):
         return pwms
 
     def _fit(self, X, cores_for_training: int = 1, result_path: Path = None):
-        self.model = self._get_ml_model(cores_for_training, X)
+        self.model = self._get_ml_model(X)
         return self.model
 
-    def generate(self, amount=10, path_to_model: Path = None):
+    def generate(self):
         generated_sequences = []
-        for i in range(amount):
+        for i in range(self._amount):
             pwm = np.random.choice(self.model, p=self.model_weight)
             sequence = ""
             for j in range(pwm.shape[0]):
@@ -74,7 +97,9 @@ class PWM(GenerativeModel):
         raise NotImplementedError
 
     def get_compatible_encoders(self):
-        raise NotImplementedError
+        from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
+
+        return [OneHotEncoder]
 
     def load(self, path: Path, details_path: Path = None):
 
@@ -82,8 +107,7 @@ class PWM(GenerativeModel):
 
         for file in csv_files:
             df = pd.read_csv(file, index_col=False)
-            # if alphabet is saved, it must be removed
-            #df.pop('alphabet')
+            df.pop('alphabet')
 
             self.model_weight.append(df.pop('weight')[0])
             self.model.append(np.array(df.values).T)
@@ -99,8 +123,7 @@ class PWM(GenerativeModel):
             file_path = path / f"{self._get_model_filename()}_{pwm.shape[0]}.csv"
             data = {str(ind + 1): numbers for ind, numbers in enumerate(pwm)}
             data['weight'] = self.model_weight[i]
-            # should i inlcude alphabet in the saved csv file?
-            # data["alphabet"] = list(self._alphabet)
+            data["alphabet"] = list(self.alphabet)
             dataframe = pd.DataFrame(data)
             dataframe.to_csv(file_path, index=False)
 
@@ -109,7 +132,7 @@ class PWM(GenerativeModel):
         doc = str(PWM.__doc__)
 
         mapping = {
-            "For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.": GenerativeModel.get_usage_documentation("LSTM"),
+            "For usage instructions, check :py:obj:`~immuneML.ml_methods.GenerativeModel.GenerativeModel`.": GenerativeModel.get_usage_documentation("LSTM"),
         }
 
         doc = update_docs_per_mapping(doc, mapping)

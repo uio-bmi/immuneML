@@ -1,11 +1,11 @@
 definitions:
   ml_methods:
     G1:
-      LSTM:
-        cores_for_training: 2
-        amount: 200
+      VAE:
+        cores_for_training: 8
+        amount: 2000
   reports:
-    GeneratorReport: GeneratorReportLSTM
+    GeneratorReport: GeneratorReport
 instructions:
   machine_learning_instruction:
     type: GenerativeModelLoad
@@ -13,6 +13,6 @@ instructions:
       generator_1:
         ml_method: G1
         report: GeneratorReport
-        path: LSTM_out_1024/machine_learning_instruction/analysis_generator_1
+        path: VAE_out/machine_learning_instruction/analysis_generator_1
 
 

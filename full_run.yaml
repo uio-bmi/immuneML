@@ -10,7 +10,7 @@ definitions:
     native:
       format: Generic
       params:
-        path: LSTM_dataset/sequences.tsv
+        path: datasets/sequences.tsv
         is_repertoire: False
         paired: False
         region_type: FULL_SEQUENCE

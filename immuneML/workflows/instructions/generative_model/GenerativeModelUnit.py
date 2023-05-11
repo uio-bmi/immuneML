@@ -15,11 +15,8 @@ class GenerativeModelUnit:
 
     report: GeneratorReport
     genModel: GenerativeModel
-    amount: int = 10
     dataset: Dataset = None
     generated_sequences: list = None
     encoder: DatasetEncoder = None
-    label_config: LabelConfiguration = None
     report_result: ReportResult = None
     path: Path = None
-    predictions_path: Path = None

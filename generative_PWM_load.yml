@@ -3,6 +3,7 @@ definitions:
     G1:
       PWM:
         cores_for_training: 2
+        amount: 20000
   reports:
     GeneratorReport: GeneratorReportPWM
 instructions:
@@ -13,6 +14,5 @@ instructions:
         ml_method: G1
         report: GeneratorReport
         path: save_out/PWM_native/machine_learning_instruction/analysis_generator_1
-        amount: 20000
 
 

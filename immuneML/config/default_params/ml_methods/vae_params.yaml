@@ -2,4 +2,5 @@ batch_size: 64
 layers: 3
 latent_dim: 4
 epochs: 2
+amount: 100
 sequence_type: sequence_aas # set as amino acids, alternative is "sequence" for nucleotide data

@@ -3,7 +3,7 @@ definitions:
     d1:
       format: Generic
       params:
-        path: LSTM_dataset/sequences_under_30.tsv
+        path: datasets/sequences_under_30.tsv
         is_repertoire: False
         paired: False
         region_type: FULL_SEQUENCE
@@ -12,7 +12,7 @@ definitions:
   ml_methods:
     G1: PWM
   reports:
-    GeneratorReport: GeneratorReportPWM
+    GeneratorReport: GeneratorReport
 instructions:
   machine_learning_instruction:
     type: GenerativeModel
@@ -22,6 +22,5 @@ instructions:
         dataset: d1
         ml_method: G1
         report: GeneratorReport
-        amount: 20
 
 

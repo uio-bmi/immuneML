@@ -18,9 +18,9 @@ definitions:
         import_productive: true
         import_with_stop_codon: false
         is_repertoire: true
-        metadata_file: LSTM_dataset/AIRR/repertoires/metadata.csv
+        metadata_file: datasets/AIRR/repertoires/metadata.csv
         paired: false
-        path: LSTM_dataset/AIRR/repertoires
+        path: datasets/AIRR/repertoires
         region_type: IMGT_CDR3
         result_path: existing_LSTM_model/datasets/d1
         separator: "\t"

@@ -8,25 +8,25 @@ definitions:
         paired: False
         region_type: FULL_SEQUENCE
   encodings:
-    cti: CharToInt
-    one_hot: OneHot
+    e1: OneHot
   ml_methods:
-    LSTM_1:
-      LSTM:
+    G1:
+      VAE:
+        cores_for_training: 8
+        layers: 2
+        epochs: 2
+        latent_dim: 2
         batch_size: 64
-        rnn_units: 128
-        embedding_dim: 256
-        epochs: 5
   reports:
-    LSTM_report: GeneratorReportLSTM
+    GeneratorReport: GeneratorReport
 instructions:
-  generative_instruction:
+  machine_learning_instruction:
     type: GenerativeModel
     generators:
-      LSTM_1:
+      generator_1:
         dataset: d1
-        encoding: cti
-        ml_method: LSTM_1
-        report: LSTM_report
+        encoding: e1
+        ml_method: G1
+        report: GeneratorReport
 
 

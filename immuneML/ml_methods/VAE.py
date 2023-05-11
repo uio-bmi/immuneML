@@ -2,31 +2,62 @@
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-import matplotlib.pyplot as plt
 from keras import backend as K
 
 from pathlib import Path
 from immuneML.ml_methods.GenerativeModel import GenerativeModel
 from scripts.specification_util import update_docs_per_mapping
 from immuneML.util.PathBuilder import PathBuilder
-from tensorflow.python.framework.ops import disable_eager_execution, enable_eager_execution
+from tensorflow.python.framework.ops import disable_eager_execution
 
 
 class VAE(GenerativeModel):
+    """
+    This is an implementation of Variational Autoencoders as a generative model.
+    This ML method applies a collection of Keras Layers, specifically convolutional layers to produce a VAE. The
+    structure of the model is based on the implementation by Hawkins-Hooker et al. (2021)
+    https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008736
+
+    For usage instructions, check :py:obj:`~immuneML.ml_methods.GenerativeModel.GenerativeModel`.
+
+    Arguments specific for VAE:
+
+        layers: number of convolutional layers to add in both encoding and decoding
+        latent_dim: dimensionality of the latent layer
+        batch_size: size of batches trained on at a time
+        epochs: number of epochs to train the model
+
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_vae:
+            VAE:
+                # params
+                layers: 2
+                epochs: 2
+                latent_dim: 2
+                batch_size: 64
+        # alternative way to define ML method with default values:
+        my_default_vae: VAE
+
+    """
+
 
     def get_classes(self) -> list:
         pass
 
-    def __init__(self, parameter_grid: dict = None, parameters: dict = None):
+    def __init__(self, **parameters):
         parameters = parameters if parameters is not None else {}
-        parameter_grid = parameter_grid if parameter_grid is not None else {}
-        super(VAE, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
+        super(VAE, self).__init__(parameters=parameters)
         disable_eager_execution()
 
-        self.latent_dim = self._parameters['latent_dim']
-        self.epochs = self._parameters["epochs"]
-        self.batch_size = self._parameters["batch_size"]
-        self.layers = self._parameters['layers']
+        self._latent_dim = self._parameters['latent_dim']
+        self._epochs = self._parameters["epochs"]
+        self._batch_size = self._parameters["batch_size"]
+        self._layers = self._parameters['layers']
 
         self.historydf = {}
         self.encoder = None
@@ -109,14 +140,16 @@ class VAE(GenerativeModel):
         self.model.compile(loss=self.loss_func(z_mean, z_var),
                            optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=0.001))
 
-    def sampler(self, zs):
+    @staticmethod
+    def sampler(zs):
         z_mean, z_var = zs
         epsilon = K.sqrt(tf.convert_to_tensor(z_var + 1e-8, np.float32)) * \
                   K.random_normal(shape=K.shape(z_mean), mean=0., stddev=1)
 
         return z_mean + epsilon
 
-    def loss_func(self, z_mean, z_var):
+    @staticmethod
+    def loss_func(z_mean, z_var):
 
         def xent_loss(x, x_d_m):
             xent = K.sum(tf.keras.losses.categorical_crossentropy(x, x_d_m), -1)
@@ -156,7 +189,7 @@ class VAE(GenerativeModel):
         x_test = one_hot[train_len:train_len + int((train_len / 2))]
         x_val = one_hot[train_len + int((train_len / 2)):]
 
-        self._get_ml_model(one_hot.shape[1], one_hot.shape[2], latent_space=self.latent_dim, layers=self.layers)
+        self._get_ml_model(one_hot.shape[1], one_hot.shape[2], latent_space=self._latent_dim, layers=self._layers)
 
         self.encoder.summary()
         self.decoder.summary()
@@ -164,8 +197,8 @@ class VAE(GenerativeModel):
 
         history = self.model.fit(x_train,
                        x_train,
-                       epochs=self.epochs,
-                       batch_size=self.batch_size,
+                       epochs=self._epochs,
+                       batch_size=self._batch_size,
                        shuffle=True,
                        validation_data=(x_test,
                                         x_test),
@@ -180,6 +213,7 @@ class VAE(GenerativeModel):
             history_contents.append([metric, metric_contents])
         self.historydf = pd.DataFrame(history_contents, columns=['metric', 'data'])
 
+        # If latent_space = 2, this can be used to visualize the latent space after encoding
         # latent = np.transpose(self.encoder.predict(x_val)[2])
         #
         # x = latent[0]
@@ -190,9 +224,9 @@ class VAE(GenerativeModel):
 
         return self.model
 
-    def generate(self, amount=10, mean=0, stddev=1, path_to_model: Path = None):
+    def generate(self):
 
-        z = mean + stddev * np.random.randn(amount, self.decoder.input_shape[0][1])
+        z = np.random.randn(self._amount, self.decoder.input_shape[0][1])
 
         original_dim, alphabet_size = self.decoder.output_shape[1], self.decoder.output_shape[-1]
         x = np.zeros((z.shape[0], original_dim, alphabet_size))
@@ -224,7 +258,9 @@ class VAE(GenerativeModel):
         raise Exception("can_predict_proba has not been implemented")
 
     def get_compatible_encoders(self):
-        raise Exception("get_compatible_encoders has not been implemented")
+        from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
+
+        return [OneHotEncoder]
 
     def load(self, path: Path, details_path: Path = None):
         self.decoder = tf.keras.models.load_model(path / "VAE_decoder")
@@ -243,7 +279,7 @@ class VAE(GenerativeModel):
         doc = str(VAE.__doc__)
 
         mapping = {
-            "For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.": GenerativeModel.get_usage_documentation("VAE"),
+            "For usage instructions, check :py:obj:`~immuneML.ml_methods.GenerativeModel.GenerativeModel`.": GenerativeModel.get_usage_documentation("VAE"),
         }
 
         doc = update_docs_per_mapping(doc, mapping)
