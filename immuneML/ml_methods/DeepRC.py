@@ -2,14 +2,12 @@ import hashlib
 import warnings
 from pathlib import Path
 
-import h5py
 import numpy as np
 import pkg_resources
 import torch
 import yaml
 from sklearn.exceptions import NotFittedError
 from sklearn.model_selection import train_test_split
-from tqdm import tqdm
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
@@ -168,6 +166,8 @@ class DeepRC(MLMethod):
         return hdf5_filepath
 
     def _load_dataset_in_ram(self, hdf5_filepath: Path):
+        import h5py
+
         with h5py.File(str(hdf5_filepath), 'r') as hf:
             pre_loaded_hdf5_file = dict()
             pre_loaded_hdf5_file['seq_lens'] = hf['sampledata']['seq_lens'][:]
@@ -329,6 +329,8 @@ class DeepRC(MLMethod):
 
     def _model_predict(self, model, dataloader):
         """Based on the DeepRC function evaluate (deeprc.deeprc_binary.training.evaluate)"""
+        from tqdm import tqdm
+
         with torch.no_grad():
             model.to(device=self.pytorch_device)
             scoring_predictions = []
