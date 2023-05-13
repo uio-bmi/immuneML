@@ -84,8 +84,6 @@ definitions:
   reports:
     clusteringReport:  # user-defined report name
       ClusteringReport: # report type
-        labels: # labels in data to compare clustering to
-          - epitope
 instructions:
   clustering_inst1: # user-defined instruction name
     type: Clustering  # instruction type
@@ -96,17 +94,23 @@ instructions:
         dimensionality_reduction: pca_2d # dimensionality reduction to run before clustering (optional)
         clustering_method: kmeans # clustering method to use for this analysis
         report: clusteringReport # report name for this analysis
+        labels: # labels in data to compare clustering to
+          - epitope
       kmeans_3d:
         dataset: d1
         encoding: 3mer_encoding
         dimensionality_reduction: pca_3d
         clustering_method: kmeans
         report: clusteringReport
+        labels: # labels in data to compare clustering to
+          - epitope
       kmeans_no_dim_reduction:
         dataset: d1
         encoding: 3mer_encoding
         clustering_method: kmeans
         report: clusteringReport
+        labels: # labels in data to compare clustering to
+          - epitope
     number_of_processes: 4  # processes for parallelization
 ```
   The example data the yaml refers to (EBV.tsv) as well as the yaml file can already be found on the branch.
@@ -116,10 +120,10 @@ instructions:
 ### Expected result
   In the output folder you will now have a file named index.html. This file will open the report 
   created by the command ran above.
-  What you will see here is first a summary of the three analyses and what analyses scored best when looking at 
-  the [Silhouette Coefficient](https://en.wikipedia.org/wiki/Silhouette_(clustering)), 
-  [Calinski-Harabasz index](https://medium.com/@haataa/how-to-measure-clustering-performances-when-there-are-no-ground-truth-db027e9a871c#:~:text=complexity%3A%20O(n%C2%B2)-,Calinski%2DHarabasz%20Index,-The%20Calinski%2DHarabasz) and
-  [Davies-Bouldin index](https://en.wikipedia.org/wiki/Davies%E2%80%93Bouldin_index).
+  What you will see here is first a summary of the scores obtained in the three analyses and what analyses scored best when looking at 
+  the [Silhouette Coefficient](https://scikit-learn.org/stable/modules/clustering.html#silhouette-coefficient), 
+  [Calinski-Harabasz index](https://scikit-learn.org/stable/modules/clustering.html#calinski-harabasz-index) and
+  [Davies-Bouldin index](https://scikit-learn.org/stable/modules/clustering.html#davies-bouldin-index). The Silhouette Coefficient measures the average of a data point's similarity to its own cluster compared to other clusters, Calinski-Harabasz index measures the ratio of between-cluster variance to within-cluster   variance, while Davies-Bouldin index measures the average similarity between each cluster and its most similar cluster. The optimal score is presented at the top of the table.
 
   After that all the analyses are presented. Here you have a some dropdowns with details of the dataset, encoding, 
   clustering algorithm parameters, dimensionality reduction parameters (if used) and 
