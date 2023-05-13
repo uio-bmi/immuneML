@@ -13,13 +13,41 @@ from immuneML.ml_methods.UnsupervisedMLMethod import UnsupervisedMLMethod
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.Logger import print_log
-from immuneML.util.DistanceMetrics import levenshtein
 
 from scipy.sparse import csr_matrix
 from scipy.spatial import distance
 
 
 class UnsupervisedSklearnMethod(UnsupervisedMLMethod):
+    """
+        The UnsupervisedSklearnMethod class is a base class for unsupervised machine learning methods
+        in the scikit-learn library. It acts as a wrapper around the corresponding scikit-learn class,
+        providing additional methods for handling warnings, fitting the model, checking if the model
+        is fitted, storing the model, loading the model, getting package information, and getting
+        feature names. It also defines abstract methods that need to be implemented by any class that
+        inherits from it.
+
+        Classes that inherit from UnsupervisedSklearnMethod need to implement the following methods:
+
+        __init__()
+        _get_ml_model()
+
+        This class accepts the following parameters:
+
+            parameters: A dictionary of parameters that will be passed directly to the scikit-learn class's __init__() method. For a detailed list, see the scikit-learn documentation for the specific class.
+            parameter_grid: A dictionary of parameters which are valid arguments for the scikit-learn class's __init__() method. Unlike parameters, this can contain a list of values instead of a single value.
+
+        YAML specification:
+
+        .. indent with spaces
+        .. code-block:: yaml
+
+        ml_methods:
+            unsupervised_method_example:
+                UnsupervisedSklearnMethod:
+                    # sklearn parameters (same names as in original sklearn class)
+    """
+
     FIT_CV = "fit_CV"
     FIT = "fit"
 
@@ -54,8 +82,6 @@ class UnsupervisedSklearnMethod(UnsupervisedMLMethod):
             if self._parameters["metric"] in distance._METRICS_NAMES:
                 if isinstance(X, csr_matrix):
                     X = X.toarray()
-            if self._parameters["metric"] == "levenshtein":
-                self._parameters["metric"] = levenshtein
 
         self.model = self._get_ml_model(cores_for_training, X)
         if type(self.model).__name__ == ["AgglomerativeClustering", "PCA"]:

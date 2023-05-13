@@ -19,7 +19,48 @@ from scipy.sparse import csr_matrix
 
 class ClusteringInstruction(Instruction):
     """
-    Todo: add documentation here
+    The ClusteringInstruction class allows for the execution of clustering analyses on
+    datasets using specified encodings and clustering methods.
+
+    Each clustering analysis is defined by a dictionary of ClusteringUnit objects that
+    encapsulate the analyses. Each analysis needs a dataset, an encoding, a clustering method, and optional parameters such
+    as dimensionality reduction before clustering and evaluation metrics. Each clustering
+    analysis specified under analyses is completely independent from all others.
+
+    - dataset: dataset on which to perform the clustering analysis
+    - encoding: the encoding to use on the dataset before running the clustering
+    - clustering_method: the method to use for clustering the dataset
+    - dimensionality_reduction: (optional) the method to use for dimensionality reduction
+    - dim_red_before_clustering: (optional) boolean value indicating whether to perform dimensionality reduction before clustering (default is False)
+    - eval_metrics: (optional) a list of metrics to use for evaluating the clustering (default is Silhoutte, Calinski-Harabasz, and Davies-Bouldin)
+    - true_labels_path: (optional) path to a file containing the true labels for the data, used when calculating evaluation metrics (default is None)
+    - labels: (optional) list of labels to compare clustering results to
+    - report: the report to generate after clustering
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+    my_clustering_instruction: # user-defined instruction name
+      type: Clustering # which instruction to execute
+      analyses: # clustering analyses to perform
+        my_first_clustering: # user-defined name of the clustering analysis
+          dataset: d1 # dataset to use in the first analysis
+          encoding: e1 # encoding to use on the dataset
+          clustering_method: c1 # clustering method to use
+          dimensionality_reduction: dr1 # dimensionality reduction method to use (if dim_red_before_clustering is True)
+          dim_red_before_clustering: True # whether to perform dimensionality reduction before clustering
+          eval_metrics: # metrics to use for evaluating the clustering
+            -  eval_metric1
+            -  eval_metric2
+          labels:
+            -  label1
+            -  label2
+          true_labels_path: "/path/to/true_labels.csv" # path to a file containing the true labels for the data
+          report: r1 # which report to generate using the clustered dataset
+      number_of_processes: 4
+
     """
 
     def __init__(self, clustering_units: dict, name: str = None):
@@ -228,3 +269,8 @@ class ClusteringInstruction(Instruction):
         processed_dataset.encoded_data = dataset.encoded_data
         processed_dataset.labels = dataset.labels
         return processed_dataset
+
+    @staticmethod
+    def get_documentation():
+        doc = str(ClusteringInstruction.__doc__)
+        return doc

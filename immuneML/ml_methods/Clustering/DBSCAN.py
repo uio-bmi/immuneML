@@ -4,6 +4,25 @@ from immuneML.ml_methods.Clustering.Clustering import Clustering
 
 
 class DBSCAN(Clustering):
+    """
+    This is a wrapper of scikit-learn’s DBSCAN class for clustering. Please see the
+    scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html>
+    of DBSCAN for the parameters.
+
+    Additionally, eps parameter can be set to "auto" for automatic eps calculation using kneed package.
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_dbscan: # user-defined method name
+            DBSCAN: # name of the Clustering method
+                # sklearn parameters (same names as in original sklearn class)
+                eps: 0.5 # The maximum distance between two samples for one to be considered as in the neighborhood of the other.
+        my_default_dbscan: DBSCAN
+    """
+
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         _parameters = parameters if parameters is not None else {"eps": 0.5}
         _parameter_grid = parameter_grid if parameter_grid is not None else {}
