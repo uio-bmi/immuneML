@@ -129,7 +129,7 @@ class OLGA(GenerativeModel):
                                 RegionType.IMGT_JUNCTION.name, SequenceFrameType.IN.name, p_gen, int(olga_model == self._olga_model),
                                 -1)
 
-        sequences.to_csv(path, index=False, sep='\t')
+        sequences.to_csv(path, index=False, sep='\t', lineterminator="\n")
         return path
 
     def compute_p_gen(self, sequence: dict, sequence_type: SequenceType) -> float:

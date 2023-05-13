@@ -52,7 +52,7 @@ class ClusteringInstruction(Instruction):
             labels_true = None
             if unit.true_labels_path is not None and unit.true_labels_path.is_file():
                 try:
-                    labels_true = genfromtxt(unit.true_labels_path, dtype=int, delimiter=',')
+                    labels_true = genfromtxt(unit.true_labels_path, dtype=str, delimiter=',')
                 except:
                     print_log("Problem getting true_labels_path file\nCheck the file is in the right format(CSV, 1 line)")
             distance_metric = unit.clustering_method.model.metric if hasattr(unit.clustering_method.model, "metric") else "euclidean"

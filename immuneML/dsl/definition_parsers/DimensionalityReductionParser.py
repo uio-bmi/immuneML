@@ -7,8 +7,9 @@ from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
 class DimensionalityReductionParser:
+    keyword = "dimensionality_reduction"
     @staticmethod
-    def parse_dim_reductions(dim_reductions: dict, symbol_table: SymbolTable):
+    def parse(dim_reductions: dict, symbol_table: SymbolTable):
         if dim_reductions is None or len(dim_reductions) == 0:
             dim_reductions = {}
 

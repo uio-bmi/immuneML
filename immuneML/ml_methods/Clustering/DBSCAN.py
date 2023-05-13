@@ -8,12 +8,22 @@ class DBSCAN(Clustering):
         _parameters = parameters if parameters is not None else {"eps": 0.5}
         _parameter_grid = parameter_grid if parameter_grid is not None else {}
 
+        self.auto_eps = False
+        self.auto_eps_s = 3.0
+
+        if "S" in _parameters:
+            self.auto_eps_s = _parameters["S"]
+            _parameters.pop("S")
+
         super(DBSCAN, self).__init__(parameter_grid=_parameter_grid, parameters=_parameters)
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
-        if self._parameters["eps"] == "auto":
-            self._parameters["eps"] = self._calculate_auto_eps(X, cores_for_training, self._parameters["min_samples"])
+        if self.auto_eps:
+            self._parameters["eps"] = "auto"
+        else:
+            self.auto_eps = self._parameters["eps"] == "auto"
 
-        if "S" in self._parameters:
-            self._parameters.pop("S")
+        if self._parameters["eps"] == "auto":
+            self._parameters["eps"] = self._calculate_auto_eps(X, cores_for_training, self._parameters["min_samples"], self.auto_eps_s)
+
         return SklearnDBSCAN(**self._parameters)

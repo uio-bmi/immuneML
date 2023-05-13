@@ -324,10 +324,8 @@ class Repertoire(DatasetItem):
     def get_sequence_objects(self, load_implants: bool = True) -> List[ReceptorSequence]:
         """
         Lazily loads sequences from disk to reduce RAM consumption
-
         Args:
             load_implants: whether implants should be parsed to objects and converted to ImplantAnnotations; if True, might slow down the loading
-
         Returns:
             a list of ReceptorSequence objects
         """
@@ -353,10 +351,8 @@ class Repertoire(DatasetItem):
             - they are divided into groups based on the chain
             - all valid combinations of chains are created and used to make a receptor object - this means that if a cell has
               two beta (b1 and b2) and one alpha chain (a1), two receptor objects will be created: receptor1 (b1, a1), receptor2 (b2, a1)
-
         To avoid have multiple receptors in the same cell, use some of the preprocessing classes which could merge/eliminate multiple
         sequences. See the documentation of the preprocessing module for more information.
-
         Returns:
             ReceptorList: a list of objects of Receptor class
         """
@@ -378,10 +374,8 @@ class Repertoire(DatasetItem):
             - all valid combinations of chains are created and used to make a receptor object - this means that if a cell has
               two beta (b1 and b2) and one alpha chain (a1), two receptor objects will be created: receptor1 (b1, a1), receptor2 (b2, a1)
             - an object of the Cell class is created from all receptors with the same cell_id created as described in the previous steps
-
         To avoid have multiple receptors in the same cell, use some of the preprocessing classes which could merge/eliminate multiple
         sequences. See the documentation of the preprocessing module for more information.
-
         Returns:
             CellList: a list of objects of Cell class
         """

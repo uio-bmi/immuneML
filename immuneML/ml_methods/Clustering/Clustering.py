@@ -14,43 +14,48 @@ class Clustering(UnsupervisedSklearnMethod, ABC):
         params = self.model.get_params()
         return params
 
-    def _calculate_auto_eps(self, X, cores_for_training, min_samples):
-        from sklearn.neighbors import NearestNeighbors
-        import numpy as np
-        from scipy.sparse import csr_matrix
-        from kneed import KneeLocator
-
-        if "metric" in self._parameters:
-            if self._parameters["metric"] == "precomputed":
-                X = csr_matrix(X)
-            neighbors = NearestNeighbors(n_neighbors=min_samples, metric=self._parameters["metric"], n_jobs=cores_for_training)
-        else:
-            neighbors = NearestNeighbors(n_neighbors=min_samples, metric="euclidean", n_jobs=cores_for_training)
+    def _calculate_auto_eps(self, X, cores_for_training, min_samples, sensitivity: float = 3.0):
+        if "metric" in self._parameters and self._parameters["metric"] == "precomputed":
+            X = self._convert_to_csr(X)
+        neighbors = self._create_nearest_neighbors(X, cores_for_training, min_samples)
         neighbors_fit = neighbors.fit(X)
         distances, indices = neighbors_fit.kneighbors(X)
 
-        # Sort the distances by ascending order
-        distances = np.sort(distances, axis=0)
-        average_distances = distances[:, 1]
+        average_distances = self._calculate_average_distances(distances)
+        S = self._adjust_sensitivity(sensitivity)
 
-        import matplotlib.pyplot as plt
-        # Plot the k-distance graph
-        plt.plot(average_distances)
+        elbow = self._find_elbow(average_distances, S)
 
-        S = 3
-        if "metric" in self._parameters and self._parameters["metric"] == "precomputed":
-            S = 200
-        if "S" in self._parameters:
-            S = self._parameters["S"]
-
-        kl = KneeLocator(range(len(average_distances)), average_distances, S=S, curve='convex', direction='increasing', online=False)
-        elbow = kl.elbow
-
-        # Plot the elbow point
-        plt.plot(elbow, average_distances[elbow], marker='o', markersize=10, markeredgewidth=2, markeredgecolor='r', markerfacecolor='None')
-
-        plt.show()
         return float(average_distances[elbow])
+
+    def _convert_to_csr(self, X):
+        from scipy.sparse import csr_matrix
+        return csr_matrix(X)
+
+    def _create_nearest_neighbors(self, X, cores_for_training, min_samples):
+        from sklearn.neighbors import NearestNeighbors
+
+        if "metric" in self._parameters:
+            return NearestNeighbors(n_neighbors=min_samples, metric=self._parameters["metric"], n_jobs=cores_for_training)
+        else:
+            return NearestNeighbors(n_neighbors=min_samples, metric="euclidean", n_jobs=cores_for_training)
+
+    def _calculate_average_distances(self, distances):
+        import numpy as np
+
+        distances = np.sort(distances, axis=0)
+        return distances[:, 1]
+
+    def _adjust_sensitivity(self, sensitivity):
+        if "metric" in self._parameters and self._parameters["metric"] == "precomputed":
+            return 200
+        return sensitivity
+
+    def _find_elbow(self, average_distances, sensitivity):
+        from kneed import KneeLocator
+
+        kl = KneeLocator(range(len(average_distances)), average_distances, S=sensitivity, curve='convex', direction='increasing', online=False)
+        return kl.elbow
 
     def get_compatible_encoders(self):
         from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder

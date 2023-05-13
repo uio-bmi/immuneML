@@ -121,7 +121,7 @@ class TCRdistHelper:
                                       and receptor.get_chain("beta").metadata.count is not None else 1)
         elif type(receptor).__name__ == "ReceptorSequence":
             if receptor.metadata.chain.name.lower() in chains:
-                fields["count"].append(receptor.metadata.count if receptor.metadata.count is not None else 1)
+                fields["count"].append(receptor.metadata.duplicate_count if receptor.metadata.duplicate_count is not None else 1)
 
     @staticmethod
     def process_receptor_alpha_chain(receptor, fields, chains):
@@ -132,8 +132,8 @@ class TCRdistHelper:
                 fields["cdr3_a_aa"].append(receptor.get_chain('alpha').amino_acid_sequence)
                 fields["cdr3_a_nucseq"].append(receptor.get_chain("alpha").nucleotide_sequence)
             elif type(receptor).__name__ == "ReceptorSequence" and receptor.metadata.chain.value == "TRA":
-                fields["v_a_gene"].append(TCRdistHelper.add_default_allele_to_v_gene(receptor.metadata.v_allele))
-                fields["j_a_gene"].append(receptor.metadata.j_allele)
+                fields["v_a_gene"].append(TCRdistHelper.add_default_allele_to_v_gene(receptor.metadata.v_gene))
+                fields["j_a_gene"].append(receptor.metadata.j_gene)
                 fields["cdr3_a_aa"].append(receptor.amino_acid_sequence)
                 fields["cdr3_a_nucseq"].append(receptor.nucleotide_sequence)
 
@@ -146,8 +146,8 @@ class TCRdistHelper:
                 fields["cdr3_b_aa"].append(receptor.get_chain('beta').amino_acid_sequence)
                 fields["cdr3_b_nucseq"].append(receptor.get_chain("beta").nucleotide_sequence)
             elif type(receptor).__name__ == "ReceptorSequence" and receptor.metadata.chain.value == "TRB":
-                fields["v_b_gene"].append(TCRdistHelper.add_default_allele_to_v_gene(receptor.metadata.v_allele))
-                fields["j_b_gene"].append(receptor.metadata.j_allele)
+                fields["v_b_gene"].append(TCRdistHelper.add_default_allele_to_v_gene(receptor.metadata.v_gene))
+                fields["j_b_gene"].append(receptor.metadata.j_gene)
                 fields["cdr3_b_aa"].append(receptor.amino_acid_sequence)
                 fields["cdr3_b_nucseq"].append(receptor.nucleotide_sequence)
 
