@@ -116,9 +116,9 @@ class TCRdistHelper:
     @staticmethod
     def process_receptor_count(receptor, fields, chains):
         if type(receptor).__name__ == "TCABReceptor":
-            fields["count"].append(receptor.get_chain("alpha").metadata.count
-                                   if receptor.get_chain("alpha").metadata.count == receptor.get_chain("beta").metadata.count
-                                      and receptor.get_chain("beta").metadata.count is not None else 1)
+            fields["count"].append(receptor.get_chain("alpha").metadata.duplicate_count
+                                   if receptor.get_chain("alpha").metadata.duplicate_count == receptor.get_chain("beta").metadata.duplicate_count
+                                      and receptor.get_chain("beta").metadata.duplicate_count is not None else 1)
         elif type(receptor).__name__ == "ReceptorSequence":
             if receptor.metadata.chain.name.lower() in chains:
                 fields["count"].append(receptor.metadata.duplicate_count if receptor.metadata.duplicate_count is not None else 1)
@@ -127,8 +127,8 @@ class TCRdistHelper:
     def process_receptor_alpha_chain(receptor, fields, chains):
         if "alpha" in chains:
             if type(receptor).__name__ == "TCABReceptor":
-                fields["v_a_gene"].append(TCRdistHelper.add_default_allele_to_v_gene(receptor.get_chain('alpha').metadata.v_allele))
-                fields["j_a_gene"].append(receptor.get_chain('alpha').metadata.j_allele)
+                fields["v_a_gene"].append(TCRdistHelper.add_default_allele_to_v_gene(receptor.get_chain('alpha').metadata.v_gene))
+                fields["j_a_gene"].append(receptor.get_chain('alpha').metadata.j_gene)
                 fields["cdr3_a_aa"].append(receptor.get_chain('alpha').amino_acid_sequence)
                 fields["cdr3_a_nucseq"].append(receptor.get_chain("alpha").nucleotide_sequence)
             elif type(receptor).__name__ == "ReceptorSequence" and receptor.metadata.chain.value == "TRA":
@@ -141,8 +141,8 @@ class TCRdistHelper:
     def process_receptor_beta_chain(receptor, fields, chains):
         if "beta" in chains:
             if type(receptor).__name__ == "TCABReceptor":
-                fields["v_b_gene"].append(TCRdistHelper.add_default_allele_to_v_gene(receptor.get_chain('beta').metadata.v_allele))
-                fields["j_b_gene"].append(receptor.get_chain('beta').metadata.j_allele)
+                fields["v_b_gene"].append(TCRdistHelper.add_default_allele_to_v_gene(receptor.get_chain('beta').metadata.v_gene))
+                fields["j_b_gene"].append(receptor.get_chain('beta').metadata.j_gene)
                 fields["cdr3_b_aa"].append(receptor.get_chain('beta').amino_acid_sequence)
                 fields["cdr3_b_nucseq"].append(receptor.get_chain("beta").nucleotide_sequence)
             elif type(receptor).__name__ == "ReceptorSequence" and receptor.metadata.chain.value == "TRB":
