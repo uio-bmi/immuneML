@@ -77,6 +77,36 @@
                         </div>
 
                         {{/show_encoding}}
+                        {{#show_dimRed}}
+                            <details>
+                                <summary>Dimensionality reduction details</summary>
+                                <div class="col-container">
+                                    <div>
+                                        <h4 style="margin: 0.3em 0;">{{dimRed_key}}</h4>
+                                        <h5 style="margin: 0.3em 0;">Algorithm: {{dimRed_name}}</h5>
+                                    </div>
+                                    <div class="table-container">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Parameter</th>
+                                                    <th>Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {{#dimRed_params}}
+                                                <tr>
+                                                    <td>{{param_name}}</td>
+                                                    <td>{{param_value}}</td>
+                                                </tr>
+                                                {{/dimRed_params}}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </details>
+                        {{/show_dimRed}}
                         {{#show_labels}}
                         <h3>Analysis labels</h3>
                         <div class="table-container">

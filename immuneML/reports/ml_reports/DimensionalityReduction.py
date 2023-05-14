@@ -13,6 +13,33 @@ import plotly as plt
 from sklearn.preprocessing import StandardScaler
 
 class DimensionalityReduction(UnsupervisedMLReport):
+    """
+    This is a report that visualizes the results of applying dimensionality reduction techniques like PCA or t-SNE to your dataset.
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        reports:
+          my_dimensionality_reduction_report: DimensionalityReduction
+              name: my_report_name  # user-defined name of the report
+              label: epitope  # label of the data
+
+    Attributes:
+
+    - name: a user-defined name of the report. It will also be the name of the HTML file.
+    - label: the label of the data on which dimensionality reduction was performed.
+    - method: an instance of UnsupervisedMLMethod class. It must have been trained before running the report.
+    - result_path: the path where the HTML file will be stored.
+    - dataset: the dataset on which the method was trained.
+
+    Returns:
+
+    - An HTML file containing plots of the dimensionality-reduced data. If the data was reduced to two dimensions, a 2D scatter plot will be created.
+      If the method used has an explained variance, an additional explained variance plot will also be created. The plots are interactive and the data points in the scatter plot can be hovered over to display more information.
+
+    """
     @classmethod
     def build_object(cls, **kwargs):
         name = kwargs["name"] if "name" in kwargs else "DimensionalityReduction"
@@ -43,11 +70,11 @@ class DimensionalityReduction(UnsupervisedMLReport):
     def explained_varience_plot(self):
         filename = self.result_path / "explained_variance.html"
 
-        exp_var_pca = self.method.model.explained_variance_ratio_
-        x = list(range(0, len(exp_var_pca)))
-        cum_sum_eigenvalues = np.cumsum(exp_var_pca)
+        exp_var = self.method.model.explained_variance_ratio_
+        x = list(range(0, len(exp_var)))
+        cum_sum_eigenvalues = np.cumsum(exp_var)
         traces = []
-        bar0 = go.Bar(x=x, y=exp_var_pca, name="Individual explained variance")
+        bar0 = go.Bar(x=x, y=exp_var, name="Individual explained variance")
         traces.append(bar0)
         bar1 = go.Scatter(x=x, y=cum_sum_eigenvalues, line_shape="hvh", mode="lines", name="Cumulative explained variance")
         traces.append(bar1)

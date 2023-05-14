@@ -120,7 +120,7 @@ class TestAIRRExporter(TestCase):
         path_exported = path / "exported_receptors"
         AIRRExporter.export(dataset, path_exported)
 
-        resulting_data = pd.read_csv(path_exported / "batch1.tsv", sep="\t", dtype=str)
+        resulting_data = pd.read_csv(path_exported / "simulated.tsv", sep="\t", dtype=str)
 
         self.assertListEqual(list(resulting_data["cell_id"]), ["1", "1", "2", "2"])
         self.assertListEqual(list(resulting_data["sequence_id"]), ["1a", "1b", "2a", "2b"])
@@ -165,7 +165,7 @@ class TestAIRRExporter(TestCase):
         path_exported = path / "exported_sequences"
         AIRRExporter.export(dataset, path_exported)
 
-        resulting_data = pd.read_csv(path_exported / "batch1.tsv", sep="\t")
+        resulting_data = pd.read_csv(path_exported / "simulated.tsv", sep="\t")
 
         self.assertListEqual(list(resulting_data["sequence_id"]), ["1a", "1b"])
         self.assertListEqual(list(resulting_data["cdr3_aa"]), ["AAATTT", "ATATAT"])

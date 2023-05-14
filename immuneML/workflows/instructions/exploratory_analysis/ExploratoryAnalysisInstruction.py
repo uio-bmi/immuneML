@@ -16,11 +16,11 @@ from immuneML.workflows.steps.DataEncoderParams import DataEncoderParams
 
 class ExploratoryAnalysisInstruction(Instruction):
     """
-    Allows exploratory analysis of different datasets using encodings and reports.
+    Allows exploratory analysis of different datasets using encodings, dimensionality reductions, and reports.
 
-    Analysis is defined by a dictionary of ExploratoryAnalysisUnit objects that encapsulate a dataset, an encoding [optional]
-    and a report to be executed on the [encoded] dataset. Each analysis specified under `analyses` is completely independent from all
-    others.
+    Analysis is defined by a dictionary of ExploratoryAnalysisUnit objects that encapsulate a dataset, an encoding [optional],
+    a dimensionality reduction method [optional], and a report to be executed on the [encoded and/or reduced] dataset.
+    Each analysis specified under `analyses` is completely independent from all others.
 
     Arguments:
 
@@ -31,7 +31,8 @@ class ExploratoryAnalysisInstruction(Instruction):
         - preprocessing_sequence: which preprocessings to use on the dataset, this item is optional and does not have to be specified.
         - encoding: how to encode the dataset before running the report, this item is optional and does not have to be specified.
         - labels: if encoding is specified, the relevant labels must be specified here.
-        - report: which report to run on the dataset. Reports specified here may be of the category :ref:`Data reports` or :ref:`Encoding reports`, depending on whether 'encoding' was specified.
+        - dimensionality_reduction: method to use for dimensionality reduction on the encoded dataset, this item is optional and does not have to be specified.
+        - report: which report to run on the dataset. Reports specified here may be of the category :ref:`Data reports` or :ref:`Encoding reports`, depending on whether 'encoding' and 'dimensionality_reduction' were specified.
 
         number_of_processes: (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
 
@@ -50,6 +51,7 @@ class ExploratoryAnalysisInstruction(Instruction):
                 my_second_analysis: # user-defined name of another analysis
                     dataset: d1 # dataset to use in the second analysis - can be the same or different from other analyses
                     encoding: e1 # encoding to apply on the specified dataset (d1)
+                    dimensionality_reduction: dr1 # method to apply for dimensionality reduction on the encoded dataset
                     report: r2 # which report to generate in the second analysis
                     labels: # labels present in the dataset d1 which will be included in the encoded data on which report r2 will be run
                         - celiac # name of the first label as present in the column of dataset's metadata file

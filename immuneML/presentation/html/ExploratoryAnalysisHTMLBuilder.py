@@ -63,6 +63,11 @@ class ExploratoryAnalysisHTMLBuilder:
                 else None,
                 "encoding_params": [{"param_name": key, "param_value": str(value)} for key, value in vars(analysis.encoder).items()] if analysis.encoder is not None else None,
                 "show_encoding": analysis.encoder is not None,
+                "dimRed_key": analysis.dimensionality_reduction.name if analysis.dimensionality_reduction is not None else None,
+                "dimRed_name": type(analysis.dimensionality_reduction).__name__ if analysis.dimensionality_reduction is not None else None,
+                "dimRed_params": [{"param_name": key, "param_value": str(value)} for key, value in
+                                  analysis.dimensionality_reduction.get_params().items()] if analysis.dimensionality_reduction is not None else None,
+                "show_dimRed": analysis.dimensionality_reduction is not None,
                 "report": Util.to_dict_recursive(Util.update_report_paths(analysis.report_result, base_path), base_path)
             } for name, analysis in state.exploratory_analysis_units.items()]
         }
