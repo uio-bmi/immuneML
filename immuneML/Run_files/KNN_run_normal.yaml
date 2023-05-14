@@ -3,8 +3,8 @@ definitions:
     my_dataset:
       format: PDB
       params:
-        path: C:\Users\iamwi\Documents\UiO\Master\immuneMLReal\immuneML\Run_files\quickstart_data\KNN_run_normal\pdb_files      # path to the folder containing the repertoire .tsv files
-        metadata_file: C:\Users\iamwi\Documents\UiO\Master\immuneMLReal\immuneML\Run_files\quickstart_data\KNN_run_normal\metadata.csv
+        path: /usr/immuneML/immuneML/immuneML/Run_files/quickstart_data/KNN_run_normal/pdb_files
+        metadata_file: /usr/immuneML/immuneML/immuneML/Run_files/quickstart_data/KNN_run_normal/pdb_files
         region_type: IMGT_CDR3
   encodings:
     my_encoding:

@@ -5,8 +5,8 @@ definitions:
     my_dataset:
       format: PDB
       params:
-        path: C:\Users\Wii\Documents\UiO\Master\immuneMLReal\immuneML\Run_files\quickstart_data\PDB_heatmap\PDB_files
-        metadata_file: C:\Users\Wii\Documents\UiO\Master\immuneMLReal\immuneML\Run_files\quickstart_data\PDB_heatmap\metadata.csv
+        path: /usr/immuneML/immuneML/immuneML/Run_files/quickstart_data/PDB_heatmap/PDB_files
+        metadata_file: /usr/immuneML/immuneML/immuneML/Run_files/quickstart_data/PDB_heatmap/metadata.csv
         region_type: IMGT_CDR3
   encodings:
     my_encoding:
