@@ -223,10 +223,6 @@ class DistanceToAntigenMatrixEncoder(DatasetEncoder):
 
         return return_array
 
-
-
-
-
     def get_chain_ID(self, collection):
         light_id = -1
         heavy_id = -1
@@ -259,7 +255,6 @@ class DistanceToAntigenMatrixEncoder(DatasetEncoder):
             antigen_id = 2
 
         return light_id, heavy_id, antigen_id
-
 
     def is_in_CDR3(self, num):
         if 117 >= num >= 105:

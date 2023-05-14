@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from Bio.PDB import PDBParser
@@ -19,7 +20,7 @@ class TestPDBDataset(unittest.TestCase):
             PERMISSIVE=True
         )
         cls.pdb_structure = cls.pdb_parser.get_structure("pdbStructure", "1u8o.pdb")
-        cls.path = ["C:\\Users\\Wii\Documents\\UiO\\Master\\immuneMLReal\\test\\data_model\\datasets\\1u8o.pdb"]
+        cls.path = ["1u8o.pdb"]
         cls.pdb_dataset = PDBDataset(pdb_file_paths=cls.path,
                                  file_names="1u8o.pdb")
 
@@ -30,5 +31,5 @@ class TestPDBDataset(unittest.TestCase):
 
 
     def test_check_if_PDB_file_has_IMGT_numbering(self):
-        self.assertTrue(self.pdb_dataset.check_if_PDB_file_has_IMGT_numbering(self.pdb_structure))
+        self.assertTrue(self.pdb_dataset.check_if_PDB_file_has_IMGT_numbering(self.path[0]))
 

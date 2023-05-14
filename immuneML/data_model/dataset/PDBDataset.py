@@ -39,13 +39,16 @@ class PDBDataset(Dataset):
 
 
     def check_if_PDB_file_has_IMGT_numbering(self, checked_pdb_filepath):
-        #checked_pdb_filepath = os.path.basename(checked_pdb_filepath).split('/')[-1]
         file = open(checked_pdb_filepath, "r")
+
+        if "removed_antigen.pdb" in checked_pdb_filepath:
+            return True
 
         for line in file:
             if "REMARK 410" in line or "IMGT " in line:
                 file.close()
                 return True
+
 
             elif "ATOM      1" in line:
                 file.close()
@@ -79,7 +82,7 @@ class PDBDataset(Dataset):
                                                               stop_position=stop_position_from_meta_file[1], region_type=self.region_type))
                 except:
 
-                    print("Start and stop position column are required in the metadata file for non imgt-numbered PDB files")
+                    print("Start and stop position column are required in the metadata file for non imgt-numbered PDB files - ", pdb_filepath)
 
         return list_of_PDBStructures
 
