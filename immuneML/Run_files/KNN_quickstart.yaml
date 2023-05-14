@@ -3,8 +3,8 @@ definitions:
     my_dataset:
       format: PDB
       params:
-        path: C:\Users\Wii\Documents\UiO\Master\immuneMLReal\immuneML\Run_files\quickstart_data\KNN_quickstart\pdb_files      # path to the folder containing the repertoire .tsv files
-        metadata_file: C:\Users\Wii\Documents\UiO\Master\immuneMLReal\immuneML\Run_files\quickstart_data\KNN_quickstart\metadata.csv
+        path: C:\Users\iamwi\Documents\UiO\Master\immuneMLReal\immuneML\Run_files\quickstart_data\KNN_quickstart\pdb_files      # path to the folder containing the repertoire .tsv files
+        metadata_file: C:\Users\iamwi\Documents\UiO\Master\immuneMLReal\immuneML\Run_files\quickstart_data\KNN_quickstart\metadata.csv
         region_type: IMGT_CDR3
   encodings:
     my_encoding:
@@ -25,6 +25,8 @@ instructions:
       settings:
       - encoding: my_encoding
         ml_method: my_precomputedKNN
+
+      number_of_processes: 8
 
       optimization_metric: balanced_accuracy # the metric to optimize during nested cross-validation when comparing multiple models
       metrics: # other metrics to compute for reference

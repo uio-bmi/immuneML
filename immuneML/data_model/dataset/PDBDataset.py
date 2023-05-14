@@ -42,6 +42,9 @@ class PDBDataset(Dataset):
         #checked_pdb_filepath = os.path.basename(checked_pdb_filepath).split('/')[-1]
         file = open(checked_pdb_filepath, "r")
 
+        if "removed_antigen.pdb" in checked_pdb_filepath:
+            return True
+
         for line in file:
             if "REMARK 410" in line or "IMGT " in line:
                 file.close()
@@ -78,7 +81,9 @@ class PDBDataset(Dataset):
                                                               has_imgt_numbering=False, start_position=start_position_from_meta_file[0],
                                                               stop_position=stop_position_from_meta_file[1], region_type=self.region_type))
                 except:
-
+                    list_of_PDBStructures.append(PDBStructure(structure, contains_antigen=False, receptor_type="BCR",
+                                                              has_imgt_numbering=False,
+                                                              region_type=self.region_type))
                     print("Start and stop position column are required in the metadata file for non imgt-numbered PDB files")
 
         return list_of_PDBStructures
