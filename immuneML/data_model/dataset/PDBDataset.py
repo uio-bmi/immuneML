@@ -81,7 +81,9 @@ class PDBDataset(Dataset):
                                                               has_imgt_numbering=False, start_position=start_position_from_meta_file[0],
                                                               stop_position=stop_position_from_meta_file[1], region_type=self.region_type))
                 except:
-
+                    list_of_PDBStructures.append(PDBStructure(structure, contains_antigen=False, receptor_type="BCR",
+                                                              has_imgt_numbering=False,
+                                                              region_type=self.region_type))
                     print("Start and stop position column are required in the metadata file for non imgt-numbered PDB files - ", pdb_filepath)
 
         return list_of_PDBStructures
