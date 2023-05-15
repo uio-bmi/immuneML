@@ -1,9 +1,9 @@
 import os
 import shutil
+from pathlib import Path
 from unittest import TestCase
 
 import numpy as np
-from pathlib import Path
 import pandas as pd
 
 from immuneML.caching.CacheType import CacheType
@@ -29,6 +29,8 @@ class TestCompAIRRSequenceAbundanceEncoder(TestCase):
             if compairr_path.exists():
                 self._test_encode(compairr_path)
                 break
+            else:
+                print(f"test ignored for compairr path: {compairr_path}")
 
     def _build_test_dataset(self, path):
         repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
