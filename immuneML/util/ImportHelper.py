@@ -158,6 +158,8 @@ class ImportHelper:
             alternative_load_func = getattr(import_class, "alternative_load_func", None)
 
             filename = params.path / f"{metadata_row['filename']}"
+            if not filename.is_file():
+                filename = params.path / f"repertoires/{metadata_row['filename']}"
 
             dataframe = ImportHelper.load_sequence_dataframe(filename, params, alternative_load_func)
             dataframe = import_class.preprocess_dataframe(dataframe, params)
