@@ -237,10 +237,15 @@ class Repertoire(DatasetItem):
         return result
 
     def get_region_type(self):
-        region_types = set(self.get_attribute("region_types"))
-        assert len(region_types) == 1, f"Repertoire: expected one region_type, found: {region_types}"
+        region_types = self.get_attribute("region_types")
+        if region_types is not None:
+            region_types = set(region_types)
+            assert len(region_types) == 1, f"Repertoire {self.identifier}: expected one region_type, found: {region_types}"
 
-        return RegionType(region_types.pop())
+            return RegionType(region_types.pop())
+        else:
+            logging.warning(f'Repertoire {self.identifier}: region_types are not set for sequences.')
+            return None
 
     def free_memory(self):
         self.data = None

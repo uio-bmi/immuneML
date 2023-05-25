@@ -21,7 +21,7 @@ class TestKernelSequenceLogo(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_generate(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "kernel_sequence_logo/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "kernel_sequence_logo/")
         dataset = RandomDatasetGenerator.generate_receptor_dataset(receptor_count=500, chain_1_length_probabilities={4: 1},
                                                                    chain_2_length_probabilities={4: 1},
                                                                    labels={"CMV": {True: 0.5, False: 0.5}}, path=path / "dataset")
