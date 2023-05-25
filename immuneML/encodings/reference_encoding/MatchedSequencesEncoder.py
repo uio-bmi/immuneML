@@ -1,22 +1,20 @@
-from pathlib import Path
+from multiprocessing.pool import Pool
+from typing import List
 
 import numpy as np
 import pandas as pd
-from multiprocessing.pool import Pool
 
+from immuneML.analysis.SequenceMatcher import SequenceMatcher
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.reference_encoding.MatchedReferenceUtil import MatchedReferenceUtil
-from immuneML.util.CompAIRRHelper import CompAIRRHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReadsType import ReadsType
-from immuneML.analysis.SequenceMatcher import SequenceMatcher
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.data_model.repertoire.Repertoire import Repertoire
-
 
 
 class MatchedSequencesEncoder(DatasetEncoder):
@@ -55,11 +53,10 @@ class MatchedSequencesEncoder(DatasetEncoder):
                     params:
                         path: path/to/file.txt
                 max_edit_distance: 1
+
     """
 
-
-
-    def __init__(self, max_edit_distance: int, reference: ReceptorSequenceList, reads: ReadsType, sum_matches: bool, normalize: bool,
+    def __init__(self, max_edit_distance: int, reference: List[ReceptorSequence], reads: ReadsType, sum_matches: bool, normalize: bool,
                  name: str = None):
         self.max_edit_distance = max_edit_distance
         self.reference_sequences = reference
@@ -121,7 +118,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
                 ("labels", tuple(params.label_config.get_labels_by_name())),
                 ("encoding", MatchedSequencesEncoder.__name__),
                 ("learn_model", params.learn_model),
-                ("encoding_params", encoding_params_desc), )
+                ("encoding_params", encoding_params_desc),)
 
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires, labels=dataset.labels,
@@ -132,7 +129,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
         encoded_repertoires = self._normalize(dataset, encoded_repertoires) if self.normalize else encoded_repertoires
 
         feature_annotations = None if self.sum_matches else self._get_feature_info()
-        feature_names = [f"sum_of_{self.reads.value}_reads"] if self.sum_matches else list(feature_annotations["sequence_id"])
+        feature_names = [f"sum_of_{self.reads.value}_reads"] if self.sum_matches else list(feature_annotations["sequence_desc"])
 
         encoded_dataset.add_encoded_data(EncodedData(
             examples=encoded_repertoires,
@@ -170,12 +167,26 @@ class MatchedSequencesEncoder(DatasetEncoder):
                            sequence.get_attribute("chain").name.lower(),
                            sequence.get_sequence(),
                            sequence.get_attribute("v_gene"),
-                           sequence.get_attribute("j_gene")]
+                           sequence.get_attribute("j_gene"),
+                           self._get_sequence_desc(sequence)]
 
-        features = pd.DataFrame(features,
-                                columns=["sequence_id", "chain", "sequence", "v_gene", "j_gene"])
+        features = pd.DataFrame(features, columns=["sequence_id", "chain", "sequence", "v_gene", "j_gene", "sequence_desc"])
+        if features['sequence_desc'].unique().shape[0] < features.shape[0]:
+            features.loc[:, 'sequence_desc'] = [row['sequence_desc'] + "_" + row['sequence_id'] for ind, row in features.iterrows()]
 
         return features
+
+    def _get_sequence_desc(self, sequence: ReceptorSequence) -> str:
+        desc = ""
+        if sequence.get_attribute('v_gene') not in [None, ""]:
+            desc += f"{sequence.get_attribute('v_gene')}_"
+
+        desc += sequence.get_sequence()
+
+        if sequence.get_attribute('j_gene') not in ["", None]:
+            desc += f"_{sequence.get_attribute('j_gene')}"
+
+        return desc
 
     def _encode_repertoires(self, dataset: RepertoireDataset, params):
         labels = {label: [] for label in params.label_config.get_labels_by_name()} if params.encode_labels else None
@@ -190,15 +201,16 @@ class MatchedSequencesEncoder(DatasetEncoder):
         return encoded_repertories, labels
 
     def _get_repertoire_matches_to_reference(self, repertoire):
-         return CacheHandler.memo_by_params(
-             (("repertoire_identifier", repertoire.identifier),
-              ("encoding", MatchedSequencesEncoder.__name__),
-              ("readstype", self.reads.name),
-              ("sum_matches", self.sum_matches),
-              ("max_edit_distance", self.max_edit_distance),
-              ("reference_sequences", tuple([(seq.get_attribute("chain"), seq.get_sequence(), seq.get_attribute("v_gene"), seq.get_attribute("j_gene")) for seq in self.reference_sequences]))),
+        return CacheHandler.memo_by_params(
+            (("repertoire_identifier", repertoire.identifier),
+             ("encoding", MatchedSequencesEncoder.__name__),
+             ("readstype", self.reads.name),
+             ("sum_matches", self.sum_matches),
+             ("max_edit_distance", self.max_edit_distance),
+             ("reference_sequences", tuple(
+                 [(seq.get_attribute("chain"), seq.get_sequence(), seq.get_attribute("v_gene"), seq.get_attribute("j_gene")) for seq in
+                  self.reference_sequences]))),
             lambda: self._compute_matches_to_reference(repertoire))
-
 
     def _compute_matches_to_reference(self, repertoire: Repertoire):
         matcher = SequenceMatcher()

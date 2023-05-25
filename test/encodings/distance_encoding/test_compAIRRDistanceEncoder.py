@@ -1,9 +1,9 @@
 import os
 import shutil
+from pathlib import Path
 from unittest import TestCase
 
 import numpy as np
-from pathlib import Path
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -32,10 +32,14 @@ class TestCompAIRRDistanceEncoder(TestCase):
     def test_encode(self):
         compairr_paths = [Path("/usr/local/bin/compairr"), Path("./compairr/src/compairr")]
 
+        working = 0
         for compairr_path in compairr_paths:
             if compairr_path.exists():
+                working += 1
                 self._run_test(compairr_path)
                 break
+
+        assert working > 0
 
     def _run_test(self, compairr_path):
 

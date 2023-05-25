@@ -122,7 +122,7 @@ metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDat
             df.loc[df["sequence_identifiers"] == "0", "sequence_identifiers"] = None
 
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
-        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
+        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters, params.import_with_stop_codon)
         ImportHelper.update_gene_info(df)
         ImportHelper.load_chains(df)
 
@@ -167,7 +167,7 @@ metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDat
             return sequence_identifiers
         else:
             counts = sequence_identifiers.value_counts()
-            for id, count in counts[counts > 1].iteritems():
+            for id, count in counts[counts > 1].items():
                 unique_ids = [f"{id}{i}" for i in range(1, count+1)]
                 sequence_identifiers.loc[sequence_identifiers == id] = unique_ids
         return sequence_identifiers

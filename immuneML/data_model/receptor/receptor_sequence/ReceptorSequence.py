@@ -1,5 +1,6 @@
 # quality: gold
 import json
+from uuid import uuid4
 
 import numpy as np
 
@@ -35,12 +36,12 @@ class ReceptorSequence(DatasetItem):
                  nucleotide_sequence: str = None,
                  identifier: str = None,
                  annotation: SequenceAnnotation = None,
-                 metadata: SequenceMetadata = SequenceMetadata()):
-        self.identifier = identifier
+                 metadata: SequenceMetadata = None):
+        self.identifier = identifier if identifier is not None and identifier != "" else uuid4().hex
         self.amino_acid_sequence = amino_acid_sequence
         self.nucleotide_sequence = nucleotide_sequence
         self.annotation = annotation
-        self.metadata = metadata
+        self.metadata = metadata if metadata is not None else SequenceMetadata()
 
     def __repr__(self):
         return f"ReceptorSequence(sequence_aa={self.amino_acid_sequence}, sequence={self.nucleotide_sequence}, " \

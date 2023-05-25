@@ -1,5 +1,4 @@
 import json
-from uuid import uuid4
 
 import numpy as np
 
@@ -29,7 +28,7 @@ class TCABReceptor(Receptor):
             raise NotImplementedError(f"Supported ({TCABReceptor.version}) and available version differ, but there is no converter available.")
 
     def __init__(self, alpha: ReceptorSequence = None, beta: ReceptorSequence = None, metadata: dict = None, identifier: str = None):
-        super().__init__(metadata, identifier)
+        super().__init__(metadata=metadata, identifier=identifier)
         self.alpha = alpha
         self.beta = beta
 

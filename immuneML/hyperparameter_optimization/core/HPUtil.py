@@ -11,7 +11,6 @@ from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
-from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.util.PathBuilder import PathBuilder
@@ -19,8 +18,6 @@ from immuneML.workflows.steps.DataEncoder import DataEncoder
 from immuneML.workflows.steps.DataEncoderParams import DataEncoderParams
 from immuneML.workflows.steps.MLMethodAssessment import MLMethodAssessment
 from immuneML.workflows.steps.MLMethodAssessmentParams import MLMethodAssessmentParams
-from immuneML.workflows.steps.MLMethodTrainer import MLMethodTrainer
-from immuneML.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
 from immuneML.workflows.steps.data_splitter.DataSplitter import DataSplitter
 from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
 
@@ -69,22 +66,6 @@ class HPUtil:
                 return preprocessed_dataset
             else:
                 return dataset
-
-    @staticmethod
-    def train_method(label: Label, dataset, hp_setting: HPSetting, path: Path, train_predictions_path, ml_details_path, cores_for_training, optimization_metric) -> MLMethod:
-        method = MLMethodTrainer.run(MLMethodTrainerParams(
-            method=copy.deepcopy(hp_setting.ml_method),
-            result_path=path / "ml_method",
-            dataset=dataset,
-            label=label,
-            train_predictions_path=train_predictions_path,
-            ml_details_path=ml_details_path,
-            model_selection_cv=hp_setting.ml_params["model_selection_cv"],
-            model_selection_n_folds=hp_setting.ml_params["model_selection_n_folds"],
-            cores_for_training=cores_for_training,
-            optimization_metric=optimization_metric.name.lower()
-        ))
-        return method
 
     @staticmethod
     def encode_dataset(dataset, hp_setting: HPSetting, path: Path, learn_model: bool, context: dict, number_of_processes: int,

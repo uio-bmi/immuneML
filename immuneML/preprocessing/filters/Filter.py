@@ -1,5 +1,4 @@
 from abc import ABC
-from pathlib import Path
 
 import pandas as pd
 
@@ -17,7 +16,7 @@ class Filter(Preprocessor, ABC):
             df.reset_index(drop=True, inplace=True)
 
             PathBuilder.build(self.result_path)
-            path = self.result_path / f"{dataset.metadata_file.stem}_metadata_filtered.csv"
+            path = self.result_path / f"{dataset.metadata_file.stem}_filtered.csv"
             df.to_csv(path, index=False)
         else:
             path = None

@@ -5,7 +5,9 @@ from pathlib import Path
 
 import pandas as pd
 
+from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.CompAIRRParams import CompAIRRParams
 
 
 class CompAIRRHelper:
@@ -48,23 +50,35 @@ class CompAIRRHelper:
         return compairr_path
 
     @staticmethod
-    def get_cmd_args(compairr_params, input_file_list, result_path):
+    def get_cmd_args(compairr_params: CompAIRRParams, input_file_list, result_path):
         indels_args = ["-i"] if compairr_params.indels else []
         frequency_args = ["-f"] if compairr_params.ignore_counts else []
         ignore_genes = ["-g"] if compairr_params.ignore_genes else []
         output_args = ["-o", str(result_path / compairr_params.output_filename), "-l", str(result_path / compairr_params.log_filename)]
+        output_pairs = ['-p', str(result_path / compairr_params.pairs_filename)] if compairr_params.output_pairs else []
+        cdr3_indicator = ['--cdr3'] if compairr_params.is_cdr3 else []
+        command = '-m' if compairr_params.do_repertoire_overlap and not compairr_params.do_sequence_matching else '-x'
 
-        return [str(compairr_params.compairr_path), "-m", "-d", str(compairr_params.differences), "-t", str(compairr_params.threads)] + \
-               indels_args + frequency_args + ignore_genes + output_args + input_file_list
+        return [str(compairr_params.compairr_path), command, "-d", str(compairr_params.differences), "-t", str(compairr_params.threads)] + \
+                indels_args + frequency_args + ignore_genes + output_args + input_file_list + output_pairs + cdr3_indicator
 
     @staticmethod
-    def write_repertoire_file(repertoire_dataset, filename, compairr_params):
+    def write_repertoire_file(repertoire_dataset=None, filename=None, compairr_params=None, repertoires: list = None):
         mode = "w"
         header = True
 
-        for repertoire in repertoire_dataset.get_data():
+        columns_in_order = []
+
+        if repertoire_dataset is not None and repertoires is None:
+            repertoires = repertoire_dataset.get_data()
+
+        for ind, repertoire in enumerate(repertoires):
             repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, compairr_params)
-            repertoire_contents.to_csv(filename, mode=mode, header=header, index=False, sep="\t")
+
+            if ind == 0:
+                columns_in_order = sorted(repertoire_contents.columns)
+
+            repertoire_contents[columns_in_order].to_csv(filename, mode=mode, header=header, index=False, sep="\t")
 
             mode = "a"
             header = False
@@ -91,7 +105,7 @@ class CompAIRRHelper:
         if compairr_params.ignore_counts:
             repertoire_contents["counts"] = 1
 
-        repertoire_contents.rename(columns={EnvironmentSettings.get_sequence_type().value: "junction_aa",
+        repertoire_contents.rename(columns={EnvironmentSettings.get_sequence_type().value: "cdr3_aa" if repertoire.get_region_type() == RegionType.IMGT_CDR3 else 'junction_aa',
                                             "v_genes": "v_call", "j_genes": "j_call",
                                             "counts": "duplicate_count", "identifier": "repertoire_id"},
                                    inplace=True)

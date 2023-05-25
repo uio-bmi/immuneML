@@ -8,6 +8,7 @@ import pandas as pd
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.util.CompAIRRHelper import CompAIRRHelper
@@ -82,7 +83,7 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
                                               ignore_genes=ignore_genes,
                                               threads=threads,
                                               output_filename=CompAIRRDistanceEncoder.OUTPUT_FILENAME,
-                                              log_filename=CompAIRRDistanceEncoder.LOG_FILENAME)
+                                              log_filename=CompAIRRDistanceEncoder.LOG_FILENAME, output_pairs=False, pairs_filename=None)
 
         self.context = context
         self.name = name
@@ -199,6 +200,7 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
     def _run_compairr(self, dataset, params, filename):
         repertoire_sizes, repertoire_indices = self._prepare_repertoire_file(dataset, filename)
 
+        self.compairr_params.is_cdr3 = dataset.repertoires[0].get_region_type() == RegionType.IMGT_CDR3
         args = CompAIRRHelper.get_cmd_args(self.compairr_params, [filename], params.result_path)
         compairr_result = subprocess.run(args, capture_output=True, text=True)
 

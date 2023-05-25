@@ -76,12 +76,14 @@ class Matches(EncodingReport):
                             output_tables=output_tables)
 
     def _write_match_table(self):
-        id_df = pd.DataFrame({"repertoire_id": self.dataset.encoded_data.example_ids})
+        id_df = pd.DataFrame({"repertoire_id": self.dataset.encoded_data.example_ids,
+                              'subject_id': self.dataset.get_subject_ids()})
         label_df = pd.DataFrame(self.dataset.encoded_data.labels)
         matches_df = pd.DataFrame(self.dataset.encoded_data.examples, columns=self.dataset.encoded_data.feature_names)
+        different_cols = label_df.columns.difference(id_df.columns)
 
         result_path = self.result_path / "complete_match_count_table.csv"
-        id_df.join(label_df).join(matches_df).to_csv(result_path, index=False)
+        id_df.join(label_df[different_cols]).join(matches_df).to_csv(result_path, index=False)
 
         return ReportOutput(result_path, "All matches")
 

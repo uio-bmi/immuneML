@@ -15,6 +15,7 @@ from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.reports.encoding_reports.Matches import Matches
+from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
@@ -73,7 +74,7 @@ class TestMatches(unittest.TestCase):
         return encoded
 
     def test_generate_for_matchedreceptors(self):
-        path = EnvironmentSettings.root_path / "test/tmp/matches_for_matchedreceptors/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "matches_for_matchedreceptors/")
 
         encoded_data = self.create_encoded_matchedreceptors(path)
 
@@ -117,8 +118,7 @@ class TestMatches(unittest.TestCase):
 
     def create_encoded_matchedsequences(self, path):
         # Setting up dummy data
-        labels = {"subject_id": ["subject_1", "subject_2"],
-                  "label": ["yes", "no"]}
+        labels = {"label": ["yes", "no"]}
 
         metadata_beta = {"v_gene": "TRBV1", "j_gene": "TRBJ1", "chain": Chain.BETA.value}
 
@@ -129,12 +129,11 @@ class TestMatches(unittest.TestCase):
                                                                        {**metadata_beta, "count": 10}],
                                                                       [{**metadata_beta, "count": 5},
                                                                        {**metadata_beta, "count": 5}]],
-                                                        subject_ids=labels["subject_id"])
+                                                        subject_ids=["subject_1", "subject_2"])
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
 
         label_config = LabelConfiguration()
-        label_config.add_label("subject_id", labels["subject_id"])
         label_config.add_label("label", labels["label"])
 
         file_content = """complex.id	Gene	CDR3	V	J	Species	MHC A	MHC B	MHC class	Epitope	Epitope gene	Epitope species	Reference	Method	Meta	CDR3fix	Score
@@ -164,7 +163,7 @@ class TestMatches(unittest.TestCase):
         return encoded
 
     def test_generate_for_matchedsequences(self):
-        path = EnvironmentSettings.root_path / "test/tmp/matches_for_matchedsequences/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.root_path / "test/tmp/matches_for_matchedsequences/")
 
         encoded_data = self.create_encoded_matchedsequences(path)
 
@@ -183,9 +182,9 @@ class TestMatches(unittest.TestCase):
         chains = pd.read_csv(path / "report_results/sequence_info/all_chains.csv")
         unique_chains = pd.read_csv(path / "report_results/sequence_info/unique_chains.csv")
 
-        self.assertListEqual(list(matches["100_TRB"]), [10, 0])
-        self.assertListEqual(list(matches["101_TRB"]), [10, 0])
-        self.assertListEqual(list(matches["200_TRB"]), [10, 5])
+        self.assertListEqual(list(matches["TRBV1_AAAA_TRBJ1_100_TRB"]), [10, 0])
+        self.assertListEqual(list(matches["TRBV1_AAAA_TRBJ1_101_TRB"]), [10, 0])
+        self.assertListEqual(list(matches["TRBV1_TTTT_TRBJ1_200_TRB"]), [10, 5])
 
         self.assertListEqual(list(chains["sequence_id"]), ["100_TRB", "101_TRB", "200_TRB"])
         self.assertListEqual(list(unique_chains["sequence_id"]), ["100_TRB", "200_TRB"])
@@ -247,7 +246,7 @@ class TestMatches(unittest.TestCase):
         return encoded
 
     def test_generate_for_matchedregex(self):
-        path = EnvironmentSettings.root_path / "test/tmp/regex_matches_report/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "regex_matches_report/")
 
         encoded_data = self.create_encoded_matchedregex(path / "input_data/")
 
