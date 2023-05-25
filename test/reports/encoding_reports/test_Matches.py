@@ -74,7 +74,7 @@ class TestMatches(unittest.TestCase):
         return encoded
 
     def test_generate_for_matchedreceptors(self):
-        path = EnvironmentSettings.root_path / "test/tmp/matches_for_matchedreceptors/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "matches_for_matchedreceptors/")
 
         encoded_data = self.create_encoded_matchedreceptors(path)
 
@@ -246,7 +246,7 @@ class TestMatches(unittest.TestCase):
         return encoded
 
     def test_generate_for_matchedregex(self):
-        path = EnvironmentSettings.root_path / "test/tmp/regex_matches_report/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "regex_matches_report/")
 
         encoded_data = self.create_encoded_matchedregex(path / "input_data/")
 
