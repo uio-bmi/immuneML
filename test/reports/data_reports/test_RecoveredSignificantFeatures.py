@@ -86,7 +86,7 @@ class TestSignificantFeatures(TestCase):
         base_path = EnvironmentSettings.tmp_test_path / f"recovered_significant_features/"
         path = base_path / path_suffix
 
-        PathBuilder.remove_old_and_build(path)
+        PathBuilder.build(path)
 
         dataset = self._get_example_dataset(path)
         implanted_sequences_path = self._get_implanted_sequences(path)
