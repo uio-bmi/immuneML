@@ -9,6 +9,8 @@ from uuid import uuid4
 
 import numpy as np
 import yaml
+from bionumpy import AminoAcidEncoding, DNAEncoding
+from bionumpy.bnpdataclass import bnpdataclass
 
 from immuneML.data_model.DatasetItem import DatasetItem
 from immuneML.data_model.cell.Cell import Cell
@@ -24,6 +26,18 @@ from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.simulation.implants.ImplantAnnotation import ImplantAnnotation
 from immuneML.util.NumpyHelper import NumpyHelper
 from immuneML.util.PathBuilder import PathBuilder
+
+
+@bnpdataclass
+class SequenceSet:
+    sequence_aa: AminoAcidEncoding
+    sequence: DNAEncoding
+    v_call: str
+    j_call: str
+    region_type: str
+    frame_type: str
+    duplicate_count: int
+
 
 
 class Repertoire(DatasetItem):
