@@ -1,17 +1,19 @@
 # quality: gold
 import ast
+import dataclasses
 import logging
 import shutil
 import weakref
+from dataclasses import make_dataclass
 from pathlib import Path
-from typing import List
+from typing import List, Any, Dict
 from uuid import uuid4
 
 import numpy as np
 import yaml
 from bionumpy import AminoAcidEncoding, DNAEncoding
 from bionumpy.bnpdataclass import bnpdataclass
-
+import bionumpy as bnp
 from immuneML.data_model.DatasetItem import DatasetItem
 from immuneML.data_model.cell.Cell import Cell
 from immuneML.data_model.cell.CellList import CellList
@@ -39,21 +41,22 @@ class SequenceSet:
     duplicate_count: int
 
 
-
 class Repertoire(DatasetItem):
     """
     Repertoire object consisting of sequence objects, each sequence attribute is stored as a list across all sequences and can be
     loaded separately. Internally, this class relies on numpy to store/import_dataset the data.
     """
 
-    FIELDS = ("sequence_aa", "sequence", "v_call", "j_call", "chain", "duplicate_count", "region_type", "frame_type", "sequence_id", "cell_id")
+    FIELDS = ("sequence_aa", "sequence", "v_call", "j_call", "chain", "duplicate_count", "region_type", "frame_type",
+              "sequence_id", "cell_id")
 
     @staticmethod
     def process_custom_lists(custom_lists):
         try:
             if custom_lists:
                 field_list = list(custom_lists.keys())
-                values = [[NumpyHelper.get_numpy_representation(el) for el in custom_lists[field]] for field in custom_lists.keys()]
+                values = [[NumpyHelper.get_numpy_representation(el) for el in custom_lists[field]] for field in
+                          custom_lists.keys()]
                 dtype = [(field, np.array(values[index]).dtype) for index, field in enumerate(custom_lists.keys())]
             else:
                 field_list, values, dtype = [], [], []
@@ -64,7 +67,8 @@ class Repertoire(DatasetItem):
 
     @staticmethod
     def check_count(sequence_aas: list = None, sequences: list = None, custom_lists: dict = None) -> int:
-        sequence_count = len(sequence_aas) if sequence_aas is not None else len(sequences) if sequences is not None else 0
+        sequence_count = len(sequence_aas) if sequence_aas is not None else len(
+            sequences) if sequences is not None else 0
 
         if sequences is not None and sequence_aas is not None:
             assert len(sequences) == len(sequence_aas), \
@@ -76,6 +80,27 @@ class Repertoire(DatasetItem):
             f"{str(list(custom_lists.keys()))[1:-1]}"
 
         return sequence_count
+
+    @classmethod
+    def _build_bnpdataclass(cls, all_fields_dict: Dict[str, Any]):
+        sequence_field_names = {field.name: field.type for field in dataclasses.fields(SequenceSet)}
+        types = {}
+        for key, value in all_fields_dict.items():
+            if key in sequence_field_names:
+                field_type = sequence_field_names[key]
+            else:
+                field_type = cls._get_field_type_from_values(value)
+            types[key] = field_type
+        dc = bnpdataclass(make_dataclass('DynamicSequenceSet', fields=types.items()))
+        return dc(**all_fields_dict)
+
+    @classmethod
+    def _get_field_type_from_values(cls, value):
+        if isinstance(value, np.ndarray):
+            return value.dtype
+        if len(value) == 0:
+            return str
+        return type(value[0])
 
     @classmethod
     def build(cls, sequence_aa: list = None, sequence: list = None, v_call: list = None, j_call: list = None,
@@ -94,26 +119,17 @@ class Repertoire(DatasetItem):
 
         data_filename = path / f"{filename_base}.npy"
 
-        field_list, values, dtype = Repertoire.process_custom_lists(custom_lists)
-
-        if signals:
-            signals_filtered = {f'{signal}_info': signals[signal] for signal in signals if signal not in Repertoire.FIELDS}
-            field_list_signals, values_signals, dtype_signals = Repertoire.process_custom_lists(signals_filtered)
-
-            for index, field_name in enumerate(field_list_signals):
-                if field_name not in field_list:
-                    field_list.append(field_name)
-                    values.append(values_signals[index])
-                    dtype.append(dtype_signals[index])
-
-        for field in Repertoire.FIELDS:
-            if eval(field) is not None and not all(el is None for el in eval(field)):
-                field_list.append(field)
-                values.append([NumpyHelper.get_numpy_representation(val) if val is not None else np.nan for val in eval(field)])
-                dtype.append((field, np.array(values[-1]).dtype))
-
-        repertoire_matrix = np.array(list(map(tuple, zip(*values))), order='F', dtype=dtype)
-        np.save(str(data_filename), repertoire_matrix, allow_pickle=False)
+        dtype, field_list, values = cls._create_field_specs(sequence_aa, sequence, v_call, j_call,
+                                                            chain, duplicate_count, region_type, frame_type,
+                                                            custom_lists, sequence_id, path, metadata,
+                                                            signals, cell_id, filename_base, identifier)
+        field_dict = dict(zip(field_list, values))
+        bnp_object = cls._build_bnpdataclass(field_dict)
+        buffer_type = bnp.io.delimited_buffers.get_bufferclass_for_datatype(type(bnp_object), delimiter='\t',
+                                                                            has_header=True)
+        bnp.open(str(data_filename) + '.tsv', 'w', buffer_type=buffer_type).write(bnp_object)
+        repertoire_matrix = np.array(list(map(tuple, zip(*values))), order='F', dtype=dtype)  # erase this
+        np.save(str(data_filename), repertoire_matrix, allow_pickle=False)  # erase this
 
         metadata_filename = path / f"{filename_base}_metadata.yaml"
         metadata = {} if metadata is None else metadata
@@ -121,8 +137,36 @@ class Repertoire(DatasetItem):
         with metadata_filename.open("w") as file:
             yaml.dump(metadata, file)
 
-        repertoire = Repertoire(data_filename, metadata_filename, identifier)
+        repertoire = Repertoire(data_filename, metadata_filename, identifier, buffer_type=buffer_type)
         return repertoire
+
+    @classmethod
+    def _create_field_specs(cls, sequence_aa: list = None, sequence: list = None, v_call: list = None,
+                            j_call: list = None,
+                            chain: list = None, duplicate_count: list = None, region_type: list = None,
+                            frame_type: list = None,
+                            custom_lists: dict = None, sequence_id: list = None, path: Path = None,
+                            metadata: dict = None,
+                            signals: dict = None, cell_id: List[str] = None, filename_base: str = None,
+                            identifier: str = None):
+        field_list, values, dtype = Repertoire.process_custom_lists(custom_lists)
+        if signals:
+            signals_filtered = {f'{signal}_info': signals[signal] for signal in signals if
+                                signal not in Repertoire.FIELDS}
+            field_list_signals, values_signals, dtype_signals = Repertoire.process_custom_lists(signals_filtered)
+
+            for index, field_name in enumerate(field_list_signals):
+                if field_name not in field_list:
+                    field_list.append(field_name)
+                    values.append(values_signals[index])
+                    dtype.append(dtype_signals[index])
+        for field in Repertoire.FIELDS:
+            if eval(field) is not None and not all(el is None for el in eval(field)):
+                field_list.append(field)
+                values.append(
+                    [NumpyHelper.get_numpy_representation(val) if val is not None else np.nan for val in eval(field)])
+                dtype.append((field, np.array(values[-1]).dtype))
+        return dtype, field_list, values
 
     @classmethod
     def build_like(cls, repertoire, indices_to_keep: list, result_path: Path, filename_base: str = None):
@@ -146,13 +190,15 @@ class Repertoire(DatasetItem):
             return None
 
     @classmethod
-    def build_from_sequence_objects(cls, sequence_objects: list, path: Path, metadata: dict, filename_base: str = None, repertoire_id: str = None):
+    def build_from_sequence_objects(cls, sequence_objects: list, path: Path, metadata: dict, filename_base: str = None,
+                                    repertoire_id: str = None):
 
         assert all(isinstance(sequence, ReceptorSequence) for sequence in sequence_objects), \
             "Repertoire: all sequences have to be instances of ReceptorSequence class."
 
         sequence_aa, sequence, v_call, j_call, chain, duplicate_count, region_type, frame_type, sequence_id, cell_id = [], [], [], [], [], [], [], [], [], []
-        custom_lists = {key: [] for key in sequence_objects[0].metadata.custom_params} if sequence_objects[0].metadata else {}
+        custom_lists = {key: [] for key in sequence_objects[0].metadata.custom_params} if sequence_objects[
+            0].metadata else {}
         signals = {}
 
         for index, seq in enumerate(sequence_objects):
@@ -188,19 +234,26 @@ class Repertoire(DatasetItem):
             if signal_info_count < sequence_count:
                 signals[signal].extend([None for _ in range(sequence_count - signal_info_count)])
 
-        return cls.build(sequence_aa=sequence_aa, sequence=sequence, v_call=v_call, j_call=j_call, chain=chain, duplicate_count=duplicate_count,
-                         region_type=region_type, frame_type=frame_type, custom_lists=custom_lists, sequence_id=sequence_id, path=path,
-                         metadata=metadata, signals=signals, cell_id=cell_id, filename_base=filename_base, identifier=repertoire_id)
+        return cls.build(sequence_aa=sequence_aa, sequence=sequence, v_call=v_call, j_call=j_call, chain=chain,
+                         duplicate_count=duplicate_count,
+                         region_type=region_type, frame_type=frame_type, custom_lists=custom_lists,
+                         sequence_id=sequence_id, path=path,
+                         metadata=metadata, signals=signals, cell_id=cell_id, filename_base=filename_base,
+                         identifier=repertoire_id)
 
-    def __init__(self, data_filename: Path, metadata_filename: Path, identifier: str):
+    @property
+    def _bnp_filename(self):
+        return Path(str(self.data_filename) + ".tsv")
+
+    def __init__(self, data_filename: Path, metadata_filename: Path, identifier: str, buffer_type=None):
         data_filename = Path(data_filename)
         metadata_filename = Path(metadata_filename) if metadata_filename is not None else None
-
+        self._buffer_type = buffer_type
+        self.__bnp_data = None
         assert data_filename.suffix == ".npy", \
             f"Repertoire: the file representing the repertoire has to be in numpy binary format. Got {data_filename.suffix} instead."
 
         self.data_filename = data_filename
-
         if metadata_filename:
             with metadata_filename.open("r") as file:
                 self.metadata = yaml.safe_load(file)
@@ -258,7 +311,8 @@ class Repertoire(DatasetItem):
             if attribute in data.dtype.names:
                 result[attribute] = data[attribute]
             else:
-                logging.warning(f"{Repertoire.__name__}: attribute {attribute} is not present in the repertoire {self.identifier}, skipping...")
+                logging.warning(
+                    f"{Repertoire.__name__}: attribute {attribute} is not present in the repertoire {self.identifier}, skipping...")
         return result
 
     def get_region_type(self):
@@ -309,12 +363,17 @@ class Repertoire(DatasetItem):
                                metadata=SequenceMetadata(v_call=row["v_call"] if "v_call" in fields else None,
                                                          j_call=row["j_call"] if "j_call" in fields else None,
                                                          chain=row["chain"] if "chain" in fields else None,
-                                                         duplicate_count=row["duplicate_count"] if "duplicate_count" in fields and not NumpyHelper.is_nan_or_empty(row['duplicate_count']) else None,
-                                                         region_type=row["region_type"] if "region_type" in fields else None,
-                                                         frame_type=row["frame_type"] if "frame_type" in fields else "IN",
+                                                         duplicate_count=row[
+                                                             "duplicate_count"] if "duplicate_count" in fields and not NumpyHelper.is_nan_or_empty(
+                                                             row['duplicate_count']) else None,
+                                                         region_type=row[
+                                                             "region_type"] if "region_type" in fields else None,
+                                                         frame_type=row[
+                                                             "frame_type"] if "frame_type" in fields else "IN",
                                                          cell_id=row["cell_id"] if "cell_id" in fields else None,
                                                          custom_params={key: row[key] if key in fields else None
-                                                                        for key in set(self.fields) - set(Repertoire.FIELDS)}),
+                                                                        for key in
+                                                                        set(self.fields) - set(Repertoire.FIELDS)}),
                                annotation=SequenceAnnotation(implants=implants))
 
         return seq
@@ -354,6 +413,12 @@ class Repertoire(DatasetItem):
             seqs.append(seq)
 
         return seqs
+
+    @property
+    def _bnp_data(self):
+        if self.__bnp_data is None:
+            self.__bnp_data = self._load_bnp_data()
+        return self.__bnp_data
 
     @property
     def sequences(self):
@@ -407,3 +472,6 @@ class Repertoire(DatasetItem):
             cells.append(Cell(receptors))
 
         return cell_lists
+
+    def _load_bnp_data(self):
+        return bnp.open(self._bnp_filename, buffer_type=self._buffer_type).read()
