@@ -70,7 +70,7 @@ class TestSignificantFeatures(TestCase):
 
     def test_generate(self, compairr_path=None):
         path_suffix = "compairr" if compairr_path else "no_compairr"
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / f"significant_features_{path_suffix}/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / f"significant_features_{path_suffix}/")
 
         dataset = self._get_example_dataset(path)
 

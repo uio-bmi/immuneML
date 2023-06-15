@@ -20,7 +20,7 @@ class TestRelevantSequenceExporter(TestCase):
 
     def test_generate(self):
         path = EnvironmentSettings.tmp_test_path / "relevant_sequence_exporter/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         df = pd.DataFrame({"v_call": ["TRBV1-1", "TRBV1-1"], 'j_call': ["TRBJ1-1", "TRBJ1-2"], "sequence_aa": ['ACCF', "EEFG"]})
         df.to_csv(path / 'sequences.csv', index=False)

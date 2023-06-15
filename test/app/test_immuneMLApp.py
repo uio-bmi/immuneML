@@ -175,7 +175,7 @@ class TestImmuneMLApp(TestCase):
         }
 
         path = EnvironmentSettings.tmp_test_path / "immuneml_app/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         specs_file = path / "specs.yaml"
         with specs_file.open("w") as file:
             yaml.dump(specs, file)

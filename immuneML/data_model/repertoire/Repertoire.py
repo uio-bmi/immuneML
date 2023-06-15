@@ -9,11 +9,12 @@ from pathlib import Path
 from typing import List, Any, Dict
 from uuid import uuid4
 
+import bionumpy as bnp
 import numpy as np
 import yaml
 from bionumpy import AminoAcidEncoding, DNAEncoding
 from bionumpy.bnpdataclass import bnpdataclass
-import bionumpy as bnp
+
 from immuneML.data_model.DatasetItem import DatasetItem
 from immuneML.data_model.cell.Cell import Cell
 from immuneML.data_model.cell.CellList import CellList
@@ -22,7 +23,6 @@ from immuneML.data_model.receptor.ReceptorBuilder import ReceptorBuilder
 from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.simulation.implants.ImplantAnnotation import ImplantAnnotation
@@ -131,7 +131,8 @@ class Repertoire(DatasetItem):
         bnp_object, type_dict = cls._build_bnpdataclass(field_dict)
         buffer_type = bnp.io.delimited_buffers.get_bufferclass_for_datatype(type(bnp_object), delimiter='\t',
                                                                             has_header=True)
-        bnp.open(str(data_filename) + '.tsv', 'w', buffer_type=buffer_type).write(bnp_object)
+        with bnp.open(str(data_filename) + '.tsv', 'w', buffer_type=buffer_type) as file:
+            file.write(bnp_object)
         repertoire_matrix = np.array(list(map(tuple, zip(*values))), order='F', dtype=dtype)  # erase this
         np.save(str(data_filename), repertoire_matrix, allow_pickle=False)  # erase this
 
@@ -229,12 +230,6 @@ class Repertoire(DatasetItem):
                     else:
                         custom_lists[param] = [None for _ in range(index)]
                         custom_lists[param].append(current_value)
-            if seq.annotation and seq.annotation.implants and len(seq.annotation.implants) > 0:
-                for implant in seq.annotation.implants:
-                    if implant.signal_id in signals:
-                        signals[implant.signal_id].append(str(vars(implant)))
-                    else:
-                        signals[implant.signal_id] = [None for _ in range(index)] + [str(vars(implant))]
 
         sequence_count = len(sequence)
 
@@ -390,8 +385,7 @@ class Repertoire(DatasetItem):
                                                          cell_id=row["cell_id"] if "cell_id" in fields else None,
                                                          custom_params={key: row[key] if key in fields else None
                                                                         for key in
-                                                                        set(self._type_dict.keys()) - set(Repertoire.FIELDS)}),
-                               annotation=SequenceAnnotation(implants=implants))
+                                                                        set(self._type_dict.keys()) - set(Repertoire.FIELDS)}))
 
         return seq
 

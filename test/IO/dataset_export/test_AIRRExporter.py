@@ -11,11 +11,9 @@ from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.simulation.implants.ImplantAnnotation import ImplantAnnotation
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -31,11 +29,12 @@ class TestAIRRExporter(TestCase):
                                                                        region_type="IMGT_CDR3",
                                                                        frame_type="IN",
                                                                        custom_params={"d_call": "TRBD1",
-                                                                                      "custom_test": "cust1"})),
+                                                                                      "custom_test": "cust1",
+                                                                                      'sig1': 0,
+                                                                                      'signal_sig1_info': None})),
                             ReceptorSequence(amino_acid_sequence="GGG",
                                              nucleotide_sequence="GGTGGTGGT",
                                              identifier="receptor_2",
-                                             annotation=SequenceAnnotation(implants=[ImplantAnnotation('sig1', 'm1', "G", 1)]),
                                              metadata=SequenceMetadata(v_call="TRAV2*01",
                                                                        j_call="TRAJ2",
                                                                        chain=Chain.ALPHA,
@@ -43,7 +42,10 @@ class TestAIRRExporter(TestCase):
                                                                        frame_type=None,
                                                                        region_type="IMGT_CDR3",
                                                                        custom_params={"d_call": "TRAD2",
-                                                                                      "custom_test": "cust2"}))]
+                                                                                      "custom_test": "cust2",
+                                                                                      'signal_sig1_info': {'signal_id': 'sig1', 'motif': 'm1',
+                                                                                                           'motif_instance': 'G', 'position': 1},
+                                                                                      'sig1': 1}))]
 
         repertoire = Repertoire.build_from_sequence_objects(sequence_objects=sequence_objects, path=path, metadata={"subject_id": "REP1"})
         df = pd.DataFrame({"filename": [f"{repertoire.identifier}_data.npy"], "subject_id": ["REP1"],
@@ -53,7 +55,7 @@ class TestAIRRExporter(TestCase):
         return repertoire, path / "metadata.csv"
 
     def test_repertoire_export(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "airr_exporter_repertoire/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "airr_exporter_repertoire/")
 
         repertoire, metadata_path = self.create_dummy_repertoire(path)
         dataset = RepertoireDataset(repertoires=[repertoire], metadata_file=metadata_path)
@@ -115,7 +117,7 @@ class TestAIRRExporter(TestCase):
         return ReceptorDataset.build_from_objects(receptors, 2, receptors_path)
 
     def test_receptor_export(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "airr_exporter_receptor/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "airr_exporter_receptor/")
 
         dataset = self.create_dummy_receptordataset(path)
 
@@ -159,7 +161,7 @@ class TestAIRRExporter(TestCase):
         return SequenceDataset.build_from_objects(sequences, 2, sequences_path)
 
     def test_sequence_export(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "airr_exporter_sequence/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "airr_exporter_sequence/")
 
         dataset = self.create_dummy_sequencedataset(path)
 

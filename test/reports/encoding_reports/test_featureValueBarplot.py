@@ -57,7 +57,7 @@ class TestFeatureValueBarplot(TestCase):
 
     def test_generate(self):
         path = EnvironmentSettings.tmp_test_path / "featurevaluebarplot/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset = self._create_dummy_encoded_data(path)
 

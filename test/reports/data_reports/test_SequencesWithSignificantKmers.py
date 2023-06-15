@@ -70,7 +70,7 @@ class TestSequencesWithSignificantKmers(TestCase):
     def test_generate(self):
         path = EnvironmentSettings.tmp_test_path / f"seqs_with_significant_kmer_positions/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset = self._get_example_dataset(path)
         implanted_sequences_path = self._get_implanted_sequences(path)

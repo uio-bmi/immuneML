@@ -20,8 +20,8 @@ class TestSequenceMatcher(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_match(self):
-        path = EnvironmentSettings.root_path / "test/tmp/seqmatch/"
-        PathBuilder.build(path)
+        path = EnvironmentSettings.tmp_test_path / "seqmatch/"
+        PathBuilder.remove_old_and_build(path)
 
         repertoire = Repertoire.build_from_sequence_objects(sequence_objects=[
             ReceptorSequence(amino_acid_sequence="AAAAAA", metadata=SequenceMetadata(chain="A", v_call="V1", j_call="J2"), identifier="3"),
@@ -46,8 +46,8 @@ class TestSequenceMatcher(TestCase):
 
     def test_match_repertoire(self):
 
-        path = EnvironmentSettings.root_path / "test/tmp/seqmatchrep/"
-        PathBuilder.build(path)
+        path = EnvironmentSettings.tmp_test_path / "seqmatchrep/"
+        PathBuilder.remove_old_and_build(path)
 
         repertoire = Repertoire.build_from_sequence_objects(sequence_objects=
                                                                     [ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="1",

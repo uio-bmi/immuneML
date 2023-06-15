@@ -27,9 +27,9 @@ class TestImportParser(TestCase):
 3050	TRA	CAAIYESRGSTLGRLYF	TRAV13-1*01	TRAJ18*01	HomoSapiens	HLA-A*11:01	B2M	MHCI	AVFDRKSDAK	EBNA4	EBV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/11684", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "1", "tissue": ""}	{"cdr3": "CAAIYESRGSTLGRLYF", "cdr3_old": "CAAIYESRGSTLGRLYF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRAJ18*01", "jStart": 7, "oldVEnd": -1, "oldVFixType": "FailedBadSegment", "oldVId": null, "vCanonical": true, "vEnd": 3, "vFixType": "ChangeSegment", "vId": "TRAV13-1*01"}	0
 15760	TRA	CALRLNNQGGKLIF	TRAV9-2*01	TRAJ23*01	HomoSapiens	HLA-A*03:01	B2M	MHCI	KLGGALQAK	IE1	CMV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/25584", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "3", "tissue": ""}	{"cdr3": "CALRLNNQGGKLIF", "cdr3_old": "CALRLNNQGGKLIF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRAJ23*01", "jStart": 6, "vCanonical": true, "vEnd": 3, "vFixType": "NoFixNeeded", "vId": "TRAV9-2*01"}	0
                 """
-        path = EnvironmentSettings.root_path / "test/tmp/dslimportparservdj/"
-        data_path = EnvironmentSettings.root_path / "test/tmp/dslimportparservdj/receptor_data/"
-        PathBuilder.build(data_path)
+        path = EnvironmentSettings.tmp_test_path / "dslimportparservdj/"
+        data_path = EnvironmentSettings.tmp_test_path / "dslimportparservdj/receptor_data/"
+        PathBuilder.remove_old_and_build(data_path)
 
         with open(data_path / "receptors.tsv", "w") as file:
             file.writelines(file_content)
@@ -55,7 +55,7 @@ class TestImportParser(TestCase):
     def test_parse(self):
         path = EnvironmentSettings.tmp_test_path / "parser/"
 
-        PathBuilder.build(path / "tmp_input/")
+        PathBuilder.remove_old_and_build(path / "tmp_input/")
         with open(path / "tmp_input/CD1_clones_TRA.csv", "w") as file:
             writer = csv.DictWriter(file,
                                     delimiter="\t",

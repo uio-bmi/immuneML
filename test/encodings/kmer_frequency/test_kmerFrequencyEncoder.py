@@ -11,13 +11,13 @@ from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import Rece
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
-from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.ReadsType import ReadsType
 
 
 class TestKmerFrequencyEncoder(TestCase):
@@ -26,9 +26,9 @@ class TestKmerFrequencyEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode(self):
-        path = EnvironmentSettings.root_path / "test/tmp/kmerfreqenc/"
+        path = EnvironmentSettings.tmp_test_path / "kmerfreqenc/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", nucleotide_sequence="AAA", identifier="1"),
                                                        ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier="2"),

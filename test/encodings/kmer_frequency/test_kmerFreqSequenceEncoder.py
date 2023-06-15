@@ -11,13 +11,13 @@ from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import Rece
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFreqSequenceEncoder import KmerFreqSequenceEncoder
-from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.ReadsType import ReadsType
 
 
 class TestKmerFreqSequenceEncoder(TestCase):
@@ -47,7 +47,7 @@ class TestKmerFreqSequenceEncoder(TestCase):
                                       metadata=SequenceMetadata(custom_params={"l1": 1}))]
 
         path = EnvironmentSettings.tmp_test_path / "kmrefreqseqfacencoder/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         dataset = SequenceDataset.build_from_objects(sequences, 100, PathBuilder.build(path / 'data'), 'd2')
 
         lc = LabelConfiguration()

@@ -39,9 +39,9 @@ rep2.tsv,2""")
 
     def test_load_repertoire(self):
         """Test dataset content with and without a header included in the input file"""
-        path = EnvironmentSettings.root_path / "test/tmp/io_igor_load/"
+        path = EnvironmentSettings.tmp_test_path / "io_igor_load/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         self.write_dummy_files(path, True)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "igor")
@@ -64,9 +64,9 @@ rep2.tsv,2""")
         shutil.rmtree(path)
 
     def test_load_repertoire_with_stop_codon(self):
-        path = EnvironmentSettings.root_path / "test/tmp/io_igor_load/"
+        path = EnvironmentSettings.tmp_test_path / "io_igor_load/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         self.write_dummy_files(path, True)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "igor")
@@ -88,9 +88,9 @@ rep2.tsv,2""")
 
     def test_load_sequence_dataset(self):
         """Test dataset content with and without a header included in the input file"""
-        path = EnvironmentSettings.root_path / "test/tmp/io_igor_load/"
+        path = EnvironmentSettings.tmp_test_path / "io_igor_load_seq/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         self.write_dummy_files(path, False)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "igor")

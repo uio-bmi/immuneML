@@ -24,7 +24,7 @@ class TestRepertoireClassificationTool(TestCase):
     def test_run(self):
         path = EnvironmentSettings.tmp_test_path / "galaxy_repertoire_classification/"
         result_path = path / "result/"
-        PathBuilder.build(result_path)
+        PathBuilder.remove_old_and_build(result_path)
 
         old_working_dir = os.getcwd()
         os.chdir(path)

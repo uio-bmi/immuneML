@@ -30,7 +30,7 @@ class TestOneHotSequenceEncoder(TestCase):
 
     def test(self):
         path = EnvironmentSettings.tmp_test_path / "onehot_sequence/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset, lc = self._construct_test_dataset(path)
 
@@ -72,9 +72,9 @@ class TestOneHotSequenceEncoder(TestCase):
 
 
     def test_sequence_flattened(self):
-        path = EnvironmentSettings.root_path / "test/tmp/onehot_seq_flat/"
+        path = EnvironmentSettings.tmp_test_path / "onehot_seq_flat/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset = self.construct_test_flatten_dataset(path)
 

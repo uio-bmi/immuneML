@@ -57,7 +57,7 @@ class TestImmuneMLParser(TestCase):
             "instructions": {}
         }
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         specs_filename = path / "tmp_yaml_spec.yaml"
 

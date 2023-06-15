@@ -15,7 +15,7 @@ from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 class TestImmuneMLImport(TestCase):
     def test_import(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "iml_import/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "iml_import/")
 
         repertoires, metadata = RepertoireBuilder.build([["AA"], ["CC"]], path)
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
@@ -34,7 +34,7 @@ class TestImmuneMLImport(TestCase):
 
     def test_import_receptors(self):
         path = EnvironmentSettings.tmp_test_path / "iml_import_receptors/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset = RandomDatasetGenerator.generate_receptor_dataset(10, {2: 1}, {3: 1}, {}, path)
         dataset.name = "d1"

@@ -31,7 +31,7 @@ rep2.tsv,2""")
 
     def test_import_repertoire(self):
         """Test dataset content with and without a header included in the input file"""
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "io_olga_load_rep/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "io_olga_load_rep/")
 
         self.write_dummy_files(path, True)
 
@@ -69,7 +69,7 @@ rep2.tsv,2""")
 
     def test_import_sequences(self):
         """Test dataset content with and without a header included in the input file"""
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "io_olga_load_seq/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "io_olga_load_seq/")
 
         self.write_dummy_files(path, False)
         dataset = OLGAImport.import_dataset({"is_repertoire": False, "paired": False, "result_path": path,

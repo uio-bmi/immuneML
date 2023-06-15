@@ -15,7 +15,7 @@ class TestSingleLineReceptorImport(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_import_repertoire_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "io_generic_receptor/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "io_generic_receptor/")
         data = """subject,epitope,count,v_a_gene,j_a_gene,cdr3_a_aa,cdr3_a_nucseq,v_b_gene,j_b_gene,cdr3_b_aa,cdr3_b_nucseq,clone_id
 mouse_subject0050,PA,2,TRAV7-3*01,TRAJ33*01,CAVSLDSNYQLIW,tgtgcagtgagcctcgatagcaactatcagttgatctgg,TRBV13-1*01,TRBJ2-3*01,CASSDFDWGGDAETLYF,tgtgccagcagtgatttcgactggggaggggatgcagaaacgctgtatttt,mouse_tcr0072.clone
 mouse_subject0050,PA,6,TRAV6D-6*01,TRAJ56*01,CALGDRATGGNNKLTF,tgtgctctgggtgacagggctactggaggcaataataagctgactttt,TRBV29*01,TRBJ1-1*01,CASSPDRGEVFF,tgtgctagcagtccggacaggggtgaagtcttcttt,mouse_tcr0096.clone

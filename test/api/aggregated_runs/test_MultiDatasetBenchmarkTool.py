@@ -11,7 +11,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TestMultiDatasetBenchmarkTool(TestCase):
     def test_run(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "multi_dataset_benchmark/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "multi_dataset_benchmark/")
         specs_file = self._prepare_specs(path)
 
         tool = MultiDatasetBenchmarkTool(specs_file, path/"result/")

@@ -12,7 +12,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TestGLIPH2Exporter(TestCase):
     def test_generate(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "gliph2_export")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "gliph2_export")
         dataset = RandomDatasetGenerator.generate_receptor_dataset(10, {3: 1}, {2: 1}, {"epitope": {"ep1": 0.4, "ep2": 0.6}}, path)
         report_result = GLIPH2Exporter(dataset, path / "result", "somename", "epitope").generate_report()
 

@@ -21,7 +21,7 @@ class TestImmuneMLExporter(TestCase):
 
     def test_export(self):
         path = EnvironmentSettings.tmp_test_path / "imlexporter/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         repertoires, metadata = RepertoireBuilder.build([["AA"], ["CC"]], path)
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
@@ -38,7 +38,7 @@ class TestImmuneMLExporter(TestCase):
 
     def test_export_receptor_dataset(self):
         path = EnvironmentSettings.tmp_test_path / "imlexporter_receptor/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset = RandomDatasetGenerator.generate_receptor_dataset(10, {2: 1}, {3: 1}, {}, path)
         dataset.name = "d1"

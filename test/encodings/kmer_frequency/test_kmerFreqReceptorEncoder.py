@@ -11,13 +11,13 @@ from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFreqReceptorEncoder import KmerFreqReceptorEncoder
-from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.ReadsType import ReadsType
 
 
 class TestKmerFreqReceptorEncoder(TestCase):
@@ -33,7 +33,7 @@ class TestKmerFreqReceptorEncoder(TestCase):
                      TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAA"), beta=ReceptorSequence(amino_acid_sequence="CCC"), identifier="4")]
 
         path = EnvironmentSettings.tmp_test_path / "kmer_receptor_frequency/"
-        PathBuilder.build(path / 'data')
+        PathBuilder.remove_old_and_build(path / 'data')
         dataset = ReceptorDataset.build_from_objects(receptors, path=path, file_size=10)
 
         lc = LabelConfiguration()

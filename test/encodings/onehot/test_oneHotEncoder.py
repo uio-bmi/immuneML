@@ -47,9 +47,9 @@ class TestOneHotEncoder(unittest.TestCase):
 
     def test_not_positional(self):
 
-        path = EnvironmentSettings.root_path / "test/tmp/onehot_vanilla/"
+        path = EnvironmentSettings.tmp_test_path / "onehot_vanilla/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset, lc = self._construct_test_repertoiredataset(path, positional=False)
 
@@ -91,9 +91,9 @@ class TestOneHotEncoder(unittest.TestCase):
 
     def test_positional(self):
 
-        path = EnvironmentSettings.root_path / "test/tmp/onehot_positional/"
+        path = EnvironmentSettings.tmp_test_path / "onehot_positional/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset, lc = self._construct_test_repertoiredataset(path, positional=True)
 

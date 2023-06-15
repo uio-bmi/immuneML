@@ -32,7 +32,7 @@ class TestDeepRCEncoder(TestCase):
 
     def test_encode(self):
         path = EnvironmentSettings.tmp_test_path / "deeprc_encoder/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         PathBuilder.build(path / "encoded_data/")
 
         main_dataset, sub_dataset = self.create_datasets(path)

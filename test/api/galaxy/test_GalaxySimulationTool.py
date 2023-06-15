@@ -12,7 +12,7 @@ from immuneML.util.PathBuilder import PathBuilder
 class TestGalaxySimulationTool(TestCase):
     def test_run(self):
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "api_galaxy_simulation_tool/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "api_galaxy_simulation_tool/")
         result_path = path / "result"
 
         specs = {

@@ -29,7 +29,7 @@ class MyTestCase(unittest.TestCase):
         return f"{dataset.name}.iml_dataset"
 
     def test_main(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "args_to_yaml")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "args_to_yaml")
         data_path = path / "dummy_pickle_data"
 
         iml_dataset_name = self.create_dummy_dataset(data_path)

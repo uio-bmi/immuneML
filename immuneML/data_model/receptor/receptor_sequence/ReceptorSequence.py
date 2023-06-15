@@ -5,7 +5,6 @@ from uuid import uuid4
 import numpy as np
 
 from immuneML.data_model.DatasetItem import DatasetItem
-from immuneML.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
@@ -13,7 +12,7 @@ from immuneML.util.NumpyHelper import NumpyHelper
 
 
 class ReceptorSequence(DatasetItem):
-    FIELDS = {'amino_acid_sequence': str, 'nucleotide_sequence': str, 'identifier': str, 'metadata': dict, 'annotation': dict, 'version': str}
+    FIELDS = {'amino_acid_sequence': str, 'nucleotide_sequence': str, 'identifier': str, 'metadata': dict, 'version': str}
     version = "1"
 
     nt_to_aa_map = {
@@ -33,8 +32,7 @@ class ReceptorSequence(DatasetItem):
             return ReceptorSequence(**{**{key: record[key] for key, val_type in ReceptorSequence.FIELDS.items()
                                           if val_type == str and key != 'version'},
                                        **{'metadata': SequenceMetadata(**json.loads(record['metadata'])) if record['metadata'] != '' else None,
-                                          'annotation': SequenceAnnotation(**json.loads(record['annotation'])) if record['annotation'] != ''
-                                          else None}})
+                                          }})
         else:
             raise NotImplementedError
 
@@ -46,24 +44,18 @@ class ReceptorSequence(DatasetItem):
                  amino_acid_sequence: str = None,
                  nucleotide_sequence: str = None,
                  identifier: str = None,
-                 annotation: SequenceAnnotation = None,
                  metadata: SequenceMetadata = SequenceMetadata()):
         self.identifier = identifier if identifier is not None and identifier != "" else uuid4().hex
         self.amino_acid_sequence = amino_acid_sequence
         self.nucleotide_sequence = nucleotide_sequence
-        self.annotation = annotation
         self.metadata = metadata
 
     def __repr__(self):
         return f"ReceptorSequence(sequence_aa={self.amino_acid_sequence}, sequence={self.nucleotide_sequence}, " \
-               f"annotation={vars(self.annotation) if self.annotation is not None else '{}'}, " \
                f"metadata={vars(self.metadata) if self.metadata is not None else '{}'})"
 
     def set_metadata(self, metadata: SequenceMetadata):
         self.metadata = metadata
-
-    def set_annotation(self, annotation: SequenceAnnotation):
-        self.annotation = annotation
 
     def get_sequence(self, sequence_type: SequenceType = None):
         """Returns receptor_sequence (nucleotide/amino acid) that corresponds to provided sequence type or preset receptor_sequence type from
@@ -103,7 +95,5 @@ class ReceptorSequence(DatasetItem):
             return getattr(self.metadata, name)
         elif name in self.metadata.custom_params:
             return self.metadata.custom_params[name]
-        elif hasattr(self.annotation, name):
-            return getattr(self.annotation, name)
         else:
             raise KeyError(f"ReceptorSequence {self.identifier} does not have attribute {name}.")

@@ -32,7 +32,7 @@ class TestOneHotSequenceEncoder(TestCase):
 
     def test(self):
         path = EnvironmentSettings.tmp_test_path / "onehot_sequence_1/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset, lc = self._construct_test_dataset(path)
 
@@ -81,9 +81,9 @@ class TestOneHotSequenceEncoder(TestCase):
         return ReceptorDataset.build_from_objects(receptors, 10, path)
 
     def test_receptor_flattened(self):
-        path = EnvironmentSettings.root_path / "test/tmp/onehot_recep_flat/"
+        path = EnvironmentSettings.tmp_test_path / "onehot_recep_flat/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset = self.construct_test_flatten_dataset(path)
 

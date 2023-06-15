@@ -59,8 +59,8 @@ class TestCoefficients(TestCase):
         return report
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path / "test/tmp/logregcoefsreport/"
-        PathBuilder.build(path)
+        path = EnvironmentSettings.tmp_test_path / "logregcoefsreport/"
+        PathBuilder.remove_old_and_build(path)
 
         report = self._create_report(path)
 

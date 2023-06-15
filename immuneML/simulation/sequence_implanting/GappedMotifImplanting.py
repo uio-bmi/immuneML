@@ -4,9 +4,7 @@ import numpy as np
 
 from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from immuneML.environment.SequenceType import SequenceType
-from immuneML.simulation.implants.ImplantAnnotation import ImplantAnnotation
 from immuneML.simulation.implants.MotifInstance import MotifInstance
 from immuneML.simulation.sequence_implanting.SequenceImplantingStrategy import SequenceImplantingStrategy
 from immuneML.util.PositionHelper import PositionHelper
@@ -73,16 +71,9 @@ class GappedMotifImplanting(SequenceImplantingStrategy):
 
         new_sequence_string = part1 + motif_left + part2 + motif_right + part3
 
-        annotation = SequenceAnnotation()
-        implant = ImplantAnnotation(signal_id=signal["signal_id"],
-                                    motif_id=signal["motif_id"],
-                                    motif_instance=str(signal["motif_instance"]),
-                                    position=position)
-        annotation.add_implant(implant)
-        annotation.add_implant(ImplantAnnotation(signal_id=signal["signal_id"], motif_id=signal["motif_id"], motif_instance=signal["motif_instance"],
-                                                 position=position))
-
-        new_sequence = ReceptorSequence(annotation=annotation, metadata=copy.deepcopy(sequence.metadata))
+        new_metadata = copy.deepcopy(sequence.metadata)
+        new_sequence = ReceptorSequence(metadata=new_metadata)
+        new_metadata.custom_params[f'signal_{signal["id"]}_info'] = signal
         new_sequence.metadata.custom_params[signal['signal_id']] = True
         new_sequence.set_sequence(new_sequence_string, sequence_type)
 

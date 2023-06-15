@@ -12,7 +12,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TestPerformanceOverview(TestCase):
     def test_run(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "performance_overview/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "performance_overview/")
         specs_file = self._prepare_specs(path)
 
         tool = MultiDatasetBenchmarkTool(specs_file, path / "result/")

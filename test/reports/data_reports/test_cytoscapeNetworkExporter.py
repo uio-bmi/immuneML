@@ -14,7 +14,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TestCytoscapeNetworkExporter(TestCase):
     def _create_dummy_data(self, path, dataset_type):
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         dataset = None
 
         test_repertoire = Repertoire.build(sequence_aa=["DUPDUP", "AILUDGYF", "DFJKHJ", "DIUYUAG", "CTGTCGH"],
@@ -39,7 +39,7 @@ class TestCytoscapeNetworkExporter(TestCase):
 
     def test_receptor_dataset(self):
         path = EnvironmentSettings.root_path / "test/tmp/cytoscape_export/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         receptor_dataset = self._create_dummy_data(path / "data", dataset_type="receptor")
 
@@ -78,7 +78,7 @@ class TestCytoscapeNetworkExporter(TestCase):
 
     def test_repertoire_dataset(self):
         path = EnvironmentSettings.root_path / "test/tmp/cytoscape_export/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         repertoire_dataset = self._create_dummy_data(path / "data", dataset_type="repertoire")
 

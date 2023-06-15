@@ -37,7 +37,7 @@ class TestKmerHelper(TestCase):
     def test_create_sentences_from_repertoire(self):
 
         path = EnvironmentSettings.tmp_test_path / "kmer/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         rep = Repertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="AACT"),
                                                       ReceptorSequence(amino_acid_sequence="ACCT"),

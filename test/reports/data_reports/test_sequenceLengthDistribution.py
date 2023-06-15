@@ -18,8 +18,8 @@ class TestSequenceLengthDistribution(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_get_normalized_sequence_lengths(self):
-        path = EnvironmentSettings.root_path / "test/tmp/datareports/"
-        PathBuilder.build(path)
+        path = EnvironmentSettings.tmp_test_path / "datareports/"
+        PathBuilder.remove_old_and_build(path)
 
         rep1 = Repertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence(amino_acid_sequence="AAA", identifier="1"),
                                                                         ReceptorSequence(amino_acid_sequence="AAAA", identifier="2"),

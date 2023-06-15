@@ -40,11 +40,11 @@ class TestDatasetGenerationTool(TestCase):
 
     def test_run(self):
         path = EnvironmentSettings.tmp_test_path / "galaxy_api_dataset_generation/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         yaml_path = path / "specs.yaml"
         result_path = path / "results/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         self.prepare_specs(yaml_path)
 
         run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path, 'tool': "DatasetGenerationTool"}))

@@ -44,7 +44,7 @@ rep1.tsv,1
 rep2.tsv,2""")
 
     def test_load_repertoire_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "mixcr_rep")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "mixcr_rep")
         self.create_dummy_dataset(path, add_metadata=True)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "mixcr")
@@ -74,7 +74,7 @@ rep2.tsv,2""")
         shutil.rmtree(path)
 
     def test_load_sequence_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "mixcr_seq/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "mixcr_seq/")
 
         self.create_dummy_dataset(path, add_metadata=False)
 

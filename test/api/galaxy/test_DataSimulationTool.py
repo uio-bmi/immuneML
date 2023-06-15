@@ -14,7 +14,7 @@ class TestDataSimulationTool(TestCase):
     def test_run(self):
 
         path = EnvironmentSettings.tmp_test_path / "galaxy_api_dataset_simulation/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         yaml_path = path / "specs.yaml"
         result_path = path / "results/"
@@ -43,8 +43,6 @@ class TestDataSimulationTool(TestCase):
 
         with open(yaml_path, "w") as file:
             yaml.dump(specs, file)
-
-        PathBuilder.build(path)
 
         run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path, 'tool': "DataSimulationTool"}))
 

@@ -22,7 +22,7 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
     def test_generate(self):
 
         path = EnvironmentSettings.tmp_test_path / "disease_assoc_seq_cv/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
                                                          ["DDD", "EEE", "FFF"], ["GGG", "III", "LLL", "MMM"],

@@ -54,8 +54,8 @@ class TestMotifSeedRecovery(TestCase):
         return report
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path  / "test/tmp/motifseedrecovery/"
-        PathBuilder.build(path)
+        path = EnvironmentSettings.tmp_test_path  / "motifseedrecovery/"
+        PathBuilder.remove_old_and_build(path)
 
         report = self._create_report(path)
         self.assertTrue(report.check_prerequisites())

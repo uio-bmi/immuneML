@@ -75,7 +75,7 @@ class TestMLSettingsPerformance(TestCase):
         return state
 
     def test_generate(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "mlsettingsperformance/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "mlsettingsperformance/")
 
         report = MLSettingsPerformance(**{"single_axis_labels": False, "x_label_position": None, "y_label_position": None})
 
@@ -99,7 +99,7 @@ class TestMLSettingsPerformance(TestCase):
     def test_plot(self):
         # Does not assert anything, but can be used to manually check if the plot looks like it should
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "mlsettingsperformance/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "mlsettingsperformance/")
 
         report = MLSettingsPerformance(**{"single_axis_labels": True, "x_label_position": -0.12, "y_label_position": -0.08})
 

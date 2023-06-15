@@ -36,7 +36,7 @@ rep1.tsv,1
 rep2.tsv,2""")
 
     def test_import_repertoire_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "io_10xGenomics_rep")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "io_10xGenomics_rep")
 
         self.create_dumy_dataset(path, add_metadata=True)
 
@@ -60,7 +60,7 @@ rep2.tsv,2""")
         shutil.rmtree(path)
 
     def test_import_sequence_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "io_10xGenomics_seq")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "io_10xGenomics_seq")
 
         self.create_dumy_dataset(path, add_metadata=False)
 
@@ -84,7 +84,7 @@ rep2.tsv,2""")
         shutil.rmtree(path)
 
     def test_import_receptor_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "io_10xGenomics_receptor")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "io_10xGenomics_receptor")
 
         self.create_dumy_dataset(path, add_metadata=False)
 
