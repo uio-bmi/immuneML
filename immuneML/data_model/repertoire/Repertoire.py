@@ -41,6 +41,10 @@ class SequenceSet:
     duplicate_count: int
 
 
+STR_TO_TYPE = {'str': str, 'int': int, 'float': float, 'bool': bool, 'AminoAcidEncoding': bnp.encodings.AminoAcidEncoding}
+TYPE_TO_STR = {val: key for key, val in STR_TO_TYPE.items()}
+
+
 class Repertoire(DatasetItem):
     """
     Repertoire object consisting of sequence objects, each sequence attribute is stored as a list across all sequences and can be
@@ -92,7 +96,7 @@ class Repertoire(DatasetItem):
                 field_type = cls._get_field_type_from_values(value)
             types[key] = field_type
         dc = bnpdataclass(make_dataclass('DynamicSequenceSet', fields=types.items()))
-        return dc(**all_fields_dict)
+        return dc(**all_fields_dict), types
 
     @classmethod
     def _get_field_type_from_values(cls, value):
@@ -124,7 +128,7 @@ class Repertoire(DatasetItem):
                                                             custom_lists, sequence_id, path, metadata,
                                                             signals, cell_id, filename_base, identifier)
         field_dict = dict(zip(field_list, values))
-        bnp_object = cls._build_bnpdataclass(field_dict)
+        bnp_object, type_dict = cls._build_bnpdataclass(field_dict)
         buffer_type = bnp.io.delimited_buffers.get_bufferclass_for_datatype(type(bnp_object), delimiter='\t',
                                                                             has_header=True)
         bnp.open(str(data_filename) + '.tsv', 'w', buffer_type=buffer_type).write(bnp_object)
@@ -133,7 +137,8 @@ class Repertoire(DatasetItem):
 
         metadata_filename = path / f"{filename_base}_metadata.yaml"
         metadata = {} if metadata is None else metadata
-        metadata["field_list"] = field_list
+        # metadata["field_list"] = field_list
+        metadata['type_dict'] = {key: TYPE_TO_STR[val] for key, val in type_dict.items()}
         with metadata_filename.open("w") as file:
             yaml.dump(metadata, file)
 
@@ -169,7 +174,7 @@ class Repertoire(DatasetItem):
         return dtype, field_list, values
 
     @classmethod
-    def build_like(cls, repertoire, indices_to_keep: list, result_path: Path, filename_base: str = None):
+    def build_like(cls, repertoire: 'Repertoire', indices_to_keep: list, result_path: Path, filename_base: str = None):
         if indices_to_keep is not None and len(indices_to_keep) > 0 and sum(indices_to_keep) > 0:
             PathBuilder.build(result_path)
 
@@ -180,7 +185,11 @@ class Repertoire(DatasetItem):
 
             data_filename = result_path / f"{filename_base}.npy"
             np.save(str(data_filename), data)
-
+            bnp_datafilename = data_filename.with_suffix('.npy.tsv')
+            bnp_data= repertoire._load_bnp_data()
+            bnp_data = bnp_data[indices_to_keep]
+            with bnp.open(bnp_datafilename, 'w', buffer_type=repertoire._buffer_type) as f:
+                f.write(bnp_data)
             metadata_filename = result_path / f"{filename_base}_metadata.yaml"
             shutil.copyfile(repertoire.metadata_filename, metadata_filename)
 
@@ -248,7 +257,7 @@ class Repertoire(DatasetItem):
     def __init__(self, data_filename: Path, metadata_filename: Path, identifier: str, buffer_type=None):
         data_filename = Path(data_filename)
         metadata_filename = Path(metadata_filename) if metadata_filename is not None else None
-        self._buffer_type = buffer_type
+
         self.__bnp_data = None
         assert data_filename.suffix == ".npy", \
             f"Repertoire: the file representing the repertoire has to be in numpy binary format. Got {data_filename.suffix} instead."
@@ -257,12 +266,20 @@ class Repertoire(DatasetItem):
         if metadata_filename:
             with metadata_filename.open("r") as file:
                 self.metadata = yaml.safe_load(file)
-            self.fields = self.metadata["field_list"]
 
         self.metadata_filename = metadata_filename
         self.identifier = identifier
         self.data = None
         self.element_count = None
+
+    @property
+    def _type_dict(self):
+        return {key: STR_TO_TYPE[val] for key, val in self.metadata["type_dict"].items()}
+
+    @property
+    def _buffer_type(self):
+
+        return self._create_buffer_type_from_field_dict(self._type_dict)
 
     def get_sequence_aas(self):
         return self.get_attribute("sequence_aa")
@@ -297,9 +314,9 @@ class Repertoire(DatasetItem):
         return data
 
     def get_attribute(self, attribute):
-        data = self.load_data()
-        if attribute in data.dtype.names:
-            tmp = data[attribute]
+        data = self._load_bnp_data()
+        if attribute in self._type_dict:
+            tmp = getattr(data, attribute)
             return tmp
         else:
             return None
@@ -316,7 +333,7 @@ class Repertoire(DatasetItem):
         return result
 
     def get_region_type(self):
-        region_types = set(self.get_attribute("region_type"))
+        region_types = set(self.get_attribute("region_type").tolist())
 
         if 'nan' in region_types:
             region_types.remove('nan')
@@ -373,7 +390,7 @@ class Repertoire(DatasetItem):
                                                          cell_id=row["cell_id"] if "cell_id" in fields else None,
                                                          custom_params={key: row[key] if key in fields else None
                                                                         for key in
-                                                                        set(self.fields) - set(Repertoire.FIELDS)}),
+                                                                        set(self._type_dict.keys()) - set(Repertoire.FIELDS)}),
                                annotation=SequenceAnnotation(implants=implants))
 
         return seq
@@ -414,11 +431,13 @@ class Repertoire(DatasetItem):
 
         return seqs
 
-    @property
-    def _bnp_data(self):
-        if self.__bnp_data is None:
-            self.__bnp_data = self._load_bnp_data()
-        return self.__bnp_data
+    def _load_bnp_data(self):
+        if self.__bnp_data is None or (isinstance(self.__bnp_data, weakref.ref) and self.__bnp_data() is None):
+            data = self._read_bnp_data()
+            self.__bnp_data = weakref.ref(data) if EnvironmentSettings.low_memory else data
+        data = self.__bnp_data() if EnvironmentSettings.low_memory else self.__bnp_data
+        self.element_count = len(data)
+        return data
 
     @property
     def sequences(self):
@@ -473,5 +492,10 @@ class Repertoire(DatasetItem):
 
         return cell_lists
 
-    def _load_bnp_data(self):
+    def _read_bnp_data(self):
         return bnp.open(self._bnp_filename, buffer_type=self._buffer_type).read()
+
+    def _create_buffer_type_from_field_dict(self, type_dict: Dict[str, Any])->bnp.io.delimited_buffers.DelimitedBuffer:
+        dataclass = bnpdataclass(make_dataclass('DynamicSequenceSet', fields=type_dict.items()))
+        return bnp.io.delimited_buffers.get_bufferclass_for_datatype(dataclass, delimiter='\t', has_header=True)
+
