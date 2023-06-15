@@ -322,11 +322,11 @@ class Repertoire(DatasetItem):
             return None
 
     def get_attributes(self, attributes: list):
-        data = self.load_data()
         result = {}
+        data = self._load_bnp_data()
         for attribute in attributes:
-            if attribute in data.dtype.names:
-                result[attribute] = data[attribute]
+            if attribute in self._type_dict:
+                result[attribute] = getattr(data, attribute)
             else:
                 logging.warning(
                     f"{Repertoire.__name__}: attribute {attribute} is not present in the repertoire {self.identifier}, skipping...")
