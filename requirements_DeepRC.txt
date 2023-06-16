@@ -1,2 +1,4 @@
 git+https://github.com/ml-jku/DeepRC@fec4b4f4b2cd70e00e8de83da169560dec73a419
 git+https://github.com/widmi/widis-lstm-tools@d94edfc854477cca6f492d4c0abc37c7fd70667b
+tqdm>=0.24
+h5py<=2.10.0

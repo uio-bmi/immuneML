@@ -10,6 +10,7 @@ from immuneML.encodings.reference_encoding.MatchedSequencesEncoder import Matche
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
@@ -59,7 +60,7 @@ class TestMatchedSequencesEncoder(TestCase):
         for reads in ["unique", "all"]:
             for normalize in [True, False]:
 
-                path = EnvironmentSettings.tmp_test_path / "matched_sequences_encoder_all/"
+                path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "matched_sequences_encoder_all/")
 
                 dataset, label_config, reference_sequences, labels = self.create_dummy_data(path)
 
@@ -83,7 +84,7 @@ class TestMatchedSequencesEncoder(TestCase):
 
                 self.assertDictEqual(encoded.encoded_data.labels, {"label": ["yes", "yes", "no"],
                                                                    "subject_id": ["subject_1", "subject_2", "subject_3"]})
-                self.assertListEqual(encoded.encoded_data.feature_names, ["100_TRB", "200_TRB"])
+                self.assertListEqual(encoded.encoded_data.feature_names, ['TRBV1_AAAA_TRBJ1', 'TRBV1_SSSS_TRBJ1'])
 
                 self.assertListEqual(list(encoded.encoded_data.feature_annotations.sequence_id), ["100_TRB", "200_TRB"])
                 self.assertListEqual(list(encoded.encoded_data.feature_annotations.chain), ["beta", "beta"])

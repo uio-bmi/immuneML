@@ -63,13 +63,22 @@ class CompAIRRHelper:
                 indels_args + frequency_args + ignore_genes + output_args + input_file_list + output_pairs + cdr3_indicator
 
     @staticmethod
-    def write_repertoire_file(repertoire_dataset, filename, compairr_params):
+    def write_repertoire_file(repertoire_dataset=None, filename=None, compairr_params=None, repertoires: list = None):
         mode = "w"
         header = True
 
-        for repertoire in repertoire_dataset.get_data():
+        columns_in_order = []
+
+        if repertoire_dataset is not None and repertoires is None:
+            repertoires = repertoire_dataset.get_data()
+
+        for ind, repertoire in enumerate(repertoires):
             repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, compairr_params)
-            repertoire_contents.to_csv(filename, mode=mode, header=header, index=False, sep="\t")
+
+            if ind == 0:
+                columns_in_order = sorted(repertoire_contents.columns)
+
+            repertoire_contents[columns_in_order].to_csv(filename, mode=mode, header=header, index=False, sep="\t")
 
             mode = "a"
             header = False

@@ -11,7 +11,7 @@ from immuneML.util.PathBuilder import PathBuilder
 class TestDatasetExportHTMLOutput(TestCase):
 
     def test_repertoire_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "integration_dataset_gen_html_repertoire/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "integration_dataset_gen_html_repertoire/")
         dataset_path = path / "repertoire_dataset/"
 
         specs = {

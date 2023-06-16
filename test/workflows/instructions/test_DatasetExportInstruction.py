@@ -14,7 +14,7 @@ from immuneML.workflows.instructions.dataset_generation.DatasetExportState impor
 
 class TestDatasetExportInstruction(TestCase):
     def test_run(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "dataset_export_instruction/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "dataset_export_instruction/")
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {10: 1}, {12: 1}, {}, path)
         dataset.name = "d1"
 
@@ -31,7 +31,7 @@ class TestDatasetExportInstruction(TestCase):
         self.assertEqual("AIRR", state.formats[0])
 
         self.assertTrue(os.path.isdir(result_path))
-        self.assertEqual(1, len(list(glob(str(state.result_path / "*/")))))
+        self.assertEqual(2, len(list(glob(str(state.result_path / "*/")))))
         self.assertEqual(1, len(list(glob(str(state.result_path / f"{dataset.name}/*/")))))
         self.assertTrue(os.path.isdir(str(state.result_path / f"{dataset.name}/AIRR/")))
         self.assertTrue(os.path.isfile(str(state.result_path / f"{dataset.name}/AIRR/metadata.csv")))

@@ -1,5 +1,4 @@
 import json
-from uuid import uuid4
 
 import numpy as np
 
@@ -35,7 +34,7 @@ class TCGDReceptor(Receptor):
                + [name for name in cls.FIELDS if name not in ['gamma', 'delta']]
 
     def __init__(self, gamma: ReceptorSequence = None, delta: ReceptorSequence = None, metadata: dict = None, identifier: str = None):
-        super().__init__(metadata, identifier)
+        super().__init__(metadata=metadata, identifier=identifier)
         self.gamma = gamma
         self.delta = delta
 

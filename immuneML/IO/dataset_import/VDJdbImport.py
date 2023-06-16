@@ -166,7 +166,7 @@ metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDat
             return sequence_identifiers
         else:
             counts = sequence_identifiers.value_counts()
-            for id, count in counts[counts > 1].iteritems():
+            for id, count in counts[counts > 1].items():
                 unique_ids = [f"{id}{i}" for i in range(1, count+1)]
                 sequence_identifiers.loc[sequence_identifiers == id] = unique_ids
         return sequence_identifiers

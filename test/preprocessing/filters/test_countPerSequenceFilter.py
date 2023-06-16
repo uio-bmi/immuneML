@@ -17,8 +17,8 @@ class TestCountPerSequenceFilter(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_process(self):
-        path = EnvironmentSettings.root_path / "test/tmp/count_per_seq_filter/"
-        PathBuilder.build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "count_per_seq_filter/")
+
         dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
                                                                          ["ACF", "ACF"],
                                                                          ["ACF", "ACF", "ACF", "ACF"]], path,

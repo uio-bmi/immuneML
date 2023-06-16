@@ -26,9 +26,10 @@ def run_test(compairr_path):
                                             ReceptorSequence("AAC", metadata=SequenceMetadata(region_type='FULL_SEQUENCE')),
                                             ReceptorSequence("AAT", metadata=SequenceMetadata(region_type='FULL_SEQUENCE')),
                                             ReceptorSequence("AAD", metadata=SequenceMetadata(region_type='FULL_SEQUENCE'))],
-                                           0, compairr_path, ignore_genes=True, threads=4, output_column_name='match_test')
+                                           0, compairr_path, ignore_genes=True, threads=4, output_column_name='match_test',
+                                           repertoire_batch_size=3)
 
-    dataset = RandomDatasetGenerator.generate_repertoire_dataset(5, {500: 1.}, {3: 1}, {}, path / 'input_dataset')
+    dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {500: 1.}, {3: 1}, {}, path / 'input_dataset')
 
     annotated_dataset = annotator.process_dataset(dataset, path / 'result', 4)
 

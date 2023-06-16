@@ -176,28 +176,25 @@ class Repertoire(DatasetItem):
 
     @classmethod
     def build_like(cls, repertoire: 'Repertoire', indices_to_keep: list, result_path: Path, filename_base: str = None):
-        if indices_to_keep is not None and len(indices_to_keep) > 0 and sum(indices_to_keep) > 0:
-            PathBuilder.build(result_path)
+        PathBuilder.build(result_path)
 
-            data = repertoire.load_data()
-            data = data[indices_to_keep]
-            identifier = uuid4().hex
-            filename_base = filename_base if filename_base is not None else identifier
+        data = repertoire.load_data()
+        data = data[indices_to_keep]
+        identifier = uuid4().hex
+        filename_base = filename_base if filename_base is not None else identifier
 
-            data_filename = result_path / f"{filename_base}.npy"
-            np.save(str(data_filename), data)
-            bnp_datafilename = data_filename.with_suffix('.npy.tsv')
-            bnp_data= repertoire._load_bnp_data()
-            bnp_data = bnp_data[indices_to_keep]
-            with bnp.open(bnp_datafilename, 'w', buffer_type=repertoire._buffer_type) as f:
-                f.write(bnp_data)
-            metadata_filename = result_path / f"{filename_base}_metadata.yaml"
-            shutil.copyfile(repertoire.metadata_filename, metadata_filename)
+        data_filename = result_path / f"{filename_base}.npy"
+        np.save(str(data_filename), data)
+        bnp_datafilename = data_filename.with_suffix('.npy.tsv')
+        bnp_data= repertoire._load_bnp_data()
+        bnp_data = bnp_data[indices_to_keep]
+        with bnp.open(bnp_datafilename, 'w', buffer_type=repertoire._buffer_type) as f:
+            f.write(bnp_data)
+        metadata_filename = result_path / f"{filename_base}_metadata.yaml"
+        shutil.copyfile(repertoire.metadata_filename, metadata_filename)
 
-            new_repertoire = Repertoire(data_filename, metadata_filename, identifier)
-            return new_repertoire
-        else:
-            return None
+        new_repertoire = Repertoire(data_filename, metadata_filename, identifier)
+        return new_repertoire
 
     @classmethod
     def build_from_sequence_objects(cls, sequence_objects: list, path: Path, metadata: dict, filename_base: str = None,
@@ -273,7 +270,6 @@ class Repertoire(DatasetItem):
 
     @property
     def _buffer_type(self):
-
         return self._create_buffer_type_from_field_dict(self._type_dict)
 
     def get_sequence_aas(self):

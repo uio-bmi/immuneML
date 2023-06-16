@@ -48,7 +48,7 @@ class ReceptorSequence(DatasetItem):
         self.identifier = identifier if identifier is not None and identifier != "" else uuid4().hex
         self.amino_acid_sequence = amino_acid_sequence
         self.nucleotide_sequence = nucleotide_sequence
-        self.metadata = metadata
+        self.metadata = metadata if metadata is not None else SequenceMetadata()
 
     def __repr__(self):
         return f"ReceptorSequence(sequence_aa={self.amino_acid_sequence}, sequence={self.nucleotide_sequence}, " \
