@@ -11,6 +11,7 @@ from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -30,8 +31,7 @@ class TestAIRRExporter(TestCase):
                                                                        frame_type="IN",
                                                                        custom_params={"d_call": "TRBD1",
                                                                                       "custom_test": "cust1",
-                                                                                      'sig1': 0,
-                                                                                      'signal_sig1_info': None})),
+                                                                                      'sig1': 0})),
                             ReceptorSequence(amino_acid_sequence="GGG",
                                              nucleotide_sequence="GGTGGTGGT",
                                              identifier="receptor_2",
@@ -39,12 +39,10 @@ class TestAIRRExporter(TestCase):
                                                                        j_call="TRAJ2",
                                                                        chain=Chain.ALPHA,
                                                                        duplicate_count=15,
-                                                                       frame_type=None,
+                                                                       frame_type=SequenceFrameType.UNDEFINED,
                                                                        region_type="IMGT_CDR3",
                                                                        custom_params={"d_call": "TRAD2",
                                                                                       "custom_test": "cust2",
-                                                                                      'signal_sig1_info': {'signal_id': 'sig1', 'motif': 'm1',
-                                                                                                           'motif_instance': 'G', 'position': 1},
                                                                                       'sig1': 1}))]
 
         repertoire = Repertoire.build_from_sequence_objects(sequence_objects=sequence_objects, path=path, metadata={"subject_id": "REP1"})

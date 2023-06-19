@@ -1,4 +1,6 @@
 # quality: gold
+from typing import Union
+
 from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
@@ -20,7 +22,8 @@ class SequenceMetadata:
 
     """
 
-    def __init__(self, v_call: str = None, j_call: str = None, chain=None, duplicate_count: int = None, frame_type: str = SequenceFrameType.IN.name,
+    def __init__(self, v_call: str = None, j_call: str = None, chain=None, duplicate_count: int = None,
+                 frame_type: Union[SequenceFrameType, str] = '',
                  region_type: str = None, cell_id: str = None, custom_params: dict = None):
         self.v_call = v_call
         self.j_call = j_call

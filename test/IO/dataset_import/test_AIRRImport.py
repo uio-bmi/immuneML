@@ -61,12 +61,12 @@ rep2.tsv,2""")
         for index, rep in enumerate(dataset.get_data()):
             if index == 0:
                 self.assertEqual(3, len(rep.sequences))
-                self.assertListEqual(["IVKNQEJ01BVGQ6", "IVKNQEJ01AQVWS", "IVKNQEJ01EI5S4"], list(rep.get_sequence_identifiers()))
-                self.assertListEqual(['IGHV4-31*03', 'IGHV4-31*03', 'IGHV4-31*03'], list(rep.get_v_genes()))
-                self.assertListEqual([36, 36, 36], list(rep.get_attribute("junction_length")))
-                self.assertListEqual(["ASGVAGTFDY", "ASGVAGTFDY", "ASGVAGTFDY"], list(rep.get_sequence_aas()))
-                self.assertListEqual([1247, 4, 2913], list(rep.get_counts()))
-                self.assertListEqual([Chain.HEAVY for i in range(3)], list(rep.get_chains()))
+                self.assertListEqual(["IVKNQEJ01BVGQ6", "IVKNQEJ01AQVWS", "IVKNQEJ01EI5S4"], rep.get_sequence_identifiers().tolist())
+                self.assertListEqual(['IGHV4-31*03', 'IGHV4-31*03', 'IGHV4-31*03'], rep.get_v_genes().tolist())
+                self.assertListEqual([36, 36, 36], rep.get_attribute("junction_length").tolist())
+                self.assertListEqual(["ASGVAGTFDY", "ASGVAGTFDY", "ASGVAGTFDY"], rep.get_sequence_aas().tolist())
+                self.assertListEqual([1247, 4, 2913], rep.get_counts().tolist())
+                self.assertListEqual([Chain.HEAVY for i in range(3)], rep.get_chains().tolist())
             else:
                 self.assertEqual(2, len(rep.sequences))
 
@@ -133,25 +133,28 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         self.create_dummy_dataset(path / 'initial', True)
 
         column_mapping = self.get_column_mapping()
-        params = {"is_repertoire": True, "result_path": path, "path": path / 'initial', "metadata_file": path / "initial/metadata.csv",
+        params = {"is_repertoire": True, "result_path": path / 'imported', "path": path / 'initial', "metadata_file": path / "initial/metadata.csv",
                   "import_out_of_frame": False, "import_with_stop_codon": False,
                   "import_productive": True, "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
                   "column_mapping": column_mapping, "import_illegal_characters": False,
                   "separator": "\t"}
 
         dataset1 = AIRRImport.import_dataset(params, "airr_repertoire_dataset1")
+        print(dataset1.repertoires[0].get_region_type())
 
         path_exported = path / "exported_repertoires"
         AIRRExporter.export(dataset1, path_exported)
 
         params["path"] = path_exported
         params["metadata_file"] = path_exported / "metadata.csv"
-        params["result_path"] = path_exported / "result_path"
+        params["result_path"] = path / "final_output"
         dataset2 = AIRRImport.import_dataset(params, "airr_repertoire_dataset2")
 
-        for attribute in ["amino_acid_sequence", "nucleotide_sequence", "v_call", "j_call", "chain", "frame_type", "region_type", "custom_params"]:
+        for attribute in ["amino_acid_sequence", "nucleotide_sequence", "v_call", "j_call", "chain", "frame_type", "custom_params"]:
             self.assertListEqual([sequence.get_attribute(attribute) for sequence in dataset1.repertoires[0].sequences],
                                  [sequence.get_attribute(attribute) for sequence in dataset2.repertoires[0].sequences])
+
+        self.assertEqual(dataset1.repertoires[0].get_region_type(), dataset2.repertoires[0].get_region_type())
 
         shutil.rmtree(path)
 

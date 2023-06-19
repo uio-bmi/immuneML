@@ -1,5 +1,4 @@
 # quality: gold
-import ast
 import dataclasses
 import logging
 import shutil
@@ -12,8 +11,9 @@ from uuid import uuid4
 import bionumpy as bnp
 import numpy as np
 import yaml
-from bionumpy import AminoAcidEncoding, DNAEncoding
+from bionumpy import AminoAcidEncoding, DNAEncoding, EncodedArray
 from bionumpy.bnpdataclass import bnpdataclass
+from bionumpy.encodings import AlphabetEncoding
 
 from immuneML.data_model.DatasetItem import DatasetItem
 from immuneML.data_model.cell.Cell import Cell
@@ -25,24 +25,25 @@ from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.simulation.implants.ImplantAnnotation import ImplantAnnotation
 from immuneML.util.NumpyHelper import NumpyHelper
 from immuneML.util.PathBuilder import PathBuilder
 
 
 @bnpdataclass
 class SequenceSet:
-    sequence_aa: AminoAcidEncoding
-    sequence: DNAEncoding
-    v_call: str
-    j_call: str
-    region_type: str
-    frame_type: str
-    duplicate_count: int
+    sequence_aa: AminoAcidEncoding = None
+    sequence: DNAEncoding = None
+    v_call: str = None
+    j_call: str = None
+    region_type: str = None
+    frame_type: str = None
+    duplicate_count: int = None
 
 
-STR_TO_TYPE = {'str': str, 'int': int, 'float': float, 'bool': bool, 'AminoAcidEncoding': bnp.encodings.AminoAcidEncoding}
-TYPE_TO_STR = {val: key for key, val in STR_TO_TYPE.items()}
+STR_TO_TYPE = {'str': str, 'int': int, 'float': float, 'bool': bool, 'AminoAcidEncoding': bnp.encodings.AminoAcidEncoding,
+               'DNAEncoding': bnp.encodings.DNAEncoding}
+TYPE_TO_STR = {**{val: key for key, val in STR_TO_TYPE.items()}, **{AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY'): 'AminoAcidEncoding',
+                                                                    AlphabetEncoding('ACGT'): 'DNAEncoding'}}
 
 
 class Repertoire(DatasetItem):
@@ -95,7 +96,7 @@ class Repertoire(DatasetItem):
             else:
                 field_type = cls._get_field_type_from_values(value)
             types[key] = field_type
-        dc = bnpdataclass(make_dataclass('DynamicSequenceSet', fields=types.items()))
+        dc = cls.create_dynamic_dataclass(type_dict=types)
         return dc(**all_fields_dict), types
 
     @classmethod
@@ -250,7 +251,6 @@ class Repertoire(DatasetItem):
         data_filename = Path(data_filename)
         metadata_filename = Path(metadata_filename) if metadata_filename is not None else None
 
-        self.__bnp_data = None
         assert data_filename.suffix == ".npy", \
             f"Repertoire: the file representing the repertoire has to be in numpy binary format. Got {data_filename.suffix} instead."
 
@@ -262,6 +262,7 @@ class Repertoire(DatasetItem):
         self.metadata_filename = metadata_filename
         self.identifier = identifier
         self.data = None
+        self.bnp_data = None
         self.element_count = None
 
     @property
@@ -293,7 +294,7 @@ class Repertoire(DatasetItem):
     def get_chains(self):
         chains = self.get_attribute("chain")
         if chains is not None:
-            chains = np.array([Chain.get_chain(chain_str) if chain_str is not None else None for chain_str in chains])
+            chains = np.array([Chain.get_chain(chain_str) if chain_str is not None else None for chain_str in chains.tolist()])
         return chains
 
     def load_data(self):
@@ -324,73 +325,55 @@ class Repertoire(DatasetItem):
         return result
 
     def get_region_type(self):
-        region_types = set(self.get_attribute("region_type").tolist())
-
-        if 'nan' in region_types:
-            region_types.remove('nan')
+        region_types = self.get_attribute("region_type")
+        if region_types is not None:
+            region_types = set(region_types.tolist())
+        else:
+            return None
 
         assert len(region_types) == 1, f"Repertoire: expected one region_type, found: {region_types}"
 
         return RegionType(region_types.pop())
 
-    def free_memory(self):
-        self.data = None
-
     def __getstate__(self):
         state = self.__dict__.copy()
         del state['data']
+        del state['bnp_data']
         return state
 
     def __setstate__(self, state):
         self.__dict__.update(state)
         self.data = None
+        self.bnp_data = None
 
     def get_element_count(self):
         if self.element_count is None:
-            self.load_data()
+            self._load_bnp_data()
         return self.element_count
 
-    def _make_sequence_object(self, row, load_implants: bool = False):
+    def _make_sequence_object(self, row: SequenceSet):
 
-        fields = row.dtype.names
-
-        implants = []
-        if load_implants:
-            keys = [key for key in row.dtype.names if key not in Repertoire.FIELDS]
-            for key in keys:
-                value_dict = row[key]
-                if value_dict:
-                    try:
-                        implants.append(ImplantAnnotation(**ast.literal_eval(value_dict)))
-                    except (SyntaxError, ValueError, TypeError) as e:
-                        implants.append(ImplantAnnotation(signal_id=key))
-
-        seq = ReceptorSequence(amino_acid_sequence=row["sequence_aa"] if "sequence_aa" in fields else None,
-                               nucleotide_sequence=row["sequence"] if "sequence" in fields else None,
-                               identifier=row["sequence_id"] if "sequence_id" in fields else None,
-                               metadata=SequenceMetadata(v_call=row["v_call"] if "v_call" in fields else None,
-                                                         j_call=row["j_call"] if "j_call" in fields else None,
-                                                         chain=row["chain"] if "chain" in fields else None,
-                                                         duplicate_count=row[
-                                                             "duplicate_count"] if "duplicate_count" in fields and not NumpyHelper.is_nan_or_empty(
-                                                             row['duplicate_count']) else None,
-                                                         region_type=row[
-                                                             "region_type"] if "region_type" in fields else None,
-                                                         frame_type=row[
-                                                             "frame_type"] if "frame_type" in fields else "IN",
-                                                         cell_id=row["cell_id"] if "cell_id" in fields else None,
-                                                         custom_params={key: row[key] if key in fields else None
-                                                                        for key in
-                                                                        set(self._type_dict.keys()) - set(Repertoire.FIELDS)}))
+        seq = ReceptorSequence(amino_acid_sequence=row.get_single_row_value('sequence_aa'),
+                               nucleotide_sequence=row.get_single_row_value('sequence'),
+                               identifier=row.get_single_row_value('sequence_id'),
+                               metadata=SequenceMetadata(v_call=row.get_single_row_value('v_call'),
+                                                         j_call=row.get_single_row_value('j_call'),
+                                                         chain=row.get_single_row_value('chain'),
+                                                         duplicate_count=row.get_single_row_value('duplicate_count'),
+                                                         region_type=row.get_single_row_value('region_type'),
+                                                         frame_type=row.get_single_row_value('frame_type'),
+                                                         cell_id=row.get_single_row_value('cell_id'),
+                                                         custom_params={key: row.get_single_row_value(key) for key in vars(row)
+                                                                        if key not in Repertoire.FIELDS}))
 
         return seq
 
     def _prepare_cell_lists(self):
-        data = self.load_data()
+        data = self._load_bnp_data()
 
-        assert "cell_id" in data.dtype.names and data["cell_id"] is not None, \
+        assert hasattr(data, 'cell_id') and getattr(data, 'cell_id') is not None, \
             f"Repertoire: cannot return receptor objects in repertoire {self.identifier} since cell_ids are not specified. " \
-            f"Existing fields are: {str(data.dtype.names)[1:-1]}"
+            f"Existing fields are: {str(dir(data))[1:-1]}"
 
         same_cell_lists = NumpyHelper.group_structured_array_by(data, "cell_id")
         return same_cell_lists
@@ -401,37 +384,37 @@ class Repertoire(DatasetItem):
             sequences.append(self._make_sequence_object(item))
         return ReceptorBuilder.build_objects(sequences)
 
-    def get_sequence_objects(self, load_implants: bool = True) -> List[ReceptorSequence]:
+    def get_sequence_objects(self) -> List[ReceptorSequence]:
         """
         Lazily loads sequences from disk to reduce RAM consumption
-
-        Args:
-            load_implants: whether implants should be parsed to objects and converted to ImplantAnnotations; if True, might slow down the loading
 
         Returns:
             a list of ReceptorSequence objects
         """
         seqs = []
 
-        data = self.load_data()
+        data = self._load_bnp_data()
 
-        for i in range(len(self.get_sequence_identifiers())):
-            seq = self._make_sequence_object(data[i], load_implants)
+        for i in range(len(data)):
+            seq = self._make_sequence_object(data[i])
             seqs.append(seq)
+
+        del data
+        self.bnp_data = None
 
         return seqs
 
     def _load_bnp_data(self):
-        if self.__bnp_data is None or (isinstance(self.__bnp_data, weakref.ref) and self.__bnp_data() is None):
+        if self.bnp_data is None or (isinstance(self.bnp_data, weakref.ref) and self.bnp_data() is None):
             data = self._read_bnp_data()
-            self.__bnp_data = weakref.ref(data) if EnvironmentSettings.low_memory else data
-        data = self.__bnp_data() if EnvironmentSettings.low_memory else self.__bnp_data
+            self.bnp_data = weakref.ref(data) if EnvironmentSettings.low_memory else data
+        data = self.bnp_data() if EnvironmentSettings.low_memory else self.bnp_data
         self.element_count = len(data)
         return data
 
     @property
     def sequences(self):
-        return self.get_sequence_objects(True)
+        return self.get_sequence_objects()
 
     @property
     def receptors(self) -> List[Receptor]:
@@ -458,7 +441,7 @@ class Repertoire(DatasetItem):
         return receptors
 
     @property
-    def cells(self) -> CellList:
+    def cells(self) -> List[Cell]:
         """
         A property that creates a list of Cell objects based on the cell_ids field in the following manner:
             - all sequences that have the same cell_id are grouped together
@@ -483,9 +466,24 @@ class Repertoire(DatasetItem):
         return cell_lists
 
     def _read_bnp_data(self):
-        return bnp.open(self._bnp_filename, buffer_type=self._buffer_type).read()
+        with bnp.open(self._bnp_filename, buffer_type=self._buffer_type) as file:
+            return file.read()
 
-    def _create_buffer_type_from_field_dict(self, type_dict: Dict[str, Any])->bnp.io.delimited_buffers.DelimitedBuffer:
-        dataclass = bnpdataclass(make_dataclass('DynamicSequenceSet', fields=type_dict.items()))
+    def _create_buffer_type_from_field_dict(self, type_dict: Dict[str, Any]) -> bnp.io.delimited_buffers.DelimitedBuffer:
+        dataclass = self.__class__.create_dynamic_dataclass(type_dict)
         return bnp.io.delimited_buffers.get_bufferclass_for_datatype(dataclass, delimiter='\t', has_header=True)
 
+    @classmethod
+    def create_dynamic_dataclass(cls, type_dict: Dict[str, Any]):
+        return bnpdataclass(make_dataclass('DynamicSequenceSet', fields=type_dict.items(),
+                                           namespace={'get_single_row_value': lambda self, attr_name: get_single_row_value(self, attr_name)}))
+
+def get_single_row_value(self, attr_name: str):
+    if hasattr(self, attr_name) and getattr(self, attr_name) is not None:
+        val = getattr(self, attr_name)
+        if isinstance(val, EncodedArray):
+            return val.to_string()
+        elif isinstance(val, np.ndarray):
+            return val.item()
+    else:
+        return None

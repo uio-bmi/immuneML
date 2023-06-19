@@ -135,7 +135,7 @@ class AIRRImport(DataImport):
             else:
                 df.loc[:, 'region_type'] = params.region_type.name
         else:
-            df.loc[:, "region_types"] = params.region_type.name
+            df.loc[:, "region_type"] = params.region_type.name
         # todo else: support "full_sequence" import through regiontype?
 
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
