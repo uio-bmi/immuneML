@@ -34,7 +34,7 @@ class TestSequenceModelCreator(TestCase):
                                            sequence_type=SequenceType.AMINO_ACID)
 
         self.assertTrue(isinstance(model, Word2Vec))
-        self.assertTrue("CA" in model.wv.vocab)
-        self.assertEqual(400, len(model.wv.vocab))
+        self.assertTrue("CA" in model.wv.key_to_index)
+        self.assertEqual(400, len(model.wv.key_to_index))
 
         shutil.rmtree(test_path)
