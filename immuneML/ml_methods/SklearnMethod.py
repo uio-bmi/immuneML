@@ -7,7 +7,7 @@ import dill
 import numpy as np
 import pkg_resources
 import yaml
-from sklearn.metrics import SCORERS
+from sklearn.metrics import _scorer as SCORERS
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.utils.validation import check_is_fitted
 
