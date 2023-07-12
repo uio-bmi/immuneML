@@ -27,10 +27,12 @@ class TestKmerFreqReceptorEncoder(TestCase):
 
     def test(self):
 
-        receptors = [TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAACCC"), beta=ReceptorSequence(amino_acid_sequence="AAACCC"), identifier="1"),
-                     TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAA"), beta=ReceptorSequence(amino_acid_sequence="CCC"), identifier="2"),
-                     TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAACCC"), beta=ReceptorSequence(amino_acid_sequence="AAACCC"), identifier="3"),
-                     TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAA"), beta=ReceptorSequence(amino_acid_sequence="CCC"), identifier="4")]
+        receptors = [TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAACCC"), beta=ReceptorSequence(
+            sequence_aa="AAACCC"), identifier="1"),
+                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAA"), beta=ReceptorSequence(sequence_aa="CCC"), identifier="2"),
+                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAACCC"), beta=ReceptorSequence(
+                         sequence_aa="AAACCC"), identifier="3"),
+                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAA"), beta=ReceptorSequence(sequence_aa="CCC"), identifier="4")]
 
         path = EnvironmentSettings.tmp_test_path / "kmer_receptor_frequency/"
         PathBuilder.remove_old_and_build(path / 'data')

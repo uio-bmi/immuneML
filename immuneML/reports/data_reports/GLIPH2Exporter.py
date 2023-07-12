@@ -46,8 +46,8 @@ class GLIPH2Exporter(DataReport):
         PathBuilder.build(self.result_path)
         alpha_chains, beta_chains, trbv, trbj, subject_condition, count = [], [], [], [], [], []
         for index, receptor in enumerate(self.dataset.get_data()):
-            alpha_chains.append(receptor.get_chain("alpha").amino_acid_sequence)
-            beta_chains.append(receptor.get_chain("beta").amino_acid_sequence)
+            alpha_chains.append(receptor.get_chain("alpha").sequence_aa)
+            beta_chains.append(receptor.get_chain("beta").sequence_aa)
             trbv.append(receptor.get_chain("beta").metadata.v_call)
             trbj.append(receptor.get_chain("beta").metadata.j_call)
             subject_condition.append(f"{getattr(receptor.metadata, 'subject_id', str(index))}:{receptor.metadata[self.condition]}")

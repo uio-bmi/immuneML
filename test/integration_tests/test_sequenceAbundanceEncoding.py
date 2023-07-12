@@ -47,7 +47,7 @@ class TestSequenceAbundanceEncoding(TestCase):
                     "d1": {
                         "format": "ImmuneML",
                         "params": {
-                            "path": str(path / f"{dataset.name}.iml_dataset"),
+                            "path": str(path / f"{dataset.name}.yaml"),
                         }
                     }
                 },

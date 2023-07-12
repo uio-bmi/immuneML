@@ -1,9 +1,7 @@
 # quality: gold
-import dataclasses
 import logging
 import shutil
 import weakref
-from dataclasses import make_dataclass
 from pathlib import Path
 from typing import List, Any, Dict
 from uuid import uuid4
@@ -11,13 +9,12 @@ from uuid import uuid4
 import bionumpy as bnp
 import numpy as np
 import yaml
-from bionumpy import AminoAcidEncoding, DNAEncoding, EncodedArray
-from bionumpy.bnpdataclass import bnpdataclass
-from bionumpy.encodings import AlphabetEncoding
 
 from immuneML.data_model.DatasetItem import DatasetItem
+from immuneML.data_model.SequenceSet import SequenceSet
+from immuneML.data_model.bnp_util import bnp_write_to_file, write_yaml, bnp_read_from_file, \
+    make_dynamic_seq_set_dataclass, build_dynamic_bnp_dataclass_obj
 from immuneML.data_model.cell.Cell import Cell
-from immuneML.data_model.cell.CellList import CellList
 from immuneML.data_model.receptor.Receptor import Receptor
 from immuneML.data_model.receptor.ReceptorBuilder import ReceptorBuilder
 from immuneML.data_model.receptor.RegionType import RegionType
@@ -29,23 +26,6 @@ from immuneML.util.NumpyHelper import NumpyHelper
 from immuneML.util.PathBuilder import PathBuilder
 
 
-@bnpdataclass
-class SequenceSet:
-    sequence_aa: AminoAcidEncoding = None
-    sequence: DNAEncoding = None
-    v_call: str = None
-    j_call: str = None
-    region_type: str = None
-    frame_type: str = None
-    duplicate_count: int = None
-
-
-STR_TO_TYPE = {'str': str, 'int': int, 'float': float, 'bool': bool, 'AminoAcidEncoding': bnp.encodings.AminoAcidEncoding,
-               'DNAEncoding': bnp.encodings.DNAEncoding}
-TYPE_TO_STR = {**{val: key for key, val in STR_TO_TYPE.items()}, **{AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY'): 'AminoAcidEncoding',
-                                                                    AlphabetEncoding('ACGT'): 'DNAEncoding'}}
-
-
 class Repertoire(DatasetItem):
     """
     Repertoire object consisting of sequence objects, each sequence attribute is stored as a list across all sequences and can be
@@ -55,142 +35,37 @@ class Repertoire(DatasetItem):
     FIELDS = ("sequence_aa", "sequence", "v_call", "j_call", "chain", "duplicate_count", "region_type", "frame_type",
               "sequence_id", "cell_id")
 
-    @staticmethod
-    def process_custom_lists(custom_lists):
-        try:
-            if custom_lists:
-                field_list = list(custom_lists.keys())
-                values = [[NumpyHelper.get_numpy_representation(el) for el in custom_lists[field]] for field in
-                          custom_lists.keys()]
-                dtype = [(field, np.array(values[index]).dtype) for index, field in enumerate(custom_lists.keys())]
-            else:
-                field_list, values, dtype = [], [], []
-            return field_list, values, dtype
-        except Exception as e:
-            print(f"Error occurred when processing custom lists to create a repertoire, custom lists: {custom_lists}.")
-            raise e
-
-    @staticmethod
-    def check_count(sequence_aas: list = None, sequences: list = None, custom_lists: dict = None) -> int:
-        sequence_count = len(sequence_aas) if sequence_aas is not None else len(
-            sequences) if sequences is not None else 0
-
-        if sequences is not None and sequence_aas is not None:
-            assert len(sequences) == len(sequence_aas), \
-                f"Repertoire: there is a mismatch between number of nucleotide sequences ({len(sequences)}) and the number of amino acid " \
-                f"sequences ({len(sequence_aas)})."
-
-        assert all(len(custom_lists[key]) == sequence_count for key in custom_lists) if custom_lists else True, \
-            f"Repertoire: there is a mismatch between the number of sequences ({sequence_count}) and the number of attributes listed in " \
-            f"{str(list(custom_lists.keys()))[1:-1]}"
-
-        return sequence_count
-
     @classmethod
-    def _build_bnpdataclass(cls, all_fields_dict: Dict[str, Any]):
-        sequence_field_names = {field.name: field.type for field in dataclasses.fields(SequenceSet)}
-        types = {}
-        for key, value in all_fields_dict.items():
-            if key in sequence_field_names:
-                field_type = sequence_field_names[key]
-            else:
-                field_type = cls._get_field_type_from_values(value)
-            types[key] = field_type
-        dc = cls.create_dynamic_dataclass(type_dict=types)
-        return dc(**all_fields_dict), types
-
-    @classmethod
-    def _get_field_type_from_values(cls, value):
-        if isinstance(value, np.ndarray):
-            return value.dtype
-        if len(value) == 0:
-            return str
-        return type(value[0])
-
-    @classmethod
-    def build(cls, sequence_aa: list = None, sequence: list = None, v_call: list = None, j_call: list = None,
-              chain: list = None, duplicate_count: list = None, region_type: list = None, frame_type: list = None,
-              custom_lists: dict = None, sequence_id: list = None, path: Path = None, metadata: dict = None,
-              signals: dict = None, cell_id: List[str] = None, filename_base: str = None, identifier: str = None):
-
-        sequence_count = Repertoire.check_count(sequence_aa, sequence, custom_lists)
-
-        if sequence_id is None or len(sequence_id) == 0 or any(identifier is None for identifier in sequence_id):
-            sequence_id = np.arange(sequence_count).astype(str)
+    def build(cls, path: Path = None, metadata: dict = None, filename_base: str = None, identifier: str = None, **kwargs):
 
         identifier = uuid4().hex if identifier is None else identifier
-
         filename_base = filename_base if filename_base is not None else identifier
+        data_filename = path / f"{filename_base}.tsv"
 
-        data_filename = path / f"{filename_base}.npy"
-
-        dtype, field_list, values = cls._create_field_specs(sequence_aa, sequence, v_call, j_call,
-                                                            chain, duplicate_count, region_type, frame_type,
-                                                            custom_lists, sequence_id, path, metadata,
-                                                            signals, cell_id, filename_base, identifier)
-        field_dict = dict(zip(field_list, values))
-        bnp_object, type_dict = cls._build_bnpdataclass(field_dict)
-        buffer_type = bnp.io.delimited_buffers.get_bufferclass_for_datatype(type(bnp_object), delimiter='\t',
-                                                                            has_header=True)
-        with bnp.open(str(data_filename) + '.tsv', 'w', buffer_type=buffer_type) as file:
-            file.write(bnp_object)
-        repertoire_matrix = np.array(list(map(tuple, zip(*values))), order='F', dtype=dtype)  # erase this
-        np.save(str(data_filename), repertoire_matrix, allow_pickle=False)  # erase this
+        bnp_object, type_dict = build_dynamic_bnp_dataclass_obj(kwargs)
+        bnp_write_to_file(data_filename, bnp_object)
 
         metadata_filename = path / f"{filename_base}_metadata.yaml"
         metadata = {} if metadata is None else metadata
-        # metadata["field_list"] = field_list
-        metadata['type_dict'] = {key: TYPE_TO_STR[val] for key, val in type_dict.items()}
-        with metadata_filename.open("w") as file:
-            yaml.dump(metadata, file)
+        metadata['type_dict'] = {key: SequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()}
+        write_yaml(metadata_filename, metadata)
 
-        repertoire = Repertoire(data_filename, metadata_filename, identifier, buffer_type=buffer_type)
+        repertoire = Repertoire(data_filename, metadata_filename, identifier)
         return repertoire
-
-    @classmethod
-    def _create_field_specs(cls, sequence_aa: list = None, sequence: list = None, v_call: list = None,
-                            j_call: list = None,
-                            chain: list = None, duplicate_count: list = None, region_type: list = None,
-                            frame_type: list = None,
-                            custom_lists: dict = None, sequence_id: list = None, path: Path = None,
-                            metadata: dict = None,
-                            signals: dict = None, cell_id: List[str] = None, filename_base: str = None,
-                            identifier: str = None):
-        field_list, values, dtype = Repertoire.process_custom_lists(custom_lists)
-        if signals:
-            signals_filtered = {f'{signal}_info': signals[signal] for signal in signals if
-                                signal not in Repertoire.FIELDS}
-            field_list_signals, values_signals, dtype_signals = Repertoire.process_custom_lists(signals_filtered)
-
-            for index, field_name in enumerate(field_list_signals):
-                if field_name not in field_list:
-                    field_list.append(field_name)
-                    values.append(values_signals[index])
-                    dtype.append(dtype_signals[index])
-        for field in Repertoire.FIELDS:
-            if eval(field) is not None and not all(el is None for el in eval(field)):
-                field_list.append(field)
-                values.append(
-                    [NumpyHelper.get_numpy_representation(val) if val is not None else np.nan for val in eval(field)])
-                dtype.append((field, np.array(values[-1]).dtype))
-        return dtype, field_list, values
 
     @classmethod
     def build_like(cls, repertoire: 'Repertoire', indices_to_keep: list, result_path: Path, filename_base: str = None):
         PathBuilder.build(result_path)
 
-        data = repertoire.load_data()
-        data = data[indices_to_keep]
         identifier = uuid4().hex
         filename_base = filename_base if filename_base is not None else identifier
 
-        data_filename = result_path / f"{filename_base}.npy"
-        np.save(str(data_filename), data)
-        bnp_datafilename = data_filename.with_suffix('.npy.tsv')
-        bnp_data= repertoire._load_bnp_data()
+        data_filename = result_path / f"{filename_base}.tsv"
+        bnp_data = repertoire.load_bnp_data()
         bnp_data = bnp_data[indices_to_keep]
-        with bnp.open(bnp_datafilename, 'w', buffer_type=repertoire._buffer_type) as f:
-            f.write(bnp_data)
+
+        bnp_write_to_file(data_filename, bnp_data)
+
         metadata_filename = result_path / f"{filename_base}_metadata.yaml"
         shutil.copyfile(repertoire.metadata_filename, metadata_filename)
 
@@ -210,16 +85,16 @@ class Repertoire(DatasetItem):
         signals = {}
 
         for index, seq in enumerate(sequence_objects):
-            sequence_id.append(seq.identifier)
-            sequence_aa.append(seq.amino_acid_sequence)
-            sequence.append(seq.nucleotide_sequence)
+            sequence_id.append(seq.sequence_id)
+            sequence_aa.append(seq.sequence_aa)
+            sequence.append(seq.sequence)
             if seq.metadata:
                 v_call.append(seq.metadata.v_call)
                 j_call.append(seq.metadata.j_call)
-                chain.append(seq.metadata.chain)
+                chain.append(seq.metadata.chain.value if seq.metadata.chain else None)
                 duplicate_count.append(seq.metadata.duplicate_count)
-                region_type.append(seq.metadata.region_type)
-                frame_type.append(seq.metadata.frame_type)
+                region_type.append(seq.metadata.region_type.value if seq.metadata.region_type else None)
+                frame_type.append(seq.metadata.frame_type.value if seq.metadata.frame_type else None)
                 cell_id.append(seq.metadata.cell_id)
                 for param in seq.metadata.custom_params.keys():
                     current_value = seq.metadata.custom_params[param] if param in seq.metadata.custom_params else None
@@ -237,22 +112,20 @@ class Repertoire(DatasetItem):
                 signals[signal].extend([None for _ in range(sequence_count - signal_info_count)])
 
         return cls.build(sequence_aa=sequence_aa, sequence=sequence, v_call=v_call, j_call=j_call, chain=chain,
-                         duplicate_count=duplicate_count,
-                         region_type=region_type, frame_type=frame_type, custom_lists=custom_lists,
-                         sequence_id=sequence_id, path=path,
-                         metadata=metadata, signals=signals, cell_id=cell_id, filename_base=filename_base,
-                         identifier=repertoire_id)
+                         duplicate_count=duplicate_count, region_type=region_type, frame_type=frame_type,
+                         sequence_id=sequence_id, path=path, metadata=metadata, cell_id=cell_id,
+                         filename_base=filename_base, identifier=repertoire_id, **custom_lists, **signals)
 
     @property
     def _bnp_filename(self):
         return Path(str(self.data_filename) + ".tsv")
 
-    def __init__(self, data_filename: Path, metadata_filename: Path, identifier: str, buffer_type=None):
+    def __init__(self, data_filename: Path, metadata_filename: Path, identifier: str):
         data_filename = Path(data_filename)
         metadata_filename = Path(metadata_filename) if metadata_filename is not None else None
 
-        assert data_filename.suffix == ".npy", \
-            f"Repertoire: the file representing the repertoire has to be in numpy binary format. Got {data_filename.suffix} instead."
+        assert data_filename.suffix == ".tsv", \
+            f"Repertoire: the file representing the repertoire has to be in tsv format. Got {data_filename.suffix} instead."
 
         self.data_filename = data_filename
         if metadata_filename:
@@ -261,13 +134,12 @@ class Repertoire(DatasetItem):
 
         self.metadata_filename = metadata_filename
         self.identifier = identifier
-        self.data = None
         self.bnp_data = None
         self.element_count = None
 
     @property
     def _type_dict(self):
-        return {key: STR_TO_TYPE[val] for key, val in self.metadata["type_dict"].items()}
+        return {key: SequenceSet.STR_TO_TYPE[val] for key, val in self.metadata["type_dict"].items()}
 
     @property
     def _buffer_type(self):
@@ -288,25 +160,18 @@ class Repertoire(DatasetItem):
     def get_counts(self):
         counts = self.get_attribute("duplicate_count")
         if counts is not None:
-            counts = np.array([int(count) if not NumpyHelper.is_nan_or_empty(count) else None for count in counts])
+            counts = np.array([int(count) if count != SequenceSet.get_neutral_value(int) else None for count in counts])
         return counts
 
     def get_chains(self):
         chains = self.get_attribute("chain")
         if chains is not None:
-            chains = np.array([Chain.get_chain(chain_str) if chain_str is not None else None for chain_str in chains.tolist()])
+            chains = np.array(
+                [Chain.get_chain(chain_str) if chain_str is not None else None for chain_str in chains.tolist()])
         return chains
 
-    def load_data(self):
-        if self.data is None or (isinstance(self.data, weakref.ref) and self.data() is None):
-            data = np.load(self.data_filename, allow_pickle=False)
-            self.data = weakref.ref(data) if EnvironmentSettings.low_memory else data
-        data = self.data() if EnvironmentSettings.low_memory else self.data
-        self.element_count = data.shape[0]
-        return data
-
     def get_attribute(self, attribute):
-        data = self._load_bnp_data()
+        data = self.load_bnp_data()
         if attribute in self._type_dict:
             tmp = getattr(data, attribute)
             return tmp
@@ -315,7 +180,7 @@ class Repertoire(DatasetItem):
 
     def get_attributes(self, attributes: list):
         result = {}
-        data = self._load_bnp_data()
+        data = self.load_bnp_data()
         for attribute in attributes:
             if attribute in self._type_dict:
                 result[attribute] = getattr(data, attribute)
@@ -337,25 +202,23 @@ class Repertoire(DatasetItem):
 
     def __getstate__(self):
         state = self.__dict__.copy()
-        del state['data']
         del state['bnp_data']
         return state
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        self.data = None
         self.bnp_data = None
 
     def get_element_count(self):
         if self.element_count is None:
-            self._load_bnp_data()
+            self.load_bnp_data()
         return self.element_count
 
     def _make_sequence_object(self, row: SequenceSet):
 
-        seq = ReceptorSequence(amino_acid_sequence=row.get_single_row_value('sequence_aa'),
-                               nucleotide_sequence=row.get_single_row_value('sequence'),
-                               identifier=row.get_single_row_value('sequence_id'),
+        seq = ReceptorSequence(sequence_aa=row.get_single_row_value('sequence_aa'),
+                               sequence=row.get_single_row_value('sequence'),
+                               sequence_id=row.get_single_row_value('sequence_id'),
                                metadata=SequenceMetadata(v_call=row.get_single_row_value('v_call'),
                                                          j_call=row.get_single_row_value('j_call'),
                                                          chain=row.get_single_row_value('chain'),
@@ -363,13 +226,14 @@ class Repertoire(DatasetItem):
                                                          region_type=row.get_single_row_value('region_type'),
                                                          frame_type=row.get_single_row_value('frame_type'),
                                                          cell_id=row.get_single_row_value('cell_id'),
-                                                         custom_params={key: row.get_single_row_value(key) for key in vars(row)
+                                                         custom_params={key: row.get_single_row_value(key) for key in
+                                                                        vars(row)
                                                                         if key not in Repertoire.FIELDS}))
 
         return seq
 
     def _prepare_cell_lists(self):
-        data = self._load_bnp_data()
+        data = self.load_bnp_data()
 
         assert hasattr(data, 'cell_id') and getattr(data, 'cell_id') is not None, \
             f"Repertoire: cannot return receptor objects in repertoire {self.identifier} since cell_ids are not specified. " \
@@ -393,7 +257,7 @@ class Repertoire(DatasetItem):
         """
         seqs = []
 
-        data = self._load_bnp_data()
+        data = self.load_bnp_data()
 
         for i in range(len(data)):
             seq = self._make_sequence_object(data[i])
@@ -404,9 +268,9 @@ class Repertoire(DatasetItem):
 
         return seqs
 
-    def _load_bnp_data(self):
+    def load_bnp_data(self):
         if self.bnp_data is None or (isinstance(self.bnp_data, weakref.ref) and self.bnp_data() is None):
-            data = self._read_bnp_data()
+            data = bnp_read_from_file(self.data_filename, self._buffer_type)
             self.bnp_data = weakref.ref(data) if EnvironmentSettings.low_memory else data
         data = self.bnp_data() if EnvironmentSettings.low_memory else self.bnp_data
         self.element_count = len(data)
@@ -442,21 +306,7 @@ class Repertoire(DatasetItem):
 
     @property
     def cells(self) -> List[Cell]:
-        """
-        A property that creates a list of Cell objects based on the cell_ids field in the following manner:
-            - all sequences that have the same cell_id are grouped together
-            - they are divided into groups based on the chain
-            - all valid combinations of chains are created and used to make a receptor object - this means that if a cell has
-              two beta (b1 and b2) and one alpha chain (a1), two receptor objects will be created: receptor1 (b1, a1), receptor2 (b2, a1)
-            - an object of the Cell class is created from all receptors with the same cell_id created as described in the previous steps
-
-        To avoid have multiple receptors in the same cell, use some of the preprocessing classes which could merge/eliminate multiple
-        sequences. See the documentation of the preprocessing module for more information.
-
-        Returns:
-            CellList: a list of objects of Cell class
-        """
-        cells = CellList()
+        cells = []
         cell_lists = self._prepare_cell_lists()
 
         for cell_content in cell_lists:
@@ -465,25 +315,7 @@ class Repertoire(DatasetItem):
 
         return cell_lists
 
-    def _read_bnp_data(self):
-        with bnp.open(self._bnp_filename, buffer_type=self._buffer_type) as file:
-            return file.read()
-
-    def _create_buffer_type_from_field_dict(self, type_dict: Dict[str, Any]) -> bnp.io.delimited_buffers.DelimitedBuffer:
-        dataclass = self.__class__.create_dynamic_dataclass(type_dict)
+    def _create_buffer_type_from_field_dict(self,
+                                            type_dict: Dict[str, Any]) -> bnp.io.delimited_buffers.DelimitedBuffer:
+        dataclass = make_dynamic_seq_set_dataclass(type_dict)
         return bnp.io.delimited_buffers.get_bufferclass_for_datatype(dataclass, delimiter='\t', has_header=True)
-
-    @classmethod
-    def create_dynamic_dataclass(cls, type_dict: Dict[str, Any]):
-        return bnpdataclass(make_dataclass('DynamicSequenceSet', fields=type_dict.items(),
-                                           namespace={'get_single_row_value': lambda self, attr_name: get_single_row_value(self, attr_name)}))
-
-def get_single_row_value(self, attr_name: str):
-    if hasattr(self, attr_name) and getattr(self, attr_name) is not None:
-        val = getattr(self, attr_name)
-        if isinstance(val, EncodedArray):
-            return val.to_string()
-        elif isinstance(val, np.ndarray):
-            return val.item()
-    else:
-        return None

@@ -21,11 +21,11 @@ class TestSubjectRepertoireCollector(TestCase):
         path = EnvironmentSettings.root_path / "test/tmp/subject_rep_collector"
         PathBuilder.build(path)
 
-        reps = [Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1")], path=path,
+        reps = [Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", sequence_id="1")], path=path,
                                                        metadata={"subject_id": "patient1"}),
-                Repertoire.build_from_sequence_objects([ReceptorSequence("AAC", identifier="2")], path=path,
+                Repertoire.build_from_sequence_objects([ReceptorSequence("AAC", sequence_id="2")], path=path,
                                                        metadata={"subject_id": "patient1"}),
-                Repertoire.build_from_sequence_objects([ReceptorSequence("AAC", identifier="3")], path=path,
+                Repertoire.build_from_sequence_objects([ReceptorSequence("AAC", sequence_id="3")], path=path,
                                                        metadata={"subject_id": "patient3"})]
 
         dataset = RepertoireDataset(repertoires=reps)

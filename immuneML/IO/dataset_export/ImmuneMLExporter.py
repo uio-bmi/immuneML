@@ -28,22 +28,25 @@ class ImmuneMLExporter(DataExporter):
         PathBuilder.build(path)
         exported_dataset = dataset.clone(keep_identifier=True)
         dataset_name = exported_dataset.name
-        dataset_filename = f"{dataset_name}.iml_dataset"
+        dataset_filename = f"{dataset_name}.yaml"
 
         if isinstance(dataset, RepertoireDataset):
             repertoires_path = PathBuilder.build(path / "repertoires")
             exported_repertoires = ImmuneMLExporter._export_repertoires(dataset.repertoires, repertoires_path)
             exported_dataset.repertoires = exported_repertoires
             exported_dataset.metadata_file = ImmuneMLExporter._export_metadata(dataset, path, dataset_filename, repertoires_path)
+
+            file_path = path / dataset_filename
+            with file_path.open("w") as file:
+                yaml_dict = {
+                    **{key: ImmuneMLExporter._parse_val_for_export(val) for key, val in vars(exported_dataset).items()
+                       if key not in ['repertoires', 'element_generator', 'encoded_data']},
+                    **{'dataset_class': type(exported_dataset).__name__}}
+                yaml.dump(yaml_dict, file)
+
         elif isinstance(dataset, SequenceDataset) or isinstance(dataset, ReceptorDataset):
             exported_dataset.set_filenames(ImmuneMLExporter._export_receptors(exported_dataset.get_filenames(), path))
-
-        file_path = path / dataset_filename
-        with file_path.open("w") as file:
-            yaml_dict = {**{key: ImmuneMLExporter._parse_val_for_export(val) for key, val in vars(exported_dataset).items()
-                            if key not in ['repertoires', 'element_generator', 'encoded_data']},
-                         **{'dataset_class': type(exported_dataset).__name__}}
-            yaml.dump(yaml_dict, file)
+            exported_dataset.dataset_file = ImmuneMLExporter._export_element_metadata(dataset, path)
 
         version_path = path / "info.txt"
         with version_path.open("w") as file:
@@ -62,6 +65,17 @@ class ImmuneMLExporter(DataExporter):
             return {inner_key: ImmuneMLExporter._parse_val_for_export(inner_val) for inner_key, inner_val in val.items()}
         else:
             return val
+
+    @staticmethod
+    def _export_element_metadata(dataset, metadata_folder_path: Path):
+        if dataset.dataset_file is None or not dataset.dataset_file.is_file():
+            return None
+
+        dataset_file = metadata_folder_path / f"{dataset.name}.yaml"
+        if not dataset_file.is_file():
+            shutil.copyfile(dataset.dataset_file, dataset_file)
+
+        return dataset_file
 
     @staticmethod
     def _export_metadata(dataset, metadata_folder_path: Path, dataset_filename, repertoires_path):
@@ -97,7 +111,7 @@ class ImmuneMLExporter(DataExporter):
         metadata.to_csv(metadata_file, mode="a", index=False)
 
     @staticmethod
-    def _export_receptors(filenames_old: List[str], path: Path) -> List[str]:
+    def _export_receptors(filenames_old: List[Path], path: Path) -> List[Path]:
         filenames_new = []
         for filename_old in filenames_old:
             filename_new = ImmuneMLExporter._copy_if_exists(filename_old, path)

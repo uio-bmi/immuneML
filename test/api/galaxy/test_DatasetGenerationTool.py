@@ -50,7 +50,7 @@ class TestDatasetGenerationTool(TestCase):
         run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path, 'tool': "DatasetGenerationTool"}))
 
         self.assertTrue(os.path.isfile(result_path / "result/dataset_metadata.csv"))
-        self.assertTrue(os.path.isfile(result_path / "result/dataset.iml_dataset"))
+        self.assertTrue(os.path.isfile(result_path / "result/dataset.yaml"))
         self.assertEqual(200, len([name for name in os.listdir(result_path / "result/repertoires/")
                                    if os.path.isfile(os.path.join(result_path / "result/repertoires/", name))]))
 

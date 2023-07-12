@@ -56,14 +56,14 @@ rep2.tsv,2""")
                 self.assertListEqual(["GCCAGCAGTTTATCGCCGGGACTGGCCTACGAGCAGTAC",
                                       "GCCAGCAAAGTCAGAATTGCTGCAACTAATGAAAAACTGTTT",
                                       "AGTGCCGACTCCAAGAACAGAGGAGCGGGGGGGGAGGCAAGCTCCTACGAGCAGTAC"],
-                                     list(rep.get_attribute("sequence")))
+                                     rep.get_attribute("sequence").tolist())
                 self.assertListEqual(["ASSLSPGLAYEQY",
                                       "ASKVRIAATNEKLF",
-                                      "SADSKNRGAGGEASSYEQY"], list(rep.get_sequence_aas()))
-                self.assertListEqual(["TRBV27", "TRBV5-6", "TRBV20-1"], list(rep.get_v_genes()))
-                self.assertListEqual(["TRBJ2-7", "TRBJ1-4", "TRBJ2-7"], list(rep.get_j_genes()))
-                self.assertListEqual([1, 1, 1], list(rep.get_counts()))
-                self.assertListEqual([Chain.BETA, Chain.BETA, Chain.BETA], list(rep.get_chains()))
+                                      "SADSKNRGAGGEASSYEQY"], rep.get_sequence_aas().tolist())
+                self.assertListEqual(["TRBV27", "TRBV5-6", "TRBV20-1"], rep.get_v_genes().tolist())
+                self.assertListEqual(["TRBJ2-7", "TRBJ1-4", "TRBJ2-7"], rep.get_j_genes().tolist())
+                self.assertListEqual([1, 1, 1], rep.get_counts().tolist())
+                self.assertListEqual([Chain.BETA, Chain.BETA, Chain.BETA], rep.get_chains().tolist())
 
         shutil.rmtree(path)
 
@@ -82,6 +82,6 @@ rep2.tsv,2""")
 
         expected = ["ASSLSPGLAYEQY", "ASKVRIAATNEKLF", "SADSKNRGAGGEASSYEQY", "ASIGGGTSLSYNEQF", "ASICGCTSTDTQY", "ASGKNRDSSAGQETQY"]
 
-        self.assertTrue(all(seq.amino_acid_sequence in expected for seq in dataset.get_data()))
+        self.assertTrue(all(seq.sequence_aa in expected for seq in dataset.get_data()))
 
         shutil.rmtree(path)

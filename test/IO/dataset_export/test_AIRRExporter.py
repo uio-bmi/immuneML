@@ -20,9 +20,9 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TestAIRRExporter(TestCase):
     def create_dummy_repertoire(self, path):
-        sequence_objects = [ReceptorSequence(amino_acid_sequence="AAA",
-                                             nucleotide_sequence="GCTGCTGCT",
-                                             identifier="receptor_1",
+        sequence_objects = [ReceptorSequence(sequence_aa="AAA",
+                                             sequence="GCTGCTGCT",
+                                             sequence_id="receptor_1",
                                              metadata=SequenceMetadata(v_call="TRBV1",
                                                                        j_call="TRBJ1",
                                                                        chain=Chain.BETA,
@@ -32,9 +32,9 @@ class TestAIRRExporter(TestCase):
                                                                        custom_params={"d_call": "TRBD1",
                                                                                       "custom_test": "cust1",
                                                                                       'sig1': 0})),
-                            ReceptorSequence(amino_acid_sequence="GGG",
-                                             nucleotide_sequence="GGTGGTGGT",
-                                             identifier="receptor_2",
+                            ReceptorSequence(sequence_aa="GGG",
+                                             sequence="GGTGGTGGT",
+                                             sequence_id="receptor_2",
                                              metadata=SequenceMetadata(v_call="TRAV2*01",
                                                                        j_call="TRAJ2",
                                                                        chain=Chain.ALPHA,
@@ -46,7 +46,7 @@ class TestAIRRExporter(TestCase):
                                                                                       'sig1': 1}))]
 
         repertoire = Repertoire.build_from_sequence_objects(sequence_objects=sequence_objects, path=path, metadata={"subject_id": "REP1"})
-        df = pd.DataFrame({"filename": [f"{repertoire.identifier}_data.npy"], "subject_id": ["REP1"],
+        df = pd.DataFrame({"filename": [f"{repertoire.identifier}_data.tsv"], "subject_id": ["REP1"],
                            "repertoire_identifier": [repertoire.identifier]})
         df.to_csv(path / "metadata.csv", index=False)
 
@@ -80,31 +80,31 @@ class TestAIRRExporter(TestCase):
 
     def create_dummy_receptordataset(self, path):
         receptors = [TCABReceptor(identifier="1",
-                                  alpha=ReceptorSequence(amino_acid_sequence="AAATTT", identifier="1a",
+                                  alpha=ReceptorSequence(sequence_aa="AAATTT", sequence_id="1a",
                                                          metadata=SequenceMetadata(v_call="TRAV1", j_call="TRAJ1",
                                                                                    chain=Chain.ALPHA,
-                                                                                   frame_type="IN",
+                                                                                   frame_type="IN", cell_id='1',
                                                                                    region_type="IMGT_CDR3",
                                                                                    custom_params={"d_call": "TRAD1",
                                                                                                   "custom1": "cust1"})),
-                                  beta=ReceptorSequence(amino_acid_sequence="ATATAT", identifier="1b",
+                                  beta=ReceptorSequence(sequence_aa="ATATAT", sequence_id="1b",
                                                         metadata=SequenceMetadata(v_call="TRBV1", j_call="TRBJ1",
                                                                                   chain=Chain.BETA,
-                                                                                  frame_type="IN",
+                                                                                  frame_type="IN", cell_id='1',
                                                                                   region_type="IMGT_CDR3",
                                                                                   custom_params={"d_call": "TRBD1",
                                                                                                  "custom1": "cust1"}))),
                      TCABReceptor(identifier="2",
-                                  alpha=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2a",
+                                  alpha=ReceptorSequence(sequence_aa="AAAAAA", sequence_id="2a",
                                                          metadata=SequenceMetadata(v_call="TRAV1", j_call="TRAJ1",
                                                                                    chain=Chain.ALPHA,
-                                                                                   frame_type="IN",
+                                                                                   frame_type="IN", cell_id="2",
                                                                                    region_type="IMGT_CDR3",
                                                                                    custom_params={"d_call": "TRAD1",
                                                                                                   "custom2": "cust1"})),
-                                  beta=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2b",
+                                  beta=ReceptorSequence(sequence_aa="AAAAAA", sequence_id="2b",
                                                         metadata=SequenceMetadata(v_call="TRBV1", j_call="TRBJ1",
-                                                                                  chain=Chain.BETA,
+                                                                                  chain=Chain.BETA, cell_id="2",
                                                                                   frame_type="IN",
                                                                                   region_type="IMGT_CDR3",
                                                                                   custom_params={"d_call": "TRBD1",
@@ -139,17 +139,17 @@ class TestAIRRExporter(TestCase):
         shutil.rmtree(path)
 
     def create_dummy_sequencedataset(self, path):
-        sequences = [ReceptorSequence(amino_acid_sequence="AAATTT", identifier="1a",
+        sequences = [ReceptorSequence(sequence_aa="AAATTT", sequence_id="1a",
                                       metadata=SequenceMetadata(v_call="TRAV1", j_call="TRAJ1", chain=Chain.ALPHA, frame_type="IN",
                                                                 region_type="IMGT_CDR3",
                                                                 custom_params={"d_call": "TRAD1",
                                                                                "custom1": "cust1"})),
-                     ReceptorSequence(amino_acid_sequence="ATATAT", identifier="1b",
+                     ReceptorSequence(sequence_aa="ATATAT", sequence_id="1b",
                                       metadata=SequenceMetadata(v_call="TRBV1", j_call="TRBJ1", chain=Chain.BETA, frame_type="IN",
                                                                 region_type="IMGT_CDR3",
                                                                 custom_params={"d_call": "TRBD1",
                                                                                "custom2": "cust1"})),
-                     ReceptorSequence(amino_acid_sequence="ATATAT", identifier="2b",
+                     ReceptorSequence(sequence_aa="ATATAT", sequence_id="2b",
                                       metadata=SequenceMetadata(v_call="TRBV1", j_call="TRBJ1", chain=Chain.BETA, frame_type="IN",
                                                                 region_type="IMGT_CDR3",
                                                                 custom_params={"d_call": "TRBD1",

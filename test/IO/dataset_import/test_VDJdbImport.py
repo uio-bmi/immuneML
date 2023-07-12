@@ -19,7 +19,7 @@ class TestVDJdbLoader(TestCase):
 15760	TRA	CALRLNNQGGKLIF	TRAV9-2*01	TRAJ23*01	HomoSapiens	HLA-A*03:01	B2M	MHCI	KLGGALQAK	IE1	CMV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/25584", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "3", "tissue": ""}	{"cdr3": "CALRLNNQGGKLIF", "cdr3_old": "CALRLNNQGGKLIF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRAJ23*01", "jStart": 6, "vCanonical": true, "vEnd": 3, "vFixType": "NoFixNeeded", "vId": "TRAV9-2*01"}	0
 15760	TRA	CALRLNNQGGKLIF	TRAV9-2*01	TRAJ23*01	HomoSapiens	HLA-A*03:01	B2M	MHCI	KLGGALQAK	IE1	CMV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/25584", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "3", "tissue": ""}	{"cdr3": "CALRLNNQGGKLIF", "cdr3_old": "CALRLNNQGGKLIF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRAJ23*01", "jStart": 6, "vCanonical": true, "vEnd": 3, "vFixType": "NoFixNeeded", "vId": "TRAV9-2*01"}	0
 """
-        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "iovdjdb/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "iovdjdb_sequence/")
 
         with open(path / "receptors.tsv", "w") as file:
             file.writelines(file_content)
@@ -37,9 +37,9 @@ class TestVDJdbLoader(TestCase):
         self.assertEqual(5, len(dataset.get_filenames()))
 
         for sequence in dataset.get_data():
-            self.assertTrue(sequence.identifier in ["3050_TRA", "3050_TRB", "15760_TRB", "15760_TRA1", "15760_TRA2"])
+            self.assertTrue(sequence.sequence_id in ["3050_TRA", "3050_TRB", "15760_TRB", "15760_TRA1", "15760_TRA2"])
             self.assertTrue(
-                sequence.amino_acid_sequence in ["ASSPPRVYSNGAGLAGVGWRNEQF", "ASSWTWDAATLWGQGALGGANVLT", "AAIYESRGSTLGRLY", "ALRLNNQGGKLI"])
+                sequence.sequence_aa in ["ASSPPRVYSNGAGLAGVGWRNEQF", "ASSWTWDAATLWGQGALGGANVLT", "AAIYESRGSTLGRLY", "ALRLNNQGGKLI"])
             self.assertTrue(sequence.metadata.custom_params["epitope_species"] in ["EBV", "CMV"])
             self.assertTrue(sequence.metadata.custom_params["epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
             self.assertTrue(sequence.metadata.custom_params["epitope_gene"] in ["EBNA4", "IE1"])
@@ -58,7 +58,7 @@ class TestVDJdbLoader(TestCase):
 0	TRA	CALRLNNQGGKLIF	TRAV9-2*01	TRAJ23*01	HomoSapiens	HLA-A*03:01	B2M	MHCI	KLGGALQAK	IE1	CMV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/25584", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "3", "tissue": ""}	{"cdr3": "CALRLNNQGGKLIF", "cdr3_old": "CALRLNNQGGKLIF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRAJ23*01", "jStart": 6, "vCanonical": true, "vEnd": 3, "vFixType": "NoFixNeeded", "vId": "TRAV9-2*01"}	0
 0	TRA	CALRLNNQGGKLIF	TRAV9-2*01	TRAJ23*01	HomoSapiens	HLA-A*03:01	B2M	MHCI	KLGGALQAK	IE1	CMV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/25584", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "3", "tissue": ""}	{"cdr3": "CALRLNNQGGKLIF", "cdr3_old": "CALRLNNQGGKLIF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRAJ23*01", "jStart": 6, "vCanonical": true, "vEnd": 3, "vFixType": "NoFixNeeded", "vId": "TRAV9-2*01"}	0
 """
-        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "iovdjdb/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "iovdjdb_receptor/")
 
         with open(path / "receptors.tsv", "w") as file:
             file.writelines(file_content)
@@ -76,7 +76,7 @@ class TestVDJdbLoader(TestCase):
         self.assertEqual(2, len(dataset.get_filenames()))
 
         for receptor in dataset.get_data(2):
-            self.assertTrue(receptor.alpha.amino_acid_sequence in ["AAIYESRGSTLGRLY", "ALRLNNQGGKLI"])
+            self.assertTrue(receptor.alpha.sequence_aa in ["AAIYESRGSTLGRLY", "ALRLNNQGGKLI"])
             self.assertTrue(receptor.metadata["epitope_species"] in ["EBV", "CMV"])
             self.assertTrue(receptor.metadata["epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
             self.assertTrue(receptor.metadata["epitope_gene"] in ["EBNA4", "IE1"])
@@ -90,8 +90,7 @@ class TestVDJdbLoader(TestCase):
 3050	TRA	CAAIYESRGSTLGRLYF	TRAV13-1*01	TRAJ18*01	HomoSapiens	HLA-A*11:01	B2M	MHCI	AVFDRKSDAK	EBNA4	EBV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/11684", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "1", "tissue": ""}	{"cdr3": "CAAIYESRGSTLGRLYF", "cdr3_old": "CAAIYESRGSTLGRLYF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRAJ18*01", "jStart": 7, "oldVEnd": -1, "oldVFixType": "FailedBadSegment", "oldVId": null, "vCanonical": true, "vEnd": 3, "vFixType": "ChangeSegment", "vId": "TRAV13-1*01"}	0
 15760	TRA	CALRLNNQGGKLIF	TRAV9-2*01	TRAJ23*01	HomoSapiens	HLA-A*03:01	B2M	MHCI	KLGGALQAK	IE1	CMV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/25584", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "3", "tissue": ""}	{"cdr3": "CALRLNNQGGKLIF", "cdr3_old": "CALRLNNQGGKLIF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRAJ23*01", "jStart": 6, "vCanonical": true, "vEnd": 3, "vFixType": "NoFixNeeded", "vId": "TRAV9-2*01"}	0
 """
-        path = EnvironmentSettings.tmp_test_path / "iovdjdb2/"
-        PathBuilder.remove_old_and_build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "iovdjdb2/")
 
         number_of_repertoires = 5
 
@@ -156,10 +155,10 @@ class TestVDJdbLoader(TestCase):
         self.assertEqual(2, len(dataset.get_filenames()))
 
         for receptor in dataset.get_data(2):
-            self.assertTrue(receptor.alpha.amino_acid_sequence in ["AAIYESRGSTLGRLY", "ALRLNNQGGKLI"])
-            self.assertTrue(receptor.alpha.get_attribute("v_call") in ["TRAV13-1*01", None])
-            self.assertTrue(receptor.alpha.get_attribute("j_call") in [None])
-            self.assertTrue(receptor.beta.get_attribute("v_call") in ["TRBV5-4*01", None])
+            self.assertTrue(receptor.alpha.sequence_aa in ["AAIYESRGSTLGRLY", "ALRLNNQGGKLI"])
+            self.assertTrue(receptor.alpha.get_attribute("v_call") in ["TRAV13-1*01", ''])
+            self.assertTrue(receptor.alpha.get_attribute("j_call") in [''])
+            self.assertTrue(receptor.beta.get_attribute("v_call") in ["TRBV5-4*01", ''])
             self.assertTrue(receptor.beta.get_attribute("j_call") in ["TRBJ2-1*01", "TRBJ2-6*01"])
             self.assertTrue(receptor.metadata["epitope_species"] in ["EBV", "CMV"])
             self.assertTrue(receptor.metadata["epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])

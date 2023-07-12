@@ -58,7 +58,7 @@ class AdaptiveImportHelper:
                         dataframe.loc[:, f"{gene}_{part}"] = dataframe[f"{gene}_{part}"].replace(germline_value_replacement, regex=True)
 
             if f"{gene}_call" in dataframe.columns and f"{gene}_allele" in dataframe.columns:
-                rows_to_add_allele = ~dataframe[f'{gene}_call'].str.contains("\*") & dataframe[f"{gene}_allele"].str.contains("[0-9]{2}")
+                rows_to_add_allele = ~dataframe[f'{gene}_call'].str.contains("\*") & dataframe[f"{gene}_allele"].astype(str).str.contains("[0-9]{2}")
                 dataframe.loc[rows_to_add_allele, f"{gene}_call"] = \
                     dataframe.loc[rows_to_add_allele, lambda df: [f"{gene}_call", f"{gene}_allele"]].agg('*'.join, axis=1)
 

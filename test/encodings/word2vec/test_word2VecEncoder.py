@@ -25,8 +25,8 @@ class TestWord2VecEncoder(TestCase):
 
         test_path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "w2v_repertoire/")
 
-        sequence1 = ReceptorSequence("CASSVFA", identifier="1")
-        sequence2 = ReceptorSequence("CASSCCC", identifier="2")
+        sequence1 = ReceptorSequence("CASSVFA", sequence_id="1")
+        sequence2 = ReceptorSequence("CASSCCC", sequence_id="2")
 
         metadata1 = {"T1D": "T1D", "subject_id": "1"}
         rep1 = Repertoire.build_from_sequence_objects([sequence1, sequence2], test_path, metadata1)

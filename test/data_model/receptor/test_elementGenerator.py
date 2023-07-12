@@ -1,29 +1,30 @@
-import math
 import shutil
 from unittest import TestCase
 
-import numpy as np
-
+from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.BCReceptor import BCReceptor
 from immuneML.data_model.receptor.ElementGenerator import ElementGenerator
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestElementGenerator(TestCase):
     def test_build_batch_generator(self):
-        path = EnvironmentSettings.tmp_test_path / "element_batch_generator/"
-        PathBuilder.build(path)
-        receptors = [BCReceptor(identifier=str(i), heavy=ReceptorSequence('A'), light=ReceptorSequence('C')) for i in range(307)]
-        file_list = [path / f"batch{i}.npy" for i in range(4)]
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "element_batch_generator/")
 
-        for i in range(4):
-            matrix = np.core.records.fromrecords([r.get_record() for r in receptors[i * 100: (i+1) * 100]], names=BCReceptor.get_record_names())
-            np.save(str(file_list[i]), matrix, allow_pickle=False)
+        receptors = [BCReceptor(identifier=str(i),
+                                heavy=ReceptorSequence('A', metadata=SequenceMetadata(chain='HEAVY', cell_id=str(i))),
+                                light=ReceptorSequence('C', metadata=SequenceMetadata(chain='LIGHT', cell_id=str(i))))
+                     for i in range(307)]
+        file_list = [path / f"batch{i+1}.tsv" for i in range(4)]
 
-        receptor_generator = ElementGenerator(file_list, element_class_name=BCReceptor.__name__)
+        dataset = ReceptorDataset.build_from_objects(receptors, 100, path)
+
+        receptor_generator = ElementGenerator(file_list, element_class_name=BCReceptor.__name__,
+                                              buffer_type=dataset.element_generator.buffer_type)
         generator = receptor_generator.build_batch_generator()
 
         counter = 0
@@ -50,19 +51,12 @@ class TestElementGenerator(TestCase):
 
         shutil.rmtree(path)
 
-    def make_seq_dataset(self, path, seq_count: int = 100, file_size: int = 10):
+    def make_seq_dataset(self, path, seq_count: int = 100, file_size: int = 10) -> SequenceDataset:
         sequences = []
         for i in range(seq_count):
-            sequences.append(ReceptorSequence(amino_acid_sequence="AAA", identifier=str(i)))
+            sequences.append(ReceptorSequence(sequence_aa="AAA", sequence_id=str(i)))
 
-        for i in range(math.ceil(seq_count / file_size)):
-            filepath = path / f"batch{i}.npy"
-            sequences_to_pickle = sequences[i * file_size:(i + 1) * file_size]
-            sequence_matrix = np.core.records.fromrecords([seq.get_record() for seq in sequences_to_pickle],
-                                                          names=ReceptorSequence.get_record_names())
-            np.save(str(filepath), sequence_matrix, allow_pickle=False)
-
-        return SequenceDataset(filenames=[path / f"batch{i}.npy" for i in range(math.ceil(seq_count / file_size))], file_size=file_size)
+        return SequenceDataset.build_from_objects(sequences, file_size, path, 'dataset_name1')
 
     def test_make_subset(self):
 
@@ -75,7 +69,7 @@ class TestElementGenerator(TestCase):
 
         for batch in d2.get_batch(1000):
             for sequence in batch:
-                self.assertTrue(int(sequence.identifier) in indices)
+                self.assertTrue(int(sequence.sequence_id) in indices)
 
         self.assertEqual(15, d2.get_example_count())
 
@@ -86,7 +80,7 @@ class TestElementGenerator(TestCase):
 
         dataset = self.make_seq_dataset(path, 18, 5)
         seqs = dataset.get_data_from_index_range(7, 13)
-        print([seq.identifier for seq in seqs])
+        print([seq.sequence_id for seq in seqs])
         assert len(seqs) == 7
 
         shutil.rmtree(path)

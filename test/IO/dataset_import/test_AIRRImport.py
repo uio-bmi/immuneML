@@ -90,7 +90,7 @@ rep2.tsv,2""")
         self.assertEqual(5, len(dataset.get_filenames()))
 
         for idx, sequence in enumerate(dataset.get_data()):
-            self.assertEqual(sequence.amino_acid_sequence, "ASGVAGTFDY")
+            self.assertEqual(sequence.sequence_aa, "ASGVAGTFDY")
 
         v_genes = sorted(["IGHV4-31*03", "IGHV4-31*03", "IGHV4-31*03", "IGHV4-34*09", "IGHV4-59*06"])
         self.assertListEqual(sorted([sequence.metadata.v_call for sequence in dataset.get_data()]), v_genes)
@@ -98,8 +98,8 @@ rep2.tsv,2""")
         shutil.rmtree(path)
 
     def test_receptor_dataset(self):
-        path = EnvironmentSettings.tmp_test_path / "ioairr/"
-        PathBuilder.remove_old_and_build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "io_airr_receptor/")
+
         file_content = """rearrangement_id	rearrangement_set_id	sequence_id	sequence	rev_comp	productive	sequence_alignment	germline_alignment	v_call	d_call	j_call	c_call	junction	junction_length	junction_aa	v_score	d_score	j_score	c_score	v_cigar	d_cigar	j_cigar	c_cigar	v_identity	v_evalue	d_identity	d_evalue	j_identity	j_evalue	v_sequence_start	v_sequence_end	v_germline_start	v_germline_end	d_sequence_start	d_sequence_end	d_germline_start	d_germline_end	j_sequence_start	j_sequence_end	j_germline_start	j_germline_end	np1_length	np2_length	duplicate_count	cell_id
 IVKNQEJ01DGRRI	1	IVKNQEJ01DGRRI	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCTGTCTATGGTGGGTCCTTCAGTGGTTACTACTGGAGCTGGATCCGCCAGCCCCCAGGGAAGGGTCTGGAGTGGATTGGGTACATCTATTACAGTGGGAGCACCTACTACAACCCGTCCCTCAAGAGTCGAGTTACCATATCAGTAGACACGTCTAAGAACCAGTTCTCCCTGAAGCTGAGCTCTGTGACTGCCGCGGACACGGCCGTGTATTACTGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTGGGGCCAGGGAACCCTGGTCACCGTCTCCTCA	T	T			IGHV4-34*09	IGHD1-7*01,IGHD6-19*01	IGHJ4*02		TGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTGG	36	CASGVAGTFDYW	389	16.4	83.8		22N1S23=2X85=1X15=1X1=1X3=1X2=1X1=1X5=1X6=1X118=	11N274S8=	6N286S42=		0.9628	2E-110	1	2.6	1	2E-20	0	269	0	317	273	281	10	18	285	327	5	47	4	4	1	1
 IVKNQEJ01APN5N	1	IVKNQEJ01APN5N	GGCCCAGGACTGGTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACTGTCTCTGGTGGCTCCATCAGCAGTGGTGGTTACTACTGGAGCTGGATCCGCCAGCACCCAGGGAAGGGCCTGGAGTGGATTGGGTACATCTATTACAGTGGGAGCACCTACTACAACCCGTCCCTCAAGAGTCGAGTTACCATATCAGTAGACACGTCTAAGAACCAGTTCTCCCTGAAGCTGAGCTCTGTGACTGCCGCGGACACGGCCGTGTATTACTGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTAGGGCCAGGGAACCCTGGTCACTGTCTCCTCA	T	T			IGLV4-31*03	IGLD1-7*01,IGLD6-19*01	IGLJ4*02		TGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTAG	36	CASGVAGTFDY	430	16.4	67.9		22N1S275=	11N280S8=	6N292S10=1X21=1X9=		1	1E-122	1	2.7	0.9524	1E-15	0	275	0	317	279	287	10	18	291	333	5	47	4	4	1	1
@@ -122,13 +122,13 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         self.assertEqual(2, dataset.get_example_count())
         self.assertEqual(2, len(dataset.get_filenames()))
 
-        for idx, sequence in enumerate(dataset.get_data()):
-            self.assertTrue(sequence.heavy.amino_acid_sequence in ['ASGVAGTFDY', 'ASGVAGNFLL'])
+        for idx, receptor in enumerate(dataset.get_data()):
+            self.assertTrue(receptor.heavy.sequence_aa in ['ASGVAGTFDY', 'ASGVAGNFLL'])
 
         shutil.rmtree(path)
 
     def test_import_exported_dataset(self):
-        path = EnvironmentSettings.tmp_test_path / "ioairr/"
+        path = EnvironmentSettings.tmp_test_path / "io_airr/"
         PathBuilder.remove_old_and_build(path / 'initial')
         self.create_dummy_dataset(path / 'initial', True)
 

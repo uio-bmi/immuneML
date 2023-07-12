@@ -1,40 +1,42 @@
 import math
 from pathlib import Path
 
-import numpy as np
-
+from immuneML.data_model.bnp_util import bnp_read_from_file, bnp_write_to_file, make_element_dataset_objects, \
+    merge_dataclass_objects
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
 class ElementGenerator:
 
-    def __init__(self, file_list: list, file_size: int = 1000, element_class_name: str = ""):
+    def __init__(self, file_list: list, file_size: int = 10000, element_class_name: str = "", buffer_type=None):
         self.file_list = file_list
         self.file_lengths = [-1 for _ in range(len(file_list))]
         self.file_size = file_size
         self.element_class_name = element_class_name
+        self.buffer_type = buffer_type
 
-    def _load_batch(self, current_file: int):
+    def _load_batch(self, current_file: int, return_objects: bool = True):
 
         element_class = ReflectionHandler.get_class_by_name(self.element_class_name, "data_model")
         assert hasattr(element_class, 'create_from_record'), \
             f"{ElementGenerator.__name__}: cannot load the binary file, the class {element_class.__name__} has no 'create_from_record' method."
 
         try:
-            elements = [element_class.create_from_record(el) for el in np.load(self.file_list[current_file], allow_pickle=False)]
+            bnp_data = bnp_read_from_file(self.file_list[current_file], self.buffer_type)
+            if return_objects:
+                elements = make_element_dataset_objects(bnp_data, self.element_class_name)
+            else:
+                elements = bnp_data
         except ValueError as error:
-            raise ValueError(f'{ElementGenerator.__name__}: an error occurred while creating an object from binary file. Details: {error}')
+            raise ValueError(f'{ElementGenerator.__name__}: an error occurred while creating an object from tsv file. '
+                             f'Details: {error}')
 
         return elements
 
     def _get_element_count(self, file_index: int):
 
-        # TODO: make this abstract and move implementation to specific generator: count elements in file for new format
-
         if self.file_lengths[file_index] == -1:
-            with self.file_list[file_index].open("rb") as file:
-                count = len(np.load(file))
-            self.file_lengths[file_index] = count
+            self.file_lengths[file_index] = len(bnp_read_from_file(self.file_list[file_index], self.buffer_type))
 
         return self.file_lengths[file_index]
 
@@ -44,7 +46,7 @@ class ElementGenerator:
                 self._get_element_count(index)
         return sum(self.file_lengths)
 
-    def build_batch_generator(self):
+    def build_batch_generator(self, return_objects: bool = True):
         """
         creates a generator which will return one batch of elements at the time
 
@@ -53,56 +55,55 @@ class ElementGenerator:
         """
 
         for current_file_index in range(len(self.file_list)):
-            batch = self._load_batch(current_file_index)
+            batch = self._load_batch(current_file_index, return_objects)
             yield batch
 
-    def build_element_generator(self):
+    def build_element_generator(self, return_objects: bool = True):
         """
         creates a generator which will return one element at the time
         :return: element generator
         """
         for current_file_index in range(len(self.file_list)):
-            batch = self._load_batch(current_file_index)
-            for element in batch:
-                yield element
+            batch = self._load_batch(current_file_index, return_objects)
+            if return_objects:
+                for element in batch:
+                    yield element
+            else:
+                yield batch
 
     def make_subset(self, example_indices: list, path: Path, dataset_type: str, dataset_identifier: str):
         if example_indices is None or len(example_indices) == 0:
             raise RuntimeError(f"{ElementGenerator.__name__}: no examples were specified to create the dataset subset. "
                                f"Dataset type was {dataset_type}, dataset identifier: {dataset_identifier}.")
         batch_size = self.file_size
-        elements = []
+        elements = None
         file_count = 1
 
         example_indices.sort()
 
         batch_filenames = self._prepare_batch_filenames(len(example_indices), path, dataset_type, dataset_identifier)
 
-        for index, batch in enumerate(self.build_batch_generator()):
+        for index, batch in enumerate(self.build_batch_generator(return_objects=False)):
             extracted_elements = self._extract_elements_from_batch(index, batch_size, batch, example_indices)
-            elements.extend(extracted_elements)
+            elements = merge_dataclass_objects([elements, extracted_elements]) if elements else extracted_elements
 
             if len(elements) >= self.file_size or len(elements) == len(example_indices):
-                self._store_elements_to_file(batch_filenames[file_count - 1], elements[:self.file_size])
+                bnp_write_to_file(batch_filenames[file_count - 1], elements[:self.file_size])
                 file_count += 1
                 elements = elements[self.file_size:]
 
         if len(elements) > 0:
-            self._store_elements_to_file(batch_filenames[file_count - 1], elements)
+            bnp_write_to_file(batch_filenames[file_count - 1], elements)
 
         return batch_filenames
 
     def _prepare_batch_filenames(self, example_count: int, path: Path, dataset_type: str, dataset_identifier: str):
         batch_count = math.ceil(example_count / self.file_size)
         digits_count = len(str(batch_count)) + 1
-        filenames = [path / f"{dataset_identifier}_{dataset_type}_batch{''.join(['0' for i in range(digits_count - len(str(index)))])}{index}.npy"
-                     for index in range(batch_count)]
+        filenames = [
+            path / f"{dataset_identifier}_{dataset_type}_batch{''.join(['0' for _ in range(digits_count - len(str(index)))])}{index}.tsv"
+            for index in range(batch_count)]
         return filenames
-
-    def _store_elements_to_file(self, path, elements):
-        if isinstance(elements, list) and len(elements) > 0:
-            element_matrix = np.core.records.fromrecords([el.get_record() for el in elements], names=type(elements[0]).get_record_names())
-            np.save(str(path), element_matrix, allow_pickle=False)
 
     def _extract_elements_from_batch(self, index, batch_size, batch, example_indices):
         upper_limit, lower_limit = (index + 1) * batch_size, index * batch_size
@@ -112,10 +113,10 @@ class ElementGenerator:
             batch), f"ElementGenerator: Found batch of size {len(batch)}, but expected {batch_size}. " \
                     f"Are the batch files sorted correctly? All files except the last file must have batch size {batch_size}."
 
-        elements = [batch[i - lower_limit] for i in batch_indices]
+        elements = batch[[i - lower_limit for i in batch_indices]]
         return elements
 
-    def get_data_from_index_range(self, start_index: int, end_index: int):
+    def get_single_objs_from_index_range(self, start_index: int, end_index: int):
         elements = []
         start_file_index = start_index // self.file_size
         end_file_index = min(len(self.file_list) - 1, end_index // self.file_size)
@@ -126,3 +127,8 @@ class ElementGenerator:
                 elements.append(batch[i])
                 i += 1
         return elements
+
+    def get_objs_from_index_range(self, start_index: int, end_index: int):
+        elements = []
+        start_file_index = start_index // self.file_size
+

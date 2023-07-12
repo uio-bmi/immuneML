@@ -53,7 +53,7 @@ rep2.tsv,2""")
         self.assertEqual(len(dataset.repertoires[0].sequences), 2)
         self.assertEqual(len(dataset.repertoires[1].sequences), 4)
 
-        self.assertEqual(dataset.repertoires[0].sequences[0].amino_acid_sequence, "ALSGTGGYKVV")
+        self.assertEqual(dataset.repertoires[0].sequences[0].sequence_aa, "ALSGTGGYKVV")
         self.assertListEqual([Chain.ALPHA, Chain.BETA], list(dataset.repertoires[0].get_chains()))
         self.assertListEqual([2, 4], list(dataset.repertoires[0].get_counts()))
 
@@ -79,7 +79,7 @@ rep2.tsv,2""")
         data = dataset.get_data(1)
         for receptorseq in data:
             self.assertTrue(
-                receptorseq.amino_acid_sequence in ["ALSGTGGYKVV", "ASSLYGGPEVF", "AAKGTQVVGQLT", "AIVGNTGKLI", "ASSFATNSDYT", "AVSANSNNRIF"])
+                receptorseq.sequence_aa in ["ALSGTGGYKVV", "ASSLYGGPEVF", "AAKGTQVVGQLT", "AIVGNTGKLI", "ASSFATNSDYT", "AVSANSNNRIF"])
 
         shutil.rmtree(path)
 
@@ -103,7 +103,7 @@ rep2.tsv,2""")
 
         data = dataset.get_data(1)
         for receptor in data:
-            self.assertTrue(receptor.alpha.amino_acid_sequence in ["ALSGTGGYKVV", "AIVGNTGKLI"])
-            self.assertTrue(receptor.beta.amino_acid_sequence in ["ASSLYGGPEVF", "ASSFATNSDYT"])
+            self.assertTrue(receptor.alpha.sequence_aa in ["ALSGTGGYKVV", "AIVGNTGKLI"])
+            self.assertTrue(receptor.beta.sequence_aa in ["ASSLYGGPEVF", "ASSFATNSDYT"])
 
         shutil.rmtree(path)

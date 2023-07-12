@@ -22,8 +22,8 @@ class TestFullSequenceImplanting(TestCase):
         new_repertoire = signal.implant_to_repertoire(repertoire, 0.33, path)
 
         self.assertEqual(len(repertoire.sequences), len(new_repertoire.sequences))
-        self.assertEqual(1, len([seq for seq in new_repertoire.sequences if seq.amino_acid_sequence == "AAAA" and seq.metadata.v_call == "v1"]))
-        self.assertEqual(2, len([seq for seq in new_repertoire.sequences if seq.amino_acid_sequence == "CCCC" and seq.metadata.v_call != "v1"]))
+        self.assertEqual(1, len([seq for seq in new_repertoire.sequences if seq.sequence_aa == "AAAA" and seq.metadata.v_call == "v1"]))
+        self.assertEqual(2, len([seq for seq in new_repertoire.sequences if seq.sequence_aa == "CCCC" and seq.metadata.v_call != "v1"]))
         self.assertEqual(new_repertoire.get_region_type(), RegionType.IMGT_JUNCTION)
 
         shutil.rmtree(path)

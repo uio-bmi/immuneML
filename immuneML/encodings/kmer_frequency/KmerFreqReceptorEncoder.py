@@ -29,7 +29,7 @@ class KmerFreqReceptorEncoder(KmerFrequencyEncoder):
             for chain in receptor.get_chains():
                 counts[chain] = self._encode_sequence(receptor.get_chain(chain), params, sequence_encoder, counts[chain])
             encoded_receptors_counts.append(counts)
-            receptor_ids.append(receptor.identifier)
+            receptor_ids.append(receptor.sequence_id)
 
             if params.encode_labels:
                 for label_name in label_config.get_labels_by_name():

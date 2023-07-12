@@ -170,7 +170,7 @@ class TCRdistMotifDiscovery(MLReport):
         if self.use_reference_sequences:
             for index, receptor in enumerate(self.train_dataset.get_data()):
                 if str(receptor.metadata[self.label.name]) != str(self.positive_class_name):
-                    reference_sequences['a'].append(receptor.alpha.amino_acid_sequence)
-                    reference_sequences['b'].append(receptor.beta.amino_acid_sequence)
+                    reference_sequences['a'].append(receptor.alpha.sequence_aa)
+                    reference_sequences['b'].append(receptor.beta.sequence_aa)
 
         return reference_sequences

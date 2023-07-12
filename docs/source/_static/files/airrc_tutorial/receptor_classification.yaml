@@ -3,7 +3,7 @@ definitions:
     dataset:
       format: ImmuneML
       params:
-        path: dataset.iml_dataset
+        path: dataset.yaml
   encodings:
     encoding_1:
       KmerFrequency:

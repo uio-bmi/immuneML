@@ -33,3 +33,6 @@ class Chain(Enum):
 
     def __str__(self):
         return self.name
+
+    def to_string(self):
+        return self.value

@@ -23,7 +23,7 @@ class TestGappedKmerSequenceEncoder(TestCase):
                                                                                            result_path="")),
                          None)
 
-        sequence.amino_acid_sequence = "ABCDEFG"
+        sequence.sequence_aa = "ABCDEFG"
         result = GappedKmerSequenceEncoder.encode_sequence(sequence, EncoderParams(model={"k_left": 3, "max_gap": 1},
                                                                                    label_config=LabelConfiguration(),
                                                                                    result_path=""))
@@ -38,7 +38,7 @@ class TestGappedKmerSequenceEncoder(TestCase):
                                                                                            result_path="")),
                          None)
 
-        sequence.amino_acid_sequence = "ABCDEFG"
+        sequence.sequence_aa = "ABCDEFG"
         result = GappedKmerSequenceEncoder.encode_sequence(sequence,
                                                            EncoderParams(model={"k_left": 2,
                                                                                 "max_gap": 1,

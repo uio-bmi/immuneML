@@ -129,6 +129,7 @@ class AIRRImport(DataImport):
                 df.drop(['sequence'], axis=1, inplace=True)
             if "cdr3" in df.columns or "cdr3_aa" in df.columns:
                 df.rename(columns={"cdr3": "sequence", "cdr3_aa": "sequence_aa"}, inplace=True)
+                df.loc[:, 'region_type'] = params.region_type.name
             elif "junction" in df.columns or "junction_aa" in df.columns:
                 df.rename(columns={'junction': 'sequence', 'junction_aa': 'sequence_aa'}, inplace=True)
                 ImportHelper.junction_to_cdr3(df, params.region_type)

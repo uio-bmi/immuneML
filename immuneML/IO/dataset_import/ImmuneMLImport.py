@@ -38,7 +38,7 @@ class ImmuneMLImport(DataImport):
 
     Arguments:
 
-        path (str): The path to the previously created dataset file. This file should have an '.iml_dataset' extension. If the path has not been specified, immuneML attempts to load the dataset from a specified metadata file (only for RepertoireDatasets).
+        path (str): The path to the previously created dataset file. This file should have an '.yaml' extension. If the path has not been specified, immuneML attempts to load the dataset from a specified metadata file (only for RepertoireDatasets).
 
         metadata_file (str): An optional metadata file for a RepertoireDataset. If specified, the RepertoireDataset metadata will be updated to the newly specified metadata without otherwise changing the Repertoire objects
 
@@ -51,7 +51,7 @@ class ImmuneMLImport(DataImport):
         my_dataset:
             format: ImmuneML
             params:
-                path: path/to/dataset.iml_dataset
+                path: path/to/dataset.yaml
                 metadata_file: path/to/metadata.csv
 
     """
@@ -91,7 +91,14 @@ class ImmuneMLImport(DataImport):
         if 'metadata_file' in dataset_dict and Path(dataset_dict['metadata_file']).parent.samefile(cwd) and not iml_params.path.samefile(cwd):
             dataset_dict['metadata_file'] = iml_params.path.parent / Path(dataset_dict['metadata_file']).name
 
-        dataset = dataset_class.build(**dataset_dict)
+        if dataset_class.__name__ in ['ReceptorDataset', 'SequenceDataset']:
+            dataset_dict['filenames'] = [iml_params.path.parent / filename for filename in dataset_dict['filenames']]
+            del dataset_dict['type_dict']
+
+            dataset = dataset_class.build(**{**dataset_dict, 'dataset_file': iml_params.path})
+
+        else:
+            dataset = dataset_class.build(**dataset_dict)
 
         return dataset
 
@@ -113,7 +120,7 @@ class ImmuneMLImport(DataImport):
         if path is not None:
             for repertoire in dataset.repertoires:
                 repertoire.data_filename = path / repertoire.data_filename.name
-                repertoire.metadata_filename = path / repertoire.metadata_filename.name
+                repertoire.metadata_file = path / repertoire.metadata_file.name
         return dataset
 
     @staticmethod

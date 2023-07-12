@@ -42,7 +42,7 @@ class RepertoireDataset(Dataset):
                 filename = filename.parent.parent / Path(row['filename']).name
             repertoire = Repertoire(data_filename=filename,
                                     metadata_filename=filename.parent / f'{filename.stem}_metadata.yaml',
-                                    identifier=row['identifier'])
+                                    identifier=row['identifier'] if 'identifier' in row else uuid.uuid4().hex)
             repertoires.append(repertoire)
 
         if "repertoire_id" in kwargs.keys() and "repertoires" not in kwargs.keys() and kwargs['repertoire_id'] is not None:

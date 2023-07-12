@@ -1,19 +1,16 @@
 # quality: gold
-import json
+from typing import List
 from uuid import uuid4
-
-import numpy as np
 
 from immuneML.data_model.DatasetItem import DatasetItem
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
-from immuneML.util.NumpyHelper import NumpyHelper
 
 
 class ReceptorSequence(DatasetItem):
-    FIELDS = {'amino_acid_sequence': str, 'nucleotide_sequence': str, 'identifier': str, 'metadata': dict, 'version': str}
-    version = "1"
+    FIELDS = {'sequence_aa': str, 'sequence': str, 'sequence_id': str, 'metadata': dict, 'version': str}
+    version = "2"
 
     nt_to_aa_map = {
         "AAA": "K", "AAC": "N", "AAG": "K", "AAT": "N", "ACA": "T", "ACC": "T", "ACG": "T", 'ACT': 'T',
@@ -27,31 +24,31 @@ class ReceptorSequence(DatasetItem):
     }
 
     @classmethod
-    def create_from_record(cls, record: np.void):
-        if 'version' in record.dtype.names and record['version'] == cls.version:
-            return ReceptorSequence(**{**{key: record[key] for key, val_type in ReceptorSequence.FIELDS.items()
-                                          if val_type == str and key != 'version'},
-                                       **{'metadata': SequenceMetadata(**json.loads(record['metadata'])) if record['metadata'] != '' else None,
-                                          }})
-        else:
-            raise NotImplementedError
+    def create_from_record(cls, **kwargs):
+        metadata_keys = vars(SequenceMetadata())
+        metadata_obj = SequenceMetadata(**{**{key: val for key, val in kwargs.items() if key in metadata_keys},
+                                           **{'custom_params': {key: value for key, value in kwargs.items()
+                                                                if key not in metadata_keys and key not in ReceptorSequence.FIELDS}}})
+        return ReceptorSequence(**{**{key: kwargs[key] for key, val_type in ReceptorSequence.FIELDS.items()
+                                      if val_type == str and key != 'version'},
+                                   **{'metadata': metadata_obj}})
 
     @classmethod
     def get_record_names(cls):
         return [key for key in cls.FIELDS]
 
     def __init__(self,
-                 amino_acid_sequence: str = None,
-                 nucleotide_sequence: str = None,
-                 identifier: str = None,
-                 metadata: SequenceMetadata = SequenceMetadata()):
-        self.identifier = identifier if identifier is not None and identifier != "" else uuid4().hex
-        self.amino_acid_sequence = amino_acid_sequence
-        self.nucleotide_sequence = nucleotide_sequence
+                 sequence_aa: str = None,
+                 sequence: str = None,
+                 sequence_id: str = None,
+                 metadata: SequenceMetadata = None):
+        self.sequence_id = sequence_id if sequence_id is not None and sequence_id != "" else uuid4().hex
+        self.sequence_aa = sequence_aa
+        self.sequence = sequence
         self.metadata = metadata if metadata is not None else SequenceMetadata()
 
     def __repr__(self):
-        return f"ReceptorSequence(sequence_aa={self.amino_acid_sequence}, sequence={self.nucleotide_sequence}, " \
+        return f"ReceptorSequence(sequence_aa={self.sequence_aa}, sequence={self.sequence}, " \
                f"metadata={vars(self.metadata) if self.metadata is not None else '{}'})"
 
     def set_metadata(self, metadata: SequenceMetadata):
@@ -63,16 +60,19 @@ class ReceptorSequence(DatasetItem):
 
         sequence_type_ = EnvironmentSettings.get_sequence_type() if sequence_type is None else sequence_type
         if sequence_type_ == SequenceType.AMINO_ACID:
-            return self.amino_acid_sequence
+            return self.sequence_aa
         else:
-            return self.nucleotide_sequence
+            return self.sequence
 
     def set_sequence(self, sequence: str, sequence_type: SequenceType):
         if sequence_type == SequenceType.AMINO_ACID:
-            self.amino_acid_sequence = sequence
+            self.sequence_aa = sequence
         else:
-            self.nucleotide_sequence = sequence
-            self.amino_acid_sequence = self._convert_to_aa(sequence)
+            self.sequence = sequence
+            self.sequence_aa = self._convert_to_aa(sequence)
+
+    def get_id(self):
+        return self.sequence_id
 
     def _convert_to_aa(self, nt_sequence: str) -> str:
         return ReceptorSequence.nt_to_aa(nt_sequence)
@@ -83,17 +83,16 @@ class ReceptorSequence(DatasetItem):
         kmers = [nt_sequence[i:i + kmer_length] for i in range(0, len(nt_sequence), kmer_length)]
         return "".join([ReceptorSequence.nt_to_aa_map[kmer] for kmer in kmers])
 
-    def get_record(self):
-        """exports the sequence object as a numpy record"""
-        return [NumpyHelper.get_numpy_representation(getattr(self, name)) if hasattr(self, name) else getattr(ReceptorSequence, name)
-                for name in ReceptorSequence.FIELDS.keys()]
+    def get_all_attribute_names(self) -> List[str]:
+        return [el for el in vars(self) if el not in ['metadata']] + self.metadata.get_all_attribute_names() \
+            if self.metadata is not None else []
 
     def get_attribute(self, name: str):
         if hasattr(self, name):
             return getattr(self, name)
         elif hasattr(self.metadata, name):
-            return getattr(self.metadata, name)
+            return self.metadata.get_attribute(name)
         elif name in self.metadata.custom_params:
             return self.metadata.custom_params[name]
         else:
-            raise KeyError(f"ReceptorSequence {self.identifier} does not have attribute {name}.")
+            return ''

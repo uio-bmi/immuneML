@@ -96,7 +96,7 @@ class AIRRExporter(DataExporter):
 
     @staticmethod
     def _repertoire_to_dataframe(repertoire: Repertoire):
-        df = pd.DataFrame(repertoire.load_data())
+        df = pd.DataFrame(repertoire.load_bnp_data().to_dict())
 
         region_type = repertoire.get_region_type()
 
@@ -138,9 +138,9 @@ class AIRRExporter(DataExporter):
         attributes_dict = {"chain": [], "v_call": [], "j_call": [], "duplicate_count": [], "cell_id": [], "frame_type": []}
 
         for i, sequence in enumerate(sequences):
-            main_data_dict["sequence_id"].append(sequence.identifier)
-            main_data_dict[sequence_field].append(sequence.nucleotide_sequence)
-            main_data_dict[sequence_aa_field].append(sequence.amino_acid_sequence)
+            main_data_dict["sequence_id"].append(sequence.sequence_id)
+            main_data_dict[sequence_field].append(sequence.sequence)
+            main_data_dict[sequence_aa_field].append(sequence.sequence_aa)
 
             # add custom params of this receptor sequence to attributes dict
             if sequence.metadata is not None and sequence.metadata.custom_params is not None:

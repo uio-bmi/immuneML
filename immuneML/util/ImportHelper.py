@@ -1,3 +1,4 @@
+import copy
 import logging
 import warnings
 from multiprocessing.pool import Pool
@@ -34,7 +35,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 
 class ImportHelper:
-    DATASET_FORMAT = "iml_dataset"
+    DATASET_FORMAT = "yaml"
 
     @staticmethod
     def import_dataset(import_class, params: dict, dataset_name: str) -> Dataset:
@@ -83,8 +84,9 @@ class ImportHelper:
         try:
             metadata = pd.read_csv(params.metadata_file, sep=",")
         except Exception as e:
-            raise Exception(f"{e}\nAn error occurred while reading in the metadata file {params.metadata_file}. Please see the error log above for "
-                            f"more details on this error and the documentation for the expected format of the metadata.")
+            raise Exception(
+                f"{e}\nAn error occurred while reading in the metadata file {params.metadata_file}. Please see the error log above for "
+                f"more details on this error and the documentation for the expected format of the metadata.")
 
         ParameterValidator.assert_keys_present(metadata.columns.tolist(), ["filename"], ImportHelper.__name__,
                                                f'{dataset_name}: params: metadata_file')
@@ -127,9 +129,10 @@ class ImportHelper:
 
             dataframe = ImportHelper.load_sequence_dataframe(filename, params, alternative_load_func)
             dataframe = import_class.preprocess_dataframe(dataframe, params)
-            sequence_lists = {field: dataframe[field].values.tolist() for field in Repertoire.FIELDS if field in dataframe.columns}
-            sequence_lists["custom_lists"] = {field: dataframe[field].values.tolist()
-                                              for field in list(set(dataframe.columns) - set(Repertoire.FIELDS))}
+            sequence_lists = {field: dataframe[field].values.tolist() for field in Repertoire.FIELDS if
+                              field in dataframe.columns}
+            sequence_lists = {**sequence_lists, **{field: dataframe[field].values.tolist()
+                                                   for field in list(set(dataframe.columns) - set(Repertoire.FIELDS))}}
 
             repertoire_inputs = {**{"metadata": metadata_row.to_dict(),
                                     "path": params.result_path / "repertoires/",
@@ -138,7 +141,8 @@ class ImportHelper:
 
             return repertoire
         except Exception as exception:
-            raise RuntimeError(f"{ImportHelper.__name__}: error when importing file {metadata_row['filename']}.") from exception
+            raise RuntimeError(
+                f"{ImportHelper.__name__}: error when importing file {metadata_row['filename']}.") from exception
 
     @staticmethod
     def load_sequence_dataframe(filepath, params, alternative_load_func=None):
@@ -148,10 +152,11 @@ class ImportHelper:
             else:
                 df = ImportHelper.safe_load_dataframe(filepath, params)
         except Exception as ex:
-            raise Exception(f"{ex}\n\nImportHelper: an error occurred during dataset import while parsing the input file: {filepath}.\n"
-                            f"Please make sure this is a correct immune receptor data file (not metadata).\n"
-                            f"The parameters used for import are {params}.\nFor technical description of the error, see the log above. "
-                            f"For details on how to specify the dataset import, see the documentation.")
+            raise Exception(
+                f"{ex}\n\nImportHelper: an error occurred during dataset import while parsing the input file: {filepath}.\n"
+                f"Please make sure this is a correct immune receptor data file (not metadata).\n"
+                f"The parameters used for import are {params}.\nFor technical description of the error, see the log above. "
+                f"For details on how to specify the dataset import, see the documentation.")
 
         ImportHelper.rename_dataframe_columns(df, params)
         ImportHelper.standardize_none_values(df)
@@ -161,13 +166,17 @@ class ImportHelper:
     @staticmethod
     def safe_load_dataframe(filepath, params: DatasetImportParams):
         if hasattr(params, "columns_to_load") and params.columns_to_load is not None:
-            usecols = set(params.columns_to_load) if hasattr(params, "columns_to_load") and params.columns_to_load is not None else set()
+            usecols = set(params.columns_to_load) if hasattr(params,
+                                                             "columns_to_load") and params.columns_to_load is not None else set()
             usecols = usecols.union(
-                set(params.column_mapping.keys()) if hasattr(params, "column_mapping") and params.column_mapping is not None else set())
+                set(params.column_mapping.keys()) if hasattr(params,
+                                                             "column_mapping") and params.column_mapping is not None else set())
             usecols = usecols.union(set(params.column_mapping_synonyms.keys())
-                                    if hasattr(params, "column_mapping_synonyms") and params.column_mapping_synonyms is not None else set())
+                                    if hasattr(params,
+                                               "column_mapping_synonyms") and params.column_mapping_synonyms is not None else set())
             usecols = usecols.union(set(params.metadata_column_mapping.keys())
-                                    if hasattr(params, "metadata_column_mapping") and params.metadata_column_mapping is not None else set())
+                                    if hasattr(params,
+                                               "metadata_column_mapping") and params.metadata_column_mapping is not None else set())
         else:
             usecols = None
 
@@ -181,9 +190,10 @@ class ImportHelper:
 
                 expected = [e for e in params.columns_to_load if e not in list(df.columns)]
 
-                warnings.warn(f"ImportHelper: expected to find the following column(s) in the input file '{filepath.name}', which were not found: {expected}."
-                              f"The following columns were imported instead: {list(df.columns)}. \nTo remove this warning, add the relevant columns "
-                              f"to the input file, or change which columns are imported under 'datasets/<dataset_key>/params/columns_to_load' and 'datasets/<dataset_key>/params/column_mapping'.")
+                warnings.warn(
+                    f"ImportHelper: expected to find the following column(s) in the input file '{filepath.name}', which were not found: {expected}."
+                    f"The following columns were imported instead: {list(df.columns)}. \nTo remove this warning, add the relevant columns "
+                    f"to the input file, or change which columns are imported under 'datasets/<dataset_key>/params/columns_to_load' and 'datasets/<dataset_key>/params/column_mapping'.")
 
         return df
 
@@ -200,12 +210,24 @@ class ImportHelper:
         if hasattr(params, "metadata_column_mapping") and params.metadata_column_mapping is not None:
             df.rename(columns=params.metadata_column_mapping, inplace=True)
 
-    @staticmethod
-    def standardize_none_values(dataframe: pd.DataFrame):
-        dataframe.replace({key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown", "null", "nan", np.nan, ""]}, inplace=True)
+        invalid_chars = [" ", "#", "&"]
+        invalid_col_names = {col: col.replace(" ", "_").replace("#", "_").replace("&", "_")
+                             for col in df.columns if any(el in col for el in invalid_chars)}
+        if len(invalid_col_names.keys()) > 0:
+            logging.warning(
+                f"Note that column names that contain characters which are not letters, numbers nor '_' signs"
+                f" have been renamed to replace these invalid characters with '_' instead: {invalid_col_names}")
+        df.rename(columns=invalid_col_names, inplace=True)
 
     @staticmethod
-    def drop_empty_sequences(dataframe: pd.DataFrame, import_empty_aa_sequences: bool, import_empty_nt_sequences: bool) -> pd.DataFrame:
+    def standardize_none_values(dataframe: pd.DataFrame):
+        dataframe.replace(
+            {key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown", "null", "nan", np.nan, ""]},
+            inplace=True)
+
+    @staticmethod
+    def drop_empty_sequences(dataframe: pd.DataFrame, import_empty_aa_sequences: bool,
+                             import_empty_nt_sequences: bool) -> pd.DataFrame:
         sequence_types = []
         if not import_empty_aa_sequences:
             sequence_types.append(SequenceType.AMINO_ACID)
@@ -232,7 +254,8 @@ class ImportHelper:
         return dataframe
 
     @staticmethod
-    def drop_illegal_character_sequences(dataframe: pd.DataFrame, import_illegal_characters: bool, import_with_stop_codon: bool) -> pd.DataFrame:
+    def drop_illegal_character_sequences(dataframe: pd.DataFrame, import_illegal_characters: bool,
+                                         import_with_stop_codon: bool) -> pd.DataFrame:
         for sequence_type in SequenceType:
             if not import_illegal_characters:
                 sequence_name = sequence_type.name.lower().replace("_", " ")
@@ -242,7 +265,8 @@ class ImportHelper:
                     legal_alphabet.append(Constants.STOP_CODON)
 
                 if sequence_type.value in dataframe.columns:
-                    is_illegal_seq = [ImportHelper.is_illegal_sequence(sequence, legal_alphabet) for sequence in dataframe[sequence_type.value]]
+                    is_illegal_seq = [ImportHelper.is_illegal_sequence(sequence, legal_alphabet) for sequence in
+                                      dataframe[sequence_type.value]]
                     n_illegal = sum(is_illegal_seq)
                     n_total = dataframe.shape[0]
 
@@ -253,7 +277,8 @@ class ImportHelper:
                             f" sequence contained illegal characters. ")
 
                 else:
-                    logging.warning(f"{ImportHelper.__name__}: column {sequence_type.value} is missing, illegal characters were not checked.")
+                    logging.warning(
+                        f"{ImportHelper.__name__}: column {sequence_type.value} is missing, illegal characters were not checked.")
 
         return dataframe
 
@@ -278,9 +303,9 @@ class ImportHelper:
     @staticmethod
     def load_chains(df: pd.DataFrame):
         if "chain" in df.columns:
-            df.loc[:, "chain"] = ImportHelper.load_chains_from_chains(df)
+            df["chain"] = ImportHelper.load_chains_from_chains(df)
         else:
-            df.loc[:, "chain"] = ImportHelper.load_chains_from_genes(df)
+            df["chain"] = ImportHelper.load_chains_from_genes(df)
 
     @staticmethod
     def load_chains_from_chains(df: pd.DataFrame) -> list:
@@ -310,7 +335,7 @@ class ImportHelper:
                 df.loc[:, "sequence_aa"] = df["sequence_aa"].str[1:-1]
             if "sequence" in df:
                 df.loc[:, "sequence"] = df["sequence"].str[3:-3]
-            df.loc[:, "region_type"] = region_type.name
+            df["region_type"] = region_type.name
 
     @staticmethod
     def strip_alleles(df: pd.DataFrame, column_name):
@@ -343,8 +368,9 @@ class ImportHelper:
             raise ValueError(f"ImportHelper: path '{path}' given in YAML specification is not a valid path. "
                              f"This parameter can either point to a single file with immune receptor data or to a directory containing such files.")
 
-        assert len(filenames) >= 1, f"ImportHelper: the dataset {dataset_name} cannot be imported, no files were found under {path}.\n" \
-                                    f"Note that only files with the following extensions can be imported: {data_file_extensions}"
+        assert len(
+            filenames) >= 1, f"ImportHelper: the dataset {dataset_name} cannot be imported, no files were found under {path}.\n" \
+                             f"Note that only files with the following extensions can be imported: {data_file_extensions}"
         return filenames
 
     @staticmethod
@@ -353,28 +379,17 @@ class ImportHelper:
 
         filenames = ImportHelper.get_sequence_filenames(params.path, dataset_name)
 
-        file_index = 0
-        dataset_filenames = []
         dataset_params = {}
         items = None
-        class_name = None
 
         for index, filename in enumerate(filenames):
             new_items = ImportHelper.import_items(import_class, filename, params)
             items = np.append(items, new_items) if items is not None else new_items
             dataset_params = ImportHelper.extract_sequence_dataset_params(items, params)
-            class_name = type(new_items[0]).__name__ if len(new_items) > 0 else None
 
-            while len(items) > params.sequence_file_size or (index == len(filenames) - 1 and len(items) > 0):
-                dataset_filenames.append(params.result_path / "batch_{}.npy".format(file_index))
-                ImportHelper.store_sequence_items(dataset_filenames, items, params.sequence_file_size)
-                items = items[params.sequence_file_size:]
-                file_index += 1
-
-        init_kwargs = {"filenames": dataset_filenames, "file_size": params.sequence_file_size, "name": dataset_name, "labels": dataset_params,
-                       "element_class_name": class_name}
-
-        dataset = ReceptorDataset(**init_kwargs) if params.paired else SequenceDataset(**init_kwargs)
+        cls = ReceptorDataset if params.paired else SequenceDataset
+        dataset = cls.build_from_objects(items, params.sequence_file_size, params.result_path, dataset_name,
+                                         dataset_params)
 
         ImmuneMLExporter.export(dataset, params.result_path)
 
@@ -384,7 +399,8 @@ class ImportHelper:
     def extract_sequence_dataset_params(items=None, params=None) -> dict:
         result = {}
         if params is not None:
-            result = {'region_type': params.region_type, 'receptor_chains': params.receptor_chains, 'organism': params.organism}
+            result = {'region_type': params.region_type, 'receptor_chains': params.receptor_chains,
+                      'organism': params.organism}
         if items is not None:
             for index, item in enumerate(items):
                 metadata = item.metadata if params.paired else item.metadata.custom_params if item.metadata is not None else {}
@@ -406,7 +422,8 @@ class ImportHelper:
             if import_receptor_func:
                 sequences = import_receptor_func(df, params)
             else:
-                raise NotImplementedError(f"{import_class.__name__}: import of paired receptor data has not been implemented.")
+                raise NotImplementedError(
+                    f"{import_class.__name__}: import of paired receptor data has not been implemented.")
         else:
             metadata_columns = params.metadata_column_mapping.values() if params.metadata_column_mapping else None
             sequences = df.apply(ImportHelper.import_sequence, metadata_columns=metadata_columns, axis=1).values
@@ -414,28 +431,25 @@ class ImportHelper:
         return sequences
 
     @staticmethod
-    def store_sequence_items(dataset_filenames: list, items: list, sequence_file_size: int):
-        sequence_matrix = np.core.records.fromrecords([item.get_record() for item in items[:sequence_file_size]],
-                                                      names=type(items[0]).get_record_names())
-        np.save(str(dataset_filenames[-1]), sequence_matrix, allow_pickle=False)
-
-    @staticmethod
     def import_sequence(row, metadata_columns=None) -> ReceptorSequence:
         if metadata_columns is None:
             metadata_columns = []
-        metadata = SequenceMetadata(v_call=str(row["v_call"]) if "v_call" in row and row["v_call"] is not None else None,
-                                    j_call=str(row["j_call"]) if "j_call" in row and row["j_call"] is not None else None,
-                                    chain=row["chain"] if "chain" in row and row["chain"] is not None else None,
-                                    region_type=row["region_type"] if "region_type" in row and row["region_type"] is not None else None,
-                                    duplicate_count=int(row["duplicate_count"]) if "duplicate_count" in row and row[
-                                        "duplicate_count"] is not None else None,
-                                    frame_type=row["frame_type"] if "frame_type" in row and row["frame_type"] is not None else None,
-                                    custom_params={custom_col: row[custom_col] for custom_col in metadata_columns if
-                                                   custom_col in row} if metadata_columns is not None else {})
+        metadata = SequenceMetadata(
+            v_call=str(row["v_call"]) if "v_call" in row and row["v_call"] is not None else None,
+            j_call=str(row["j_call"]) if "j_call" in row and row["j_call"] is not None else None,
+            cell_id=str(row['cell_id']) if 'cell_id' in row and row['cell_id'] is not None else None,
+            chain=row["chain"] if "chain" in row and row["chain"] is not None else None,
+            region_type=row["region_type"] if "region_type" in row and row["region_type"] is not None else None,
+            duplicate_count=int(row["duplicate_count"]) if "duplicate_count" in row and row[
+                "duplicate_count"] is not None else None,
+            frame_type=row["frame_type"] if "frame_type" in row and row["frame_type"] is not None else None,
+            custom_params={custom_col: row[custom_col] for custom_col in metadata_columns if
+                           custom_col in row} if metadata_columns is not None else {})
         sequence = ReceptorSequence(
-            amino_acid_sequence=str(row["sequence_aa"]) if "sequence_aa" in row and row["sequence_aa"] is not None else None,
-            nucleotide_sequence=str(row["sequence"]) if "sequence" in row and row["sequence"] is not None else None,
-            identifier=str(row["sequence_id"]) if "sequence_id" in row and row["sequence_id"] is not None else None,
+            sequence_aa=str(row["sequence_aa"]) if "sequence_aa" in row and row[
+                "sequence_aa"] is not None else None,
+            sequence=str(row["sequence"]) if "sequence" in row and row["sequence"] is not None else None,
+            sequence_id=str(row["sequence_id"]) if "sequence_id" in row and row["sequence_id"] is not None else None,
             metadata=metadata)
 
         return sequence
@@ -475,7 +489,8 @@ class ImportHelper:
 
         # todo add possibility to import multiple chain combo's? (BCR heavy-light & heavy-kappa, as seen in 10xGenomics?)
 
-        return [ImportHelper.build_receptor_from_rows(first_row.iloc[0], second_row.iloc[0], identifier, chain_pair, metadata_columns)]
+        return [ImportHelper.build_receptor_from_rows(first_row.iloc[0], second_row.iloc[0], identifier, chain_pair,
+                                                      metadata_columns)]
 
     @staticmethod
     def build_receptor_from_rows(first_row, second_row, identifier, chain_pair, metadata_columns):
@@ -486,22 +501,22 @@ class ImportHelper:
             receptor = TCABReceptor(alpha=first_sequence,
                                     beta=second_sequence,
                                     identifier=identifier,
-                                    metadata={**second_sequence.metadata.custom_params})
+                                    metadata=copy.deepcopy(second_sequence.metadata.custom_params))
         elif chain_pair == ChainPair.TRG_TRD:
             receptor = TCGDReceptor(gamma=first_sequence,
                                     delta=second_sequence,
                                     identifier=identifier,
-                                    metadata={**second_sequence.metadata.custom_params})
+                                    metadata=copy.deepcopy(second_sequence.metadata.custom_params))
         elif chain_pair == ChainPair.IGH_IGL:
             receptor = BCReceptor(heavy=first_sequence,
                                   light=second_sequence,
                                   identifier=identifier,
-                                  metadata={**first_sequence.metadata.custom_params})
+                                  metadata=copy.deepcopy(first_sequence.metadata.custom_params))
         elif chain_pair == ChainPair.IGH_IGK:
             receptor = BCKReceptor(heavy=first_sequence,
                                    kappa=second_sequence,
                                    identifier=identifier,
-                                   metadata={**first_sequence.metadata.custom_params})
+                                   metadata=copy.deepcopy(first_sequence.metadata.custom_params))
         else:
             raise NotImplementedError(f"ImportHelper: {chain_pair} chain pair is not supported.")
 

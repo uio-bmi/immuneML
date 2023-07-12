@@ -27,7 +27,7 @@ class TestImmuneMLExporter(TestCase):
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
         ImmuneMLExporter.export(dataset, EnvironmentSettings.tmp_test_path / "imlexporter/")
 
-        with open(EnvironmentSettings.tmp_test_path / f"imlexporter/{dataset.name}.iml_dataset", "r") as file:
+        with open(EnvironmentSettings.tmp_test_path / f"imlexporter/{dataset.name}.yaml", "r") as file:
             dataset2 = yaml.safe_load(file)
 
         shutil.rmtree(EnvironmentSettings.tmp_test_path / "imlexporter/")
@@ -37,18 +37,17 @@ class TestImmuneMLExporter(TestCase):
         self.assertEqual(dataset.identifier, dataset2['identifier'])
 
     def test_export_receptor_dataset(self):
-        path = EnvironmentSettings.tmp_test_path / "imlexporter_receptor/"
-        PathBuilder.remove_old_and_build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "imlexporter_receptor/")
 
         dataset = RandomDatasetGenerator.generate_receptor_dataset(10, {2: 1}, {3: 1}, {}, path)
         dataset.name = "d1"
-        element_ids = dataset.get_example_ids()
+        filenames = dataset.get_filenames()
         ImmuneMLExporter.export(dataset, path)
 
-        with open(path / f"{dataset.name}.iml_dataset", "r") as file:
+        with open(path / f"{dataset.name}.yaml", "r") as file:
             dataset2 = yaml.safe_load(file)
 
         self.assertEqual('ReceptorDataset', dataset2['dataset_class'])
-        self.assertEqual(element_ids, dataset2['element_ids'])
+        self.assertEqual([str(f) for f in filenames], dataset2['filenames'])
 
         shutil.rmtree(path)

@@ -40,7 +40,7 @@ class RepertoireBuilder:
                 else:
                     m = SequenceMetadata(**seq_metadata[rep_index][seq_index])
 
-                s = ReceptorSequence(amino_acid_sequence=sequence, metadata=m, identifier=str(seq_index))
+                s = ReceptorSequence(sequence_aa=sequence, metadata=m, sequence_id=str(seq_index))
                 rep_sequences.append(s)
 
             if labels is not None:

@@ -27,23 +27,23 @@ class TestKmerFreqSequenceEncoder(TestCase):
 
     def test(self):
 
-        sequences = [ReceptorSequence(amino_acid_sequence="AAACCC", nucleotide_sequence="AAACCC", identifier="1",
+        sequences = [ReceptorSequence(sequence_aa="AAACCC", sequence="AAACCC", sequence_id="1",
                                       metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(amino_acid_sequence="ACACAC", nucleotide_sequence="ACACAC", identifier="2",
+                     ReceptorSequence(sequence_aa="ACACAC", sequence="ACACAC", sequence_id="2",
                                       metadata=SequenceMetadata(custom_params={"l1": 2})),
-                     ReceptorSequence(amino_acid_sequence="CCCAAA", nucleotide_sequence="CCCAAA", identifier="3",
+                     ReceptorSequence(sequence_aa="CCCAAA", sequence="CCCAAA", sequence_id="3",
                                       metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(amino_acid_sequence="AAACCC", nucleotide_sequence="AAACCC", identifier="4",
+                     ReceptorSequence(sequence_aa="AAACCC", sequence="AAACCC", sequence_id="4",
                                       metadata=SequenceMetadata(custom_params={"l1": 2})),
-                     ReceptorSequence(amino_acid_sequence="ACACAC", nucleotide_sequence="ACACAC", identifier="5",
+                     ReceptorSequence(sequence_aa="ACACAC", sequence="ACACAC", sequence_id="5",
                                       metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(amino_acid_sequence="CCCAAA", nucleotide_sequence="CCCAAA", identifier="6",
+                     ReceptorSequence(sequence_aa="CCCAAA", sequence="CCCAAA", sequence_id="6",
                                       metadata=SequenceMetadata(custom_params={"l1": 2})),
-                     ReceptorSequence(amino_acid_sequence="AAACCC", nucleotide_sequence="AAACCC", identifier="7",
+                     ReceptorSequence(sequence_aa="AAACCC", sequence="AAACCC", sequence_id="7",
                                       metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(amino_acid_sequence="ACACAC", nucleotide_sequence="ACACAC", identifier="8",
+                     ReceptorSequence(sequence_aa="ACACAC", sequence="ACACAC", sequence_id="8",
                                       metadata=SequenceMetadata(custom_params={"l1": 2})),
-                     ReceptorSequence(amino_acid_sequence="CCCAAA", nucleotide_sequence="CCCAAA", identifier="9",
+                     ReceptorSequence(sequence_aa="CCCAAA", sequence="CCCAAA", sequence_id="9",
                                       metadata=SequenceMetadata(custom_params={"l1": 1}))]
 
         path = EnvironmentSettings.tmp_test_path / "kmrefreqseqfacencoder/"

@@ -1,16 +1,9 @@
 import os
-import shutil
 from unittest import TestCase
 
-from immuneML.IO.dataset_import.SingleLineReceptorImport import SingleLineReceptorImport
 from immuneML.caching.CacheType import CacheType
-from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.environment.Label import Label
-from immuneML.environment.LabelConfiguration import LabelConfiguration
-from immuneML.reports.ml_reports.TCRdistMotifDiscovery import TCRdistMotifDiscovery
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -52,35 +45,36 @@ mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagc
     def test_generate(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "tcrdist_motif_discovery/")
         dataset_path = self._create_dataset(path)
+        self.fail("change import method")
 
-        dataset = SingleLineReceptorImport.import_dataset({"path": dataset_path,
-                                                           "result_path": path / "dataset/",
-                                                           "separator": ",",
-                                                           "columns_to_load": ["subject", "epitope", "count", "v_a_gene", "j_a_gene", "cdr3_a_aa",
-                                                                               "v_b_gene", "j_b_gene", "cdr3_b_aa", "clone_id", "cdr3_a_nucseq",
-                                                                               "cdr3_b_nucseq"],
-                                                           "column_mapping": {
-                                                               "cdr3_a_aa": "alpha_amino_acid_sequence",
-                                                               "cdr3_b_aa": "beta_amino_acid_sequence",
-                                                               "cdr3_a_nucseq": "alpha_nucleotide_sequence",
-                                                               "cdr3_b_nucseq": "beta_nucleotide_sequence",
-                                                               "v_a_gene": "alpha_v_call",
-                                                               "v_b_gene": "beta_v_call",
-                                                               "j_a_gene": "alpha_j_call",
-                                                               "j_b_gene": "beta_j_call",
-                                                               "clone_id": "identifier",
-                                                               "count": "duplicate_count"
-                                                           },
-                                                           "receptor_chains": "TRA_TRB",
-                                                           "region_type": "IMGT_CDR3",
-                                                           "sequence_file_size": 50000,
-                                                           "organism": "mouse"}, 'd1')
-
-        dataset = TCRdistEncoder(8).encode(dataset, EncoderParams(path / "result", LabelConfiguration([Label("epitope", None)])))
-
-        report = TCRdistMotifDiscovery(train_dataset=dataset, test_dataset=dataset, result_path=path / "report", name="report name", cores=8,
-                                       positive_class_name="PA", min_cluster_size=3)
-        report.label = Label("epitope", None)
-        report._generate()
-
-        shutil.rmtree(path)
+        # dataset = SingleLineReceptorImport.import_dataset({"path": dataset_path,
+        #                                                    "result_path": path / "dataset/",
+        #                                                    "separator": ",",
+        #                                                    "columns_to_load": ["subject", "epitope", "count", "v_a_gene", "j_a_gene", "cdr3_a_aa",
+        #                                                                        "v_b_gene", "j_b_gene", "cdr3_b_aa", "clone_id", "cdr3_a_nucseq",
+        #                                                                        "cdr3_b_nucseq"],
+        #                                                    "column_mapping": {
+        #                                                        "cdr3_a_aa": "alpha_amino_acid_sequence",
+        #                                                        "cdr3_b_aa": "beta_amino_acid_sequence",
+        #                                                        "cdr3_a_nucseq": "alpha_nucleotide_sequence",
+        #                                                        "cdr3_b_nucseq": "beta_nucleotide_sequence",
+        #                                                        "v_a_gene": "alpha_v_call",
+        #                                                        "v_b_gene": "beta_v_call",
+        #                                                        "j_a_gene": "alpha_j_call",
+        #                                                        "j_b_gene": "beta_j_call",
+        #                                                        "clone_id": "identifier",
+        #                                                        "count": "duplicate_count"
+        #                                                    },
+        #                                                    "receptor_chains": "TRA_TRB",
+        #                                                    "region_type": "IMGT_CDR3",
+        #                                                    "sequence_file_size": 50000,
+        #                                                    "organism": "mouse"}, 'd1')
+        #
+        # dataset = TCRdistEncoder(8).encode(dataset, EncoderParams(path / "result", LabelConfiguration([Label("epitope", None)])))
+        #
+        # report = TCRdistMotifDiscovery(train_dataset=dataset, test_dataset=dataset, result_path=path / "report", name="report name", cores=8,
+        #                                positive_class_name="PA", min_cluster_size=3)
+        # report.label = Label("epitope", None)
+        # report._generate()
+        #
+        # shutil.rmtree(path)

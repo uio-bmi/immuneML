@@ -22,15 +22,15 @@ class TestSequenceLengthDistribution(TestCase):
     def test_get_normalized_sequence_lengths(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "seq_len_rep")
 
-        rep1 = Repertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence(amino_acid_sequence="AAA", identifier="1"),
-                                                                        ReceptorSequence(amino_acid_sequence="AAAA", identifier="2"),
-                                                                        ReceptorSequence(amino_acid_sequence="AAAAA", identifier="3"),
-                                                                        ReceptorSequence(amino_acid_sequence="AAA", identifier="4")],
+        rep1 = Repertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence(sequence_aa="AAA", sequence_id="1"),
+                                                                        ReceptorSequence(sequence_aa="AAAA", sequence_id="2"),
+                                                                        ReceptorSequence(sequence_aa="AAAAA", sequence_id="3"),
+                                                                        ReceptorSequence(sequence_aa="AAA", sequence_id="4")],
                                                       path=path, metadata={})
-        rep2 = Repertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence(amino_acid_sequence="AAA", identifier="5"),
-                                                                        ReceptorSequence(amino_acid_sequence="AAAA", identifier="6"),
-                                                                        ReceptorSequence(amino_acid_sequence="AAAA", identifier="7"),
-                                                                        ReceptorSequence(amino_acid_sequence="AAA", identifier="8")],
+        rep2 = Repertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence(sequence_aa="AAA", sequence_id="5"),
+                                                                        ReceptorSequence(sequence_aa="AAAA", sequence_id="6"),
+                                                                        ReceptorSequence(sequence_aa="AAAA", sequence_id="7"),
+                                                                        ReceptorSequence(sequence_aa="AAA", sequence_id="8")],
                                                       path=path, metadata={})
 
         dataset = RepertoireDataset(repertoires=[rep1, rep2])

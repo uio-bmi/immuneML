@@ -208,12 +208,12 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
             features[i * 2] = [id, clonotype_id, chain_names[0],
                                first_dual_chain_id,
-                               first_chain.amino_acid_sequence,
+                               first_chain.sequence_aa,
                                first_chain.metadata.v_gene,
                                first_chain.metadata.j_gene]
             features[i * 2 + 1] = [id, clonotype_id, chain_names[1],
                                    second_dual_chain_id,
-                                   second_chain.amino_acid_sequence,
+                                   second_chain.sequence_aa,
                                    second_chain.metadata.v_gene,
                                    second_chain.metadata.j_gene]
 

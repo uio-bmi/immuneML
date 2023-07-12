@@ -126,8 +126,8 @@ rep2.tsv,TRB,1234a,no"""
         self.assertEqual(21, dataset.get_example_count())
 
         seqs = [sequence for sequence in dataset.get_data()]
-        self.assertTrue(seqs[0].amino_acid_sequence in ["ASSLPGTNTGELF", "SVEESYEQY"])  # OSX/windows
-        self.assertTrue(seqs[0].nucleotide_sequence in ["GCCAGCAGCTTACCGGGGACGAACACCGGGGAGCTGTTT", 'AGCGTTGAAGAATCCTACGAGCAGTAC'])  # OSX/windows
+        self.assertTrue(seqs[0].sequence_aa in ["ASSLPGTNTGELF", "SVEESYEQY"])  # OSX/windows
+        self.assertTrue(seqs[0].sequence in ["GCCAGCAGCTTACCGGGGACGAACACCGGGGAGCTGTTT", 'AGCGTTGAAGAATCCTACGAGCAGTAC'])  # OSX/windows
         self.assertEqual("IN", seqs[0].metadata.frame_type.name)
         self.assertTrue(seqs[0].metadata.v_call in ['TRBV7-9*01', 'TRBV29-1*01'])  # OSX/windows
         self.assertTrue(seqs[0].metadata.j_call in ['TRBJ2-2*01', 'TRBJ2-7*01'])  # OSX/windows

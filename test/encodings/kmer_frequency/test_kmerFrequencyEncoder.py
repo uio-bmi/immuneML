@@ -30,14 +30,14 @@ class TestKmerFrequencyEncoder(TestCase):
 
         PathBuilder.remove_old_and_build(path)
 
-        rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", nucleotide_sequence="AAA", identifier="1"),
-                                                       ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier="2"),
-                                                       ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier='3')],
+        rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", sequence="AAA", sequence_id="1"),
+                                                       ReceptorSequence("ATA", sequence="ATA", sequence_id="2"),
+                                                       ReceptorSequence("ATA", sequence="ATA", sequence_id='3')],
                                                       metadata={"l1": 1, "l2": 2, "subject_id": "1"}, path=path)
 
-        rep2 = Repertoire.build_from_sequence_objects([ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier="1"),
-                                                       ReceptorSequence("TAA", nucleotide_sequence="TAA", identifier="2"),
-                                                       ReceptorSequence("AAC", nucleotide_sequence="AAC", identifier="3")],
+        rep2 = Repertoire.build_from_sequence_objects([ReceptorSequence("ATA", sequence="ATA", sequence_id="1"),
+                                                       ReceptorSequence("TAA", sequence="TAA", sequence_id="2"),
+                                                       ReceptorSequence("AAC", sequence="AAC", sequence_id="3")],
                                                       metadata={"l1": 0, "l2": 3, "subject_id": "2"}, path=path)
 
         lc = LabelConfiguration()

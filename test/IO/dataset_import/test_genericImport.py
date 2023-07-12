@@ -54,9 +54,9 @@ rep1.tsv,TRA,1234e,no"""
             self.assertEqual(15, len(rep.sequences))
 
         repertoire = dataset.get_data()[0]
-        self.assertEqual('ASSLWEKLAKNIQY', repertoire.sequences[0].amino_acid_sequence)
-        self.assertEqual('ASSLVGGPSSEAF', repertoire.sequences[1].amino_acid_sequence)
-        self.assertEqual('ASSSFWGSDTGELF', repertoire.sequences[2].amino_acid_sequence)
+        self.assertEqual('ASSLWEKLAKNIQY', repertoire.sequences[0].sequence_aa)
+        self.assertEqual('ASSLVGGPSSEAF', repertoire.sequences[1].sequence_aa)
+        self.assertEqual('ASSSFWGSDTGELF', repertoire.sequences[2].sequence_aa)
         self.assertListEqual([1, 3, 7, 2, 10, None, 1, 3, None, 2, 1, 1, 1, 1, 1], list(rep.get_counts()))
         self.assertListEqual([Chain.BETA for i in range(15)], list(rep.get_chains()))
 
@@ -77,8 +77,8 @@ rep1.tsv,TRA,1234e,no"""
 
         seqs = [sequence for sequence in dataset.get_data()]
 
-        self.assertEqual('ASSLWEKLAKNIQY', seqs[0].amino_acid_sequence)
-        self.assertEqual('ASSLVGGPSSEAF', seqs[1].amino_acid_sequence)
-        self.assertEqual('ASSSFWGSDTGELF', seqs[2].amino_acid_sequence)
+        self.assertEqual('ASSLWEKLAKNIQY', seqs[0].sequence_aa)
+        self.assertEqual('ASSLVGGPSSEAF', seqs[1].sequence_aa)
+        self.assertEqual('ASSSFWGSDTGELF', seqs[2].sequence_aa)
 
         shutil.rmtree(path)

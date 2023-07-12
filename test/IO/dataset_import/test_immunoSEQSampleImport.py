@@ -83,9 +83,9 @@ rep1.tsv,TRA,1234a,no"""
 
         seqs = [sequence for sequence in dataset.get_data()]
 
-        self.assertEqual(seqs[0].amino_acid_sequence, "ATSDQLNRWGTGELF")
-        self.assertEqual(seqs[1].amino_acid_sequence, "ASKDGDTGELF")
-        self.assertEqual(seqs[2].amino_acid_sequence, "ASSGEGQGVFGGTEAF")
-        self.assertEqual(seqs[3].amino_acid_sequence, "ASSEEVGGNQPQH")
+        self.assertEqual(seqs[0].sequence_aa, "ATSDQLNRWGTGELF")
+        self.assertEqual(seqs[1].sequence_aa, "ASKDGDTGELF")
+        self.assertEqual(seqs[2].sequence_aa, "ASSGEGQGVFGGTEAF")
+        self.assertEqual(seqs[3].sequence_aa, "ASSEEVGGNQPQH")
 
         shutil.rmtree(path)

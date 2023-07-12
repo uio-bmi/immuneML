@@ -1,7 +1,7 @@
 import copy
 import glob
-import shutil
 import math
+import shutil
 import subprocess
 from pathlib import Path
 from typing import List
@@ -142,7 +142,7 @@ class ReferenceSequenceAnnotator(Preprocessor):
 
             if compairr_out_df[repertoire.identifier].any():
                 sequence_selection = compairr_out_df[repertoire.identifier]
-                matches = np.array([repertoire.get_sequence_aas() == seq.amino_acid_sequence for seq in
+                matches = np.array([repertoire.get_sequence_aas() == seq.sequence_aa for seq in
                                     np.array(self._reference_sequences)[sequence_selection.values]]).any(axis=0)
                 sequences = self._add_params_to_sequence_objects(repertoire.sequences, matches)
             else:

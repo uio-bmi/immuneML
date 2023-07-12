@@ -1,7 +1,6 @@
 import os
 import random
 import shutil
-from pathlib import Path
 from unittest import TestCase
 
 import yaml
@@ -21,8 +20,7 @@ class TestImmuneMLApp(TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-    def create_dataset(self):
-        path = Path(os.path.relpath(EnvironmentSettings.tmp_test_path / "immuneml_app/initial_dataset"))
+    def create_dataset(self, path):
         PathBuilder.build(path)
 
         repertoire_count = 30
@@ -37,11 +35,12 @@ class TestImmuneMLApp(TestCase):
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"CD": ["yes", "no"], "CMV": [True, False]}, name="d1")
         ImmuneMLExporter.export(dataset, path)
 
-        return path / "d1.iml_dataset"
+        return path / "d1.yaml"
 
     def test_run(self):
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "immuneml_app/")
 
-        dataset_path = self.create_dataset()
+        dataset_path = self.create_dataset(path / 'initial_dataset')
 
         specs = {
             "definitions": {
@@ -174,8 +173,7 @@ class TestImmuneMLApp(TestCase):
             }
         }
 
-        path = EnvironmentSettings.tmp_test_path / "immuneml_app/"
-        PathBuilder.remove_old_and_build(path)
+
         specs_file = path / "specs.yaml"
         with specs_file.open("w") as file:
             yaml.dump(specs, file)

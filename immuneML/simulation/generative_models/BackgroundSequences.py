@@ -27,8 +27,8 @@ class BackgroundSequences:
 
     @classmethod
     def build_from_receptor_sequences(cls, sequences: List[ReceptorSequence]):
-        return BackgroundSequences(sequence_aa=[s.amino_acid_sequence for s in sequences],
-                                   sequence=[s.nucleotide_sequence for s in sequences],
+        return BackgroundSequences(sequence_aa=[s.sequence_aa for s in sequences],
+                                   sequence=[s.sequence for s in sequences],
                                    v_call=[s.metadata.v_call if s.metadata else '' for s in sequences],
                                    j_call=[s.metadata.j_call if s.metadata else '' for s in sequences],
                                    region_type=[s.metadata.region_type.name if s.metadata else '' for s in sequences],

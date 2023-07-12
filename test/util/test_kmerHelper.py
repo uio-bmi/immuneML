@@ -27,11 +27,11 @@ class TestKmerHelper(TestCase):
         self.assertTrue("DA" in kmers)
 
     def test_create_kmers_from_sequence(self):
-        kmers = KmerHelper.create_kmers_from_sequence(ReceptorSequence(amino_acid_sequence="ABCDEFG"), 3, sequence_type=SequenceType.AMINO_ACID)
+        kmers = KmerHelper.create_kmers_from_sequence(ReceptorSequence(sequence_aa="ABCDEFG"), 3, sequence_type=SequenceType.AMINO_ACID)
         self.assertTrue("ABC" in kmers and "BCD" in kmers and "CDE" in kmers and "DEF" in kmers and "EFG" in kmers)
         self.assertEqual(5, len(kmers))
 
-        kmers = KmerHelper.create_kmers_from_sequence(ReceptorSequence(amino_acid_sequence="AB"), 3, sequence_type=SequenceType.AMINO_ACID)
+        kmers = KmerHelper.create_kmers_from_sequence(ReceptorSequence(sequence_aa="AB"), 3, sequence_type=SequenceType.AMINO_ACID)
         self.assertTrue(len(kmers) == 0)
 
     def test_create_sentences_from_repertoire(self):
@@ -39,9 +39,9 @@ class TestKmerHelper(TestCase):
         path = EnvironmentSettings.tmp_test_path / "kmer/"
         PathBuilder.remove_old_and_build(path)
 
-        rep = Repertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="AACT"),
-                                                      ReceptorSequence(amino_acid_sequence="ACCT"),
-                                                      ReceptorSequence(amino_acid_sequence="AACT")], path, {})
+        rep = Repertoire.build_from_sequence_objects([ReceptorSequence(sequence_aa="AACT"),
+                                                      ReceptorSequence(sequence_aa="ACCT"),
+                                                      ReceptorSequence(sequence_aa="AACT")], path, {})
 
         sentences = KmerHelper.create_sentences_from_repertoire(rep, 3, sequence_type=SequenceType.AMINO_ACID)
 

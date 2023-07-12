@@ -106,13 +106,14 @@ class TenxGenomicsImport(DataImport):
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
         df["frame_type"] = None
-        df.loc[df["productive"].eq("True"), "frame_type"] = SequenceFrameType.IN.name
+        df['productive'] = df['productive'] == 'True'
+        df.loc[df['productive'], "frame_type"] = SequenceFrameType.IN.name
 
         allowed_productive_values = []
         if params.import_productive:
-            allowed_productive_values.append("True")
+            allowed_productive_values.append(True)
         if params.import_unproductive:
-            allowed_productive_values.append("False")
+            allowed_productive_values.append(False)
 
         df = df[df.productive.isin(allowed_productive_values)]
 

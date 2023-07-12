@@ -778,7 +778,7 @@ Because we use a ground truth benchmarking dataset where the true implanted sign
 recovered by the ML methods overlap with the k-mers that we originally implanted.
 
 The YAML specification below shows the settings that were used for the benchmarking. We assume that the dataset
-with simulated signals can be found at :code:`path/to/simulated_data/olga2000.iml_dataset`.
+with simulated signals can be found at :code:`path/to/simulated_data/olga2000.yaml`.
 Alternatively, you may want to use the AIRR files (airr.zip) that were produced in the original use case, which can be downloaded
 from the NIRD research data archive (DOI: `10.11582/2021.00005 <https://doi.org/10.11582/2021.00005>`_).
 In this case, uncomment the lines for AIRR import and remove the lines for ImmuneML import.
@@ -792,7 +792,7 @@ In this case, uncomment the lines for AIRR import and remove the lines for Immun
       d1:
         format: ImmuneML
         params:
-          path: path/to/simulated_data/olga2000.iml_dataset
+          path: path/to/simulated_data/olga2000.yaml
       #d1:
         #format: AIRR
         #params:

@@ -43,7 +43,7 @@ class FullSequenceImplanting(SignalImplantingStrategy):
     def implant_in_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, signal, path: Path):
 
         assert all("/" not in motif.seed for motif in signal.motifs), \
-            f'FullSequenceImplanting: motifs cannot include gaps. Check motifs {[motif.identifier for motif in signal.motifs]}.'
+            f'FullSequenceImplanting: motifs cannot include gaps. Check motifs {[motif.sequence_id for motif in signal.motifs]}.'
 
         sequences = repertoire.sequences
         new_sequence_count = math.ceil(len(sequences) * repertoire_implanting_rate)
@@ -66,12 +66,12 @@ class FullSequenceImplanting(SignalImplantingStrategy):
 
             motif = random.choice(signal.motifs)
             motif_instance = motif.instantiate_motif()
-            signal_info = {'signal_id': signal.id, 'motif_id': motif.identifier,
+            signal_info = {'signal_id': signal.id, 'motif_id': motif.sequence_id,
                            'motif_instance': motif_instance.instance, 'position': 0}
             metadata = SequenceMetadata(v_call=motif.v_call, j_call=motif.j_call, duplicate_count=1, region_type=sequences[0].metadata.region_type,
                                         custom_params={f'signal_{signal.id}_info': signal_info, signal.id: True})
 
-            new_sequences.append(ReceptorSequence(amino_acid_sequence=motif_instance.instance, metadata=metadata))
+            new_sequences.append(ReceptorSequence(sequence_aa=motif_instance.instance, metadata=metadata))
 
         return new_sequences
 

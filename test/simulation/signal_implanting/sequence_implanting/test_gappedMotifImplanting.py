@@ -11,7 +11,7 @@ class TestGappedMotifImplanting(TestCase):
 
         strategy = GappedMotifImplanting()
         motif_instance = MotifInstance("CC/T", 2)
-        sequence = strategy.implant(ReceptorSequence(amino_acid_sequence="AAAAAAAAAA",
+        sequence = strategy.implant(ReceptorSequence(sequence_aa="AAAAAAAAAA",
                                                      metadata=SequenceMetadata(region_type="IMGT_CDR3")), {"signal_id": "1",
                                                                                          "motif_id": "1",
                                                                                          "motif_instance": motif_instance})
@@ -19,7 +19,7 @@ class TestGappedMotifImplanting(TestCase):
         self.assertTrue(sequence.get_sequence().find("CCAAT") > -1)
         self.assertEqual(10, len(sequence.get_sequence()))
 
-        sequence = strategy.implant(ReceptorSequence(amino_acid_sequence="AAAAAAAAAA",
+        sequence = strategy.implant(ReceptorSequence(sequence_aa="AAAAAAAAAA",
                                                      metadata=SequenceMetadata(region_type="IMGT_CDR3")), {"signal_id": "1",
                                                                                          "motif_id": "1",
                                                                                          "motif_instance": motif_instance},
@@ -29,7 +29,7 @@ class TestGappedMotifImplanting(TestCase):
         self.assertEqual(10, len(sequence.get_sequence()))
 
         motif_instance = MotifInstance("CCT", 0)
-        sequence = strategy.implant(ReceptorSequence(amino_acid_sequence="AAAAAAAAAA",
+        sequence = strategy.implant(ReceptorSequence(sequence_aa="AAAAAAAAAA",
                                                      metadata=SequenceMetadata(region_type="IMGT_CDR3")), {"signal_id": "1",
                                                                                          "motif_id": "1",
                                                                                          "motif_instance": motif_instance},
@@ -39,7 +39,7 @@ class TestGappedMotifImplanting(TestCase):
         self.assertEqual(10, len(sequence.get_sequence()))
 
         motif_instance = MotifInstance("C/T", 0)
-        sequence = strategy.implant(ReceptorSequence(amino_acid_sequence="AAAAAAAAAA",
+        sequence = strategy.implant(ReceptorSequence(sequence_aa="AAAAAAAAAA",
                                                      metadata=SequenceMetadata(region_type="IMGT_CDR3")), {"signal_id": "1",
                                                                                          "motif_id": "1",
                                                                                          "motif_instance": motif_instance},

@@ -44,7 +44,7 @@ class SequenceMatcher:
         return matched
 
     def matches_gene(self, gene1, gene2):
-        if gene1 == gene2:
+        if gene1 == gene2 or all(gene in ['', None] for gene in [gene1, gene2]):
             return True
         else:
             return gene2.split("-", 1)[0] == gene1 or gene1.split("-", 1)[0] == gene2

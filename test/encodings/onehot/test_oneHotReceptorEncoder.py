@@ -15,11 +15,11 @@ from immuneML.util.PathBuilder import PathBuilder
 class TestOneHotSequenceEncoder(TestCase):
 
     def _construct_test_dataset(self, path, dataset_size: int = 50):
-        receptors = [TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAAA"),
-                                  beta=ReceptorSequence(amino_acid_sequence="ATA"),
+        receptors = [TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAAA"),
+                                  beta=ReceptorSequence(sequence_aa="ATA"),
                                   metadata={"l1": 1}, identifier=str("1")),
-                     TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="ATA"),
-                                  beta=ReceptorSequence(amino_acid_sequence="ATT"),
+                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="ATA"),
+                                  beta=ReceptorSequence(sequence_aa="ATT"),
                                   metadata={"l1": 2}, identifier=str("2"))]
 
         PathBuilder.build(path)
@@ -65,16 +65,16 @@ class TestOneHotSequenceEncoder(TestCase):
         shutil.rmtree(path)
 
     def construct_test_flatten_dataset(self, path):
-        receptors = [TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAATTT", identifier="1a"),
-                                  beta=ReceptorSequence(amino_acid_sequence="ATATAT", identifier="1b"),
+        receptors = [TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAATTT", sequence_id="1a"),
+                                  beta=ReceptorSequence(sequence_aa="ATATAT", sequence_id="1b"),
                                   metadata={"l1": 1},
                                   identifier="1"),
-                     TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2a"),
-                                  beta=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2b"),
+                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAAAAA", sequence_id="2a"),
+                                  beta=ReceptorSequence(sequence_aa="AAAAAA", sequence_id="2b"),
                                   metadata={"l1": 2},
                                   identifier="2"),
-                     TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2a"),
-                                  beta=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2b"),
+                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAAAAA", sequence_id="2a"),
+                                  beta=ReceptorSequence(sequence_aa="AAAAAA", sequence_id="2b"),
                                   metadata={"l1": 2},
                                   identifier="2")]
 

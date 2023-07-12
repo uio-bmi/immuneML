@@ -162,7 +162,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
         features = [[] for i in range(0, self.feature_count)]
 
         for i, sequence in enumerate(self.reference_sequences):
-            features[i] = [sequence.identifier,
+            features[i] = [sequence.sequence_id,
                            sequence.get_attribute("chain").name.lower(),
                            sequence.get_sequence(),
                            sequence.get_attribute("v_gene"),
