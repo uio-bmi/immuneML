@@ -106,4 +106,4 @@ class ElementDataset(Dataset):
         raise NotImplementedError
 
     def get_data_from_index_range(self, start_index: int, end_index: int):
-        return self.element_generator.get_single_objs_from_index_range(start_index, end_index)
+        return self.element_generator.get_data_from_index_range(start_index, end_index)

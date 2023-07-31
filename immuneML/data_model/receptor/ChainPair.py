@@ -1,6 +1,10 @@
 from enum import Enum
 from typing import List
 
+from immuneML.data_model.receptor.BCKReceptor import BCKReceptor
+from immuneML.data_model.receptor.BCReceptor import BCReceptor
+from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
+from immuneML.data_model.receptor.TCGDReceptor import TCGDReceptor
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 
 
@@ -27,3 +31,15 @@ class ChainPair(Enum):
             return ChainPair.IGH_IGK
         else:
             raise ValueError(f"ChainPair: illegal chain combination: {chains[0]} and {chains[1]}")
+
+    def get_appropriate_receptor_class(self):
+        if self.name == 'TRA_TRB':
+            return TCABReceptor
+        elif self.name == 'TRG_TRD':
+            return TCGDReceptor
+        elif self.name == 'IGH_IGL':
+            return BCReceptor
+        elif self.name == 'IGH_IGK':
+            return BCKReceptor
+        else:
+            raise RuntimeError(f"No receptor class defined for {self}.")

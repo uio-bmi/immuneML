@@ -1,10 +1,12 @@
 import shutil
+from pprint import pprint
 from unittest import TestCase
 
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.BCReceptor import BCReceptor
 from immuneML.data_model.receptor.ElementGenerator import ElementGenerator
+from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -58,6 +60,15 @@ class TestElementGenerator(TestCase):
 
         return SequenceDataset.build_from_objects(sequences, file_size, path, 'dataset_name1')
 
+    def make_rec_dataset(self, path, count: int, file_size: int) -> ReceptorDataset:
+        receptors = []
+        for i in range(count):
+            receptors.append(TCABReceptor(ReceptorSequence("AA", metadata=SequenceMetadata(chain='alpha', cell_id=str(i))),
+                                          ReceptorSequence('CCC', metadata=SequenceMetadata(chain='beta', cell_id=str(i))),
+                                          identifier=str(i)))
+
+        return ReceptorDataset.build_from_objects(receptors, file_size, path, 'dataset_rec1')
+
     def test_make_subset(self):
 
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "element_generator_subset/")
@@ -76,12 +87,13 @@ class TestElementGenerator(TestCase):
         shutil.rmtree(path)
 
     def test_get_data_from_index_range(self):
-        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "el_gen_index_range/")
+        for ind, dataset_gen_func in enumerate([self.make_seq_dataset, self.make_rec_dataset]):
+            path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / f"el_gen_index_range_{ind}/")
 
-        dataset = self.make_seq_dataset(path, 18, 5)
-        seqs = dataset.get_data_from_index_range(7, 13)
-        print([seq.sequence_id for seq in seqs])
-        assert len(seqs) == 7
+            dataset = dataset_gen_func(path, 18, 5)
+            elements = dataset.get_data_from_index_range(7, 13)
+            pprint(elements)
+            assert len(elements) == 7
 
-        shutil.rmtree(path)
+            shutil.rmtree(path)
 

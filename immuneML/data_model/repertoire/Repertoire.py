@@ -14,7 +14,7 @@ from immuneML.data_model.DatasetItem import DatasetItem
 from immuneML.data_model.SequenceSet import SequenceSet
 from immuneML.data_model.bnp_util import bnp_write_to_file, write_yaml, bnp_read_from_file, \
     make_dynamic_seq_set_dataclass, build_dynamic_bnp_dataclass_obj
-from immuneML.data_model.cell.Cell import Cell
+from immuneML.data_model.receptor.ChainPair import ChainPair
 from immuneML.data_model.receptor.Receptor import Receptor
 from immuneML.data_model.receptor.ReceptorBuilder import ReceptorBuilder
 from immuneML.data_model.receptor.RegionType import RegionType
@@ -293,27 +293,17 @@ class Repertoire(DatasetItem):
         sequences. See the documentation of the preprocessing module for more information.
 
         Returns:
-            ReceptorList: a list of objects of Receptor class
+            List[Receptor]: a list of objects of Receptor class
         """
+        data = self.load_bnp_data()
         receptors = []
-
-        same_cell_lists = self._prepare_cell_lists()
-
-        for cell_content in same_cell_lists:
-            receptors.extend(self._make_receptors(cell_content))
+        chains = data.chain.tolist()
+        for i in range(0, len(data), 2):
+            rows = data.get_rows_by_indices(i, i + 1)
+            cls = ChainPair.get_chain_pair([Chain.get_chain(el) for el in chains[i:i+2]]).get_appropriate_receptor_class()
+            receptors.append(cls.create_from_record(**rows))
 
         return receptors
-
-    @property
-    def cells(self) -> List[Cell]:
-        cells = []
-        cell_lists = self._prepare_cell_lists()
-
-        for cell_content in cell_lists:
-            receptors = self._make_receptors(cell_content)
-            cells.append(Cell(receptors))
-
-        return cell_lists
 
     def _create_buffer_type_from_field_dict(self,
                                             type_dict: Dict[str, Any]) -> bnp.io.delimited_buffers.DelimitedBuffer:

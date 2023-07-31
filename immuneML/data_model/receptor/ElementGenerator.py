@@ -116,19 +116,16 @@ class ElementGenerator:
         elements = batch[[i - lower_limit for i in batch_indices]]
         return elements
 
-    def get_single_objs_from_index_range(self, start_index: int, end_index: int):
+    def get_data_from_index_range(self, start_index: int, end_index: int, obj_in_two_lines: bool = False):
         elements = []
         start_file_index = start_index // self.file_size
         end_file_index = min(len(self.file_list) - 1, end_index // self.file_size)
+
         for current_file_index in range(start_file_index, end_file_index + 1):
             batch = self._load_batch(current_file_index)
-            i = start_index % self.file_size
+            i = start_index % self.file_size if current_file_index == start_file_index else 0
             while len(elements) < end_index - start_index + 1 and i < len(batch):
                 elements.append(batch[i])
                 i += 1
+
         return elements
-
-    def get_objs_from_index_range(self, start_index: int, end_index: int):
-        elements = []
-        start_file_index = start_index // self.file_size
-

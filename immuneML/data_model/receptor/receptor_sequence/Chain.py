@@ -14,19 +14,19 @@ class Chain(Enum):
     def get_chain(item: str):
         if type(item) is Chain:
             return item
-        elif item in ["TRA", "TCRA", "A", "ALPHA", "TCRA"]:
+        elif item.upper() in ["TRA", "TCRA", "A", "ALPHA", "TCRA"]:
             return Chain.ALPHA
-        elif item in ["TRB", "TCRB", "B", "BETA", "TCRB"]:
+        elif item.upper() in ["TRB", "TCRB", "B", "BETA", "TCRB"]:
             return Chain.BETA
-        elif item in ["TRD", "TCRD", "D", "DELTA", "TCRD"]:
+        elif item.upper() in ["TRD", "TCRD", "D", "DELTA", "TCRD"]:
             return Chain.DELTA
-        elif item in ["TRG", "TCRG", "G", "GAMMA", "TCRG"]:
+        elif item.upper() in ["TRG", "TCRG", "G", "GAMMA", "TCRG"]:
             return Chain.GAMMA
-        elif item in ["IGH", "H", "HEAVY"]:
+        elif item.upper() in ["IGH", "H", "HEAVY"]:
             return Chain.HEAVY
-        elif item in ["IGL", "L", "LIGHT", "LAMBDA"]:
+        elif item.upper() in ["IGL", "L", "LIGHT", "LAMBDA"]:
             return Chain.LIGHT
-        elif item in ["IGK", "K", "KAPPA"]:
+        elif item.upper() in ["IGK", "K", "KAPPA"]:
             return Chain.KAPPA
         else:
             return None

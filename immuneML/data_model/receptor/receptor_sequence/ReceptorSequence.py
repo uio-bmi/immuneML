@@ -49,6 +49,7 @@ class ReceptorSequence(DatasetItem):
 
     def __repr__(self):
         return f"ReceptorSequence(sequence_aa={self.sequence_aa}, sequence={self.sequence}, " \
+               f"sequence_id={self.sequence_id}, " \
                f"metadata={vars(self.metadata) if self.metadata is not None else '{}'})"
 
     def set_metadata(self, metadata: SequenceMetadata):

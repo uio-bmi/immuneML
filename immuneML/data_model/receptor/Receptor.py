@@ -32,6 +32,8 @@ class Receptor(DatasetItem):
         chain2_record = {key.replace(f'{chains[1]}_', ''): val for key, val in kwargs.items() if
                          key.startswith(chains[1])}
 
+        assert chain1_record['cell_id'] == chain2_record['cell_id'], (chain1_record['cell_id'], chain2_record['cell_id'])
+
         return cls(**{chains[0]: ReceptorSequence.create_from_record(**chain1_record),
                       chains[1]: ReceptorSequence.create_from_record(**chain2_record),
                       'identifier': kwargs[f'{chains[1]}_cell_id'],
@@ -75,3 +77,6 @@ class Receptor(DatasetItem):
         names = list(self.metadata.keys()) if self.metadata is not None else [] + ['cell_id']
         names += list(set(chain.from_iterable([self.get_chain(ch).get_all_attribute_names() for ch in self.get_chains()])))
         return names
+
+    def __repr__(self):
+        return self.__class__.__name__ + f"(identifier={self.identifier})"
