@@ -29,6 +29,6 @@ class PathBuilder:
         if path.is_dir():
             shutil.rmtree(path)
 
-        path.mkdir()
+        path.mkdir(parents=True)
 
         return path

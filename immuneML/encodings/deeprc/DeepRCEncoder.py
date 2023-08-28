@@ -33,6 +33,8 @@ class DeepRCEncoder(DatasetEncoder):
     COUNTS_COLUMN = "templates"
     SEP = "\t"
     EXTENSION = "tsv"
+    METADATA_EXTENSION = "csv"
+    METADATA_SEP = ","
 
     def __init__(self, context: dict = None, name: str = None):
         self.context = context
@@ -72,11 +74,11 @@ class DeepRCEncoder(DatasetEncoder):
                 self.max_sequence_length = max(self.max_sequence_length, max_sequence_length)
 
     def export_metadata_file(self, dataset, labels, output_folder):
-        metadata_filepath = output_folder / f"{dataset.identifier}_metadata.{DeepRCEncoder.EXTENSION}"
+        metadata_filepath = output_folder / f"{dataset.identifier}_metadata.{DeepRCEncoder.METADATA_EXTENSION}"
         metadata = dataset.get_metadata(labels, return_df=True)
         metadata[DeepRCEncoder.ID_COLUMN] = dataset.get_repertoire_ids()
 
-        metadata.to_csv(path_or_buf=metadata_filepath, sep="\t", index=False)
+        metadata.to_csv(path_or_buf=metadata_filepath, sep=DeepRCEncoder.METADATA_SEP, index=False)
 
         return metadata_filepath
 

@@ -6,7 +6,6 @@ from pathlib import Path
 from unittest import TestCase
 
 import pandas as pd
-import torch
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
@@ -27,13 +26,13 @@ class TestDeepRC(TestCase):
         return "".join([rn.choice(alphabet) for i in range(rn.choice(range(15, 30)))])
 
     def make_encoded_data(self, path: Path):
-        metadata_filepath = path / f"metadata.tsv"
+        metadata_filepath = path / f"metadata.csv"
 
-        rep_ids = [f"REP{i}" for i in range(10)]
+        rep_ids = [f"REP{i}.tsv" for i in range(10)]
         status_label = [chr((i % 2) + 65) for i in range(10)]  # List of alternating strings "A" "B"
 
         metadata = pd.DataFrame({"ID": rep_ids, "status": status_label})
-        metadata.to_csv(sep="\t", index=False, path_or_buf=metadata_filepath)
+        metadata.to_csv(sep=",", index=False, path_or_buf=metadata_filepath)
 
         for rep_id in rep_ids:
             repertoire_seqs = [self.get_random_sequence() for i in range(100)]
@@ -53,62 +52,59 @@ class TestDeepRC(TestCase):
         To test the rest of the DeepRC class without errors, it is replaced with this dummy function."""
         pass
 
+    def internal_deep_RC_test(self):
+        from immuneML.ml_methods.DeepRC import DeepRC
+        from deeprc.architectures import DeepRC as DeepRCInternal
+
+        logging.warning("DeepRC test is temporarily excluded")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "deeprc_classifier")
+        data_path = path / "encoded_data"
+        result_path = path / "result"
+        PathBuilder.build(data_path)
+        PathBuilder.build(result_path)
+
+        encoded_data = self.make_encoded_data(data_path)
+        y = {"status": encoded_data.labels["status"]}
+
+        params = DefaultParamsLoader.load("ml_methods/", "DeepRC")
+        params['pytorch_device_name'] = 'cpu'
+
+        classifier = DeepRC(**params)
+
+        classifier.result_path = path
+
+        train_indices, val_indices = classifier._get_train_val_indices(10, y['status'])
+        self.assertEqual(len(train_indices) + len(val_indices), 10)
+        self.assertEqual(set(list(train_indices) + list(val_indices)), set(range(10)))
+
+        # test if 'fit' function saves models
+        classifier.fit(encoded_data, Label("status", values=["A", "B"]))
+
+        self.assertIsInstance(classifier.model, DeepRCInternal)
+
+        # Test storing and loading of models
+        self.assertFalse(classifier.check_if_exists(result_path))
+        classifier.store(result_path, feature_names=None)
+        self.assertTrue(classifier.check_if_exists(result_path))
+
+        second_classifier = DeepRC(**params)
+        second_classifier.load(result_path)
+
+        self.assertIsInstance(second_classifier.model, DeepRCInternal)
+
+        shutil.rmtree(path)
+
+        # test get package info
+        params = DefaultParamsLoader.load("ml_methods/", "DeepRC")
+        classifier = DeepRC(**params)
+        classifier.get_package_info()
+
     def test(self):
 
-        is_installed = True
+        self.internal_deep_RC_test()
 
-        try:
-            from immuneML.ml_methods.DeepRC import DeepRC
-            from deeprc.deeprc_binary.architectures import DeepRC as DeepRCInternal
-        except Exception as e:
-            is_installed = False
-
-        if is_installed:
-
-            logging.warning("DeepRC test is temporarily excluded")
-            path = EnvironmentSettings.tmp_test_path / "deeprc_classifier"
-            data_path = path / "encoded_data"
-            result_path = path / "result"
-            PathBuilder.build(data_path)
-            PathBuilder.build(result_path)
-
-            encoded_data = self.make_encoded_data(data_path)
-            y = {"status": encoded_data.labels["status"]}
-
-            params = DefaultParamsLoader.load("ml_methods/", "DeepRC")
-
-            classifier = DeepRC(**params)
-
-            # Prepare 'dummy training' for classifier, to test other functionalities
-            classifier.result_path = path
-            classifier.pytorch_device = torch.device("cpu")
-            classifier.training_function = self.dummy_training_function
-
-            train_indices, val_indices = classifier._get_train_val_indices(10, y['status'])
-            self.assertEqual(len(train_indices) + len(val_indices), 10)
-            self.assertEqual(set(list(train_indices) + list(val_indices)), set(range(10)))
-
-            # test if 'fit' function saves models
-            classifier.fit(encoded_data, Label("status", values=["A", "B"]))
-
-            self.assertIsInstance(classifier.model, DeepRCInternal)
-
-            # Test storing and loading of models
-            self.assertFalse(classifier.check_if_exists(result_path))
-            classifier.store(result_path, feature_names=None)
-            self.assertTrue(classifier.check_if_exists(result_path))
-
-            second_classifier = DeepRC(**params)
-            second_classifier.load(result_path)
-
-            self.assertIsInstance(second_classifier.model, DeepRCInternal)
-
-            shutil.rmtree(path)
-
-            # test get package info
-            params = DefaultParamsLoader.load("ml_methods/", "DeepRC")
-            classifier = DeepRC(**params)
-            classifier.get_package_info()
-
-        else:
-            logging.warning("DeepRC is not installed, skipping test. To install DeepRC, install the requirements from requirements_DeepRC.txt.")
+        # try:
+        #     self.internal_deep_RC_test()
+        # except Exception as e:
+        #     logging.warning("DeepRC is not installed, skipping test. "
+        #                     "To install DeepRC, install the requirements from requirements_DeepRC.txt.")
