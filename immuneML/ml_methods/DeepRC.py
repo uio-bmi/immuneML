@@ -161,13 +161,10 @@ class DeepRC(MLMethod):
         from deeprc.dataset_converters import DatasetToHDF5
 
         hdf5_filepath = metadata_filepath.parent / f"{metadata_filepath.stem}.hdf5"
-        converter = DatasetToHDF5(metadata_file=str(metadata_filepath),
-                                  id_column=DeepRCEncoder.ID_COLUMN,
-                                  single_class_label_columns=tuple([label_name]),
+        converter = DatasetToHDF5(repertoiresdata_directory=str(metadata_filepath.parent),
                                   sequence_column=DeepRCEncoder.SEQUENCE_COLUMN,
                                   sequence_counts_column=DeepRCEncoder.COUNTS_COLUMN,
-                                  column_sep=DeepRCEncoder.SEP,
-                                  filename_extension=f".{DeepRCEncoder.EXTENSION}",
+                                  column_sep=DeepRCEncoder.SEP, filename_extension=f".{DeepRCEncoder.EXTENSION}",
                                   verbose=False)
         converter.save_data_to_file(output_file=str(hdf5_filepath), n_workers=self.n_workers)
 
@@ -220,7 +217,7 @@ class DeepRC(MLMethod):
                                          sample_n_sequences=sample_n_sequences)
 
         data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers,
-                                 collate_fn=no_stack_collate_fn)
+                                 collate_fn=no_stack_collate_fn, multiprocessing_context='spawn')
         return data_loader
 
     def _prepare_caching_params(self, encoded_data: EncodedData, type: str, label_name: str):
