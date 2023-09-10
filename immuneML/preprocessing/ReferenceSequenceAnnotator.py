@@ -6,7 +6,6 @@ import subprocess
 from pathlib import Path
 from typing import List
 
-import numpy as np
 import pandas as pd
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
@@ -76,7 +75,7 @@ class ReferenceSequenceAnnotator(Preprocessor):
         self._compairr_params = CompAIRRParams(compairr_path=CompAIRRHelper.determine_compairr_path(compairr_path), keep_compairr_input=True,
                                                differences=max_edit_distance, indels=False, ignore_counts=True, ignore_genes=ignore_genes,
                                                threads=threads, output_filename="compairr_out.tsv", log_filename="compairr_log.txt",
-                                               output_pairs=True, do_repertoire_overlap=False, do_sequence_matching=True, pairs_filename="pairs.tsv")
+                                               output_pairs=False, do_repertoire_overlap=False, do_sequence_matching=True, pairs_filename="pairs.tsv")
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -114,7 +113,7 @@ class ReferenceSequenceAnnotator(Preprocessor):
 
         for index, rep_file in enumerate(repertoire_filepaths):
             batch_tmp_path = PathBuilder.build(tmp_path / str(index))
-            args = CompAIRRHelper.get_cmd_args(self._compairr_params, [sequences_filepath, rep_file], batch_tmp_path)
+            args = CompAIRRHelper.get_cmd_args(self._compairr_params, [rep_file, sequences_filepath], batch_tmp_path)
             compairr_result = subprocess.run(args, capture_output=True, text=True)
             output_file = CompAIRRHelper.verify_compairr_output_path(compairr_result, self._compairr_params, batch_tmp_path)
             updated_output_file = result_path / f'updated_compairr_output_{index}.tsv'
@@ -148,6 +147,9 @@ class ReferenceSequenceAnnotator(Preprocessor):
             else:
                 sequences = self._add_params_to_sequence_objects(repertoire.sequences, np.zeros(len(repertoire.sequences), dtype=bool))
 
+            compairr_out_df = pd.read_csv(compairr_output_files[index], sep='\t', comment="#")
+            sequences = self._add_params_to_sequence_objects(repertoire.sequences, compairr_out_df.iloc[:, 1])
+
             repertoires.append(Repertoire.build_from_sequence_objects(sequences, repertoire_path, repertoire.metadata))
 
         return RepertoireDataset.build_from_objects(**{'repertoires': repertoires, 'path': result_path})
@@ -180,14 +182,15 @@ class ReferenceSequenceAnnotator(Preprocessor):
     def _prepare_repertoires_for_compairr(self, dataset: RepertoireDataset, result_path: Path) -> List[Path]:
         PathBuilder.build(result_path)
         paths = []
-        for i in range(math.ceil(dataset.get_example_count() / self._repertoire_batch_size)):
+        for i, repertoire in enumerate(dataset.repertoires):
             path = result_path / f'repertoires_{i}.tsv'
-            CompAIRRHelper.write_repertoire_file(repertoires=dataset.repertoires[i*self._repertoire_batch_size: (i+1)*self._repertoire_batch_size],
-                                                 filename=path, compairr_params=self._compairr_params)
+            CompAIRRHelper.write_repertoire_file(repertoires=[repertoire], filename=path,
+                                                 compairr_params=self._compairr_params, export_sequence_id=True)
             paths.append(path)
         return paths
 
     def _check_column_name(self, dataset):
         for repertoire in dataset.repertoires:
             assert repertoire.get_attribute(self._output_column_name) is None, \
-                f"{ReferenceSequenceAnnotator.__name__}: attribute {self._output_column_name} already exists in repertoire ({repertoire.identifier}); choose another name."
+                (f"{ReferenceSequenceAnnotator.__name__}: attribute {self._output_column_name} already exists in "
+                 f"repertoire ({repertoire.identifier}); choose another name.")

@@ -29,12 +29,12 @@ class TestRepertoireSimilarityComputer(TestCase):
         a = sparse.csr_matrix(np.array([[0, 1, 1, 3, 4, 1, 5],
                                         [1, 1, 1, 0, 0, 5, 6]]))
 
-        result = RepertoireSimilarityComputer.compute_morisita(a)
+        result = RepertoireSimilarityComputer.compute_morisita(a).tocsr()
 
         self.assertTrue(np.equal(result[1, 0], 0.6269162497982895))
         self.assertTrue(np.equal(result[0, 1], 0.6269162497982895))
         self.assertTrue(np.equal(result[0, 0], 0.9999999999999999))
-        self.assertTrue(np.equal(result[1, 1], 1.0000000000000002))
+        self.assertTrue(np.equal(result[1, 1], 1.0))
 
     def test_compute_cosine(self):
         a = sparse.csr_matrix(np.array([[0, 1, 1, 3, 4, 1, 5],

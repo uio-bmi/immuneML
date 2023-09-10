@@ -1,6 +1,5 @@
 import os
 import shutil
-from pathlib import Path
 from unittest import TestCase
 
 import pandas as pd
@@ -70,10 +69,8 @@ class TestSignificantFeatures(TestCase):
         return str(file_path)
 
     def test_generate_with_compairr(self):
-        compairr_paths = [Path("/usr/local/bin/compairr"), Path("./compairr/src/compairr")]
-
         working = 0
-        for compairr_path in compairr_paths:
+        for compairr_path in EnvironmentSettings.compairr_paths:
             if compairr_path.exists():
                 working += 1
                 self.test_generate(str(compairr_path))

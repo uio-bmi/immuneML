@@ -193,12 +193,11 @@ class Repertoire(DatasetItem):
         region_types = self.get_attribute("region_type")
         if region_types is not None:
             region_types = set(region_types.tolist())
+            assert len(region_types) == 1, f"Repertoire {self.identifier}: expected one region_type, found: {region_types}"
+            return RegionType(region_types.pop())
         else:
+            logging.warning(f'Repertoire {self.identifier}: region_types are not set for sequences.')
             return None
-
-        assert len(region_types) == 1, f"Repertoire: expected one region_type, found: {region_types}"
-
-        return RegionType(region_types.pop())
 
     def __getstate__(self):
         state = self.__dict__.copy()
