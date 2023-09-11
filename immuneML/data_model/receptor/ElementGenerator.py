@@ -1,5 +1,7 @@
-import math
+from itertools import chain
 from pathlib import Path
+
+import math
 
 from immuneML.data_model.bnp_util import bnp_read_from_file, bnp_write_to_file, make_element_dataset_objects, \
     merge_dataclass_objects
@@ -71,26 +73,26 @@ class ElementGenerator:
             else:
                 yield batch
 
-    def make_subset(self, example_indices: list, path: Path, dataset_type: str, dataset_identifier: str):
+    def make_subset(self, example_indices: list, path: Path, dataset_type: str, dataset_identifier: str, paired: bool = False):
         if example_indices is None or len(example_indices) == 0:
             raise RuntimeError(f"{ElementGenerator.__name__}: no examples were specified to create the dataset subset. "
                                f"Dataset type was {dataset_type}, dataset identifier: {dataset_identifier}.")
-        batch_size = self.file_size
         elements = None
         file_count = 1
+        tmp_file_size = self.file_size if not paired else self.file_size * 2
 
         example_indices.sort()
 
         batch_filenames = self._prepare_batch_filenames(len(example_indices), path, dataset_type, dataset_identifier)
 
         for index, batch in enumerate(self.build_batch_generator(return_objects=False)):
-            extracted_elements = self._extract_elements_from_batch(index, batch_size, batch, example_indices)
+            extracted_elements = self._extract_elements_from_batch(index, batch, example_indices, paired=paired)
             elements = merge_dataclass_objects([elements, extracted_elements]) if elements else extracted_elements
 
-            if len(elements) >= self.file_size or len(elements) == len(example_indices):
-                bnp_write_to_file(batch_filenames[file_count - 1], elements[:self.file_size])
+            if len(elements) >= tmp_file_size or len(elements) == len(example_indices):
+                bnp_write_to_file(batch_filenames[file_count - 1], elements[:tmp_file_size])
                 file_count += 1
-                elements = elements[self.file_size:]
+                elements = elements[tmp_file_size:]
 
         if len(elements) > 0:
             bnp_write_to_file(batch_filenames[file_count - 1], elements)
@@ -105,15 +107,16 @@ class ElementGenerator:
             for index in range(batch_count)]
         return filenames
 
-    def _extract_elements_from_batch(self, index, batch_size, batch, example_indices):
-        upper_limit, lower_limit = (index + 1) * batch_size, index * batch_size
-        batch_indices = [ind for ind in example_indices if lower_limit <= ind < upper_limit]
+    def _extract_elements_from_batch(self, index, batch, example_indices, paired: bool = False):
+        if paired:
+            upper_limit, lower_limit = (index + 1) * len(batch) / 2, index * len(batch) / 2
+            batch_indices = list(chain.from_iterable([((ind - lower_limit) * 2, (ind - lower_limit) * 2 + 1)
+                                                      for ind in example_indices if lower_limit <= ind < upper_limit]))
+        else:
+            upper_limit, lower_limit = (index + 1) * len(batch), index * len(batch)
+            batch_indices = [ind - lower_limit for ind in example_indices if lower_limit <= ind < upper_limit]
 
-        assert len(batch_indices) == 0 or max(batch_indices) - lower_limit < len(
-            batch), f"ElementGenerator: Found batch of size {len(batch)}, but expected {batch_size}. " \
-                    f"Are the batch files sorted correctly? All files except the last file must have batch size {batch_size}."
-
-        elements = batch[[i - lower_limit for i in batch_indices]]
+        elements = batch[[int(i) for i in batch_indices]]
         return elements
 
     def get_data_from_index_range(self, start_index: int, end_index: int, obj_in_two_lines: bool = False):

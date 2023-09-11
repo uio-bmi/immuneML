@@ -4,6 +4,7 @@ from unittest import TestCase
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -15,11 +16,11 @@ from immuneML.util.PathBuilder import PathBuilder
 class TestOneHotSequenceEncoder(TestCase):
 
     def _construct_test_dataset(self, path, dataset_size: int = 50):
-        receptors = [TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAAA"),
-                                  beta=ReceptorSequence(sequence_aa="ATA"),
+        receptors = [TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAAA", metadata=SequenceMetadata(chain='alpha')),
+                                  beta=ReceptorSequence(sequence_aa="ATA", metadata=SequenceMetadata(chain='beta')),
                                   metadata={"l1": 1}, identifier=str("1")),
-                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="ATA"),
-                                  beta=ReceptorSequence(sequence_aa="ATT"),
+                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="ATA", metadata=SequenceMetadata(chain='alpha')),
+                                  beta=ReceptorSequence(sequence_aa="ATT", metadata=SequenceMetadata(chain='beta')),
                                   metadata={"l1": 2}, identifier=str("2"))]
 
         PathBuilder.build(path)
@@ -65,16 +66,16 @@ class TestOneHotSequenceEncoder(TestCase):
         shutil.rmtree(path)
 
     def construct_test_flatten_dataset(self, path):
-        receptors = [TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAATTT", sequence_id="1a"),
-                                  beta=ReceptorSequence(sequence_aa="ATATAT", sequence_id="1b"),
+        receptors = [TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAATTT", sequence_id="1a", metadata=SequenceMetadata(chain='alpha')),
+                                  beta=ReceptorSequence(sequence_aa="ATATAT", sequence_id="1b", metadata=SequenceMetadata(chain='beta')),
                                   metadata={"l1": 1},
                                   identifier="1"),
-                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAAAAA", sequence_id="2a"),
-                                  beta=ReceptorSequence(sequence_aa="AAAAAA", sequence_id="2b"),
+                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAAAAA", sequence_id="2a", metadata=SequenceMetadata(chain='alpha')),
+                                  beta=ReceptorSequence(sequence_aa="AAAAAA", sequence_id="2b", metadata=SequenceMetadata(chain='beta')),
                                   metadata={"l1": 2},
                                   identifier="2"),
-                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAAAAA", sequence_id="2a"),
-                                  beta=ReceptorSequence(sequence_aa="AAAAAA", sequence_id="2b"),
+                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAAAAA", sequence_id="2a", metadata=SequenceMetadata(chain='alpha')),
+                                  beta=ReceptorSequence(sequence_aa="AAAAAA", sequence_id="2b", metadata=SequenceMetadata(chain='beta')),
                                   metadata={"l1": 2},
                                   identifier="2")]
 

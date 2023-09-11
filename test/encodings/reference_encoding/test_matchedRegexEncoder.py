@@ -27,9 +27,9 @@ class TestMatchedReceptorsEncoder(TestCase):
         metadata_alpha = {"v_call": "V1", "j_call": "J1", "chain": Chain.LIGHT.value}
         metadata_beta = {"v_call": "V1", "j_call": "J1", "chain": Chain.HEAVY.value}
 
-        repertoires, metadata = RepertoireBuilder.build(sequences=[["XXAGQXGSSNTGKLIXX", "XXAGQXGSSNTGKLIYY", "XXSAGQGETQYXX"],
-                                                                   ["ASSXRXX"],
-                                                                   ["XXIXXNDYKLSXX", "CCCC", "SSSS", "TTTT"]],
+        repertoires, metadata = RepertoireBuilder.build(sequences=[["FFAGQFGSSNTGKLIFF", "FFAGQFGSSNTGKLIYY", "FFSAGQGETQYFF"],
+                                                                   ["ASSFRFF"],
+                                                                   ["FFIFFNDYKLSFF", "CCCC", "SSSS", "TTTT"]],
                                                         path=path, labels=labels,
                                                         seq_metadata=[[{**metadata_alpha, "duplicate_count": 10, "v_call": "IGLV35"},
                                                                        {**metadata_alpha, "duplicate_count": 10},
@@ -61,7 +61,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         return dataset, label_config, filepath, labels
 
     def test_encode_no_v_all(self):
-        path = EnvironmentSettings.root_path / "test/tmp/regex_matches_encoder/"
+        path = EnvironmentSettings.tmp_test_path / "regex_matches_encoder/"
 
         dataset, label_config, motif_filepath, labels = self.create_dummy_data(path)
 

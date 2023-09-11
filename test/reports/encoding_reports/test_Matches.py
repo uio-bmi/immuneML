@@ -66,8 +66,7 @@ class TestMatches(unittest.TestCase):
 
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
-            label_config=label_config,
-            filename="dataset.csv"
+            label_config=label_config
         ))
 
         return encoded
@@ -155,7 +154,6 @@ class TestMatches(unittest.TestCase):
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_config=label_config,
-            filename="dataset.csv"
         ))
 
         return encoded
@@ -198,9 +196,9 @@ class TestMatches(unittest.TestCase):
         metadata_beta = {"v_call": "V1", "j_call": "J1", "chain": Chain.BETA.value}
 
         repertoires, metadata = RepertoireBuilder.build(
-            sequences=[["XXAGQXGSSNTGKLIXX", "XXAGQXGSSNTGKLIYY", "XXSAGQGETQYXX"],
-                       ["ASSXRXX"],
-                       ["XXIXXNDYKLSXX", "CCCC", "SSSS", "TTTT"]],
+            sequences=[["FFAGQFGSSNTGKLIFF", "FFAGQFGSSNTGKLIYY", "FFSAGQGETQYFF"],
+                       ["ASSFRFF"],
+                       ["FFIFFNDYKLSFF", "CCCC", "SSSS", "TTTT"]],
             path=path, labels=labels,
             seq_metadata=[[{**metadata_alpha, "duplicate_count": 10, "v_call": "TRAV35"},
                            {**metadata_alpha, "duplicate_count": 10},
@@ -238,7 +236,6 @@ class TestMatches(unittest.TestCase):
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_config=label_config,
-            filename="dataset.csv"
         ))
 
         return encoded

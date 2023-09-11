@@ -47,6 +47,10 @@ class ReceptorSequence(DatasetItem):
         self.sequence = sequence
         self.metadata = metadata if metadata is not None else SequenceMetadata()
 
+    @property
+    def identifier(self):
+        return self.sequence_id
+
     def __repr__(self):
         return f"ReceptorSequence(sequence_aa={self.sequence_aa}, sequence={self.sequence}, " \
                f"sequence_id={self.sequence_id}, " \

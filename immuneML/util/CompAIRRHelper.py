@@ -86,16 +86,16 @@ class CompAIRRHelper:
 
     @staticmethod
     def get_repertoire_contents(repertoire, compairr_params, export_sequence_id=False):
-        attributes = [EnvironmentSettings.get_sequence_type().value, "counts"]
-        attributes += [] if compairr_params.ignore_genes else ["v_genes", "j_genes"]
+        attributes = [EnvironmentSettings.get_sequence_type().value, "duplicate_count"]
+        attributes += [] if compairr_params.ignore_genes else ["v_call", "j_call"]
         repertoire_contents = repertoire.get_attributes(attributes)
         repertoire_contents = pd.DataFrame({**repertoire_contents, "identifier": repertoire.identifier})
         if export_sequence_id:
             repertoire_contents['sequence_id'] = repertoire.get_attribute('sequence_identifiers')
 
         check_na_rows = [EnvironmentSettings.get_sequence_type().value]
-        check_na_rows += [] if compairr_params.ignore_counts else ["counts"]
-        check_na_rows += [] if compairr_params.ignore_genes else ["v_genes", "j_genes"]
+        check_na_rows += [] if compairr_params.ignore_counts else ["duplicate_count"]
+        check_na_rows += [] if compairr_params.ignore_genes else ["v_call", "j_call"]
 
         n_rows_before = len(repertoire_contents)
 
@@ -106,11 +106,10 @@ class CompAIRRHelper:
                 f"CompAIRRHelper: removed {n_rows_before - len(repertoire_contents)} entries from repertoire {repertoire.identifier} due to missing values.")
 
         if compairr_params.ignore_counts:
-            repertoire_contents["counts"] = 1
+            repertoire_contents["duplicate_count"] = 1
 
         repertoire_contents.rename(columns={EnvironmentSettings.get_sequence_type().value: "cdr3_aa" if repertoire.get_region_type() == RegionType.IMGT_CDR3 else 'junction_aa',
-                                            "v_genes": "v_call", "j_genes": "j_call",
-                                            "counts": "duplicate_count", "identifier": "repertoire_id"},
+                                            "identifier": "repertoire_id"},
                                    inplace=True)
 
         return repertoire_contents

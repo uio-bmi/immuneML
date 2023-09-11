@@ -33,10 +33,15 @@ class Receptor(DatasetItem):
                          key.startswith(chains[1])}
 
         assert chain1_record['cell_id'] == chain2_record['cell_id'], (chain1_record['cell_id'], chain2_record['cell_id'])
+        if 'identifier' in chain1_record:
+            assert chain1_record['identifier'] == chain2_record['identifier'], (chain1_record['identifier'], chain2_record['identifier'])
+            identifier = kwargs[f'{chains[0]}_identifier']
+        else:
+            identifier = kwargs[f'{chains[0]}_cell_id']
 
         return cls(**{chains[0]: ReceptorSequence.create_from_record(**chain1_record),
                       chains[1]: ReceptorSequence.create_from_record(**chain2_record),
-                      'identifier': kwargs[f'{chains[1]}_cell_id'],
+                      'identifier': identifier,
                       'metadata': {key.replace(f'{chains[0]}_', '').replace(f'{chains[1]}_', ''): val
                                    for key, val in kwargs.items()
                                    if key.replace(f'{chains[0]}_', '').replace(f'{chains[1]}_', '') not in ReceptorSequence.FIELDS.keys() and key.replace(f'{chains[0]}_', '').replace(f'{chains[1]}_', '') not in vars(SequenceMetadata()).keys()}})
@@ -75,6 +80,7 @@ class Receptor(DatasetItem):
 
     def get_all_attribute_names(self) -> List[str]:
         names = list(self.metadata.keys()) if self.metadata is not None else [] + ['cell_id']
+        names += ['identifier']
         names += list(set(chain.from_iterable([self.get_chain(ch).get_all_attribute_names() for ch in self.get_chains()])))
         return names
 

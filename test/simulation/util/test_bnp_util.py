@@ -4,6 +4,7 @@ from bionumpy import DNAEncoding
 from immuneML.simulation.util.bnp_util import make_bnp_dataclass_object_from_dicts
 
 
+@pytest.mark.skip(reason='simulation will come from ligo')
 def test_make_bnpdataclass_from_dict():
 
     dict_list = [

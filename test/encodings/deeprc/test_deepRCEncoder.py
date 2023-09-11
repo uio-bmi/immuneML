@@ -23,7 +23,7 @@ class TestDeepRCEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_datasets(self, path: Path):
-        repertoires, metadata = RepertoireBuilder.build([["A", "B"], ["B", "C"], ["D"], ["E", "F"]], path,
+        repertoires, metadata = RepertoireBuilder.build([["A", "C"], ["C", "D"], ["E"], ["F", "G"]], path,
                                                       {"l1": [1, 0, 1, 0], "l2": [2, 3, 2, 3]})
 
         main_dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)

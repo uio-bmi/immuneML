@@ -73,7 +73,7 @@ class RepertoireClonotypeSummary(DataReport):
             sequences = repertoire.get_sequence_aas()
 
         sequence_count = sequences.shape[0]
-        unique_sequence_count = np.unique(sequences).shape[0]
+        unique_sequence_count = np.unique(sequences.tolist()).shape[0]
         if sequence_count != unique_sequence_count:
             logging.warning(f"{RepertoireClonotypeSummary.__name__}: for repertoire {repertoire.identifier}, there are {sequence_count} sequences, "
                             f"but {unique_sequence_count} unique sequences.")

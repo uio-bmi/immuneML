@@ -85,7 +85,8 @@ class ElementDataset(Dataset):
         """
         new_dataset_id = uuid.uuid4().hex
 
-        batch_filenames = self.element_generator.make_subset(example_indices, path, dataset_type, new_dataset_id)
+        batch_filenames = self.element_generator.make_subset(example_indices, path, dataset_type, new_dataset_id,
+                                                             paired=self.element_class_name != 'ReceptorSequence')
         dataset_name = f"{self.name}_split_{dataset_type.lower()}"
 
         types = read_yaml(self.dataset_file)['type_dict']

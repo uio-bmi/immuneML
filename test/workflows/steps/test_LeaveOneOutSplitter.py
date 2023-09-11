@@ -4,6 +4,7 @@ from unittest import TestCase
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.hyperparameter_optimization.config.LeaveOneOutConfig import LeaveOneOutConfig
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
@@ -18,7 +19,9 @@ class TestLeaveOneOutSplitter(TestCase):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "leave_one_out_splitter/")
         receptors = []
         for i in range(10):
-            receptors.append(TCABReceptor(ReceptorSequence(), ReceptorSequence(), {"subject": i % 3}))
+            receptors.append(TCABReceptor(ReceptorSequence(metadata=SequenceMetadata(chain='alpha')),
+                                          ReceptorSequence(metadata=SequenceMetadata(chain='beta')),
+                                          {"subject": i % 3}))
 
         dataset = ReceptorDataset.build_from_objects(receptors, 100, path, 'd1')
 

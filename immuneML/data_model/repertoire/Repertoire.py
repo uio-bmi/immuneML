@@ -170,20 +170,23 @@ class Repertoire(DatasetItem):
                 [Chain.get_chain(chain_str) if chain_str is not None else None for chain_str in chains.tolist()])
         return chains
 
-    def get_attribute(self, attribute):
+    def get_attribute(self, attribute, as_list: bool = False):
         data = self.load_bnp_data()
         if attribute in self._type_dict:
             tmp = getattr(data, attribute)
-            return tmp
+            if as_list:
+                return tmp.tolist()
+            else:
+                return tmp
         else:
             return None
 
-    def get_attributes(self, attributes: list):
+    def get_attributes(self, attributes: list, as_list: bool = False):
         result = {}
         data = self.load_bnp_data()
         for attribute in attributes:
             if attribute in self._type_dict:
-                result[attribute] = getattr(data, attribute)
+                result[attribute] = getattr(data, attribute).tolist() if as_list else getattr(data, attribute)
             else:
                 logging.warning(
                     f"{Repertoire.__name__}: attribute {attribute} is not present in the repertoire {self.identifier}, skipping...")

@@ -41,15 +41,13 @@ class TestOneHotEncoder(unittest.TestCase):
         lc.add_label("l1", [1, 2])
         lc.add_label("l2", [0, 3])
 
-        dataset = RepertoireDataset(repertoires=[rep1, rep2])
+        dataset = RepertoireDataset.build_from_objects(repertoires=[rep1, rep2], path=path)
 
         return dataset, lc
 
     def test_not_positional(self):
 
-        path = EnvironmentSettings.tmp_test_path / "onehot_vanilla/"
-
-        PathBuilder.remove_old_and_build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "onehot_vanilla/")
 
         dataset, lc = self._construct_test_repertoiredataset(path, positional=False)
 
@@ -60,8 +58,7 @@ class TestOneHotEncoder(unittest.TestCase):
             result_path=path,
             label_config=lc,
             learn_model=True,
-            model={},
-            filename="dataset.pkl"
+            model={}
         ))
 
         self.assertTrue(isinstance(encoded_data, RepertoireDataset))

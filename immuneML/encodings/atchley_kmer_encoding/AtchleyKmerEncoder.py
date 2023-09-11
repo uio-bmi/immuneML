@@ -1,9 +1,9 @@
 import logging
-import math
 from multiprocessing import Pool
 from pathlib import Path
 from typing import Tuple, List
 
+import math
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
@@ -184,7 +184,7 @@ class AtchleyKmerEncoder(DatasetEncoder):
         sequences = sequences[indices]
         counts = counts[indices]
         if self.skip_first_n_aa > 0 or self.skip_last_n_aa > 0:
-            sequences = np.apply_along_axis(remove_aa_func, 0, sequences)
+            sequences = remove_aa_func(sequences.tolist())
         return sequences, counts
 
     def get_additional_files(self) -> List[str]:

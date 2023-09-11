@@ -1,7 +1,7 @@
 import hashlib
-import math
 from multiprocessing.pool import Pool
 
+import math
 import numpy as np
 
 from immuneML.analysis.entropy_calculations.EntropyCalculator import EntropyCalculator
@@ -50,7 +50,7 @@ class EvennessProfileRepertoireEncoder(EvennessProfileEncoder):
         return CacheHandler.memo_by_params((("encoding_model", params.model),
                                             ("labels", params.label_config.get_labels_by_name()),
                                             ("repertoire_id", repertoire.identifier),
-                                            ("repertoire_data",  hashlib.sha256(np.ascontiguousarray(repertoire.get_sequence_aas())).hexdigest())),
+                                            ("repertoire_data",  hashlib.sha256(np.ascontiguousarray(repertoire.get_sequence_aas().tolist())).hexdigest())),
                                            lambda: self.encode_repertoire(repertoire, params), CacheObjectType.ENCODING_STEP)
 
     def encode_repertoire(self, repertoire, params: EncoderParams):

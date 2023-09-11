@@ -21,7 +21,7 @@ class TestPairwiseRepertoireComparison(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_dataset(self, path: str) -> RepertoireDataset:
-        repertoires, metadata = RepertoireBuilder.build([["A", "B"], ["D"], ["E", "F"], ["B", "C"], ["A", "D"]], path)
+        repertoires, metadata = RepertoireBuilder.build([["A", "T"], ["D"], ["E", "F"], ["T", "C"], ["A", "D"]], path)
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
         return dataset
 

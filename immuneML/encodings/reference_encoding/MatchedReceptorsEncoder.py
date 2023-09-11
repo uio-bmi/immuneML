@@ -271,7 +271,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
             for rep_seq in rep_seqs:
                 matches_idx = 0 if self.sum_matches else i * 2
-                match_count = 1 if self.reads == ReadsType.UNIQUE else rep_seq.metadata.count
+                match_count = 1 if self.reads == ReadsType.UNIQUE else rep_seq.metadata.duplicate_count
 
                 # Match with first chain: add to even columns in matches.
                 # Match with second chain: add to odd columns

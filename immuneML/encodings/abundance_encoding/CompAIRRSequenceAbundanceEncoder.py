@@ -1,10 +1,10 @@
 import copy
-import math
 import subprocess
 from multiprocessing.pool import Pool
 from pathlib import Path
 from typing import List
 
+import math
 import numpy as np
 import pandas as pd
 
@@ -173,7 +173,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         return np.array(list(sequence_set))
 
     def get_sequence_set_for_repertoire(self, repertoire, sequence_attributes):
-        return set(zip(*[value for value in repertoire.get_attributes(sequence_attributes).values() if value is not None]))
+        return set(zip(*[value for value in repertoire.get_attributes(sequence_attributes, True).values() if value is not None]))
 
     def _get_sequence_presence(self, full_dataset, full_sequence_set, params):
         compairr_sequence_presence = CacheHandler.memo_by_params(

@@ -73,7 +73,7 @@ class TCRdistHelper:
             [], [], [], [], [], [], [], [], [], [], [], []
 
         for receptor in dataset.get_data():
-            subject.append(receptor.metadata["subject"] if "subject" in receptor.metadata else "sub" + receptor.sequence_id)
+            subject.append(receptor.metadata["subject"] if "subject" in receptor.metadata else "sub" + receptor.identifier)
             epitope.append(receptor.metadata[label_name])
             count.append(receptor.get_chain("alpha").metadata.duplicate_count
                          if receptor.get_chain("alpha").metadata.duplicate_count == receptor.get_chain("beta").metadata.duplicate_count
@@ -86,7 +86,7 @@ class TCRdistHelper:
             j_b_gene.append(receptor.get_chain('beta').metadata.v_call)
             cdr3_b_aa.append(receptor.get_chain('beta').sequence_aa)
             cdr3_b_nucseq.append(receptor.get_chain("beta").sequence)
-            clone_id.append(receptor.sequence_id)
+            clone_id.append(receptor.identifier)
 
         if all(item is not None for item in cdr3_a_nucseq) and all(item is not None for item in cdr3_b_nucseq):
             return pd.DataFrame({"subject": subject, "epitope": epitope, "count": count, "v_a_gene": v_a_gene, "j_a_gene": j_a_gene,

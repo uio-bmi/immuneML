@@ -221,7 +221,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
             for repertoire_seq in rep_seqs:
                 if matcher.matches_sequence(reference_seq, repertoire_seq, max_distance=self.max_edit_distance):
                     matches_idx = 0 if self.sum_matches else i
-                    match_count = 1 if self.reads == ReadsType.UNIQUE else repertoire_seq.metadata.count
+                    match_count = 1 if self.reads == ReadsType.UNIQUE else repertoire_seq.metadata.duplicate_count
                     matches[matches_idx] += match_count
 
         return matches

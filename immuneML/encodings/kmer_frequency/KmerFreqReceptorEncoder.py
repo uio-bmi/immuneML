@@ -23,13 +23,13 @@ class KmerFreqReceptorEncoder(KmerFrequencyEncoder):
 
         sequence_encoder = self._prepare_sequence_encoder()
         feature_names = sequence_encoder.get_feature_names(params)
-        for receptor in dataset.get_data(params.pool_size):
+        for receptor in dataset.get_data():
             counts = {chain: Counter() for chain in receptor.get_chains()}
             chains = receptor.get_chains()
             for chain in receptor.get_chains():
                 counts[chain] = self._encode_sequence(receptor.get_chain(chain), params, sequence_encoder, counts[chain])
             encoded_receptors_counts.append(counts)
-            receptor_ids.append(receptor.sequence_id)
+            receptor_ids.append(receptor.identifier)
 
             if params.encode_labels:
                 for label_name in label_config.get_labels_by_name():

@@ -24,8 +24,8 @@ class TestDistanceEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_dataset(self, path: Path) -> RepertoireDataset:
-        repertoires, metadata = RepertoireBuilder.build([["A", "B"], ["B", "C"], ["D"], ["E", "F"],
-                                                       ["A", "B"], ["B", "C"], ["D"], ["E", "F"]], path,
+        repertoires, metadata = RepertoireBuilder.build([["A", "T"], ["T", "C"], ["D"], ["E", "F"],
+                                                       ["A", "T"], ["T", "C"], ["D"], ["E", "F"]], path,
                                                       {"l1": [1, 0, 1, 0, 1, 0, 1, 0], "l2": [2, 3, 2, 3, 2, 3, 3, 3]})
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
         return dataset

@@ -1,16 +1,16 @@
 import shutil
-from unittest import TestCase
+
+import pytest
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.simulation.util.igor_helper import _import_genes_from_model_params
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class IGoRHelperTest(TestCase):
+@pytest.mark.skip(reason='simulation will come from ligo')
+def test_import_original_genes():
 
-    def test_import_original_genes(self):
-
-        file_content = """@Event_list
+    file_content = """@Event_list
 #GeneChoice;V_gene;Undefined_side;8;v_choice
 %IGHV7-81*01;CAGGTGCAGCTGGTGCAGTCTGGCCATGAGGTGAAGCAGCCTGGGGCCTCAGTGAAGGTCTCCTGCAAGGCTTCTGGTTACAGTTTCACCACCTATGGTATGAATTGGGTGCCACAGGCCCCTGGACAAGGGCTTGAGTGGATGGGATGGTTCAACACCTACACTGGGAACCCAACATATGCCCAGGGCTTCACAGGACGGTTTGTCTTCTCCATGGACACCTCTGCCAGCACAGCATACCTGCAGATCAGCAGCCTAAAGGCTGAGGACATGGCCATGTATTACTGTGCGAGATA;96
 %IGHV1-2*01;CAGGTGCAGCTGGTGCAGTCTGGGGCTGAGGTGAAGAAGCCTGGGGCCTCAGTGAAGGTCTCCTGCAAGGCTTCTGGATACACCTTCACCGGCTACTATATGCACTGGGTGCGACAGGCCCCTGGACAAGGGCTTGAGTGGATGGGACGGATCAACCCTAACAGTGGTGGCACAAACTATGCACAGAAGTTTCAGGGCAGGGTCACCATGACCAGGGACACGTCCATCAGCACAGCCTACATGGAGCTGAGCAGGCTGAGATCTGACGACACGGCCGTGTATTACTGTGCGAGAGA;0
@@ -447,15 +447,15 @@ class IGoRHelperTest(TestCase):
 0.00565073
 """
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "igor_helper")
-        with (path / "model_params.txt").open('w') as file:
-            file.write(file_content)
+    path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "igor_helper")
+    with (path / "model_params.txt").open('w') as file:
+        file.write(file_content)
 
-        genes = _import_genes_from_model_params(path)
+    genes = _import_genes_from_model_params(path)
 
-        self.assertEqual(len(genes['j']), 7)
-        self.assertEqual(len(genes['v']), 97)
-        self.assertEqual(genes['v'].index("IGHV4-28*01"), 73)
+    assert len(genes['j']) == 7
+    assert len(genes['v']) == 97
+    assert genes['v'].index("IGHV4-28*01") == 73
 
-        shutil.rmtree(path)
+    shutil.rmtree(path)
 

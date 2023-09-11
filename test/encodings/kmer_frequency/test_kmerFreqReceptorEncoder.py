@@ -9,6 +9,7 @@ from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFreqReceptorEncoder import KmerFreqReceptorEncoder
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
@@ -27,12 +28,18 @@ class TestKmerFreqReceptorEncoder(TestCase):
 
     def test(self):
 
-        receptors = [TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAACCC"), beta=ReceptorSequence(
-            sequence_aa="AAACCC"), identifier="1"),
-                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAA"), beta=ReceptorSequence(sequence_aa="CCC"), identifier="2"),
-                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAACCC"), beta=ReceptorSequence(
-                         sequence_aa="AAACCC"), identifier="3"),
-                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAA"), beta=ReceptorSequence(sequence_aa="CCC"), identifier="4")]
+        receptors = [TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAACCC", metadata=SequenceMetadata(chain='alpha')),
+                                  beta=ReceptorSequence(sequence_aa="AAACCC", metadata=SequenceMetadata(chain='beta')),
+                                  identifier="1"),
+                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAA", metadata=SequenceMetadata(chain='alpha')),
+                                  beta=ReceptorSequence(sequence_aa="CCC", metadata=SequenceMetadata(chain='beta')),
+                                  identifier="2"),
+                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAACCC", metadata=SequenceMetadata(chain='alpha')),
+                                  beta=ReceptorSequence(sequence_aa="AAACCC", metadata=SequenceMetadata(chain='beta')),
+                                  identifier="3"),
+                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAA", metadata=SequenceMetadata(chain='alpha')),
+                                  beta=ReceptorSequence(sequence_aa="CCC", metadata=SequenceMetadata(chain='beta')),
+                                  identifier="4")]
 
         path = EnvironmentSettings.tmp_test_path / "kmer_receptor_frequency/"
         PathBuilder.remove_old_and_build(path / 'data')

@@ -28,7 +28,7 @@ def bnp_read_from_file(filename: Path, buffer_type: bnp.io.delimited_buffers.Del
         buffer_type = bnp.io.delimited_buffers.get_bufferclass_for_datatype(dataclass, delimiter='\t',
                                                                             has_header=True)
     with bnp.open(str(filename), buffer_type=buffer_type) as file:
-        return file.read()
+        return file.read()  # TODO: fix - throws error when empty file (no lines after header)
 
 
 def write_yaml(filename: Path, yaml_dict):
@@ -119,6 +119,8 @@ def get_receptor_attributes_for_bnp(receptors, receptor_dc, types) -> dict:
     for field_obj in dataclasses.fields(receptor_dc):
         if receptors[0].metadata and field_obj.name in receptors[0].metadata:
             field_vals[field_obj.name] = list(chain.from_iterable((receptor.get_attribute(field_obj.name), receptor.get_attribute(field_obj.name)) for receptor in receptors))
+        elif field_obj.name == 'identifier':
+            field_vals[field_obj.name] = list(chain.from_iterable((receptor.identifier, receptor.identifier) for receptor in receptors))
         else:
             field_vals[field_obj.name] = list(chain.from_iterable([receptor.get_chain(ch).get_attribute(field_obj.name)
                                                                    for ch in receptor.get_chains()]

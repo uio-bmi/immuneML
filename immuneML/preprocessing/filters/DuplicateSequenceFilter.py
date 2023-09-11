@@ -1,8 +1,7 @@
 import copy
+from dataclasses import fields as get_fields
 from multiprocessing.pool import Pool
 from pathlib import Path
-
-import pandas as pd
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
@@ -129,15 +128,16 @@ class DuplicateSequenceFilter(Filter):
         return agg_dict
 
     def _process_repertoire(self, repertoire: Repertoire) -> Repertoire:
-        data = pd.DataFrame(repertoire.load_data())
+        data = repertoire.load_bnp_data()
+        columns = [field.name for field in get_fields(data)]
 
-        groupby_fields = self._prepare_group_by_field(data.columns)
-        custom_lists = list(set(data.columns) - set(Repertoire.FIELDS))
-        agg_dict = self._prepare_agg_dict(data.columns, custom_lists)
+        groupby_fields = self._prepare_group_by_field(columns)
+        custom_lists = list(set(columns) - set(Repertoire.FIELDS))
+        agg_dict = self._prepare_agg_dict(columns, custom_lists)
 
         # Chain objects can not be aggregated, convert to strings
-        if "chain" in data.columns:
-            data["chain"] = [chain.value if isinstance(chain, Chain) else chain for chain in data["chain"]]
+        if "chain" in columns:
+            data["chain"] = data.chain.tolist()
         else:
             data["chain"] = None
 

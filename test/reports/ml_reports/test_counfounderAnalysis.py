@@ -15,7 +15,7 @@ from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
 from immuneML.reports.ml_reports.ConfounderAnalysis import ConfounderAnalysis
-from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator as RDG
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReadsType import ReadsType
 
@@ -35,28 +35,11 @@ class TestConfounderAnalysis(TestCase):
 
     def _make_dataset(self, path, size) -> RepertoireDataset:
 
-        random_dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=size, sequence_count_probabilities={100: 1.},
-                                                                            sequence_length_probabilities={5: 1.}, labels={}, path=path)
-
-        # signals = [Signal(id="disease", motifs=[Motif(identifier="m1", instantiation=GappedKmerInstantiation(), seed="AAA")],
-        #                   implanting_strategy=HealthySequenceImplanting(implanting_computation=ImplantingComputation.ROUND,
-        #                                                                 implanting=GappedMotifImplanting())),
-        #            Signal(id="HLA", motifs=[Motif(identifier="m2", instantiation=GappedKmerInstantiation(), seed="CCC")],
-        #                   implanting_strategy=HealthySequenceImplanting(implanting_computation=ImplantingComputation.ROUND,
-        #                                                                 implanting=GappedMotifImplanting())),
-        #            Signal(id="age", motifs=[Motif(identifier="m3", instantiation=GappedKmerInstantiation(), seed="GGG")],
-        #                   implanting_strategy=HealthySequenceImplanting(implanting_computation=ImplantingComputation.ROUND,
-        #                                                                 implanting=GappedMotifImplanting()))]
-        #
-        # simulation = Simulation([Implanting(dataset_implanting_rate=0.2, signals=signals, name='i1', repertoire_implanting_rate=0.25),
-        #                          Implanting(dataset_implanting_rate=0.2, signals=[signals[0], signals[1]], name='i2', repertoire_implanting_rate=0.25),
-        #                          Implanting(dataset_implanting_rate=0.1, signals=[signals[0]], name='i3', repertoire_implanting_rate=0.25),
-        #                          Implanting(dataset_implanting_rate=0.2, signals=[signals[2]], name='i4', repertoire_implanting_rate=0.25),
-        #                          Implanting(dataset_implanting_rate=0.1, signals=[signals[1]], name='i5', repertoire_implanting_rate=0.25)
-        #                          ])
-        #
-        # dataset = SignalImplanter.run(SimulationState(signals=signals, dataset=random_dataset, formats=['ImmuneML'], result_path=path,
-        #                                               name='my_synthetic_dataset', simulation=simulation, store_signal_in_receptors=True))
+        random_dataset = RDG.generate_repertoire_dataset(repertoire_count=size, sequence_count_probabilities={100: 1.},
+                                                         sequence_length_probabilities={5: 1.},
+                                                         labels={'disease': {True: 0.5, False: 0.5},
+                                                                 'HLA': {True: 0.5, False: 0.5},
+                                                                 'age': {True: 0.5, False: 0.5}}, path=path)
 
         return random_dataset
 
