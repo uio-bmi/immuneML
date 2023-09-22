@@ -316,7 +316,6 @@ class DeepRC(MLMethod):
     def _fit_for_label(self, metadata_file, hdf5_filepath: Path, train_indices, val_indices,
                        label: Label, cores_for_training: int):
 
-        print("fitting for label")
         from deeprc.dataset_readers import RepertoireDataset as DeepRCRepDataset
 
         task_definition = self._make_task_definition(label)

@@ -28,7 +28,7 @@ class TestDeepRC(TestCase):
     def make_encoded_data(self, path: Path):
         metadata_filepath = path / f"metadata.csv"
 
-        rep_ids = [f"REP{i}.tsv" for i in range(10)]
+        rep_ids = [f"REP{i}" for i in range(10)]
         status_label = [chr((i % 2) + 65) for i in range(10)]  # List of alternating strings "A" "B"
 
         metadata = pd.DataFrame({"ID": rep_ids, "status": status_label})
@@ -102,10 +102,4 @@ class TestDeepRC(TestCase):
         classifier.get_package_info()
 
     def test(self):
-        pass
-        # self.internal_deep_RC_test()
-        # try:
-        #     self.internal_deep_RC_test()
-        # except Exception as e:
-        #     logging.warning("DeepRC is not installed, skipping test. "
-        #                     "To install DeepRC, install the requirements from requirements_DeepRC.txt.")
+        self.internal_deep_RC_test()
