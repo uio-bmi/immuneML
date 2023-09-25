@@ -67,9 +67,10 @@ class TestDeepRC(TestCase):
         y = {"status": encoded_data.labels["status"]}
 
         params = DefaultParamsLoader.load("ml_methods/", "DeepRC")
-        params['pytorch_device_name'] = 'cpu'
+        params['pytorch_device_name'] = 'cuda:1'
         params['n_torch_threads'] = 1
         params['n_workers'] = 1
+        params['n_updates'] = 5
 
         classifier = DeepRC(**params)
 
