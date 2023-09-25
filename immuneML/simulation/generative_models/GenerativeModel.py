@@ -10,6 +10,13 @@ class GenerativeModel:
 
     OUTPUT_COLUMNS = []
 
+    def __init__(self, chain):
+        self.chain = chain
+
+    @abc.abstractmethod
+    def fit(self, data):
+        pass
+
     @abc.abstractmethod
     def is_same(self, model) -> bool:
         raise NotImplementedError

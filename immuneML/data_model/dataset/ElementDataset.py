@@ -69,6 +69,14 @@ class ElementDataset(Dataset):
                 self.element_ids.append(str(element.get_id()))
         return self.element_ids
 
+    def get_attribute(self, attribute: str, aslist: bool = False):
+        res = getattr(list(self.get_data(batch_size=self.get_example_count(), return_objects=False))[0], attribute)
+        # TODO: line above is too slow, fix somehow
+        if aslist:
+            return res.tolist()
+        else:
+            return res
+
     def make_subset(self, example_indices, path, dataset_type: str):
         """
         Creates a new dataset object with only those examples (receptors or receptor sequences) available which were given by index in example_indices argument.

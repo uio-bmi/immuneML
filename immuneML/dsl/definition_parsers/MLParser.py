@@ -4,6 +4,7 @@ from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
 from immuneML.util.Logger import log
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -27,7 +28,8 @@ class MLParser:
     @log
     def _parse_ml_method(ml_method_id: str, ml_specification) -> tuple:
 
-        valid_class_values = ReflectionHandler.all_nonabstract_subclass_basic_names(MLMethod, "", "ml_methods/")
+        valid_class_values = (ReflectionHandler.all_nonabstract_subclass_basic_names(MLMethod, "", "ml_methods/") +
+                              ReflectionHandler.all_nonabstract_subclass_basic_names(GenerativeModel, "", "simulation/generative_models/"))
 
         if type(ml_specification) is str:
             ml_specification = {ml_specification: {}}
@@ -45,7 +47,7 @@ class MLParser:
                                                 f"{str([key for key in non_default_keys])[1:-1]}."
 
         ml_method_class_name = non_default_keys[0]
-        ml_method_class = ReflectionHandler.get_class_by_name(ml_method_class_name, "ml_methods/")
+        ml_method_class = ReflectionHandler.get_class_by_name(ml_method_class_name)
 
         ml_specification[ml_method_class_name] = {**DefaultParamsLoader.load("ml_methods/", ml_method_class_name, log_if_missing=False),
                                                   **ml_specification[ml_method_class_name]}

@@ -23,6 +23,10 @@ class Dataset:
         pass
 
     @abc.abstractmethod
+    def get_attribute(self, attribute: str, aslist: bool = True):
+        pass
+
+    @abc.abstractmethod
     def get_example_count(self):
         pass
 
