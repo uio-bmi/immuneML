@@ -1,4 +1,5 @@
 import abc
+from typing import List
 
 
 class Dataset:
@@ -23,7 +24,11 @@ class Dataset:
         pass
 
     @abc.abstractmethod
-    def get_attribute(self, attribute: str, aslist: bool = True):
+    def get_attribute(self, attribute: str, as_list: bool = True):
+        pass
+
+    @abc.abstractmethod
+    def get_attributes(self, attributes: List[str], as_list: bool = True):
         pass
 
     @abc.abstractmethod

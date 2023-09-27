@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
@@ -32,7 +33,6 @@ class TrainGenModelInstruction(Instruction):
         self.state = TrainGenModelState(result_path, name, gen_sequence_count)
 
     def run(self, result_path: Path) -> TrainGenModelState:
-
         self._set_path(result_path)
         self._fit_model()
         self._save_model()
@@ -42,20 +42,20 @@ class TrainGenModelInstruction(Instruction):
 
     def _fit_model(self):
         print_log(f"{self.state.name}: starting to fit the model", True)
-        self.model.fit(self.dataset.get_attribute('sequence_aa', aslist=True))
+        self.model.fit(self.dataset)
         print_log(f"{self.state.name}: fitted the model", True)
 
     def _save_model(self):
         print(self.model)
 
     def _gen_data(self):
-        seqs = self.model.generate_sequences(self.state.gen_sequence_count, 1,
-                                             self.state.result_path / 'generated_sequences',
-                                             SequenceType.AMINO_ACID, False)
+        dataset = self.model.generate_sequences(self.state.gen_sequence_count, 1,
+                                                self.state.result_path / 'generated_sequences',
+                                                SequenceType.AMINO_ACID, False)
 
         print_log(f"{self.state.name}: generated sample sequences from the fitted model", True)
-        print(seqs)
-        self.state.sequence_examples = seqs[:TrainGenModelInstruction.MAX_ELEMENT_COUNT_TO_SHOW]
+
+        AIRRExporter.export(dataset, self.state.result_path)
 
     def _set_path(self, result_path):
         self.state.result_path = PathBuilder.build(result_path / self.state.name)

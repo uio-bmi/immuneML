@@ -69,11 +69,17 @@ class ElementDataset(Dataset):
                 self.element_ids.append(str(element.get_id()))
         return self.element_ids
 
-    def get_attribute(self, attribute: str, aslist: bool = False):
-        res = getattr(list(self.get_data(batch_size=self.get_example_count(), return_objects=False))[0], attribute)
-        # TODO: line above is too slow, fix somehow
-        if aslist:
+    def get_attribute(self, attribute: str, as_list: bool = False):
+        res = self.element_generator.get_attribute(attribute)
+        if as_list:
             return res.tolist()
+        else:
+            return res
+
+    def get_attributes(self, attributes: list, as_list: bool = False) -> dict:
+        res = self.element_generator.get_attributes(attributes)
+        if as_list:
+            return {attr: val.tolist() for attr, val in res.items()}
         else:
             return res
 

@@ -1,7 +1,9 @@
 from itertools import chain
 from pathlib import Path
+from typing import List
 
 import math
+import numpy as np
 
 from immuneML.data_model.bnp_util import bnp_read_from_file, bnp_write_to_file, make_element_dataset_objects, \
     merge_dataclass_objects
@@ -16,6 +18,21 @@ class ElementGenerator:
         self.file_size = file_size
         self.element_class_name = element_class_name
         self.buffer_type = buffer_type
+
+    def get_attribute(self, attribute: str):
+        elements = []
+        for file in self.file_list:
+            bnp_data = bnp_read_from_file(file, self.buffer_type)
+            elements.append(getattr(bnp_data, attribute))
+        return np.concatenate(elements)
+
+    def get_attributes(self, attributes: List[str]):
+        elements = {attr: [] for attr in attributes}
+        for file in self.file_list:
+            bnp_data = bnp_read_from_file(file, self.buffer_type)
+            for attribute in attributes:
+                elements[attribute].append(getattr(bnp_data, attribute))
+        return {attr: np.concatenate(elements[attr]) for attr in attributes}
 
     def _load_batch(self, current_file: int, return_objects: bool = True):
 

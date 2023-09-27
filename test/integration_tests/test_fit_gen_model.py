@@ -20,7 +20,11 @@ def test_fit_gen_model():
                 "sonnia": {
                     "SoNNia": {
                         "batch_size": 1e4,
-                        "epochs": 30
+                        "epochs": 30,
+                        'default_model_name': 'humanTRB',
+                        'deep': False,
+                        'include_joint_genes': True,
+                        'n_gen_seqs': 1000
                     }
                 }
             }
@@ -40,4 +44,4 @@ def test_fit_gen_model():
 
     ImmuneMLApp(path / 'specs.yaml', path / 'output').run()
 
-    # shutil.rmtree(path)
+    shutil.rmtree(path)

@@ -1,12 +1,21 @@
 from pathlib import Path
 
 import numpy as np
+from olga import load_model
 from sonia.sequence_generation import SequenceGeneration
 from sonnia.sonnia import SoNNia as InternalSoNNia
 
+from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
+from immuneML.simulation.generative_models.OLGA import OLGA
 from immuneML.util.Logger import print_log
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class SoNNia(GenerativeModel):
@@ -30,26 +39,52 @@ class SoNNia(GenerativeModel):
 
         include_joint_genes (bool)
 
-        include_indep_genes (bool)
+        n_gen_seqs (int)
+
+        custom_model_path (str)
+
+        default_model_name (str)
 
     """
 
     def __init__(self, chain=None, batch_size: int = None, epochs: int = None, deep: bool = False,
-                 include_joint_genes: bool = True, include_indep_genes: bool = False):
-        super().__init__(chain)
+                 default_model_name: str = None, n_gen_seqs: int = None, include_joint_genes: bool = True,
+                 custom_model_path: str = None):
+        if chain is not None:
+            super().__init__(chain)
+        elif default_model_name is not None:
+            super().__init__(chain=Chain.get_chain(default_model_name[-3:]))
         self.epochs = epochs
-        self.batch_size = batch_size
+        self.batch_size = int(batch_size)
         self.deep = deep
         self.include_joint_genes = include_joint_genes
-        self.include_indep_genes = include_indep_genes
+        self.n_gen_seqs = n_gen_seqs
         self._model = None
+        self.default_model_name = default_model_name
+        if custom_model_path is None or custom_model_path == '':
+            self._model_path = Path(
+                load_model.__file__).parent / f"default_models/{OLGA.DEFAULT_MODEL_FOLDER_MAP[self.default_model_name]}"
+        else:
+            self._model_path = custom_model_path
 
-    def fit(self, data):
-        # TODO: decide how to represent this data - what format should data be in, where should SoNNia-specific representation happen?
+    def fit(self, dataset: Dataset):
         print_log(f"{SoNNia.__name__}: fitting a selection model...", True)
-        self._model = InternalSoNNia(data_seqs=data, deep=self.deep, include_joint_genes=self.include_joint_genes,
-                                     include_indep_genes=self.include_indep_genes)
-        self._model.infer_selection(self.epochs, self.batch_size)
+
+        data = dataset.get_attributes(['sequence_aa', 'v_call', 'j_call'], as_list=True)
+        data_seqs = [[data['sequence_aa'][i], data['v_call'][i], data['j_call'][i]]
+                     for i in range(len(data['sequence_aa']))]
+
+        self._model = InternalSoNNia(data_seqs=data_seqs,
+                                     gen_seqs=[],
+                                     custom_pgen_model=self._model_path,
+                                     vj=self.chain in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
+                                     include_joint_genes=self.include_joint_genes,
+                                     include_indep_genes=not self.include_joint_genes)
+
+        self._model.add_generated_seqs(num_gen_seqs=self.n_gen_seqs, custom_model_folder=self._model_path)
+
+        self._model.infer_selection(epochs=self.epochs, batch_size=self.batch_size, verbose=1)
+
         print_log(f"{SoNNia.__name__}: selection model fitted.", True)
 
     def is_same(self, model) -> bool:
@@ -58,7 +93,14 @@ class SoNNia(GenerativeModel):
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
         gen_model = SequenceGeneration(self._model)
         sequences = gen_model.generate_sequences_post(count)
-        return sequences  # TODO: make some meaningful data structure here
+        return SequenceDataset.build_from_objects(sequences=[ReceptorSequence(sequence_aa=seq[0], sequence=seq[3],
+                                                                              metadata=SequenceMetadata(
+                                                                                  v_call=seq[1],
+                                                                                  j_call=seq[2],
+                                                                                  region_type=RegionType.IMGT_JUNCTION.name))
+                                                             for seq in sequences],
+                                                  file_size=len(sequences), path=PathBuilder.build(path),
+                                                  name='SoNNiaDataset')
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         raise NotImplementedError
@@ -75,3 +117,7 @@ class SoNNia(GenerativeModel):
     def generate_from_skewed_gene_models(self, v_genes: list, j_genes: list, seed: int, path: Path,
                                          sequence_type: SequenceType, batch_size: int, compute_p_gen: bool):
         raise NotImplementedError
+
+    def save_model(self, path: Path):
+        PathBuilder.build(path)
+        self._model.save_model(path)
