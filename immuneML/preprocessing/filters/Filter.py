@@ -30,7 +30,7 @@ class Filter(Preprocessor, ABC):
             if len(repertoire.sequences) > 0:
                 filtered_repertoires.append(repertoire)
             else:
-                removed_repertoire_info.append({"id": repertoire.id,
+                removed_repertoire_info.append({"id": repertoire.identifier,
                                                 'subject_id': repertoire.metadata['subject_id']
                                                 if repertoire.metadata is not None
                                                    and 'subject_id' in repertoire.metadata else ''})
