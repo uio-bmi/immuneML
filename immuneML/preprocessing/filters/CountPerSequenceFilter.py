@@ -1,3 +1,4 @@
+import logging
 from multiprocessing.pool import Pool
 from pathlib import Path
 
@@ -84,5 +85,9 @@ class CountPerSequenceFilter(Filter):
             np.greater_equal(counts, self.low_count_limit, out=indices_to_keep, where=not_none_indices)
 
         processed_repertoire = Repertoire.build_like(repertoire, indices_to_keep, self.result_path, filename_base=f"{repertoire.data_filename.stem}_filtered")
+
+        logging.info(f"{CountPerSequenceFilter.__name__}: finished processing repertoire "
+                     f"(subject_id: {repertoire.metadata['subject_id'] if repertoire.metadata and 'subject_id' in repertoire.metadata else ''}, "
+                     f"id: {repertoire.identifier}).")
 
         return processed_repertoire
