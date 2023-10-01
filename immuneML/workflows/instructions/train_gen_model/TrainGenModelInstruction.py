@@ -16,6 +16,7 @@ class TrainGenModelState:
     name: str
     gen_sequence_count: int
     sequence_examples: list = None
+    model_path: Path = None
 
 
 class TrainGenModelInstruction(Instruction):
@@ -46,7 +47,7 @@ class TrainGenModelInstruction(Instruction):
         print_log(f"{self.state.name}: fitted the model", True)
 
     def _save_model(self):
-        print(self.model)
+        self.state.model_path = self.model.save_model(self.state.result_path / 'trained_model/')
 
     def _gen_data(self):
         dataset = self.model.generate_sequences(self.state.gen_sequence_count, 1,

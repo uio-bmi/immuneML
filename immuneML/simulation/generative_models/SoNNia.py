@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -118,6 +119,7 @@ class SoNNia(GenerativeModel):
                                          sequence_type: SequenceType, batch_size: int, compute_p_gen: bool):
         raise NotImplementedError
 
-    def save_model(self, path: Path):
-        PathBuilder.build(path)
-        self._model.save_model(path)
+    def save_model(self, path: Path) -> Path:
+        PathBuilder.build(path / 'model')
+        self._model.save_model(path / 'model')
+        return Path(shutil.make_archive(str(path / 'trained_model'), "zip", str(path / 'model'))).absolute()

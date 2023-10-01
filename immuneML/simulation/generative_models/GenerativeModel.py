@@ -45,3 +45,7 @@ class GenerativeModel:
     def generate_from_skewed_gene_models(self, v_genes: list, j_genes: list, seed: int, path: Path, sequence_type: SequenceType, batch_size: int,
                                          compute_p_gen: bool):
         pass
+
+    @abc.abstractmethod
+    def save_model(self, path: Path) -> Path:
+        pass
