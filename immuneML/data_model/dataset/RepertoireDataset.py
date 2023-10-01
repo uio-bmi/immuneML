@@ -1,5 +1,6 @@
 # quality: gold
 import copy
+import logging
 import uuid
 from pathlib import Path
 
@@ -27,6 +28,9 @@ class RepertoireDataset(Dataset):
 
         metadata_path = PathBuilder.build(kwargs['path']) / 'metadata.csv'
         metadata_df.to_csv(metadata_path, index=False)
+
+        logging.info(f"Made new repertoire dataset at {kwargs['path']} with metadata at {metadata_path} "
+                     f"with {len(kwargs['repertoires'])} repertoires.")
 
         return RepertoireDataset(repertoires=kwargs['repertoires'], metadata_file=metadata_path)
 

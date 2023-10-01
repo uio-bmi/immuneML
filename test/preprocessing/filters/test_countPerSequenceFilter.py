@@ -27,44 +27,40 @@ def test_count_per_seq_filter():
                                                                      ["ACF", "ACF", "ACF", "ACF"]], path,
                                                                     seq_metadata=seq_metadata)[0])
 
-    dataset1 = CountPerSequenceFilter(
-        **{"low_count_limit": 2, "remove_without_count": True, "remove_empty_repertoires": False,
-           "result_path": path, "batch_size": 4}).process_dataset(dataset, path)
+    dataset1 = CountPerSequenceFilter(**{"low_count_limit": 2, "remove_without_count": True, "remove_empty_repertoires": False,
+                                             "result_path": path, "batch_size": 4}).process_dataset(dataset, PathBuilder.build(path / 'dataset1'))
     assert 2 == dataset1.repertoires[0].get_sequence_aas().shape[0]
 
-    dataset2 = CountPerSequenceFilter(
-        **{"low_count_limit": 5, "remove_without_count": True, "remove_empty_repertoires": False,
-           "result_path": path, "batch_size": 4}).process_dataset(dataset, path)
+    dataset2 = CountPerSequenceFilter(**{"low_count_limit": 5, "remove_without_count": True, "remove_empty_repertoires": False,
+                                         "result_path": path, "batch_size": 4}).process_dataset(dataset, PathBuilder.build(path / 'dataset2'))
     assert 0 == dataset2.repertoires[0].get_sequence_aas().shape[0]
 
-    dataset3 = CountPerSequenceFilter(
-        **{"low_count_limit": 0, "remove_without_count": True, "remove_empty_repertoires": False,
-           "result_path": path, "batch_size": 4}).process_dataset(dataset, path)
+    dataset3 = CountPerSequenceFilter(**{"low_count_limit": 0, "remove_without_count": True, "remove_empty_repertoires": False,
+                                         "result_path": path, "batch_size": 4}).process_dataset(dataset, PathBuilder.build(path / 'dataset3'))
     assert 3 == dataset3.repertoires[2].get_sequence_aas().shape[0]
+
+    dataset4 = CountPerSequenceFilter(
+        **{"low_count_limit": 4, "remove_without_count": True, "remove_empty_repertoires": True,
+           "result_path": path, "batch_size": 4}).process_dataset(dataset, PathBuilder.build(path / 'with_removed_repertoires'))
+    assert 2 == dataset4.get_example_count()
 
     dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
                                                                      ["ACF", "ACF"],
                                                                      ["ACF", "ACF", "ACF", "ACF"]], path,
-                                                                    seq_metadata=[[{"duplicate_count": None},
-                                                                                   {"duplicate_count": None},
-                                                                                   {"duplicate_count": None}],
-                                                                                  [{"duplicate_count": None},
-                                                                                   {"duplicate_count": None}],
-                                                                                  [{"duplicate_count": None},
-                                                                                   {"duplicate_count": None},
-                                                                                   {"duplicate_count": None},
+                                                                    seq_metadata=[[{"duplicate_count": None}, {"duplicate_count": None}, {"duplicate_count": None}],
+                                                                                  [{"duplicate_count": None}, {"duplicate_count": None}],
+                                                                                  [{"duplicate_count": None}, {"duplicate_count": None}, {"duplicate_count": None},
                                                                                    {"duplicate_count": None}]])[0])
 
-    dataset4 = CountPerSequenceFilter(
-        **{"low_count_limit": 0, "remove_without_count": True, "remove_empty_repertoires": False,
-           "result_path": path, "batch_size": 4}).process_dataset(dataset, path)
-    assert 0 == dataset4.repertoires[0].get_sequence_aas().shape[0]
-    assert 0 == dataset4.repertoires[1].get_sequence_aas().shape[0]
-    assert 0 == dataset4.repertoires[2].get_sequence_aas().shape[0]
+    dataset5 = CountPerSequenceFilter(**{"low_count_limit": 0, "remove_without_count": True, "remove_empty_repertoires": False,
+                                         "result_path": path, "batch_size": 4}).process_dataset(dataset, PathBuilder.build(path / 'dataset5'))
+    assert 0 == dataset5.repertoires[0].get_sequence_aas().shape[0]
+    assert 0 == dataset5.repertoires[1].get_sequence_aas().shape[0]
+    assert 0 == dataset5.repertoires[2].get_sequence_aas().shape[0]
 
     with pytest.raises(AssertionError):
         CountPerSequenceFilter(**{"low_count_limit": 10, "remove_without_count": True,
-                                  "remove_empty_repertoires": True, "result_path": path,
+                                  "remove_empty_repertoires": True, "result_path": PathBuilder.build(path / 'dataset6'),
                                   "batch_size": 4}).process_dataset(dataset, path)
 
     shutil.rmtree(path)

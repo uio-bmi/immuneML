@@ -1,3 +1,4 @@
+import logging
 from abc import ABC
 
 import pandas as pd
@@ -24,9 +25,17 @@ class Filter(Preprocessor, ABC):
 
     def _remove_empty_repertoires(self, repertoires: list):
         filtered_repertoires = []
+        removed_repertoire_info = []
         for repertoire in repertoires:
             if len(repertoire.sequences) > 0:
                 filtered_repertoires.append(repertoire)
+            else:
+                removed_repertoire_info.append({"id": repertoire.identifier,
+                                                'subject_id': repertoire.metadata['subject_id']
+                                                if repertoire.metadata is not None
+                                                   and 'subject_id' in repertoire.metadata else ''})
+
+        logging.info(f"Removed {len(removed_repertoire_info)} repertoires:\n{removed_repertoire_info}")
         return filtered_repertoires
 
     def check_dataset_not_empty(self, processed_dataset: Dataset, location="Filter"):
