@@ -15,6 +15,7 @@ from immuneML.dsl.import_parsers.ImportParser import ImportParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
@@ -63,6 +64,7 @@ class DefinitionParser:
         DefinitionParser.make_encodings_docs(def_path)
         DefinitionParser.make_reports_docs(def_path)
         DefinitionParser.make_ml_methods_docs(def_path)
+        DefinitionParser.make_gen_methods_docs(def_path)
         DefinitionParser.make_preprocessing_docs(def_path)
 
     @staticmethod
@@ -113,6 +115,12 @@ class DefinitionParser:
     def make_ml_methods_docs(path: Path):
         classes = ReflectionHandler.all_nonabstract_subclasses(MLMethod, "", "ml_methods/")
         make_docs(path, classes, "ml_methods.rst", "")
+
+    @staticmethod
+    def make_gen_methods_docs(path: Path):
+        classes = ReflectionHandler.all_nonabstract_subclasses(GenerativeModel, "", "ml_methods/generative_models/")
+        make_docs(path, classes, "generative_methods.rst", "")
+
 
     @staticmethod
     def make_preprocessing_docs(path: Path):

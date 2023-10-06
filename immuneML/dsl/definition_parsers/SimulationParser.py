@@ -10,9 +10,9 @@ from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.simulation.SimConfig import SimConfig
 from immuneML.simulation.SimConfigItem import SimConfigItem
-from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
 from immuneML.simulation.implants.Signal import SignalPair
 from immuneML.simulation.simulation_strategy.SimulationStrategy import SimulationStrategy
 from immuneML.util.ParameterValidator import ParameterValidator

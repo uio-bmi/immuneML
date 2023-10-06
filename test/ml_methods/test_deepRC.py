@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest import TestCase
 
 import pandas as pd
+import torch.cuda
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
@@ -103,4 +104,7 @@ class TestDeepRC(TestCase):
         classifier.get_package_info()
 
     def test(self):
-        self.internal_deep_RC_test()
+        if torch.cuda.is_available():
+            self.internal_deep_RC_test()
+        else:
+            pass

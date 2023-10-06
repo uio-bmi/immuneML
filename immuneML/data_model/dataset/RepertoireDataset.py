@@ -32,7 +32,11 @@ class RepertoireDataset(Dataset):
         logging.info(f"Made new repertoire dataset at {kwargs['path']} with metadata at {metadata_path} "
                      f"with {len(kwargs['repertoires'])} repertoires.")
 
-        return RepertoireDataset(repertoires=kwargs['repertoires'], metadata_file=metadata_path)
+        dataset = RepertoireDataset(repertoires=kwargs['repertoires'], metadata_file=metadata_path)
+        label_names = list(dataset.get_label_names(refresh=True))
+        dataset.labels = {label: list(set(values)) for label, values in dataset.get_metadata(label_names).items()}
+
+        return dataset
 
     @classmethod
     def build(cls, **kwargs):
@@ -89,14 +93,16 @@ class RepertoireDataset(Dataset):
         return len(self.repertoires)
 
     def get_metadata_fields(self, refresh=False):
-        """Returns the list of metadata fields, includes also the fields that will typically not be used as labels, like filename or identifier"""
+        """Returns the list of metadata fields, includes also the fields that will typically not be used as labels,
+        like filename or identifier"""
         if self.metadata_fields is None or refresh:
             df = pd.read_csv(self.metadata_file, sep=",", nrows=0, comment=Constants.COMMENT_SIGN)
             self.metadata_fields = df.columns.values.tolist()
         return self.metadata_fields
 
     def get_label_names(self, refresh=False):
-        """Returns the list of metadata fields which can be used as labels; if refresh=True, it reloads the fields from disk"""
+        """Returns the list of metadata fields which can be used as labels; if refresh=True, it reloads the fields
+        from disk"""
         all_metadata_fields = set(self.get_metadata_fields(refresh))
         for non_label in ["subject_id", "filename", "repertoire_id", "identifier"]:
             if non_label in all_metadata_fields:

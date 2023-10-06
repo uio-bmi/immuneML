@@ -16,8 +16,8 @@ from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.environment.SequenceType import SequenceType
-from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
-from immuneML.simulation.generative_models.InternalOlgaModel import InternalOlgaModel
+from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
+from immuneML.ml_methods.generative_models.InternalOlgaModel import InternalOlgaModel
 from immuneML.simulation.util.igor_helper import make_skewed_model_files
 from immuneML.util.ImportHelper import ImportHelper
 from immuneML.util.ParameterValidator import ParameterValidator
@@ -41,6 +41,7 @@ class OLGA(GenerativeModel):
         - Gene names are as provided in OLGA (either in default models or in the user-specified model files). For simulation, one should use gene names in the same format.
 
     """
+
     model_path: Path
     default_model_name: str
     chain: Chain = None
@@ -186,3 +187,9 @@ class OLGA(GenerativeModel):
     def is_same(self, model) -> bool:
         return type(model) == type(self) and self.chain == model.chain and self.model_path == model.model_path and \
                self.default_model_name == model.default_model_name
+
+    def fit(self, data):
+        raise NotImplementedError
+
+    def save_model(self, path: Path) -> Path:
+        raise NotImplementedError

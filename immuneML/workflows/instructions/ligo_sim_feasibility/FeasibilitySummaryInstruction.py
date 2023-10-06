@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Dict
 
@@ -7,15 +6,16 @@ import numpy as np
 import pandas as pd
 
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences
+from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.simulation.SimConfig import SimConfig
-from immuneML.simulation.generative_models.BackgroundSequences import BackgroundSequences
-from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.util.util import annotate_sequences, make_annotated_dataclass, get_bnp_data
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
-from immuneML.workflows.instructions.ligo_sim_feasibility.feasibility_reports import report_signal_frequencies, report_signal_cooccurrences, \
+from immuneML.workflows.instructions.ligo_sim_feasibility.feasibility_reports import report_signal_frequencies, \
+    report_signal_cooccurrences, \
     report_p_gen_histogram, report_seq_len_dist
 
 

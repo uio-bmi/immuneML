@@ -13,8 +13,8 @@ from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.environment.SequenceType import SequenceType
-from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
-from immuneML.simulation.generative_models.OLGA import OLGA
+from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
+from immuneML.ml_methods.generative_models.OLGA import OLGA
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -22,6 +22,7 @@ from immuneML.util.PathBuilder import PathBuilder
 class SoNNia(GenerativeModel):
     """
     SoNNia models the selection process of T and B cell receptor repertoires. It is based on the SoNNia Python package.
+    It supports SequenceDataset as input, but not RepertoireDataset.
 
     Original publication:
     Isacchini, G., Walczak, A. M., Mora, T., & Nourmohammad, A. (2021). Deep generative selection models of T and B

@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Dict, Union
 
-from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
+from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.simulation.implants.Signal import Signal, SignalPair
 
 

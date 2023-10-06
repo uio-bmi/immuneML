@@ -4,7 +4,7 @@ from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
+from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.util.Logger import log
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler

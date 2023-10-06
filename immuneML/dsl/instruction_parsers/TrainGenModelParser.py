@@ -14,12 +14,12 @@ class TrainGenModelParser:
         ParameterValidator.assert_keys(instruction.keys(), valid_keys, TrainGenModelParser.__name__, key)
 
         dataset = symbol_table.get(instruction['dataset'])
-        model = symbol_table.get(instruction['model'])
+        model = symbol_table.get(instruction['method'])
 
-        ParameterValidator.assert_type_and_value(instruction['gen_sequence_count'], int, TrainGenModelParser.__name__,
-                                                 'gen_sequence_count', 0)
+        ParameterValidator.assert_type_and_value(instruction['gen_examples_count'], int, TrainGenModelParser.__name__,
+                                                 'gen_examples_count', 0)
         ParameterValidator.assert_type_and_value(instruction['number_of_processes'], int, TrainGenModelParser.__name__,
                                                  'number_of_processes', 1)
 
         return TrainGenModelInstruction(**{**{k: v for k, v in instruction.items() if k != 'type'},
-                                           **{'dataset': dataset, 'model': model, 'name': key}})
+                                           **{'dataset': dataset, 'method': model, 'name': key}})

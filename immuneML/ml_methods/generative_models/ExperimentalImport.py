@@ -6,8 +6,8 @@ import numpy as np
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.dsl.import_parsers.ImportParser import ImportParser
 from immuneML.environment.SequenceType import SequenceType
-from immuneML.simulation.generative_models.BackgroundSequences import BackgroundSequences
-from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
+from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences
+from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.simulation.util.util import write_bnp_data
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder

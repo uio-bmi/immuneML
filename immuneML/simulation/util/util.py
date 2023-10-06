@@ -22,8 +22,8 @@ from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import Rece
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.SimConfigItem import SimConfigItem
-from immuneML.simulation.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.implants.LigoPWM import LigoPWM
 from immuneML.simulation.implants.MotifInstance import MotifInstance, MotifInstanceGroup
 from immuneML.simulation.implants.Signal import Signal, SignalPair

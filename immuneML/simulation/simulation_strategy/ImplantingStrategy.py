@@ -7,13 +7,14 @@ from bionumpy.bnpdataclass import BNPDataClass
 
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.SimConfigItem import SimConfigItem
-from immuneML.simulation.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.implants.MotifInstance import MotifInstance
 from immuneML.simulation.implants.Signal import Signal, SignalPair
 from immuneML.simulation.simulation_strategy.SimulationStrategy import SimulationStrategy
 from immuneML.simulation.util.bnp_util import merge_dataclass_objects
-from immuneML.simulation.util.util import build_imgt_positions, choose_implant_position, filter_out_illegal_sequences, annotate_sequences
+from immuneML.simulation.util.util import build_imgt_positions, choose_implant_position, filter_out_illegal_sequences, \
+    annotate_sequences
 from immuneML.util.Logger import print_log
 from immuneML.util.PositionHelper import PositionHelper
 

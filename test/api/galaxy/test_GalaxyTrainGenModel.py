@@ -37,9 +37,9 @@ def test_train_gen_model_run():
         "instructions": {
             "inst1": {
                 "type": "TrainGenModel",
-                "gen_sequence_count": 100,
+                "gen_examples_count": 100,
                 "dataset": "d1",
-                "model": "sonnia",
+                "method": "sonnia",
                 "number_of_processes": 2
             }
         }

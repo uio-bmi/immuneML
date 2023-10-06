@@ -1,3 +1,5 @@
+import shutil
+
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
 from immuneML.data_model.bnp_util import write_yaml
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -32,9 +34,9 @@ def test_fit_gen_model():
         "instructions": {
             "inst1": {
                 "type": "TrainGenModel",
-                "gen_sequence_count": 100,
+                "gen_examples_count": 100,
                 "dataset": "d1",
-                "model": "sonnia",
+                "method": "sonnia",
                 "number_of_processes": 2
             }
         }

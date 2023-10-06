@@ -1,5 +1,4 @@
 import copy
-import math
 import os
 import random
 from dataclasses import fields
@@ -8,6 +7,7 @@ from multiprocessing import Pool
 from pathlib import Path
 from typing import List, Dict, Tuple
 
+import math
 import numpy as np
 from bionumpy.bnpdataclass import BNPDataClass
 
@@ -15,15 +15,17 @@ from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.LigoSimState import LigoSimState
 from immuneML.simulation.SimConfig import SimConfig
 from immuneML.simulation.SimConfigItem import SimConfigItem
-from immuneML.simulation.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.simulation_strategy.ImplantingStrategy import ImplantingStrategy
 from immuneML.simulation.util.bnp_util import merge_dataclass_objects
-from immuneML.simulation.util.util import get_bnp_data, make_receptor_sequence_objects, make_annotated_dataclass, get_sequence_per_signal_count, \
-    update_seqs_without_signal, update_seqs_with_signal, check_iteration_progress, make_sequence_paths, make_signal_metadata, needs_seqs_with_signal, \
+from immuneML.simulation.util.util import get_bnp_data, make_receptor_sequence_objects, make_annotated_dataclass, \
+    get_sequence_per_signal_count, \
+    update_seqs_without_signal, update_seqs_with_signal, check_iteration_progress, make_sequence_paths, \
+    make_signal_metadata, needs_seqs_with_signal, \
     check_sequence_count, make_repertoire_from_sequences, get_no_signal_sequences, get_signal_sequences, \
     annotate_sequences, get_signal_sequence_count, filter_sequences_by_length
 from immuneML.util.ExporterHelper import ExporterHelper

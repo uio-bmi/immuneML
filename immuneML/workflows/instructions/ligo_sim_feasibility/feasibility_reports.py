@@ -5,9 +5,9 @@ import pandas as pd
 import plotly.express as px
 
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
-from immuneML.simulation.generative_models.BackgroundSequences import BackgroundSequences
 
 
 def report_signal_frequencies(frequencies: pd.DataFrame, path: Path) -> ReportResult:
