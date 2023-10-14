@@ -69,9 +69,7 @@ class TestSignificantKmerPositions(TestCase):
         return str(file_path)
 
     def test_generate(self):
-        path = EnvironmentSettings.tmp_test_path / f"significant_kmer_positions/"
-
-        PathBuilder.build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / f"significant_kmer_positions/")
 
         dataset = self._get_example_dataset(path)
         implanted_sequences_path = self._get_implanted_sequences(path)
@@ -102,7 +100,7 @@ class TestSignificantKmerPositions(TestCase):
         self.assertListEqual(list(result_output.columns), ["encoding", "p-value", "imgt_position", "k-mer", "count"])
         self.assertListEqual(list(result_output["encoding"]), ["2-mer"] * 12 + ["3-mer"] * 10)
         self.assertListEqual(list(result_output["p-value"]), [1.] * 6 + [0.5] * 6 + [1.] * 5 + [0.5] * 5)
-        self.assertListEqual(list(result_output["imgt_position"]), [105, 105, 106, 106, 107, 116] * 2 + [105, 105, 106, 106, 107] * 2)
+        self.assertListEqual(list(result_output["imgt_position"]), ['105', '105', '106', '106', '107', '116'] * 2 + ['105', '105', '106', '106', '107'] * 2)
         self.assertListEqual(list(result_output["count"]), [1] * 22)
 
         shutil.rmtree(path)

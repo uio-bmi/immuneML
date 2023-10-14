@@ -1,5 +1,6 @@
 # quality: peripheral
 import itertools
+import logging
 import warnings
 
 from immuneML.data_model.receptor.RegionType import RegionType
@@ -29,11 +30,15 @@ class KmerHelper:
     @staticmethod
     def create_IMGT_kmers_from_string(sequence: str, k: int, region_type: RegionType):
         positions = PositionHelper.gen_imgt_positions_from_length(len(sequence), region_type)
-        sequence_w_pos = list(zip(list(sequence), positions))
-        kmers = KmerHelper.create_kmers_from_string(sequence_w_pos, k)
-        kmers = [(''.join([x[0] for x in kmer]), min([i[1] for i in kmer]) if int(min([i[1] for i in kmer])) != 112 else max([i[1] for i in kmer if int(i[1]) == 112]))
-                 for kmer in kmers]
-        return kmers
+        if positions is not None and len(positions) > 0:
+            sequence_w_pos = list(zip(list(sequence), positions))
+            kmers = KmerHelper.create_kmers_from_string(sequence_w_pos, k)
+            kmers = [(''.join([x[0] for x in kmer]), kmer[0][1]) for kmer in kmers]
+            return kmers
+        else:
+            logging.warning(f"{KmerHelper.__name__}: {sequence} could not be represented using IMGT {k}-mers, "
+                            f"no IMGT positions were found. Returning empty list instead...")
+            return []
 
     @staticmethod
     def create_IMGT_gapped_kmers_from_sequence(sequence: ReceptorSequence, sequence_type: SequenceType, k_left: int, max_gap: int, k_right: int = None, min_gap: int = 0):
@@ -43,12 +48,7 @@ class KmerHelper:
         kmers = KmerHelper.create_gapped_kmers_from_string(sequence_w_pos, k_left=k_left, max_gap=max_gap,
                                                            k_right=k_right, min_gap=min_gap)
         if kmers is not None:
-            kmers = [(''.join([x[0] if isinstance(x, tuple) else x for x in kmer]),
-                      min([i[1] if isinstance(i, tuple) else 1000 for i in kmer])
-                      if int(min([i[1] if isinstance(i, tuple) else 1000 for i in kmer])) != 112
-                      else max([i[1] if isinstance(i, tuple) else 0 for i in kmer if
-                                int(i[1] if isinstance(i, tuple) else 0) == 112]))
-                     for kmer in kmers]
+            kmers = [(''.join([x[0] for x in kmer]), kmer[0][1]) for kmer in kmers]
             return kmers
         else:
             return None
@@ -68,7 +68,7 @@ class KmerHelper:
             if isinstance(sequence, str):
                 gapped_kmers.extend([kmer[:k_left] + i * "." + kmer[k_left + i:] for kmer in kmers])
             if isinstance(sequence, list):
-                gapped_kmers.extend([kmer[:k_left] + i * ["."] + kmer[k_left + i:] for kmer in kmers])
+                gapped_kmers.extend([kmer[:k_left] + [(".", el[1]) for el in kmer[k_left:k_left+i]] + kmer[k_left + i:] for kmer in kmers])
         return gapped_kmers
 
     @staticmethod
