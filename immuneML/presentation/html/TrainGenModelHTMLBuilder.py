@@ -1,3 +1,4 @@
+import itertools
 from pathlib import Path
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -29,8 +30,14 @@ class TrainGenModelHTMLBuilder:
             "name": state.name,
             'immuneML_version': MLUtil.get_immuneML_version(),
             "full_specs": Util.get_full_specs_path(base_path),
-            # "elements": state.sequence_examples
         }
 
-        return html_map
+        html_map = {**html_map, **{
+            'show_reports': any(len(rep_results) > 0 for rep_results in state.report_results.values()),
+            'reports': list(itertools.chain.from_iterable(
+                [Util.to_dict_recursive(Util.update_report_paths(report_result, base_path), base_path)
+                 for report_result in state.report_results[report_type]]
+                for report_type in state.report_results.keys()))
+        }}
 
+        return html_map

@@ -1,10 +1,14 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import List, Dict
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
+from immuneML.reports.ReportResult import ReportResult
+from immuneML.reports.data_reports.DataReport import DataReport
+from immuneML.reports.ml_reports.MLReport import MLReport
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
@@ -17,6 +21,7 @@ class TrainGenModelState:
     gen_examples_count: int
     sequence_examples: list = None
     model_path: Path = None
+    report_results: Dict[str, List[ReportResult]] = field(default_factory=lambda: {'data_reports': [], 'ml_reports': []})
 
 
 class TrainGenModelInstruction(Instruction):
@@ -41,6 +46,8 @@ class TrainGenModelInstruction(Instruction):
 
         gen_examples_count (int): how many examples (sequences, repertoires) to generate from the fitted model
 
+        reports (list): list of report ids (defined under definitions/reports) to apply after fitting a generative model and generating gen_examples_count examples; these can be data reports (to be run on generated examples), ML reports (to be run on the fitted model)
+
     YAML specification:
 
     .. indent with spaces
@@ -52,23 +59,28 @@ class TrainGenModelInstruction(Instruction):
             model: model1 # defined previously under definitions/ml_methods
             gen_examples_count: 100
             number_of_processes: 4
+            reports: [data_rep1, ml_rep2]
 
     """
 
     MAX_ELEMENT_COUNT_TO_SHOW = 10
 
     def __init__(self, dataset: Dataset = None, method: GenerativeModel = None, number_of_processes: int = 1,
-                 gen_examples_count: int = 100, result_path: Path = None, name: str = None):
+                 gen_examples_count: int = 100, result_path: Path = None, name: str = None, reports: list = None):
         self.dataset = dataset
+        self.generated_dataset = None
         self.number_of_processes = number_of_processes
         self.method = method
         self.state = TrainGenModelState(result_path, name, gen_examples_count)
+        self.reports = reports
 
     def run(self, result_path: Path) -> TrainGenModelState:
         self._set_path(result_path)
         self._fit_model()
         self._save_model()
         self._gen_data()
+        self._evaluate_model()
+        self._run_reports()
 
         return self.state
 
@@ -86,8 +98,27 @@ class TrainGenModelInstruction(Instruction):
                                                  SequenceType.AMINO_ACID, False)
 
         print_log(f"{self.state.name}: generated {self.state.gen_examples_count} examples from the fitted model", True)
+        self.generated_dataset = dataset
 
         AIRRExporter.export(dataset, self.state.result_path)
+
+    def _evaluate_model(self):
+        print("Evaluation is not implemented yet!")
+
+    def _run_reports(self):
+        report_path = PathBuilder.build(self.state.result_path / 'reports')
+        for report in self.reports:
+            report.result_path = report_path
+            if isinstance(report, DataReport):
+                report.dataset = self.generated_dataset
+                self.state.report_results['data_reports'].append(report.generate_report())
+            elif isinstance(report, MLReport):
+                report.method = self.method
+                self.state.report_results['ml_reports'].append(report.generate_report())
+
+        if len(self.reports) > 0:
+            gen_rep_count = len(self.state.report_results['ml_reports']) + len(self.state.report_results['data_reports'])
+            print_log(f"{self.state.name}: generated {gen_rep_count} reports.", True)
 
     def _set_path(self, result_path):
         self.state.result_path = PathBuilder.build(result_path / self.state.name)
