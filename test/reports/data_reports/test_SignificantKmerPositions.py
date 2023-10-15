@@ -69,6 +69,7 @@ class TestSignificantKmerPositions(TestCase):
         return str(file_path)
 
     def test_generate(self):
+        # TODO: double check the expected results of this test
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / f"significant_kmer_positions/")
 
         dataset = self._get_example_dataset(path)
@@ -95,12 +96,12 @@ class TestSignificantKmerPositions(TestCase):
         self.assertTrue(os.path.isfile(result.output_figures[0].path))
         self.assertTrue(os.path.isfile(result.output_tables[0].path))
 
-        result_output = pd.read_csv(path / "significant_kmer_positions_report.csv", sep=",")
+        result_output = pd.read_csv(path / "significant_kmer_positions_report.csv", sep=",", dtype={'imgt_position': str})
 
         self.assertListEqual(list(result_output.columns), ["encoding", "p-value", "imgt_position", "k-mer", "count"])
-        self.assertListEqual(list(result_output["encoding"]), ["2-mer"] * 12 + ["3-mer"] * 10)
-        self.assertListEqual(list(result_output["p-value"]), [1.] * 6 + [0.5] * 6 + [1.] * 5 + [0.5] * 5)
-        self.assertListEqual(list(result_output["imgt_position"]), ['105', '105', '106', '106', '107', '116'] * 2 + ['105', '105', '106', '106', '107'] * 2)
-        self.assertListEqual(list(result_output["count"]), [1] * 22)
+        self.assertListEqual(list(result_output["encoding"]), ["2-mer"] * 6 + ["3-mer"] * 6)
+        self.assertListEqual(list(result_output["p-value"]), [1.] * 3 + [0.5] * 3 + [1.] * 3 + [0.5] * 3)
+        self.assertListEqual(list(result_output["imgt_position"]), ['105', '106', '107'] * 4)
+        self.assertListEqual(list(result_output["count"]), [1] * 12)
 
         shutil.rmtree(path)

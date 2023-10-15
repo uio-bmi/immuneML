@@ -122,7 +122,7 @@ class SignificantKmerPositions(DataReport):
                         result["k-mer"].append(kmer)
                         result["count"].append(count)
 
-        return pd.DataFrame(result)
+        return pd.DataFrame(result).astype({'imgt_position': str})
 
     def _get_encoder_result_path(self, k, p_value):
         result_path =  self.result_path / f"{k}-mer_{p_value}"
