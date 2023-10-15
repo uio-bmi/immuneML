@@ -95,30 +95,14 @@ def prepare_specs(self, path) -> Path:
 
     return path / "specs.yaml"
 
-
-def prepare_dataset(self, path):
-    PathBuilder.build(path)
-    repertoires, metadata = RepertoireBuilder.build(sequences=[["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                               ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                               ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                               ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                               ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                               ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                               ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                               ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                               ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                               ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                               ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                               ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                               ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                               ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                               ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                               ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                               ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"]], path=path,
-                                                    labels={"l1": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
-                                                                   1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
-                                                            "l2": [0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1,
-                                                                   0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]})
+    def prepare_dataset(self, path):
+        PathBuilder.build(path)
+        repertoires, metadata = RepertoireBuilder.build(sequences=[["AAAAA", "CCCCC", "DDDDD"] for _ in range(34)],
+                                                        path=path,
+                                                        labels={"l1": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
+                                                                       1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+                                                                "l2": [0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1,
+                                                                       0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]})
 
     dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"l1": [1, 2], "l2": [0, 1]},
                                 name="dataset1")
@@ -127,7 +111,7 @@ def prepare_dataset(self, path):
 
 @pytest.mark.skip(reason='simulation will come from ligo')
 def test_simulation(self):
-    path = EnvironmentSettings.tmp_test_path / "integration_simulation/"
+    path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "integration_simulation/")
     self.prepare_dataset(path)
     specs_path = self.prepare_specs(path)
 
@@ -240,10 +224,10 @@ def test_simulation_receptors():
     self.assertTrue(os.path.isfile(path / "result/inst1/exported_dataset/immuneml/d1.yaml"))
     dataset = ImmuneMLImport.import_dataset({"path": path / "result/inst1/exported_dataset/immuneml/d1.yaml"}, "d1")
 
-    self.assertEqual(100, dataset.get_example_count())
-    self.assertEqual(100, len([receptor for receptor in dataset.get_data() if "signal1" in receptor.metadata]))
-    self.assertEqual(50, len([receptor for receptor in dataset.get_data() if receptor.metadata["signal1"]]))
-    self.assertEqual(100, len([receptor for receptor in dataset.get_data() if "signal2" in receptor.metadata]))
-    self.assertEqual(50, len([receptor for receptor in dataset.get_data() if receptor.metadata["signal2"]]))
+    assert 100 == dataset.get_example_count()
+    assert 100 == len([receptor for receptor in dataset.get_data() if "signal1" in receptor.metadata])
+    assert 50 == len([receptor for receptor in dataset.get_data() if receptor.metadata["signal1"]])
+    assert 100 == len([receptor for receptor in dataset.get_data() if "signal2" in receptor.metadata])
+    assert 50 == len([receptor for receptor in dataset.get_data() if receptor.metadata["signal2"]])
 
     shutil.rmtree(path)

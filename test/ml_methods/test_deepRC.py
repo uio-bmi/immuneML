@@ -81,20 +81,21 @@ class TestDeepRC(TestCase):
         self.assertEqual(len(train_indices) + len(val_indices), 10)
         self.assertEqual(set(list(train_indices) + list(val_indices)), set(range(10)))
 
-        # test if 'fit' function saves models
-        classifier.fit(encoded_data, Label("status", values=["A", "B"]))
+        if torch.cuda.is_available():
+            # test if 'fit' function saves models
+            classifier.fit(encoded_data, Label("status", values=["A", "B"]))
 
-        self.assertIsInstance(classifier.model, DeepRCInternal)
+            self.assertIsInstance(classifier.model, DeepRCInternal)
 
-        # Test storing and loading of models
-        self.assertFalse(classifier.check_if_exists(result_path))
-        classifier.store(result_path, feature_names=None)
-        self.assertTrue(classifier.check_if_exists(result_path))
+            # Test storing and loading of models
+            self.assertFalse(classifier.check_if_exists(result_path))
+            classifier.store(result_path, feature_names=None)
+            self.assertTrue(classifier.check_if_exists(result_path))
 
-        second_classifier = DeepRC(**params)
-        second_classifier.load(result_path)
+            second_classifier = DeepRC(**params)
+            second_classifier.load(result_path)
 
-        self.assertIsInstance(second_classifier.model, DeepRCInternal)
+            self.assertIsInstance(second_classifier.model, DeepRCInternal)
 
         shutil.rmtree(path)
 
