@@ -3,11 +3,12 @@ from typing import Tuple
 
 from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.IO.dataset_import.IReceptorImport import IReceptorImport
+from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.receptor.ChainPair import ChainPair
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
-from immuneML.util.Logger import log
+from immuneML.util.Logger import log, print_log
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
@@ -59,6 +60,7 @@ class ImportParser:
             dataset = import_cls.import_dataset(params, key)
             dataset.name = key
             symbol_table.add(key, SymbolType.DATASET, dataset)
+            ImportParser.log_dataset_info(dataset)
         except KeyError as key_error:
             raise KeyError(f"{key_error}\n\nAn error occurred during parsing of dataset {key}. "
                            f"The keyword {key_error.args[0]} was missing. This either means this argument was "
@@ -85,3 +87,8 @@ class ImportParser:
             params["metadata_file"] = Path(params["metadata_file"])
         dataset_specs["params"] = params
         return params
+
+    @staticmethod
+    def log_dataset_info(dataset: Dataset):
+        print_log(f"Imported {dataset.__class__.__name__.split('Dataset')[0].lower()} dataset {dataset.name} with "
+                  f"{dataset.get_example_count()} examples.", True)

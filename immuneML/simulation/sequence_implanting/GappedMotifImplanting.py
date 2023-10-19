@@ -23,9 +23,9 @@ class GappedMotifImplanting(SequenceImplantingStrategy):
         return new_sequence
 
     def _build_imgt_positions(self, sequence: ReceptorSequence, motif_instance: MotifInstance):
-        assert len(sequence.get_sequence()) >= motif_instance.gap + len(motif_instance.instance) - 1, \
-            "The motif instance is longer than receptor_sequence length. Remove the receptor_sequence from the repertoire or reduce max gap length " \
-            "to be able to proceed. "
+        assert len(sequence.get_sequence()) >= motif_instance.gap + len(motif_instance.instance), \
+            ("The motif instance is longer than receptor_sequence length. Remove the receptor_sequence from the "
+             "repertoire or reduce max gap length to be able to proceed. ")
         return PositionHelper.gen_imgt_positions_from_sequence(sequence)
 
     def _choose_implant_position(self, imgt_positions, position_weights):

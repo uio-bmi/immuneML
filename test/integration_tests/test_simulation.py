@@ -97,23 +97,8 @@ class TestSimulation(TestCase):
 
     def prepare_dataset(self, path):
         PathBuilder.build(path)
-        repertoires, metadata = RepertoireBuilder.build(sequences=[["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                                   ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                                   ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                                   ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                                   ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                                   ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                                   ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                                   ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                                   ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                                   ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                                   ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                                   ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                                   ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                                   ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                                   ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                                   ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
-                                                                   ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"]], path=path,
+        repertoires, metadata = RepertoireBuilder.build(sequences=[["AAAAA", "CCCCC", "DDDDD"] for _ in range(34)],
+                                                        path=path,
                                                         labels={"l1": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
                                                                        1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
                                                                 "l2": [0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1,
@@ -123,7 +108,7 @@ class TestSimulation(TestCase):
         ImmuneMLExporter.export(dataset, path)
 
     def test_simulation(self):
-        path = EnvironmentSettings.tmp_test_path / "integration_simulation/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "integration_simulation/")
         self.prepare_dataset(path)
         specs_path = self.prepare_specs(path)
 
@@ -174,10 +159,10 @@ class TestSimulation(TestCase):
                         }
                     },
                     "motif2": {
-                        "seed_chain1": "CCC",
+                        "seed_chain1": "CCCC",
                         "name_chain1": "ALPHA",
                         "name_chain2": "BETA",
-                        "seed_chain2": "FFF",
+                        "seed_chain2": "FFFF",
                         "instantiation": "GappedKmer"
                     }
                 },

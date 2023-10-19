@@ -7,18 +7,18 @@ class TestPositionHelper(TestCase):
     def test_gen_imgt_positions_from_length(self):
         length = 11
         positions = PositionHelper.gen_imgt_positions_from_cdr3_length(length)
-        self.assertEqual(positions, [105, 106, 107, 108, 109, 110, 113, 114, 115, 116, 117])
+        self.assertEqual(positions, ['105', '106', '107', '108', '109', '110', '113', '114', '115', '116', '117'])
         length = 12
         positions = PositionHelper.gen_imgt_positions_from_cdr3_length(length)
-        self.assertEqual(positions, [105, 106, 107, 108, 109, 110, 112, 113, 114, 115, 116, 117])
+        self.assertEqual(positions, ['105', '106', '107', '108', '109', '110', '112', '113', '114', '115', '116', '117'])
         length = 13
         positions = PositionHelper.gen_imgt_positions_from_cdr3_length(length)
-        self.assertEqual(positions, [105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117])
+        self.assertEqual(positions, ['105', '106', '107', '108', '109', '110', '111', '112', '113', '114', '115', '116', '117'])
         length = 18
         positions = PositionHelper.gen_imgt_positions_from_cdr3_length(length)
         self.assertEqual(positions,
-                         [105, 106, 107, 108, 109, 110, 111, 111.001, 111.002, 112.003, 112.002, 112.001, 112, 113, 114,
-                          115, 116, 117])
+                         ['105', '106', '107', '108', '109', '110', '111', '111.1', '111.2', '112.3', '112.2', '112.1', '112', '113', '114',
+                          '115', '116', '117'])
 
     def test_adjust_position_weights(self):
         weights = PositionHelper.adjust_position_weights(sequence_position_weights={105: 0.8, 106: 0.1, 109: 0.1},

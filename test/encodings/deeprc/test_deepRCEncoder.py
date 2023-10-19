@@ -32,7 +32,6 @@ class TestDeepRCEncoder(TestCase):
 
     def test_encode(self):
         path = EnvironmentSettings.tmp_test_path / "deeprc_encoder/"
-        PathBuilder.build(path)
         PathBuilder.build(path / "encoded_data/")
 
         main_dataset, sub_dataset = self.create_datasets(path)
@@ -48,7 +47,7 @@ class TestDeepRCEncoder(TestCase):
         self.assertListEqual(encoded.encoded_data.example_ids, sub_dataset.get_repertoire_ids())
         self.assertTrue(os.path.isfile(encoded.encoded_data.info["metadata_filepath"]))
 
-        metadata_content = pd.read_csv(encoded.encoded_data.info["metadata_filepath"], sep="\t")
+        metadata_content = pd.read_csv(encoded.encoded_data.info["metadata_filepath"], sep=",")
         self.assertListEqual(list(metadata_content["ID"]), sub_dataset.get_repertoire_ids())
 
         for repertoire in main_dataset.repertoires:

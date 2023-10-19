@@ -63,7 +63,8 @@ class CompAIRRHelper:
                 indels_args + frequency_args + ignore_genes + output_args + input_file_list + output_pairs + cdr3_indicator
 
     @staticmethod
-    def write_repertoire_file(repertoire_dataset=None, filename=None, compairr_params=None, repertoires: list = None):
+    def write_repertoire_file(repertoire_dataset=None, filename=None, compairr_params=None, repertoires: list = None,
+                              export_sequence_id: bool = False):
         mode = "w"
         header = True
 
@@ -73,7 +74,7 @@ class CompAIRRHelper:
             repertoires = repertoire_dataset.get_data()
 
         for ind, repertoire in enumerate(repertoires):
-            repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, compairr_params)
+            repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, compairr_params, export_sequence_id)
 
             if ind == 0:
                 columns_in_order = sorted(repertoire_contents.columns)
@@ -84,11 +85,13 @@ class CompAIRRHelper:
             header = False
 
     @staticmethod
-    def get_repertoire_contents(repertoire, compairr_params):
+    def get_repertoire_contents(repertoire, compairr_params, export_sequence_id=False):
         attributes = [EnvironmentSettings.get_sequence_type().value, "counts"]
         attributes += [] if compairr_params.ignore_genes else ["v_genes", "j_genes"]
         repertoire_contents = repertoire.get_attributes(attributes)
         repertoire_contents = pd.DataFrame({**repertoire_contents, "identifier": repertoire.identifier})
+        if export_sequence_id:
+            repertoire_contents['sequence_id'] = repertoire.get_attribute('sequence_identifiers')
 
         check_na_rows = [EnvironmentSettings.get_sequence_type().value]
         check_na_rows += [] if compairr_params.ignore_counts else ["counts"]

@@ -27,6 +27,7 @@ class EnvironmentSettings:
     source_docs_path = root_path / "docs/source"
     max_sequence_length = 20
     low_memory = True
+    compairr_paths = [Path("/usr/local/bin/compairr"), Path("./compairr/src/compairr"), root_path / 'compairr/src/compairr']
 
     @staticmethod
     def reset_cache_path():
