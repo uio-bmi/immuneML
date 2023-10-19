@@ -20,7 +20,7 @@ setup(
     author="immuneML Team",
     author_email="milenpa@student.matnat.uio.no",
     url="https://github.com/uio-bmi/immuneML",
-    install_requires=["numpy", "pytest>=4", "pandas>=1,<=1.5.3", "PyYAML>=5.3", "scikit-learn>=0.23",
+    install_requires=["numpy<1.20", "pytest>=4", "pandas>=1,<2.0", "PyYAML>=5.3", "scikit-learn>=0.23",
                       "gensim>=3.8", "matplotlib>=3.1", "editdistance", "regex", "tzlocal", "airr>=1,<1.4",
                       "fishersapi", "pystache", "torch>=1.5.1", "dill>=0.3", "plotly>=4", "logomaker>=0.8",
                       "matplotlib-venn>=0.11", "scipy"],
@@ -32,7 +32,7 @@ setup(
         "License :: OSI Approved :: GNU Affero General Public License v3"
     ],
     python_requires='>=3.7',
-    packages=find_packages(exclude=["test", "test.*", "performance_tests", "performance_tests.*"]),
+    packages=find_packages(exclude=["test", "test.*"]),
     package_data={
         'immuneML': [str(Path('IO/dataset_import/conversion/*.csv')),
                      str(Path("presentation/html/templates/*.html")),

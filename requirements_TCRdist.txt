@@ -1,3 +1,4 @@
 parasail==1.2
 tcrdist3>=0.1.6
 pandas<2.0
+numpy<1.20

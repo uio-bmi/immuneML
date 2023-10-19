@@ -30,8 +30,7 @@ Useful links:
 ## Installation
 
 immuneML can be installed directly [using pip](<https://pypi.org/project/immuneML/>).
-immuneML uses Python 3.7 or 3.8, we recommend installing immuneML inside a virtual environment 
-with one of these Python versions. 
+immuneML uses Python 3.7 or later. We recommend installing immuneML inside a virtual environment.
 
 For more detailed instructions (virtual environment, troubleshooting, Docker, developer installation), please see the [installation documentation](https://docs.immuneml.uio.no/installation/install_with_package_manager.html).
 
@@ -157,17 +156,17 @@ If you would like to make contributions, for example by adding a new ML method, 
 
 ## Requirements
 
-- [Python 3.7 or 3.8](https://www.python.org/)
+- [Python 3.7 or later](https://www.python.org/)
 - Python packages:
    - [airr](https://pypi.org/project/airr/) (1 or higher)
    - [dill](https://pypi.org/project/dill/) (0.3 or higher)
    - [editdistance](https://pypi.org/project/editdistance/) (0.5.3 or higher)
    - [fishersapi](https://pypi.org/project/fishersapi/)
-   - [gensim](https://pypi.org/project/gensim/) (3.8 or higher, < 4)
+   - [gensim](https://pypi.org/project/gensim/) (3.8 or higher)
    - [logomaker](https://pypi.org/project/logomaker/) (0.8 or higher)
    - [matplotlib](https://matplotlib.org) (3.1 or higher)
    - [matplotlib-venn](https://pypi.org/project/matplotlib-venn/) (0.11 or higher)
-   - [numpy](https://www.numpy.org/) (1.18 or higher, but at most 1.23.5)
+   - [numpy](https://www.numpy.org/) (1.18 or higher)
    - [pandas](https://pandas.pydata.org/) (1 or higher)
    - [plotly](https://plotly.com/python/) (4 or higher)
    - [pystache](https://pypi.org/project/pystache/) (0.5.4)
@@ -176,13 +175,13 @@ If you would like to make contributions, for example by adding a new ML method, 
    - [regex](https://pypi.org/project/regex/) 
    - [scikit-learn](https://scikit-learn.org/) (0.23 or higher)
    - [scipy](https://www.scipy.org)
-   - [tensorboard](https://www.tensorflow.org/tensorboard) (1.14.0 or higher)
    - [tzlocal](https://pypi.org/project/tzlocal/) 
 - Optional dependencies when using DeepRC:
    - [DeepRC](https://github.com/ml-jku/DeepRC) (0.0.1)
    - [widis-lstm-tools](https://github.com/widmi/widis-lstm-tools) (0.4)
    - [tqdm](https://tqdm.github.io/) (0.24 or higher)
-   - [h5py](https://www.h5py.org/) (2.10.0 or lower when using DeepRC 0.0.1)
+   - [h5py](https://www.h5py.org/) 
+   - [tensorboard](https://www.tensorflow.org/tensorboard) (1.14.0 or higher)
 - Optional dependencies when using TCRdist:
    - [parasail](https://pypi.org/project/parasail/) (1.2)
    - [tcrdist3](https://github.com/kmayerb/tcrdist3) (0.1.6 or higher)
