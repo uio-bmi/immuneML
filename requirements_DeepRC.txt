@@ -2,3 +2,4 @@ git+https://github.com/ghadialhajj/DeepRC2@change_inds
 git+https://github.com/widmi/widis-lstm-tools
 tqdm>=0.24
 h5py
+tensorboard>=1.14.0
