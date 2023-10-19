@@ -220,8 +220,8 @@ def test_simulation_receptors():
     app = ImmuneMLApp(path / "specs.yaml", path / "result/")
     app.run()
 
-    self.assertTrue(os.path.isfile(path / "result/index.html"))
-    self.assertTrue(os.path.isfile(path / "result/inst1/exported_dataset/immuneml/d1.yaml"))
+    assert os.path.isfile(path / "result/index.html")
+    assert os.path.isfile(path / "result/inst1/exported_dataset/immuneml/d1.yaml")
     dataset = ImmuneMLImport.import_dataset({"path": path / "result/inst1/exported_dataset/immuneml/d1.yaml"}, "d1")
 
     assert 100 == dataset.get_example_count()

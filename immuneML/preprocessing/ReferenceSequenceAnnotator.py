@@ -132,20 +132,8 @@ class ReferenceSequenceAnnotator(Preprocessor):
     def _make_annotated_dataset(self, dataset: RepertoireDataset, result_path: Path, compairr_output_files: List[Path]) -> RepertoireDataset:
         repertoires = []
         repertoire_path = PathBuilder.build(result_path / 'repertoires')
-        compairr_out_df = None
 
         for index, repertoire in enumerate(dataset.repertoires):
-
-            if index % self._repertoire_batch_size == 0:
-                compairr_out_df = pd.read_csv(compairr_output_files[index // self._repertoire_batch_size], sep='\t')
-
-            if compairr_out_df[repertoire.identifier].any():
-                sequence_selection = compairr_out_df[repertoire.identifier]
-                matches = np.array([repertoire.get_sequence_aas() == seq.sequence_aa for seq in
-                                    np.array(self._reference_sequences)[sequence_selection.values]]).any(axis=0)
-                sequences = self._add_params_to_sequence_objects(repertoire.sequences, matches)
-            else:
-                sequences = self._add_params_to_sequence_objects(repertoire.sequences, np.zeros(len(repertoire.sequences), dtype=bool))
 
             compairr_out_df = pd.read_csv(compairr_output_files[index], sep='\t', comment="#")
             sequences = self._add_params_to_sequence_objects(repertoire.sequences, compairr_out_df.iloc[:, 1])
