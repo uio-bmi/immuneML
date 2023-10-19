@@ -15,11 +15,11 @@ from immuneML.util.Logger import print_log
 
 
 class SimpleLSTM(GenerativeModel):
-
     PREVIEW_SEQ_COUNT = 10
     ITER_TO_REPORT = 100
 
-    def __init__(self, chain, sequence_type: SequenceType, hidden_size, learning_rate, num_epochs, batch_size, embed_size):
+    def __init__(self, chain, sequence_type: SequenceType, hidden_size, learning_rate, num_epochs, batch_size,
+                 embed_size, temperature, name=None):
         super().__init__(chain)
         self._model = None
         self.num_letters = len(EnvironmentSettings.get_sequence_alphabet(sequence_type)) + 1
@@ -28,8 +28,9 @@ class SimpleLSTM(GenerativeModel):
         self.num_epochs = num_epochs
         self.batch_size = batch_size
         self.embed_size = embed_size
-        self.max_length = 10
+        self.temperature = temperature
         self.sequence_type = sequence_type
+        self.name = name
         self.unique_letters = EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + ["*"]
         self.letter_to_index = {letter: i for i, letter in enumerate(self.unique_letters)}
         self.index_to_letter = {i: letter for letter, i in self.letter_to_index.items()}
@@ -37,11 +38,14 @@ class SimpleLSTM(GenerativeModel):
     def fit(self, data):
         data_loader = self._encode_dataset(data)
 
-        model = SimpleLSTMGenerator(input_size=self.num_letters, hidden_size=self.hidden_size, output_size=self.num_letters, embed_size=self.embed_size)
+        model = SimpleLSTMGenerator(input_size=self.num_letters, hidden_size=self.hidden_size,
+                                    embed_size=self.embed_size,
+                                    output_size=self.num_letters, batch_size=self.batch_size)
         model.train()
 
         criterion = nn.CrossEntropyLoss(reduction='sum')
         optimizer = optim.Adam(model.parameters(), self.learning_rate)
+        loss_list = []
 
         for epoch in range(self.num_epochs):
             loss = 0.
@@ -49,6 +53,7 @@ class SimpleLSTM(GenerativeModel):
             optimizer.zero_grad()
 
             for x_batch, y_batch in data_loader:
+                state = state[0][:, :x_batch.size(0), :], state[1][:, :x_batch.size(0), :]
 
                 outputs, state = model(x_batch, state)
                 loss += criterion(outputs, y_batch)
@@ -58,15 +63,22 @@ class SimpleLSTM(GenerativeModel):
             optimizer.step()
 
             if (epoch + 1) % SimpleLSTM.ITER_TO_REPORT == 0:
-                print_log(f"{SimpleLSTM.__name__}: Epoch [{epoch+1}/{self.num_epochs}]: loss: {loss.item():.4f}", True)
+                print_log(f"{SimpleLSTM.__name__}: Epoch [{epoch + 1}/{self.num_epochs}]: loss: {loss.item():.4f}",
+                          True)
+                loss_list.append(loss.item())
+                self._log_training_progress(loss_list, epoch)
 
         self._model = model
 
+    def _log_training_progress(self, loss_list, epoch):
+        pass # do some plotting here
+
     def _encode_dataset(self, dataset):
         sequences = dataset.get_attribute(self.sequence_type.value)
-        self.max_length = sequences.lengths.max() + 1
 
-        sequences = list(chain.from_iterable([[self.letter_to_index[letter] for letter in seq] + [self.letter_to_index['*']] for seq in sequences.tolist()]))
+        sequences = list(chain.from_iterable(
+            [[self.letter_to_index[letter] for letter in seq] + [self.letter_to_index['*']] for seq in
+             sequences.tolist()]))
         sequences = torch.as_tensor(sequences).long()
 
         return DataLoader(TensorDataset(sequences[:-1], sequences[1:]), shuffle=True, batch_size=self.batch_size)
@@ -84,32 +96,37 @@ class SimpleLSTM(GenerativeModel):
 
         with torch.no_grad():
 
-            state = self._model.init_zero_state()
+            state = self._model.init_zero_state(batch_size=1)
 
             for p in range(len(prime_str) - 1):
                 _, state = self._model(input_vector[p], state)
 
             inp = input_vector[-1]
             gen_seq_count = 0
-            temperature = 1.
+            probability_scores = [1.]
 
-            while gen_seq_count < count:
+            while gen_seq_count <= count:
                 output, state = self._model(inp, state)
 
-                output_dist = output.data.view(-1).div(temperature).exp()
+                output_dist = output.data.view(-1).div(self.temperature).exp()
                 top_i = torch.multinomial(output_dist, 1)[0].item()
+                probability_scores[-1] *= torch.nn.functional.softmax(output, dim=-1).flatten()[top_i].item()
+                # downside: longer sequences have lower probability which is not realistic?
 
                 predicted_char = self.index_to_letter[top_i]
                 predicted += predicted_char
                 inp = torch.as_tensor(self.letter_to_index[predicted_char]).long()
                 if predicted_char == "*":
                     gen_seq_count += 1
+                    probability_scores.append(1.)
 
-        generated_sequences = predicted.split("*")[:-1]
-        pd.DataFrame({sequence_type.value: generated_sequences}).to_csv(str(path), sep='\t', index=False)
+        generated_sequences = predicted.split("*")[1:-1]
+        generated_sequences = pd.DataFrame({sequence_type.value: generated_sequences,
+                                            'probability': probability_scores[1:-1]})
+        generated_sequences.to_csv(str(path), sep='\t', index=False)
 
-        print_log(f"{SimpleLSTM.__name__}: generated {count} sequences stored at {path}. "
-                  f"Preview:\n{generated_sequences[:SimpleLSTM.PREVIEW_SEQ_COUNT]}", True)
+        print_log(f"{SimpleLSTM.__name__} {self.name}: generated {count} sequences stored at {path}.", True)
+        print_log(f"Preview:\n{generated_sequences.head(SimpleLSTM.PREVIEW_SEQ_COUNT)}", True)
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         raise RuntimeError

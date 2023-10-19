@@ -12,10 +12,10 @@ from immuneML.util.PathBuilder import PathBuilder
 def test_simple_lstm():
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'simple_lstm')
 
-    dataset = RandomDatasetGenerator.generate_sequence_dataset(100, {3: 0.3, 4: 0.2, 5: 0.5},
+    dataset = RandomDatasetGenerator.generate_sequence_dataset(10, {3: 1.},
                                                                {}, path / 'dataset')
 
-    lstm = SimpleLSTM('beta', SequenceType.AMINO_ACID, 50, 0.001, 200, 10, 10)
+    lstm = SimpleLSTM('beta', SequenceType.AMINO_ACID, 50, 0.001, 5, 5, 10, 1., 'lstm_small')
     lstm.fit(dataset)
 
     lstm.generate_sequences(5, 1, path / 'generated_sequences.tsv', SequenceType.AMINO_ACID, False)
