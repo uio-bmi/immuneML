@@ -4,11 +4,11 @@ from torch import nn
 
 class SimpleLSTMGenerator(nn.Module):
 
-    def __init__(self, input_size, embed_size, hidden_size, output_size, batch_size):
+    def __init__(self, input_size, embed_size, hidden_size, output_size, batch_size, num_layers=1):
         super(SimpleLSTMGenerator, self).__init__()
 
         self.hidden_size = hidden_size
-        self.num_layers = 1
+        self.num_layers = num_layers
         self.batch_size = batch_size
 
         self.embed = nn.Embedding(num_embeddings=input_size, embedding_dim=embed_size)

@@ -15,8 +15,8 @@ def test_simple_lstm():
     dataset = RandomDatasetGenerator.generate_sequence_dataset(10, {3: 1.},
                                                                {}, path / 'dataset')
 
-    lstm = SimpleLSTM('beta', SequenceType.AMINO_ACID, 50, 0.001, 5, 5, 10, 1., 'lstm_small')
-    lstm.fit(dataset)
+    lstm = SimpleLSTM('beta', SequenceType.AMINO_ACID, 50, 0.001, 500, 5, 10, 100, 1., 'lstm_small')
+    lstm.fit(dataset, path / 'model')
 
     lstm.generate_sequences(5, 1, path / 'generated_sequences.tsv', SequenceType.AMINO_ACID, False)
 

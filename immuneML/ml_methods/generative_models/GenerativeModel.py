@@ -14,7 +14,7 @@ class GenerativeModel:
         self.chain = chain
 
     @abc.abstractmethod
-    def fit(self, data):
+    def fit(self, data, path: Path = None):
         pass
 
     @abc.abstractmethod
