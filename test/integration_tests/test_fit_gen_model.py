@@ -15,18 +15,21 @@ def test_fit_gen_model():
             "datasets": {
                 "d1": {
                     "format": "RandomSequenceDataset",
-                    "params": {}
+                    "params": {
+                        'length_probabilities': {
+                            3: 0.5,
+                            4: 0.5
+                        },
+                        'sequence_count': 10
+                    }
                 }
             },
             "ml_methods": {
-                "sonnia": {
-                    "SoNNia": {
-                        "batch_size": 1e4,
-                        "epochs": 30,
-                        'default_model_name': 'humanTRB',
-                        'deep': False,
-                        'include_joint_genes': True,
-                        'n_gen_seqs': 1000
+                'pwm': {
+                    "PWM": {
+                        'chain': 'beta',
+                        'sequence_type': 'amino_acid',
+                        'region_type': 'IMGT_CDR3'
                     }
                 }
             },
@@ -40,7 +43,7 @@ def test_fit_gen_model():
                 "type": "TrainGenModel",
                 "gen_examples_count": 100,
                 "dataset": "d1",
-                "method": "sonnia",
+                "method": "pwm",
                 "reports": ['sld_rep', 'aa_freq']
             }
         }

@@ -60,6 +60,11 @@ class SimpleLSTM(GenerativeModel):
 
 
     """
+
+    @classmethod
+    def load_model(cls, path: Path):
+        raise NotImplementedError
+
     PREVIEW_SEQ_COUNT = 10
     ITER_TO_REPORT = 100
 
@@ -199,4 +204,4 @@ class SimpleLSTM(GenerativeModel):
         raise RuntimeError
 
     def save_model(self, path: Path) -> Path:
-        pass
+        raise NotImplementedError

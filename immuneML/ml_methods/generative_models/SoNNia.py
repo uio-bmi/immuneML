@@ -49,6 +49,10 @@ class SoNNia(GenerativeModel):
 
     """
 
+    @classmethod
+    def load_model(cls, path: Path):
+        raise NotImplementedError
+
     def __init__(self, chain=None, batch_size: int = None, epochs: int = None, deep: bool = False,
                  default_model_name: str = None, n_gen_seqs: int = None, include_joint_genes: bool = True,
                  custom_model_path: str = None):
