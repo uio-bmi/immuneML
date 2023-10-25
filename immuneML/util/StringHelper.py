@@ -18,5 +18,5 @@ class StringHelper:
             return sequence
         else:
             pad_start = len(sequence) // 2
-            pad_len = max_len - pad_start
+            pad_len = max_len - len(sequence)
             return sequence[:pad_start] + pad_char * pad_len + sequence[pad_start:]

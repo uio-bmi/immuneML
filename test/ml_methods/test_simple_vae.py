@@ -2,6 +2,7 @@ import shutil
 
 import pandas as pd
 
+from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.SimpleVAE import SimpleVAE
@@ -15,13 +16,15 @@ def test_simple_vae():
     dataset = RandomDatasetGenerator.generate_sequence_dataset(10, {10: 1.},
                                                                {}, path / 'dataset')
 
-    vae = SimpleVAE('beta', 0.75, 20, 75, 500, 100, 2, 2, 21)  # TODO: add more params here
+    vae = SimpleVAE('beta', 0.75, 20, 75, 500, 100, 2,
+                    2, 21, None, None, RegionType.IMGT_CDR3.name, 10)
 
     vae.fit(dataset, path / 'model')
-    vae.generate_sequences(7, 1, path / 'generated_sequences.tsv', SequenceType.AMINO_ACID, False)
+    vae.generate_sequences(7, 1, path / 'generated_dataset', SequenceType.AMINO_ACID, False)
 
-    assert (path / 'generated_sequences.tsv').is_file()
+    assert (path / 'generated_dataset').exists()
+    assert (path / 'generated_dataset/batch1.tsv').exists()
 
-    assert pd.read_csv(str(path / 'generated_sequences.tsv'), sep='\t').shape[0] == 7
+    assert pd.read_csv(str(path / 'generated_dataset/batch1.tsv'), sep='\t').shape[0] == 7
 
     shutil.rmtree(path)

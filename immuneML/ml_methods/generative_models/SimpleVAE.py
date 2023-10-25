@@ -1,11 +1,17 @@
 from pathlib import Path
 
 import numpy as np
+import scipy
 import torch.optim
+from torch.distributions import Categorical
 from torch.nn.functional import cross_entropy, one_hot
 from torch.utils.data import DataLoader, TensorDataset
 
 from immuneML import Constants
+from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
@@ -30,10 +36,12 @@ class SimpleVAE(GenerativeModel):
     """
 
     def __init__(self, chain, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim,
-                 v_gene_embed_dim, cdr3_embed_dim):
+                 v_gene_embed_dim, cdr3_embed_dim, warmup_period, patience, region_type, iter_count_prob_estimation):
         super().__init__(chain)
         self.sequence_type = SequenceType.AMINO_ACID
+        self.iter_count_prob_estimation = iter_count_prob_estimation
         self.num_epochs = num_epochs
+        self.region_type = RegionType[region_type]
         self.vocab_size = len(EnvironmentSettings.get_sequence_alphabet(self.sequence_type)) + 1  # includes gap
         self.vocab = sorted((EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + [Constants.GAP_LETTER]))
         self.beta = beta
@@ -43,7 +51,7 @@ class SimpleVAE(GenerativeModel):
         self.linear_nodes_count = linear_nodes_count
         self.batch_size = batch_size
         self.max_cdr3_len, self.unique_v_genes, self.unique_j_genes = None, None, None
-        self.model = None
+        self._model = None
 
         # hard-coded in the original implementation
         self.v_gene_loss_weight = 0.8138
@@ -67,6 +75,7 @@ class SimpleVAE(GenerativeModel):
 
         data_loader = self._encode_dataset(data)
         model = self._make_empty_model()
+        model.train()
 
         optimizer = torch.optim.Adam(model.parameters())
 
@@ -75,14 +84,14 @@ class SimpleVAE(GenerativeModel):
                 cdr3_input, v_gene_input, j_gene_input = batch
                 cdr3_output, v_gene_output, j_gene_output, z = model(cdr3_input, v_gene_input, j_gene_input)
                 loss = (vae_cdr3_loss(cdr3_output, cdr3_input, self.max_cdr3_len, z[0], z[1], self.beta)
-                        + cross_entropy(v_gene_output, v_gene_input) * self.v_gene_loss_weight
-                        + cross_entropy(j_gene_output, j_gene_input)) * self.j_gene_loss_weight
+                        + cross_entropy(v_gene_output, v_gene_input.float()) * self.v_gene_loss_weight
+                        + cross_entropy(j_gene_output, j_gene_input.float())) * self.j_gene_loss_weight
 
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
-        self.model = model
+        self._model = model
 
     def _encode_dataset(self, dataset):
         data = dataset.get_attributes([self.sequence_type.value, 'v_call', 'j_call'], as_list=True)
@@ -90,11 +99,16 @@ class SimpleVAE(GenerativeModel):
         self.unique_j_genes = sorted(list(set([el.split("*")[0] for el in data['j_call']])))
         self.max_cdr3_len = max(len(el) for el in data[self.sequence_type.value])
 
-        encoded_v_genes = one_hot(torch.as_tensor([self.unique_v_genes.index(v_gene.split("*")[0]) for v_gene in data['v_call']]), num_classes=len(self.unique_v_genes))
-        encoded_j_genes = one_hot(torch.as_tensor([self.unique_j_genes.index(j_gene.split("*")[0]) for j_gene in data['j_call']]), num_classes=len(self.unique_j_genes))
+        encoded_v_genes = one_hot(
+            torch.as_tensor([self.unique_v_genes.index(v_gene.split("*")[0]) for v_gene in data['v_call']]),
+            num_classes=len(self.unique_v_genes))
+        encoded_j_genes = one_hot(
+            torch.as_tensor([self.unique_j_genes.index(j_gene.split("*")[0]) for j_gene in data['j_call']]),
+            num_classes=len(self.unique_j_genes))
         padded_encoded_cdr3s = one_hot(torch.as_tensor([
-            [self.vocab.index(letter) for letter in StringHelper.pad_sequence_in_the_middle(seq, self.max_cdr3_len, Constants.GAP_LETTER)]
-            for seq in data[self.sequence_type.value]]))
+            [self.vocab.index(letter) for letter in
+             StringHelper.pad_sequence_in_the_middle(seq, self.max_cdr3_len, Constants.GAP_LETTER)]
+            for seq in data[self.sequence_type.value]]), num_classes=self.vocab_size)
 
         pytorch_dataset = PyTorchSequenceDataset({'v_gene': encoded_v_genes, 'j_gene': encoded_j_genes,
                                                   'cdr3': padded_encoded_cdr3s})
@@ -102,26 +116,80 @@ class SimpleVAE(GenerativeModel):
         return DataLoader(pytorch_dataset, shuffle=True, batch_size=self.batch_size)
 
     def is_same(self, model) -> bool:
-        pass
+        raise RuntimeError
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
-        pass
+        torch.manual_seed(seed)
+        self._model.eval()
+
+        with torch.no_grad():
+            z_sample = torch.as_tensor(np.random.normal(0, 1, size=(count, self.latent_dim))).float()
+            sequences, v_genes, j_genes = self._model.decode(z_sample)
+
+        seq_objs = [ReceptorSequence(**{
+            self.sequence_type.value: ''.join([self.vocab[Categorical(letter).sample()] for letter in sequences[i]])
+                                     .replace(Constants.GAP_LETTER, ''),
+            'metadata': SequenceMetadata(v_call=self.unique_v_genes[Categorical(v_genes[i]).sample()],
+                                         j_call=self.unique_j_genes[Categorical(j_genes[i]).sample()], chain=self.chain,
+                                         region_type=self.region_type.name)
+        }) for i in range(count)]
+
+        for obj in seq_objs:
+            log_prob = self.compute_p_gen({self.sequence_type.value: obj.get_attribute(self.sequence_type.value),
+                                           'v_call': obj.metadata.v_call, 'j_call': obj.metadata.j_call},
+                                          self.sequence_type)
+            obj.metadata.custom_params = {'log_prob': log_prob}
+
+        dataset = SequenceDataset.build_from_objects(seq_objs, count, path, 'synthetic_vae')
+
+        return dataset
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         pass
 
     def compute_p_gen(self, sequence: dict, sequence_type: SequenceType) -> float:
-        pass
+        with torch.no_grad():
+            encoded_v_genes = one_hot(
+                torch.as_tensor([self.unique_v_genes.index(sequence['v_call'].split("*")[0])]),
+                num_classes=len(self.unique_v_genes))
+            encoded_j_genes = one_hot(
+                torch.as_tensor([self.unique_j_genes.index(sequence['j_call'].split("*")[0])]),
+                num_classes=len(self.unique_j_genes))
+            padded_encoded_cdr3s = one_hot(torch.as_tensor([
+                [self.vocab.index(letter) for letter in
+                 StringHelper.pad_sequence_in_the_middle(sequence[self.sequence_type.value], self.max_cdr3_len,
+                                                         Constants.GAP_LETTER)]]), num_classes=self.vocab_size)
+
+            log_prob_estimates = []
+
+            for _ in range(self.iter_count_prob_estimation):
+                z_mean, z_log_var = self._model.encode(padded_encoded_cdr3s, encoded_v_genes, encoded_j_genes)
+                z_sd = (z_log_var / 2).exp()
+                z_sample = torch.as_tensor([scipy.stats.norm.rvs(loc=z_mean, scale=z_sd)]).float()
+                aa_probs, v_gene_probs, j_gene_probs = self._model.decode(z_sample)
+                aa_probs, v_gene_probs, j_gene_probs = aa_probs.numpy(), v_gene_probs.numpy(), j_gene_probs.numpy()
+
+                log_p_x_given_z = (np.sum(np.log(np.sum(aa_probs[0] * padded_encoded_cdr3s[0].numpy(), axis=1))) +
+                                   np.log(np.sum(v_gene_probs[0] * encoded_v_genes[0].numpy())) +
+                                   np.log(np.sum(j_gene_probs[0] * encoded_j_genes[0].numpy())))
+
+                log_p_z = np.sum(scipy.stats.norm.logpdf(z_sample[0], 0, 1))
+                log_q_z_given_x = np.sum(scipy.stats.norm.logpdf(z_sample[0], z_mean[0], z_sd[0]))
+
+                log_imp_weight = log_p_z - log_q_z_given_x
+                log_prob_estimates.append(float(log_p_x_given_z + log_imp_weight))
+
+        return sum(log_prob_estimates) / self.iter_count_prob_estimation
 
     def can_compute_p_gens(self) -> bool:
-        pass
+        return True
 
     def can_generate_from_skewed_gene_models(self) -> bool:
-        pass
+        return False
 
     def generate_from_skewed_gene_models(self, v_genes: list, j_genes: list, seed: int, path: Path,
                                          sequence_type: SequenceType, batch_size: int, compute_p_gen: bool):
-        pass
+        raise RuntimeError
 
     def save_model(self, path: Path) -> Path:
         pass

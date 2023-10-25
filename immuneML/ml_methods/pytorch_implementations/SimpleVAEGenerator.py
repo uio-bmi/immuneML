@@ -10,6 +10,8 @@ class Encoder(nn.Module):
                  latent_dim, max_cdr3_len, linear_nodes_count):
         super().__init__()
 
+        # TODO: add beta warmup in VAE
+
         # params
         self.vocab_size = vocab_size
         self.cdr3_embed_dim = cdr3_embed_dim
@@ -64,19 +66,20 @@ class Decoder(nn.Module):
         self.decoder_linear_2 = nn.Linear(linear_nodes_count, linear_nodes_count)
 
         # decoding layers
-        self.cdr3_post_linear_flat = nn.Linear(linear_nodes_count, np.prod(max_cdr3_len))
-        self.cdr3_output = nn.Linear(max_cdr3_len, vocab_size)
+        self.cdr3_post_linear_flat = nn.Linear(linear_nodes_count, self.vocab_size * self.max_cdr3_len)
+        self.cdr3_output = nn.Linear(self.vocab_size * self.max_cdr3_len, self.vocab_size * self.max_cdr3_len)
         self.v_gene_output = nn.Linear(linear_nodes_count, n_v_genes)
         self.j_gene_output = nn.Linear(linear_nodes_count, n_j_genes)
 
     def forward(self, z):
+
         # latent
         decoder_linear_1 = relu(self.decoder_linear_1(z))
         decoder_linear_2 = relu(self.decoder_linear_2(decoder_linear_1))
 
         # decoding
         cdr3_post_dense_flat = self.cdr3_post_linear_flat(decoder_linear_2)
-        cdr3_output = softmax(self.cdr3_output(cdr3_post_dense_flat.reshape(-1, self.max_cdr3_len, self.vocab_size)),
+        cdr3_output = softmax(self.cdr3_output(cdr3_post_dense_flat).view(-1, self.max_cdr3_len, self.vocab_size),
                               dim=1)
         v_gene_output = softmax(self.v_gene_output(decoder_linear_2), dim=1)
         j_gene_output = softmax(self.j_gene_output(decoder_linear_2), dim=1)
@@ -99,10 +102,17 @@ class SimpleVAEGenerator(nn.Module):
         z = z_mean + torch.exp(z_log_var / 2) * epsilon
 
         cdr3_output, v_gene_output, j_gene_output = self.decoder(z)
-        return cdr3_output, v_gene_output, j_gene_output
+        return cdr3_output, v_gene_output, j_gene_output, z
+
+    def decode(self, z):
+        return self.decoder(z)
+
+    def encode(self, cdr3_input, v_gene_input, j_gene_input):
+        z_mean, z_log_var = self.encoder(cdr3_input, v_gene_input, j_gene_input)
+        return z_mean, z_log_var
 
 
 def vae_cdr3_loss(cdr3_output, cdr3_input, max_cdr3_len, z_mean, z_log_var, beta):
-    xent_loss = max_cdr3_len * cross_entropy(cdr3_input, cdr3_output)
-    kl_loss = -0.5 * torch.sum(1 + z_log_var - z_mean.power(2) - z_log_var.exp()) * beta
+    xent_loss = max_cdr3_len * cross_entropy(cdr3_input.float(), cdr3_output.float())
+    kl_loss = -0.5 * torch.sum(1 + z_log_var - torch.square(z_mean) - z_log_var.exp(), dim=-1) * beta
     return xent_loss + kl_loss
