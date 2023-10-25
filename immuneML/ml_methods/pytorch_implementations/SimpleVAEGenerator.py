@@ -16,7 +16,7 @@ class Encoder(nn.Module):
         self.max_cdr3_len = max_cdr3_len
 
         # input layers
-        self.cdr3_embedding = nn.Embedding(vocab_size, cdr3_embed_dim)
+        self.cdr3_embedding = nn.Linear(vocab_size, cdr3_embed_dim)
         self.v_gene_embedding = nn.Linear(n_v_genes, v_gene_embed_dim)
         self.j_gene_embedding = nn.Linear(n_j_genes, j_gene_embed_dim)
 
@@ -31,7 +31,7 @@ class Encoder(nn.Module):
 
     def forward(self, cdr3_input, v_gene_input, j_gene_input):
         # input processing
-        cdr3_embedding = self.cdr3_embedding(cdr3_input)
+        cdr3_embedding = self.cdr3_embedding(cdr3_input.float())
         cdr3_embedding_flat = cdr3_embedding.view(-1, self.vocab_size * self.max_cdr3_len)
         v_gene_embedding = relu(self.v_gene_embedding(v_gene_input.float()))
         j_gene_embedding = relu(self.j_gene_embedding(j_gene_input.float()))
@@ -76,7 +76,8 @@ class Decoder(nn.Module):
 
         # decoding
         cdr3_post_dense_flat = self.cdr3_post_linear_flat(decoder_linear_2)
-        cdr3_output = softmax(self.cdr3_output(cdr3_post_dense_flat.reshape(self.max_cdr3_len, self.vocab_size)), dim=1) # this only works with batch size = 1
+        cdr3_output = softmax(self.cdr3_output(cdr3_post_dense_flat.reshape(-1, self.max_cdr3_len, self.vocab_size)),
+                              dim=1)
         v_gene_output = softmax(self.v_gene_output(decoder_linear_2), dim=1)
         j_gene_output = softmax(self.j_gene_output(decoder_linear_2), dim=1)
 
