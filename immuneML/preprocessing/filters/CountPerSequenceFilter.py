@@ -1,4 +1,4 @@
-import copy
+import logging
 from multiprocessing.pool import Pool
 from pathlib import Path
 
@@ -53,11 +53,9 @@ class CountPerSequenceFilter(Filter):
     def keeps_example_count(self) -> bool:
         return not self.remove_empty_repertoires
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: Path) -> RepertoireDataset:
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1) -> RepertoireDataset:
         self.check_dataset_type(dataset, [RepertoireDataset], "CountPerSequenceFilter")
         self.result_path = result_path if result_path is not None else self.result_path
-
-        processed_dataset = copy.deepcopy(dataset)
 
         with Pool(self.batch_size) as pool:
             repertoires = pool.map(self._process_repertoire, dataset.repertoires)
@@ -65,7 +63,7 @@ class CountPerSequenceFilter(Filter):
         if self.remove_empty_repertoires:
             repertoires = self._remove_empty_repertoires(repertoires)
 
-        processed_dataset.repertoires = repertoires
+        processed_dataset = RepertoireDataset.build_from_objects(repertoires=repertoires, path=result_path)
 
         self.check_dataset_not_empty(processed_dataset, "CountPerSequenceFilter")
 
@@ -76,7 +74,7 @@ class CountPerSequenceFilter(Filter):
         counts = repertoire.get_counts()
         counts = counts if counts is not None else np.full(repertoire.get_element_count(), None)
         not_none_indices = counts != None
-        counts[not_none_indices] = counts[not_none_indices].astype(np.int)
+        counts[not_none_indices] = counts[not_none_indices].astype(int)
         indices_to_keep = np.full(repertoire.get_element_count(), False)
         if self.remove_without_count and self.low_count_limit is not None:
             np.greater_equal(counts, self.low_count_limit, out=indices_to_keep, where=not_none_indices)
@@ -87,5 +85,9 @@ class CountPerSequenceFilter(Filter):
             np.greater_equal(counts, self.low_count_limit, out=indices_to_keep, where=not_none_indices)
 
         processed_repertoire = Repertoire.build_like(repertoire, indices_to_keep, self.result_path, filename_base=f"{repertoire.data_filename.stem}_filtered")
+
+        logging.info(f"{CountPerSequenceFilter.__name__}: finished processing repertoire "
+                     f"(subject_id: {repertoire.metadata['subject_id'] if repertoire.metadata and 'subject_id' in repertoire.metadata else ''}, "
+                     f"id: {repertoire.identifier}).")
 
         return processed_repertoire

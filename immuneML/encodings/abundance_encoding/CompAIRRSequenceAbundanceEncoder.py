@@ -11,6 +11,7 @@ import pandas as pd
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.abundance_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
@@ -67,7 +68,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         The default number of threads is 8.
 
         keep_temporary_files (bool): whether to keep temporary files, including CompAIRR input, output and log files, and the sequence
-        presence matrix. This may take a lot of storage space if the input dataset is large. By default temporary files are not kept.
+        presence matrix. This may take a lot of storage space if the input dataset is large. By default, temporary files are not kept.
 
 
     YAML specification:
@@ -112,7 +113,9 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
                                               ignore_genes=ignore_genes,
                                               threads=threads,
                                               output_filename=None,
-                                              log_filename=None)
+                                              log_filename=None,
+                                              output_pairs=False,
+                                              pairs_filename=None)
 
     @staticmethod
     def _prepare_parameters(p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, keep_temporary_files: bool,  threads: int,
@@ -143,7 +146,10 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         return CompAIRRSequenceAbundanceEncoder(**prepared_params)
 
     def encode(self, dataset, params: EncoderParams):
-        EncoderHelper.check_positive_class_labels(params.label_config, CompAIRRSequenceAbundanceEncoder.__name__)
+        # or:  EncoderHelper.check_positive_class_labels(params.label_config, CompAIRRSequenceAbundanceEncoder.__name__)
+        AbundanceEncoderHelper.check_labels(params.label_config, CompAIRRSequenceAbundanceEncoder.__name__)
+        self.compairr_params.is_cdr3 = dataset.repertoires[0].get_region_type() == RegionType.IMGT_CDR3
+
         self.compairr_sequence_presence = self._prepare_sequence_presence_data(dataset, params)
 
         return self._encode_data(dataset, params)
@@ -227,7 +233,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
                 self.sequences_filepaths.append(filename)
                 sequence_subset = full_sequence_set[subset_start_index:subset_end_index]
 
-                self.write_sequence_set_file(sequence_subset, filename, offset=subset_start_index)
+                self.write_sequence_set_file(sequence_subset, filename, offset=subset_start_index, region_type=dataset.repertoires[0].get_region_type())
 
                 subset_start_index += self.sequence_batch_size
                 subset_end_index = min(subset_end_index + self.sequence_batch_size, len(full_sequence_set))
@@ -238,8 +244,10 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         for file in self.sequences_filepaths:
             file.unlink()
 
-    def write_sequence_set_file(self, sequence_set, filename, offset=0):
-        sequence_col = "junction_aa" if EnvironmentSettings.get_sequence_type() == SequenceType.AMINO_ACID else "junction"
+    def write_sequence_set_file(self, sequence_set, filename, offset=0, region_type=RegionType.IMGT_JUNCTION):
+        sequence_col = 'junction' if region_type == RegionType.IMGT_JUNCTION else 'cdr3'
+        if EnvironmentSettings.get_sequence_type() == SequenceType.AMINO_ACID:
+            sequence_col = f"{sequence_col}_aa"
         vj_header = "" if self.compairr_params.ignore_genes else "\tv_call\tj_call"
 
         with open(filename, "w") as file:

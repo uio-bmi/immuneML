@@ -50,7 +50,7 @@ mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagc
         return filename
 
     def test_generate(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "tcrdist_motif_discovery/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "tcrdist_motif_discovery/")
         dataset_path = self._create_dataset(path)
 
         dataset = SingleLineReceptorImport.import_dataset({"path": dataset_path,

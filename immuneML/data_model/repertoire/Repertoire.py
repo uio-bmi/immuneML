@@ -18,7 +18,6 @@ from immuneML.data_model.receptor.ReceptorBuilder import ReceptorBuilder
 from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from immuneML.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -112,24 +111,21 @@ class Repertoire(DatasetItem):
 
     @classmethod
     def build_like(cls, repertoire, indices_to_keep: list, result_path: Path, filename_base: str = None):
-        if indices_to_keep is not None and len(indices_to_keep) > 0:
-            PathBuilder.build(result_path)
+        PathBuilder.build(result_path)
 
-            data = repertoire.load_data()
-            data = data[indices_to_keep]
-            identifier = uuid4().hex
-            filename_base = filename_base if filename_base is not None else identifier
+        data = repertoire.load_data()
+        data = data[indices_to_keep]
+        identifier = uuid4().hex
+        filename_base = filename_base if filename_base is not None else identifier
 
-            data_filename = result_path / f"{filename_base}.npy"
-            np.save(str(data_filename), data)
+        data_filename = result_path / f"{filename_base}.npy"
+        np.save(str(data_filename), data)
 
-            metadata_filename = result_path / f"{filename_base}_metadata.yaml"
-            shutil.copyfile(repertoire.metadata_filename, metadata_filename)
+        metadata_filename = result_path / f"{filename_base}_metadata.yaml"
+        shutil.copyfile(repertoire.metadata_filename, metadata_filename)
 
-            new_repertoire = Repertoire(data_filename, metadata_filename, identifier)
-            return new_repertoire
-        else:
-            return None
+        new_repertoire = Repertoire(data_filename, metadata_filename, identifier)
+        return new_repertoire
 
     @classmethod
     def build_from_sequence_objects(cls, sequence_objects: list, path: Path, metadata: dict, filename_base: str = None):
@@ -241,10 +237,15 @@ class Repertoire(DatasetItem):
         return result
 
     def get_region_type(self):
-        region_types = set(self.get_attribute("region_types"))
-        assert len(region_types) == 1, f"Repertoire: expected one region_type, found: {region_types}"
+        region_types = self.get_attribute("region_types")
+        if region_types is not None:
+            region_types = set(region_types)
+            assert len(region_types) == 1, f"Repertoire {self.identifier}: expected one region_type, found: {region_types}"
 
-        return RegionType(region_types.pop())
+            return RegionType(region_types.pop())
+        else:
+            logging.warning(f'Repertoire {self.identifier}: region_types are not set for sequences.')
+            return None
 
     def free_memory(self):
         self.data = None
@@ -309,7 +310,7 @@ class Repertoire(DatasetItem):
         return same_cell_lists
 
     def _make_receptors(self, cell_content):
-        sequences = ReceptorSequenceList()
+        sequences = []
         for item in cell_content:
             sequences.append(self._make_sequence_object(item))
         return ReceptorBuilder.build_objects(sequences)

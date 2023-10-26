@@ -119,11 +119,15 @@ class HPAssessment:
             comp_func = Metric.get_search_criterion(state.optimization_metric)
             hp_items = state.assessment_states[split_index].label_states[label_name].selection_state.hp_items[hp_setting.get_key()]
 
-            optimal_params = {hp_item.performance[state.optimization_metric.name.lower()]:
-                                  HPAssessment._get_only_hyperparams(hp_item.method.get_params())
-                              for hp_item in hp_items}
+            if len(hp_items) > 1:
+                optimal_params = {hp_item.performance[state.optimization_metric.name.lower()]:
+                                      HPAssessment._get_only_hyperparams(hp_item.method.get_params())
+                                  for hp_item in hp_items}
+                updated_hp_setting.ml_params[updated_hp_setting.ml_method.__class__.__name__] = optimal_params[
+                    comp_func(optimal_params.keys())]
 
-            updated_hp_setting.ml_params[updated_hp_setting.ml_method.__class__.__name__] = optimal_params[comp_func(optimal_params.keys())]
+            elif len(hp_items) == 1:
+                updated_hp_setting.ml_params[updated_hp_setting.ml_method.__class__.__name__] = hp_items[0].method.model.get_params()
 
             return updated_hp_setting
 

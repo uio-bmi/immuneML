@@ -60,11 +60,11 @@ class MLMethodAssessment(Step):
 
         for metric in metrics_with_optim_metric:
             score = MetricUtil.score_for_metric(metric=metric,
-                                                         predicted_y=predicted_y[label.name],
-                                                         true_y=true_y[label.name],
-                                                         example_weights=example_weights,
-                                                         classes=label.values,
-                                                         predicted_proba_y=predicted_proba_y)
+                                                predicted_y=predicted_y[label.name],
+                                                true_y=true_y[label.name],
+                                                example_weights=example_weights,
+                                                classes=label.values,
+                                                predicted_proba_y=predicted_proba_y)
             results[f"{label.name}_{metric.name.lower()}"] = score
             scores[metric.name.lower()] = score
 

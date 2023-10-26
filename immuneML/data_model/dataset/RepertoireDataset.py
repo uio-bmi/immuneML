@@ -1,5 +1,6 @@
 # quality: gold
 import copy
+import logging
 import uuid
 from pathlib import Path
 
@@ -10,9 +11,34 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.Constants import Constants
 from immuneML.util.ParameterValidator import ParameterValidator
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class RepertoireDataset(Dataset):
+
+    @classmethod
+    def build_from_objects(cls, **kwargs):
+        ParameterValidator.assert_keys_present(list(kwargs.keys()), ['repertoires', 'path'], RepertoireDataset.__name__, RepertoireDataset.__name__)
+        ParameterValidator.assert_all_type_and_value(kwargs['repertoires'], Repertoire, RepertoireDataset.__name__, 'repertoires')
+
+        assert len(kwargs['repertoires']) > 0, "Cannot to construct a repertoire dataset without repertories."
+
+        metadata_df = pd.DataFrame.from_records([{**rep.metadata, **{'filename': rep.data_filename}} for rep in kwargs['repertoires']])
+
+        if 'field_list' in metadata_df.columns:
+            metadata_df.drop(columns=['field_list'], inplace=True)
+
+        metadata_path = PathBuilder.build(kwargs['path']) / 'metadata.csv'
+        metadata_df.to_csv(metadata_path, index=False)
+
+        logging.info(f"Made new repertoire dataset at {kwargs['path']} with metadata at {metadata_path} "
+                     f"with {len(kwargs['repertoires'])} repertoires.")
+
+        dataset = RepertoireDataset(repertoires=kwargs['repertoires'], metadata_file=metadata_path)
+        label_names = list(dataset.get_label_names(refresh=True))
+        dataset.labels = {label: list(set(values)) for label, values in dataset.get_metadata(label_names).items()}
+
+        return dataset
 
     @classmethod
     def build(cls, **kwargs):

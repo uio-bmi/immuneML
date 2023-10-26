@@ -158,6 +158,8 @@ class ImportHelper:
             alternative_load_func = getattr(import_class, "alternative_load_func", None)
 
             filename = params.path / f"{metadata_row['filename']}"
+            if not filename.is_file():
+                filename = params.path / f"repertoires/{metadata_row['filename']}"
 
             dataframe = ImportHelper.load_sequence_dataframe(filename, params, alternative_load_func)
             dataframe = import_class.preprocess_dataframe(dataframe, params)
@@ -265,23 +267,24 @@ class ImportHelper:
         return dataframe
 
     @staticmethod
-    def drop_illegal_character_sequences(dataframe: pd.DataFrame, import_illegal_characters: bool) -> pd.DataFrame:
+    def drop_illegal_character_sequences(dataframe: pd.DataFrame, import_illegal_characters: bool, import_with_stop_codon: bool) -> pd.DataFrame:
         if not import_illegal_characters:
             sequence_type = EnvironmentSettings.get_sequence_type()
             sequence_name = sequence_type.name.lower().replace("_", " ")
 
             legal_alphabet = EnvironmentSettings.get_sequence_alphabet(sequence_type)
-            if sequence_type == SequenceType.AMINO_ACID:
+            if sequence_type == SequenceType.AMINO_ACID and import_with_stop_codon:
                 legal_alphabet.append(Constants.STOP_CODON)
 
             is_illegal_seq = [ImportHelper.is_illegal_sequence(sequence, legal_alphabet) for
                               sequence in dataframe[sequence_type.value]]
             n_illegal = sum(is_illegal_seq)
+            n_total = dataframe.shape[0]
 
             if n_illegal > 0:
                 dataframe.drop(dataframe.loc[is_illegal_seq].index, inplace=True)
-                warnings.warn(
-                    f"{ImportHelper.__name__}: {n_illegal} sequences were removed from the dataset because their {sequence_name} sequence contained illegal characters. ")
+                warnings.warn(f"{ImportHelper.__name__}: {n_illegal}/{n_total} sequences were removed from the dataset because their {sequence_name}"
+                              f" sequence contained illegal characters. ")
         return dataframe
 
     @staticmethod

@@ -8,7 +8,7 @@ import dill
 import numpy as np
 import pkg_resources
 import yaml
-from sklearn.metrics import SCORERS
+from sklearn.metrics import get_scorer_names
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.utils.validation import check_is_fitted
 
@@ -175,7 +175,7 @@ class SklearnMethod(MLMethod):
         model = self._get_ml_model()
         scoring = Metric.get_sklearn_score_name(Metric.get_metric(optimization_metric.upper()))
 
-        if scoring not in SCORERS.keys():
+        if scoring not in get_scorer_names():
             scoring = "balanced_accuracy"
             warnings.warn(
                 f"{self.__class__.__name__}: specified optimization metric ({optimization_metric}) is not defined as a sklearn scoring function, using {scoring} instead... ")

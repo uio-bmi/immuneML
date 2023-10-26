@@ -109,11 +109,6 @@ class AminoAcidFrequencyDistribution(DataReport):
             # todo plot figure
 
 
-
-
-
-
-
         return ReportResult(name=self.name,
                             info="A barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.",
                             output_figures=[fig for fig in figures if fig is not None],
@@ -128,6 +123,10 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         elif isinstance(self.dataset, RepertoireDataset):
             plotting_data = self._get_repertoire_dataset_plotting_data()
+
+        else:
+            plotting_data = None
+            # todo raise error
 
         if not self.split_by_label:
             plotting_data.drop(columns=["class"], inplace=True)
@@ -216,7 +215,7 @@ class AminoAcidFrequencyDistribution(DataReport):
             for aa, pos in zip(seq_str, seq_pos):
                 if pos not in raw_count_dict[class_name]:
                     raw_count_dict[class_name][pos] = {legal_aa: 0 for legal_aa in
-                                           EnvironmentSettings.get_sequence_alphabet(SequenceType.AMINO_ACID)}
+                                                       EnvironmentSettings.get_sequence_alphabet(SequenceType.AMINO_ACID)}
 
                 raw_count_dict[class_name][pos][aa] += 1
 
@@ -253,13 +252,6 @@ class AminoAcidFrequencyDistribution(DataReport):
         return ReportOutput(path=file_path, name="Table of amino acid frequencies")
 
 
-    # def _get_colors(self):
-    #     return ['rgb(102, 197, 204)','rgb(179,222,105)', 'rgb(220, 176, 242)', 'rgb(217,217,217)',
-    #             'rgb(141,211,199)', 'rgb(251,128,114)', 'rgb(158, 185, 243)', 'rgb(248, 156, 116)',
-    #             'rgb(135, 197, 95)', 'rgb(254, 136, 177)', 'rgb(201, 219, 116)', 'rgb(255,237,111)',
-    #             'rgb(180, 151, 231)', 'rgb(246, 207, 113)', 'rgb(190,186,218)', 'rgb(128,177,211)',
-    #             'rgb(253,180,98)',  'rgb(252,205,229)', 'rgb(188,128,189)', 'rgb(204,235,197)', ]
-    #
     def _get_colors(self):
         return {'Y': 'rgb(102, 197, 204)', 'W': 'rgb(179,222,105)', 'V': 'rgb(220, 176, 242)',
                 'T': 'rgb(217,217,217)', 'S': 'rgb(141,211,199)', 'R': 'rgb(251,128,114)',
@@ -285,10 +277,10 @@ class AminoAcidFrequencyDistribution(DataReport):
                                 "relative frequency": "Relative frequency",
                                 "amino acid": "Amino acid"}, template="plotly_white")
         figure.update_xaxes(categoryorder='array', categoryarray=self._get_position_order(freq_dist["position"]))
-        figure.update_layout(showlegend=False, yaxis={'categoryorder':'category ascending'})
+        figure.update_layout(showlegend=False, yaxis={'categoryorder': 'category ascending'})
 
         if self.relative_frequency:
-            figure.update_yaxes(tickformat=",.0%", range=[0,1])
+            figure.update_yaxes(tickformat=",.0%", range=[0, 1])
 
         file_path = self.result_path / "amino_acid_frequency_distribution.html"
         figure.write_html(str(file_path))

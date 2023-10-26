@@ -94,8 +94,8 @@ class KernelSequenceLogo(MLReport):
         return ReportOutput(self.result_path / "fully_connected_layer_weights.html", "fully-connected layer weights")
 
     def _store_fc_table(self, df, bias):
-        df.append({"weights": bias, "names": "bias"}, ignore_index=True)
-        df.to_csv(self.result_path / "fully_connected_layer_weights.csv", index=False)
+        new_df = pd.concat([df, pd.DataFrame({"weights": bias, "names": "bias"})], ignore_index=True)
+        new_df.to_csv(self.result_path / "fully_connected_layer_weights.csv", index=False)
 
         return ReportOutput(self.result_path / "fully_connected_layer_weights.csv", "fully-connected layer weights")
 

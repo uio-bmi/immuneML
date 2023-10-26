@@ -36,7 +36,7 @@ class ChainRepertoireFilter(Filter):
         super().__init__(result_path)
         self.keep_chain = Chain.get_chain(keep_chain)
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: Path):
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1):
         self.check_dataset_type(dataset, [RepertoireDataset], "ChainRepertoireFilter")
         processed_dataset = dataset.clone()
         self.result_path = result_path if result_path is not None else self.result_path

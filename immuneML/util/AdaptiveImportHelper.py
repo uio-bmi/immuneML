@@ -31,7 +31,7 @@ class AdaptiveImportHelper:
         ImportHelper.update_gene_info(dataframe)
         ImportHelper.load_chains(dataframe)
         ImportHelper.drop_empty_sequences(dataframe, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
-        ImportHelper.drop_illegal_character_sequences(dataframe, params.import_illegal_characters)
+        ImportHelper.drop_illegal_character_sequences(dataframe, params.import_illegal_characters, params.import_with_stop_codon)
 
         return dataframe
 

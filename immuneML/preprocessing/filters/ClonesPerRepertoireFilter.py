@@ -44,11 +44,10 @@ class ClonesPerRepertoireFilter(Filter):
     def keeps_example_count(self) -> bool:
         return False
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: Path = None):
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1):
         self.check_dataset_type(dataset, [RepertoireDataset], "ClonesPerRepertoireFilter")
         self.result_path = result_path if result_path is not None else self.result_path
 
-        processed_dataset = dataset.clone()
         repertoires, indices = [], []
 
         for index, repertoire in enumerate(dataset.get_data()):
@@ -59,8 +58,7 @@ class ClonesPerRepertoireFilter(Filter):
             repertoires.append(dataset.repertoires[index])
             indices.append(index)
 
-        processed_dataset.repertoires = repertoires
-        processed_dataset.metadata_file = self._build_new_metadata(dataset, indices)
+        processed_dataset = RepertoireDataset.build_from_objects(repertoires=repertoires, path=result_path)
 
         self.check_dataset_not_empty(processed_dataset, "ClonesPerRepertoireFilter")
 

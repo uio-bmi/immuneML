@@ -126,7 +126,7 @@ class IGoRImport(DataImport):
         df.loc[:, "region_types"] = params.region_type.name
         # note: import_empty_aa_sequences is set to true here; since IGoR doesnt output aa, this parameter is insensible
         ImportHelper.drop_empty_sequences(df, True, params.import_empty_nt_sequences)
-        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
+        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters, params.import_with_stop_codon)
 
         # chain or at least receptorsequence?
 

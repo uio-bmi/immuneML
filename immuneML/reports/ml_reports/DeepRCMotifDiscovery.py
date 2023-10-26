@@ -132,9 +132,7 @@ class DeepRCMotifDiscovery(MLReport):
 
         intgrds_set = intgrds_set_loader.dataset
 
-        #
         # Integrated gradients w.r.t. kernels
-        #
         active_kernels = deeprc_model.sequence_embedding_16bit.conv_aas.weight
         original_kernel_values = active_kernels.cpu().clone().data.detach().to(dtype=torch.float32)
 
