@@ -7,7 +7,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 
 def test_fit_apply_gen_model():
-    base_path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "apply_gen_model_integration")
+    base_path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "fit_apply_gen_model_integration")
     generated_model_path = PathBuilder.remove_old_and_build(base_path / "generated_model")
     applied_model_path = PathBuilder.remove_old_and_build(base_path / "applied_model")
 
