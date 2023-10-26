@@ -169,7 +169,7 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
     def _run_compairr(self, compairr_params, all_sequences_path, pos_sequences_path, compairr_result_path):
         import subprocess
 
-        args = CompAIRRHelper.get_cmd_args(compairr_params, [all_sequences_path, pos_sequences_path], compairr_result_path, mode="-x")
+        args = CompAIRRHelper.get_cmd_args(compairr_params, [all_sequences_path, pos_sequences_path], compairr_result_path)
         logging.info(f"{SimilarToPositiveSequenceEncoder.__name__}: running CompAIRR with the following arguments: {' '.join(args)}")
         compairr_result = subprocess.run(args, capture_output=True, text=True)
 
@@ -197,8 +197,12 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
                               ignore_counts=True,
                               ignore_genes=self.ignore_genes,
                               threads=self.threads,
+                              output_pairs=False,
+                              pairs_filename=None,
                               output_filename="compairr_out.txt",
-                              log_filename="compairr_log.txt")
+                              log_filename="compairr_log.txt",
+                              do_repertoire_overlap=False,
+                              do_sequence_matching=True)
 
     def get_sequence_matching_feature_without_compairr(self, dataset):
         matcher = SequenceMatcher()
