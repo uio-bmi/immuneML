@@ -6,6 +6,8 @@ from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.reports.ReportResult import ReportResult
+from immuneML.reports.data_reports.DataReport import DataReport
+from immuneML.reports.ml_reports.MLReport import MLReport
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
@@ -31,15 +33,10 @@ class ApplyGenModelInstruction(Instruction):
 
     def run(self, result_path: Path) -> ApplyGenModelState:
         self.state.result_path = PathBuilder.build(result_path / self.state.name)
-        dataset = self.method.generate_sequences(self.state.gen_examples_count, 1,
-                                                 self.state.result_path / 'generated_sequences',
-                                                 SequenceType.AMINO_ACID, False)
-        #self._gen_data()
+
+        self._gen_data()
 
         return self.state
-
-    def _load_model(self):
-        pass
 
     def _gen_data(self):
         dataset = self.method.generate_sequences(self.state.gen_examples_count, 1,
@@ -52,4 +49,17 @@ class ApplyGenModelInstruction(Instruction):
         AIRRExporter.export(dataset, self.state.result_path)
 
     def _run_reports(self):
-        pass
+        report_path = PathBuilder.build(self.state.result_path / 'reports')
+        for report in self.reports:
+            report.result_path = report_path
+            if isinstance(report, DataReport):
+                report.dataset = self.generated_dataset
+                self.state.report_results['data_reports'].append(report.generate_report())
+            elif isinstance(report, MLReport):
+                report.method = self.method
+                self.state.report_results['ml_reports'].append(report.generate_report())
+
+        if len(self.reports) > 0:
+            gen_rep_count = len(self.state.report_results['ml_reports']) + len(
+                self.state.report_results['data_reports'])
+            print_log(f"{self.state.name}: generated {gen_rep_count} reports.", True)

@@ -6,29 +6,31 @@ from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 
 
-def test_apply_gen_model():
-    generated_model_path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path /
-                                                            "apply_gen_model_integration/generated_model")
-    applied_model_path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path /
-                                                          "apply_gen_model_integration/applied_model")
+def test_fit_apply_gen_model():
+    base_path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "apply_gen_model_integration")
+    generated_model_path = PathBuilder.remove_old_and_build(base_path / "generated_model")
+    applied_model_path = PathBuilder.remove_old_and_build(base_path / "applied_model")
 
     specs = {
         "definitions": {
             "datasets": {
                 "d1": {
                     "format": "RandomSequenceDataset",
-                    "params": {}
+                    "params": {
+                        'length_probabilities': {
+                            3: 0.5,
+                            4: 0.5
+                        },
+                        'sequence_count': 10
+                    }
                 }
             },
             "ml_methods": {
-                "sonnia": {
-                    "SoNNia": {
-                        "batch_size": 1e4,
-                        "epochs": 30,
-                        'default_model_name': 'humanTRB',
-                        'deep': False,
-                        'include_joint_genes': True,
-                        'n_gen_seqs': 1000
+                'pwm': {
+                    "PWM": {
+                        'chain': 'beta',
+                        'sequence_type': 'amino_acid',
+                        'region_type': 'IMGT_CDR3'
                     }
                 }
             },
@@ -42,33 +44,36 @@ def test_apply_gen_model():
                 "type": "TrainGenModel",
                 "gen_examples_count": 100,
                 "dataset": "d1",
-                "method": "sonnia",
+                "method": "pwm",
                 "reports": ['sld_rep', 'aa_freq']
             }
         }
     }
 
-    #write_yaml(generated_model_path / 'specs.yaml', specs)
+    write_yaml(generated_model_path / 'specs.yaml', specs)
 
-    #ImmuneMLApp(generated_model_path / 'specs.yaml', generated_model_path / 'output').run()
+    ImmuneMLApp(generated_model_path / 'specs.yaml', generated_model_path / 'output').run()
 
     specs = {
         "definitions": {
             "datasets": {
                 "d1": {
                     "format": "RandomSequenceDataset",
-                    "params": {}
+                    "params": {
+                        'length_probabilities': {
+                            3: 0.5,
+                            4: 0.5
+                        },
+                        'sequence_count': 10
+                    }
                 }
             },
             "ml_methods": {
-                "sonnia": {
-                    "SoNNia": {
-                        "batch_size": 1e4,
-                        "epochs": 30,
-                        'default_model_name': 'humanTRB',
-                        'deep': False,
-                        'include_joint_genes': True,
-                        'n_gen_seqs': 1000
+                'pwm': {
+                    "PWM": {
+                        'chain': 'beta',
+                        'sequence_type': 'amino_acid',
+                        'region_type': 'IMGT_CDR3'
                     }
                 }
             },
@@ -81,7 +86,7 @@ def test_apply_gen_model():
             "inst1": {
                 "type": "ApplyGenModel",
                 "gen_examples_count": 100,
-                "method": "sonnia",
+                "method": "pwm",
                 "reports": ['sld_rep', 'aa_freq'],
                 "config_path": str(generated_model_path / "output/inst1/trained_model/trained_model.zip"),
             }
@@ -92,4 +97,4 @@ def test_apply_gen_model():
 
     ImmuneMLApp(applied_model_path / 'specs.yaml', applied_model_path / 'output').run()
 
-#    shutil.rmtree(path)
+    shutil.rmtree(base_path)
