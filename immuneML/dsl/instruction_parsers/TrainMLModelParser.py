@@ -170,6 +170,19 @@ class TrainMLModelParser:
                 raise ValueError(f"{TrainMLModelParser.__name__}: Stratified k-fold cross-validation cannot be used when "
                                  f"{len(label_config.get_labels_by_name())} labels are specified. It support only one label (and multiple classes).")
 
+            if split_strategy == SplitType.MANUAL:
+                ParameterValidator.assert_keys(keys=instruction[split_key]["manual_config"].keys(),
+                                               valid_keys=["train_metadata_path", "test_metadata_path"],
+                                               location=TrainMLModelParser.__name__, parameter_name="manual_config", exclusive=True)
+
+                ParameterValidator.assert_valid_tabular_file(instruction[split_key]["manual_config"]["train_metadata_path"],
+                                                             location=TrainMLModelParser.__name__,
+                                                             parameter_name="train_metadata_path")
+
+                ParameterValidator.assert_valid_tabular_file(instruction[split_key]["manual_config"]["test_metadata_path"],
+                                                             location=TrainMLModelParser.__name__,
+                                                             parameter_name="test_metadata_path")
+
             return SplitConfig(split_strategy=split_strategy,
                                split_count=int(instruction[split_key]["split_count"]),
                                training_percentage=training_percentage,
