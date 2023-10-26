@@ -25,16 +25,17 @@ class ApplyGenModelState:
 
 
 class ApplyGenModelInstruction(Instruction):
-    def __init__(self, result_path: Path = None, name: str = None, method: GenerativeModel = None,
-                 gen_examples_count: int = None, reports: list = None):
-        self.state = ApplyGenModelState(result_path, name, gen_examples_count)
+    def __init__(self, method: GenerativeModel = None, reports: list = None, result_path: Path = None,
+                 name: str = None, gen_examples_count: int = None):
+        self.generated_dataset = None
         self.method = method
         self.reports = reports
+        self.state = ApplyGenModelState(result_path, name, gen_examples_count)
 
     def run(self, result_path: Path) -> ApplyGenModelState:
         self.state.result_path = PathBuilder.build(result_path / self.state.name)
-
         self._gen_data()
+        self._run_reports()
 
         return self.state
 
