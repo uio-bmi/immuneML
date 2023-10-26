@@ -12,6 +12,7 @@ from immuneML.data_model.bnp_util import bnp_write_to_file, make_dynamic_seq_set
     write_yaml
 from immuneML.data_model.dataset.ElementDataset import ElementDataset
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class SequenceDataset(ElementDataset):
@@ -25,6 +26,8 @@ class SequenceDataset(ElementDataset):
                            labels: dict = None):
 
         file_count = math.ceil(len(sequences) / file_size)
+        PathBuilder.build(path)
+
         file_names = [
             path / f"batch{''.join(['0' for i in range(1, len(str(file_count)) - len(str(index)) + 1)])}{index}.tsv"
             for index in range(1, file_count + 1)]

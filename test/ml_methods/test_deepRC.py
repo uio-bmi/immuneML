@@ -11,7 +11,6 @@ import torch.cuda
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
-from immuneML.encodings.deeprc.DeepRCEncoder import DeepRCEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
@@ -44,7 +43,7 @@ class TestDeepRC(TestCase):
             repertoire_data.to_csv(sep="\t", index=False, path_or_buf=path / f"{rep_id}.tsv")
 
         return EncodedData(examples=None, labels={"status": status_label},
-                           example_ids=rep_ids, encoding=DeepRCEncoder.__name__,
+                           example_ids=rep_ids, encoding="DeepRCEncoder",
                            info={"metadata_filepath": metadata_filepath,
                                  "max_sequence_length": 30})
 
@@ -81,20 +80,21 @@ class TestDeepRC(TestCase):
         self.assertEqual(len(train_indices) + len(val_indices), 10)
         self.assertEqual(set(list(train_indices) + list(val_indices)), set(range(10)))
 
-        # test if 'fit' function saves models
-        classifier.fit(encoded_data, Label("status", values=["A", "B"]))
+        if torch.cuda.is_available():
+            # test if 'fit' function saves models
+            classifier.fit(encoded_data, Label("status", values=["A", "B"]))
 
-        self.assertIsInstance(classifier.model, DeepRCInternal)
+            self.assertIsInstance(classifier.model, DeepRCInternal)
 
-        # Test storing and loading of models
-        self.assertFalse(classifier.check_if_exists(result_path))
-        classifier.store(result_path, feature_names=None)
-        self.assertTrue(classifier.check_if_exists(result_path))
+            # Test storing and loading of models
+            self.assertFalse(classifier.check_if_exists(result_path))
+            classifier.store(result_path, feature_names=None)
+            self.assertTrue(classifier.check_if_exists(result_path))
 
-        second_classifier = DeepRC(**params)
-        second_classifier.load(result_path)
+            second_classifier = DeepRC(**params)
+            second_classifier.load(result_path)
 
-        self.assertIsInstance(second_classifier.model, DeepRCInternal)
+            self.assertIsInstance(second_classifier.model, DeepRCInternal)
 
         shutil.rmtree(path)
 
@@ -104,7 +104,8 @@ class TestDeepRC(TestCase):
         classifier.get_package_info()
 
     def test(self):
-        if torch.cuda.is_available():
+        try:
+            import deeprc
             self.internal_deep_RC_test()
-        else:
-            pass
+        except ImportError as e:
+            print("Test ignored since deepRC is not installed.")

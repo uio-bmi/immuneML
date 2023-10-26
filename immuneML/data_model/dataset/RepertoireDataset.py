@@ -21,6 +21,8 @@ class RepertoireDataset(Dataset):
         ParameterValidator.assert_keys_present(list(kwargs.keys()), ['repertoires', 'path'], RepertoireDataset.__name__, RepertoireDataset.__name__)
         ParameterValidator.assert_all_type_and_value(kwargs['repertoires'], Repertoire, RepertoireDataset.__name__, 'repertoires')
 
+        assert len(kwargs['repertoires']) > 0, "Cannot to construct a repertoire dataset without repertories."
+
         metadata_df = pd.DataFrame.from_records([{**rep.metadata, **{'filename': rep.data_filename}} for rep in kwargs['repertoires']])
 
         if 'field_list' in metadata_df.columns:
