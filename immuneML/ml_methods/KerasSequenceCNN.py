@@ -1,9 +1,6 @@
 import copy
 import logging
 from pathlib import Path
-import keras
-from keras.optimizers import Adam
-import numpy as np
 import yaml
 
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
@@ -16,23 +13,66 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class KerasSequenceCNN(MLMethod):
     """
+    A CNN-based classifier for sequence datasets. Should be used in combination with :py:obj:`source.encodings.onehot.OneHotEncoder.OneHotEncoder`.
+    This classifier integrates the CNN proposed by Mason et al., the original code can be found at: https://github.com/dahjan/DMS_opt/blob/master/scripts/CNN.py
+
+    Note: make sure keras and tensorflow dependencies are installed (see installation instructions).
+
+    Reference:
+    Derek M. Mason, Simon Friedensohn, Cédric R. Weber, Christian Jordi, Bastian Wagner, Simon M. Men1, Roy A. Ehling,
+    Lucia Bonati, Jan Dahinden, Pablo Gainza, Bruno E. Correia and Sai T. Reddy
+    ‘Optimization of therapeutic antibodies by predicting antigen specificity from antibody sequence via deep learning’.
+    Nat Biomed Eng 5, 600–612 (2021). https://doi.org/10.1038/s41551-021-00699-9
+
+    Arguments:
+
+        units_per_layer (list): A nested list specifying the layers of the CNN. The first element in each nested list defines the layer type, other elements define the layer parameters.
+        Valid layer types are: CONV (keras.layers.Conv1D), DROP (keras.layers.Dropout), POOL (keras.layers.MaxPool1D), FLAT (keras.layers.Flatten), DENSE (keras.layers.Dense).
+        The parameters per layer type are as follows:
+
+        - [CONV, <filters>, <kernel_size>, <strides>]
+
+        - [DROP, <rate>]
+
+        - [POOL, <pool_size>, <strides>]
+
+        - [FLAT]
+
+        - [DENSE, <units>]
+
+        activation (str): The Activation function to use in the convolutional or dense layers. Activation functions can be chosen from keras.activations. For example, rely or softmax. By default, relu is used.
+
+        training_percentage (float): The fraction of sequences that will be randomly assigned to form the training set (the rest will be the validation set). Should be a value between 0 and 1. By default, training_percentage is 0.7.
+
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_cnn:
+            KerasSequenceCNN:
+                training_percentage: 0.7
+                units_per_layer: [[CONV, 400, 3, 1], [DROP, 0.5], [POOL, 2, 1], [FLAT], [DENSE, 50]]
+                activation: relu
+
+
 
     """
 
-    def __init__(self, units_per_layer: list = None, activation: str = None, regularizer: str = None, training_percentage: float = None, result_path: Path = None):
+    def __init__(self, units_per_layer: list = None, activation: str = None, training_percentage: float = None):
 
         super().__init__()
 
         self.units_per_layer = units_per_layer # todo refactor this to something more sensible
         self.activation = activation
-        self.regularizer = regularizer
         self.training_percentage = training_percentage
 
         self.background_probabilities = None
         self.CNN = None
         self.label = None
         self.class_mapping = None
-        self.result_path = result_path
+        self.result_path = None
         self.feature_names = None
 
     def predict(self, encoded_data: EncodedData, label: Label):
@@ -47,8 +87,10 @@ class KerasSequenceCNN(MLMethod):
                              label.get_binary_negative_class(): 1 - predictions}}
 
     def _create_cnn(self, units_per_layer, input_shape,
-               activation, regularizer):
-        """ # todo docs reference Mason code
+               activation):
+        """
+        Based on: https://github.com/dahjan/DMS_opt/blob/master/scripts/CNN.py
+
         Generate the CNN layers with a Keras wrapper.
 
         Parameters
@@ -62,11 +104,11 @@ class KerasSequenceCNN(MLMethod):
 
         input_shape: a tuple defining the input shape of the data
 
-        activation: Activation function, i.e. ReLU, softmax
+        activation: Activation function to use , i.e. ReLU, softmax
 
-        regularizer: Kernel and bias regularizer in convulational and dense
-            layers, i.e., regularizers.l1(0.01)
+        # note: 'regularizer' option was removed, original authors used kernel_regularizer and bias_regularizer = None
         """
+        import keras
 
         # Initialize the CNN
         model = keras.Sequential()
@@ -81,8 +123,8 @@ class KerasSequenceCNN(MLMethod):
                                               kernel_size=units[2],
                                               strides=units[3],
                                               activation=activation,
-                                              kernel_regularizer=regularizer,
-                                              bias_regularizer=regularizer,
+                                              kernel_regularizer=None,
+                                              bias_regularizer=None,
                                               padding='same'))
             elif units[0] == 'POOL':
                 model.add(keras.layers.MaxPool1D(pool_size=units[1],
@@ -90,8 +132,8 @@ class KerasSequenceCNN(MLMethod):
             elif units[0] == 'DENSE':
                 model.add(keras.layers.Dense(units=units[1],
                                              activation=activation,
-                                             kernel_regularizer=regularizer,
-                                             bias_regularizer=regularizer))
+                                             kernel_regularizer=None,
+                                             bias_regularizer=None))
             elif units[0] == 'DROP':
                 model.add(keras.layers.Dropout(rate=units[1]))
             elif units[0] == 'FLAT':
@@ -114,8 +156,7 @@ class KerasSequenceCNN(MLMethod):
 
         self.model = self._create_cnn(units_per_layer=self.units_per_layer, # todo better input format...
                                       input_shape=encoded_data.examples.shape[1:],
-                                      activation=self.activation,
-                                      regularizer=self.regularizer)
+                                      activation=self.activation)
 
         self._fit(encoded_train_data=encoded_train_data, encoded_val_data=encoded_val_data)
 
@@ -130,6 +171,8 @@ class KerasSequenceCNN(MLMethod):
 
     def _fit(self, encoded_train_data, encoded_val_data):
         """reference to original code, maybe the input should just be the encoded data instead? #todo"""
+        from keras.optimizers import Adam
+
         X_train = encoded_train_data.examples
         X_val = encoded_val_data.examples
         y_train = Util.map_to_new_class_values(encoded_train_data.labels[self.label.name], self.class_mapping)
@@ -171,6 +214,8 @@ class KerasSequenceCNN(MLMethod):
             yaml.dump(custom_vars, file)
 
     def load(self, path):
+        import keras
+
         params_path = path / "custom_params.yaml"
 
         with params_path.open("r") as file:

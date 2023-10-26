@@ -1,7 +1,6 @@
 import os
 import shutil
 from unittest import TestCase
-import numpy as np
 import keras
 
 from immuneML.caching.CacheType import CacheType
@@ -25,7 +24,16 @@ class TestKerasSequenceCNN(TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-    def test_fit(self):
+    def test_if_keras_installed(self):
+        try:
+            import keras
+            from keras.optimizers import Adam
+            self._test_fit()
+        except ImportError as e:
+            print("Test ignored since keras is not installed.")
+
+
+    def _test_fit(self):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "keras_cnn")
 
         dataset = RandomDatasetGenerator.generate_sequence_dataset(sequence_count=500, length_probabilities={5: 1},
