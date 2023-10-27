@@ -14,9 +14,7 @@ class TestMotifGeneralizationAnalysis(TestCase):
     def test_generate(self):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "significant_motif_overlap/")
 
-
         dataset = RandomDatasetGenerator.generate_sequence_dataset(100, {10: 1}, {"l1": {"A": 0.5, "B": 0.5}}, path / "dataset")
-
 
         identifiers = [seq.identifier for seq in dataset.get_data()]
         training_set_identifiers = identifiers[::2]

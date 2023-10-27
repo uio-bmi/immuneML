@@ -27,7 +27,6 @@ class TestGroundTruthMotifOverlap(TestCase):
             "min_precision": 0.1,
             "min_recall": 0,
             "min_true_positives": 1,
-            "generalize_motifs": False,
         })
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(

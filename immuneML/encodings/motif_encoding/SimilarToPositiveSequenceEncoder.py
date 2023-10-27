@@ -28,11 +28,15 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
 
     Arguments:
 
-        hamming_distance (int):
+        hamming_distance (int): Maximum number of differences allowed between any positive sequence of the training set and a
+        new observed sequence in order for the observed sequence to be classified as 'positive'.
 
-        compairr_path
+        compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
+        has been installed such that it can be called directly on the command line with the command 'compairr',
+        or that it is located at /usr/local/bin/compairr.
 
-        ignore_genes (bool): only used when compairr is used
+        ignore_genes (bool): Only used when compairr is used. Whether to ignore V and J gene information. If False, the V and J genes between two sequences
+        have to match for the sequence to be considered 'similar'. If True, gene information is ignored. By default, ignore_genes is False.
 
         threads (int): The number of threads to use for parallelization. This does not affect the results of the encoding, only the speed.
         The default number of threads is 8.

@@ -55,7 +55,6 @@ class TestMotifEncoder(TestCase):
                 "min_precision": 0.9,
                 "min_recall": 0.5,
                 "min_true_positives": 1,
-                "generalize_motifs": False,
             })
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(
@@ -83,7 +82,11 @@ class TestMotifEncoder(TestCase):
 
         shutil.rmtree(path)
 
-    def test_generalized(self):
+    def _disabled_test_generalized(self):
+        '''
+        Old test, disabled as generalized_motifs option does not have a clear purpose as of now.
+        '''
+
         path = EnvironmentSettings.tmp_test_path / "significant_motif_sequence_encoder_generalized/"
         dataset = self._prepare_dataset(path)
 
@@ -95,8 +98,8 @@ class TestMotifEncoder(TestCase):
                 "max_positions": 2,
                 "min_precision": 0.9,
                 "min_recall": 0.5,
+                "generalized_motifs": True,
                 "min_true_positives": 1,
-                "generalize_motifs": True,
             })
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(

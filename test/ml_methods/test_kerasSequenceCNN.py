@@ -1,7 +1,6 @@
 import os
 import shutil
 from unittest import TestCase
-import keras
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.encodings.EncoderParams import EncoderParams

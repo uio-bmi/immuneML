@@ -22,17 +22,40 @@ from immuneML.util.PathBuilder import PathBuilder
 class BinaryFeatureClassifier(MLMethod):
     """
     A simple classifier that takes in encoded data containing features with only 1/0 or True/False values.
-    This classifier tries to select an optimal subset of such binary features, and gives a positive prediction
-    if any of the features are 'True'.
 
-    This classifier can be used in combination with the :py:obj:`~immuneML.encodings.motif_encoding.MotifEncoder.MotifEncoder`
-    and the todo formatting: SimilarToPositiveSequenceEncoder
+    This classifier gives a positive prediction if any of the binary features for an example are 'true'.
+    Optionally, the classifier can select an optimal subset of these features. In this case, the given data is split
+    into a training and validation set, a minimal set of features is learned through greedy forward selection,
+    and the validation set is used to determine when to stop growing the set of features (earlystopping).
+    Earlystopping is reached when the optimization metric on the validation set no longer improves for a given number of features (patience).
+    The optimization metric is the same metric as the one used for optimization in the :py:obj:`~immuneML.workflows.instructions.TrainMLModelInstruction`.
+
+    Currently, this classifier can be used in combination with two encoders:
+
+    - The classifier can be used in combination with the :py:obj:`~immuneML.encodings.motif_encoding.MotifEncoder.MotifEncoder`,
+    such that sequences containing any of the positive class-associated motifs are classified as positive.
+    A reduced subset of binding-associated motifs can be learned (when keep_all is false).
+    This results in a set of complementary motifs, minimizing the redundant predictions made by different motifs.
+
+    - Alternatively, this classifier can be combined with the :py:obj:`~immuneML.encodings.motif_encoding.SimilarToPositiveSequenceEncoder.SimilarToPositiveSequenceEncoder`
+    such that any sequence that falls within a given hamming distance from any of the positive class sequences in the training set
+    are classified as positive. While it is possible to learn a reduced subset of training sewuences (by setting keep_all to false),
+    this is not recommended.
 
     Arguments:
 
-        training_percentage (float): what percentage of data to use for training (the rest will be used for validation); values between 0 and 1
+        training_percentage (float): What percentage of data to use for training (the rest will be used for validation); values between 0 and 1
 
-        random_seed (int):
+        keep_all (bool): Whether to keep all the input features (true) or learn a reduced subset (false). By default, keep_all is false.
+
+        random_seed (int): Random seed for splitting the data into training and validation sets when learning a minimal subset of features. This is only used when keep_all is false.
+
+        max_features (int): The maximum number of features to allow in the reduced subset. When this number is reached, no more features are added even if the earlystopping criterion is not reached yet.
+        This is only used when keep_all is false. By default, max_features is 100.
+
+        patience (int): The patience for earlystopping. When earlystopping is reached, <patience> more features are added to the reduced set to test whether the optimization metric on the validation set improves again. By default, patience is 5.
+
+        min_delta (float): The delta value used to test if there was improvement between the previous set of features and the new set of features (+1). By default, min_delta is 0, meaning the new set of features does not need to yield a higher optimization metric score on the validation set, but it needs to be at least equally high as the previous set.
 
 
     YAML specification:
@@ -42,7 +65,11 @@ class BinaryFeatureClassifier(MLMethod):
 
         my_motif_classifier:
             MotifClassifier:
-                ...
+                training_percentage: 0.7
+                max_features: 100
+                patience: 5
+                min_delta: 0
+                keep_all: false
 
     """
 
@@ -261,10 +288,6 @@ class BinaryFeatureClassifier(MLMethod):
         return [self._test_performance_predictions(encoded_data=encoded_data,
                                                    pred=np.logical_or(prev_predictions, encoded_data.examples[:, idx]))
                 for idx in new_indices_to_test]
-
-
-    # def _get_new_performances(self, encoded_data, prev_rule_indices, new_indices_to_test):
-    #     return [self._test_performance_rule_tree(encoded_data, rule_indices=prev_rule_indices + [idx]) for idx in new_indices_to_test]
 
     def _test_performance_rule_tree(self, encoded_data, rule_indices):
         pred = self._get_rule_tree_predictions_bool(encoded_data, rule_indices)

@@ -25,42 +25,52 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class MotifEncoder(DatasetEncoder):
     """
-    xxx
-    todo docs
+    This encoder enumerates every possible positional motif, and keeps only the motifs associated with the positive class.
+    A 'motif' is defined as a combination of position-specific amino acids. These motifs may contain one or multiple gaps.
+    Motifs are filtered out based on a minimal precision and recall threshold for predicting the positive class.
 
-    can only be used for sequences of the same length
+    Note: the MotifEncoder can only be used for sequences of the same length.
+
+    The ideal recall threshold(s) given a user-defined precision threshold can be calibrated using the
+    :py:obj:`~immuneML.reports.data_reports.MotifGeneralizationAnalysis` report. It is recommended to first run this report
+    in :py:obj:`~immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisInstruction` before using this encoder for ML.
+
+    This encoder can be used in combination with the :py:obj:`~immuneML.ml_methods.BinaryFeatureClassifier` in order to
+    learn a minimal set of compatible motifs for predicting the positive class.
+    Alternatively, it may be combined with scikit-learn methods, such as for example :py:obj:`~immuneML.ml_methods.LogisticRegression`,
+    to learn a weight per motif.
+
 
     Arguments:
 
-        max_positions (int):
+        max_positions (int): The maximum motif size. This is number of positional amino acids the motif consists of (excluding gaps). The default value for max_positions is 4.
 
-        min_positions (int):
+        min_positions (int): The minimum motif size (see also: max_positions). The default value for max_positions is 1.
 
-        min_true_positives (int):
+        min_precision (float): The minimum precision threshold for keeping a motif. The default value for min_precision is 0.8.
 
-        min_precision (float):
+        min_recall (float): The minimum recall threshold for keeping a motif. The default value for min_precision is 0.
+        It is also possible to specify a recall threshold for each motif size. In this case, a dictionary must be specified where
+        the motif sizes are keys and the recall values are values. Use the :py:obj:`~immuneML.reports.data_reports.MotifGeneralizationAnalysis` report
+        to calibrate the optimal recall threshold given a user-defined precision threshold to ensure generalisability to unseen data.
 
-        min_recall (float):
+        min_true_positives (int): The minimum number of true positive sequences that a motif needs to occur in. The default value for min_true_positives is 10.
 
-        generalize_motifs (bool):
+        candidate_motif_filepath (str): Optional filepath for pre-filterd candidate motifs. This may be used to save time. Only the given candidate motifs are considered.
+        When this encoder has been run previously, a candidate motifs file named 'all_candidate_motifs.tsv' will have been exported. This file contains all
+        possible motifs with high enough min_true_positives without applying precision and recall thresholds.
+        The file must be a tab-separated file, structured as follows:
 
-        candidate_motif_filepath (str):
+        ========  ==============
+        indices    amino_acids
+        ========  ==============
+        1&2&3      A&G&C
+        5&7        E&D
+        ========  ==============
 
-        label (str):
+        The example above contains two motifs: AGC in positions 123, and E-D in positions 5-7 (with a gap at position 6).
 
-        # note on negative aa: the aa must occur at least count_threshold times in that position, but the negative aa
-        must also occur as often in that position. This to prevent motifs that are extreme outlier cases; if F never
-        occurs in position 8, it is not worth having a motif with not-F in position 8.
-        Similarly if there are only less-than-threshold sequences with F in position 8 (almost always F-8), it is also
-        not worth considering not-F in pos 8
-
-        # todo check all motif related reports to see if they can work with negative aas
-
-
-        # todo should weighting be a parameter here?
-
-
-
+        label (str): The name of the binary label to train the encoder for. This is only necessary when the dataset contains multiple labels.
 
 
     YAML specification:
@@ -70,11 +80,14 @@ class MotifEncoder(DatasetEncoder):
 
             my_motif_encoder:
                 MotifEncoder:
-                    max_positions: 5
-                    min_precision: 0.9
-                    min_recall: 0.1
+                    max_positions: 4
+                    min_precision: 0.8
+                    min_recall:  # different recall thresholds for each motif size
+                        1: 0.5   # For shorter motifs, a stricter recall threshold is used
+                        2: 0.1
+                        3: 0.01
+                        4: 0.001
                     min_true_positives: 10
-                    generalize_motifs: False
 
 
 
@@ -83,16 +96,13 @@ class MotifEncoder(DatasetEncoder):
 
     def __init__(self, max_positions: int = None, min_positions: int = None,
                  min_precision: float = None, min_recall: dict = None,
-                 min_true_positives: int = None, generalize_motifs: bool = False,
-                 allow_negative_aas: bool = False,
+                 min_true_positives: int = None,
                  candidate_motif_filepath: str = None, label: str = None, name: str = None):
         self.max_positions = max_positions
         self.min_positions = min_positions
         self.min_precision = min_precision
         self.min_recall = min_recall
         self.min_true_positives = min_true_positives
-        self.generalize_motifs = generalize_motifs
-        self.allow_negative_aas = allow_negative_aas
         self.candidate_motif_filepath = Path(candidate_motif_filepath) if candidate_motif_filepath is not None else None
         self.learned_motif_filepath = None
 
@@ -102,8 +112,7 @@ class MotifEncoder(DatasetEncoder):
 
     @staticmethod
     def _prepare_parameters(max_positions: int = None, min_positions: int = None, min_precision: float = None, min_recall: dict = None,
-                            min_true_positives: int = None, generalize_motifs: bool = False, allow_negative_aas: bool = False,
-                            candidate_motif_filepath: str = None, label: str = None, name: str = None):
+                            min_true_positives: int = None, candidate_motif_filepath: str = None, label: str = None, name: str = None):
 
         location = MotifEncoder.__name__
 
@@ -113,8 +122,6 @@ class MotifEncoder(DatasetEncoder):
 
         ParameterValidator.assert_type_and_value(min_precision, (int, float), location, "min_precision", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(min_true_positives, int, location, "min_true_positives", min_inclusive=1)
-        ParameterValidator.assert_type_and_value(generalize_motifs, bool, location, "generalize_motifs")
-        ParameterValidator.assert_type_and_value(allow_negative_aas, bool, location, "allow_negative_aas")
 
         if isinstance(min_recall, dict):
             assert set(min_recall.keys()) == set(range(min_positions, max_positions+1)), f"{location}: {min_recall} is not a valid value for parameter min_recall. " \
@@ -143,8 +150,6 @@ class MotifEncoder(DatasetEncoder):
             "min_precision": min_precision,
             "min_recall": min_recall,
             "min_true_positives": min_true_positives,
-            "generalize_motifs": generalize_motifs,
-            "allow_negative_aas": allow_negative_aas,
             "candidate_motif_filepath": candidate_motif_filepath,
             "label": label,
             "name": name,
@@ -184,11 +189,9 @@ class MotifEncoder(DatasetEncoder):
 
         motifs = self._filter_motifs(motifs, dataset, y_true, params.pool_size, generalized=False)
 
-        if self.generalize_motifs:
-            generalized_motifs = PositionalMotifHelper.get_generalized_motifs(motifs)
-            generalized_motifs = self._filter_motifs(generalized_motifs, dataset, y_true, params.pool_size, generalized=True)
-
-            motifs += generalized_motifs
+        # Option disabled for now
+        # if self.generalize_motifs:
+        #     motifs += self._filter_motifs(PositionalMotifHelper.get_generalized_motifs(motifs), dataset, y_true, params.pool_size, generalized=True)
 
         return motifs
 
@@ -268,8 +271,7 @@ class MotifEncoder(DatasetEncoder):
     def _compute_candidate_motifs(self, full_dataset, pool_size=4):
         np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(full_dataset)
         params = PositionalMotifParams(max_positions=self.max_positions, min_positions=self.min_positions,
-                                       count_threshold=self.min_true_positives, allow_negative_aas=self.allow_negative_aas,
-                                       pool_size=pool_size)
+                                       count_threshold=self.min_true_positives, pool_size=pool_size)
         return PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params)
 
     def _get_y_true(self, dataset, label_config: LabelConfiguration):

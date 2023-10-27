@@ -171,8 +171,15 @@ class PositionalMotifHelper:
 
         return candidate_motifs
 
-    @staticmethod
     def _add_negative_aa_candidate_motifs(np_sequences, candidate_motifs, legal_positional_aas, params):
+        '''
+        Negative aa option is temporarily not in use for MotifEncoder, some fixes still need to be made:
+        - for a negative aa to be legal, both positive and negative version of that aa must occur at least count_threshold
+        times in that position. This to prevent 'clutter' motifs: if F never occurs in position 8, it is not worth having
+        a motif with not-F in position 8.
+        - All motif-related reports need to be checked to see if they can work with negative aas.
+        '''
+
         for n_positions in range(max(params.min_positions, 2), params.max_positions + 1):
             logging.info(f"{PositionalMotifHelper.__name__}: computing motifs with {n_positions+1} positions of which 1 negative amino acid")
 
@@ -263,6 +270,9 @@ class PositionalMotifHelper:
 
     @staticmethod
     def get_generalized_motifs(motifs):
+        '''
+        Generalized motifs option is temporarily not in use by MotifEncoder, as there does not seem to be a clear purpose as of now.
+        '''
         sorted_motifs = PositionalMotifHelper.sort_motifs_by_index(motifs)
         generalized_motifs = []
 

@@ -33,7 +33,6 @@ class TestNonMotifSequenceSimilarity(TestCase):
                 "min_precision": 0.1,
                 "min_recall": 0,
                 "min_true_positives": 1,
-                "generalize_motifs": False,
                 "allow_negative_aas": False,
             }
         )
