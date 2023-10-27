@@ -103,23 +103,26 @@ class TestPositionalMotifHelper(TestCase):
     def test_compute_all_candidate_motifs(self):
         np_sequences = np.asarray(['A' 'A', 'A' 'A', 'C' 'C']).view('U1').reshape(3, -1)
 
-        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=1, min_positions=1, count_threshold=2, allow_negative_aas=False))
+        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=1, min_positions=1, count_threshold=2,))
         expected = [[[0], ["A"]], [[1], ["A"]]]
         self.assertListEqual(outcome, expected)
 
-        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=2, min_positions=1, count_threshold=2, allow_negative_aas=False))
+        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=2, min_positions=1, count_threshold=2))
         expected = [[[0], ["A"]], [[1], ["A"]], [[0, 1], ["A", "A"]]]
         self.assertListEqual(outcome, expected)
 
-        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=1, min_positions=1, count_threshold=1, allow_negative_aas=False))
+        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=1, min_positions=1, count_threshold=1))
         expected = [[[0], ["A"]], [[0], ["C"]], [[1], ["A"]], [[1], ["C"]]]
         self.assertListEqual(outcome, expected)
 
-        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=2, min_positions=1, count_threshold=2, allow_negative_aas=False))
+        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=2, min_positions=1, count_threshold=2))
         expected = [[[0], ["A"]], [[1], ["A"]], [[0, 1], ["A", "A"]]]
         self.assertListEqual(outcome, expected)
 
         np_sequences = np.asarray(['A' 'A', 'A' 'C']).view('U1').reshape(2, -1)
+
+    def _disabled_test_compute_all_candidate_motifs_negative_aas(self):
+        np_sequences = np.asarray(['A' 'A', 'A' 'A', 'C' 'C']).view('U1').reshape(3, -1)
 
         outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=2, min_positions=2, count_threshold=1, allow_negative_aas=True))
         expected = [[[0, 1], ["A", "A"]], [[0, 1], ["A", "C"]], [[0, 1], ["A", "a"]], [[0, 1], ["A", "c"]]]

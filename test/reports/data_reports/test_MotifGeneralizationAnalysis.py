@@ -29,7 +29,6 @@ class TestMotifGeneralizationAnalysis(TestCase):
         params["max_positions"] = 1
         params["min_precision"] = 0.8
         params["split_by_motif_size"] = True
-        params["allow_negative_aas"] = False
         params["random_seed"] = 1
         params["dataset"] = dataset
         params["result_path"] = path / "result"
