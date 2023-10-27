@@ -25,19 +25,15 @@ class AminoAcidFrequencyDistribution(DataReport):
     """
     Generates a barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.
 
-    # todo: if split_by_label -> also plots logfold difference
-
     Arguments:
 
         imgt_positions (bool): Whether to use IMGT positional numbering or sequence index numbering. When imgt_positions is True, IMGT positions are used, meaning sequences of unequal length are aligned according to their IMGT positions. By default imgt_positions is True.
 
         relative_frequency (bool): Whether to plot relative frequencies (true) or absolute counts (false) of the positional amino acids. By default, relative_frequency is True.
 
-        split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a single label, or alternatively the label of interest can be specified under 'label'. By default, split_by_label is False.
+        split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a single label, or alternatively the label of interest can be specified under 'label'. If split_by_label is set to true, the logfold frequency difference between classes is plotted additionally. By default, split_by_label is False.
 
         label (str): if split_by_label is set to True, a label can be specified here.
-
-        pseudocount
 
     YAML specification:
 
@@ -66,20 +62,16 @@ class AminoAcidFrequencyDistribution(DataReport):
                 warnings.warn(f"{location}: label is set but split_by_label was False, setting split_by_label to True")
                 kwargs["split_by_label"] = True
 
-        if kwargs["split_by_label"]:
-            ParameterValidator.assert_type_and_value(kwargs["pseudocount"], (int, float), location, "pseudocount", min_exclusive=0)
-
         return AminoAcidFrequencyDistribution(**kwargs)
 
     def __init__(self, dataset: SequenceDataset = None, imgt_positions: bool = None, relative_frequency: bool = None,
-                 split_by_label: bool = None, label: str = None, pseudocount: float = None,
+                 split_by_label: bool = None, label: str = None,
                  result_path: Path = None, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.imgt_positions = imgt_positions
         self.relative_frequency = relative_frequency
         self.split_by_label = split_by_label
         self.label_name = label
-        self.pseudocount = pseudocount
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
@@ -104,10 +96,6 @@ class AminoAcidFrequencyDistribution(DataReport):
                                                    name=f"Log-fold change between classes"))
             figures.append(self._safe_plot(logfold_change=logfold_change, plot_callable="_plot_logfold_change"))
 
-            # todo numpy log base 2??
-            # todo write these tables
-            # todo plot figure
-
 
         return ReportResult(name=self.name,
                             info="A barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.",
@@ -123,10 +111,6 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         elif isinstance(self.dataset, RepertoireDataset):
             plotting_data = self._get_repertoire_dataset_plotting_data()
-
-        else:
-            plotting_data = None
-            # todo raise error
 
         if not self.split_by_label:
             plotting_data.drop(columns=["class"], inplace=True)

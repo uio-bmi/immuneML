@@ -2,4 +2,3 @@ imgt_positions: True
 relative_frequency: True
 split_by_label: False
 label: null
-pseudocount: 1
