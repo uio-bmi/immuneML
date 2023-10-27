@@ -39,8 +39,8 @@ class BinaryFeatureClassifier(MLMethod):
 
     - Alternatively, this classifier can be combined with the :py:obj:`~immuneML.encodings.motif_encoding.SimilarToPositiveSequenceEncoder.SimilarToPositiveSequenceEncoder`
     such that any sequence that falls within a given hamming distance from any of the positive class sequences in the training set
-    are classified as positive. While it is possible to learn a reduced subset of training sewuences (by setting keep_all to false),
-    this is not recommended.
+    are classified as positive. Parameter keep_all should be set to true, since this encoder creates only 1 feature.
+
 
     Arguments:
 
