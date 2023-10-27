@@ -26,7 +26,7 @@ setup(
                       "matplotlib-venn>=0.11", "scipy"],
     extras_require={
         "TCRdist": ["parasail==1.2", "tcrdist3>=0.1.6"],
-        "KerasSequenceCNN": ["keras>=2.3.1", "tensorflow>=2.2.0"]
+        "KerasSequenceCNN": ["keras==2.11.0", "tensorflow==2.11.0"]
     },
     classifiers=[
         "Programming Language :: Python :: 3",
