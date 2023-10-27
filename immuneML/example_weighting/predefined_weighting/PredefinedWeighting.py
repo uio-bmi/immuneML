@@ -9,8 +9,21 @@ from immuneML.util.ParameterValidator import ParameterValidator
 class PredefinedWeighting(ExampleWeightingStrategy):
     '''
 
-    file:
-    identifier  example_weight
+    Example weighting strategy where weights are supplied in a file.
+
+    Arguments:
+
+        file_path (Path): Path to the example weights, should contain the columns 'identifier' and 'example_weight':
+
+        ==========  ==============
+        identifier  example_weight
+        ==========  ==============
+        1           0.5
+        2           1
+        3           1
+        ========  ==============
+
+        separator (str): Column separator in the input file.
 
     '''
 
