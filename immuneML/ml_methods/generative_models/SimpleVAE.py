@@ -75,6 +75,8 @@ class SimpleVAE(GenerativeModel):
 
         unique_j_genes (list): list of allowed J genes (this will be automatically filled from the dataset if not provided here manually)
 
+        device (str): name of the device where to train the model (e.g., cpu)
+
     YAML specification:
 
     .. indent with spaces
@@ -94,6 +96,7 @@ class SimpleVAE(GenerativeModel):
                 pretrains: 10
                 warmup_epochs: 20
                 patience: 20
+                device: cpu
 
     """
 
@@ -114,7 +117,7 @@ class SimpleVAE(GenerativeModel):
         return vae
 
     def __init__(self, chain, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim, pretrains,
-                 v_gene_embed_dim, cdr3_embed_dim, warmup_epochs, patience, iter_count_prob_estimation,
+                 v_gene_embed_dim, cdr3_embed_dim, warmup_epochs, patience, iter_count_prob_estimation, device,
                  vocab=None, max_cdr3_len=None, unique_v_genes=None, unique_j_genes=None):
         super().__init__(chain)
         self.sequence_type = SequenceType.AMINO_ACID
@@ -133,6 +136,7 @@ class SimpleVAE(GenerativeModel):
         self.j_gene_embed_dim, self.v_gene_embed_dim = j_gene_embed_dim, v_gene_embed_dim
         self.linear_nodes_count = linear_nodes_count
         self.batch_size = batch_size
+        self.device = device
         self.max_cdr3_len, self.unique_v_genes, self.unique_j_genes = max_cdr3_len, unique_v_genes, unique_j_genes
         self.model = None
 
@@ -156,8 +160,10 @@ class SimpleVAE(GenerativeModel):
 
         if initial_values_path and initial_values_path.is_file():
             state_dict = read_yaml(filename=initial_values_path)
-            state_dict = {k: torch.as_tensor(v) for k, v in state_dict.items()}
+            state_dict = {k: torch.as_tensor(v, device=self.device) for k, v in state_dict.items()}
             vae.load_state_dict(state_dict)
+
+        vae.to(self.device)
 
         return vae
 
@@ -233,15 +239,17 @@ class SimpleVAE(GenerativeModel):
         self.max_cdr3_len = max(len(el) for el in data[self.sequence_type.value])
 
         encoded_v_genes = one_hot(
-            torch.as_tensor([self.unique_v_genes.index(v_gene.split("*")[0]) for v_gene in data['v_call']]),
+            torch.as_tensor([self.unique_v_genes.index(v_gene.split("*")[0]) for v_gene in data['v_call']],
+                            device=self.device),
             num_classes=len(self.unique_v_genes))
         encoded_j_genes = one_hot(
-            torch.as_tensor([self.unique_j_genes.index(j_gene.split("*")[0]) for j_gene in data['j_call']]),
+            torch.as_tensor([self.unique_j_genes.index(j_gene.split("*")[0]) for j_gene in data['j_call']],
+                            device=self.device),
             num_classes=len(self.unique_j_genes))
         padded_encoded_cdr3s = one_hot(torch.as_tensor([
             [self.vocab.index(letter) for letter in
              StringHelper.pad_sequence_in_the_middle(seq, self.max_cdr3_len, Constants.GAP_LETTER)]
-            for seq in data[self.sequence_type.value]]), num_classes=self.vocab_size)
+            for seq in data[self.sequence_type.value]], device=self.device), num_classes=self.vocab_size)
 
         pytorch_dataset = PyTorchSequenceDataset({'v_gene': encoded_v_genes, 'j_gene': encoded_j_genes,
                                                   'cdr3': padded_encoded_cdr3s})
@@ -263,7 +271,8 @@ class SimpleVAE(GenerativeModel):
         self.model.eval()
 
         with torch.no_grad():
-            z_sample = torch.as_tensor(np.random.normal(0, 1, size=(count, self.latent_dim))).float()
+            z_sample = torch.as_tensor(np.random.normal(0, 1, size=(count, self.latent_dim)),
+                                       device=self.device).float()
             sequences, v_genes, j_genes = self.model.decode(z_sample)
 
         seq_objs = [ReceptorSequence(**{
