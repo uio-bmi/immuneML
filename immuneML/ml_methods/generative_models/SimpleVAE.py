@@ -1,11 +1,11 @@
 import logging
+import shutil
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import scipy
 import torch.optim
-from torch import Tensor
 from torch.distributions import Categorical
 from torch.nn.functional import cross_entropy, one_hot
 from torch.utils.data import DataLoader
@@ -21,6 +21,7 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.ml_methods.pytorch_implementations.SimpleVAEGenerator import Encoder, Decoder, SimpleVAEGenerator, \
     vae_cdr3_loss
+from immuneML.ml_methods.util.pytorch_util import store_weights
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.StringHelper import StringHelper
@@ -37,19 +38,92 @@ class SimpleVAE(GenerativeModel):
     Davidsen, K., Olson, B. J., DeWitt, W. S., III, Feng, J., Harkins, E., Bradley, P., & Matsen, F. A., IV. (2019).
     Deep generative models for T cell receptor protein sequences. eLife, 8, e46935. https://doi.org/10.7554/eLife.46935
 
+
     Arguments:
+
+        chain (str): which chain the sequence come from, e.g., TRB
+
+        beta (float): VAE hyperparameter that balanced the reconstruction loss and latent dimension regularization
+
+        latent_dim (int): latent dimension of the VAE
+
+        linear_nodes_count (int): in linear layers, how many nodes to use
+
+        num_epochs (int): how many epochs to use for training
+
+        batch_size (int): how many examples to consider at the same time
+
+        j_gene_embed_dim (int): dimension of J gene embedding
+
+        v_gene_embed_dim (int): dimension of V gene embedding
+
+        cdr3_embed_dim (int): dimension of the cdr3 embedding
+
+        pretrains (int): how many times to attempt pretraining to initialize the weights and use warm-up for the beta hyperparameter before the main training process
+
+        warmup_epochs (int): how many epochs to use for training where beta hyperparameter is linearly increased from 0 up to its max value; this is in addition to num_epochs set above
+
+        patience (int): number of epochs to wait before the training is stopped when the loss is not improving
+
+        iter_count_prob_estimation (int): how many iterations to use to estimate the log probability of the generated sequence (the more iterations, the better the estimated log probability)
+
+        vocab (list): which letters (amino acids) are allowed - this is automatically filled for new models (no need to set)
+
+        max_cdr3_len (int): what is the maximum cdr3 length - this is automatically filled for new models (no need to set)
+
+        unique_v_genes (list): list of allowed V genes (this will be automatically filled from the dataset if not provided here manually)
+
+        unique_j_genes (list): list of allowed J genes (this will be automatically filled from the dataset if not provided here manually)
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_vae:
+            SimpleVAE:
+                chain: beta
+                beta: 0.75
+                latent_dim: 20
+                linear_nodes_count: 75
+                num_epochs: 5000
+                batch_size: 10000
+                j_gene_embed_dim: 13
+                v_gene_embed_dim: 30
+                cdr3_embed_dim: 21
+                pretrains: 10
+                warmup_epochs: 20
+                patience: 20
 
     """
 
+    @classmethod
+    def load_model(cls, path: Path):
+        assert path.exists(), f"{cls.__name__}: {path} does not exist."
+
+        model_overview_file = path / 'model_overview.yaml'
+        state_dict_file = path / 'state_dict.yaml'
+
+        for file in [model_overview_file, state_dict_file]:
+            assert file.exists(), f"{cls.__name__}: {file} is not a file."
+
+        model_overview = read_yaml(model_overview_file)
+        vae = SimpleVAE(**model_overview)
+        vae.model = vae.make_new_model(state_dict_file)
+
+        return vae
+
     def __init__(self, chain, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim, pretrains,
-                 v_gene_embed_dim, cdr3_embed_dim, warmup_epochs, patience, region_type, iter_count_prob_estimation):
+                 v_gene_embed_dim, cdr3_embed_dim, warmup_epochs, patience, iter_count_prob_estimation,
+                 vocab=None, max_cdr3_len=None, unique_v_genes=None, unique_j_genes=None):
         super().__init__(chain)
         self.sequence_type = SequenceType.AMINO_ACID
         self.iter_count_prob_estimation = iter_count_prob_estimation
         self.num_epochs = num_epochs
         self.pretrains = pretrains
-        self.region_type = RegionType[region_type]
-        self.vocab = sorted((EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + [Constants.GAP_LETTER]))
+        self.region_type = RegionType.IMGT_CDR3  # TODO: check if they use cdr3 or junction in the original paper
+        self.vocab = vocab if vocab is not None else (
+            sorted((EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + [Constants.GAP_LETTER])))
         self.vocab_size = len(self.vocab)
         self.beta = beta
         self.warmup_epochs = warmup_epochs
@@ -59,14 +133,14 @@ class SimpleVAE(GenerativeModel):
         self.j_gene_embed_dim, self.v_gene_embed_dim = j_gene_embed_dim, v_gene_embed_dim
         self.linear_nodes_count = linear_nodes_count
         self.batch_size = batch_size
-        self.max_cdr3_len, self.unique_v_genes, self.unique_j_genes = None, None, None
-        self._model = None
+        self.max_cdr3_len, self.unique_v_genes, self.unique_j_genes = max_cdr3_len, unique_v_genes, unique_j_genes
+        self.model = None
 
         # hard-coded in the original implementation
         self.v_gene_loss_weight = 0.8138
         self.j_gene_loss_weight = 0.1305
 
-    def _make_new_model(self, initial_values_path: Path = None):
+    def make_new_model(self, initial_values_path: Path = None):
 
         assert self.unique_v_genes is not None and self.unique_j_genes is not None, \
             f'{SimpleVAE.__name__}: cannot generate empty model since unique V and J genes are not set.'
@@ -90,10 +164,11 @@ class SimpleVAE(GenerativeModel):
     def fit(self, data, path: Path = None):
 
         data_loader = self._encode_dataset(data)
+        # TODO: split the data to train and validation? or have external validation/test dataset
 
-        pretrained_weights_path = self._pretrain(data_loader, path)
+        pretrained_weights_path = self._pretrain(data_loader=data_loader, path=path)
 
-        model = self._make_new_model(pretrained_weights_path)
+        model = self.make_new_model(pretrained_weights_path)
         model.train()
 
         optimizer = torch.optim.Adam(model.parameters())
@@ -107,7 +182,7 @@ class SimpleVAE(GenerativeModel):
             print_log(f"{SimpleVAE.__name__}: epoch: {epoch}, loss: {loss}.")
 
             if min(losses) == loss.item():
-                self._store_weights(model, path / 'optimal_model_weights.yaml')
+                store_weights(model, path / 'state_dict.yaml')
 
             if all(x <= y for x, y in zip(losses[-self.patience:], losses[-self.patience][1:])):
                 loss_decreasing = False
@@ -115,14 +190,14 @@ class SimpleVAE(GenerativeModel):
         pd.DataFrame({'epoch': list(range(1, epoch)), 'loss': losses}).to_csv(str(path / 'training_losses.csv'),
                                                                               index=False)  # TODO: attach this to sth
 
-        self._model = self._make_new_model(path / 'optimal_model_weights.yaml')
+        self.model = self.make_new_model(path / 'state_dict.yaml')
 
     def _pretrain(self, data_loader, path: Path):
 
         pretrained_weights_path = PathBuilder.build(path) / 'pretrained_warmup_weights.yaml'
 
         for pretrain_index in range(self.pretrains):
-            model = self._make_new_model()
+            model = self.make_new_model()
             optimizer = torch.optim.Adam(model.parameters())
             beta = 0 if self.warmup_epochs > 0 else self.beta
             best_val_loss = np.inf
@@ -133,7 +208,7 @@ class SimpleVAE(GenerativeModel):
                 beta = self._update_beta_on_epoch_end(epoch)
                 if val_loss < best_val_loss:
                     best_val_loss = val_loss
-                    self._store_weights(model, pretrained_weights_path)
+                    store_weights(model, pretrained_weights_path)
 
         return pretrained_weights_path
 
@@ -150,12 +225,6 @@ class SimpleVAE(GenerativeModel):
             loss.backward()
             optimizer.step()
         return loss
-
-    def _store_weights(self, model, path):
-
-        state_dict = {key: val.tolist() if isinstance(val, Tensor) else val for key, val in model.state_dict().items()}
-
-        write_yaml(yaml_dict=state_dict, filename=path)
 
     def _encode_dataset(self, dataset):
         data = dataset.get_attributes([self.sequence_type.value, 'v_call', 'j_call'], as_list=True)
@@ -191,11 +260,11 @@ class SimpleVAE(GenerativeModel):
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
         torch.manual_seed(seed)
-        self._model.eval()
+        self.model.eval()
 
         with torch.no_grad():
             z_sample = torch.as_tensor(np.random.normal(0, 1, size=(count, self.latent_dim))).float()
-            sequences, v_genes, j_genes = self._model.decode(z_sample)
+            sequences, v_genes, j_genes = self.model.decode(z_sample)
 
         seq_objs = [ReceptorSequence(**{
             self.sequence_type.value: ''.join([self.vocab[Categorical(letter).sample()] for letter in sequences[i]])
@@ -234,10 +303,10 @@ class SimpleVAE(GenerativeModel):
             log_prob_estimates = []
 
             for _ in range(self.iter_count_prob_estimation):
-                z_mean, z_log_var = self._model.encode(padded_encoded_cdr3s, encoded_v_genes, encoded_j_genes)
+                z_mean, z_log_var = self.model.encode(padded_encoded_cdr3s, encoded_v_genes, encoded_j_genes)
                 z_sd = (z_log_var / 2).exp()
                 z_sample = torch.as_tensor(np.array([scipy.stats.norm.rvs(loc=z_mean, scale=z_sd)])).float()
-                aa_probs, v_gene_probs, j_gene_probs = self._model.decode(z_sample)
+                aa_probs, v_gene_probs, j_gene_probs = self.model.decode(z_sample)
                 aa_probs, v_gene_probs, j_gene_probs = aa_probs.numpy(), v_gene_probs.numpy(), j_gene_probs.numpy()
 
                 log_p_x_given_z = (np.sum(np.log(np.sum(aa_probs[0] * padded_encoded_cdr3s[0].numpy(), axis=1))) +
@@ -263,7 +332,16 @@ class SimpleVAE(GenerativeModel):
         raise RuntimeError
 
     def save_model(self, path: Path) -> Path:
-        pass
+        model_path = PathBuilder.build(path / 'model')
+
+        write_yaml(filename=model_path / 'model_overview.yaml',
+                   yaml_dict={**{k: v for k, v in vars(self).items() if k != 'model'},
+                              **{'type': self.__class__.__name__, 'region_type': self.region_type.name,
+                                 'sequence_type': self.sequence_type.name}})
+
+        store_weights(self.model, model_path / 'state_dict.yaml')
+
+        return Path(shutil.make_archive(str(path / 'trained_model'), 'zip', str(model_path))).absolute()
 
 
 class PyTorchSequenceDataset(torch.utils.data.Dataset):

@@ -3,7 +3,7 @@ from pathlib import Path
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
-from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.reports.Report import Report
 
 

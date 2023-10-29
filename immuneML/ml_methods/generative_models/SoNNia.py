@@ -73,7 +73,7 @@ class SoNNia(GenerativeModel):
         else:
             self._model_path = custom_model_path
 
-    def fit(self, dataset: Dataset):
+    def fit(self, dataset: Dataset, path: Path = None):
         print_log(f"{SoNNia.__name__}: fitting a selection model...", True)
 
         data = dataset.get_attributes(['sequence_aa', 'v_call', 'j_call'], as_list=True)

@@ -17,8 +17,8 @@ def test_fit_gen_model():
                     "format": "RandomSequenceDataset",
                     "params": {
                         'length_probabilities': {
-                            3: 0.5,
-                            4: 0.5
+                            13: 0.5,
+                            14: 0.5
                         },
                         'sequence_count': 10
                     }
@@ -30,6 +30,11 @@ def test_fit_gen_model():
                         'chain': 'beta',
                         'sequence_type': 'amino_acid',
                         'region_type': 'IMGT_CDR3'
+                    }
+                },
+                'vae': {
+                    "SimpleVAE": {
+                        'num_epochs': 50
                     }
                 }
             },
@@ -43,7 +48,7 @@ def test_fit_gen_model():
                 "type": "TrainGenModel",
                 "gen_examples_count": 100,
                 "dataset": "d1",
-                "method": "pwm",
+                "method": "vae",
                 "reports": ['sld_rep', 'aa_freq']
             }
         }

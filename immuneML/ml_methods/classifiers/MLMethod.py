@@ -1,8 +1,6 @@
 import abc
 from pathlib import Path
 
-from sklearn.exceptions import NotFittedError
-
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment import Label
 
@@ -226,7 +224,7 @@ class MLMethod(metaclass=abc.ABCMeta):
     def get_package_info(self) -> str:
         """
         Returns the package and version used for implementing the ML method if an external package was used or immuneML version if it is custom
-        implementation. See py:mod:`immuneML.ml_methods.SklearnMethod.SklearnMethod` and py:mod:`immuneML.ml_methods.ProbabilisticBinaryClassifier.ProbabilisticBinaryClassifier`
+        implementation. See py:mod:`immuneML.ml_methods.classifiers.SklearnMethod.SklearnMethod` and py:mod:`immuneML.ml_methods.ProbabilisticBinaryClassifier.ProbabilisticBinaryClassifier`
         for examples of both.
         """
         pass

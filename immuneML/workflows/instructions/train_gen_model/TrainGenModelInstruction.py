@@ -86,7 +86,7 @@ class TrainGenModelInstruction(Instruction):
 
     def _fit_model(self):
         print_log(f"{self.state.name}: starting to fit the model", True)
-        self.method.fit(self.dataset)
+        self.method.fit(self.dataset, self.state.result_path)
         print_log(f"{self.state.name}: fitted the model", True)
 
     def _save_model(self):

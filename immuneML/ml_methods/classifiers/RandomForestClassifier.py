@@ -1,6 +1,6 @@
 from sklearn.ensemble import RandomForestClassifier as RFC
 
-from immuneML.ml_methods.SklearnMethod import SklearnMethod
+from immuneML.ml_methods.classifiers.SklearnMethod import SklearnMethod
 from scripts.specification_util import update_docs_per_mapping
 
 
@@ -13,7 +13,7 @@ class RandomForestClassifier(SklearnMethod):
     Note: if you are interested in plotting the coefficients of the random forest classifier model,
     consider running the :ref:`Coefficients` report.
 
-    For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.
+    For usage instructions, check :py:obj:`~immuneML.ml_methods.classifiers.SklearnMethod.SklearnMethod`.
 
 
     YAML specification:
@@ -66,7 +66,7 @@ class RandomForestClassifier(SklearnMethod):
         doc = str(RandomForestClassifier.__doc__)
 
         mapping = {
-            "For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.": SklearnMethod.get_usage_documentation("RandomForestClassifier"),
+            "For usage instructions, check :py:obj:`~immuneML.ml_methods.classifiers.SklearnMethod.SklearnMethod`.": SklearnMethod.get_usage_documentation("RandomForestClassifier"),
         }
 
         doc = update_docs_per_mapping(doc, mapping)

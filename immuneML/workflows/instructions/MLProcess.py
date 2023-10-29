@@ -8,7 +8,7 @@ from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
-from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_metrics.Metric import Metric
 from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.reports.ml_reports.MLReport import MLReport

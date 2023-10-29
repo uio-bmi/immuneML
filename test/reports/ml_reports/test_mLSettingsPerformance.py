@@ -16,7 +16,7 @@ from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 from immuneML.ml_metrics.Metric import Metric
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.train_ml_model_reports.MLSettingsPerformance import MLSettingsPerformance

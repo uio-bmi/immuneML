@@ -3,7 +3,7 @@ import copy
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 
-from immuneML.ml_methods.SklearnMethod import SklearnMethod
+from immuneML.ml_methods.classifiers.SklearnMethod import SklearnMethod
 from immuneML.util.ParameterValidator import ParameterValidator
 
 

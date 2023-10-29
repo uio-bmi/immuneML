@@ -1,6 +1,6 @@
 from sklearn.linear_model import LogisticRegression as SklearnLogisticRegression
 
-from immuneML.ml_methods.SklearnMethod import SklearnMethod
+from immuneML.ml_methods.classifiers.SklearnMethod import SklearnMethod
 from scripts.specification_util import update_docs_per_mapping
 
 
@@ -13,7 +13,7 @@ class LogisticRegression(SklearnMethod):
     Note: if you are interested in plotting the coefficients of the logistic regression model,
     consider running the :ref:`Coefficients` report.
 
-    For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.
+    For usage instructions, check :py:obj:`~immuneML.ml_methods.classifiers.SklearnMethod.SklearnMethod`.
 
 
     YAML specification:
@@ -69,7 +69,7 @@ class LogisticRegression(SklearnMethod):
         doc = str(LogisticRegression.__doc__)
 
         mapping = {
-            "For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.": SklearnMethod.get_usage_documentation(
+            "For usage instructions, check :py:obj:`~immuneML.ml_methods.classifiers.SklearnMethod.SklearnMethod`.": SklearnMethod.get_usage_documentation(
                 "LogisticRegression"),
         }
 

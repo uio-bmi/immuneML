@@ -9,7 +9,7 @@ from pathlib import Path
 import yaml
 
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
-from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReadsType import ReadsType
@@ -231,7 +231,7 @@ def check_arguments(args):
 
 
 def parse_commandline_arguments(args):
-    ReflectionHandler.get_classes_by_partial_name("", "ml_methods/")
+    ReflectionHandler.get_classes_by_partial_name("", "ml_methods/classifiers/")
     ml_method_names = [cl.__name__ for cl in ReflectionHandler.all_nonabstract_subclasses(MLMethod)] + ["SimpleLogisticRegression"]
 
     parser = argparse.ArgumentParser(description="tool for building immuneML Galaxy YAML from arguments")

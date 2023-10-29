@@ -2,7 +2,6 @@ import shutil
 
 import pandas as pd
 
-from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.SimpleVAE import SimpleVAE
@@ -17,7 +16,7 @@ def test_simple_vae():
                                                                {}, path / 'dataset')
 
     vae = SimpleVAE('beta', 0.75, 20, 75, 50, 10, 2,
-                    2, 1, 21, 2, 5, RegionType.IMGT_CDR3.name, 10)
+                    2, 1, 21, 2, 5, 10)
 
     vae.fit(dataset, path / 'model')
     vae.generate_sequences(7, 1, path / 'generated_dataset', SequenceType.AMINO_ACID, False)

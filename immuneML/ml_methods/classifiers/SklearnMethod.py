@@ -13,7 +13,7 @@ from sklearn.utils.validation import check_is_fitted
 
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.util.Util import Util
 from immuneML.ml_metrics.Metric import Metric
 from immuneML.util.FilenameHandler import FilenameHandler
