@@ -1,13 +1,17 @@
+import logging
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import scipy
 import torch.optim
+from torch import Tensor
 from torch.distributions import Categorical
 from torch.nn.functional import cross_entropy, one_hot
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader
 
 from immuneML import Constants
+from immuneML.data_model.bnp_util import write_yaml, read_yaml
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
@@ -17,6 +21,8 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.ml_methods.pytorch_implementations.SimpleVAEGenerator import Encoder, Decoder, SimpleVAEGenerator, \
     vae_cdr3_loss
+from immuneML.util.Logger import print_log
+from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.StringHelper import StringHelper
 
 
@@ -35,16 +41,19 @@ class SimpleVAE(GenerativeModel):
 
     """
 
-    def __init__(self, chain, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim,
-                 v_gene_embed_dim, cdr3_embed_dim, warmup_period, patience, region_type, iter_count_prob_estimation):
+    def __init__(self, chain, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim, pretrains,
+                 v_gene_embed_dim, cdr3_embed_dim, warmup_epochs, patience, region_type, iter_count_prob_estimation):
         super().__init__(chain)
         self.sequence_type = SequenceType.AMINO_ACID
         self.iter_count_prob_estimation = iter_count_prob_estimation
         self.num_epochs = num_epochs
+        self.pretrains = pretrains
         self.region_type = RegionType[region_type]
-        self.vocab_size = len(EnvironmentSettings.get_sequence_alphabet(self.sequence_type)) + 1  # includes gap
         self.vocab = sorted((EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + [Constants.GAP_LETTER]))
+        self.vocab_size = len(self.vocab)
         self.beta = beta
+        self.warmup_epochs = warmup_epochs
+        self.patience = patience
         self.cdr3_embed_dim = cdr3_embed_dim
         self.latent_dim = latent_dim
         self.j_gene_embed_dim, self.v_gene_embed_dim = j_gene_embed_dim, v_gene_embed_dim
@@ -57,7 +66,7 @@ class SimpleVAE(GenerativeModel):
         self.v_gene_loss_weight = 0.8138
         self.j_gene_loss_weight = 0.1305
 
-    def _make_empty_model(self):
+    def _make_new_model(self, initial_values_path: Path = None):
 
         assert self.unique_v_genes is not None and self.unique_j_genes is not None, \
             f'{SimpleVAE.__name__}: cannot generate empty model since unique V and J genes are not set.'
@@ -69,29 +78,84 @@ class SimpleVAE(GenerativeModel):
         decoder = Decoder(self.latent_dim, self.linear_nodes_count, self.max_cdr3_len, self.vocab_size,
                           len(self.unique_v_genes), len(self.unique_j_genes))
 
-        return SimpleVAEGenerator(encoder, decoder)
+        vae = SimpleVAEGenerator(encoder, decoder)
+
+        if initial_values_path and initial_values_path.is_file():
+            state_dict = read_yaml(filename=initial_values_path)
+            state_dict = {k: torch.as_tensor(v) for k, v in state_dict.items()}
+            vae.load_state_dict(state_dict)
+
+        return vae
 
     def fit(self, data, path: Path = None):
 
         data_loader = self._encode_dataset(data)
-        model = self._make_empty_model()
+
+        pretrained_weights_path = self._pretrain(data_loader, path)
+
+        model = self._make_new_model(pretrained_weights_path)
         model.train()
 
         optimizer = torch.optim.Adam(model.parameters())
+        losses = []
+        epoch = 1
+        loss_decreasing = False
 
-        for epoch in range(self.num_epochs):
-            for batch in data_loader:
-                cdr3_input, v_gene_input, j_gene_input = batch
-                cdr3_output, v_gene_output, j_gene_output, z = model(cdr3_input, v_gene_input, j_gene_input)
-                loss = (vae_cdr3_loss(cdr3_output, cdr3_input, self.max_cdr3_len, z[0], z[1], self.beta)
-                        + cross_entropy(v_gene_output, v_gene_input.float()) * self.v_gene_loss_weight
-                        + cross_entropy(j_gene_output, j_gene_input.float())) * self.j_gene_loss_weight
+        while epoch <= self.num_epochs and loss_decreasing:
+            loss = self._train_for_epoch(data_loader, model, self.beta, optimizer)
+            losses.append(loss.item())
+            print_log(f"{SimpleVAE.__name__}: epoch: {epoch}, loss: {loss}.")
 
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
+            if min(losses) == loss.item():
+                self._store_weights(model, path / 'optimal_model_weights.yaml')
 
-        self._model = model
+            if all(x <= y for x, y in zip(losses[-self.patience:], losses[-self.patience][1:])):
+                loss_decreasing = False
+
+        pd.DataFrame({'epoch': list(range(1, epoch)), 'loss': losses}).to_csv(str(path / 'training_losses.csv'),
+                                                                              index=False)  # TODO: attach this to sth
+
+        self._model = self._make_new_model(path / 'optimal_model_weights.yaml')
+
+    def _pretrain(self, data_loader, path: Path):
+
+        pretrained_weights_path = PathBuilder.build(path) / 'pretrained_warmup_weights.yaml'
+
+        for pretrain_index in range(self.pretrains):
+            model = self._make_new_model()
+            optimizer = torch.optim.Adam(model.parameters())
+            beta = 0 if self.warmup_epochs > 0 else self.beta
+            best_val_loss = np.inf
+
+            for epoch in range(self.warmup_epochs + 1):
+                loss = self._train_for_epoch(data_loader, model, beta, optimizer)
+                val_loss = loss.item()
+                beta = self._update_beta_on_epoch_end(epoch)
+                if val_loss < best_val_loss:
+                    best_val_loss = val_loss
+                    self._store_weights(model, pretrained_weights_path)
+
+        return pretrained_weights_path
+
+    def _train_for_epoch(self, data_loader, model, beta, optimizer):
+        loss = None
+        for batch in data_loader:
+            cdr3_input, v_gene_input, j_gene_input = batch
+            cdr3_output, v_gene_output, j_gene_output, z = model(cdr3_input, v_gene_input, j_gene_input)
+            loss = (vae_cdr3_loss(cdr3_output, cdr3_input, self.max_cdr3_len, z[0], z[1], beta)
+                    + cross_entropy(v_gene_output, v_gene_input.float()) * self.v_gene_loss_weight
+                    + cross_entropy(j_gene_output, j_gene_input.float())) * self.j_gene_loss_weight
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+        return loss
+
+    def _store_weights(self, model, path):
+
+        state_dict = {key: val.tolist() if isinstance(val, Tensor) else val for key, val in model.state_dict().items()}
+
+        write_yaml(yaml_dict=state_dict, filename=path)
 
     def _encode_dataset(self, dataset):
         data = dataset.get_attributes([self.sequence_type.value, 'v_call', 'j_call'], as_list=True)
@@ -117,6 +181,13 @@ class SimpleVAE(GenerativeModel):
 
     def is_same(self, model) -> bool:
         raise RuntimeError
+
+    def _update_beta_on_epoch_end(self, epoch):
+        new_beta = self.beta
+        if self.warmup_epochs > 0 and epoch < self.warmup_epochs:
+            new_beta *= epoch / self.warmup_epochs
+            logging.info(f'{SimpleVAE.__name__}: epoch {epoch}: beta updated to {new_beta}.')
+        return new_beta
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
         torch.manual_seed(seed)
@@ -165,7 +236,7 @@ class SimpleVAE(GenerativeModel):
             for _ in range(self.iter_count_prob_estimation):
                 z_mean, z_log_var = self._model.encode(padded_encoded_cdr3s, encoded_v_genes, encoded_j_genes)
                 z_sd = (z_log_var / 2).exp()
-                z_sample = torch.as_tensor([scipy.stats.norm.rvs(loc=z_mean, scale=z_sd)]).float()
+                z_sample = torch.as_tensor(np.array([scipy.stats.norm.rvs(loc=z_mean, scale=z_sd)])).float()
                 aa_probs, v_gene_probs, j_gene_probs = self._model.decode(z_sample)
                 aa_probs, v_gene_probs, j_gene_probs = aa_probs.numpy(), v_gene_probs.numpy(), j_gene_probs.numpy()
 

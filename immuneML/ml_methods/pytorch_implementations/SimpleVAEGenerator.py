@@ -1,7 +1,6 @@
-import numpy as np
 import torch
-from torch import nn, relu
-from torch.nn.functional import softmax, cross_entropy
+from torch import nn
+from torch.nn.functional import softmax, cross_entropy, elu
 
 
 class Encoder(nn.Module):
@@ -10,7 +9,7 @@ class Encoder(nn.Module):
                  latent_dim, max_cdr3_len, linear_nodes_count):
         super().__init__()
 
-        # TODO: add beta warmup in VAE
+        # TODO: add weight initialization
 
         # params
         self.vocab_size = vocab_size
@@ -35,13 +34,13 @@ class Encoder(nn.Module):
         # input processing
         cdr3_embedding = self.cdr3_embedding(cdr3_input.float())
         cdr3_embedding_flat = cdr3_embedding.view(-1, self.vocab_size * self.max_cdr3_len)
-        v_gene_embedding = relu(self.v_gene_embedding(v_gene_input.float()))
-        j_gene_embedding = relu(self.j_gene_embedding(j_gene_input.float()))
+        v_gene_embedding = elu(self.v_gene_embedding(v_gene_input.float()))
+        j_gene_embedding = elu(self.j_gene_embedding(j_gene_input.float()))
 
         # encoding
         merged_embedding = torch.cat([cdr3_embedding_flat, v_gene_embedding, j_gene_embedding], dim=1)
-        encoder_linear_1 = relu(self.encoder_linear_layer_1(merged_embedding))
-        encoder_linear_2 = relu(self.encoder_linear_layer_2(encoder_linear_1))
+        encoder_linear_1 = elu(self.encoder_linear_layer_1(merged_embedding))
+        encoder_linear_2 = elu(self.encoder_linear_layer_2(encoder_linear_1))
 
         # latent
         z_mean = self.z_mean(encoder_linear_2)
@@ -74,8 +73,8 @@ class Decoder(nn.Module):
     def forward(self, z):
 
         # latent
-        decoder_linear_1 = relu(self.decoder_linear_1(z))
-        decoder_linear_2 = relu(self.decoder_linear_2(decoder_linear_1))
+        decoder_linear_1 = elu(self.decoder_linear_1(z))
+        decoder_linear_2 = elu(self.decoder_linear_2(decoder_linear_1))
 
         # decoding
         cdr3_post_dense_flat = self.cdr3_post_linear_flat(decoder_linear_2)
