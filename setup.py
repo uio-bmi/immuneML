@@ -12,8 +12,8 @@ def import_requirements(filename) -> list:
 
 
 setup(
-    name="immuneML",
-    version=Constants.VERSION,
+    name="immuneML_dev",
+    version=Constants.DEV_VERSION,
     description="immuneML is a software platform for machine learning analysis of immune receptor repertoires.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
