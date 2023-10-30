@@ -110,6 +110,11 @@ class SimpleVAEGenerator(nn.Module):
         z_mean, z_log_var = self.encoder(cdr3_input, v_gene_input, j_gene_input)
         return z_mean, z_log_var
 
+    def encoding_func(self, cdr3_input, v_gene_input, j_gene_input):
+        z_mean, z_log_var = self.encoder(cdr3_input, v_gene_input, j_gene_input)
+        epsilon = torch.randn(z_mean.size()).to(z_mean.device)
+        return z_mean + torch.exp(z_log_var / 2) * epsilon
+
 
 def vae_cdr3_loss(cdr3_output, cdr3_input, max_cdr3_len, z_mean, z_log_var, beta):
     xent_loss = max_cdr3_len * cross_entropy(cdr3_input.float(), cdr3_output.float())

@@ -144,6 +144,8 @@ class SimpleVAE(GenerativeModel):
         self.v_gene_loss_weight = 0.8138
         self.j_gene_loss_weight = 0.1305
 
+        self.loss_path = None
+
     def make_new_model(self, initial_values_path: Path = None):
 
         assert self.unique_v_genes is not None and self.unique_j_genes is not None, \
@@ -169,7 +171,7 @@ class SimpleVAE(GenerativeModel):
 
     def fit(self, data, path: Path = None):
 
-        data_loader = self._encode_dataset(data)
+        data_loader = self.encode_dataset(data)
         # TODO: split the data to train and validation? or have external validation/test dataset
 
         pretrained_weights_path = self._pretrain(data_loader=data_loader, path=path)
@@ -180,7 +182,7 @@ class SimpleVAE(GenerativeModel):
         optimizer = torch.optim.Adam(model.parameters())
         losses = []
         epoch = 1
-        loss_decreasing = False
+        loss_decreasing = True
 
         while epoch <= self.num_epochs and loss_decreasing:
             loss = self._train_for_epoch(data_loader, model, self.beta, optimizer)
@@ -190,11 +192,14 @@ class SimpleVAE(GenerativeModel):
             if min(losses) == loss.item():
                 store_weights(model, path / 'state_dict.yaml')
 
-            if all(x <= y for x, y in zip(losses[-self.patience:], losses[-self.patience][1:])):
+            if epoch > self.patience and all(x <= y for x, y in zip(losses[-self.patience:], losses[-self.patience:][1:])):
                 loss_decreasing = False
 
+            epoch += 1
+
         pd.DataFrame({'epoch': list(range(1, epoch)), 'loss': losses}).to_csv(str(path / 'training_losses.csv'),
-                                                                              index=False)  # TODO: attach this to sth
+                                                                              index=False)
+        self.loss_path = path / 'training_losses.csv'
 
         self.model = self.make_new_model(path / 'state_dict.yaml')
 
@@ -232,11 +237,14 @@ class SimpleVAE(GenerativeModel):
             optimizer.step()
         return loss
 
-    def _encode_dataset(self, dataset):
+    def encode_dataset(self, dataset, batch_size=None, shuffle=True):
         data = dataset.get_attributes([self.sequence_type.value, 'v_call', 'j_call'], as_list=True)
-        self.unique_v_genes = sorted(list(set([el.split("*")[0] for el in data['v_call']])))
-        self.unique_j_genes = sorted(list(set([el.split("*")[0] for el in data['j_call']])))
-        self.max_cdr3_len = max(len(el) for el in data[self.sequence_type.value])
+        if self.unique_v_genes is None:
+            self.unique_v_genes = sorted(list(set([el.split("*")[0] for el in data['v_call']])))
+        if self.unique_j_genes is None:
+            self.unique_j_genes = sorted(list(set([el.split("*")[0] for el in data['j_call']])))
+        if self.max_cdr3_len is None:
+            self.max_cdr3_len = max(len(el) for el in data[self.sequence_type.value])
 
         encoded_v_genes = one_hot(
             torch.as_tensor([self.unique_v_genes.index(v_gene.split("*")[0]) for v_gene in data['v_call']],
@@ -254,7 +262,7 @@ class SimpleVAE(GenerativeModel):
         pytorch_dataset = PyTorchSequenceDataset({'v_gene': encoded_v_genes, 'j_gene': encoded_j_genes,
                                                   'cdr3': padded_encoded_cdr3s})
 
-        return DataLoader(pytorch_dataset, shuffle=True, batch_size=self.batch_size)
+        return DataLoader(pytorch_dataset, shuffle=shuffle, batch_size=batch_size if batch_size else self.batch_size)
 
     def is_same(self, model) -> bool:
         raise RuntimeError
@@ -358,7 +366,13 @@ class PyTorchSequenceDataset(torch.utils.data.Dataset):
         self.data = data
 
     def __len__(self):
-        return len(self.data)
+        return len(self.data['cdr3'])
 
     def __getitem__(self, index):
         return self.data['cdr3'][index], self.data['v_gene'][index], self.data['j_gene'][index]
+
+    def get_v_genes(self):
+        return self.data['v_gene']
+
+    def get_j_genes(self):
+        return self.data['j_gene']

@@ -34,13 +34,22 @@ def test_fit_gen_model():
                 },
                 'vae': {
                     "SimpleVAE": {
-                        'num_epochs': 50
+                        'num_epochs': 10,
+                        'latent_dim': 8,
+                        'pretrains': 1,
+                        'warmup_epochs': 1
                     }
                 }
             },
             "reports": {
                 "sld_rep": "SequenceLengthDistribution",
-                "aa_freq": "AminoAcidFrequencyDistribution"
+                "aa_freq": "AminoAcidFrequencyDistribution",
+                "summary": {
+                    "VAESummary": {
+                        'dim_dist_rows': 4,
+                        'dim_dist_cols': None
+                    }
+                }
             }
         },
         "instructions": {
@@ -49,7 +58,7 @@ def test_fit_gen_model():
                 "gen_examples_count": 100,
                 "dataset": "d1",
                 "method": "vae",
-                "reports": ['sld_rep', 'aa_freq']
+                "reports": ['sld_rep', 'aa_freq', 'summary']
             }
         }
     }

@@ -8,6 +8,7 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
+from immuneML.reports.gen_model_reports.GenModelReport import GenModelReport
 from immuneML.reports.ml_reports.MLReport import MLReport
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
@@ -112,8 +113,9 @@ class TrainGenModelInstruction(Instruction):
             if isinstance(report, DataReport):
                 report.dataset = self.generated_dataset
                 self.state.report_results['data_reports'].append(report.generate_report())
-            elif isinstance(report, MLReport):
-                report.method = self.method
+            elif isinstance(report, GenModelReport):
+                report.model = self.method
+                report.dataset = self.dataset
                 self.state.report_results['ml_reports'].append(report.generate_report())
 
         if len(self.reports) > 0:
