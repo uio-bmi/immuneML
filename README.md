@@ -4,6 +4,11 @@
 ![Docker](https://github.com/uio-bmi/immuneML/workflows/Docker/badge.svg?branch=master)
 [![](https://img.shields.io/static/v1?label=AIRR-C%20sw-tools%20v1&message=compliant&color=008AFF&labelColor=000000&style=plastic)](https://docs.airr-community.org/en/stable/swtools/airr_swtools_standard.html)
 
+---
+
+ **NOTE**: This is a development version of immuneML that includes integration with Galaxy tools. To use the main immuneML (recommended), see the package immuneML at https://pypi.org/project/immuneML/.
+
+---
 
 immuneML is a platform for machine learning-based analysis and 
 classification of adaptive immune receptors and repertoires (AIRR).
