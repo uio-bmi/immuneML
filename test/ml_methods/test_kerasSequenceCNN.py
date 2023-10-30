@@ -33,6 +33,7 @@ class TestKerasSequenceCNN(TestCase):
 
 
     def _test_fit(self):
+        import keras
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "keras_cnn")
 
         dataset = RandomDatasetGenerator.generate_sequence_dataset(sequence_count=500, length_probabilities={5: 1},
@@ -48,7 +49,6 @@ class TestKerasSequenceCNN(TestCase):
                                                   ['FLAT'],
                                                   ['DENSE', 50]],
                                activation="relu",
-                               regularizer=None,
                                training_percentage=0.7)
 
         cnn.check_encoder_compatibility(encoder)
