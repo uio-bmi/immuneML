@@ -20,7 +20,7 @@ def update_dependencies(file_content):
 
 
 def main():
-    meta_file_path = Path("immuneML-dev/meta.yaml")
+    meta_file_path = Path("immuneml-dev/meta.yaml")
     with meta_file_path.open('r') as file:
         file_content = file.readlines()
 
