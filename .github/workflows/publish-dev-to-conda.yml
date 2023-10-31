@@ -38,6 +38,7 @@ jobs:
           auto-update-conda: false
           auto-activate-base: false
           show-channel-urls: true
+      - run: ls -l
       - name: Build and upload the conda packages
         uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
         with:
