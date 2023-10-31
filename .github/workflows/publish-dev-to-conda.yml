@@ -22,7 +22,7 @@ jobs:
   build_package_and_deploy_to_conda:
     name: Conda deployment of package with Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
-    needs: [ make_conda_package_from_pypi ]
+    needs: [ prepare_conda_meta_from_pypi ]
     strategy:
       matrix:
         python-version: [ "3.8", "3.9", "3.10", "3.11" ]
