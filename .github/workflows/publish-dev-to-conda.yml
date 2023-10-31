@@ -20,7 +20,10 @@ jobs:
           ls -l
           python3 scripts/update_conda_meta_file.py
       - name: Build conda package from meta.yaml
-        run: conda-build immuneml-dev
+        run: |
+          conda update conda
+          conda update conda-build
+          conda-build immuneml-dev
 
   deploy_to_conda:
     name: Conda deployment of package with Python ${{ matrix.python-version }}
