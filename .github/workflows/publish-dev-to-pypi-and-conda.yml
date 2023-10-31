@@ -46,6 +46,9 @@ jobs:
         path: dist/
     - name: Publish distribution to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_TOKEN }}
 
   make_conda_package_from_pypi:
     name: Make conda package from PyPI
