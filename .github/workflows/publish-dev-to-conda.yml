@@ -22,14 +22,6 @@ jobs:
           conda config --add channels bioconda
           python3 scripts/update_conda_meta_file.py
       - run: ls -l
-      - name: Conda environment creation and activation
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-          environment-file: immuneml-dev/meta.yaml
-          auto-update-conda: false
-          auto-activate-base: false
-          show-channel-urls: true
       - name: Build and upload the conda packages
         uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
         with:
