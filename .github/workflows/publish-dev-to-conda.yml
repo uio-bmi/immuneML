@@ -25,11 +25,12 @@ jobs:
     needs: [ prepare_conda_meta_from_pypi ]
     strategy:
       matrix:
-        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
+        python-version: [ "3.8" ]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - run: ls -l
       - name: Conda environment creation and activation
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -38,15 +39,14 @@ jobs:
           auto-update-conda: false
           auto-activate-base: false
           show-channel-urls: true
-      - run: ls -l
       - name: Build and upload the conda packages
         uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
         with:
           meta_yaml_dir: ../immuneml-dev
           python-version: ${{ matrix.python-version }}
           platform_linux-64: true
-          platform_osx-64: true
-          platform_win-64: true
+          platform_osx-64: false
+          platform_win-64: false
           user: milenapavlovic
           label: auto
           token: ${{ secrets.ANACONDA_TOKEN }}
