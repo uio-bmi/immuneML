@@ -1,95 +1,95 @@
-name: Publish Python distribution of dev immuneML to PyPI and Conda
-
-on:
-  push:
-    branches:
-      - nar
-
-jobs:
-  build_python_package:
-    name: build distribution
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.x"
-      - name: Install pypa/build
-        run: >-
-          python3 -m
-          pip install
-          build
-          --user
-      - name: Build a binary wheel and a source tarball
-        run: python3 -m build
-      - name: Store the distribution packages
-        uses: actions/upload-artifact@v3
-        with:
-          name: python-package-distributions
-          path: dist/
-
-  publish_to_pypi:
-    name: Publish Python distribution to PyPI
-    needs: [ build_python_package ]
-    runs-on: ubuntu-latest
-    environment:
-      name: dev_nar_env
-      url: https://pypi.org/p/immuneML_dev
-    permissions:
-      id-token: write
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v3
-      with:
-        name: python-package-distributions
-        path: dist/
-    - name: Publish distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-
-  make_conda_package_from_pypi:
-    name: Make conda package from PyPI
-    runs-on: ubuntu-latest
-    needs: [ publish_to_pypi ]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build conda meta.yaml from PyPI package
-        run: |
-          conda install conda-build
-          conda skeleton pypi immuneML-dev
-          conda config --add channels conda-forge
-          conda config --add channels bioconda
-          python3 scripts/update_conda_meta_file.py
-      - name: Build conda package from meta.yaml
-        run: conda-build immuneML-dev
-
-  deploy_to_conda:
-    name: Conda deployment of package with Python ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
-    needs: [ make_conda_package_from_pypi ]
-    strategy:
-      matrix:
-        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Conda environment creation and activation
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-          environment-file: immuneML-dev/meta.yaml
-          auto-update-conda: false
-          auto-activate-base: false
-          show-channel-urls: true
-      - name: Build and upload the conda packages
-        uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
-        with:
-          meta_yaml_dir: immuneML-dev/conda-build
-          python-version: ${{ matrix.python-version }}
-          platform_linux-64: true
-          platform_osx-64: true
-          platform_win-64: true
-          user: milenapavlovic
-          label: auto
-          token: ${{ secrets.ANACONDA_TOKEN }}
+#name: Publish Python distribution of dev immuneML to PyPI and Conda
+#
+#on:
+#  push:
+#    branches:
+#      - nar
+#
+#jobs:
+#  build_python_package:
+#    name: build distribution
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - name: Set up Python
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: "3.x"
+#      - name: Install pypa/build
+#        run: >-
+#          python3 -m
+#          pip install
+#          build
+#          --user
+#      - name: Build a binary wheel and a source tarball
+#        run: python3 -m build
+#      - name: Store the distribution packages
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: python-package-distributions
+#          path: dist/
+#
+#  publish_to_pypi:
+#    name: Publish Python distribution to PyPI
+#    needs: [ build_python_package ]
+#    runs-on: ubuntu-latest
+#    environment:
+#      name: dev_nar_env
+#      url: https://pypi.org/p/immuneML_dev
+#    permissions:
+#      id-token: write
+#    steps:
+#    - name: Download all the dists
+#      uses: actions/download-artifact@v3
+#      with:
+#        name: python-package-distributions
+#        path: dist/
+#    - name: Publish distribution to PyPI
+#      uses: pypa/gh-action-pypi-publish@release/v1
+#
+#  make_conda_package_from_pypi:
+#    name: Make conda package from PyPI
+#    runs-on: ubuntu-latest
+#    needs: [ publish_to_pypi ]
+#    steps:
+#      - uses: actions/checkout@v4
+#      - name: Build conda meta.yaml from PyPI package
+#        run: |
+#          conda install conda-build
+#          conda skeleton pypi immuneML-dev
+#          conda config --add channels conda-forge
+#          conda config --add channels bioconda
+#          python3 scripts/update_conda_meta_file.py
+#      - name: Build conda package from meta.yaml
+#        run: conda-build immuneML-dev
+#
+#  deploy_to_conda:
+#    name: Conda deployment of package with Python ${{ matrix.python-version }}
+#    runs-on: ubuntu-latest
+#    needs: [ make_conda_package_from_pypi ]
+#    strategy:
+#      matrix:
+#        python-version: [ "3.8", "3.9", "3.10", "3.11" ]
+#    steps:
+#      - uses: actions/checkout@v4
+#        with:
+#          fetch-depth: 0
+#      - name: Conda environment creation and activation
+#        uses: conda-incubator/setup-miniconda@v2
+#        with:
+#          python-version: ${{ matrix.python-version }}
+#          environment-file: immuneML-dev/meta.yaml
+#          auto-update-conda: false
+#          auto-activate-base: false
+#          show-channel-urls: true
+#      - name: Build and upload the conda packages
+#        uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
+#        with:
+#          meta_yaml_dir: immuneML-dev/conda-build
+#          python-version: ${{ matrix.python-version }}
+#          platform_linux-64: true
+#          platform_osx-64: true
+#          platform_win-64: true
+#          user: milenapavlovic
+#          label: auto
+#          token: ${{ secrets.ANACONDA_TOKEN }}
