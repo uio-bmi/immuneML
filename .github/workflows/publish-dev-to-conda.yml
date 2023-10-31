@@ -6,7 +6,7 @@ on:
       - nar
 
 jobs:
-  make_conda_package_from_pypi:
+  prepare_conda_meta_from_pypi:
     name: Make conda package from PyPI
     runs-on: ubuntu-latest
     steps:
@@ -18,9 +18,8 @@ jobs:
           conda config --add channels conda-forge
           conda config --add channels bioconda
           python3 scripts/update_conda_meta_file.py
-          conda-build immuneml-dev
 
-  deploy_to_conda:
+  build_package_and_deploy_to_conda:
     name: Conda deployment of package with Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     needs: [ make_conda_package_from_pypi ]
@@ -42,7 +41,7 @@ jobs:
       - name: Build and upload the conda packages
         uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
         with:
-          meta_yaml_dir: immuneml-dev/conda-build
+          meta_yaml_dir: immuneml-dev
           python-version: ${{ matrix.python-version }}
           platform_linux-64: true
           platform_osx-64: true
