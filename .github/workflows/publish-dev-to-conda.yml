@@ -12,17 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build conda meta.yaml from PyPI package
+        uses: conda-incubator/setup-miniconda@v2
         run: |
           conda install conda-build
           conda skeleton pypi immuneML-dev
           conda config --add channels conda-forge
           conda config --add channels bioconda
-          ls -l
           python3 scripts/update_conda_meta_file.py
-      - name: Build conda package from meta.yaml
-        run: |
-          conda update conda
-          conda update conda-build
           conda-build immuneml-dev
 
   deploy_to_conda:
