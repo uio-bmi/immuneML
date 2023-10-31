@@ -54,7 +54,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build conda meta.yaml from PyPI package
-        run: >-
+        run: |
           conda install conda-build
           conda skeleton pypi immuneML-dev
           conda config --add channels conda-forge
