@@ -6,9 +6,12 @@ on:
       - nar
 
 jobs:
-  prepare_conda_meta_from_pypi:
-    name: Make conda package from PyPI
+  build_package_and_deploy_to_conda:
+    name: Conda deployment of package with Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.8" ]
     steps:
       - uses: actions/checkout@v4
       - name: Build conda meta.yaml from PyPI package
@@ -18,31 +21,19 @@ jobs:
           conda config --add channels conda-forge
           conda config --add channels bioconda
           python3 scripts/update_conda_meta_file.py
-
-  build_package_and_deploy_to_conda:
-    name: Conda deployment of package with Python ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
-    needs: [ prepare_conda_meta_from_pypi ]
-    strategy:
-      matrix:
-        python-version: [ "3.8" ]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - run: ls -l
       - name: Conda environment creation and activation
         uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: ${{ matrix.python-version }}
-          environment-file: ../immuneml-dev/meta.yaml
+          environment-file: immuneml-dev/meta.yaml
           auto-update-conda: false
           auto-activate-base: false
           show-channel-urls: true
       - name: Build and upload the conda packages
         uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
         with:
-          meta_yaml_dir: ../immuneml-dev
+          meta_yaml_dir: immuneml-dev
           python-version: ${{ matrix.python-version }}
           platform_linux-64: true
           platform_osx-64: false
