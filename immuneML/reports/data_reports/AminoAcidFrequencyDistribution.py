@@ -31,7 +31,7 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         relative_frequency (bool): Whether to plot relative frequencies (true) or absolute counts (false) of the positional amino acids. By default, relative_frequency is True.
 
-        split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a single label, or alternatively the label of interest can be specified under 'label'. If split_by_label is set to true, the logfold frequency difference between classes is plotted additionally. By default, split_by_label is False.
+        split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a single label, or alternatively the label of interest can be specified under 'label'. If split_by_label is set to true, the percentage-wise frequency difference between classes is plotted additionally. By default, split_by_label is False.
 
         label (str): if split_by_label is set to True, a label can be specified here.
 
@@ -89,12 +89,12 @@ class AminoAcidFrequencyDistribution(DataReport):
         figures.append(self._safe_plot(freq_dist=freq_dist, plot_callable="_plot_distribution"))
 
         if self.split_by_label:
-            logfold_change = self._compute_frequency_change(freq_dist)
+            frequency_change = self._compute_frequency_change(freq_dist)
 
-            tables.append(self._write_output_table(logfold_change,
+            tables.append(self._write_output_table(frequency_change,
                                                    self.result_path / f"frequency_change.tsv",
                                                    name=f"Log-fold change between classes"))
-            figures.append(self._safe_plot(logfold_change=logfold_change, plot_callable="_plot_logfold_change"))
+            figures.append(self._safe_plot(frequency_change=frequency_change, plot_callable="_plot_frequency_change"))
 
 
         return ReportResult(name=self.name,
@@ -287,7 +287,6 @@ class AminoAcidFrequencyDistribution(DataReport):
         merged_dfs = pd.merge(class_a_df, class_b_df, on=on, how="outer", suffixes=["_a", "_b"])
         merged_dfs = merged_dfs[(merged_dfs["relative frequency_a"] + merged_dfs["relative frequency_b"]) > 0]
 
-        # merged_dfs["log_fold_change"] = np.log2(merged_dfs["relative frequency_a"] / merged_dfs["relative frequency_b"])
         merged_dfs["frequency_change"] = merged_dfs["relative frequency_a"] - merged_dfs["relative frequency_b"]
 
         pos_class_a = merged_dfs[merged_dfs["frequency_change"] > 0]
@@ -303,18 +302,17 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         return pd.concat([pos_class_a, pos_class_b])
 
-    def _plot_logfold_change(self, logfold_change):
-        # logfold_change = logfold_change[logfold_change["log_fold_change"] < np.inf]
-        figure = px.bar(logfold_change, x="position", y="frequency_change", color="amino acid", text="amino acid",
+    def _plot_frequency_change(self, frequency_change):
+        figure = px.bar(frequency_change, x="position", y="frequency_change", color="amino acid", text="amino acid",
                         facet_col="positive_class",
-                        facet_row="chain" if "chain" in logfold_change.columns else None,
+                        facet_row="chain" if "chain" in frequency_change.columns else None,
                         color_discrete_map=PlotlyUtil.get_amino_acid_color_map(),
                         labels={"position": "IMGT position" if self.imgt_positions else "Position",
                                 "positive_class": "Class",
                                 "frequency_change": "Difference in relative frequency",
                                 "amino acid": "Amino acid"}, template="plotly_white")
 
-        figure.update_xaxes(categoryorder='array', categoryarray=self._get_position_order(logfold_change["position"]))
+        figure.update_xaxes(categoryorder='array', categoryarray=self._get_position_order(frequency_change["position"]))
         figure.update_layout(showlegend=False, yaxis={'categoryorder':'category ascending'})
 
         figure.update_yaxes(tickformat=",.0%")
@@ -322,7 +320,7 @@ class AminoAcidFrequencyDistribution(DataReport):
         file_path = self.result_path / "frequency_change.html"
         figure.write_html(str(file_path))
 
-        return ReportOutput(path=file_path, name="Log fold difference between the two classes")
+        return ReportOutput(path=file_path, name="Frequency difference between amino acid usage in the two classes")
 
 
     def _get_label_name(self):
