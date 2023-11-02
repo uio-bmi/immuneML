@@ -12,21 +12,22 @@ def import_requirements(filename) -> list:
 
 
 setup(
-    name="immuneML_dev",
-    version=Constants.DEV_VERSION,
+    name="immuneML",
+    version=Constants.VERSION,
     description="immuneML is a software platform for machine learning analysis of immune receptor repertoires.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="immuneML Team",
     author_email="milenpa@student.matnat.uio.no",
     url="https://github.com/uio-bmi/immuneML",
-    install_requires=["numpy<=1.23.5", "pytest>=4", "pandas>=1,<2.0", "PyYAML>=5.3", "scikit-learn>=0.23",
+    install_requires=["numpy<=1.23.5", "pandas>=1,<2.0", "PyYAML>=5.3", "scikit-learn>=0.23",
                       "gensim>=4", "matplotlib>=3.1", "editdistance", "regex", "tzlocal", "airr>=1,<1.4",
                       "fishersapi", "pystache", "torch>=1.5.1", "dill>=0.3", "plotly>=4", "logomaker>=0.8",
                       "matplotlib-venn>=0.11", "scipy", "bionumpy"],
     extras_require={
         "TCRdist": ["parasail==1.2", "tcrdist3>=0.1.6"],
-        "gen_models": ['olga', 'sonnia']
+        "gen_models": ['olga', 'sonnia', 'torch'],
+        "ligo": ['olga', 'stitchr', 'IMGTgeneDL']
     },
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -44,7 +45,8 @@ setup(
     entry_points={
         'console_scripts': [
             'immune-ml = immuneML.app.ImmuneMLApp:main',
-            'immune-ml-quickstart = immuneML.workflows.instructions.quickstart:main'
+            'immune-ml-quickstart = immuneML.workflows.instructions.quickstart:main',
+            'ligo = immuneML.app.LigoApp:main'
         ]
     },
 )

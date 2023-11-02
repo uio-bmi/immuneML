@@ -182,7 +182,7 @@ metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDat
         chain_pair_values = str([chain_pair.name for chain_pair in ChainPair])[1:-1].replace("'", "`")
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
         repertoire_fields = list(Repertoire.FIELDS)
-        repertoire_fields.remove("region_types")
+        repertoire_fields.remove("region_type")
 
         mapping = {
             "Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum.": f"Valid values are {chain_pair_values}.",
