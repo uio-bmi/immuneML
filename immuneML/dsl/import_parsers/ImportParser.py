@@ -88,5 +88,6 @@ class ImportParser:
 
     @staticmethod
     def log_dataset_info(dataset: Dataset):
-        print_log(f"Imported {dataset.__class__.__name__.split('Dataset')[0].lower()} dataset {dataset.name} with "
-                  f"{dataset.get_example_count()} examples.", True)
+        print_log(f"\nImported {dataset.__class__.__name__.split('Dataset')[0].lower()} dataset {dataset.name}:\n"
+                  f"Example count: {dataset.get_example_count()}\n"
+                  f"Labels: {dataset.get_label_names()}", True)
