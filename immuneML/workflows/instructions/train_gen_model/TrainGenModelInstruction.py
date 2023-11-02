@@ -1,3 +1,4 @@
+import copy
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Dict
@@ -33,7 +34,7 @@ class TrainGenModelInstruction(Instruction):
 
     This instruction takes a dataset as input which will be used to train a model, the model itself, and the number of
     sequences to generate to illustrate the applicability of the model. It can also produce reports of the fitted model
-    or generated sequences.
+    or original and generated sequences.
 
     To use the generative model previously trained with immuneML, see ApplyGenModel instruction.
 
@@ -111,15 +112,23 @@ class TrainGenModelInstruction(Instruction):
         for report in self.reports:
             report.result_path = report_path
             if isinstance(report, DataReport):
-                report.dataset = self.generated_dataset
-                self.state.report_results['data_reports'].append(report.generate_report())
+                tmp_report_synth = copy.deepcopy(report)
+                tmp_report_synth.name = tmp_report_synth.name + "_synthetic_data"
+                tmp_report_synth.dataset = self.generated_dataset
+                self.state.report_results['data_reports'].append(tmp_report_synth.generate_report())
+
+                tmp_report_org = copy.deepcopy(report)
+                tmp_report_org.name = tmp_report_org.name + '_original_data'
+                tmp_report_org.dataset = self.dataset
+                self.state.report_results['data_reports'].append(tmp_report_org.generate_report())
+
             elif isinstance(report, GenModelReport):
                 report.model = self.method
                 report.dataset = self.dataset
                 self.state.report_results['ml_reports'].append(report.generate_report())
 
         if len(self.reports) > 0:
-            gen_rep_count = len(self.state.report_results['ml_reports']) + len(self.state.report_results['data_reports'])
+            gen_rep_count = len(self.state.report_results['ml_reports']) + int(len(self.state.report_results['data_reports']) / 2)
             print_log(f"{self.state.name}: generated {gen_rep_count} reports.", True)
 
     def _set_path(self, result_path):
