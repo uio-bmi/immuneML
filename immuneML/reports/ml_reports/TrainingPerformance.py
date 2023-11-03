@@ -4,14 +4,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
-from sklearn import metrics as sklearn_metrics
-from sklearn.preprocessing import label_binarize
 
 from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.environment.Constants import Constants
 from immuneML.hyperparameter_optimization import HPSetting
-from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.ml_metrics import ml_metrics
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_metrics.Metric import Metric
 from immuneML.ml_metrics.MetricUtil import MetricUtil
 from immuneML.reports.ReportOutput import ReportOutput

@@ -6,7 +6,7 @@ from immuneML.caching.CacheType import CacheType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
+from immuneML.ml_methods.classifiers.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
 from immuneML.reports.ml_reports.SequenceAssociationLikelihood import SequenceAssociationLikelihood
 
 

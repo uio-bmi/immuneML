@@ -14,7 +14,7 @@ from immuneML.dsl.definition_parsers.SimulationParser import SimulationParser
 from immuneML.dsl.import_parsers.ImportParser import ImportParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
-from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -22,9 +22,12 @@ from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.reports.ml_reports.MLReport import MLReport
 from immuneML.reports.multi_dataset_reports.MultiDatasetReport import MultiDatasetReport
 from immuneML.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
+from immuneML.simulation.SimConfig import SimConfig
+from immuneML.simulation.SimConfigItem import SimConfigItem
+from immuneML.simulation.implants.LigoPWM import LigoPWM
 from immuneML.simulation.implants.Motif import Motif
+from immuneML.simulation.implants.SeedMotif import SeedMotif
 from immuneML.simulation.implants.Signal import Signal
-from immuneML.simulation.motif_instantiation_strategy.MotifInstantiationStrategy import MotifInstantiationStrategy
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from scripts.DocumentatonFormat import DocumentationFormat
@@ -69,12 +72,11 @@ class DefinitionParser:
 
     @staticmethod
     def make_simulation_docs(path: Path):
-        instantiations = ReflectionHandler.all_nonabstract_subclasses(MotifInstantiationStrategy, "Instantiation", "motif_instantiation_strategy/")
-        instantiations = [DocumentationFormat(inst, inst.__name__.replace('Instantiation', ""), DocumentationFormat.LEVELS[2])
-                          for inst in instantiations]
-
-        classes_to_document = [DocumentationFormat(Motif, Motif.__name__, DocumentationFormat.LEVELS[1])] + instantiations + \
-                              [DocumentationFormat(Signal, Signal.__name__, DocumentationFormat.LEVELS[1])]
+        classes_to_document = [DocumentationFormat(SeedMotif, SeedMotif.__name__, DocumentationFormat.LEVELS[1]),
+                               DocumentationFormat(LigoPWM, "PWM", DocumentationFormat.LEVELS[1]),
+                               DocumentationFormat(Signal, Signal.__name__, DocumentationFormat.LEVELS[1]),
+                               DocumentationFormat(SimConfig, "Simulation config", DocumentationFormat.LEVELS[1]),
+                               DocumentationFormat(SimConfigItem, "Simulation config item", DocumentationFormat.LEVELS[1])]
 
         file_path = path / "simulation.rst"
         with file_path.open("w") as file:
@@ -113,7 +115,7 @@ class DefinitionParser:
 
     @staticmethod
     def make_ml_methods_docs(path: Path):
-        classes = ReflectionHandler.all_nonabstract_subclasses(MLMethod, "", "ml_methods/")
+        classes = ReflectionHandler.all_nonabstract_subclasses(MLMethod, "", "ml_methods/classifiers/")
         make_docs(path, classes, "ml_methods.rst", "")
 
     @staticmethod

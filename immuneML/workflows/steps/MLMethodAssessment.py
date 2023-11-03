@@ -1,16 +1,11 @@
-import inspect
 import os
-import numpy as np
-import warnings
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
-from sklearn import metrics
 
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.ml_methods.util.Util import Util
-from immuneML.ml_metrics import ml_metrics
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_metrics.Metric import Metric
 from immuneML.ml_metrics.MetricUtil import MetricUtil
 from immuneML.util.PathBuilder import PathBuilder

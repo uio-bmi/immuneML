@@ -4,7 +4,7 @@ from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequency
 from immuneML.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 
 
 class TestGridSearch(TestCase):

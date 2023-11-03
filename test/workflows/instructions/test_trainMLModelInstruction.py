@@ -16,8 +16,8 @@ from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
-from immuneML.ml_methods.SVM import SVM
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.SVM import SVM
 from immuneML.ml_metrics.Metric import Metric
 from immuneML.preprocessing.filters.ClonesPerRepertoireFilter import ClonesPerRepertoireFilter
 from immuneML.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
