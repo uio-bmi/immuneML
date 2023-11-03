@@ -11,6 +11,20 @@ from immuneML.workflows.instructions.apply_gen_model.ApplyGenModelInstruction im
 
 
 class ApplyGenModelParser:
+    """
+    Specification example for the ApplyGenModel instruction:
+
+    .. highlight:: yaml
+    .. code-block:: yaml
+
+        instruction_name:
+            type: ApplyGenModel
+            gen_examples_count: 100
+            method: m1
+            config_path: ./config.zip
+            reports: [data_rep1, ml_rep2]
+    """
+
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable,
               path: Path = None) -> ApplyGenModelInstruction:
         location = ApplyGenModelParser.__name__

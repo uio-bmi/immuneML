@@ -1,57 +1,50 @@
 from pathlib import Path
 
-from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
-from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
-from immuneML.reports.data_reports.DataReport import DataReport
-from immuneML.reports.ml_reports.MLReport import MLReport
-from immuneML.util.Logger import print_log
-from immuneML.util.PathBuilder import PathBuilder
-from immuneML.workflows.instructions.Instruction import Instruction
-from immuneML.workflows.instructions.train_gen_model.TrainGenModelInstruction import GenModelState
+from immuneML.workflows.instructions.GenModelInstruction import GenModelInstruction
+from immuneML.workflows.instructions.GenModelInstruction import GenModelState
 
 
 class ApplyGenModelState(GenModelState):
     pass
 
 
-class ApplyGenModelInstruction(Instruction):
+class ApplyGenModelInstruction(GenModelInstruction):
+    """
+    ApplyGenModel instruction implements applying generative AIRR models on receptor level.
+
+    This instruction takes as input a trained model which will be used for generating data and the number of
+    sequences to be generated. It can also produce reports of the applied model and reports of generated
+    sequences.
+
+    To train generative model with immuneML, see TrainGenModel instruction.
+
+    Arguments:
+        method (GenerativeModel): which model to apply
+        gen_examples_count (int): how many examples (sequences, repertoires) to generate from the applied model
+        result_path (Path): path to the directory where the results will be stored
+        name (str): name of the instruction
+        reports (list): list of report ids (defined under definitions/reports) to apply after generating gen_examples_count examples; these can be data reports (to be run on generated examples), ML reports (to be run on the fitted model)
+
+    YAML specification:
+        .. highlight:: yaml
+        .. code-block:: yaml
+
+        my_apply_gen_model_inst: # user-defined instruction name
+            type: ApplyGenModel
+            gen_examples_count: 100
+            method: m1
+            config_path: ./config.zip # path to the trained model in zip format (possibly output of TrainGenModel instruction)
+            reports: [data_rep1, ml_rep2]
+
+    """
     def __init__(self, method: GenerativeModel = None, reports: list = None, result_path: Path = None,
                  name: str = None, gen_examples_count: int = None):
-        self.generated_dataset = None
-        self.method = method
-        self.reports = reports
-        self.state = ApplyGenModelState(result_path, name, gen_examples_count)
+        super().__init__(ApplyGenModelState(result_path, name, gen_examples_count), method, reports)
 
-    def run(self, result_path: Path) -> ApplyGenModelState:
-        self.state.result_path = PathBuilder.build(result_path / self.state.name)
+    def run(self, result_path: Path) -> GenModelState:
+        self._set_path(result_path)
         self._gen_data()
         self._run_reports()
 
         return self.state
-
-    def _gen_data(self):
-        dataset = self.method.generate_sequences(self.state.gen_examples_count, 1,
-                                                 self.state.result_path / 'generated_sequences',
-                                                 SequenceType.AMINO_ACID, False)
-
-        print_log(f"{self.state.name}: generated {self.state.gen_examples_count} examples from the fitted model", True)
-        self.generated_dataset = dataset
-
-        AIRRExporter.export(dataset, self.state.result_path)
-
-    def _run_reports(self):
-        report_path = PathBuilder.build(self.state.result_path / 'reports')
-        for report in self.reports:
-            report.result_path = report_path
-            if isinstance(report, DataReport):
-                report.dataset = self.generated_dataset
-                self.state.report_results['data_reports'].append(report.generate_report())
-            elif isinstance(report, MLReport):
-                report.method = self.method
-                self.state.report_results['ml_reports'].append(report.generate_report())
-
-        if len(self.reports) > 0:
-            gen_rep_count = len(self.state.report_results['ml_reports']) + len(
-                self.state.report_results['data_reports'])
-            print_log(f"{self.state.name}: generated {gen_rep_count} reports.", True)

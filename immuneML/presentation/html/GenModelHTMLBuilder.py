@@ -1,7 +1,7 @@
 import itertools
 from pathlib import Path
 
-from build.lib.immuneML.workflows.instructions.apply_gen_model.ApplyGenModelInstruction import ApplyGenModelState
+from immuneML.workflows.instructions.apply_gen_model.ApplyGenModelInstruction import ApplyGenModelState
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.util.Util import Util as MLUtil
 from immuneML.presentation.TemplateParser import TemplateParser
@@ -25,7 +25,7 @@ class GenModelHTMLBuilder:
         return result_file
 
     @staticmethod
-    def make_html_map(state: GenModelState, base_path: Path) -> dict:
+    def make_html_map(state, base_path: Path) -> dict:
         html_map = {
             "css_style": Util.get_css_content(GenModelHTMLBuilder.CSS_PATH),
             "name": state.name,

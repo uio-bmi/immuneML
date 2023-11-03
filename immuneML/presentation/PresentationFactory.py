@@ -9,13 +9,12 @@ from immuneML.presentation.html.MLApplicationHTMLBuilder import MLApplicationHTM
 from immuneML.presentation.html.SubsamplingHTMLBuilder import SubsamplingHTMLBuilder
 from immuneML.presentation.html.GenModelHTMLBuilder import GenModelHTMLBuilder
 from immuneML.simulation.LigoSimState import LigoSimState
-from immuneML.workflows.instructions.apply_gen_model.ApplyGenModelInstruction import ApplyGenModelState
 from immuneML.workflows.instructions.dataset_generation.DatasetExportState import DatasetExportState
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisState import ExploratoryAnalysisState
 from immuneML.workflows.instructions.ligo_sim_feasibility.FeasibilitySummaryInstruction import FeasibilitySummaryState
 from immuneML.workflows.instructions.ml_model_application.MLApplicationState import MLApplicationState
 from immuneML.workflows.instructions.subsampling.SubsamplingState import SubsamplingState
-from immuneML.workflows.instructions.train_gen_model.TrainGenModelInstruction import TrainGenModelState, GenModelState
+from immuneML.workflows.instructions.train_gen_model.TrainGenModelInstruction import GenModelState
 
 
 class PresentationFactory:
