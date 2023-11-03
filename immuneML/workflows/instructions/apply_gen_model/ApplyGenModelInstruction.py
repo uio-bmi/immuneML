@@ -1,27 +1,18 @@
-from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
-from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.reports.ml_reports.MLReport import MLReport
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
+from immuneML.workflows.instructions.train_gen_model.TrainGenModelInstruction import GenModelState
 
 
-@dataclass
-class ApplyGenModelState:
-    result_path: Path
-    name: str
-    gen_examples_count: int
-    sequence_examples: list = None
-    model_path: Path = None
-    report_results: Dict[str, List[ReportResult]] = field(
-        default_factory=lambda: {'data_reports': [], 'ml_reports': []})
+class ApplyGenModelState(GenModelState):
+    pass
 
 
 class ApplyGenModelInstruction(Instruction):

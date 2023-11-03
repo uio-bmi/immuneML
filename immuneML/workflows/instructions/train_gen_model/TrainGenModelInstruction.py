@@ -1,4 +1,5 @@
 import copy
+from abc import ABC
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Dict
@@ -10,20 +11,24 @@ from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeMode
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.reports.gen_model_reports.GenModelReport import GenModelReport
-from immuneML.reports.ml_reports.MLReport import MLReport
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
 
 
 @dataclass
-class TrainGenModelState:
+class GenModelState(ABC):
     result_path: Path
     name: str
     gen_examples_count: int
     sequence_examples: list = None
     model_path: Path = None
-    report_results: Dict[str, List[ReportResult]] = field(default_factory=lambda: {'data_reports': [], 'ml_reports': []})
+    report_results: Dict[str, List[ReportResult]] = field(
+        default_factory=lambda: {'data_reports': [], 'ml_reports': []})
+
+
+class TrainGenModelState(GenModelState):
+    pass
 
 
 class TrainGenModelInstruction(Instruction):
@@ -127,7 +132,8 @@ class TrainGenModelInstruction(Instruction):
                 self.state.report_results['ml_reports'].append(report.generate_report())
 
         if len(self.reports) > 0:
-            gen_rep_count = len(self.state.report_results['ml_reports']) + int(len(self.state.report_results['data_reports']) / 2)
+            gen_rep_count = len(self.state.report_results['ml_reports']) + int(
+                len(self.state.report_results['data_reports']) / 2)
             print_log(f"{self.state.name}: generated {gen_rep_count} reports.", True)
 
     def _set_path(self, result_path):
