@@ -17,8 +17,8 @@ def test_fit_gen_model():
                     "format": "RandomSequenceDataset",
                     "params": {
                         'length_probabilities': {
-                            3: 0.5,
-                            4: 0.5
+                            13: 0.5,
+                            14: 0.5
                         },
                         'sequence_count': 10
                     }
@@ -31,11 +31,25 @@ def test_fit_gen_model():
                         'sequence_type': 'amino_acid',
                         'region_type': 'IMGT_CDR3'
                     }
+                },
+                'vae': {
+                    "SimpleVAE": {
+                        'num_epochs': 10,
+                        'latent_dim': 8,
+                        'pretrains': 1,
+                        'warmup_epochs': 1
+                    }
                 }
             },
             "reports": {
                 "sld_rep": "SequenceLengthDistribution",
-                "aa_freq": "AminoAcidFrequencyDistribution"
+                "aa_freq": "AminoAcidFrequencyDistribution",
+                "summary": {
+                    "VAESummary": {
+                        'dim_dist_rows': 4,
+                        'dim_dist_cols': None
+                    }
+                }
             }
         },
         "instructions": {
@@ -43,8 +57,8 @@ def test_fit_gen_model():
                 "type": "TrainGenModel",
                 "gen_examples_count": 100,
                 "dataset": "d1",
-                "method": "pwm",
-                "reports": ['sld_rep', 'aa_freq']
+                "method": "vae",
+                "reports": ['sld_rep', 'aa_freq', 'summary']
             }
         }
     }

@@ -5,8 +5,8 @@ from typing import List, Tuple
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
-from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.ml_methods.TCRdistClassifier import TCRdistClassifier
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.TCRdistClassifier import TCRdistClassifier
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport

@@ -1,3 +1,4 @@
+import copy
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Dict
@@ -8,6 +9,7 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
+from immuneML.reports.gen_model_reports.GenModelReport import GenModelReport
 from immuneML.reports.ml_reports.MLReport import MLReport
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
@@ -26,13 +28,12 @@ class TrainGenModelState:
 
 class TrainGenModelInstruction(Instruction):
     """
-    TrainGenModel instruction implements training generative AIRR models on both repertoire and receptor level
-    depending on the parameters and the chosen model. Models that can be trained for sequence generation are listed
-    under Generative Models section.
+    TrainGenModel instruction implements training generative AIRR models on receptor level. Models that can be trained
+    for sequence generation are listed under Generative Models section.
 
     This instruction takes a dataset as input which will be used to train a model, the model itself, and the number of
     sequences to generate to illustrate the applicability of the model. It can also produce reports of the fitted model
-    or generated sequences.
+    and reports of original and generated sequences.
 
     To use the generative model previously trained with immuneML, see ApplyGenModel instruction.
 
@@ -86,7 +87,7 @@ class TrainGenModelInstruction(Instruction):
 
     def _fit_model(self):
         print_log(f"{self.state.name}: starting to fit the model", True)
-        self.method.fit(self.dataset)
+        self.method.fit(self.dataset, self.state.result_path)
         print_log(f"{self.state.name}: fitted the model", True)
 
     def _save_model(self):
@@ -110,14 +111,23 @@ class TrainGenModelInstruction(Instruction):
         for report in self.reports:
             report.result_path = report_path
             if isinstance(report, DataReport):
-                report.dataset = self.generated_dataset
-                self.state.report_results['data_reports'].append(report.generate_report())
-            elif isinstance(report, MLReport):
-                report.method = self.method
+                tmp_report_synth = copy.deepcopy(report)
+                tmp_report_synth.name = tmp_report_synth.name + "_synthetic_data"
+                tmp_report_synth.dataset = self.generated_dataset
+                self.state.report_results['data_reports'].append(tmp_report_synth.generate_report())
+
+                tmp_report_org = copy.deepcopy(report)
+                tmp_report_org.name = tmp_report_org.name + '_original_data'
+                tmp_report_org.dataset = self.dataset
+                self.state.report_results['data_reports'].append(tmp_report_org.generate_report())
+
+            elif isinstance(report, GenModelReport):
+                report.model = self.method
+                report.dataset = self.dataset
                 self.state.report_results['ml_reports'].append(report.generate_report())
 
         if len(self.reports) > 0:
-            gen_rep_count = len(self.state.report_results['ml_reports']) + len(self.state.report_results['data_reports'])
+            gen_rep_count = len(self.state.report_results['ml_reports']) + int(len(self.state.report_results['data_reports']) / 2)
             print_log(f"{self.state.name}: generated {gen_rep_count} reports.", True)
 
     def _set_path(self, result_path):

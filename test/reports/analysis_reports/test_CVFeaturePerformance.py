@@ -16,7 +16,7 @@ from immuneML.hyperparameter_optimization.states.HPLabelState import HPLabelStat
 from immuneML.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
-from immuneML.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
+from immuneML.ml_methods.classifiers.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
 from immuneML.ml_metrics.Metric import Metric
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.train_ml_model_reports.CVFeaturePerformance import CVFeaturePerformance

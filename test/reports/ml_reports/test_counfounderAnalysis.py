@@ -13,7 +13,7 @@ from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 from immuneML.reports.ml_reports.ConfounderAnalysis import ConfounderAnalysis
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator as RDG
 from immuneML.util.PathBuilder import PathBuilder

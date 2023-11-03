@@ -7,7 +7,6 @@ from immuneML.simulation.util.igor_helper import _import_genes_from_model_params
 from immuneML.util.PathBuilder import PathBuilder
 
 
-@pytest.mark.skip(reason='simulation will come from ligo')
 def test_import_original_genes():
 
     file_content = """@Event_list
@@ -447,7 +446,7 @@ def test_import_original_genes():
 0.00565073
 """
 
-    path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "igor_helper")
+    path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "igor_helper")
     with (path / "model_params.txt").open('w') as file:
         file.write(file_content)
 

@@ -9,8 +9,8 @@ from immuneML.hyperparameter_optimization.core.HPSelection import HPSelection
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
 from immuneML.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
-from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.ml_methods.SklearnMethod import SklearnMethod
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.SklearnMethod import SklearnMethod
 from immuneML.ml_metrics.Metric import Metric
 from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.util.Logger import print_log
