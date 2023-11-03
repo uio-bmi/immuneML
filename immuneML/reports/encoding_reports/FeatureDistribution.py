@@ -4,6 +4,7 @@ import plotly.express as px
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.reports.ReportOutput import ReportOutput
+from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.reports.encoding_reports.FeatureReport import FeatureReport
 
 
@@ -135,3 +136,13 @@ class FeatureDistribution(FeatureReport):
 
         return ReportOutput(path=file_path, name="Distributions of feature values")
 
+
+##
+class DimensionalitReductionReport(EncodingReport):
+    def _generate(self):
+        """
+        Get dim reduced data from self.dataset.encoded...
+        make a plot
+        return ReportResult
+        """
+        pass

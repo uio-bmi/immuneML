@@ -3,6 +3,9 @@ from pathlib import Path
 
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
+from immuneML.encodings.kmer_frequency.KmerFreqSequenceEncoder import KmerFreqSequenceEncoder
+from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
+from immuneML.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisInstruction import ExploratoryAnalysisInstruction
@@ -52,12 +55,13 @@ class ExploratoryAnalysisParser:
             params["number_of_processes"] = instruction["number_of_processes"]
             exp_analysis_units[analysis_key] = ExploratoryAnalysisUnit(**params)
 
+
         process = ExploratoryAnalysisInstruction(exploratory_analysis_units=exp_analysis_units, name=key)
         return process
 
     def _prepare_params(self, analysis: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
 
-        valid_keys = ["dataset", "report", "preprocessing_sequence", "labels", "encoding", "number_of_processes"]
+        valid_keys = ["dataset", "report", "preprocessing_sequence", "labels", "encoding", "number_of_processes", "dim_reduction"]
         ParameterValidator.assert_keys(list(analysis.keys()), valid_keys, "ExploratoryAnalysisParser", "analysis", False)
 
         params = {"dataset": symbol_table.get(analysis["dataset"]), "report": copy.deepcopy(symbol_table.get(analysis["report"]))}
@@ -82,5 +86,12 @@ class ExploratoryAnalysisParser:
 
         if "preprocessing_sequence" in analysis:
             params["preprocessing_sequence"] = symbol_table.get(analysis["preprocessing_sequence"])
+
+        if "dim_reduction" in analysis:
+            ParameterValidator.assert_in_valid_list(analysis["dim_reduction"], [None, "umap"],
+                                                    ExploratoryAnalysisParser.__name__, "dim_reduction")
+            params["dim_reduction"] = analysis["dim_reduction"]
+
+            # todo: Only KmerFrequency and Word2Vec are valid encoders when doing dim reduction. assert this
 
         return params
