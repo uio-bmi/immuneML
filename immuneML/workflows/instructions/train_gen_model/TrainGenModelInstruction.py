@@ -28,13 +28,12 @@ class TrainGenModelState:
 
 class TrainGenModelInstruction(Instruction):
     """
-    TrainGenModel instruction implements training generative AIRR models on both repertoire and receptor level
-    depending on the parameters and the chosen model. Models that can be trained for sequence generation are listed
-    under Generative Models section.
+    TrainGenModel instruction implements training generative AIRR models on receptor level. Models that can be trained
+    for sequence generation are listed under Generative Models section.
 
     This instruction takes a dataset as input which will be used to train a model, the model itself, and the number of
     sequences to generate to illustrate the applicability of the model. It can also produce reports of the fitted model
-    or original and generated sequences.
+    and reports of original and generated sequences.
 
     To use the generative model previously trained with immuneML, see ApplyGenModel instruction.
 
