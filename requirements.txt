@@ -22,6 +22,7 @@ bionumpy>=0.1.0
 fisher>=0.1.9
 olga>=1.2.4
 npstructures>=0.2.0
+umap-learn
 
 # gen models
 olga
