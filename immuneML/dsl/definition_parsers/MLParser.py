@@ -3,7 +3,7 @@ import inspect
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
-from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.util.Logger import log
 from immuneML.util.ParameterValidator import ParameterValidator
@@ -28,8 +28,8 @@ class MLParser:
     @log
     def _parse_ml_method(ml_method_id: str, ml_specification) -> tuple:
 
-        valid_class_values = (ReflectionHandler.all_nonabstract_subclass_basic_names(MLMethod, "", "ml_methods/") +
-                              ReflectionHandler.all_nonabstract_subclass_basic_names(GenerativeModel, "", "simulation/generative_models/"))
+        valid_class_values = (ReflectionHandler.all_nonabstract_subclass_basic_names(MLMethod, "", "ml_methods/classifiers/") +
+                              ReflectionHandler.all_nonabstract_subclass_basic_names(GenerativeModel, "", "ml_methods/generative_models/"))
 
         if type(ml_specification) is str:
             ml_specification = {ml_specification: {}}

@@ -6,7 +6,7 @@ from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
 from immuneML.dsl.definition_parsers.MLParser import MLParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.environment.Constants import Constants
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 
 
 class TestMLParser(TestCase):

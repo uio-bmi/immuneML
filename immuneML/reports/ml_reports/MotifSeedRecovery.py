@@ -7,11 +7,11 @@ import pandas as pd
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
-from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.ml_methods.RandomForestClassifier import RandomForestClassifier
-from immuneML.ml_methods.SVC import SVC
-from immuneML.ml_methods.SVM import SVM
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.RandomForestClassifier import RandomForestClassifier
+from immuneML.ml_methods.classifiers.SVC import SVC
+from immuneML.ml_methods.classifiers.SVM import SVM
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport

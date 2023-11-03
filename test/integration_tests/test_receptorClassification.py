@@ -12,7 +12,7 @@ from immuneML.hyperparameter_optimization.config.ReportConfig import ReportConfi
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 from immuneML.ml_metrics.Metric import Metric
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.ReadsType import ReadsType

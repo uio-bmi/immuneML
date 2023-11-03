@@ -22,9 +22,9 @@ class TestRepertoireClassificationTool(TestCase):
         ImmuneMLExporter.export(dataset, path)
 
     def test_run(self):
-        path = EnvironmentSettings.tmp_test_path / "galaxy_repertoire_classification/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "galaxy_repertoire_classification/")
         result_path = path / "result/"
-        PathBuilder.remove_old_and_build(result_path)
+        PathBuilder.build(result_path)
 
         old_working_dir = os.getcwd()
         os.chdir(path)

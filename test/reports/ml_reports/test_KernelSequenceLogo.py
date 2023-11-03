@@ -9,7 +9,7 @@ from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
-from immuneML.ml_methods.ReceptorCNN import ReceptorCNN
+from immuneML.ml_methods.classifiers.ReceptorCNN import ReceptorCNN
 from immuneML.reports.ml_reports.KernelSequenceLogo import KernelSequenceLogo
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder

@@ -54,11 +54,12 @@ class Util:
 
     @staticmethod
     def update_result_paths(specs: dict, result_path: Path, yaml_path: Path):
-        for key, item in specs["definitions"]["datasets"].items():
-            if isinstance(item, dict) and 'params' in item.keys() and isinstance(item["params"], dict):
-                item['params']["result_path"] = str(result_path / key)
-                if item['format'] not in ['ImmuneML', 'RandomRepertoireDataset', 'RandomReceptorDataset', 'RandomSequenceDataset']:
-                    item['params']['path'] = str(yaml_path.parent)
+        if 'datasets' in specs['definitions']:
+            for key, item in specs["definitions"]["datasets"].items():
+                if isinstance(item, dict) and 'params' in item.keys() and isinstance(item["params"], dict):
+                    item['params']["result_path"] = str(result_path / key)
+                    if item['format'] not in ['ImmuneML', 'RandomRepertoireDataset', 'RandomReceptorDataset', 'RandomSequenceDataset']:
+                        item['params']['path'] = str(yaml_path.parent)
 
         with yaml_path.open("w") as file:
             yaml.dump(specs, file)

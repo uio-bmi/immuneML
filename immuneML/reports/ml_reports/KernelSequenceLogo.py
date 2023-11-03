@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.ml_methods.ReceptorCNN import ReceptorCNN
+from immuneML.ml_methods.classifiers.ReceptorCNN import ReceptorCNN
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
