@@ -1,3 +1,4 @@
+import shutil
 from unittest import TestCase
 from unittest.mock import Mock
 
@@ -44,3 +45,5 @@ class TestApplyGenModelInstruction(TestCase):
 
         df = pd.read_csv(path / "Test/generated_sequences/batch1.tsv")
         self.assertEqual(2, df.shape[0])
+
+        shutil.rmtree(path)
