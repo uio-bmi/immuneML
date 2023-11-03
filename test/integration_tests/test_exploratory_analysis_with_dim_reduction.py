@@ -22,8 +22,8 @@ def test_dimensionality_reduction():
                         'sequence_count': 20,
                         'labels': {
                             'diseased': {
-                                0: 0.6,
-                                1: 0.4
+                                "diseased": 0.6,
+                                "health": 0.4
                             }
                         }
                     }

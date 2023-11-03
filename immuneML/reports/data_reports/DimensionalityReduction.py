@@ -29,7 +29,6 @@ class DimensionalityReduction(DataReport):
                  name: str = None, label: str = None):
         super().__init__(dataset=dataset, result_path=result_path, name=name)
         self._label = label
-        print_log("Will use label " + label)
 
     def check_prerequisites(self):
         if isinstance(self.dataset, SequenceDataset):
@@ -44,11 +43,15 @@ class DimensionalityReduction(DataReport):
         dim_reduced_data = self.dataset.encoded_data.dimensionality_reduced_data
         assert dim_reduced_data.shape[1] == 2
 
-        data_labels = self.dataset.get_attribute(self._label)
+        try:
+            data_labels = self.dataset.get_attribute(self._label)
+        except AttributeError:
+            warnings.warn(f"Label {self._label} not found in the dataset. Skipping label coloring in the plot.")
 
         PathBuilder.build(self.result_path)
+        # Convering labels to list in case labels are strings
         df = pd.DataFrame(
-            {"x": dim_reduced_data[:, 0], 'y': dim_reduced_data[:, 1], self._label: data_labels})
+            {"x": dim_reduced_data[:, 0], 'y': dim_reduced_data[:, 1], self._label: data_labels.tolist()})
         df.to_csv(self.result_path / 'dimensionality_reduced_data.csv', index=False)
 
         report_output_fig = self._safe_plot(df=df, output_written=False)

@@ -93,5 +93,7 @@ class ExploratoryAnalysisParser:
             params["dim_reduction"] = analysis["dim_reduction"]
 
             # todo: Only KmerFrequency and Word2Vec are valid encoders when doing dim reduction. assert this
+            assert isinstance(params["encoder"], (KmerFreqSequenceEncoder, Word2VecEncoder)), \
+                "Only KmerFrequency and Word2Vec are valid encoders when doing dimensionality reduction."
 
         return params
