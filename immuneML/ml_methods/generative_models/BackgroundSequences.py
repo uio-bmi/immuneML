@@ -18,6 +18,7 @@ class BackgroundSequences:
     p_gen: float
     from_default_model: int
     duplicate_count: int
+    chain: str
 
     def get_sequence(self, sequence_type: SequenceType = SequenceType.AMINO_ACID):
         if sequence_type == SequenceType.AMINO_ACID:

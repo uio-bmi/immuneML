@@ -204,16 +204,16 @@ class LigoSimInstruction(Instruction):
         for index, seq1, seq2 in zip(list(range(len(sequences1))), sequences1, sequences2):
             seq1.metadata.cell_id = index
             seq2.metadata.cell_id = index
-            seq1.identifier = f"{seq1.identifier}_{seq1.metadata.chain.value}"
-            seq2.identifier = f"{seq2.identifier}_{seq2.metadata.chain.value}"
+            seq1.sequence_id = f"{seq1.sequence_id}_{seq1.metadata.chain.value}"
+            seq2.sequence_id = f"{seq2.sequence_id}_{seq2.metadata.chain.value}"
             sequences.extend([seq1, seq2])
 
         return Repertoire.build_from_sequence_objects(sequences, path,
                                                       metadata={**repertoire1.metadata, **repertoire2.metadata})
 
     def _pair_sequences(self, sequences1: list, sequences2: list, path: Path = None) -> List[Receptor]:
-        assert len(sequences1) == len(
-            sequences2), f"{LigoSimInstruction.__name__}: could not create paired dataset, the number of sequences in two simulation items did not match."
+        assert len(sequences1) == len(sequences2), (f"{LigoSimInstruction.__name__}: could not create paired dataset, "
+                                                    f"the number of sequences in two simulation items did not match.")
 
         random.shuffle(sequences1)
         random.shuffle(sequences2)

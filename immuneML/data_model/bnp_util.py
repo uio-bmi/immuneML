@@ -25,8 +25,7 @@ def bnp_write_to_file(filename: Path, bnp_object):
 
 def bnp_read_from_file(filename: Path, buffer_type: bnp.io.delimited_buffers.DelimitedBuffer = None, dataclass=None):
     if buffer_type is None:
-        buffer_type = bnp.io.delimited_buffers.get_bufferclass_for_datatype(dataclass, delimiter='\t',
-                                                                            has_header=True)
+        buffer_type = bnp.io.delimited_buffers.get_bufferclass_for_datatype(dataclass, delimiter='\t', has_header=True)
     with bnp.open(str(filename), buffer_type=buffer_type) as file:
         return file.read()  # TODO: fix - throws error when empty file (no lines after header)
 
@@ -98,20 +97,18 @@ def convert_enums_to_str(field_values: dict) -> dict:
 
 
 def make_dynamic_seq_set_dataclass(type_dict: Dict[str, Any]):
-    dc = dataclasses.make_dataclass('DynamicSequenceSet', fields=type_dict.items(),
-                                    namespace={
-                                        'get_row_by_index': lambda self, index: get_row_by_index(self, index),
-                                        'get_single_row_value': lambda self,
-                                                                       attr_name: get_single_row_value(self, attr_name),
+    bnp_dc = bnpdataclass(dataclasses.make_dataclass('DynamicSequenceSet', fields=type_dict.items()))
 
-                                        'to_dict': lambda self: {field: getattr(self, field).tolist()
-                                                                 for field in type_dict.keys()},
-                                        'get_rows_by_indices': lambda self, index1, index2: get_rows_by_indices(self,
-                                                                                                                index1,
-                                                                                                                index2)
-                                    })
+    methods = {'get_row_by_index': lambda self, index: get_row_by_index(self, index),
+               'get_single_row_value': lambda self, attr_name: get_single_row_value(self, attr_name),
+               'to_dict': lambda self: {field: getattr(self, field).tolist() for field in type_dict.keys()},
+               'get_rows_by_indices': lambda self, index1, index2: get_rows_by_indices(self, index1, index2)
+               }
 
-    return bnpdataclass(dc)
+    for method_name, method in methods.items():
+        setattr(bnp_dc, method_name, method)
+
+    return bnp_dc
 
 
 def get_receptor_attributes_for_bnp(receptors, receptor_dc, types) -> dict:
@@ -144,20 +141,24 @@ def make_dynamic_seq_set_from_objs(objs: list):
 
 
 def get_field_type_from_values(values):
+    t = None
     if isinstance(values, np.ndarray):
-        return values.dtype
-    if len(values) == 0:
-        return str
-    if values[0] is not None:
+        t = type(values[0].item())
+    elif len(values) == 0:
+        t = str
+    elif values[0] is not None:
         if issubclass(type(values[0]), Enum):
-            return str
+            t = str
         else:
-            return type(values[0])
-    proper_values = [v for v in values if v is not None]
-    if len(proper_values) > 0:
-        return type(proper_values[0])
+            t = type(values[0])
     else:
-        return str
+        proper_values = [v for v in values if v is not None]
+        if len(proper_values) > 0:
+            t = type(proper_values[0])
+        else:
+            t = str
+
+    return t
 
 
 def get_row_by_index(self, index) -> dict:

@@ -41,3 +41,12 @@ class ReceptorBuilder:
                               for combination in combinations])
 
         return receptors
+
+    @classmethod
+    def build_objects_from_pairs(cls, sequences1: List[ReceptorSequence], sequences2: List[ReceptorSequence]) -> List[Receptor]:
+        receptors = [ReceptorBuilder.build_object({sequences1[ind].metadata.chain.value: sequences1[ind],
+                                                   sequences2[ind].metadata.chain.value: sequences2[ind]},
+                                                  metadata={**sequences1[ind].metadata.custom_params, **sequences2[ind].metadata.custom_params})
+                     for ind in range(len(sequences1))]
+
+        return receptors

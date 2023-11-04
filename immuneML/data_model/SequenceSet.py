@@ -16,6 +16,7 @@ class SequenceSet:
     frame_type: str = None
     duplicate_count: int = None
     sequence_id: str = None
+    chain: str = None
 
     STR_TO_TYPE = {'str': str, 'int': int, 'float': float, 'bool': bool,
                    'AminoAcidEncoding': bnp.encodings.AminoAcidEncoding,

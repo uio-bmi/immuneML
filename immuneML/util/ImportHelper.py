@@ -84,9 +84,9 @@ class ImportHelper:
         try:
             metadata = pd.read_csv(params.metadata_file, sep=",")
         except Exception as e:
-            raise Exception(
-                f"{e}\nAn error occurred while reading in the metadata file {params.metadata_file}. Please see the error log above for "
-                f"more details on this error and the documentation for the expected format of the metadata.")
+            raise Exception(f"{e}\nAn error occurred while reading in the metadata file {params.metadata_file}. Please "
+                            f"see the error log above for more details on this error and the documentation for the "
+                            f"expected format of the metadata.")
 
         ParameterValidator.assert_keys_present(metadata.columns.tolist(), ["filename"], ImportHelper.__name__,
                                                f'{dataset_name}: params: metadata_file')
