@@ -27,7 +27,7 @@ class TestImmuneMLApp(TestCase):
         repertoires, metadata = RepertoireBuilder.build([["AA", "AAAA", "AAAA", "AAA"] for i in range(repertoire_count)], path,
                                                         {"CD": ['yes' if i % 2 == 0 else 'no' for i in range(repertoire_count)],
                                                          "CMV": [True if i % 2 == 1 else False for i in range(repertoire_count)]},
-                                                        [[{"chain": "A" if i % 2 == 0 else "B", "duplicate_count": random.randint(2, 5),
+                                                        [[{"chain": "A" if i % 2 == 0 else "B", "duplicate_count": random.randint(3, 5),
                                                            "region_type": "IMGT_CDR3"}
                                                           for i in range(4)]
                                                          for j in range(repertoire_count)])
