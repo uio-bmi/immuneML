@@ -25,6 +25,7 @@ olga>=1.2.4
 npstructures>=0.2.0
 stitchr
 IMGTgeneDL
+umap-learn
 
 # gen models
 olga
