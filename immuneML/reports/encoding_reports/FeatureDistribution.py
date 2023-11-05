@@ -29,19 +29,19 @@ class FeatureDistribution(FeatureReport):
     When comparing the feature values between two subsets of the data, please use :ref:`FeatureComparison`.
 
 
-    Arguments:
+    Specification arguments:
 
-        color_grouping_label (str): The label that is used to color each bar, at each level of the grouping_label.
+    - color_grouping_label (str): The label that is used to color each bar, at each level of the grouping_label.
 
-        row_grouping_label (str): The label that is used to group bars into different row facets.
+    - row_grouping_label (str): The label that is used to group bars into different row facets.
 
-        column_grouping_label (str): The label that is used to group bars into different column facets.
+    - column_grouping_label (str): The label that is used to group bars into different column facets.
 
-        mode (str): either 'normal', 'sparse' or 'auto' (default)
+    - mode (str): either 'normal', 'sparse' or 'auto' (default)
 
-        x_title (str): x-axis label
+    - x_title (str): x-axis label
 
-        y_title (str): y-axis label
+    - y_title (str): y-axis label
 
 
     YAML specification:

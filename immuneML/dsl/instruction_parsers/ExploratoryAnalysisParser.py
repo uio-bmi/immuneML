@@ -46,7 +46,8 @@ class ExploratoryAnalysisParser:
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> ExploratoryAnalysisInstruction:
         exp_analysis_units = {}
 
-        ParameterValidator.assert_keys(instruction, ["analyses", "type", "number_of_processes"], "ExploratoryAnalysisParser", "ExploratoryAnalysis")
+        ParameterValidator.assert_keys(instruction, ["analyses", "type", "number_of_processes"],
+                                       "ExploratoryAnalysisParser", "ExploratoryAnalysis")
         ParameterValidator.assert_type_and_value(instruction["number_of_processes"], int, ExploratoryAnalysisParser.__name__, "number_of_processes")
 
         for analysis_key, analysis in instruction["analyses"].items():
@@ -54,7 +55,6 @@ class ExploratoryAnalysisParser:
             params = self._prepare_params(analysis, symbol_table, f"{key}/{analysis_key}")
             params["number_of_processes"] = instruction["number_of_processes"]
             exp_analysis_units[analysis_key] = ExploratoryAnalysisUnit(**params)
-
 
         process = ExploratoryAnalysisInstruction(exploratory_analysis_units=exp_analysis_units, name=key)
         return process

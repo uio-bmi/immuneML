@@ -24,5 +24,6 @@ class OutputParser:
     def generate_docs(path: Path):
         output_path = PathBuilder.build(path / "output")
         output_path = output_path / "outputs.rst"
-        with output_path.open( "w") as file:
-            file.writelines(HTMLBuilder.__doc__)
+        with output_path.open("w") as file:
+            file.writelines("\n".join([el.replace('    ', '', 1) if el.startswith('    ') else el for el in
+                                       HTMLBuilder.__doc__.split("\n")]))

@@ -25,29 +25,29 @@ class AtchleyKmerMILClassifier(MLMethod):
     lymphocytes and adjacent healthy tissue. Cancer Res. Published online January 1, 2019:canres.2292.2018. `doi:10.1158/0008-5472.CAN-18-2292
     <https://cancerres.aacrjournals.org/content/79/7/1671>`_ .
 
-    Arguments:
+    Specification arguments:
 
-        iteration_count (int): max number of training iterations
+    - iteration_count (int): max number of training iterations
 
-        threshold (float): loss threshold at which to stop training if reached
+    - threshold (float): loss threshold at which to stop training if reached
 
-        evaluate_at (int): log model performance every 'evaluate_at' iterations and store the model every 'evaluate_at' iterations if early stopping
-        is used
+    - evaluate_at (int): log model performance every 'evaluate_at' iterations and store the model every 'evaluate_at' iterations if early stopping
+      is used
 
-        use_early_stopping (bool): whether to use early stopping
+    - use_early_stopping (bool): whether to use early stopping
 
-        learning_rate (float): learning rate for stochastic gradient descent
+    - learning_rate (float): learning rate for stochastic gradient descent
 
-        random_seed (int): random seed used
+    - random_seed (int): random seed used
 
-        zero_abundance_weight_init (bool): whether to use 0 as initial weight for abundance  term (if not, a random value is sampled from normal
-        distribution with mean 0 and variance 1 / total_number_of_features
+    - zero_abundance_weight_init (bool): whether to use 0 as initial weight for abundance  term (if not, a random value is sampled from normal
+      distribution with mean 0 and variance 1 / total_number_of_features
 
-        number_of_threads: number of threads to be used for training
+    - number_of_threads: number of threads to be used for training
 
-        initialization_count (int): how many times to repeat the fitting procedure from the beginning before choosing the optimal model (trains the model with multiple random initializations)
+    - initialization_count (int): how many times to repeat the fitting procedure from the beginning before choosing the optimal model (trains the model with multiple random initializations)
 
-        pytorch_device_name (str): The name of the pytorch device to use. This name will be passed to torch.device(pytorch_device_name).
+    - pytorch_device_name (str): The name of the pytorch device to use. This name will be passed to torch.device(pytorch_device_name).
 
     YAML specification:
 

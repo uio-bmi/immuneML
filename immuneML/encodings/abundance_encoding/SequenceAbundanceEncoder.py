@@ -38,18 +38,18 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
     For full example of using this encoder, see :ref:`Reproduction of the CMV status predictions study`.
 
-    Arguments:
+    Specification arguments:
 
-        comparison_attributes (list): The attributes to be considered to group receptors into clonotypes. Only the fields specified in
-        comparison_attributes will be considered, all other fields are ignored. Valid comparison value can be any repertoire field name.
+    - comparison_attributes (list): The attributes to be considered to group receptors into clonotypes. Only the fields specified in
+      comparison_attributes will be considered, all other fields are ignored. Valid comparison value can be any repertoire field name.
 
-        p_value_threshold (float): The p value threshold to be used by the statistical test.
+    - p_value_threshold (float): The p value threshold to be used by the statistical test.
 
-        sequence_batch_size (int): The number of sequences in a batch when comparing sequences across repertoires, typically 100s of thousands.
-        This does not affect the results of the encoding, only the speed. The default value is 1.000.000
+    - sequence_batch_size (int): The number of sequences in a batch when comparing sequences across repertoires, typically 100s of thousands.
+      This does not affect the results of the encoding, only the speed. The default value is 1.000.000
 
-        repertoire_batch_size (int): How many repertoires will be loaded at once. This does not affect the result of the encoding, only the speed.
-        This value is a trade-off between the number of repertoires that can fit the RAM at the time and loading time from disk.
+    - repertoire_batch_size (int): How many repertoires will be loaded at once. This does not affect the result of the encoding, only the speed.
+      This value is a trade-off between the number of repertoires that can fit the RAM at the time and loading time from disk.
 
 
     YAML specification:

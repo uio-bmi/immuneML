@@ -26,10 +26,10 @@ class TrainMLModelInstruction(Instruction):
     Class implementing hyperparameter optimization and training and assessing the model through nested cross-validation (CV).
     The process is defined by two loops:
 
-        - the outer loop over defined splits of the dataset for performance assessment
+    - the outer loop over defined splits of the dataset for performance assessment
 
-        - the inner loop over defined hyperparameter space and with cross-validation or train & validation split
-          to choose the best hyperparameters.
+    - the inner loop over defined hyperparameter space and with cross-validation or train & validation split
+      to choose the best hyperparameters.
 
     Optimal model chosen by the inner loop is then retrained on the whole training dataset in the outer loop.
 
@@ -37,35 +37,36 @@ class TrainMLModelInstruction(Instruction):
     consider running the :ref:`MLSettingsPerformance` report as hyperparameter report in the assessment loop.
 
 
-    Arguments:
+    Specification arguments:
 
-        dataset (Dataset): dataset to use for training and assessing the classifier
+    - dataset (Dataset): dataset to use for training and assessing the classifier
 
-        hp_strategy (HPOptimizationStrategy): how to search different hyperparameters; common options include grid search, random search. Valid values are objects of any class inheriting :py:obj:`~immuneML.hyperparameter_optimization.strategy.HPOptimizationStrategy.HPOptimizationStrategy`.
+    - hp_strategy (HPOptimizationStrategy): how to search different hyperparameters; common options include grid search, random search. Valid values are objects of any class inheriting :py:obj:`~immuneML.hyperparameter_optimization.strategy.HPOptimizationStrategy.HPOptimizationStrategy`.
 
-        hp_settings (list): a list of combinations of `preprocessing_sequence`, `encoding` and `ml_method`. `preprocessing_sequence` is optional, while `encoding` and `ml_method` are mandatory. These three options (and their parameters) can be optimized over, choosing the highest performing combination.
+    - hp_settings (list): a list of combinations of `preprocessing_sequence`, `encoding` and `ml_method`. `preprocessing_sequence` is optional, while `encoding` and `ml_method` are mandatory. These three options (and their parameters) can be optimized over, choosing the highest performing combination.
 
-        assessment (SplitConfig): description of the outer loop (for assessment) of nested cross-validation. It describes how to split the data, how many splits to make, what percentage to use for training and what reports to execute on those splits. See :ref:`SplitConfig`.
+    - assessment (SplitConfig): description of the outer loop (for assessment) of nested cross-validation. It describes how to split the data, how many splits to make, what percentage to use for training and what reports to execute on those splits. See :ref:`SplitConfig`.
 
-        selection (SplitConfig): description of the inner loop (for selection) of nested cross-validation. The same as assessment argument, just to be executed in the inner loop. See :ref:`SplitConfig`.
+    - selection (SplitConfig): description of the inner loop (for selection) of nested cross-validation. The same as assessment argument, just to be executed in the inner loop. See :ref:`SplitConfig`.
 
-        metrics (list): a list of metrics to compute for all splits and settings created during the nested cross-validation. These metrics will be computed only for reporting purposes. For choosing the optimal setting, `optimization_metric` will be used.
+    - metrics (list): a list of metrics to compute for all splits and settings created during the nested cross-validation. These metrics will be computed only for reporting purposes. For choosing the optimal setting, `optimization_metric` will be used.
 
-        optimization_metric (Metric): a metric to use for optimization and assessment in the nested cross-validation.
+    - optimization_metric (Metric): a metric to use for optimization and assessment in the nested cross-validation.
 
-        label_configuration (LabelConfiguration): a list of labels for which to train the classifiers. The goal of the nested CV is to find the
-        setting which will have best performance in predicting the given label (e.g., if a subject has experienced an immune event or not).
-        Performance and optimal settings will be reported for each label separately. If a label is binary, instead of specifying only its name, one
-        should explicitly set the name of the positive class as well under parameter `positive_class`. If positive class is not set, one of the label
-        classes will be assumed to be positive.
+    - label_configuration (LabelConfiguration): a list of labels for which to train the classifiers. The goal of the nested CV is to find the
+      setting which will have best performance in predicting the given label (e.g., if a subject has experienced an immune event or not).
+      Performance and optimal settings will be reported for each label separately. If a label is binary, instead of specifying only its name, one
+      should explicitly set the name of the positive class as well under parameter `positive_class`. If positive class is not set, one of the label
+      classes will be assumed to be positive.
 
-        number_of_processes (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
+    - number_of_processes (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
 
-        reports (list): a list of report names to be executed after the nested CV has finished to show the overall performance or some statistic;
-        the reports to be specified here have to be :py:obj:`~immuneML.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport` reports.
+    - reports (list): a list of report names to be executed after the nested CV has finished to show the overall performance or some statistic;
+      the reports to be specified here have to be :py:obj:`~immuneML.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport` reports.
 
-        refit_optimal_model (bool): if the final combination of preprocessing-encoding-ML model should be refitted on the full dataset thus providing
-        the final model to be exported from instruction; alternatively, train combination from one of the assessment folds will be used
+    - refit_optimal_model (bool): if the final combination of preprocessing-encoding-ML model should be refitted on the full dataset thus providing
+      the final model to be exported from instruction; alternatively, train combination from one of the assessment folds will be used
+
 
     YAML specification:
 

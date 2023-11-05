@@ -21,18 +21,24 @@ class ExploratoryAnalysisInstruction(Instruction):
     and a report to be executed on the [encoded] dataset. Each analysis specified under `analyses` is completely independent from all
     others.
 
-    Arguments:
+    Specification arguments:
 
-        analyses (dict): a dictionary of analyses to perform. The keys are the names of different analyses, and the values for each
-        of the analyses are:
+    - analyses (dict): a dictionary of analyses to perform. The keys are the names of different analyses, and the values for each
+      of the analyses are:
 
-        - dataset: dataset on which to perform the exploratory analysis
-        - preprocessing_sequence: which preprocessings to use on the dataset, this item is optional and does not have to be specified.
-        - encoding: how to encode the dataset before running the report, this item is optional and does not have to be specified.
-        - labels: if encoding is specified, the relevant labels must be specified here.
-        - report: which report to run on the dataset. Reports specified here may be of the category :ref:`Data reports` or :ref:`Encoding reports`, depending on whether 'encoding' was specified.
+      - dataset: dataset on which to perform the exploratory analysis
 
-        number_of_processes: (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
+      - preprocessing_sequence: which preprocessings to use on the dataset, this item is optional and does not have to be specified.
+
+      - encoding: how to encode the dataset before running the report, this item is optional and does not have to be specified.
+
+      - labels: if encoding is specified, the relevant labels must be specified here.
+
+      - report: which report to run on the dataset. Reports specified here may be of the category :ref:`Data reports` or :ref:`Encoding reports`, depending on whether 'encoding' was specified.
+
+    - number_of_processes: (int): how many processes should be created at once to speed up the analysis. For personal
+      machines, 4 or 8 is usually a good choice.
+
 
     YAML specification:
 
@@ -53,12 +59,18 @@ class ExploratoryAnalysisInstruction(Instruction):
                     labels: # labels present in the dataset d1 which will be included in the encoded data on which report r2 will be run
                         - celiac # name of the first label as present in the column of dataset's metadata file
                         - CMV # name of the second label as present in the column of dataset's metadata file
+                my_third_analysis: # user-defined name of another analysis
+                    dataset: d1 # dataset to use in the second analysis - can be the same or different from other analyses
+                    encoding: e1 # encoding to apply on the specified dataset (d1)
+                    dim_reduction: umap # or None; which dimensionality reduction method to apply to encoded d1
+                    report: r3 # which report to generate in the third analysis
             number_of_processes: 4 # number of parallel processes to create (could speed up the computation)
     """
 
     def __init__(self, exploratory_analysis_units: dict, name: str = None):
         assert all(isinstance(unit, ExploratoryAnalysisUnit) for unit in exploratory_analysis_units.values()), \
-            "ExploratoryAnalysisInstruction: not all elements passed to init method are instances of ExploratoryAnalysisUnit."
+            ("ExploratoryAnalysisInstruction: not all elements passed to init method are instances of "
+             "ExploratoryAnalysisUnit.")
         self.state = ExploratoryAnalysisState(exploratory_analysis_units, name=name)
         self.name = name
 
@@ -66,12 +78,14 @@ class ExploratoryAnalysisInstruction(Instruction):
         name = self.name if self.name is not None else "exploratory_analysis"
         self.state.result_path = result_path / name
         for index, (key, unit) in enumerate(self.state.exploratory_analysis_units.items()):
-            print_log(f"Started analysis {key} ({index+1}/{len(self.state.exploratory_analysis_units)}).", include_datetime=True)
+            print_log(f"Started analysis {key} ({index+1}/{len(self.state.exploratory_analysis_units)}).",
+                      include_datetime=True)
             path = self.state.result_path / f"analysis_{key}"
             PathBuilder.build(path)
             report_result = self.run_unit(unit, path)
             unit.report_result = report_result
-            print_log(f"Finished analysis {key} ({index+1}/{len(self.state.exploratory_analysis_units)}).\n", include_datetime=True)
+            print_log(f"Finished analysis {key} ({index+1}/{len(self.state.exploratory_analysis_units)}).\n",
+                      include_datetime=True)
         return self.state
 
     def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> ReportResult:

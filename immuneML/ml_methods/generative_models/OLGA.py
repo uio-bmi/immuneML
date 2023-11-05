@@ -41,7 +41,7 @@ class OLGA(GenerativeModel):
 
     - Gene names are as provided in OLGA (either in default models or in the user-specified model files). For simulation, one should use gene names in the same format.
 
-    Arguments:
+    Specification arguments:
 
     - model_path (str): if not default model, this parameter should point to a folder where the four OLGA/IGOR format files are stored (could also be inferred from some experimental data)
 

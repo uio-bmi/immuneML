@@ -19,10 +19,26 @@ from immuneML.util.PathBuilder import PathBuilder
 
 
 class DimensionalityReduction(DataReport):
+    """
+    This report visualizes the data obtained by dimensionality reduction.
+
+    Specification arguments:
+
+    - label (str): name of the label to use for highlighting data points
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        rep1:
+            DimensionalityReduction:
+                label: epitope
+
+    """
 
     @classmethod
     def build_object(cls, **kwargs):
-        #ParameterValidator.assert_sequence_type(kwargs)
         return DimensionalityReduction(**{**kwargs})
 
     def __init__(self, dataset: Union[SequenceDataset] = None, batch_size: int = 1, result_path: Path = None,

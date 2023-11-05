@@ -23,7 +23,7 @@ class Signal:
 
         To use sequence position weights, IMGT positions should be explicitly specified as strings, under quotation marks, to allow for all positions to be properly distinguished.
 
-    Arguments:
+    Specification arguments:
 
     - motifs (list): A list of the motifs associated with this signal, either defined by seed or by position weight matrix. Alternatively, it can be a list of a list of motifs, in which case the motifs in the same sublist (max 2 motifs) have to co-occur in the same sequence
 

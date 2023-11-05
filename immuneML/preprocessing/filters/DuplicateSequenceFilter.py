@@ -20,10 +20,13 @@ class DuplicateSequenceFilter(Filter):
 
     Sequences are considered duplicates if the following fields are identical:
 
-      - amino acid or nucleotide sequence (whichever is specified)
-      - v and j genes (note that the full field including subgroup + gene is used for matching, i.e. V1 and V1-1 are not considered duplicates)
-      - chain
-      - region type
+    - amino acid or nucleotide sequence (whichever is specified)
+
+    - v and j genes (note that the full field including subgroup + gene is used for matching, i.e. V1 and V1-1 are not considered duplicates)
+
+    - chain
+
+    - region type
 
     For all other fields (the non-specified sequence type, custom lists, sequence identifier) only the first occurring
     value is kept.
@@ -31,13 +34,14 @@ class DuplicateSequenceFilter(Filter):
     Note that this means the count value of a sequence with a given sequence identifier might not be the same as before
     removing duplicates, unless count_agg = FIRST is used.
 
-    Arguments:
+    Specification arguments:
 
-        filter_sequence_type (:py:obj:`~immuneML.environment.SequenceType.SequenceType`): Whether the sequences should be collapsed on the nucleotide or amino acid level. Valid options are defined by the SequenceType enum.
+    - filter_sequence_type (:py:obj:`~immuneML.environment.SequenceType.SequenceType`): Whether the sequences should be collapsed on the nucleotide or amino acid level. Valid options are defined by the SequenceType enum.
 
-        batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed)
+    - batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed)
 
-        count_agg (:py:obj:`~immuneML.preprocessing.filters.CountAggregationFunction.CountAggregationFunction`): determines how the sequence counts of duplicate sequences are aggregated. Valid options are defined by the CountAggregationFunction enum.
+    - count_agg (:py:obj:`~immuneML.preprocessing.filters.CountAggregationFunction.CountAggregationFunction`): determines how the sequence counts of duplicate sequences are aggregated. Valid options are defined by the CountAggregationFunction enum.
+
 
     YAML specification:
 
@@ -164,8 +168,8 @@ class DuplicateSequenceFilter(Filter):
         doc = str(DuplicateSequenceFilter.__doc__)
 
         mapping = {
-            "Valid options are defined by the CountAggregationFunction enum.": f"Valid values are: {[e.name for e in CountAggregationFunction]}.",
-            "Valid options are defined by the SequenceType enum.": f"Valid values are: {[e.name for e in SequenceType]}."
+            "Valid options are defined by the CountAggregationFunction enum.": f"Valid values are: {[e.name.lower() for e in CountAggregationFunction]}.",
+            "Valid options are defined by the SequenceType enum.": f"Valid values are: {[e.name.lower() for e in SequenceType]}."
         }
 
         doc = update_docs_per_mapping(doc, mapping)

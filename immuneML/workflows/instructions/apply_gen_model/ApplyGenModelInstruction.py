@@ -11,7 +11,7 @@ class ApplyGenModelState(GenModelState):
 
 class ApplyGenModelInstruction(GenModelInstruction):
     """
-    ApplyGenModel instruction implements applying generative AIRR models on receptor level.
+    ApplyGenModel instruction implements applying generative AIRR models on the sequence level.
 
     This instruction takes as input a trained model which will be used for generating data and the number of
     sequences to be generated. It can also produce reports of the applied model and reports of generated
@@ -19,22 +19,26 @@ class ApplyGenModelInstruction(GenModelInstruction):
 
     To train generative model with immuneML, see TrainGenModel instruction.
 
-    Arguments:
-        method (GenerativeModel): which model to apply
-        gen_examples_count (int): how many examples (sequences, repertoires) to generate from the applied model
-        result_path (Path): path to the directory where the results will be stored
-        name (str): name of the instruction
-        reports (list): list of report ids (defined under definitions/reports) to apply after generating gen_examples_count examples; these can be data reports (to be run on generated examples), ML reports (to be run on the fitted model)
+    Specification arguments:
+
+    - gen_examples_count (int): how many examples (sequences, repertoires) to generate from the applied model
+
+    - reports (list): list of report ids (defined under definitions/reports) to apply after generating
+      gen_examples_count examples; these can be data reports (to be run on generated examples), ML reports (to be run
+      on the fitted model)
+
+    - config_path (str): path to the trained model in zip format (as provided by TrainGenModel instruction)
 
     YAML specification:
-        .. highlight:: yaml
-        .. code-block:: yaml
+
+    .. highlight:: yaml
+    .. code-block:: yaml
 
         my_apply_gen_model_inst: # user-defined instruction name
             type: ApplyGenModel
             gen_examples_count: 100
             method: m1
-            config_path: ./config.zip # path to the trained model in zip format (possibly output of TrainGenModel instruction)
+            config_path: ./config.zip
             reports: [data_rep1, ml_rep2]
 
     """

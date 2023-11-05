@@ -26,23 +26,23 @@ class SimpleLSTM(GenerativeModel):
     Saka, K. et al. (2021). Antibody design using LSTM based deep generative model from phage display library for affinity maturation. Scientific Reports, 11(1), Article 1. https://doi.org/10.1038/s41598-021-85274-7
 
 
-    Arguments:
+    Specification arguments:
 
-        - sequence_type (str): whether the model should work on amino_acid or nucleotide level
+    - sequence_type (str): whether the model should work on amino_acid or nucleotide level
 
-        - hidden_size (int): how many LSTM cells should exist per layer
+    - hidden_size (int): how many LSTM cells should exist per layer
 
-        - num_layers (int): how many hidden LSTM layers should there be
+    - num_layers (int): how many hidden LSTM layers should there be
 
-        - num_epochs (int): for how many epochs to train the model
+    - num_epochs (int): for how many epochs to train the model
 
-        - learning_rate (float): what learning rate to use for optimization
+    - learning_rate (float): what learning rate to use for optimization
 
-        - batch_size (int): how many examples (sequences) to use for training for one batch
+    - batch_size (int): how many examples (sequences) to use for training for one batch
 
-        - embed_size (int): the dimension of the sequence embedding
+    - embed_size (int): the dimension of the sequence embedding
 
-        - temperature (float)
+    - temperature (float)
 
     YAML specification:
 

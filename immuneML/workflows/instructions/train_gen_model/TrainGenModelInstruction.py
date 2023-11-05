@@ -21,17 +21,19 @@ class TrainGenModelInstruction(GenModelInstruction):
 
     To use the generative model previously trained with immuneML, see ApplyGenModel instruction.
 
-    Arguments:
+    Specification arguments:
 
-        dataset: dataset to use for fitting the generative model; it has to be defined under definitions/datasets
+    - dataset: dataset to use for fitting the generative model; it has to be defined under definitions/datasets
 
-        method: which model to fit (defined previously under definitions/ml_methods)
+    - method: which model to fit (defined previously under definitions/ml_methods)
 
-        number_of_processes (int): how many processes to use for fitting the model
+    - number_of_processes (int): how many processes to use for fitting the model
 
-        gen_examples_count (int): how many examples (sequences, repertoires) to generate from the fitted model
+    - gen_examples_count (int): how many examples (sequences, repertoires) to generate from the fitted model
 
-        reports (list): list of report ids (defined under definitions/reports) to apply after fitting a generative model and generating gen_examples_count examples; these can be data reports (to be run on generated examples), ML reports (to be run on the fitted model)
+    - reports (list): list of report ids (defined under definitions/reports) to apply after fitting a generative model
+      and generating gen_examples_count examples; these can be data reports (to be run on generated examples), ML
+      reports (to be run on the fitted model)
 
     YAML specification:
 

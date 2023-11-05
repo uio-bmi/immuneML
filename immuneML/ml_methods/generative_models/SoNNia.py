@@ -29,23 +29,23 @@ class SoNNia(GenerativeModel):
     cell receptor repertoires with soNNia. Proceedings of the National Academy of Sciences, 118(14), e2023141118.
     https://doi.org/10.1073/pnas.2023141118
 
-    Arguments:
+    Specification arguments:
 
-        chain (str)
+    - chain (str)
 
-        batch_size (int)
+    - batch_size (int)
 
-        epochs (int)
+    - epochs (int)
 
-        deep (bool)
+    - deep (bool)
 
-        include_joint_genes (bool)
+    - include_joint_genes (bool)
 
-        n_gen_seqs (int)
+    - n_gen_seqs (int)
 
-        custom_model_path (str)
+    - custom_model_path (str)
 
-        default_model_name (str)
+    - default_model_name (str)
 
     """
 

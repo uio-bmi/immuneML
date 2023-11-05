@@ -39,43 +39,44 @@ class SimpleVAE(GenerativeModel):
     Deep generative models for T cell receptor protein sequences. eLife, 8, e46935. https://doi.org/10.7554/eLife.46935
 
 
-    Arguments:
+    Specification arguments:
 
-        chain (str): which chain the sequence come from, e.g., TRB
+    - chain (str): which chain the sequence come from, e.g., TRB
 
-        beta (float): VAE hyperparameter that balanced the reconstruction loss and latent dimension regularization
+    - beta (float): VAE hyperparameter that balanced the reconstruction loss and latent dimension regularization
 
-        latent_dim (int): latent dimension of the VAE
+    - latent_dim (int): latent dimension of the VAE
 
-        linear_nodes_count (int): in linear layers, how many nodes to use
+    - linear_nodes_count (int): in linear layers, how many nodes to use
 
-        num_epochs (int): how many epochs to use for training
+    - num_epochs (int): how many epochs to use for training
 
-        batch_size (int): how many examples to consider at the same time
+    - batch_size (int): how many examples to consider at the same time
 
-        j_gene_embed_dim (int): dimension of J gene embedding
+    - j_gene_embed_dim (int): dimension of J gene embedding
 
-        v_gene_embed_dim (int): dimension of V gene embedding
+    - v_gene_embed_dim (int): dimension of V gene embedding
 
-        cdr3_embed_dim (int): dimension of the cdr3 embedding
+    - cdr3_embed_dim (int): dimension of the cdr3 embedding
 
-        pretrains (int): how many times to attempt pretraining to initialize the weights and use warm-up for the beta hyperparameter before the main training process
+    - pretrains (int): how many times to attempt pretraining to initialize the weights and use warm-up for the beta hyperparameter before the main training process
 
-        warmup_epochs (int): how many epochs to use for training where beta hyperparameter is linearly increased from 0 up to its max value; this is in addition to num_epochs set above
+    - warmup_epochs (int): how many epochs to use for training where beta hyperparameter is linearly increased from 0 up to its max value; this is in addition to num_epochs set above
 
-        patience (int): number of epochs to wait before the training is stopped when the loss is not improving
+    - patience (int): number of epochs to wait before the training is stopped when the loss is not improving
 
-        iter_count_prob_estimation (int): how many iterations to use to estimate the log probability of the generated sequence (the more iterations, the better the estimated log probability)
+    - iter_count_prob_estimation (int): how many iterations to use to estimate the log probability of the generated sequence (the more iterations, the better the estimated log probability)
 
-        vocab (list): which letters (amino acids) are allowed - this is automatically filled for new models (no need to set)
+    - vocab (list): which letters (amino acids) are allowed - this is automatically filled for new models (no need to set)
 
-        max_cdr3_len (int): what is the maximum cdr3 length - this is automatically filled for new models (no need to set)
+    - max_cdr3_len (int): what is the maximum cdr3 length - this is automatically filled for new models (no need to set)
 
-        unique_v_genes (list): list of allowed V genes (this will be automatically filled from the dataset if not provided here manually)
+    - unique_v_genes (list): list of allowed V genes (this will be automatically filled from the dataset if not provided here manually)
 
-        unique_j_genes (list): list of allowed J genes (this will be automatically filled from the dataset if not provided here manually)
+    - unique_j_genes (list): list of allowed J genes (this will be automatically filled from the dataset if not provided here manually)
 
-        device (str): name of the device where to train the model (e.g., cpu)
+    - device (str): name of the device where to train the model (e.g., cpu)
+
 
     YAML specification:
 

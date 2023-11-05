@@ -24,37 +24,37 @@ class IGoRImport(DataImport):
     ‘High-throughput immune repertoire analysis with IGoR’. Nature Communications, (2018)
     `doi.org/10.1038/s41467-018-02832-w <https://doi.org/10.1038/s41467-018-02832-w>`_.
 
-    Arguments:
+    Specification arguments:
 
-        path (str): For RepertoireDatasets, this is the path to a directory with IGoR files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
+    - path (str): For RepertoireDatasets, this is the path to a directory with IGoR files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
-        is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset. By default, is_repertoire is set to True.
+    - is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset. By default, is_repertoire is set to True.
 
-        metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. Only the IGoR files included under the column 'filename' are imported into the RepertoireDataset. For setting SequenceDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
+    - metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. Only the IGoR files included under the column 'filename' are imported into the RepertoireDataset. For setting SequenceDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
 
-        import_with_stop_codon (bool): Whether sequences with stop codons should be included in the imported sequences. By default, import_with_stop_codon is False.
+    - import_with_stop_codon (bool): Whether sequences with stop codons should be included in the imported sequences. By default, import_with_stop_codon is False.
 
-        import_out_of_frame (bool): Whether out of frame sequences (with value '0' in column is_inframe) should be included in the imported sequences. By default, import_out_of_frame is False.
+    - import_out_of_frame (bool): Whether out of frame sequences (with value '0' in column is_inframe) should be included in the imported sequences. By default, import_out_of_frame is False.
 
-        import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.
+    - import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.
 
-        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.
+    - import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.
 
-        region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as IGoR uses the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
+    - region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as IGoR uses the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
-        column_mapping (dict): A mapping from IGoR column names to immuneML's internal data representation. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the IGoR file, or using alternative column names). Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS. For IGoR, this is by default set to:
+    - column_mapping (dict): A mapping from IGoR column names to immuneML's internal data representation. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the IGoR file, or using alternative column names). Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS. For IGoR, this is by default set to:
 
-            .. indent with spaces
-            .. code-block:: yaml
+        .. indent with spaces
+        .. code-block:: yaml
 
-                nt_CDR3: sequences
-                seq_index: sequence_identifiers
+            nt_CDR3: sequences
+            seq_index: sequence_identifiers
 
-        column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For IGoR format, there is no default column_mapping_synonyms.
+    - column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For IGoR format, there is no default column_mapping_synonyms.
 
-        metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDatasets. This should specify a mapping similar to column_mapping where keys are IGoR column names and values are the names that are internally used in immuneML as metadata fields. These metadata fields can be used as prediction labels for Sequence- and ReceptorDatasets. This parameter can also be used to specify sequence-level metadata columns for RepertoireDatasets, which can be used by reports. To set prediction label metadata for RepertoireDatasets, see metadata_file instead. For IGoR format, there is no default metadata_column_mapping.
+    - metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDatasets. This should specify a mapping similar to column_mapping where keys are IGoR column names and values are the names that are internally used in immuneML as metadata fields. These metadata fields can be used as prediction labels for Sequence- and ReceptorDatasets. This parameter can also be used to specify sequence-level metadata columns for RepertoireDatasets, which can be used by reports. To set prediction label metadata for RepertoireDatasets, see metadata_file instead. For IGoR format, there is no default metadata_column_mapping.
 
-        separator (str): Column separator, for IGoR this is by default ",".
+    - separator (str): Column separator, for IGoR this is by default ",".
 
 
     YAML specification:
