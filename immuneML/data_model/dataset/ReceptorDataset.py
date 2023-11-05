@@ -14,8 +14,8 @@ from immuneML.data_model.receptor.Receptor import Receptor
 
 
 class ReceptorDataset(ElementDataset):
-    """A dataset class for receptor datasets (paired chain). All the functionality is implemented in ElementDataset class, except creating a new
-    dataset and obtaining metadata. """
+    """A dataset class for receptor datasets (paired chain). All the functionality is implemented in ElementDataset
+    class, except creating a new dataset and obtaining metadata. """
 
     @classmethod
     def build_from_objects(cls, receptors: List[Receptor], file_size: int, path: Path, name: str = None,

@@ -60,9 +60,5 @@ def test_dimensionality_reduction():
     }
 
     write_yaml(path / 'specs.yaml', specs)
-
     ImmuneMLApp(path / 'specs.yaml', path / 'output').run()
-
-    write_yaml(path / 'specs.yaml', specs)
-    ImmuneMLApp(path / 'specs.yaml', path / 'output').run()
-    #shutil.rmtree(path)
+    shutil.rmtree(path)

@@ -92,19 +92,25 @@ class RandomDatasetGenerator:
                 random.choices(list(sequence_count_probabilities.keys()), sequence_count_probabilities.values())[0])]
                      for rep in range(repertoire_count)]
 
+        processed_labels, dataset_params = RandomDatasetGenerator._make_labels(labels, repertoire_count)
+
+        repertoires, metadata = RepertoireBuilder.build(sequences=sequences, path=path, labels=processed_labels)
+        dataset = RepertoireDataset(labels=dataset_params, repertoires=repertoires, metadata_file=metadata)
+
+        return dataset
+
+    @staticmethod
+    def _make_labels(labels: dict, element_count: int):
         if labels is not None:
             processed_labels = {
-                label: random.choices(list(labels[label].keys()), labels[label].values(), k=repertoire_count) for label
+                label: random.choices(list(labels[label].keys()), labels[label].values(), k=element_count) for label
                 in labels}
             dataset_params = {label: list(labels[label].keys()) for label in labels}
         else:
             processed_labels = None
             dataset_params = None
 
-        repertoires, metadata = RepertoireBuilder.build(sequences=sequences, path=path, labels=processed_labels)
-        dataset = RepertoireDataset(labels=dataset_params, repertoires=repertoires, metadata_file=metadata)
-
-        return dataset
+        return processed_labels, dataset_params
 
     @staticmethod
     def _check_receptor_dataset_generation_params(receptor_count: int, chain_1_length_probabilities: dict,
@@ -167,7 +173,9 @@ class RandomDatasetGenerator:
                                          for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}})
                      for i in range(receptor_count)]
 
-        return ReceptorDataset.build_from_objects(receptors, 100, path, labels=labels)
+        processed_labels, dataset_params = RandomDatasetGenerator._make_labels(labels, receptor_count)
+
+        return ReceptorDataset.build_from_objects(receptors, 100, path, labels=dataset_params)
 
     @staticmethod
     def _check_sequence_dataset_generation_params(receptor_count: int, length_probabilities: dict, labels: dict,
