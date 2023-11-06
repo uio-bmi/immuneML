@@ -1,11 +1,10 @@
 import warnings
-from collections import Counter
 from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
-import numpy as np
 
+from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
@@ -64,7 +63,7 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         return AminoAcidFrequencyDistribution(**kwargs)
 
-    def __init__(self, dataset: SequenceDataset = None, imgt_positions: bool = None, relative_frequency: bool = None,
+    def __init__(self, dataset: Dataset = None, imgt_positions: bool = None, relative_frequency: bool = None,
                  split_by_label: bool = None, label: str = None,
                  result_path: Path = None, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)

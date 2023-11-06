@@ -96,11 +96,11 @@ class SequenceLengthDistribution(DataReport):
 
         figure = px.bar(df, x="sequence_lengths", y="counts")
         figure.update_layout(xaxis=dict(tickmode='array', tickvals=df["sequence_lengths"]), yaxis=dict(tickmode='array', tickvals=df["counts"]),
-                             title="Sequence length distribution", template="plotly_white")
+                             template="plotly_white")
         figure.update_traces(marker_color=px.colors.diverging.Tealrose[0])
         PathBuilder.build(self.result_path)
 
         file_path = self.result_path / "sequence_length_distribution.html"
         figure.write_html(str(file_path))
-        return ReportOutput(path=file_path, name="sequence length distribution plot")
+        return ReportOutput(path=file_path, name="Sequence length distribution plot")
 
