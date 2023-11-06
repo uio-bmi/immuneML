@@ -167,7 +167,8 @@ class RandomDatasetGenerator:
                                          for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}})
                      for i in range(receptor_count)]
 
-        return ReceptorDataset.build_from_objects(receptors, 100, path, labels=labels)
+        return ReceptorDataset.build_from_objects(receptors, 100, path, labels={label: list(label_dict.keys())
+                                                                                for label, label_dict in labels.items()})
 
     @staticmethod
     def _check_sequence_dataset_generation_params(receptor_count: int, length_probabilities: dict, labels: dict,
