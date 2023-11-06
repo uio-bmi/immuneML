@@ -1,5 +1,6 @@
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.presentation.PresentationFormat import PresentationFormat
+from immuneML.presentation.html.ClusteringHTMLBuilder import ClusteringHTMLBuilder
 from immuneML.presentation.html.DatasetExportHTMLBuilder import DatasetExportHTMLBuilder
 from immuneML.presentation.html.ExploratoryAnalysisHTMLBuilder import ExploratoryAnalysisHTMLBuilder
 from immuneML.presentation.html.FeasibilitySummaryHTMLBuilder import FeasibilitySummaryHTMLBuilder
@@ -9,6 +10,7 @@ from immuneML.presentation.html.MLApplicationHTMLBuilder import MLApplicationHTM
 from immuneML.presentation.html.SubsamplingHTMLBuilder import SubsamplingHTMLBuilder
 from immuneML.presentation.html.GenModelHTMLBuilder import GenModelHTMLBuilder
 from immuneML.simulation.LigoSimState import LigoSimState
+from immuneML.workflows.instructions.clustering.ClusteringInstruction import ClusteringState
 from immuneML.workflows.instructions.dataset_generation.DatasetExportState import DatasetExportState
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisState import ExploratoryAnalysisState
 from immuneML.workflows.instructions.ligo_sim_feasibility.FeasibilitySummaryInstruction import FeasibilitySummaryState
@@ -37,6 +39,8 @@ class PresentationFactory:
             return FeasibilitySummaryHTMLBuilder
         elif isinstance(state, GenModelState) and presentation_format == PresentationFormat.HTML:
             return GenModelHTMLBuilder
+        elif isinstance(state, ClusteringState) and presentation_format == PresentationFormat.HTML:
+            return ClusteringHTMLBuilder
         else:
             raise ValueError(f"PresentationFactory: state and format combination ({type(state).__name__}, {presentation_format.name}) "
                              f"is not supported.")
