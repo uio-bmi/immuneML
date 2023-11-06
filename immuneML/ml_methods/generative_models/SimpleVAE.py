@@ -112,14 +112,14 @@ class SimpleVAE(GenerativeModel):
             assert file.exists(), f"{cls.__name__}: {file} is not a file."
 
         model_overview = read_yaml(model_overview_file)
-        vae = SimpleVAE(**model_overview)
+        vae = SimpleVAE(**{k: v for k, v in model_overview.items() if k != 'type'})
         vae.model = vae.make_new_model(state_dict_file)
 
         return vae
 
     def __init__(self, chain, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim, pretrains,
                  v_gene_embed_dim, cdr3_embed_dim, warmup_epochs, patience, iter_count_prob_estimation, device,
-                 vocab=None, max_cdr3_len=None, unique_v_genes=None, unique_j_genes=None):
+                 vocab=None, max_cdr3_len=None, unique_v_genes=None, unique_j_genes=None, name: str = None):
         super().__init__(chain)
         self.sequence_type = SequenceType.AMINO_ACID
         self.iter_count_prob_estimation = iter_count_prob_estimation
@@ -139,6 +139,7 @@ class SimpleVAE(GenerativeModel):
         self.batch_size = batch_size
         self.device = device
         self.max_cdr3_len, self.unique_v_genes, self.unique_j_genes = max_cdr3_len, unique_v_genes, unique_j_genes
+        self.name = name
         self.model = None
 
         # hard-coded in the original implementation
@@ -352,10 +353,11 @@ class SimpleVAE(GenerativeModel):
     def save_model(self, path: Path) -> Path:
         model_path = PathBuilder.build(path / 'model')
 
+        skip_export_keys = ['model', 'loss_path', 'j_gene_loss_weight', 'v_gene_loss_weight', 'region_type',
+                            'sequence_type', 'vocab_size']
         write_yaml(filename=model_path / 'model_overview.yaml',
-                   yaml_dict={**{k: v for k, v in vars(self).items() if k != 'model'},
-                              **{'type': self.__class__.__name__, 'region_type': self.region_type.name,
-                                 'sequence_type': self.sequence_type.name}})
+                   yaml_dict={**{k: v for k, v in vars(self).items() if k not in skip_export_keys},
+                              **{'type': self.__class__.__name__}})
 
         store_weights(self.model, model_path / 'state_dict.yaml')
 

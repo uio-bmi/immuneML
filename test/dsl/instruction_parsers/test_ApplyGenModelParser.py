@@ -15,9 +15,8 @@ class TestApplyGenModelParser(TestCase):
         instruction = {
             'type': 'some_type',
             'gen_examples_count': 10,
-            'method': 'model_name',
             'reports': ['report_1'],
-            'config_path': 'path/to/config.zip'
+            'ml_config_path': 'path/to/config.zip'
         }
         symbol_table = SymbolTable()
         report1 = MagicMock()
@@ -45,4 +44,4 @@ class TestApplyGenModelParser(TestCase):
         self.assertEqual(result.reports, expected_instruction.reports)
         self.assertEqual(result.state, expected_instruction.state)
 
-        parser._load_model.assert_called_once_with('path/to/config.zip', 'test_instruction', base_model, path)
+        parser._load_model.assert_called_once_with('path/to/config.zip', 'test_instruction', path)

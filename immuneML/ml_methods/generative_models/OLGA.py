@@ -1,4 +1,5 @@
 import os
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -11,6 +12,7 @@ from olga.sequence_generation import SequenceGenerationVJ, SequenceGenerationVDJ
 
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.IO.dataset_import.OLGAImport import OLGAImport
+from immuneML.data_model.bnp_util import read_yaml, write_yaml
 from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
@@ -58,6 +60,7 @@ class OLGA(GenerativeModel):
             default_model_name: humanTRB
 
     """
+
     model_path: Path = None
     default_model_name: str = None
     chain: Chain = None
@@ -106,11 +109,28 @@ class OLGA(GenerativeModel):
 
         return OLGA(**{**kwargs, **{'chain': chain}})
 
+    @classmethod
+    def load_model(cls, path: Path):
+        assert path.exists(), f"{cls.__name__}: {path} does not exist."
+
+        model_overview_file = path / 'model_overview.yaml'
+
+        for file in [model_overview_file]:
+            assert file.exists(), f"{cls.__name__}: {file} is not a file."
+
+        model_overview = read_yaml(model_overview_file)
+        olga = OLGA(**{k: v for k, v in model_overview.items() if k != 'type'})
+        olga._olga_model = olga.load_internal_model(path)
+        return olga
+
     @property
     def is_vdj(self):
         return self.chain in [Chain.BETA, Chain.HEAVY]
 
-    def load_model(self, model_path: Path = None) -> InternalOlgaModel:
+    def fit(self, data, path: Path = None):
+        raise NotImplementedError("Fitting an OLGA model is currently not supported by immuneML.")
+
+    def load_internal_model(self, model_path: Path = None) -> InternalOlgaModel:
         model_path = self.model_path if model_path is None else model_path
         olga_gen_model = load_model.GenerativeModelVDJ() if self.is_vdj else load_model.GenerativeModelVJ()
         olga_gen_model.load_and_process_igor_model(str(model_path / OLGA.MODEL_FILENAMES['marginals']))
@@ -134,7 +154,7 @@ class OLGA(GenerativeModel):
                            compute_p_gen: bool) -> Path:
 
         if not self._olga_model:
-            self._olga_model = self.load_model()
+            self._olga_model = self.load_internal_model()
 
         self._generate_productive_sequences(count, path, seed, self._olga_model, compute_p_gen, sequence_type)
 
@@ -194,14 +214,14 @@ class OLGA(GenerativeModel):
                                          compute_p_gen: bool):
 
         if not self._olga_model:
-            self._olga_model = self.load_model()
+            self._olga_model = self.load_internal_model()
 
         if len(v_genes) > 0 or len(j_genes) > 0:
 
             skewed_model_path = PathBuilder.build(path.parent / "skewed_model/")
             skewed_seqs_path = PathBuilder.build(path.parent) / f"tmp_skewed_model_seqs_{seed}.tsv"
             make_skewed_model_files(v_genes, j_genes, self.model_path, skewed_model_path)
-            skewed_model = self.load_model(skewed_model_path)
+            skewed_model = self.load_internal_model(skewed_model_path)
 
             self._generate_productive_sequences(count=batch_size, path=skewed_seqs_path, seed=seed,
                                                 olga_model=skewed_model,
@@ -224,3 +244,14 @@ class OLGA(GenerativeModel):
     def is_same(self, model) -> bool:
         return type(model) == type(self) and self.chain == model.chain and self.model_path == model.model_path and \
             self.default_model_name == model.default_model_name
+
+    def save_model(self, path: Path) -> Path:
+        PathBuilder.build(path / 'model')
+
+        write_yaml(path / 'model_overview.yaml',
+                   {'type': 'OLGA', 'default_model_name': self.default_model_name, 'chain': self.chain.name,
+                    'region_type': self.region_type.name})
+
+        shutil.copytree(str(self.model_path), str(path / 'model'), dirs_exist_ok=True)
+        return Path(shutil.make_archive(str(path / 'trained_model'), "zip", str(path / 'model'))).absolute()
+
