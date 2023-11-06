@@ -68,15 +68,6 @@ def test_fit_apply_gen_model():
                     }
                 }
             },
-            "ml_methods": {
-                'pwm': {
-                    "PWM": {
-                        'chain': 'beta',
-                        'sequence_type': 'amino_acid',
-                        'region_type': 'IMGT_CDR3'
-                    }
-                }
-            },
             "reports": {
                 "sld_rep": "SequenceLengthDistribution",
                 "aa_freq": "AminoAcidFrequencyDistribution"
@@ -86,9 +77,8 @@ def test_fit_apply_gen_model():
             "inst1": {
                 "type": "ApplyGenModel",
                 "gen_examples_count": 100,
-                "method": "pwm",
                 "reports": ['sld_rep', 'aa_freq'],
-                "config_path": str(generated_model_path / "output/inst1/trained_model/trained_model.zip"),
+                "ml_config_path": str(generated_model_path / "output/inst1/trained_model/trained_model.zip"),
             }
         }
     }

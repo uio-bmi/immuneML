@@ -37,8 +37,7 @@ class ApplyGenModelInstruction(GenModelInstruction):
         my_apply_gen_model_inst: # user-defined instruction name
             type: ApplyGenModel
             gen_examples_count: 100
-            method: m1
-            config_path: ./config.zip
+            ml_config_path: ./config.zip
             reports: [data_rep1, ml_rep2]
 
     """

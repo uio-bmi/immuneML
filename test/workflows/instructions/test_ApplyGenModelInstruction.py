@@ -14,8 +14,7 @@ from immuneML.workflows.instructions.apply_gen_model.ApplyGenModelInstruction im
 
 class TestApplyGenModelInstruction(TestCase):
     def test_run(self):
-        path = EnvironmentSettings.tmp_test_path / "applygenmodelinstruction/"
-        PathBuilder.build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "apply_gen_model_instruction/")
 
         # Create a mock GenerativeModel
         mock_model = Mock()
