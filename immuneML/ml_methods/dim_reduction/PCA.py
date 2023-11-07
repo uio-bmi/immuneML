@@ -1,3 +1,4 @@
+import scipy
 from sklearn.decomposition import PCA as SklearnPCA
 
 from immuneML.data_model.dataset.Dataset import Dataset
@@ -34,4 +35,7 @@ class PCA(DimRedMethod):
         return self.method.transform(dataset.encoded_data.examples)
 
     def fit_transform(self, dataset: Dataset):
-        return self.method.fit_transform(dataset.encoded_data.examples)
+        data = dataset.encoded_data.examples.toarray() if scipy.sparse.issparse(dataset.encoded_data.examples) \
+            else dataset.encoded_data.examples
+
+        return self.method.fit_transform(data)

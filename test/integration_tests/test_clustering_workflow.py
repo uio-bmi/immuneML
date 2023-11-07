@@ -31,7 +31,11 @@ def test_clustering_workflow():
                 'kmer': 'KmerFrequency'
             },
             'ml_methods': {
-                'pca': 'PCA',
+                'pca': {
+                    "PCA": {
+                        'n_components': 2
+                    }
+                },
                 'kmeans2': {
                     'KMeans': {
                         'n_clusters': 2
@@ -58,7 +62,8 @@ def test_clustering_workflow():
                     {'encoding': 'kmer', 'dim_reduction': 'pca', 'method': 'kmeans2'},
                     {'encoding': 'kmer', 'dim_reduction': 'pca', 'method': 'kmeans3'}
                 ],
-                'reports': ['rep1']
+                'reports': ['rep1'],
+                'number_of_processes': 4
             }
         }
     }

@@ -1,3 +1,4 @@
+import copy
 import inspect
 from pathlib import Path
 from typing import List
@@ -13,7 +14,7 @@ from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.reports.Report import Report
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.workflows.instructions.clustering.ClusteringInstruction import ClusteringInstruction
-from immuneML.workflows.instructions.clustering.ClusteringSetting import ClusteringSetting
+from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringSetting
 
 
 class ClusteringParser:
@@ -90,14 +91,14 @@ def make_setting_obj(setting, valid_encodings, valid_clusterings, valid_dim_red,
     if 'dim_reduction' in setting and setting['dim_reduction'] is not None:
         ParameterValidator.assert_in_valid_list(setting['dim_reduction'], valid_dim_red, 'ClusteringParser',
                                                 'dim_reduction')
-        dim_reduction = symbol_table.get(setting['dim_reduction'])
+        dim_reduction = copy.deepcopy(symbol_table.get(setting['dim_reduction']))
         dim_red_params = symbol_table.get_config(setting['dim_reduction'])
         dim_red_name = setting['dim_reduction']
     else:
         dim_reduction, dim_red_params, dim_red_name = None, None, None
 
     encoder = make_encoder_obj(symbol_table, setting['encoding'], instruction['dataset'])
-    method = symbol_table.get(setting['method'])
+    method = copy.deepcopy(symbol_table.get(setting['method']))
 
     return ClusteringSetting(encoder=encoder, encoder_params=symbol_table.get_config(setting['encoding']),
                              encoder_name=setting['encoding'], clustering_method=method,
