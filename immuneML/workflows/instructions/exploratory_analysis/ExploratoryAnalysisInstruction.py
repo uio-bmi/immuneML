@@ -76,10 +76,7 @@ class ExploratoryAnalysisInstruction(Instruction):
     def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> ReportResult:
         unit.dataset = self.preprocess_dataset(unit, result_path / "preprocessed_dataset")
         encoded_dataset = self.encode(unit, result_path / "encoded_dataset")
-        unit.report.dataset = encoded_dataset
-        unit.report.result_path = result_path / "report"
-        unit.report.number_of_processes = unit.number_of_processes
-        report_result = unit.report.generate_report()
+        report_result = self.run_report(unit, encoded_dataset, result_path / "report")
         return report_result
 
     def preprocess_dataset(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> Dataset:
@@ -104,3 +101,14 @@ class ExploratoryAnalysisInstruction(Instruction):
         else:
             encoded_dataset = unit.dataset
         return encoded_dataset
+
+    def run_report(self, unit: ExploratoryAnalysisUnit, encoded_dataset: Dataset, result_path: Path):
+        if unit.report is not None:
+            unit.report.dataset = encoded_dataset
+            unit.report.result_path = result_path
+            unit.report.number_of_processes = unit.number_of_processes
+            report_result = unit.report.generate_report()
+        else:
+            report_result = None
+
+        return report_result
