@@ -53,7 +53,7 @@ class MLApplicationInstruction(Instruction):
     will be added to the predictions table in addition:
 
     .. list-table::
-        :widths: 25 25 25 25
+        :widths: 20 20 20 20 20
         :header-rows: 1
 
         * - example_id
