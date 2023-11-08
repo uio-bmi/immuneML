@@ -67,9 +67,6 @@ class MyTestCase(unittest.TestCase):
             self.assertDictEqual(loaded_specs["instructions"], {"my_dataset_generation_instruction": {
                                                                      "type":"ExploratoryAnalysis",
                                                                      "analyses":{
-                                                                         "dataset_overview":
-                                                                              {"dataset": "dataset",
-                                                                               "report": None},
                                                                          "sequence_length_analysis":
                                                                               {"dataset": "dataset",
                                                                                "report": "sequence_length_report"},
@@ -126,7 +123,7 @@ class MyTestCase(unittest.TestCase):
 
         os.chdir(path)
 
-        yamlbuilder_main(["-r", "VDJdb", "-o", str(path), "-f", "repertoire.yaml", "-m", "metadata.csv", "-i", "True"])
+        yamlbuilder_main(["-r", "VDJdb", "-o", str(path), "-f", "repertoire.yaml", "-m", "metadata.csv", "-i", "True", "-q", "True"])
 
         with open(path / "repertoire.yaml", "r") as file:
             loaded_specs = yaml.load(file, Loader=yaml.FullLoader)
@@ -135,12 +132,14 @@ class MyTestCase(unittest.TestCase):
                 {"path": "./", "metadata_file": "metadata.csv", "is_repertoire": True, "region_type": RegionType.IMGT_CDR3.name,
                  "result_path": "./"}}})
 
+            self.assertDictEqual(loaded_specs["definitions"]["reports"], {"amino_acid_report": "AminoAcidFrequencyDistribution"})
+
             self.assertDictEqual(loaded_specs["instructions"], {"my_dataset_generation_instruction":
                                                                     {"type": "ExploratoryAnalysis",
                                                                      "analyses":
-                                                                         {"dataset_overview":
+                                                                         {"amino_acid_analysis":
                                                                               {"dataset": "dataset",
-                                                                               "report": None}}}})
+                                                                               "report": "amino_acid_report"}}}})
 
         ImmuneMLParser.parse_yaml_file(path / "repertoire.yaml")
 

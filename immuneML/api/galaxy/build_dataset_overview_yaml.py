@@ -27,10 +27,7 @@ def build_specs(args):
         "instructions": {
             "my_dataset_generation_instruction": {
                 "type": "ExploratoryAnalysis",
-                "analyses":{
-                    "dataset_overview":{
-                        "dataset": args.dataset_name,
-                        "report": None}}
+                "analyses": dict()
             }
         }
     }
@@ -52,6 +49,9 @@ def build_specs(args):
 
     if args.amino_acid_report == "True":
         add_report_with_label(specs, args, report_name="AminoAcidFrequencyDistribution", report_key="amino_acid")
+
+    if len(specs["instructions"]["my_dataset_generation_instruction"]["analyses"]) == 0:
+        specs["instructions"]["my_dataset_generation_instruction"]["analyses"] = {"dataset_overview":{"dataset": args.dataset_name, "report": None}}
 
     return specs
 
