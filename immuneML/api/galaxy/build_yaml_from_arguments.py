@@ -138,8 +138,6 @@ def discover_dataset_params():
 
     dataset_path = dataset[0]
 
-    dataset_name = dataset_path.rsplit('.yaml', 1)[0]
-
     return {"path": dataset_path}
 
 

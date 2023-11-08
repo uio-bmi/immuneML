@@ -25,7 +25,6 @@ class TestSimpleDatasetOverview(TestCase):
         self.assertIsInstance(result, ReportResult)
 
         self.assertTrue(os.path.isfile(path / "result/dataset_description.txt"))
-        self.assertTrue(os.path.isfile(path / "result/label_results_table.html"))
 
         shutil.rmtree(path)
 

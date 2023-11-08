@@ -18,7 +18,7 @@ class TestRepertoireClassificationTool(TestCase):
         sequences = [["".join([rn.choice(alphabet) for i in range(20)]) for i in range(100)] for i in range(40)]
 
         repertoires, metadata = RepertoireBuilder.build(sequences, path, subject_ids=[i % 2 for i in range(len(sequences))])
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, name="dataset")
         ImmuneMLExporter.export(dataset, path)
 
     def test_run(self):
