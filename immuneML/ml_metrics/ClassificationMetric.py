@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class Metric(Enum):
+class ClassificationMetric(Enum):
 
     ACCURACY = "accuracy_score"
     BALANCED_ACCURACY = "balanced_accuracy_score"
@@ -17,24 +17,24 @@ class Metric(Enum):
     @staticmethod
     def get_metric(metric_name: str):
         try:
-            return Metric[metric_name.upper()]
+            return ClassificationMetric[metric_name.upper()]
         except KeyError:
-            raise KeyError(f"'{metric_name}' is not a valid performance metric. Valid metrics are: {', '.join([m.name for m in Metric])}")
+            raise KeyError(f"'{metric_name}' is not a valid performance metric. Valid metrics are: {', '.join([m.name for m in ClassificationMetric])}")
 
     @staticmethod
     def get_search_criterion(metric):
-        if metric in [Metric.LOG_LOSS]:
+        if metric in [ClassificationMetric.LOG_LOSS]:
             return min
         else:
             return max
 
     @staticmethod
     def get_sklearn_score_name(metric):
-        if metric in [Metric.LOG_LOSS]:
+        if metric in [ClassificationMetric.LOG_LOSS]:
             return f"neg_{metric.name.lower()}"
         else:
             return metric.name.lower()
 
     @staticmethod
     def get_probability_based_metric_types():
-        return [Metric.LOG_LOSS, Metric.AUC]
+        return [ClassificationMetric.LOG_LOSS, ClassificationMetric.AUC]

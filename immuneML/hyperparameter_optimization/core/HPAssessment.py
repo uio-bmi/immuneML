@@ -11,7 +11,7 @@ from immuneML.hyperparameter_optimization.states.HPAssessmentState import HPAsse
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.classifiers.SklearnMethod import SklearnMethod
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
@@ -116,7 +116,7 @@ class HPAssessment:
             updated_hp_setting.ml_params['model_selection_cv'] = False
             updated_hp_setting.ml_params['model_selection_n_folds'] = -1
 
-            comp_func = Metric.get_search_criterion(state.optimization_metric)
+            comp_func = ClassificationMetric.get_search_criterion(state.optimization_metric)
             hp_items = state.assessment_states[split_index].label_states[label_name].selection_state.hp_items[hp_setting.get_key()]
 
             if len(hp_items) > 1:

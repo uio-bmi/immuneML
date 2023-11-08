@@ -3,16 +3,15 @@ import inspect
 
 from immuneML.ml_metrics import ml_metrics
 from sklearn import metrics as sklearn_metrics
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.ml_methods.util.Util import Util
 from immuneML.environment.Constants import Constants
-
 
 
 class MetricUtil:
 
     @staticmethod
-    def get_metric_fn(metric: Metric):
+    def get_metric_fn(metric: ClassificationMetric):
         if hasattr(ml_metrics, metric.value):
             fn = getattr(ml_metrics, metric.value)
         else:
@@ -20,9 +19,8 @@ class MetricUtil:
 
         return fn
 
-
     @staticmethod
-    def score_for_metric(metric: Metric, predicted_y, predicted_proba_y, true_y, classes):
+    def score_for_metric(metric: ClassificationMetric, predicted_y, predicted_proba_y, true_y, classes):
         '''
         Note: when providing label classes, make sure the 'positive class' is sorted last.
         This sorting should be done automatically when accessing Label.values
@@ -33,7 +31,7 @@ class MetricUtil:
         true_y, predicted_y = Util.binarize_label_classes(true_y=true_y, predicted_y=predicted_y, classes=classes)
 
         try:
-            if metric in Metric.get_probability_based_metric_types():
+            if metric in ClassificationMetric.get_probability_based_metric_types():
                 predictions = predicted_proba_y
                 if predicted_proba_y is None:
                     warnings.warn(

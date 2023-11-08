@@ -21,6 +21,10 @@ class TrainGenModelInstruction(GenModelInstruction):
 
     To use the generative model previously trained with immuneML, see ApplyGenModel instruction.
 
+    .. note::
+
+        This is an experimental feature in version 3.0.0a1.
+
     Specification arguments:
 
     - dataset: dataset to use for fitting the generative model; it has to be defined under definitions/datasets

@@ -19,6 +19,10 @@ class ApplyGenModelInstruction(GenModelInstruction):
 
     To train generative model with immuneML, see TrainGenModel instruction.
 
+    .. note::
+
+        This is an experimental feature in version 3.0.0a1.
+
     Specification arguments:
 
     - gen_examples_count (int): how many examples (sequences, repertoires) to generate from the applied model

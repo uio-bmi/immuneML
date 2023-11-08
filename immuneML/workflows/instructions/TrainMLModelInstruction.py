@@ -12,7 +12,7 @@ from immuneML.hyperparameter_optimization.core.HPAssessment import HPAssessment
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from immuneML.util.Logger import print_log
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -121,7 +121,7 @@ class TrainMLModelInstruction(Instruction):
     """
 
     def __init__(self, dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list, assessment: SplitConfig, selection: SplitConfig,
-                 metrics: set, optimization_metric: Metric, label_configuration: LabelConfiguration, path: Path = None, context: dict = None,
+                 metrics: set, optimization_metric: ClassificationMetric, label_configuration: LabelConfiguration, path: Path = None, context: dict = None,
                  number_of_processes: int = 1, reports: dict = None, name: str = None, refit_optimal_model: bool = False):
         self.state = TrainMLModelState(dataset, hp_strategy, hp_settings, assessment, selection, metrics,
                                        optimization_metric, label_configuration, path, context, number_of_processes,
@@ -216,7 +216,7 @@ class TrainMLModelInstruction(Instruction):
     @staticmethod
     def get_documentation():
         doc = str(TrainMLModelInstruction.__doc__)
-        valid_values = str([metric.name.lower() for metric in Metric])[1:-1].replace("'", "`")
+        valid_values = str([metric.name.lower() for metric in ClassificationMetric])[1:-1].replace("'", "`")
         valid_strategies = str(ReflectionHandler.all_nonabstract_subclass_basic_names(HPOptimizationStrategy, "",
                                                                                       "hyperparameter_optimization/strategy/"))[1:-1]\
             .replace("'", "`")

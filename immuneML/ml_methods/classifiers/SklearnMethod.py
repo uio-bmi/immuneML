@@ -15,7 +15,7 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Label import Label
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.util.Util import Util
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -147,7 +147,7 @@ class SklearnMethod(MLMethod):
                                  optimization_metric: str = "balanced_accuracy"):
 
         model = self._get_ml_model()
-        scoring = Metric.get_sklearn_score_name(Metric.get_metric(optimization_metric.upper()))
+        scoring = ClassificationMetric.get_sklearn_score_name(ClassificationMetric.get_metric(optimization_metric.upper()))
 
         if scoring not in get_scorer_names():
             scoring = "balanced_accuracy"

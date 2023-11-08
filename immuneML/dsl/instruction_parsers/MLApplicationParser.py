@@ -9,7 +9,7 @@ from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.ml_model_application.MLApplicationInstruction import MLApplicationInstruction
@@ -43,7 +43,7 @@ class MLApplicationParser:
 
         if 'metrics' in instruction and instruction['metrics'] is not None:
             ParameterValidator.assert_type_and_value(instruction['metrics'], list, location, f'{key}: metrics')
-            metrics = [Metric.get_metric(metric) for metric in instruction["metrics"]]
+            metrics = [ClassificationMetric.get_metric(metric) for metric in instruction["metrics"]]
         else:
             metrics = []
 

@@ -12,7 +12,7 @@ from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.ml_metrics.MetricUtil import MetricUtil
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
@@ -105,7 +105,7 @@ class MLApplicationInstruction(Instruction):
 
     """
 
-    def __init__(self, dataset: Dataset, label_configuration: LabelConfiguration, hp_setting: HPSetting, metrics: List[Metric], number_of_processes: int, name: str):
+    def __init__(self, dataset: Dataset, label_configuration: LabelConfiguration, hp_setting: HPSetting, metrics: List[ClassificationMetric], number_of_processes: int, name: str):
 
         self.state = MLApplicationState(dataset=dataset, hp_setting=hp_setting, label_config=label_configuration, metrics=metrics, pool_size=number_of_processes, name=name)
 
@@ -192,7 +192,7 @@ class MLApplicationInstruction(Instruction):
     @staticmethod
     def get_documentation():
         doc = str(MLApplicationInstruction.__doc__)
-        valid_metrics = str([metric.name.lower() for metric in Metric])[1:-1].replace("'", "`")
+        valid_metrics = str([metric.name.lower() for metric in ClassificationMetric])[1:-1].replace("'", "`")
 
         mapping = {
             "a list of metrics": f"a list of metrics ({valid_metrics})",

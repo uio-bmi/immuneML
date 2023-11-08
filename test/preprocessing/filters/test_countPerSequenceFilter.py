@@ -12,7 +12,6 @@ from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
-@pytest.mark.skip(reason='bionumpy fails if no seqs in rep files')
 def test_count_per_seq_filter():
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "count_per_seq_filter/")
 

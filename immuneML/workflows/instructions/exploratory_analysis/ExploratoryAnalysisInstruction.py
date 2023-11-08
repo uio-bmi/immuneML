@@ -32,7 +32,9 @@ class ExploratoryAnalysisInstruction(Instruction):
 
       - encoding: how to encode the dataset before running the report, this item is optional and does not have to be specified.
 
-      - labels: if encoding is specified, the relevant labels must be specified here.
+      - labels: if encoding is specified, the relevant labels should be specified here.
+
+      - dim_reduction: which dimensionality reduction to apply; this is an experimental feature in version 3.0.0a1
 
       - report: which report to run on the dataset. Reports specified here may be of the category :ref:`Data reports` or :ref:`Encoding reports`, depending on whether 'encoding' was specified.
 

@@ -15,7 +15,6 @@ from immuneML.preprocessing.filters.DuplicateSequenceFilter import DuplicateSequ
 from immuneML.util.PathBuilder import PathBuilder
 
 
-@pytest.mark.skip(reason='how does bionumpy support filtering of duplicates?')
 def test_duplicate_seq_filter():
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "duplicate_sequence_filter/")
 
@@ -23,7 +22,7 @@ def test_duplicate_seq_filter():
 
     dataset = RepertoireDataset(
         repertoires=[Repertoire.build(sequence_aa=["AAA", "AAA", "CCC", "AAA", "CCC", "CCC", "CCC"],
-                                      sequence=["AAAAA", "AAAAA", "AACCC", "AAAAA", "AACCC", "AACCC", "AATTT"],
+                                      sequence=["AAAAA", "CCAAA", "AACCC", "AAAAA", "AACCC", "AACCC", "AATTT"],
                                       v_call=["v1", "v1", "v1", "v1", "v1", "v1", "v1"],
                                       j_call=["j1", "j1", "j1", "j1", "j1", "j1", "j1"],
                                       chain=[Chain.ALPHA, Chain.ALPHA, Chain.ALPHA, Chain.ALPHA, Chain.ALPHA,
@@ -42,14 +41,15 @@ def test_duplicate_seq_filter():
 
     reduced_repertoire = dupfilter.process_dataset(dataset=dataset, result_path=path).repertoires[0]
 
-    attr = reduced_repertoire.get_attributes(["sequence_id", "sequence_aa", "sequence", "duplicate_count", "chain"])
+    attr = reduced_repertoire.get_attributes(["sequence_id", "sequence_aa", "sequence", "duplicate_count", "chain"],
+                                             as_list=True)
 
     assert 3 == len(reduced_repertoire.get_sequence_identifiers())
-    assert ["AAA", "CCC", "CCC"] == list(attr["sequence_aa"])
-    assert ["AAAAA", "AACCC", "AATTT"] == list(attr["sequence"])
-    assert [35, 50, 40] == list(attr["duplicate_count"])
-    assert [1, 3, 7] == list(attr["sequence_id"])
-    assert ['ALPHA', 'ALPHA', 'BETA'] == list(attr["chain"])
+    assert ["AAA", "CCC", "CCC"] == attr["sequence_aa"]
+    assert ["AAAAA", "AACCC", "AATTT"] == attr["sequence"]
+    assert [35, 50, 40] == attr["duplicate_count"]
+    assert ['1', '3', '7'] == attr["sequence_id"]
+    assert ['ALPHA', 'ALPHA', 'BETA'] == attr["chain"]
 
     # collapse by nucleotides & use min counts
     dupfilter = DuplicateSequenceFilter(filter_sequence_type=SequenceType.NUCLEOTIDE,
@@ -57,12 +57,12 @@ def test_duplicate_seq_filter():
 
     reduced_repertoire = dupfilter.process_dataset(dataset=dataset, result_path=path).repertoires[0]
 
-    attr = reduced_repertoire.get_attributes(["sequence_id", "sequence_aa", "sequence", "duplicate_count"])
+    attr = reduced_repertoire.get_attributes(["sequence_id", "sequence_aa", "sequence", "duplicate_count"], as_list=True)
 
     assert 4 == len(reduced_repertoire.get_sequence_identifiers())
-    assert [1, 2, 3, 7] == list(attr["sequence_id"])
-    assert ["AAA", "AAA", "CCC", "CCC"] == list(attr["sequence_aa"])
-    assert ["AAAAA", "AAAAA", "AACCC", "AATTT"] == list(attr["sequence"])
-    assert [5, 20, 20, 40] == list(attr["duplicate_count"])
+    assert ['1', '2', '3', '7'] == attr["sequence_id"]
+    assert ["AAA", "AAA", "CCC", "CCC"] == attr["sequence_aa"]
+    assert ["AAAAA", "CCAAA", "AACCC", "AATTT"] == attr["sequence"]
+    assert [5, 20, 20, 40] == attr["duplicate_count"]
 
     shutil.rmtree(path)

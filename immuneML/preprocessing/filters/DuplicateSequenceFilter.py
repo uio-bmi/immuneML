@@ -2,7 +2,11 @@ import copy
 from dataclasses import fields as get_fields
 from multiprocessing.pool import Pool
 from pathlib import Path
+from uuid import uuid4
 
+import pandas as pd
+
+from immuneML.data_model.bnp_util import write_yaml
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.repertoire.Repertoire import Repertoire
@@ -132,8 +136,9 @@ class DuplicateSequenceFilter(Filter):
         return agg_dict
 
     def _process_repertoire(self, repertoire: Repertoire) -> Repertoire:
-        data = repertoire.load_bnp_data()
-        columns = [field.name for field in get_fields(data)]
+        data = repertoire.load_bnp_data().topandas()
+        data['duplicate_count'] = [el if el != -1 else pd.NA for el in data['duplicate_count']]
+        columns = data.columns
 
         groupby_fields = self._prepare_group_by_field(columns)
         custom_lists = list(set(columns) - set(Repertoire.FIELDS))
@@ -145,23 +150,14 @@ class DuplicateSequenceFilter(Filter):
         else:
             data["chain"] = None
 
-        no_duplicates = data.groupby(groupby_fields).agg(agg_dict).reset_index()
+        no_duplicates = data.groupby(groupby_fields, sort=False).agg(agg_dict).reset_index()
 
-        processed_repertoire = Repertoire.build(sequence_aa=list(no_duplicates["sequence_aa"]) if "sequence_aa" in no_duplicates.columns else None,
-                                                sequence=list(no_duplicates["sequence"]) if "sequence" in no_duplicates.columns else None,
-                                                v_call=list(no_duplicates["v_call"]) if "v_call" in no_duplicates.columns else None,
-                                                j_call=list(no_duplicates["j_call"]) if 'j_call' in no_duplicates.columns else None,
-                                                chain=[Chain.get_chain(key) for key in
-                                                        list(no_duplicates["chain"])] if "chain" in no_duplicates.columns else None,
-                                                duplicate_count=list(no_duplicates["duplicate_count"]) if "duplicate_count" in no_duplicates else None,
-                                                region_type=list(no_duplicates["region_type"]) if "region_type" in no_duplicates else None,
-                                                custom_lists={key: list(no_duplicates[key]) for key in custom_lists},
-                                                sequence_id=list(no_duplicates["sequence_id"]),
-                                                metadata=copy.deepcopy(repertoire.metadata),
-                                                path=self.result_path,
-                                                filename_base=f"{repertoire.data_filename.stem}_filtered")
+        no_duplicates.to_csv(f"{self.result_path}/{repertoire.data_filename.stem}_filtered.tsv", sep='\t', index=False)
+        write_yaml(Path(f"{self.result_path}/{repertoire.metadata_filename.stem}_filtered.yaml"), repertoire.metadata)
 
-        return processed_repertoire
+        return Repertoire(Path(f"{self.result_path}/{repertoire.data_filename.stem}_filtered.tsv"),
+                          Path(f"{self.result_path}/{repertoire.metadata_filename.stem}_filtered.yaml"),
+                          str(uuid4().hex))
 
     @staticmethod
     def get_documentation():

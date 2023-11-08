@@ -9,6 +9,7 @@ import sklearn
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.ml_metrics.ClusteringMetric import is_internal, is_external
 from immuneML.reports.Report import Report
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.clustering_reports.ClusteringReport import ClusteringReport
@@ -40,6 +41,10 @@ class ClusteringInstruction(Instruction):
     Clustering instruction fits clustering methods to the provided encoded dataset and compares the combinations of
     clustering method with its hyperparameters, and encodings across a pre-defined set of metrics. Finally, it
     provides options to include a set of reports to visualize the results.
+
+    .. note::
+
+        This is an experimental feature in version 3.0.0a1.
 
     Specification arguments:
 
@@ -124,30 +129,40 @@ class ClusteringInstruction(Instruction):
         predictions = cl_setting.clustering_method.predict(dataset)
         predictions_df[f'predictions_{cl_setting.get_key()}'] = predictions
 
-        performances = self._evaluate_clustering(predictions_df, cl_setting.get_key())
+        features = dataset.encoded_data.examples if cl_setting.dim_reduction_method is None \
+            else dataset.encoded_data.dimensionality_reduced_data
+        ext_performances, int_performances = self._evaluate_clustering(predictions_df, cl_setting.get_key(), features)
 
         cl_item = ClusteringItem(cl_setting=cl_setting, dataset=dataset, predictions=predictions,
-                                 performance=performances)
+                                 performance=None)
 
-        performances.to_csv(str(cl_setting_path / 'performances.csv'), index=False)
+        # performances.to_csv(str(cl_setting_path / 'performances.csv'), index=False)
         self._run_reports(cl_item)
 
         cl_item.dataset.encoded_data = None
 
         return cl_item, predictions_df
 
-    def _evaluate_clustering(self, predictions: pd.DataFrame, cl_setting_name: str) -> pd.DataFrame:
+    def _evaluate_clustering(self, predictions: pd.DataFrame, cl_setting_name: str, features) \
+            -> Tuple[pd.DataFrame, pd.DataFrame]:
         if self.state.label_config is not None and self.state.label_config.get_label_count() > 0:
 
-            performances = {label: {} for label in self.state.label_config.get_labels_by_name()}
+            external_performances = {label: {} for label in self.state.label_config.get_labels_by_name()}
+            internal_performances = {}
 
-            for metric in self.state.metrics:
+            for metric in [m for m in self.state.metrics if is_internal(m)]:
+                metric_fn = getattr(sklearn.metrics, metric)
+                internal_performances[metric] = metric_fn(features, predictions[f'predictions_{cl_setting_name}'].values)
+
+            for metric in [m for m in self.state.metrics if is_external(m)]:
                 metric_fn = getattr(sklearn.metrics, metric)
                 for label in self.state.label_config.get_labels_by_name():
-                    performances[label][metric] = metric_fn(predictions[label].values,
-                                                            predictions[f'predictions_{cl_setting_name}'].values)
+                    external_performances[label][metric] = metric_fn(predictions[label].values,
+                                                                     predictions[
+                                                                         f'predictions_{cl_setting_name}'].values)
 
-            return pd.DataFrame(performances).reset_index().rename(columns={'index': 'metric'})
+            return (pd.DataFrame(external_performances).reset_index().rename(columns={'index': 'metric'}),
+                    pd.DataFrame(internal_performances))
 
     def _run_clustering_reports(self):
         report_path = PathBuilder.build(self.state.result_path / f'reports/')
