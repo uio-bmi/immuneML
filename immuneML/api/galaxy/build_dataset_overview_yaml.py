@@ -13,7 +13,7 @@ def add_report_with_label(specs, args, report_name, report_key):
     if args.label_name != "":
         specs["definitions"]["reports"][f"{report_key}_report"] = {report_name: {"label": args.label_name}}
     else:
-        specs["definitions"]["reports"][f"{report_key}_report"] = "VJGeneDistribution"
+        specs["definitions"]["reports"][f"{report_key}_report"] = report_name
 
     specs["instructions"]["my_dataset_generation_instruction"]["analyses"][f"{report_key}_analysis"] = {
         "dataset": args.dataset_name, "report": f"{report_key}_report"}
@@ -61,10 +61,10 @@ def parse_commandline_arguments(args):
     parser.add_argument("-x", "--existing_dataset", choices=["True", "False"], default="False", help="Whether to use an already existing dataset from the current working directory (use the 'dataset_name' parameter to pass the name).")
     parser.add_argument("-d", "--dataset_name", default="dataset", help="The name of the dataset to import/export.")
 
-    parser.add_argument("-r", "--format", required=True, help="The format of the repertoire/receptor dataset")
+    parser.add_argument("-r", "--format", help="The format of the repertoire/receptor dataset")
     parser.add_argument("-m", "--metadata_file", default="",
                         help="The metadata file when using a repertoire dataset. When using a receptor dataset, you may supply an empty string.")
-    parser.add_argument("-i", "--is_repertoire", choices=["True", "False"], required=True, help="Whether to import a RepertoireDataset")
+    parser.add_argument("-i", "--is_repertoire", choices=["True", "False"], help="Whether to import a RepertoireDataset")
     parser.add_argument("-p", "--paired", choices=["True", "False"], default="False",
                         help="When the data is not repertoire data (metadata file = ''), this specifies whether the data is paired (ReceptorDataset) or unpaired (SequenceDataset)")
     parser.add_argument("-c", "--receptor_chains", choices=["TRA_TRB", "TRG_TRD", "IGH_IGL", "IGH_IGK"], default="TRA_TRB",
