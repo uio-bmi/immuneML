@@ -33,19 +33,20 @@ class TCRdistMotifDiscovery(MLReport):
     `doi:10.1101/2020.12.24.424260 <https://www.biorxiv.org/content/10.1101/2020.12.24.424260v1>`_
 
 
-    Arguments:
+    Specification arguments:
 
-        positive_class_name (str): the class value (e.g., epitope) used to select only the receptors that are specific to the given epitope so that
-        only those sequences are used to infer motifs; the reference receptors as required by TCRdist will be the ones from the dataset that have
-        different or no epitope specified in their metadata; if the labels are available only on the epitope level (e.g., label is "AVFDRKSDAK" and
-        classes are True and False), then here it should be specified that only the receptors with value "True" for label "AVFDRKSDAK" should be used;
-        there is no default value for this argument
+    - positive_class_name (str): the class value (e.g., epitope) used to select only the receptors that are specific to the given epitope so that
+      only those sequences are used to infer motifs; the reference receptors as required by TCRdist will be the ones from the dataset that have
+      different or no epitope specified in their metadata; if the labels are available only on the epitope level (e.g., label is "AVFDRKSDAK" and
+      classes are True and False), then here it should be specified that only the receptors with value "True" for label "AVFDRKSDAK" should be used;
+      there is no default value for this argument
 
-        cores (int): number of processes to use for the computation of the distance and motifs
+    - cores (int): number of processes to use for the computation of the distance and motifs
 
-        min_cluster_size (int): the minimum size of the cluster to discover the motifs for
+    - min_cluster_size (int): the minimum size of the cluster to discover the motifs for
 
-        use_reference_sequences (bool): when showing motifs, this parameter defines if reference sequences should be provided as well as a background
+    - use_reference_sequences (bool): when showing motifs, this parameter defines if reference sequences should be provided as well as a background
+
 
     YAML specification:
 

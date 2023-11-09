@@ -20,8 +20,9 @@ class RepertoireClonotypeSummary(DataReport):
     """
     Shows the number of distinct clonotypes per repertoire in a given dataset as a bar plot.
 
-    Arguments:
-        color_by_label (str): name of the label to use to color the plot, e.g., could be disease label, or None
+    Specification arguments:
+
+    - color_by_label (str): name of the label to use to color the plot, e.g., could be disease label, or None
 
     YAML specification:
 

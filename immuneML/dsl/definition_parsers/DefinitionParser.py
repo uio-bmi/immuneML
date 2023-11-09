@@ -15,6 +15,7 @@ from immuneML.dsl.import_parsers.ImportParser import ImportParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
+from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -43,8 +44,10 @@ class DefinitionParser:
 
         specs_defs = {}
 
-        for parser in [MotifParser, SignalParser, SimulationParser, PreprocessingParser, EncodingParser, MLParser, ReportParser, ImportParser]:
-            symbol_table, new_specs = DefinitionParser._call_if_exists(parser.keyword, parser.parse, specs, symbol_table, result_path)
+        for parser in [MotifParser, SignalParser, SimulationParser, PreprocessingParser, EncodingParser, MLParser,
+                       ReportParser, ImportParser]:
+            symbol_table, new_specs = DefinitionParser._call_if_exists(parser.keyword, parser.parse, specs,
+                                                                       symbol_table, result_path)
             specs_defs[parser.keyword] = new_specs
 
         return DefinitionParserOutput(symbol_table=symbol_table, specification=workflow_specification), specs_defs
@@ -67,7 +70,6 @@ class DefinitionParser:
         DefinitionParser.make_encodings_docs(def_path)
         DefinitionParser.make_reports_docs(def_path)
         DefinitionParser.make_ml_methods_docs(def_path)
-        DefinitionParser.make_gen_methods_docs(def_path)
         DefinitionParser.make_preprocessing_docs(def_path)
 
     @staticmethod
@@ -76,7 +78,8 @@ class DefinitionParser:
                                DocumentationFormat(LigoPWM, "PWM", DocumentationFormat.LEVELS[1]),
                                DocumentationFormat(Signal, Signal.__name__, DocumentationFormat.LEVELS[1]),
                                DocumentationFormat(SimConfig, "Simulation config", DocumentationFormat.LEVELS[1]),
-                               DocumentationFormat(SimConfigItem, "Simulation config item", DocumentationFormat.LEVELS[1])]
+                               DocumentationFormat(SimConfigItem, "Simulation config item",
+                                                   DocumentationFormat.LEVELS[1])]
 
         file_path = path / "simulation.rst"
         with file_path.open("w") as file:
@@ -98,9 +101,6 @@ class DefinitionParser:
         filename = "reports.rst"
         file_path = path / filename
 
-        with file_path.open("w") as file:
-            pass
-
         for report_type_class in [DataReport, EncodingReport, MLReport, TrainMLModelReport, MultiDatasetReport]:
             with file_path.open("a") as file:
                 doc_format = DocumentationFormat(cls=report_type_class,
@@ -115,14 +115,24 @@ class DefinitionParser:
 
     @staticmethod
     def make_ml_methods_docs(path: Path):
-        classes = ReflectionHandler.all_nonabstract_subclasses(MLMethod, "", "ml_methods/classifiers/")
-        make_docs(path, classes, "ml_methods.rst", "")
+        filename = 'ml_methods.rst'
+        file_path = path / filename
 
-    @staticmethod
-    def make_gen_methods_docs(path: Path):
-        classes = ReflectionHandler.all_nonabstract_subclasses(GenerativeModel, "", "ml_methods/generative_models/")
-        make_docs(path, classes, "generative_methods.rst", "")
+        method_mapping = [{'method_type': MLMethod, 'subdir': 'classifiers', 'title': 'Classifiers'},
+                          {'method_type': GenerativeModel, 'subdir': 'generative_models', 'title': 'Generative models'},
+                          {'method_type': DimRedMethod, 'subdir': 'dim_reduction',
+                           'title': 'Dimensionality reduction methods'}]
 
+        for method in method_mapping:
+            with file_path.open('a') as file:
+                doc_format = DocumentationFormat(cls=method['method_type'],
+                                                 cls_name=f"**{method['title']}**",
+                                                 level_heading=DocumentationFormat.LEVELS[1])
+                write_class_docs(doc_format, file)
+
+            classes = ReflectionHandler.all_nonabstract_subclasses(method['method_type'], "",
+                                                                   f"ml_methods/{method['subdir']}/")
+            make_docs(path, classes, filename, "", "a")
 
     @staticmethod
     def make_preprocessing_docs(path: Path):

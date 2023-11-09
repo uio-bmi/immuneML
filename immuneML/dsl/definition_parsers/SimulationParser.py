@@ -214,8 +214,11 @@ def _parse_generative_model(simulation_item: dict, location: str):
     ParameterValidator.assert_keys_present(simulation_item['generative_model'].keys(), ['type'], location,
                                            'generative_model')
 
-    gen_model_classes = ReflectionHandler.all_nonabstract_subclass_basic_names(GenerativeModel, "",
-                                                                               "ml_methods/generative_models/")
+    # gen_model_classes = ReflectionHandler.all_nonabstract_subclass_basic_names(GenerativeModel, "",
+    #                                                                            "ml_methods/generative_models/")
+
+    gen_model_classes = ['OLGA', 'ExperimentalImport']  # TODO: allow other gen models to be used with Ligo as well
+
     ParameterValidator.assert_in_valid_list(simulation_item['generative_model']['type'], gen_model_classes, location,
                                             "generative_model:type")
 

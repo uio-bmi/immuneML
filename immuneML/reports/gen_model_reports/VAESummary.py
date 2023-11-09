@@ -45,8 +45,6 @@ class VAESummary(GenModelReport):
     """
     @classmethod
     def build_object(cls, **kwargs):
-        print("Entering vae summary build obj!")
-
         name = kwargs["name"] if "name" in kwargs else "VAESummary"
 
         ParameterValidator.assert_keys_present(list(kwargs.keys()), ['dim_dist_cols', 'dim_dist_rows'],

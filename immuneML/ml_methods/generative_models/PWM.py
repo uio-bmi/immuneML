@@ -22,13 +22,14 @@ class PWM(GenerativeModel):
     This is a baseline implementation of a positional weight matrix. It is estimated from a set of sequences for each
     of the different lengths that appear in the dataset.
 
-    Arguments:
+    Specification arguments:
 
-        chain (str): which chain is generated (for now, it is only assigned to the generated sequences) # TODO: fix
+    - chain (str): which chain is generated (for now, it is only assigned to the generated sequences) # TODO: fix
 
-        sequence_type (str): amino_acid or nucleotide
+    - sequence_type (str): amino_acid or nucleotide
 
-        region_type (str): which region type to use (e.g., IMGT_CDR3), this is only assigned to the generated sequences; # TODO: fix
+    - region_type (str): which region type to use (e.g., IMGT_CDR3), this is only assigned to the generated sequences; # TODO: fix
+
 
     YAML specification:
 
@@ -36,10 +37,10 @@ class PWM(GenerativeModel):
     .. code-block:: yaml
 
         my_pwm:
-            PWM:
-                chain: beta
-                sequence_type: amino_acid
-                region_type: IMGT_CDR3
+          PWM:
+            chain: beta
+            sequence_type: amino_acid
+            region_type: IMGT_CDR3
 
     """
 

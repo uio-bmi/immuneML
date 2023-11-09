@@ -32,31 +32,30 @@ class AtchleyKmerEncoder(DatasetEncoder):
 
     Note that sequences in the repertoire with length shorter than skip_first_n_aa + skip_last_n_aa + k will not be encoded.
 
-    Arguments:
+    Specification arguments:
 
-        k (int): k-mer length
+    - k (int): k-mer length
 
-        skip_first_n_aa (int): number of amino acids to remove from the beginning of the receptor sequence
+    - skip_first_n_aa (int): number of amino acids to remove from the beginning of the receptor sequence
 
-        skip_last_n_aa (int): number of amino acids to remove from the end of the receptor sequence
+    - skip_last_n_aa (int): number of amino acids to remove from the end of the receptor sequence
 
-        abundance: how to compute abundance term for k-mers
+    - abundance: how to compute abundance term for k-mers
 
-        normalize_all_features (bool): when normalizing features to have 0 mean and unit variance, this parameter indicates if the abundance
-        feature should be included in the normalization
+    - normalize_all_features (bool): when normalizing features to have 0 mean and unit variance, this parameter indicates if the abundance feature should be included in the normalization
 
     YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
 
-            my_encoder:
-                AtchleyKmer:
-                    k: 4
-                    skip_first_n_aa: 3
-                    skip_last_n_aa: 3
-                    abundance: RELATIVE_ABUNDANCE
-                    normalize_all_features: False
+        my_encoder:
+            AtchleyKmer:
+                k: 4
+                skip_first_n_aa: 3
+                skip_last_n_aa: 3
+                abundance: RELATIVE_ABUNDANCE
+                normalize_all_features: False
 
     """
 

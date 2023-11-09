@@ -9,7 +9,7 @@ from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.reports.ml_reports.MLReport import MLReport
 from immuneML.util.Logger import print_log
@@ -29,7 +29,7 @@ class MLProcess:
     It performs the task for a given label configuration, and given list of metrics (used only in the assessment step).
     """
 
-    def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label: Label, metrics: set, optimization_metric: Metric,
+    def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label: Label, metrics: set, optimization_metric: ClassificationMetric,
                  path: Path, ml_reports: List[MLReport] = None, encoding_reports: list = None, data_reports: list = None, number_of_processes: int = 2,
                  label_config: LabelConfiguration = None, report_context: dict = None, hp_setting: HPSetting = None):
         self.train_dataset = train_dataset
@@ -44,7 +44,7 @@ class MLProcess:
         self.test_predictions_path = path / "test_predictions.csv" if path is not None else None
         self.report_path = PathBuilder.build(path / "reports") if path is not None else None
         self.number_of_processes = number_of_processes
-        assert all([isinstance(metric, Metric) for metric in metrics]), \
+        assert all([isinstance(metric, ClassificationMetric) for metric in metrics]), \
             "MLProcess: metrics are not set to be an instance of Metric."
         self.metrics = metrics
         self.optimization_metric = optimization_metric

@@ -43,14 +43,14 @@ class FeasibilitySummaryState:
 
 class FeasibilitySummaryInstruction(Instruction):
     """
-    FeasibilitySummaryInstruction instruction creates a small synthetic dataset and reports summary metrics to show if the simulation with the given
+    FeasibilitySummary instruction creates a small synthetic dataset and reports summary metrics to show if the simulation with the given
     parameters is feasible. The input parameters to this analysis are the name of the simulation
     (the same that can be used with LigoSim instruction later if feasibility analysis looks acceptable), and the number of sequences to
     simulate for estimating the feasibility.
 
     The feasibility analysis is performed for each generative model separately as these could differ in the analyses that will be reported.
 
-    Arguments:
+    Specification arguments:
 
     - simulation (str): a name of a simulation object containing a list of SimConfigItem as specified under definitions key; defines how to combine signals with simulated data; specified under definitions
 

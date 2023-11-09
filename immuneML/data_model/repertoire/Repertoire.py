@@ -216,20 +216,19 @@ class Repertoire(DatasetItem):
             self.load_bnp_data()
         return self.element_count
 
-    def _make_sequence_object(self, row: SequenceSet):
+    def _make_sequence_object(self, row: dict):
 
-        seq = ReceptorSequence(sequence_aa=row.get_single_row_value('sequence_aa'),
-                               sequence=row.get_single_row_value('sequence'),
-                               sequence_id=row.get_single_row_value('sequence_id'),
-                               metadata=SequenceMetadata(v_call=row.get_single_row_value('v_call'),
-                                                         j_call=row.get_single_row_value('j_call'),
-                                                         chain=row.get_single_row_value('chain'),
-                                                         duplicate_count=row.get_single_row_value('duplicate_count'),
-                                                         region_type=row.get_single_row_value('region_type'),
-                                                         frame_type=row.get_single_row_value('frame_type'),
-                                                         cell_id=row.get_single_row_value('cell_id'),
-                                                         custom_params={key: row.get_single_row_value(key) for key in
-                                                                        vars(row)
+        seq = ReceptorSequence(sequence_aa=row.get('sequence_aa', None),
+                               sequence=row.get('sequence', None),
+                               sequence_id=row.get('sequence_id', None),
+                               metadata=SequenceMetadata(v_call=row.get('v_call', None),
+                                                         j_call=row.get('j_call', None),
+                                                         chain=row.get('chain', None),
+                                                         duplicate_count=row.get('duplicate_count', None),
+                                                         region_type=row.get('region_type', None),
+                                                         frame_type=row.get('frame_type', None),
+                                                         cell_id=row.get('cell_id', None),
+                                                         custom_params={key: row[key] for key in row
                                                                         if key not in Repertoire.FIELDS}))
 
         return seq
@@ -262,7 +261,7 @@ class Repertoire(DatasetItem):
         data = self.load_bnp_data()
 
         for i in range(len(data)):
-            seq = self._make_sequence_object(data[i])
+            seq = self._make_sequence_object(data.get_row_by_index(i))
             seqs.append(seq)
 
         del data

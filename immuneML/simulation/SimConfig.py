@@ -11,7 +11,7 @@ class SimConfig:
     """
     Defines all parameters of the simulation.
 
-    Arguments:
+    Specification arguments:
 
     - sim_items (dict): a list of SimConfigItems defining individual units of simulation
 
@@ -35,6 +35,7 @@ class SimConfig:
 
     YAML specification:
 
+    .. indent-with-spaces
     .. code-block:: yaml
 
       simulations:

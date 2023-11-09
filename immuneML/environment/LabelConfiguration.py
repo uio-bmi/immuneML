@@ -39,7 +39,8 @@ class LabelConfiguration:
         self._labels[label_name] = Label(label_name, vals, auxiliary_labels, positive_class)
 
     def _get_default_positive_class(self, classes):
-        """Returns the default positive class when a class pair is given where the positive class is obvious (0, 1; true, false)"""
+        """Returns the default positive class when a class pair is given where the positive class is obvious (0,
+        1; true, false)"""
 
         if len(classes) != 2:
             return None

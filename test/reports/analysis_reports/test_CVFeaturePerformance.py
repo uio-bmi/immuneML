@@ -17,7 +17,7 @@ from immuneML.hyperparameter_optimization.states.HPSelectionState import HPSelec
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from immuneML.ml_methods.classifiers.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.train_ml_model_reports.CVFeaturePerformance import CVFeaturePerformance
 
@@ -28,7 +28,7 @@ class TestCVFeaturePerformance(TestCase):
 
         state = TrainMLModelState(assessment=SplitConfig(split_count=5, split_strategy=SplitType.K_FOLD),
                                   selection=SplitConfig(split_count=10, split_strategy=SplitType.K_FOLD),
-                                  optimization_metric=Metric.ACCURACY,
+                                  optimization_metric=ClassificationMetric.ACCURACY,
                                   label_configuration=LabelConfiguration(labels=[Label(name="CMV", values=[True, False])]),
                                   hp_settings=[HPSetting(encoder_params={"p_value_threshold": 0.001}, encoder_name="e1",
                                                          encoder=SequenceAbundanceEncoder([], 0, 0, 0), preproc_sequence=[], ml_method_name="ml1",

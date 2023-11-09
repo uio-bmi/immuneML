@@ -20,15 +20,16 @@ class DiseaseAssociatedSequenceOverlap(MultiDatasetReport):
     :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder`
     between multiple datasets of different sizes (different number of repertoires per dataset).
 
-    This plot can be used only with MultiDatasetBenchmarkTool
+    This plot can be used only with MultiDatasetBenchmarkTool.
 
     The overlap is computed by the following equation:
 
     .. math::
 
-        overlap(X,Y) = \\frac{|X \\cap Y|}{min(|X|, |Y|)} x 100
+        overlap(X,Y) = \\frac{|X \\cap Y|}{min(|X|, |Y|)} * 100
 
-    For details, see Greiff V, Menzel U, Miho E, et al. Systems Analysis Reveals High Genetic and Antigen-Driven Predetermination of Antibody
+    For details, see:
+    Greiff V, Menzel U, Miho E, et al. Systems Analysis Reveals High Genetic and Antigen-Driven Predetermination of Antibody
     Repertoires throughout B Cell Development. Cell Reports. 2017;19(7):1467-1478. doi:10.1016/j.celrep.2017.04.054.
 
     YAML specification:

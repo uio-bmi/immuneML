@@ -23,9 +23,10 @@ class ConfounderAnalysis(MLReport):
     the metadata features specified by the user. This allows checking whether a given machine learning model makes more
     misclassifications for some values of a metadata feature than for the others.
 
-    Arguments:
+    Specification arguments:
 
-        metadata_labels (list): A list of the metadata features to use as a basis for the calculations
+    - metadata_labels (list): A list of the metadata features to use as a basis for the calculations
+
 
     YAML specification:
 

@@ -8,11 +8,12 @@ from immuneML.simulation.implants.Signal import Signal, SignalPair
 @dataclass
 class SimConfigItem:
     """
-    When performing a simulation, one or more simulation config items can be specified. Config items define groups of repertoires or receptors
-    that have the same simulation parameters, such as signals, generative model, clonal frequencies, noise parameters.
+    When performing a simulation, one or more simulation config items can be specified. Config items define groups of
+    repertoires or receptors that have the same simulation parameters, such as signals, generative model, clonal
+    frequencies, noise parameters.
 
 
-    Arguments:
+    Specification arguments:
 
     - signals (dict): signals for the simulation item and the proportion of sequences in the repertoire that will have the given signal. For receptor-level simulation, the proportion will always be 1.
 
@@ -30,21 +31,21 @@ class SimConfigItem:
 
     - default_clonal_frequency (dict): clonal frequency in Ligo is simulated through `scipy's zeta distribution function for generating random numbers <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.zipf.html>`_, with parameters provided under default_clonal_frequency parameter. These parameters will be used to assign count values to sequences that do not contain any signals if they are required by the simulation. If clonal frequency shouldn't be used, this parameter can be None
 
-        .. indent with spaces
-        .. code-block:: yaml
+    .. indent with spaces
+    .. code-block:: yaml
 
-            clonal_frequency:
-                a: 2 # shape parameter of the distribution
-                loc: 0 # 0 by default but can be used to shift the distribution
+        clonal_frequency:
+            a: 2 # shape parameter of the distribution
+            loc: 0 # 0 by default but can be used to shift the distribution
 
     - sequence_len_limits (dict): allows for filtering the generated sequences by length, needs to have parameters min and max specified; if not used, min/max should be -1
 
-        .. indent with spaces
-        .. code-block:: yaml
+    .. indent with spaces
+    .. code-block:: yaml
 
-            sequence_len_limits:
-                min: 4 # keep sequences of length 4 and longer
-                max: -1 # no limit on the max length of the sequences
+        sequence_len_limits:
+            min: 4 # keep sequences of length 4 and longer
+            max: -1 # no limit on the max length of the sequences
 
     YAML specification:
 

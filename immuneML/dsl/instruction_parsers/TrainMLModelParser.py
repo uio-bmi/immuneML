@@ -16,7 +16,7 @@ from immuneML.hyperparameter_optimization.config.ManualSplitConfig import Manual
 from immuneML.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -46,9 +46,9 @@ class TrainMLModelParser:
         selection = self._parse_split_config(key, instruction, "selection", symbol_table, len(settings), label_config)
         assessment, selection = self._update_split_configs(assessment, selection, dataset)
         strategy = ReflectionHandler.get_class_by_name(instruction["strategy"], "hyperparameter_optimization/")
-        metrics = {Metric.get_metric(metric) for metric in instruction["metrics"]}
-        optimization_metric = Metric.get_metric(instruction["optimization_metric"].upper())
-        metric_search_criterion = Metric.get_search_criterion(optimization_metric)
+        metrics = {ClassificationMetric.get_metric(metric) for metric in instruction["metrics"]}
+        optimization_metric = ClassificationMetric.get_metric(instruction["optimization_metric"].upper())
+        metric_search_criterion = ClassificationMetric.get_search_criterion(optimization_metric)
         path = self._prepare_path(instruction)
         context = self._prepare_context(instruction, symbol_table)
         reports = self._prepare_reports(instruction["reports"], symbol_table)

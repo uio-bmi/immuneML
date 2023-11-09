@@ -27,18 +27,28 @@ class MatchedSequencesEncoder(DatasetEncoder):
     Clinical Immunology Volume 222 (January 2021): 108621. `doi.org/10.1016/j.clim.2020.108621 <https://doi.org/10.1016/j.clim.2020.108621>`_
 
 
-    Arguments:
+    Specification arguments:
 
-        reference (dict): A dictionary describing the reference dataset file. Import should be specified the same way as regular dataset import. It is only allowed to import a sequence dataset here (i.e., is_repertoire and paired are False by default, and are not allowed to be set to True).
+    - reference (dict): A dictionary describing the reference dataset file. Import should be specified the same way as
+      regular dataset import. It is only allowed to import a sequence dataset here (i.e., is_repertoire and paired are
+      False by default, and are not allowed to be set to True).
 
-        max_edit_distance (int): The maximum edit distance between a target sequence (from the repertoire) and the reference sequence.
+    - max_edit_distance (int): The maximum edit distance between a target sequence (from the repertoire) and the
+      reference sequence.
 
-        reads (:py:mod:`~immuneML.util.ReadsType`): Reads type signify whether the counts of the sequences in the repertoire will be taken into account. If :py:mod:`~immuneML.util.ReadsType.UNIQUE`, only unique sequences (clonotypes) are counted, and if :py:mod:`~immuneML.util.ReadsType.ALL`, the sequence 'count' value is summed when determining the number of matches. The default value for reads is all.
+    - reads (:py:mod:`~immuneML.util.ReadsType`): Reads type signify whether the counts of the sequences in the
+      repertoire will be taken into account. If :py:mod:`~immuneML.util.ReadsType.UNIQUE`, only unique sequences
+      (clonotypes) are counted, and if :py:mod:`~immuneML.util.ReadsType.ALL`, the sequence 'count' value is summed when
+      determining the number of matches. The default value for reads is all.
 
-        sum_matches (bool): When sum_matches is False, the resulting encoded data matrix contains multiple columns with the number of matches per reference sequence. When sum_matches is true, all columns are summed together, meaning that there is only one aggregated sum of matches per repertoire in the encoded data.
-        To use this encoder in combination with the :ref:`Matches` report, sum_matches must be set to False. When sum_matches is set to True, this encoder behaves as described by Yao, Y. et al. By default, sum_matches is False.
+    - sum_matches (bool): When sum_matches is False, the resulting encoded data matrix contains multiple columns with
+      the number of matches per reference sequence. When sum_matches is true, all columns are summed together, meaning
+      that there is only one aggregated sum of matches per repertoire in the encoded data.
+      To use this encoder in combination with the :ref:`Matches` report, sum_matches must be set to False. When
+      sum_matches is set to True, this encoder behaves as described by Yao, Y. et al. By default, sum_matches is False.
 
-        normalize (bool): If True, the sequence matches are divided by the total number of unique sequences in the repertoire (when reads = unique) or the total number of reads in the repertoire (when reads = all).
+    - normalize (bool): If True, the sequence matches are divided by the total number of unique sequences in the
+      repertoire (when reads = unique) or the total number of reads in the repertoire (when reads = all).
 
 
     YAML Specification:

@@ -24,7 +24,7 @@ We begin by defining immune signals for simulation. This step remains consistent
         motifs: [motif2]
 
 Step 2: Define frequency of each individual signal and the pair of signals in a repertoire
-````````````````````````````````````````````````````````````````````````
+`````````````````````````````````````````````````````````````````````````````````````````````````
 .. code-block:: yaml
 
   simulations:
@@ -50,7 +50,7 @@ Step 2: Define frequency of each individual signal and the pair of signals in a 
 
 
 Step 3: Run the simulation with the following yaml file 
-`````````````````````````````
+```````````````````````````````````````````````````````````````````````````````
 
 .. code-block:: yaml
 

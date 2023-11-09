@@ -18,7 +18,7 @@ from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainM
 from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 from immuneML.ml_methods.classifiers.SVM import SVM
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.preprocessing.filters.ClonesPerRepertoireFilter import ClonesPerRepertoireFilter
 from immuneML.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
 from immuneML.util.PathBuilder import PathBuilder
@@ -74,7 +74,7 @@ class TestTrainMLModelInstruction(TestCase):
         process = TrainMLModelInstruction(dataset, GridSearch(hp_settings), hp_settings,
                                           SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig(data_splits={"seqlen": report})),
                                           SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig(data_splits={"seqlen": report})),
-                                          {Metric.BALANCED_ACCURACY}, Metric.BALANCED_ACCURACY, label_config, path)
+                                          {ClassificationMetric.BALANCED_ACCURACY}, ClassificationMetric.BALANCED_ACCURACY, label_config, path)
 
         state = process.run(result_path=path)
 

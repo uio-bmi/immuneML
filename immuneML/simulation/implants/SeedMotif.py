@@ -79,7 +79,7 @@ class SeedMotif(Motif):
         position_weights = self.set_default_weights(self.position_weights, allowed_positions)
 
         gap_size = np.random.choice(range(self.min_gap, self.max_gap + 1))
-        instance = self._substitute_letters(position_weights, alphabet_weights, allowed_positions, instance)
+        instance = self._substitute_letters(position_weights, alphabet_weights, allowed_positions, instance, sequence_type)
         instance = "".join(instance)
 
         return MotifInstance(instance, gap_size)

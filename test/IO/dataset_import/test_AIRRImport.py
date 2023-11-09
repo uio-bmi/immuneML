@@ -1,6 +1,8 @@
 import shutil
 from unittest import TestCase
 
+import pandas as pd
+
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.IO.dataset_import.AIRRImport import AIRRImport
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
@@ -31,10 +33,7 @@ IVKNQEJ01AJ44V	1	IVKNQEJ01AJ44V	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCT
             file.writelines(file2_content)
 
         if add_metadata:
-            with open(path / "metadata.csv", "w") as file:
-                file.writelines("""filename,subject_id
-rep1.tsv,1
-rep2.tsv,2""")
+            pd.DataFrame({'filename': ['rep1.tsv', 'rep2.tsv'], 'subject_id': [1, 2]}).to_csv(str(path / 'metadata.csv'), index=False)
 
     def get_column_mapping(self):
         column_mapping = {
@@ -44,8 +43,7 @@ rep2.tsv,2""")
         return column_mapping
 
     def test_import_repertoire_dataset(self):
-        path = EnvironmentSettings.tmp_test_path / "ioairr_repertoire/"
-        PathBuilder.remove_old_and_build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "ioairr_repertoire/")
         self.create_dummy_dataset(path, True)
 
         column_mapping = self.get_column_mapping()
@@ -128,8 +126,8 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         shutil.rmtree(path)
 
     def test_import_exported_dataset(self):
-        path = EnvironmentSettings.tmp_test_path / "io_airr/"
-        PathBuilder.remove_old_and_build(path / 'initial')
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "io_airr/")
+        PathBuilder.build(path / 'initial')
         self.create_dummy_dataset(path / 'initial', True)
 
         column_mapping = self.get_column_mapping()
@@ -140,7 +138,6 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
                   "separator": "\t"}
 
         dataset1 = AIRRImport.import_dataset(params, "airr_repertoire_dataset1")
-        print(dataset1.repertoires[0].get_region_type())
 
         path_exported = path / "exported_repertoires"
         AIRRExporter.export(dataset1, path_exported)
@@ -160,8 +157,7 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
 
     def test_minimal_dataset(self):
         # test to make sure import works with minimally specified input
-        path = EnvironmentSettings.root_path / "test/tmp/ioairr/"
-        PathBuilder.remove_old_and_build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "ioairr_minimal/")
         file1_content = """sequence_id	junction_aa
 IVKNQEJ01BVGQ6	CASGVAGTFDYW
 IVKNQEJ01AQVWS	CASGVAGTFDYW

@@ -17,7 +17,7 @@ from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.train_ml_model_reports.MLSettingsPerformance import MLSettingsPerformance
 from immuneML.util.PathBuilder import PathBuilder
@@ -68,7 +68,7 @@ class TestMLSettingsPerformance(TestCase):
         process = TrainMLModelInstruction(dataset, GridSearch(hp_settings), hp_settings,
                                           SplitConfig(SplitType.RANDOM, 1, 0.7),
                                           SplitConfig(SplitType.RANDOM, 1, 0.7),
-                                          {Metric.BALANCED_ACCURACY}, Metric.BALANCED_ACCURACY, label_config, path)
+                                          {ClassificationMetric.BALANCED_ACCURACY}, ClassificationMetric.BALANCED_ACCURACY, label_config, path)
 
         state = process.run(result_path=path)
 

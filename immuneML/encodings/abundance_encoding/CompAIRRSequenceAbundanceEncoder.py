@@ -50,30 +50,29 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
     See :ref:`Reproduction of the CMV status predictions study` for an example using :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
 
-    Arguments:
+    Specification arguments:
 
-        p_value_threshold (float): The p value threshold to be used by the statistical test.
+    - p_value_threshold (float): The p value threshold to be used by the statistical test.
 
-        compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
-        has been installed such that it can be called directly on the command line with the command 'compairr',
-        or that it is located at /usr/local/bin/compairr.
+    - compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
+      has been installed such that it can be called directly on the command line with the command 'compairr',
+      or that it is located at /usr/local/bin/compairr.
 
-        ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor chains
-        have to match. If True, gene information is ignored. By default, ignore_genes is False.
+    - ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor chains
+      have to match. If True, gene information is ignored. By default, ignore_genes is False.
 
-        sequence_batch_size (int): The number of sequences in a batch when comparing sequences across repertoires, typically 100s of thousands.
-        This does not affect the results of the encoding, but may affect the speed and memory usage. The default value is 1.000.000
+    - sequence_batch_size (int): The number of sequences in a batch when comparing sequences across repertoires, typically 100s of thousands.
+      This does not affect the results of the encoding, but may affect the speed and memory usage. The default value is 1.000.000
 
-        threads (int): The number of threads to use for parallelization. This does not affect the results of the encoding, only the speed.
-        The default number of threads is 8.
+    - threads (int): The number of threads to use for parallelization. This does not affect the results of the encoding, only the speed.
+      The default number of threads is 8.
 
-        keep_temporary_files (bool): whether to keep temporary files, including CompAIRR input, output and log files, and the sequence
-        presence matrix. This may take a lot of storage space if the input dataset is large. By default, temporary files are not kept.
+    - keep_temporary_files (bool): whether to keep temporary files, including CompAIRR input, output and log files, and the sequence
+      presence matrix. This may take a lot of storage space if the input dataset is large. By default, temporary files are not kept.
 
 
     YAML specification:
 
-    .. indent with spaces
     .. code-block:: yaml
 
         my_sa_encoding:

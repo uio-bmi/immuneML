@@ -30,13 +30,13 @@ class ProbabilisticBinaryClassifier(MLMethod):
     ‘Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire’.
     Nature Genetics 49, no. 5 (May 2017): 659–65. `doi.org/10.1038/ng.3822 <https://doi.org/10.1038/ng.3822>`_.
 
-    Arguments:
+    Specification arguments:
 
-        max_iterations (int): maximum number of iterations while optimizing the parameters of the beta distribution (same for both classes)
+    - max_iterations (int): maximum number of iterations while optimizing the parameters of the beta distribution (same for both classes)
 
-        update_rate (float): how much the computed gradient should influence the updated value of the parameters of the beta distribution
+    - update_rate (float): how much the computed gradient should influence the updated value of the parameters of the beta distribution
 
-        likelihood_threshold (float): at which threshold to stop the optimization (default -1e-10)
+    - likelihood_threshold (float): at which threshold to stop the optimization (default -1e-10)
 
     YAML specification:
 

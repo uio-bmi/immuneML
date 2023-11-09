@@ -9,7 +9,7 @@ from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
 from immuneML.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.reports.ReportResult import ReportResult
 
 
@@ -20,8 +20,8 @@ class TrainMLModelState:
     hp_settings: List[HPSetting]
     assessment: SplitConfig
     selection: SplitConfig
-    metrics: Set[Metric]
-    optimization_metric: Metric
+    metrics: Set[ClassificationMetric]
+    optimization_metric: ClassificationMetric
     label_configuration: LabelConfiguration
     path: Path = None
     context: dict = None

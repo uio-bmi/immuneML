@@ -68,14 +68,19 @@ class MotifSeedRecovery(MLReport):
     See :ref:`Recovering simulated immune signals` for more details and an example plot.
 
 
-    Arguments:
+    Specification arguments:
 
-        implanted_motifs_per_label (dict): a nested dictionary that specifies the motif seeds that were implanted in the given dataset. The first
-        level of keys in this dictionary represents the different labels. In the inner dictionary there should be two keys: "seeds" and
-        "hamming_distance":
-                - seeds: a list of motif seeds. The seeds may contain gaps, specified by a '/' symbol.
-                - hamming_distance: A boolean value that specifies whether hamming distance was allowed when implanting the motif seeds for a given label. Note that this applies to all seeds for this label.
-                - gap_sizes: a list of all the possible gap sizes that were used when implanting a gapped motif seed. When no gapped seeds are used, this value has no effect.
+    - implanted_motifs_per_label (dict): a nested dictionary that specifies the motif seeds that were implanted in the given dataset. The first
+      level of keys in this dictionary represents the different labels. In the inner dictionary there should be two keys: "seeds" and
+      "hamming_distance":
+
+      - seeds: a list of motif seeds. The seeds may contain gaps, specified by a '/' symbol.
+
+      - hamming_distance: A boolean value that specifies whether hamming distance was allowed when implanting the motif
+        seeds for a given label. Note that this applies to all seeds for this label.
+
+      - gap_sizes: a list of all the possible gap sizes that were used when implanting a gapped motif seed. When no
+        gapped seeds are used, this value has no effect.
 
 
     YAML specification:

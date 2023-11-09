@@ -26,27 +26,27 @@ class FeatureComparison(FeatureReport):
     Alternatively, when the feature values are of interest without comparing them between labelled subgroups of the data, please
     use :ref:`FeatureValueBarplot` or :ref:`FeatureDistribution` instead.
 
-    Arguments:
+    Specification arguments:
 
-        comparison_label (str): Mandatory label. This label is used to split the encoded data matrix and define the x and y axes of the plot.
-        This label is only allowed to have 2 classes (for example: sick and healthy, binding and non-binding).
+    - comparison_label (str): Mandatory label. This label is used to split the encoded data matrix and define the x and y axes of the plot.
+      This label is only allowed to have 2 classes (for example: sick and healthy, binding and non-binding).
 
-        color_grouping_label (str): Optional label that is used to color the points in the scatterplot. This can not be the same as comparison_label.
+    - color_grouping_label (str): Optional label that is used to color the points in the scatterplot. This can not be the same as comparison_label.
 
-        row_grouping_label (str): Optional label that is used to group scatterplots into different row facets. This can not be the same as comparison_label.
+    - row_grouping_label (str): Optional label that is used to group scatterplots into different row facets. This can not be the same as comparison_label.
 
-        column_grouping_label (str): Optional label that is used to group scatterplots into different column facets. This can not be the same as comparison_label.
+    - column_grouping_label (str): Optional label that is used to group scatterplots into different column facets. This can not be the same as comparison_label.
 
-        show_error_bar (bool): Whether to show the error bar (standard deviation) for the points, both in the x and y dimension.
+    - show_error_bar (bool): Whether to show the error bar (standard deviation) for the points, both in the x and y dimension.
 
-        log_scale (bool): Whether to plot the x and y axes in log10 scale (log_scale = True) or continuous scale (log_scale = False). By default, log_scale is False.
+    - log_scale (bool): Whether to plot the x and y axes in log10 scale (log_scale = True) or continuous scale (log_scale = False). By default, log_scale is False.
 
-        keep_fraction (float): The total number of features may be very large and only the features differing significantly across
-        comparison labels may be of interest. When the keep_fraction parameter is set below 1, only the fraction of features that
-        differs the most across comparison labels is kept for plotting (note that the produced .csv file still contains all data).
-        By default, keep_fraction is 1, meaning that all features are plotted.
+    - keep_fraction (float): The total number of features may be very large and only the features differing significantly across
+      comparison labels may be of interest. When the keep_fraction parameter is set below 1, only the fraction of features that
+      differs the most across comparison labels is kept for plotting (note that the produced .csv file still contains all data).
+      By default, keep_fraction is 1, meaning that all features are plotted.
 
-        opacity (float): a value between 0 and 1 setting the opacity for data points making it easier to see if there are overlapping points
+    - opacity (float): a value between 0 and 1 setting the opacity for data points making it easier to see if there are overlapping points
 
 
     YAML specification:

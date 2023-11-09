@@ -38,37 +38,37 @@ class ReceptorCNN(MLMethod):
     - ReceptorCNN can only be used for binary classification, not multi-class classification.
 
 
-    Arguments:
+    Specification arguments:
 
-        kernel_count (count): number of kernels that will look for motifs for one chain
+    - kernel_count (count): number of kernels that will look for motifs for one chain
 
-        kernel_size (list): sizes of the kernels = how many amino acids to consider at the same time in the chain sequence, can be a tuple of values; e.g. for value [3, 4] of kernel_size, kernel_count*len(kernel_size) kernels will be created, with kernel_count kernels of size 3 and kernel_count kernels of size 4 per chain
+    - kernel_size (list): sizes of the kernels = how many amino acids to consider at the same time in the chain sequence, can be a tuple of values; e.g. for value [3, 4] of kernel_size, kernel_count*len(kernel_size) kernels will be created, with kernel_count kernels of size 3 and kernel_count kernels of size 4 per chain
 
-        positional_channels (int): how many positional channels where included in one-hot encoding of the receptor sequences (:ref:`OneHot` encoder adds 3 positional channels positional information is enabled)
+    - positional_channels (int): how many positional channels where included in one-hot encoding of the receptor sequences (:ref:`OneHot` encoder adds 3 positional channels positional information is enabled)
 
-        sequence_type (SequenceType): type of the sequence
+    - sequence_type (SequenceType): type of the sequence
 
-        device: which device to use for the model (cpu or gpu) - for more details see PyTorch documentation on device parameter
+    - device: which device to use for the model (cpu or gpu) - for more details see PyTorch documentation on device parameter
 
-        number_of_threads (int): how many threads to use
+    - number_of_threads (int): how many threads to use
 
-        random_seed (int): number used as a seed for random initialization
+    - random_seed (int): number used as a seed for random initialization
 
-        learning_rate (float): learning rate scaling the step size for optimization algorithm
+    - learning_rate (float): learning rate scaling the step size for optimization algorithm
 
-        iteration_count (int): for how many iterations to train the model
+    - iteration_count (int): for how many iterations to train the model
 
-        l1_weight_decay (float): weight decay l1 value for the CNN; encourages sparser representations
+    - l1_weight_decay (float): weight decay l1 value for the CNN; encourages sparser representations
 
-        l2_weight_decay (float): weight decay l2 value for the CNN; shrinks weight coefficients towards zero
+    - l2_weight_decay (float): weight decay l2 value for the CNN; shrinks weight coefficients towards zero
 
-        batch_size (int): how many receptors to process at once
+    - batch_size (int): how many receptors to process at once
 
-        training_percentage (float): what percentage of data to use for training (the rest will be used for validation); values between 0 and 1
+    - training_percentage (float): what percentage of data to use for training (the rest will be used for validation); values between 0 and 1
 
-        evaluate_at (int): when to evaluate the model, e.g. every 100 iterations
+    - evaluate_at (int): when to evaluate the model, e.g. every 100 iterations
 
-        background_probabilities: used for rescaling the kernel values to produce information gain matrix; represents the background probability of each amino acid (without positional information); if not specified, uniform background is assumed
+    - background_probabilities: used for rescaling the kernel values to produce information gain matrix; represents the background probability of each amino acid (without positional information); if not specified, uniform background is assumed
 
     YAML specification:
 

@@ -14,7 +14,7 @@ from immuneML.hyperparameter_optimization.states.HPLabelState import HPLabelStat
 from immuneML.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.ml_methods.util.Util import Util as MLUtil
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.presentation.TemplateParser import TemplateParser
 from immuneML.presentation.html.Util import Util
 from immuneML.reports.ReportResult import ReportResult
@@ -251,7 +251,7 @@ class HPHTMLBuilder:
         return mapping
 
     @staticmethod
-    def _print_metric(performance: dict, metric: Metric):
+    def _print_metric(performance: dict, metric: ClassificationMetric):
         if performance is not None and metric.name.lower() in performance:
             if isinstance(performance[metric.name.lower()], float):
                 return round(performance[metric.name.lower()], HPHTMLBuilder.NUM_DIGITS)
@@ -348,7 +348,7 @@ class HPHTMLBuilder:
         return obj
 
     @staticmethod
-    def _extract_selection_performance_per_metric(selection_state: HPSelectionState, metric: Metric, split_count):
+    def _extract_selection_performance_per_metric(selection_state: HPSelectionState, metric: ClassificationMetric, split_count):
         performance = {"setting": [], **{f"split {i + 1}": [] for i in range(split_count)}}
         for hp_setting, hp_item_list in selection_state.hp_items.items():
             performance['setting'].append(str(hp_setting))

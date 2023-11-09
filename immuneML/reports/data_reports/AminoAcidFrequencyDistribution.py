@@ -22,15 +22,20 @@ class AminoAcidFrequencyDistribution(DataReport):
     """
     Generates a barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.
 
-    Arguments:
+    Specification arguments:
 
-        imgt_positions (bool): Whether to use IMGT positional numbering or sequence index numbering. When imgt_positions is True, IMGT positions are used, meaning sequences of unequal length are aligned according to their IMGT positions. By default imgt_positions is True.
+    - imgt_positions (bool): Whether to use IMGT positional numbering or sequence index numbering. When imgt_positions
+      is True, IMGT positions are used, meaning sequences of unequal length are aligned according to their IMGT
+      positions. By default, imgt_positions is True.
 
-        relative_frequency (bool): Whether to plot relative frequencies (true) or absolute counts (false) of the positional amino acids. By default, relative_frequency is True.
+    - relative_frequency (bool): Whether to plot relative frequencies (true) or absolute counts (false) of the
+      positional amino acids. By default, relative_frequency is True.
 
-        split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a single label, or alternatively the label of interest can be specified under 'label'. By default, split_by_label is False.
+    - split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a
+      single label, or alternatively the label of interest can be specified under 'label'. By default, split_by_label
+      is False.
 
-        label (str): if split_by_label is set to True, a label can be specified here.
+    - label (str): if split_by_label is set to True, a label can be specified here.
 
     YAML specification:
 

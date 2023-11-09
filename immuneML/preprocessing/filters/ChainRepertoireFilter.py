@@ -14,9 +14,9 @@ class ChainRepertoireFilter(Filter):
     Since the filter removes repertoires from the dataset (examples in machine learning setting), it cannot be used with :ref:`TrainMLModel`
     instruction. If you want to filter out repertoires including a given chain, see :ref:`DatasetExport` instruction with preprocessing.
 
-    Arguments:
+    Specification arguments:
 
-        keep_chain (:py:obj:`~immuneML.environment.SequenceType.SequenceType`): Which chain should be kept.
+    - keep_chain (str): Which chain should be kept, valid values are "TRA", "TRB", "IGH", "IGL", "IGK"
 
 
     YAML specification:
