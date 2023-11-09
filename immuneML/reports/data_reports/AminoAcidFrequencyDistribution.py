@@ -98,7 +98,7 @@ class AminoAcidFrequencyDistribution(DataReport):
 
             tables.append(self._write_output_table(frequency_change,
                                                    self.result_path / f"frequency_change.tsv",
-                                                   name=f"Log-fold change between classes"))
+                                                   name=f"Frequency change between classes"))
             figures.append(self._safe_plot(frequency_change=frequency_change, plot_callable="_plot_frequency_change"))
 
 
@@ -271,7 +271,7 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     def _compute_frequency_change(self, freq_dist):
         classes = sorted(set(freq_dist["class"]))
-        assert len(classes) == 2, f"{AminoAcidFrequencyDistribution.__name__}: cannot compute log fold change when the number of classes is not 2: {classes}"
+        assert len(classes) == 2, f"{AminoAcidFrequencyDistribution.__name__}: cannot compute frequency change when the number of classes is not 2: {classes}"
 
         class_a_df = freq_dist[freq_dist["class"] == classes[0]]
         class_b_df = freq_dist[freq_dist["class"] == classes[1]]
