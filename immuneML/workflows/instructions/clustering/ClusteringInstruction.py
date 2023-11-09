@@ -66,7 +66,7 @@ class ClusteringInstruction(Instruction):
     YAML specification:
 
     .. indent with spaces
-    .. code-block: yaml
+    .. code-block:: yaml
 
         my_clustering_instruction:
             type: Clustering
