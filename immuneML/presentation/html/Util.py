@@ -8,6 +8,7 @@ import numpy as np
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.StringHelper import StringHelper
 
 
 class Util:
@@ -115,3 +116,13 @@ class Util:
                                         f"and it will not be moved to HTML output folder.")
 
         return report_result
+
+    @staticmethod
+    def make_dataset_html_map(dataset):
+        return {"dataset_name": dataset.name,
+                "dataset_type": StringHelper.camel_case_to_word_string(type(dataset).__name__),
+                "dataset_size": f"{dataset.get_example_count()} {type(dataset).__name__.replace('Dataset', 's').lower()}",
+                "dataset_labels": [{"dataset_label_name": label_name,
+                                    "dataset_label_classes": ", ".join(str(class_name) for class_name in dataset.labels[label_name])}
+                                   for label_name in dataset.get_label_names()]
+                }

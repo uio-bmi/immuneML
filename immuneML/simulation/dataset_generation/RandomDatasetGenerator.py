@@ -2,6 +2,7 @@ import random
 import uuid
 from pathlib import Path
 
+from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
@@ -54,7 +55,7 @@ class RandomDatasetGenerator:
     @staticmethod
     def generate_repertoire_dataset(repertoire_count: int, sequence_count_probabilities: dict,
                                     sequence_length_probabilities: dict,
-                                    labels: dict, path: Path) -> RepertoireDataset:
+                                    labels: dict, path: Path, name="repertoire_dataset") -> RepertoireDataset:
         """
         Creates repertoire_count repertoires where the number of sequences per repertoire is sampled from the probability distribution given
         in sequence_count_probabilities. The length of sequences is sampled independently for each sequence from
@@ -95,9 +96,10 @@ class RandomDatasetGenerator:
         processed_labels, dataset_params = RandomDatasetGenerator._make_labels(labels, repertoire_count)
 
         repertoires, metadata = RepertoireBuilder.build(sequences=sequences, path=path, labels=processed_labels)
-        dataset = RepertoireDataset(labels=dataset_params, repertoires=repertoires, metadata_file=metadata)
+        dataset = RepertoireDataset(labels=dataset_params, repertoires=repertoires, metadata_file=metadata, name=name)
 
-        return dataset
+        return ImmuneMLExporter.export(dataset, path)
+
 
     @staticmethod
     def _make_labels(labels: dict, element_count: int):
@@ -174,8 +176,9 @@ class RandomDatasetGenerator:
                      for i in range(receptor_count)]
 
         processed_labels, dataset_params = RandomDatasetGenerator._make_labels(labels, receptor_count)
+        dataset= ReceptorDataset.build_from_objects(receptors, 100, path, name="receptor_dataset", labels=dataset_params)
 
-        return ReceptorDataset.build_from_objects(receptors, 100, path, labels=dataset_params)
+        return ImmuneMLExporter.export(dataset, path)
 
     @staticmethod
     def _check_sequence_dataset_generation_params(receptor_count: int, length_probabilities: dict, labels: dict,
@@ -231,6 +234,9 @@ class RandomDatasetGenerator:
                              sequence_id=uuid.uuid4().hex)
             for i in range(sequence_count)]
 
-        return SequenceDataset.build_from_objects(sequences, sequence_count, path, name=None,
-                                                  labels={label: list(label_dict.keys()) for label, label_dict in
-                                                          labels.items()})
+        processed_labels, dataset_params = RandomDatasetGenerator._make_labels(labels, sequence_count)
+        dataset = SequenceDataset.build_from_objects(sequences, sequence_count, path, name="sequence_dataset",
+                                                  labels=dataset_params)
+
+        return ImmuneMLExporter.export(dataset, path)
+

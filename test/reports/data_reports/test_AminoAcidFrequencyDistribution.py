@@ -18,6 +18,7 @@ class TestAminoAcidFrequencyDistribution(TestCase):
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "AminoAcidFrequencyDistribution")
         params["dataset"] = dataset
+        params["split_by_label"] = True
         params["result_path"] = path / "result"
 
         report = AminoAcidFrequencyDistribution.build_object(**params)
@@ -25,8 +26,10 @@ class TestAminoAcidFrequencyDistribution(TestCase):
 
         report._generate()
 
-        self.assertTrue(os.path.isfile(path / "result/amino_acid_frequency_distribution.csv"))
+        self.assertTrue(os.path.isfile(path / "result/amino_acid_frequency_distribution.tsv"))
         self.assertTrue(os.path.isfile(path / "result/amino_acid_frequency_distribution.html"))
+        self.assertTrue(os.path.isfile(path / "result/frequency_change.tsv"))
+        self.assertTrue(os.path.isfile(path / "result/frequency_change.html"))
 
         shutil.rmtree(path)
 
@@ -40,6 +43,7 @@ class TestAminoAcidFrequencyDistribution(TestCase):
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "AminoAcidFrequencyDistribution")
         params["dataset"] = dataset
+        params["split_by_label"] = True
         params["result_path"] = path / "result"
 
         report = AminoAcidFrequencyDistribution.build_object(**params)
@@ -47,8 +51,10 @@ class TestAminoAcidFrequencyDistribution(TestCase):
 
         report._generate()
 
-        self.assertTrue(os.path.isfile(path / "result/amino_acid_frequency_distribution.csv"))
+        self.assertTrue(os.path.isfile(path / "result/amino_acid_frequency_distribution.tsv"))
         self.assertTrue(os.path.isfile(path / "result/amino_acid_frequency_distribution.html"))
+        self.assertTrue(os.path.isfile(path / "result/frequency_change.tsv"))
+        self.assertTrue(os.path.isfile(path / "result/frequency_change.html"))
 
         shutil.rmtree(path)
 
@@ -71,10 +77,10 @@ class TestAminoAcidFrequencyDistribution(TestCase):
 
         report._generate()
 
-        self.assertTrue(os.path.isfile(path / "result/amino_acid_frequency_distribution.csv"))
+        self.assertTrue(os.path.isfile(path / "result/amino_acid_frequency_distribution.tsv"))
         self.assertTrue(os.path.isfile(path / "result/amino_acid_frequency_distribution.html"))
 
-        df = pd.read_csv(path / "result/amino_acid_frequency_distribution.csv")
+        df = pd.read_csv(path / "result/amino_acid_frequency_distribution.tsv", sep="\t")
 
         # assert that the total amino acid count at each position = n_repertoires (5) * sequences_per_repertoire (20) for each positionin the sequence (10)
         self.assertEqual([100] * 10, list(df.groupby("position")["count"].sum()))
