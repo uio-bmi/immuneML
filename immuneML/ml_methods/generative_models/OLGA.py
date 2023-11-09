@@ -33,21 +33,32 @@ class OLGA(GenerativeModel):
 
     Reference:
 
-    Zachary Sethna, Yuval Elhanati, Curtis G Callan, Jr, Aleksandra M Walczak, Thierry Mora, OLGA: fast computation of generation probabilities
-    of B- and T-cell receptor amino acid sequences and motifs, Bioinformatics, Volume 35, Issue 17, 1 September 2019, Pages 2974–2981,
-    https://doi.org/10.1093/bioinformatics/btz035
+    Zachary Sethna, Yuval Elhanati, Curtis G Callan, Jr, Aleksandra M Walczak, Thierry Mora, OLGA: fast computation of
+    generation probabilities of B- and T-cell receptor amino acid sequences and motifs, Bioinformatics, Volume 35,
+    Issue 17, 1 September 2019, Pages 2974–2981, https://doi.org/10.1093/bioinformatics/btz035
 
     Note:
 
-    - OLGA generates sequences that correspond to IMGT junction and are used for matching as such. See the https://github.com/statbiophys/OLGA for more details.
+    - OLGA generates sequences that correspond to IMGT junction and are used for matching as such. See the
+      https://github.com/statbiophys/OLGA for more details.
 
-    - Gene names are as provided in OLGA (either in default models or in the user-specified model files). For simulation, one should use gene names in the same format.
+    - Gene names are as provided in OLGA (either in default models or in the user-specified model files). For
+      simulation, one should use gene names in the same format.
+
+    .. note::
+
+        While this is a generative model, in version 3.0.0a1, it cannot be used in combination with TrainGenModel or
+        ApplyGenModel instruction. If you want to use OLGA for sequence simulation, see :ref:`How to simulate antigen
+        or disease-associated signals in AIRR datasets`.
+`
 
     Specification arguments:
 
-    - model_path (str): if not default model, this parameter should point to a folder where the four OLGA/IGOR format files are stored (could also be inferred from some experimental data)
+    - model_path (str): if not default model, this parameter should point to a folder where the four OLGA/IGOR format
+      files are stored (could also be inferred from some experimental data)
 
-    - default_model_name (str): if not using custom models, one of the OLGA default models could be specified here; the value should be the same as it would be passed to command line in OLGA: e.g., humanTRB, human IGH
+    - default_model_name (str): if not using custom models, one of the OLGA default models could be specified here;
+      the value should be the same as it would be passed to command line in OLGA: e.g., humanTRB, human IGH
 
     YAML specification:
 

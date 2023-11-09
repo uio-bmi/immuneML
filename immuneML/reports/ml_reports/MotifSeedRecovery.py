@@ -74,11 +74,13 @@ class MotifSeedRecovery(MLReport):
       level of keys in this dictionary represents the different labels. In the inner dictionary there should be two keys: "seeds" and
       "hamming_distance":
 
-        - seeds: a list of motif seeds. The seeds may contain gaps, specified by a '/' symbol.
+      - seeds: a list of motif seeds. The seeds may contain gaps, specified by a '/' symbol.
 
-        - hamming_distance: A boolean value that specifies whether hamming distance was allowed when implanting the motif seeds for a given label. Note that this applies to all seeds for this label.
+      - hamming_distance: A boolean value that specifies whether hamming distance was allowed when implanting the motif
+        seeds for a given label. Note that this applies to all seeds for this label.
 
-        - gap_sizes: a list of all the possible gap sizes that were used when implanting a gapped motif seed. When no gapped seeds are used, this value has no effect.
+      - gap_sizes: a list of all the possible gap sizes that were used when implanting a gapped motif seed. When no
+        gapped seeds are used, this value has no effect.
 
 
     YAML specification:
