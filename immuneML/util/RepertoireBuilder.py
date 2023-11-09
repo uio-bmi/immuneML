@@ -23,6 +23,9 @@ class RepertoireBuilder:
             for index, sequence_list in enumerate(sequences):
                 assert len(sequence_list) == len(seq_metadata[index])
 
+        assert not (path / "repertoires").is_dir(), f"RepertoireBuilder: attempted to store new repertoires at {path / 'repertoires'} but this folder already exists. " \
+                                                    f"Please remove this folder or specify a different path. "
+
         PathBuilder.build(path)
         rep_path = PathBuilder.build(path / "repertoires")
 
