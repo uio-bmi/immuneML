@@ -106,7 +106,7 @@ class TestMLIE(TestCase):
                     "d1": {
                         "format": 'RandomRepertoireDataset',
                         "params": {
-                            "result_path": str(path / "dataset/"),
+                            "result_path": str(path / "test_dataset/"),
                             "repertoire_count": 30,
                             "sequence_length_probabilities": {3: 1},
                             "sequence_count_probabilities": {3: 1},
