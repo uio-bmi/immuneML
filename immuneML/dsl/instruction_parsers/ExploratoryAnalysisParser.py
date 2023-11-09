@@ -3,10 +3,12 @@ from pathlib import Path
 
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
+from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.encodings.kmer_frequency.KmerFreqSequenceEncoder import KmerFreqSequenceEncoder
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from immuneML.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisInstruction import ExploratoryAnalysisInstruction
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
@@ -48,7 +50,8 @@ class ExploratoryAnalysisParser:
 
         ParameterValidator.assert_keys(instruction, ["analyses", "type", "number_of_processes"],
                                        "ExploratoryAnalysisParser", "ExploratoryAnalysis")
-        ParameterValidator.assert_type_and_value(instruction["number_of_processes"], int, ExploratoryAnalysisParser.__name__, "number_of_processes")
+        ParameterValidator.assert_type_and_value(instruction["number_of_processes"], int,
+                                                 ExploratoryAnalysisParser.__name__, "number_of_processes")
 
         for analysis_key, analysis in instruction["analyses"].items():
 
@@ -75,12 +78,13 @@ class ExploratoryAnalysisParser:
 
         params = {}
         dataset = symbol_table.get(analysis["dataset"])
+        loc = ExploratoryAnalysisParser.__name__
 
         if "encoding" in analysis:
             params["encoder"] = symbol_table.get(analysis["encoding"]).build_object(dataset, **symbol_table.get_config(analysis["encoding"])["encoder_params"])
 
         if "labels" in analysis:
-            params["label_config"] = LabelHelper.create_label_config(analysis["labels"], dataset, ExploratoryAnalysisParser.__name__, yaml_location)
+            params["label_config"] = LabelHelper.create_label_config(analysis["labels"], dataset, loc, yaml_location)
         else:
             params["label_config"] = LabelConfiguration()
 
@@ -88,12 +92,14 @@ class ExploratoryAnalysisParser:
             params["preprocessing_sequence"] = symbol_table.get(analysis["preprocessing_sequence"])
 
         if "dim_reduction" in analysis:
-            ParameterValidator.assert_in_valid_list(analysis["dim_reduction"], [None, "umap"],
+            valid_dim_reductions = {el.symbol: el.item for el in symbol_table.get_by_type(SymbolType.ML_METHOD)
+                                    if isinstance(el.item, DimRedMethod)}
+            ParameterValidator.assert_in_valid_list(analysis["dim_reduction"], list(valid_dim_reductions.keys()),
                                                     ExploratoryAnalysisParser.__name__, "dim_reduction")
-            params["dim_reduction"] = analysis["dim_reduction"]
+            params["dim_reduction"] = copy.deepcopy(valid_dim_reductions[analysis['dim_reduction']])
 
-            # todo: Only KmerFrequency and Word2Vec are valid encoders when doing dim reduction. assert this
             assert isinstance(params["encoder"], (KmerFreqSequenceEncoder, Word2VecEncoder)), \
-                "Only KmerFrequency and Word2Vec are valid encoders when doing dimensionality reduction."
+                (f"{loc}: {yaml_location}: Only KmerFrequency and Word2Vec are valid encoders when doing dimensionality"
+                 f" reduction.")
 
         return params

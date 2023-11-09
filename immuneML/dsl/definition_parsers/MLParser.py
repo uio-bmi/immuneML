@@ -62,7 +62,7 @@ class MLParser:
 
     @staticmethod
     def parse_any_model(ml_method_id, ml_specification, ml_class_name):
-        ml_method_class = ReflectionHandler.get_class_by_name(ml_class_name)
+        ml_method_class = ReflectionHandler.get_class_by_name(ml_class_name, subdirectory='ml_methods/')
 
         ml_specification[ml_class_name] = {
             **DefaultParamsLoader.load("ml_methods/", ml_class_name, log_if_missing=False),
@@ -121,5 +121,8 @@ class MLParser:
                 ml_method = ml_method_class(parameters=ml_params)
             else:
                 ml_method = ml_method_class(**ml_params)
+
+        if hasattr(ml_method, 'name'):
+            ml_method.name = key
 
         return ml_method, ml_params

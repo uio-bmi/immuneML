@@ -43,6 +43,9 @@ def test_dimensionality_reduction():
                     }
                 },
             },
+            "ml_methods": {
+                "pca": {"PCA": {'n_components': 2}}
+            }
         },
         "instructions": {
             "inst1": {
@@ -51,7 +54,7 @@ def test_dimensionality_reduction():
                     "my_analysis_1": {  # user-defined analysis name
                         "dataset": "d1",
                         "report": "rep1",
-                        "dim_reduction": "umap",
+                        "dim_reduction": "pca",
                         "encoding": "e1"
                     },
                 },

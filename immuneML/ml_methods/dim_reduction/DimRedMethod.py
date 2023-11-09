@@ -5,7 +5,7 @@ from immuneML.data_model.dataset.Dataset import Dataset
 
 class DimRedMethod:
 
-    def __init__(self, name: str):
+    def __init__(self, name: str = None):
         self.method = None
         self.name = name
 

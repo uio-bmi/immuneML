@@ -5,7 +5,7 @@ from immuneML.data_model.dataset.Dataset import Dataset
 
 class ClusteringMethod:
 
-    def __init__(self, name):
+    def __init__(self, name: str = None):
         self.name = name
 
     @abc.abstractmethod

@@ -5,7 +5,6 @@ from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
-from immuneML.util.Umap import run_umap
 from immuneML.workflows.instructions.Instruction import Instruction
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisState import ExploratoryAnalysisState
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
@@ -92,22 +91,21 @@ class ExploratoryAnalysisInstruction(Instruction):
 
     def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> ReportResult:
         unit.dataset = self.preprocess_dataset(unit, result_path / "preprocessed_dataset")
-        encoded_dataset = self.encode(unit, result_path / "encoded_dataset")
-        unit.report.dataset = encoded_dataset
+        unit.dataset = self.encode(unit, result_path / "encoded_dataset")
         unit.report.result_path = result_path / "report"
         unit.report.number_of_processes = unit.number_of_processes
 
         if unit.dim_reduction is not None:
             self._run_dimensionality_reduction(unit)
 
+        unit.report.dataset = unit.dataset
         report_result = unit.report.generate_report()
 
         return report_result
 
     def _run_dimensionality_reduction(self, unit: ExploratoryAnalysisUnit):
-        assert unit.dim_reduction == "umap", "Only supported dimensionality reduction method is umap"
-        result = run_umap(unit.report.dataset.encoded_data.examples)
-        unit.report.dataset.encoded_data.dimensionality_reduced_data = result
+        result = unit.dim_reduction.fit_transform(unit.dataset)
+        unit.dataset.encoded_data.dimensionality_reduced_data = result
 
     def preprocess_dataset(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> Dataset:
         if unit.preprocessing_sequence is not None and len(unit.preprocessing_sequence) > 0:

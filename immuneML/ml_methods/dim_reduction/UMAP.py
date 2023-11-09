@@ -27,7 +27,7 @@ class UMAP(DimRedMethod):
 
     """
 
-    def __init__(self, name, **kwargs):
+    def __init__(self, name: str = None, **kwargs):
         super().__init__(name)
         self.method_kwargs = kwargs
         self.method = umap.UMAP(**kwargs)
