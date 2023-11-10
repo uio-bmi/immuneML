@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 from typing import List
 
+import numpy as np
 import pandas as pd
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter

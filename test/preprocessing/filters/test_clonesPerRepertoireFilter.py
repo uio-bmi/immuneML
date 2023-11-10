@@ -28,6 +28,6 @@ class TestClonesPerRepertoireFilter(TestCase):
         dataset2 = ClonesPerRepertoireFilter(**{"upper_limit": 2, "result_path": path / 'dataset2'}).process_dataset(dataset, path / 'processed_dataset2')
         self.assertEqual(1, dataset2.get_example_count())
 
-        self.assertRaises(Exception, ClonesPerRepertoireFilter(**{"lower_limit": 10, "result_path": path / 'dataset3'}).process_dataset, dataset, path / 'processed_dataset3')
+        self.assertRaises(AssertionError, ClonesPerRepertoireFilter(**{"lower_limit": 10, "result_path": path}).process_dataset, dataset, path)
 
         shutil.rmtree(path)
