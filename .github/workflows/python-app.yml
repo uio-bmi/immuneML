@@ -3,8 +3,10 @@ name: Python application
 on:
   push:
     branches: [ master ]
+    paths: ['**.py', '**.yaml']
   pull_request:
     branches: [ master ]
+    paths: ['**.py', '**.yaml']
 
 jobs:
   build:

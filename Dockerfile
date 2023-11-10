@@ -12,4 +12,4 @@ RUN make -C compairr_folder
 RUN cp ./compairr_folder/src/compairr ./compairr
 
 # Voila: install immuneML
-RUN pip3 install ./immuneML/[TCRdist]
+RUN pip3 install ./immuneML/[TCRdist,gen_models,ligo]
