@@ -26,10 +26,10 @@ class TestDataEncoder(TestCase):
         path = EnvironmentSettings.tmp_test_path / "data_encoder/"
         PathBuilder.build(path)
 
-        rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1")],
+        rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", sequence_id="1")],
                                                       metadata={"l1": 1, "l2": 2}, path=path)
 
-        rep2 = Repertoire.build_from_sequence_objects([ReceptorSequence("ATA", identifier="2")],
+        rep2 = Repertoire.build_from_sequence_objects([ReceptorSequence("ATA", sequence_id="2")],
                                                       metadata={"l1": 0, "l2": 3}, path=path)
 
         lc = LabelConfiguration()

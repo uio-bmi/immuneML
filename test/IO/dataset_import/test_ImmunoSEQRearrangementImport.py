@@ -28,7 +28,6 @@ GGCTGCTGTCGGCTGCTCCCTCCCAGACATCTGTGTACTTCTGTGCCAGCAGTTATGGGCCGCCAAGGTGAGCAGTTCTT
 CACATCAATTCCCTGGAGCTTGGTGACTCTGCTGTGTATTTCTGTGCCAGCAGCCAAGCAGATAATCAGCCCCAGCATTTTGGTGAT	CASSQADNQPQHF	In	VDJ	363	9277	0.0022853480050195377	0.002864253761089065	39	TCRBV03	unresolved		TCRBD01	TCRBD01-01	01	TCRBJ01	TCRBJ01-05	01	1	4	5	4	2	0	42	-1	61	58	63		TCRBV03-01,TCRBV03-02								null	null	null	null	HIP00110	Human	TCRB	Deep	null	224859	179411	41463	3983	0	130940	104850	24105	1985	0	4059338	3238889	748535	71914	0	0.100719467	14.9981718	0.1101579	15.1260223	3636.47998	559458	0.3206871650776287	0	0.0	0.0137189021	0.0191940162	v2	Human-TCRB-PD1x	2013-12-13 22:23:05.529	Age:55 Years,Biological Sex:Male,Cohort:Cohort 01,Ethnic Group:Unknown Ethnicity,HLA MHC class I:HLA-A*03,HLA MHC class I:HLA-A*24,HLA MHC class I:HLA-B*07,Inferred CMV status (cross-validation): Inferred CMV -,Inferred CMV status: Inferred CMV -,Inferred HLA type:Inferred HLA-A*03,Inferred HLA type:Inferred HLA-A*24,Inferred HLA type:Inferred HLA-B*07,Racial Group:Unknown racial group,Species:Human,Tissue Source:gDNA,Tissue Source:PBMC,Tissue Source:Peripheral blood lymphocytes (PBL),Tissue Source:T cells,Virus Diseases:Cytomegalovirus -	0.7978822284186979	null	null	0
 CACATCAATTCCCTGGAGCTTGGTGACTCTGCTGTGTATTTCTGTGCCAGCAGCCAAGCAGATAATCAGCCCCAGCATTTTGGTGAT	CASSQADNQPQHF	In	VDJ	363	9277	0.0022853480050195377	0.002864253761089065	39	nan	unresolved		TCRAD01	TCRAD01-01	01	TCRAJ01	TCRAJ01-05	01	1	4	5	4	2	0	42	-1	61	58	63		TCRBV03-01,TCRBV03-02								null	null	null	null	HIP00110	Human	TCRB	Deep	null	224859	179411	41463	3983	0	130940	104850	24105	1985	0	4059338	3238889	748535	71914	0	0.100719467	14.9981718	0.1101579	15.1260223	3636.47998	559458	0.3206871650776287	0	0.0	0.0137189021	0.0191940162	v2	Human-TCRB-PD1x	2013-12-13 22:23:05.529	Age:55 Years,Biological Sex:Male,Cohort:Cohort 01,Ethnic Group:Unknown Ethnicity,HLA MHC class I:HLA-A*03,HLA MHC class I:HLA-A*24,HLA MHC class I:HLA-B*07,Inferred CMV status (cross-validation): Inferred CMV -,Inferred CMV status: Inferred CMV -,Inferred HLA type:Inferred HLA-A*03,Inferred HLA type:Inferred HLA-A*24,Inferred HLA type:Inferred HLA-B*07,Racial Group:Unknown racial group,Species:Human,Tissue Source:gDNA,Tissue Source:PBMC,Tissue Source:Peripheral blood lymphocytes (PBL),Tissue Source:T cells,Virus Diseases:Cytomegalovirus -	0.7978822284186979	null	null	0"""
 
-
         rep2text = """rearrangement	amino_acid	bio_identity	templates	frame_type	rearrangement_type	cdr3_length	frequency	productive_frequency	v_resolved	d_resolved	j_resolved	v_family	v_family_ties	v_gene	v_gene_ties	v_allele	v_allele_ties	d_family	d_family_ties	d_gene	d_gene_ties	d_allele	d_allele_ties	j_family	j_family_ties	j_gene	j_gene_ties	j_allele	j_allele_ties	locus
 GCACAGAGCAGGGGGACTCGGCCATGTATCTCTGTGCCAGCAGCTTACTGGTAAACCCCCACTGCTTATGAGCAGTTCTTCGGGCCA	na	X+TCRBV07-09+TCRBJ02-01	170	Out	VDJ	49	0.012084162638612454	na	TCRBV07-09*01	TCRBD02-01	TCRBJ02-01*01	TCRBV07	no data	TCRBV07-09	no data	01	no data	TCRBD02	no data	TCRBD02-01	no data	unknown	01,02	TCRBJ02	no data	TCRBJ02-01	no data	01	no data	TCRB
 CCACGGAGTCAGGGGACACAGCACTGTATTTCTGTGCCAGCAGCAAATTTCAGGGGCGGATGGATTGAAAAACTGTTTTTTGGCAGT	na	X+TCRBV21-01+TCRBJ01-04	58	Out	VDJ	49	0.004122831959056014	na	TCRBV21-01*01	TCRBD01-01*01	TCRBJ01-04*01	TCRBV21	no data	TCRBV21-01	no data	01	no data	TCRBD01	no data	TCRBD01-01	no data	01	no data	TCRBJ01	no data	TCRBJ01-04	no data	01	no data	TCRB
@@ -46,7 +45,7 @@ TCGGCTGCTCCCTCCCAGACATCTGTGTACTTCTGTGCCAGCAGTTCATCCTCCGAGCGGGAGGAAGAGACCCAGTACTT
 GAGTCCGCCAGCACCAACCAGACATCTATGTACCTCTGTGCCAGCAGACCAGGAACAGGGAGGAAAAACATTCAGTACTTCGGCGCC	CASRPGTGRKNIQYF	CASRPGTGRKNIQYF+TCRBV28-01+TCRBJ02-04	2	In	VDJ	45	1.4216661927779356E-4	1.9409937888198756E-4	TCRBV28-01*01	unknown	TCRBJ02-04*01	TCRBV28	no data	TCRBV28-01	no data	01	no data	unknown	TCRBD01,TCRBD02	unresolved	TCRBD01-01,TCRBD02-01	unknown	no data	TCRBJ02	no data	TCRBJ02-04	no data	01	no data	TCRB
 ACAGTGACCAGTGCCCATCCTGAAGACAGCAGCTTCTACATCTGCAGTGCTAGATCCACCTTAGAGTACGAGCAGTACTTCGGGCCG	CSARSTLEYEQYF	CSARSTLEYEQYF+TCRBV20-X+TCRBJ02-07	2	In	VDJ	39	1.4216661927779356E-4	1.9409937888198756E-4	TCRBV20	TCRBD02-01	TCRBJ02-07*01	TCRBV20	no data	unresolved	TCRBV20-01,TCRBV20-or09_02	unknown	no data	TCRBD02	no data	TCRBD02-01	no data	unknown	01,02	TCRBJ02	no data	TCRBJ02-07	no data	01	no data	TCRB"""
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         with open(path / "rep1.tsv", "w") as file:
             file.writelines(rep1text)
@@ -60,10 +59,10 @@ ACAGTGACCAGTGCCCATCCTGAAGACAGCAGCTTCTACATCTGCAGTGCTAGATCCACCTTAGAGTACGAGCAGTACTT
                     """filename,chain,subject_id,coeliac status (yes/no)
 rep1.tsv,TRA,1234,no
 rep2.tsv,TRB,1234a,no"""
-            )
+                )
 
     def test_repertoire_import(self):
-        path = EnvironmentSettings.root_path / "test/tmp/adaptive/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "adaptive/")
         self.build_dummy_dataset(path, True)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "ImmunoSEQRearrangement")
@@ -76,7 +75,7 @@ rep2.tsv,TRB,1234a,no"""
         params["import_productive"] = True
         params["import_with_stop_codon"] = True
         params["import_out_of_frame"] = True
-        params["number_of_processes"] = 2
+        params["number_of_processes"] = 1
 
         dataset_name = "adaptive_dataset_reps"
 
@@ -92,12 +91,12 @@ rep2.tsv,TRB,1234a,no"""
             if index == 0:
                 self.assertEqual("1234", rep.metadata["subject_id"])
                 self.assertEqual(10, len(rep.sequences))
-                self.assertEqual(10, rep.sequences[0].metadata.count)
-                self.assertEqual("TRBV29", rep.sequences[0].metadata.v_subgroup)
+                self.assertEqual(10, rep.sequences[0].metadata.duplicate_count)
+                self.assertEqual("TRBV29-1*01", rep.sequences[0].metadata.v_call)
             else:
                 self.assertEqual("1234a", rep.metadata["subject_id"])
                 self.assertEqual(11, len(rep.sequences))
-                self.assertEqual(2, rep.sequences[-1].metadata.count)
+                self.assertEqual(2, rep.sequences[-1].metadata.duplicate_count)
 
         dataset_file = path / f"{dataset_name}.{ImportHelper.DATASET_FORMAT}"
 
@@ -106,7 +105,7 @@ rep2.tsv,TRB,1234a,no"""
         shutil.rmtree(path)
 
     def test_sequence_import(self):
-        path = EnvironmentSettings.root_path / "test/tmp/adaptive/"
+        path = EnvironmentSettings.tmp_test_path / "adaptive_seq"
         self.build_dummy_dataset(path, False)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "ImmunoSEQRearrangement")
@@ -127,11 +126,11 @@ rep2.tsv,TRB,1234a,no"""
         self.assertEqual(21, dataset.get_example_count())
 
         seqs = [sequence for sequence in dataset.get_data()]
-        self.assertTrue(seqs[0].amino_acid_sequence in ["ASSLPGTNTGELF","SVEESYEQY"]) # OSX/windows
-        self.assertTrue(seqs[0].nucleotide_sequence in ["GCCAGCAGCTTACCGGGGACGAACACCGGGGAGCTGTTT",'AGCGTTGAAGAATCCTACGAGCAGTAC']) # OSX/windows
+        self.assertTrue(seqs[0].sequence_aa in ["ASSLPGTNTGELF", "SVEESYEQY"])  # OSX/windows
+        self.assertTrue(seqs[0].sequence in ["GCCAGCAGCTTACCGGGGACGAACACCGGGGAGCTGTTT", 'AGCGTTGAAGAATCCTACGAGCAGTAC'])  # OSX/windows
         self.assertEqual("IN", seqs[0].metadata.frame_type.name)
-        self.assertTrue(seqs[0].metadata.v_gene in ['TRBV7-9','TRBV29-1']) # OSX/windows
-        self.assertTrue(seqs[0].metadata.j_gene in ['TRBJ2-2','TRBJ2-7']) # OSX/windows
+        self.assertTrue(seqs[0].metadata.v_call in ['TRBV7-9*01', 'TRBV29-1*01'])  # OSX/windows
+        self.assertTrue(seqs[0].metadata.j_call in ['TRBJ2-2*01', 'TRBJ2-7*01'])  # OSX/windows
 
         dataset_file = path / f"{dataset_name}.{ImportHelper.DATASET_FORMAT}"
 
@@ -140,7 +139,7 @@ rep2.tsv,TRB,1234a,no"""
         shutil.rmtree(path)
 
     def test_alternative_repertoire_import(self):
-        path = EnvironmentSettings.root_path / "test/tmp/immunoseq_alternative/"
+        path = EnvironmentSettings.tmp_test_path / "immunoseq_alternative"
 
         rep1text = """sample_name	productive_frequency	templates	amino_acid	rearrangement	v_resolved	d_resolved	j_resolved
 LivMet_45	0.014838454958215437	451	CASSLLGLGSEQYF	CTGCTGTCGGCTGCTCCCTCCCAGACATCTGTGTACTTCTGTGCCAGCAGTTTACTCGGGTTAGGGAGCGAGCAGTACTTCGGGCCG	TCRBV06	TCRBD02-01*02	TCRBJ02-07*01
@@ -148,7 +147,7 @@ LivMet_45	0.0106928999144568	325	CASSPGQGEGYEQYF	CACGCCCTGCAGCCAGAAGACTCAGCCCTGT
 LivMet_45	0.0074356780943607296	226	CASSAGETQYF	ACTCTGACGATCCAGCGCACAGAGCAGCGGGACTCGGCCATGTATCGCTGTGCCAGCAGCGCAGGCGAGACCCAGTACTTCGGGCCA	TCRBV07-06*01	TCRBD01-01*01	TCRBJ02-05*01
 LivMet_45	0.0072053694808185825	219	CASSGTGEKGEQYF	ATCCGGTCCACAAAGCTGGAGGACTCAGCCATGTACTTCTGTGCCAGCAGTGGGACAGGGGAGAAGGGCGAGCAGTACTTCGGGCCG	TCRBV02-01*01	TCRBD01-01*01	TCRBJ02-07*01
 """
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         with open(path / "rep1.tsv", "w") as file:
             file.writelines(rep1text)
@@ -169,7 +168,3 @@ rep1.tsv,TRB,1234a""")
         self.assertEqual(1, dataset.get_example_count())
 
         shutil.rmtree(path)
-
-
-
-

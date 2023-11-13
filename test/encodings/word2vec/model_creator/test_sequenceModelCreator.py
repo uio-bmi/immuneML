@@ -14,12 +14,12 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TestSequenceModelCreator(TestCase):
     def test_create_model(self):
-        test_path = EnvironmentSettings.root_path / "test/tmp/w2vseqmc/"
+        test_path = EnvironmentSettings.tmp_test_path / "w2vseqmc/"
 
-        PathBuilder.build(test_path)
+        PathBuilder.remove_old_and_build(test_path)
 
-        sequence1 = ReceptorSequence("CASSVFA", identifier="1")
-        sequence2 = ReceptorSequence("CASSCCC", identifier="2")
+        sequence1 = ReceptorSequence("CASSVFA", sequence_id="1")
+        sequence2 = ReceptorSequence("CASSCCC", sequence_id="2")
 
         metadata1 = {"T1D": "T1D", "subject_id": "1"}
         rep1 = Repertoire.build_from_sequence_objects([sequence1, sequence2], metadata=metadata1, path=test_path)

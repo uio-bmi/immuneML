@@ -1,3 +1,4 @@
+import uuid
 from pathlib import Path
 
 import pandas as pd
@@ -23,6 +24,9 @@ class RepertoireBuilder:
             for index, sequence_list in enumerate(sequences):
                 assert len(sequence_list) == len(seq_metadata[index])
 
+        assert not (path / "repertoires").is_dir(), f"RepertoireBuilder: attempted to store new repertoires at {path / 'repertoires'} but this folder already exists. " \
+                                                    f"Please remove this folder or specify a different path. "
+
         PathBuilder.build(path)
         rep_path = PathBuilder.build(path / "repertoires")
 
@@ -36,11 +40,11 @@ class RepertoireBuilder:
                 subject_ids.append("rep_" + str(rep_index))
             for seq_index, sequence in enumerate(sequence_list):
                 if seq_metadata is None:
-                    m = SequenceMetadata(v_subgroup="TRBV1", v_gene="TRBV1-1", v_allele="TRBV1-1*01", j_subgroup="TRBJ1", j_gene="TRBJ1-1", j_allele="TRBJ1-1*01", count=1, chain="TRB", region_type="IMGT_CDR3")
+                    m = SequenceMetadata(v_call="TRBV1-1*01", j_call="TRBJ1-1*01", duplicate_count=1, chain="TRB", region_type="IMGT_CDR3")
                 else:
                     m = SequenceMetadata(**seq_metadata[rep_index][seq_index])
 
-                s = ReceptorSequence(amino_acid_sequence=sequence, metadata=m, identifier=str(seq_index))
+                s = ReceptorSequence(sequence_aa=sequence, metadata=m, sequence_id=str(uuid.uuid4().hex))
                 rep_sequences.append(s)
 
             if labels is not None:

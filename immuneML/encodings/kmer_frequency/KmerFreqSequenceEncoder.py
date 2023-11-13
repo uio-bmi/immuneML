@@ -11,7 +11,7 @@ class KmerFreqSequenceEncoder(KmerFrequencyEncoder):
 
         encoded_data = self._encode_data(dataset, params)
 
-        encoded_dataset = SequenceDataset(filenames=dataset.get_filenames(),
+        encoded_dataset = SequenceDataset(filenames=dataset.get_filenames(), dataset_file=dataset.dataset_file,
                                           encoded_data=encoded_data,
                                           labels=dataset.labels)
 
@@ -29,7 +29,7 @@ class KmerFreqSequenceEncoder(KmerFrequencyEncoder):
         for sequence in dataset.get_data(params.pool_size):
             counts = self._encode_sequence(sequence, params, sequence_encoder, Counter())
             encoded_sequences.append(counts)
-            sequence_ids.append(sequence.identifier)
+            sequence_ids.append(sequence.sequence_id)
 
             if params.encode_labels:
                 for label_name in label_config.get_labels_by_name():

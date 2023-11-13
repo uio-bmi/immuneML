@@ -12,7 +12,7 @@ from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.ml_metrics.MetricUtil import MetricUtil
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
@@ -53,7 +53,7 @@ class MLApplicationInstruction(Instruction):
     will be added to the predictions table in addition:
 
     .. list-table::
-        :widths: 25 25 25 25
+        :widths: 20 20 20 20 20
         :header-rows: 1
 
         * - example_id
@@ -77,16 +77,15 @@ class MLApplicationInstruction(Instruction):
           - 0.22
           - 0
 
-    Arguments:
+    Specification arguments:
 
-        dataset: dataset for which examples need to be classified
+    - dataset: dataset for which examples need to be classified
 
-        config_path: path to the zip file exported from MLModelTraining instruction (which includes train ML model, encoder, preprocessing etc.)
+    - config_path: path to the zip file exported from MLModelTraining instruction (which includes train ML model, encoder, preprocessing etc.)
 
-        number_of_processes (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
+    - number_of_processes (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
 
-        metrics (list): a list of metrics to compute between the true and predicted classes. These metrics will only be computed when the same
-        label with the same classes is provided for the dataset as the original label the ML setting was trained for.
+    - metrics (list): a list of metrics to compute between the true and predicted classes. These metrics will only be computed when the same label with the same classes is provided for the dataset as the original label the ML setting was trained for.
 
 
     Specification example for the MLApplication instruction:
@@ -106,7 +105,7 @@ class MLApplicationInstruction(Instruction):
 
     """
 
-    def __init__(self, dataset: Dataset, label_configuration: LabelConfiguration, hp_setting: HPSetting, metrics: List[Metric], number_of_processes: int, name: str):
+    def __init__(self, dataset: Dataset, label_configuration: LabelConfiguration, hp_setting: HPSetting, metrics: List[ClassificationMetric], number_of_processes: int, name: str):
 
         self.state = MLApplicationState(dataset=dataset, hp_setting=hp_setting, label_config=label_configuration, metrics=metrics, pool_size=number_of_processes, name=name)
 
@@ -193,7 +192,7 @@ class MLApplicationInstruction(Instruction):
     @staticmethod
     def get_documentation():
         doc = str(MLApplicationInstruction.__doc__)
-        valid_metrics = str([metric.name.lower() for metric in Metric])[1:-1].replace("'", "`")
+        valid_metrics = str([metric.name.lower() for metric in ClassificationMetric])[1:-1].replace("'", "`")
 
         mapping = {
             "a list of metrics": f"a list of metrics ({valid_metrics})",

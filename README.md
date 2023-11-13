@@ -4,7 +4,6 @@
 ![Docker](https://github.com/uio-bmi/immuneML/workflows/Docker/badge.svg?branch=master)
 [![](https://img.shields.io/static/v1?label=AIRR-C%20sw-tools%20v1&message=compliant&color=008AFF&labelColor=000000&style=plastic)](https://docs.airr-community.org/en/stable/swtools/airr_swtools_standard.html)
 
-
 immuneML is a platform for machine learning-based analysis and 
 classification of adaptive immune receptors and repertoires (AIRR).
 
@@ -31,6 +30,8 @@ Useful links:
 
 immuneML can be installed directly [using pip](<https://pypi.org/project/immuneML/>).
 immuneML uses Python 3.7 or later. We recommend installing immuneML inside a virtual environment.
+
+If using immuneML simulation, Python 3.11 is recommended.
 
 For more detailed instructions (virtual environment, troubleshooting, Docker, developer installation), please see the [installation documentation](https://docs.immuneml.uio.no/installation/install_with_package_manager.html).
 

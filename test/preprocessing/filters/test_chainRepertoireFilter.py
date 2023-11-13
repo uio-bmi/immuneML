@@ -26,9 +26,9 @@ class TestChainRepertoireFilter(TestCase):
         PathBuilder.build(path)
 
         rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", metadata=SequenceMetadata(chain="A"),
-                                                                        identifier="1")], path=path, metadata={})
+                                                                        sequence_id="1")], path=path, metadata={})
         rep2 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAC", metadata=SequenceMetadata(chain="B"),
-                                                                        identifier="2")], path=path, metadata={})
+                                                                        sequence_id="2")], path=path, metadata={})
 
         metadata = pd.DataFrame({"CD": [1, 0]})
         metadata.to_csv(path / "metadata.csv")

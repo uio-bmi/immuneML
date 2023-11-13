@@ -8,11 +8,11 @@ from pathlib import Path
 
 import yaml
 
-from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
-from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.ReadsType import ReadsType
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
@@ -131,14 +131,12 @@ def build_settings_specs(enc_names, ml_names):
 
 
 def discover_dataset_params():
-    dataset = glob.glob("*.iml_dataset")
+    dataset = glob.glob("*dataset.yaml")
 
-    assert len(dataset) > 0, "no .iml_dataset file was present in the current working directory"
-    assert len(dataset) < 2, "multiple .iml_dataset files were present in the current working directory"
+    assert len(dataset) > 0, "no *dataset.yaml file was present in the current working directory"
+    assert len(dataset) < 2, f"multiple *dataset.yaml files were present in the current working directory: {list(glob.glob('*dataset.yaml'))}"
 
     dataset_path = dataset[0]
-
-    dataset_name = dataset_path.rsplit('.iml_dataset', 1)[0]
 
     return {"path": dataset_path}
 
@@ -231,7 +229,7 @@ def check_arguments(args):
 
 
 def parse_commandline_arguments(args):
-    ReflectionHandler.get_classes_by_partial_name("", "ml_methods/")
+    ReflectionHandler.get_classes_by_partial_name("", "ml_methods/classifiers/")
     ml_method_names = [cl.__name__ for cl in ReflectionHandler.all_nonabstract_subclasses(MLMethod)] + ["SimpleLogisticRegression"]
 
     parser = argparse.ArgumentParser(description="tool for building immuneML Galaxy YAML from arguments")

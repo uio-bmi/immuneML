@@ -9,7 +9,7 @@ from plotly.subplots import make_subplots
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
-from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
@@ -23,9 +23,10 @@ class ConfounderAnalysis(MLReport):
     the metadata features specified by the user. This allows checking whether a given machine learning model makes more
     misclassifications for some values of a metadata feature than for the others.
 
-    Arguments:
+    Specification arguments:
 
-        metadata_labels (list): A list of the metadata features to use as a basis for the calculations
+    - metadata_labels (list): A list of the metadata features to use as a basis for the calculations
+
 
     YAML specification:
 

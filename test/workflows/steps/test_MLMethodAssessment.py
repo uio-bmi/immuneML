@@ -12,8 +12,8 @@ from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 from immuneML.workflows.steps.MLMethodAssessment import MLMethodAssessment
@@ -46,8 +46,8 @@ class TestMLMethodAssessment(TestCase):
         res = MLMethodAssessment.run(MLMethodAssessmentParams(
             dataset=dataset,
             method=method1,
-            metrics={Metric.ACCURACY, Metric.BALANCED_ACCURACY, Metric.F1_MACRO},
-            optimization_metric=Metric.LOG_LOSS,
+            metrics={ClassificationMetric.ACCURACY, ClassificationMetric.BALANCED_ACCURACY, ClassificationMetric.F1_MACRO},
+            optimization_metric=ClassificationMetric.LOG_LOSS,
             predictions_path=EnvironmentSettings.tmp_test_path / "mlmethodassessment/predictions.csv",
             label=label,
             ml_score_path=EnvironmentSettings.tmp_test_path / "mlmethodassessment/ml_score.csv",
@@ -56,7 +56,7 @@ class TestMLMethodAssessment(TestCase):
         ))
 
         self.assertTrue(isinstance(res, dict))
-        self.assertTrue(res[Metric.LOG_LOSS.name.lower()] <= 0.1)
+        self.assertTrue(res[ClassificationMetric.LOG_LOSS.name.lower()] <= 0.1)
 
         self.assertTrue(os.path.isfile(EnvironmentSettings.tmp_test_path / "mlmethodassessment/ml_score.csv"))
 

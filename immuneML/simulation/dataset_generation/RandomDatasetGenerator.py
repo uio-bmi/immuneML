@@ -2,8 +2,7 @@ import random
 import uuid
 from pathlib import Path
 
-import numpy as np
-
+from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
@@ -19,7 +18,8 @@ class RandomDatasetGenerator:
 
     @staticmethod
     def _check_probabilities(probabilities_dict, key_type, dict_name):
-        assert isinstance(probabilities_dict, dict) and all(isinstance(key, key_type) for key in probabilities_dict.keys()) \
+        assert isinstance(probabilities_dict, dict) and all(
+            isinstance(key, key_type) for key in probabilities_dict.keys()) \
                and all(isinstance(value, float) or value in {0, 1} for value in probabilities_dict.values()) \
                and 0.99 <= round(sum(probabilities_dict.values()), 5) <= 1, \
             f"RandomDatasetGenerator: {dict_name} are not specified correctly. They should be a dictionary with probabilities per count " \
@@ -42,7 +42,8 @@ class RandomDatasetGenerator:
         assert path is not None, "RandomDatasetGenerator: path cannot be None when generating datasets."
 
     @staticmethod
-    def _check_rep_dataset_generation_params(repertoire_count: int, sequence_count_probabilities: dict, sequence_length_probabilities: dict,
+    def _check_rep_dataset_generation_params(repertoire_count: int, sequence_count_probabilities: dict,
+                                             sequence_length_probabilities: dict,
                                              labels: dict, path: Path):
 
         RandomDatasetGenerator._check_example_count(repertoire_count, "repertoire_count")
@@ -52,8 +53,9 @@ class RandomDatasetGenerator:
         RandomDatasetGenerator._check_path(path)
 
     @staticmethod
-    def generate_repertoire_dataset(repertoire_count: int, sequence_count_probabilities: dict, sequence_length_probabilities: dict,
-                                    labels: dict, path: Path) -> RepertoireDataset:
+    def generate_repertoire_dataset(repertoire_count: int, sequence_count_probabilities: dict,
+                                    sequence_length_probabilities: dict,
+                                    labels: dict, path: Path, name="repertoire_dataset") -> RepertoireDataset:
         """
         Creates repertoire_count repertoires where the number of sequences per repertoire is sampled from the probability distribution given
         in sequence_count_probabilities. The length of sequences is sampled independently for each sequence from
@@ -77,28 +79,40 @@ class RandomDatasetGenerator:
                 1: 0.3 # 30% of the generated repertoires will have class 1
                 0: 0.7 # 70% of the generated repertoires will have class 0
         """
-        RandomDatasetGenerator._check_rep_dataset_generation_params(repertoire_count, sequence_count_probabilities, sequence_length_probabilities,
+        RandomDatasetGenerator._check_rep_dataset_generation_params(repertoire_count, sequence_count_probabilities,
+                                                                    sequence_length_probabilities,
                                                                     labels, path)
 
         alphabet = EnvironmentSettings.get_sequence_alphabet()
         PathBuilder.build(path)
 
         sequences = [["".join(random.choices(alphabet,
-                                             k=random.choices(list(sequence_length_probabilities.keys()), sequence_length_probabilities.values())[0]))
-                      for seq_count in range(random.choices(list(sequence_count_probabilities.keys()), sequence_count_probabilities.values())[0])]
+                                             k=random.choices(list(sequence_length_probabilities.keys()),
+                                                              sequence_length_probabilities.values())[0]))
+                      for seq_count in range(
+                random.choices(list(sequence_count_probabilities.keys()), sequence_count_probabilities.values())[0])]
                      for rep in range(repertoire_count)]
 
+        processed_labels, dataset_params = RandomDatasetGenerator._make_labels(labels, repertoire_count)
+
+        repertoires, metadata = RepertoireBuilder.build(sequences=sequences, path=path, labels=processed_labels)
+        dataset = RepertoireDataset(labels=dataset_params, repertoires=repertoires, metadata_file=metadata, name=name)
+
+        return ImmuneMLExporter.export(dataset, path)
+
+
+    @staticmethod
+    def _make_labels(labels: dict, element_count: int):
         if labels is not None:
-            processed_labels = {label: random.choices(list(labels[label].keys()), labels[label].values(), k=repertoire_count) for label in labels}
+            processed_labels = {
+                label: random.choices(list(labels[label].keys()), labels[label].values(), k=element_count) for label
+                in labels}
             dataset_params = {label: list(labels[label].keys()) for label in labels}
         else:
             processed_labels = None
             dataset_params = None
 
-        repertoires, metadata = RepertoireBuilder.build(sequences=sequences, path=path, labels=processed_labels)
-        dataset = RepertoireDataset(labels=dataset_params, repertoires=repertoires, metadata_file=metadata)
-
-        return dataset
+        return processed_labels, dataset_params
 
     @staticmethod
     def _check_receptor_dataset_generation_params(receptor_count: int, chain_1_length_probabilities: dict,
@@ -111,7 +125,8 @@ class RandomDatasetGenerator:
         RandomDatasetGenerator._check_path(path)
 
     @staticmethod
-    def generate_receptor_dataset(receptor_count: int, chain_1_length_probabilities: dict, chain_2_length_probabilities: dict, labels: dict,
+    def generate_receptor_dataset(receptor_count: int, chain_1_length_probabilities: dict,
+                                  chain_2_length_probabilities: dict, labels: dict,
                                   path: Path):
         """
         Creates receptor_count receptors where the length of sequences in each chain is sampled independently for each sequence from
@@ -143,35 +158,31 @@ class RandomDatasetGenerator:
         alphabet = EnvironmentSettings.get_sequence_alphabet()
         PathBuilder.build(path)
 
-        get_random_sequence = lambda proba, chain, id: ReceptorSequence("".join(random.choices(alphabet, k=random.choices(list(proba.keys()),
-                                                                                                                          proba.values())[0])),
-                                                                        metadata=SequenceMetadata(count=1,
-                                                                                                  v_subgroup=chain + "V1",
-                                                                                                  v_gene=chain + "V1-1",
-                                                                                                  v_allele=chain + "V1-1*01",
-                                                                                                  j_subgroup=chain + "J1",
-                                                                                                  j_gene=chain + "J1-1",
-                                                                                                  j_allele=chain + "J1-1*01",
-                                                                                                  chain=chain,
-                                                                                                  cell_id=id,
-                                                                                                  region_type="IMGT_CDR3"))
+        get_random_sequence = lambda proba, chain, id: ReceptorSequence(
+            "".join(random.choices(alphabet, k=random.choices(list(proba.keys()),
+                                                              proba.values())[0])),
+            metadata=SequenceMetadata(duplicate_count=1, region_type='IMGT_CDR3',
+                                      v_call=chain + "V1-1*01",
+                                      j_call=chain + "J1-1*01",
+                                      chain=chain,
+                                      cell_id=str(id)))
 
         receptors = [TCABReceptor(alpha=get_random_sequence(chain_1_length_probabilities, "TRA", i),
                                   beta=get_random_sequence(chain_2_length_probabilities, "TRB", i),
-                                  metadata={**{label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]
-                                               for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}})
+                                  identifier=str(i),
+                                  metadata={
+                                      **{label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]
+                                         for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}})
                      for i in range(receptor_count)]
 
-        filename = path / "batch01.npy"
+        processed_labels, dataset_params = RandomDatasetGenerator._make_labels(labels, receptor_count)
+        dataset= ReceptorDataset.build_from_objects(receptors, 100, path, name="receptor_dataset", labels=dataset_params)
 
-        receptor_matrix = np.core.records.fromrecords([receptor.get_record() for receptor in receptors], names=TCABReceptor.get_record_names())
-        np.save(str(filename), receptor_matrix, allow_pickle=False)
-
-        return ReceptorDataset(labels={label: list(label_dict.keys()) for label, label_dict in labels.items()},
-                               filenames=[filename], file_size=receptor_count, element_class_name=type(receptors[0]).__name__ if len(receptors) > 0 else None)
+        return ImmuneMLExporter.export(dataset, path)
 
     @staticmethod
-    def _check_sequence_dataset_generation_params(receptor_count: int, length_probabilities: dict, labels: dict, path: Path):
+    def _check_sequence_dataset_generation_params(receptor_count: int, length_probabilities: dict, labels: dict,
+                                                  path: Path):
         RandomDatasetGenerator._check_probabilities(length_probabilities, int, 'length_probabilities')
         RandomDatasetGenerator._check_example_count(receptor_count, "receptor_count")
         RandomDatasetGenerator._check_labels(labels)
@@ -199,7 +210,8 @@ class RandomDatasetGenerator:
                 1: 0.3 # 30% of the generated receptors will have class 1
                 0: 0.7 # 70% of the generated receptors will have class 0
         """
-        RandomDatasetGenerator._check_sequence_dataset_generation_params(sequence_count, length_probabilities, labels, path)
+        RandomDatasetGenerator._check_sequence_dataset_generation_params(sequence_count, length_probabilities, labels,
+                                                                         path)
 
         alphabet = EnvironmentSettings.get_sequence_alphabet()
         PathBuilder.build(path)
@@ -207,25 +219,24 @@ class RandomDatasetGenerator:
         chain = "TRB"
 
         sequences = [
-            ReceptorSequence("".join(random.choices(alphabet, k=random.choices(list(length_probabilities.keys()), length_probabilities.values())[0])),
-                             metadata=SequenceMetadata(count=1,
-                                                       v_subgroup=chain + "V1",
-                                                       v_gene=chain + "V1-1",
-                                                       v_allele=chain + "V1-1*01",
-                                                       j_subgroup=chain + "J1",
-                                                       j_gene=chain + "J1-1",
-                                                       j_allele=chain + "J1-1*01",
+            ReceptorSequence("".join(random.choices(alphabet, k=
+            random.choices(list(length_probabilities.keys()), length_probabilities.values())[0])),
+                             metadata=SequenceMetadata(duplicate_count=1,
+                                                       v_call=chain + "V1-1*01",
+                                                       j_call=chain + "J1-1*01",
                                                        chain=chain,
                                                        region_type="IMGT_CDR3",
-                                                       custom_params={**{label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]
-                                                                         for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}}),
-                             identifier=uuid.uuid4().hex)
+                                                       custom_params={**{label: random.choices(list(label_dict.keys()),
+                                                                                               label_dict.values(),
+                                                                                               k=1)[0]
+                                                                         for label, label_dict in labels.items()},
+                                                                      **{"subject": f"subj_{i + 1}"}}),
+                             sequence_id=uuid.uuid4().hex)
             for i in range(sequence_count)]
 
-        filename = path / "batch01.npy"
+        processed_labels, dataset_params = RandomDatasetGenerator._make_labels(labels, sequence_count)
+        dataset = SequenceDataset.build_from_objects(sequences, sequence_count, path, name="sequence_dataset",
+                                                  labels=dataset_params)
 
-        sequence_matrix = np.core.records.fromrecords([seq.get_record() for seq in sequences], names=ReceptorSequence.get_record_names())
-        np.save(str(filename), sequence_matrix, allow_pickle=False)
+        return ImmuneMLExporter.export(dataset, path)
 
-        return SequenceDataset(labels={label: list(label_dict.keys()) for label, label_dict in labels.items()},
-                               filenames=[filename], file_size=sequence_count)

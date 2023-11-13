@@ -99,7 +99,7 @@ class Report(metaclass=abc.ABCMeta):
             ReportResult object which encapsulates all outputs (figure, table, and text files) so that they can be conveniently linked to in the
             final output of instructions
 
-        """
+        # """
         try:
             if self.check_prerequisites():
                 return self._generate()

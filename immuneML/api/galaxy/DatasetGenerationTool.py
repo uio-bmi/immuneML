@@ -17,7 +17,7 @@ class DatasetGenerationTool(GalaxyTool):
     DatasetGenerationTool is an alternative to running ImmuneMLApp directly. It accepts a path to YAML specification and a path to the
     output directory and generates the dataset according to the given specification. The created dataset will be located under
     supplied output directory, under results folder. The main dataset file will have the name of the dataset given in the
-    specification and has an extension .iml_dataset.
+    specification and has an extension .yaml.
 
     This tool is meant to be used as an endpoint for Galaxy tool that will create a Galaxy collection out of a dataset in immuneML format.
 

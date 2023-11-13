@@ -27,21 +27,21 @@ class ReferenceSequenceAnnotator(Preprocessor):
     """
     Annotates each sequence in each repertoire if it matches any of the reference sequences provided as input parameter. This report uses CompAIRR internally. To match CDR3 sequences (and not JUNCTION), CompAIRR v1.10 or later is needed.
 
-    Arguments:
+    Specification arguments:
 
-        reference_sequences (dict): A dictionary describing the reference dataset file. Import should be specified the same way as regular dataset import. It is only allowed to import a receptor dataset here (i.e., is_repertoire is False and paired is True by default, and these are not allowed to be changed).
+    - reference_sequences (dict): A dictionary describing the reference dataset file. Import should be specified the same way as regular dataset import. It is only allowed to import a receptor dataset here (i.e., is_repertoire is False and paired is True by default, and these are not allowed to be changed).
 
-        max_edit_distance (int): The maximum edit distance between a target sequence (from the repertoire) and the reference sequence.
+    - max_edit_distance (int): The maximum edit distance between a target sequence (from the repertoire) and the reference sequence.
 
-        compairr_path (str): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR has been installed such that it can be called directly on the command line with the command 'compairr', or that it is located at /usr/local/bin/compairr.
+    - compairr_path (str): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR has been installed such that it can be called directly on the command line with the command 'compairr', or that it is located at /usr/local/bin/compairr.
 
-        threads (int): how many threads to be used by CompAIRR for sequence matching
+    - threads (int): how many threads to be used by CompAIRR for sequence matching
 
-        ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor chains have to match. If True, gene information is ignored. By default, ignore_genes is False.
+    - ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor chains have to match. If True, gene information is ignored. By default, ignore_genes is False.
 
-        output_column_name (str): in case there are multiple annotations, it is possible here to define the name of the column in the output repertoire files for this specific annotation
+    - output_column_name (str): in case there are multiple annotations, it is possible here to define the name of the column in the output repertoire files for this specific annotation
 
-        repertoire_batch_size (int): how many repertoires to process simultaneously; depending on the repertoire size, this parameter might be use to limit the memory usage
+    - repertoire_batch_size (int): how many repertoires to process simultaneously; depending on the repertoire size, this parameter might be use to limit the memory usage
 
 
     YAML specification:
@@ -157,6 +157,7 @@ class ReferenceSequenceAnnotator(Preprocessor):
         for seq in self._reference_sequences:
             tmp_seq = copy.deepcopy(seq)
             tmp_seq.metadata.region_type = region_type
+            tmp_seq.metadata.duplicate_count = seq.metadata.duplicate_count if not self._compairr_params.ignore_counts else 1
             reference_sequences.append(tmp_seq)
 
         AIRRExporter.export(SequenceDataset.build_from_objects(reference_sequences, len(self._reference_sequences),

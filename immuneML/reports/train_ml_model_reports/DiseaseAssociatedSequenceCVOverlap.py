@@ -34,12 +34,12 @@ class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
     Repertoires throughout B Cell Development. Cell Reports. 2017;19(7):1467-1478. doi:10.1016/j.celrep.2017.04.054.
 
 
-    Arguments:
+    Specification arguments:
 
-        compare_in_selection (bool): whether to compute the overlap over the inner loop of the nested CV - the sequence overlap is shown across CV
-        folds for the model chosen as optimal within that selection
+    - compare_in_selection (bool): whether to compute the overlap over the inner loop of the nested CV - the sequence overlap is shown across CV
+      folds for the model chosen as optimal within that selection
 
-        compare_in_assessment (bool): whether to compute the overlap over the optimal models in the outer loop of the nested CV
+    - compare_in_assessment (bool): whether to compute the overlap over the optimal models in the outer loop of the nested CV
 
 
     YAML specification:

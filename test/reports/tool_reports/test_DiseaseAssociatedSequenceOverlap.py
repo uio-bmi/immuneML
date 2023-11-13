@@ -10,7 +10,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TestDiseaseAssociatedSequenceOverlap(TestCase):
     def test_run(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "disease_associated_seq_overlap/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "disease_associated_seq_overlap/")
         specs_file = self._prepare_specs(path)
 
         tool = MultiDatasetBenchmarkTool(specs_file, path / "result/")
@@ -57,7 +57,7 @@ class TestDiseaseAssociatedSequenceOverlap(TestCase):
                     "e1": "SequenceAbundance",
                     "e2": {
                         "SequenceAbundance": {
-                            "comparison_attributes": ["sequence_aas"],
+                            "comparison_attributes": ["sequence_aa"],
                             "p_value_threshold": 0.25,
                             "sequence_batch_size": 500
                         }

@@ -3,7 +3,7 @@ definitions:
     my_dataset: # user-defined dataset name
       format: Pickle
       params:
-        path: dataset.iml_dataset # 'dataset' is the default name given by the Create dataset tool
+        path: dataset.yaml # 'dataset' is the default name given by the Create dataset tool
 
   encodings:
     my_kmer_frequency: # user-defined encoding name

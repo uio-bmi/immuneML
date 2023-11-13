@@ -21,13 +21,13 @@ class TestImmuneMLApp(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_dataset(self, root_path):
-        path = PathBuilder.build(root_path / "initial_dataset")
+        path = PathBuilder.build(root_path / 'initial_dataset')
 
         repertoire_count = 30
         repertoires, metadata = RepertoireBuilder.build([["AA", "AAAA", "AAAA", "AAA"] for i in range(repertoire_count)], path,
                                                         {"CD": ['yes' if i % 2 == 0 else 'no' for i in range(repertoire_count)],
                                                          "CMV": [True if i % 2 == 1 else False for i in range(repertoire_count)]},
-                                                        [[{"chain": "A" if i % 2 == 0 else "B", "count": random.randint(2, 5),
+                                                        [[{"chain": "A" if i % 2 == 0 else "B", "duplicate_count": random.randint(3, 5),
                                                            "region_type": "IMGT_CDR3"}
                                                           for i in range(4)]
                                                          for j in range(repertoire_count)])
@@ -35,10 +35,9 @@ class TestImmuneMLApp(TestCase):
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"CD": ["yes", "no"], "CMV": [True, False]}, name="d1")
         ImmuneMLExporter.export(dataset, path)
 
-        return path / "d1.iml_dataset"
+        return path / "d1.yaml"
 
     def test_run(self):
-
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "immuneml_app/")
         dataset_path = self.create_dataset(path)
 

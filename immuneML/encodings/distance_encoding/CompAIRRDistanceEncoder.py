@@ -30,29 +30,28 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
     Morisita-Horn distance (= similarity - 1) is set to 0 to avoid negative distance scores.
 
 
-    Arguments:
+    Specification arguments:
 
-        compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
-        has been installed such that it can be called directly on the command line with the command 'compairr',
-        or that it is located at /usr/local/bin/compairr.
+    - compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR has been
+      installed such that it can be called directly on the command line with the command 'compairr', or that it is
+      located at /usr/local/bin/compairr.
 
-        keep_compairr_input (bool): whether to keep the input file that was passed to CompAIRR. This may take a lot of
-        storage space if the input dataset is large. By default the input file is not kept.
+    - keep_compairr_input (bool): whether to keep the input file that was passed to CompAIRR. This may take a lot of
+      storage space if the input dataset is large. By default, the input file is not kept.
 
-        differences (int): Number of differences allowed between the sequences of two immune receptor chains, this
-        may be between 0 and 2. By default, differences is 0.
+    - differences (int): Number of differences allowed between the sequences of two immune receptor chains, this may be
+      between 0 and 2. By default, differences is 0.
 
-        indels (bool): Whether to allow an indel. This is only possible if differences is 1. By default, indels is False.
+    - indels (bool): Whether to allow an indel. This is only possible if differences is 1. By default, indels is False.
 
-        ignore_counts (bool): Whether to ignore the frequencies of the immune receptor chains. If False, frequencies
-        will be included, meaning the 'counts' values for the receptors available in two repertoires are multiplied.
-        If False, only the number of unique overlapping immune receptors ('clones') are considered.
-        By default, ignore_counts is False.
+    - ignore_counts (bool): Whether to ignore the frequencies of the immune receptor chains. If False, frequencies will
+      be included, meaning the 'counts' values for the receptors available in two repertoires are multiplied. If False,
+      only the number of unique overlapping immune receptors ('clones') are considered. By default, ignore_counts is False.
 
-        ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor chains
-        have to match. If True, gene information is ignored. By default, ignore_genes is False.
+    - ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor
+      chains have to match. If True, gene information is ignored. By default, ignore_genes is False.
 
-        threads (int): The number of threads to use for parallelization. Default is 8.
+    - threads (int): The number of threads to use for parallelization. Default is 8.
 
     YAML specification:
 

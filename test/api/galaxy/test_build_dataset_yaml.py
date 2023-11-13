@@ -42,7 +42,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_sequencedataset(self):
         path = EnvironmentSettings.tmp_test_path / "sequencedataset_yaml/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         self.create_dummy_dataset(path, write_metadata=False)
 
         old_wd = os.getcwd()
@@ -67,7 +67,7 @@ class MyTestCase(unittest.TestCase):
     def test_receptordataset(self):
 
         path = EnvironmentSettings.tmp_test_path / "receptordataset_yaml/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         self.create_dummy_dataset(path, write_metadata=False)
 
         old_wd = os.getcwd()
@@ -92,7 +92,7 @@ class MyTestCase(unittest.TestCase):
     def test_repertoiredataset(self):
 
         path = EnvironmentSettings.tmp_test_path / "repertoiredataset_yaml"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         self.create_dummy_dataset(path, write_metadata=True)
 
         old_wd = os.getcwd()

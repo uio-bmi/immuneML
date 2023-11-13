@@ -10,25 +10,24 @@ class AdaptiveImportHelper:
 
     @staticmethod
     def preprocess_dataframe(dataframe: pd.DataFrame, params: DatasetImportParams):
-        if "frame_types" in dataframe.columns:
-            dataframe.loc[:, "frame_types"] = dataframe.frame_types.str.upper()
+        if "frame_type" in dataframe.columns:
+            dataframe.loc[:, "frame_type"] = dataframe.frame_type.str.upper()
 
             frame_type_list = ImportHelper.prepare_frame_type_list(params)
-            dataframe = dataframe[dataframe["frame_types"].isin(frame_type_list)]
+            dataframe = dataframe[dataframe["frame_type"].isin(frame_type_list)]
 
-        dataframe.loc[:, "region_types"] = params.region_type.name
+        dataframe.loc[:, "region_type"] = params.region_type.name
 
         if params.region_type == RegionType.IMGT_CDR3:
-            if "sequences" in dataframe.columns:
-                dataframe.loc[:, 'sequences'] = [y[(84 - 3 * len(x)): 78] if x is not None else None for x, y in
-                                                 zip(dataframe['sequence_aas'], dataframe['sequences'])]
-            dataframe.loc[:, 'sequence_aas'] = dataframe["sequence_aas"].str[1:-1]
+            if "sequence" in dataframe.columns:
+                dataframe.loc[:, 'sequence'] = [y[(84 - 3 * len(x)): 78] if x is not None else None for x, y in
+                                                 zip(dataframe['sequence_aa'], dataframe['sequence'])]
+            dataframe.loc[:, 'sequence_aa'] = dataframe["sequence_aa"].str[1:-1]
         elif "sequences" in dataframe.columns:
-            dataframe.loc[:, 'sequences'] = [y[(81 - 3 * len(x)): 81] if x is not None else None for x, y in
-                                             zip(dataframe['sequence_aas'], dataframe['sequences'])]
+            dataframe.loc[:, 'sequence'] = [y[(81 - 3 * len(x)): 81] if x is not None else None for x, y in
+                                             zip(dataframe['sequence_aa'], dataframe['sequence'])]
 
         dataframe = AdaptiveImportHelper.parse_adaptive_germline_to_imgt(dataframe, params.organism)
-        ImportHelper.update_gene_info(dataframe)
         ImportHelper.load_chains(dataframe)
         ImportHelper.drop_empty_sequences(dataframe, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(dataframe, params.import_illegal_characters, params.import_with_stop_codon)
@@ -52,16 +51,15 @@ class AdaptiveImportHelper:
     @staticmethod
     def parse_germline(dataframe: pd.DataFrame, gene_name_replacement: dict, germline_value_replacement: dict):
         for gene in ["v", "j"]:
+            for part in ['gene', 'allele', 'call', 'family']:
+                if f"{gene}_{part}" in dataframe.columns:
+                    dataframe.loc[:, f"{gene}_{part}"] = dataframe[f"{gene}_{part}"].replace(gene_name_replacement, regex=True)
+                    if part != 'family':
+                        dataframe.loc[:, f"{gene}_{part}"] = dataframe[f"{gene}_{part}"].replace(germline_value_replacement, regex=True)
 
-            if f"{gene}_genes" in dataframe.columns:
-                dataframe.loc[:, f"{gene}_genes"] = dataframe[f"{gene}_genes"].replace(gene_name_replacement, regex=True)
-                dataframe.loc[:, f"{gene}_genes"] = dataframe[f"{gene}_genes"].replace(germline_value_replacement, regex=True)
-
-            if f"{gene}_alleles" in dataframe.columns:
-                dataframe.loc[:, f"{gene}_alleles"] = dataframe[f"{gene}_alleles"].replace(gene_name_replacement, regex=True)
-                dataframe.loc[:, f"{gene}_alleles"] = dataframe[f"{gene}_alleles"].replace(germline_value_replacement, regex=True)
-
-            if f"{gene}_subgroups" in dataframe.columns:
-                dataframe.loc[:, f"{gene}_subgroups"] = dataframe[f"{gene}_subgroups"].replace(germline_value_replacement, regex=True)
+            if f"{gene}_call" in dataframe.columns and f"{gene}_allele" in dataframe.columns:
+                rows_to_add_allele = ~dataframe[f'{gene}_call'].str.contains("\*") & dataframe[f"{gene}_allele"].astype(str).str.contains("[0-9]{2}")
+                dataframe.loc[rows_to_add_allele, f"{gene}_call"] = \
+                    dataframe.loc[rows_to_add_allele, lambda df: [f"{gene}_call", f"{gene}_allele"]].agg('*'.join, axis=1)
 
         return dataframe

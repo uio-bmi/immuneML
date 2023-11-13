@@ -44,8 +44,8 @@ A complete YAML specification for training ML models is shown here:
         dataset: # user-defined dataset name
           format: ImmuneML # the default format used by the 'Create dataset' galaxy tool is ImmuneML
           params:
-            path: dataset.iml_dataset # specify the dataset name, the default name used by
-                                      # the 'Create dataset' galaxy tool is dataset.iml_dataset
+            path: dataset.yaml # specify the dataset name, the default name used by
+                                      # the 'Create dataset' galaxy tool is dataset.yaml
 
       encodings:
         my_3mer_encoding: # user-defined encoding name

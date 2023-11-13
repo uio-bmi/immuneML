@@ -23,7 +23,7 @@ class KmerFreqReceptorEncoder(KmerFrequencyEncoder):
 
         sequence_encoder = self._prepare_sequence_encoder()
         feature_names = sequence_encoder.get_feature_names(params)
-        for receptor in dataset.get_data(params.pool_size):
+        for receptor in dataset.get_data():
             counts = {chain: Counter() for chain in receptor.get_chains()}
             chains = receptor.get_chains()
             for chain in receptor.get_chains():

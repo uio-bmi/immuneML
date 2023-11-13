@@ -22,8 +22,9 @@ def log(func):
 
     return wrapped
 
-def print_log(mssg, include_datetime=False):
-    logging.info(mssg)
+
+def print_log(mssg, include_datetime=False, log_func_name='info'):
+    getattr(logging, log_func_name)(mssg)
 
     if include_datetime:
         mssg = f"{datetime.datetime.now()}: {mssg}"

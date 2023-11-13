@@ -1,10 +1,10 @@
 import copy
-import math
 import subprocess
 from multiprocessing.pool import Pool
 from pathlib import Path
 from typing import List
 
+import math
 import numpy as np
 import pandas as pd
 
@@ -50,30 +50,29 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
     See :ref:`Reproduction of the CMV status predictions study` for an example using :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
 
-    Arguments:
+    Specification arguments:
 
-        p_value_threshold (float): The p value threshold to be used by the statistical test.
+    - p_value_threshold (float): The p value threshold to be used by the statistical test.
 
-        compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
-        has been installed such that it can be called directly on the command line with the command 'compairr',
-        or that it is located at /usr/local/bin/compairr.
+    - compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
+      has been installed such that it can be called directly on the command line with the command 'compairr',
+      or that it is located at /usr/local/bin/compairr.
 
-        ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor chains
-        have to match. If True, gene information is ignored. By default, ignore_genes is False.
+    - ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor chains
+      have to match. If True, gene information is ignored. By default, ignore_genes is False.
 
-        sequence_batch_size (int): The number of sequences in a batch when comparing sequences across repertoires, typically 100s of thousands.
-        This does not affect the results of the encoding, but may affect the speed and memory usage. The default value is 1.000.000
+    - sequence_batch_size (int): The number of sequences in a batch when comparing sequences across repertoires, typically 100s of thousands.
+      This does not affect the results of the encoding, but may affect the speed and memory usage. The default value is 1.000.000
 
-        threads (int): The number of threads to use for parallelization. This does not affect the results of the encoding, only the speed.
-        The default number of threads is 8.
+    - threads (int): The number of threads to use for parallelization. This does not affect the results of the encoding, only the speed.
+      The default number of threads is 8.
 
-        keep_temporary_files (bool): whether to keep temporary files, including CompAIRR input, output and log files, and the sequence
-        presence matrix. This may take a lot of storage space if the input dataset is large. By default, temporary files are not kept.
+    - keep_temporary_files (bool): whether to keep temporary files, including CompAIRR input, output and log files, and the sequence
+      presence matrix. This may take a lot of storage space if the input dataset is large. By default, temporary files are not kept.
 
 
     YAML specification:
 
-    .. indent with spaces
     .. code-block:: yaml
 
         my_sa_encoding:
@@ -90,7 +89,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     OUTPUT_FILENAME = "compairr_out.tsv"
     LOG_FILENAME = "compairr_log.txt"
 
-    def __init__(self, p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, keep_temporary_files: bool, threads: int, name: str = None):
+    def __init__(self, p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, keep_temporary_files: bool,
+                 threads: int, name: str = None):
         self.name = name
         self.p_value_threshold = p_value_threshold
         self.sequence_batch_size = sequence_batch_size
@@ -112,7 +112,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
                                               log_filename=None, output_pairs=False, pairs_filename=None)
 
     @staticmethod
-    def _prepare_parameters(p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, keep_temporary_files: bool,  threads: int,
+    def _prepare_parameters(p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, keep_temporary_files: bool,
+                            threads: int,
                             name: str = None):
         ParameterValidator.assert_type_and_value(p_value_threshold, float, "CompAIRRSequenceAbundanceEncoder", "p_value_threshold", min_inclusive=0,
                                                  max_inclusive=1)
@@ -171,7 +172,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         return np.array(list(sequence_set))
 
     def get_sequence_set_for_repertoire(self, repertoire, sequence_attributes):
-        return set(zip(*[value for value in repertoire.get_attributes(sequence_attributes).values() if value is not None]))
+        return set(zip(*[value for value in repertoire.get_attributes(sequence_attributes, True).values() if value is not None]))
 
     def _get_sequence_presence(self, full_dataset, full_sequence_set, params):
         compairr_sequence_presence = CacheHandler.memo_by_params(
@@ -202,7 +203,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
             paths = pool.starmap(self._new_run_compairr_on_batch, arguments)
 
         if not self.keep_temporary_files:
-           self._remove_temporary_files(params.result_path)
+            self._remove_temporary_files(params.result_path)
 
         return CompAIRRBatchIterator(paths, self.sequence_batch_size)
 
@@ -315,7 +316,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
             for idx, repertoire_id in enumerate(repertoire_ids):
                 partial_repertoire_vector = batch[repertoire_id].to_numpy()
 
-                relevant_sequence_abundance = np.sum(partial_repertoire_vector[np.logical_and(partial_sequence_p_values_indices, partial_repertoire_vector)])
+                relevant_sequence_abundance = np.sum(
+                    partial_repertoire_vector[np.logical_and(partial_sequence_p_values_indices, partial_repertoire_vector)])
                 total_sequence_abundance = np.sum(partial_repertoire_vector)
                 abundance_matrix[idx] += [relevant_sequence_abundance, total_sequence_abundance]
 
@@ -343,7 +345,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         attributes = [EnvironmentSettings.get_sequence_type().value]
 
         if not self.compairr_params.ignore_genes:
-            attributes += ["v_genes", "j_genes"]
+            attributes += ["v_call", "j_call"]
 
         return attributes
 

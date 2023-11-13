@@ -12,7 +12,7 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.RandomForestClassifier import RandomForestClassifier
+from immuneML.ml_methods.classifiers.RandomForestClassifier import RandomForestClassifier
 from immuneML.util.PathBuilder import PathBuilder
 
 

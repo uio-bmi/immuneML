@@ -14,23 +14,30 @@ This page provides an overview of tutorials on how to get started using immuneML
 
 All immuneML analyses are specified using a YAML specification file. To learn how to construct this file, see this tutorial:
 
-  - :ref:`How to specify an analysis with YAML`
+- :ref:`How to specify an analysis with YAML`
 
 Each analysis begins with selecting the dataset that will be used. In immuneML, the user can choose to import an existing dataset, or to generate a
 dataset made of random sequences (for example to test out some functionality without needing to use a specific dataset, or as a benchmarking dataset).
 The respective tutorials can be found here:
 
-  - :ref:`How to import data into immuneML`
-  - :ref:`How to generate a random sequence, receptor or repertoire dataset`
+- :ref:`How to import data into immuneML`
+- :ref:`How to generate a random sequence, receptor or repertoire dataset`
 
 Using the specified dataset, immuneML can be used for various purposes: one can train and assess an ML model for immune repertoire or receptor-level
 classification, perform an exploratory analysis (to run preprocessings, encodings and reports without training a ML model), or simulate immune events
 by implanting sequence motifs in the dataset. See the tutorials below:
 
-  - :ref:`How to train and assess a receptor or repertoire-level ML classifier`
-  - :ref:`How to apply previously trained ML models to a new dataset`
-  - :ref:`How to perform an exploratory data analysis`
-  - :ref:`How to simulate antigen or disease-associated signals in AIRR datasets`
+- :ref:`How to train and assess a receptor or repertoire-level ML classifier`
+- :ref:`How to apply previously trained ML models to a new dataset`
+- :ref:`How to perform an exploratory data analysis`
+- :ref:`How to simulate antigen or disease-associated signals in AIRR datasets`
+
+For simulation purposes through integration with LIgO, see the following tutorials:
+
+- :ref:`How to simulate co-occuring immune signals`
+- :ref:`Paired chain simulations in LIgO`
+- :ref:`Simulation with custom signal functions`
+
 
 .. toctree::
   :maxdepth: 1
@@ -44,3 +51,6 @@ by implanting sequence motifs in the dataset. See the tutorials below:
   tutorials/how_to_perform_exploratory_analysis
   tutorials/how_to_simulate_antigen_signals_in_airr_datasets
   tutorials/motif_recovery
+  tutorials/how_to_simulate_co-occuring_signals
+  tutorials/how_to_simulate_paired_chain_data
+  tutorials/simulation_with_custom_signal_functions

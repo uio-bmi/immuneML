@@ -21,18 +21,16 @@ class TestEvennessEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode(self):
-        path = EnvironmentSettings.root_path / "test/tmp/evennessenc/"
-
-        PathBuilder.build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "evennessenc/")
 
         rep1 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence("AAA", metadata=SequenceMetadata(count=10)) for i in range(1000)] +
-                             [ReceptorSequence("AAA", metadata=SequenceMetadata(count=100)) for i in range(1000)] +
-                             [ReceptorSequence("AAA", metadata=SequenceMetadata(count=1)) for i in range(1000)],
+            sequence_objects=[ReceptorSequence("AAA", metadata=SequenceMetadata(duplicate_count=10, frame_type='IN')) for i in range(1000)] +
+                             [ReceptorSequence("AAA", metadata=SequenceMetadata(duplicate_count=100, frame_type='IN')) for i in range(1000)] +
+                             [ReceptorSequence("AAA", metadata=SequenceMetadata(duplicate_count=1, frame_type='IN')) for i in range(1000)],
             metadata={"l1": "test_1", "l2": 2}, path=path)
 
         rep2 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence("AAA", metadata=SequenceMetadata(count=10)) for i in range(1000)],
+            sequence_objects=[ReceptorSequence("AAA", metadata=SequenceMetadata(duplicate_count=10, frame_type='IN')) for i in range(1000)],
             metadata={"l1": "test_2", "l2": 3}, path=path)
 
         lc = LabelConfiguration()

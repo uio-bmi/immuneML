@@ -52,11 +52,11 @@ class RepertoireDataset(Dataset):
                 filename = filename.parent.parent / Path(row['filename']).name
             repertoire = Repertoire(data_filename=filename,
                                     metadata_filename=filename.parent / f'{filename.stem}_metadata.yaml',
-                                    identifier=row['identifier'])
+                                    identifier=row['identifier'] if 'identifier' in row else uuid.uuid4().hex)
             repertoires.append(repertoire)
 
-        if "repertoire_ids" in kwargs.keys() and "repertoires" not in kwargs.keys() and kwargs['repertoire_ids'] is not None:
-            assert all(rep.identifier == kwargs['repertoire_ids'][i] for i, rep in enumerate(repertoires)), \
+        if "repertoire_id" in kwargs.keys() and "repertoires" not in kwargs.keys() and kwargs['repertoire_id'] is not None:
+            assert all(rep.identifier == kwargs['repertoire_id'][i] for i, rep in enumerate(repertoires)), \
                 f"{RepertoireDataset.__name__}: repertoire ids from the iml_dataset file and metadata file don't match for the dataset " \
                 f"{kwargs['name']} with identifier {kwargs['identifier']}."
 
@@ -95,16 +95,18 @@ class RepertoireDataset(Dataset):
         return len(self.repertoires)
 
     def get_metadata_fields(self, refresh=False):
-        """Returns the list of metadata fields, includes also the fields that will typically not be used as labels, like filename or identifier"""
+        """Returns the list of metadata fields, includes also the fields that will typically not be used as labels,
+        like filename or identifier"""
         if self.metadata_fields is None or refresh:
             df = pd.read_csv(self.metadata_file, sep=",", nrows=0, comment=Constants.COMMENT_SIGN)
             self.metadata_fields = df.columns.values.tolist()
         return self.metadata_fields
 
     def get_label_names(self, refresh=False):
-        """Returns the list of metadata fields which can be used as labels; if refresh=True, it reloads the fields from disk"""
+        """Returns the list of metadata fields which can be used as labels; if refresh=True, it reloads the fields
+        from disk"""
         all_metadata_fields = set(self.get_metadata_fields(refresh))
-        for non_label in ["subject_id", "filename", "repertoire_identifier", "identifier"]:
+        for non_label in ["subject_id", "filename", "repertoire_id", "identifier"]:
             if non_label in all_metadata_fields:
                 all_metadata_fields.remove(non_label)
 
@@ -181,3 +183,6 @@ class RepertoireDataset(Dataset):
     def get_subject_ids(self):
         """Returns a list of subject identifiers"""
         return self.get_metadata(["subject_id"])["subject_id"]
+
+    def get_data_from_index_range(self, start_index: int, end_index: int):
+        return self.repertoires[start_index:end_index+1]

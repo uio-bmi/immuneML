@@ -53,8 +53,8 @@ class TestFeatureDistribution(TestCase):
         return dataset
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path / "test/tmp/featuredistribution/"
-        PathBuilder.build(path)
+        path = EnvironmentSettings.tmp_test_path / "featuredistribution/"
+        PathBuilder.remove_old_and_build(path)
 
         dataset = self._create_dummy_encoded_data(path)
 

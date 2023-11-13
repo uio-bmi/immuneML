@@ -20,8 +20,9 @@ class RepertoireClonotypeSummary(DataReport):
     """
     Shows the number of distinct clonotypes per repertoire in a given dataset as a bar plot.
 
-    Arguments:
-        color_by_label (str): name of the label to use to color the plot, e.g., could be disease label, or None
+    Specification arguments:
+
+    - color_by_label (str): name of the label to use to color the plot, e.g., could be disease label, or None
 
     YAML specification:
 
@@ -73,7 +74,7 @@ class RepertoireClonotypeSummary(DataReport):
             sequences = repertoire.get_sequence_aas()
 
         sequence_count = sequences.shape[0]
-        unique_sequence_count = np.unique(sequences).shape[0]
+        unique_sequence_count = np.unique(sequences.tolist()).shape[0]
         if sequence_count != unique_sequence_count:
             logging.warning(f"{RepertoireClonotypeSummary.__name__}: for repertoire {repertoire.identifier}, there are {sequence_count} sequences, "
                             f"but {unique_sequence_count} unique sequences.")

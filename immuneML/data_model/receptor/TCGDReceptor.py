@@ -1,31 +1,9 @@
-import json
-
-import numpy as np
-
 from immuneML.data_model.receptor.Receptor import Receptor
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 
 
 class TCGDReceptor(Receptor):
-    FIELDS = {'gamma': object, 'delta': object, 'identifier': str, 'metadata': dict, 'version': str}
-    version = "1"
-
-    @classmethod
-    def create_from_record(cls, record: np.void):
-        if 'version' in record.dtype.names and record['version'] == TCGDReceptor.version:
-
-            gamma_record = record[['gamma_' + name for name in ReceptorSequence.get_record_names()]]
-            gamma_record.dtype.names = ReceptorSequence.get_record_names()
-
-            delta_record = record[['delta_' + name for name in ReceptorSequence.get_record_names()]]
-            delta_record.dtype.names = ReceptorSequence.get_record_names()
-            metadata = json.loads(record['metadata']) if record['metadata'] != '' else None
-
-            return TCGDReceptor(gamma=ReceptorSequence.create_from_record(gamma_record),
-                                delta=ReceptorSequence.create_from_record(delta_record),
-                                identifier=record['identifier'], metadata=metadata)
-        else:
-            raise NotImplementedError(f"Supported ({TCGDReceptor.version}) and available version differ, but there is no converter available.")
+    FIELDS = {'gamma': object, 'delta': object, 'identifier': str, 'metadata': dict}
 
     @classmethod
     def get_record_names(cls):

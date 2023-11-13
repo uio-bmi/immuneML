@@ -1,28 +1,32 @@
 import shutil
+from pprint import pprint
 from unittest import TestCase
 
-import numpy as np
-
+from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.BCReceptor import BCReceptor
 from immuneML.data_model.receptor.ElementGenerator import ElementGenerator
+from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestElementGenerator(TestCase):
     def test_build_batch_generator(self):
-        path = EnvironmentSettings.tmp_test_path / "element_batch_generator/"
-        PathBuilder.build(path)
-        receptors = [BCReceptor(identifier=str(i), heavy=ReceptorSequence('A'), light=ReceptorSequence('C')) for i in range(307)]
-        file_list = [path / f"batch{i}.npy" for i in range(4)]
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "element_batch_generator/")
 
-        for i in range(4):
-            matrix = np.core.records.fromrecords([r.get_record() for r in receptors[i * 100: (i+1) * 100]], names=BCReceptor.get_record_names())
-            np.save(str(file_list[i]), matrix, allow_pickle=False)
+        receptors = [BCReceptor(identifier=str(i),
+                                heavy=ReceptorSequence('A', metadata=SequenceMetadata(chain='HEAVY', cell_id=str(i))),
+                                light=ReceptorSequence('C', metadata=SequenceMetadata(chain='LIGHT', cell_id=str(i))))
+                     for i in range(307)]
+        file_list = [path / f"batch{i+1}.tsv" for i in range(4)]
 
-        receptor_generator = ElementGenerator(file_list, element_class_name=BCReceptor.__name__)
+        dataset = ReceptorDataset.build_from_objects(receptors, 100, path)
+
+        receptor_generator = ElementGenerator(file_list, element_class_name=BCReceptor.__name__,
+                                              buffer_type=dataset.element_generator.buffer_type)
         generator = receptor_generator.build_batch_generator()
 
         counter = 0
@@ -49,21 +53,26 @@ class TestElementGenerator(TestCase):
 
         shutil.rmtree(path)
 
-    def test_make_subset(self):
+    def make_seq_dataset(self, path, seq_count: int = 100, file_size: int = 10) -> SequenceDataset:
         sequences = []
-        for i in range(100):
-            sequences.append(ReceptorSequence(amino_acid_sequence="AAA", identifier=str(i)))
+        for i in range(seq_count):
+            sequences.append(ReceptorSequence(sequence_aa="AAA", sequence_id=str(i)))
 
-        path = EnvironmentSettings.tmp_test_path / "element_generator_subset/"
-        PathBuilder.build(path)
+        return SequenceDataset.build_from_objects(sequences, file_size, path, 'dataset_name1')
 
-        for i in range(10):
-            filepath = path / f"batch{i}.npy"
-            sequences_to_pickle = sequences[i * 10:(i + 1) * 10]
-            sequence_matrix = np.core.records.fromrecords([seq.get_record() for seq in sequences_to_pickle], names=ReceptorSequence.get_record_names())
-            np.save(str(filepath), sequence_matrix, allow_pickle=False)
+    def make_rec_dataset(self, path, count: int, file_size: int) -> ReceptorDataset:
+        receptors = []
+        for i in range(count):
+            receptors.append(TCABReceptor(ReceptorSequence("AA", metadata=SequenceMetadata(chain='alpha', cell_id=str(i))),
+                                          ReceptorSequence('CCC', metadata=SequenceMetadata(chain='beta', cell_id=str(i))),
+                                          identifier=str(i)))
 
-        d = SequenceDataset(filenames=[path / f"batch{i}.npy" for i in range(10)], file_size=10)
+        return ReceptorDataset.build_from_objects(receptors, file_size, path, 'dataset_rec1')
+
+    def test_make_subset(self):
+
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "element_generator_subset/")
+        d = self.make_seq_dataset(path)
 
         indices = [1, 20, 21, 22, 23, 24, 25, 50, 52, 60, 70, 77, 78, 90, 92]
 
@@ -71,10 +80,20 @@ class TestElementGenerator(TestCase):
 
         for batch in d2.get_batch(1000):
             for sequence in batch:
-                self.assertTrue(int(sequence.identifier) in indices)
+                self.assertTrue(int(sequence.sequence_id) in indices)
 
         self.assertEqual(15, d2.get_example_count())
 
         shutil.rmtree(path)
 
+    def test_get_data_from_index_range(self):
+        for ind, dataset_gen_func in enumerate([self.make_seq_dataset, self.make_rec_dataset]):
+            path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / f"el_gen_index_range_{ind}/")
+
+            dataset = dataset_gen_func(path, 18, 5)
+            elements = dataset.get_data_from_index_range(7, 13)
+            pprint(elements)
+            assert len(elements) == 7
+
+            shutil.rmtree(path)
 

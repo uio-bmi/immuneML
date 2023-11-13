@@ -43,7 +43,7 @@ class TestRandomDatasetGenerator(TestCase):
 
         self.assertEqual(100, dataset.get_example_count())
         for receptor in dataset.get_data():
-            self.assertTrue(len(sequence_aa) in [4, 5] for sequence_aa in [receptor.alpha.amino_acid_sequence, receptor.beta.amino_acid_sequence])
+            self.assertTrue(len(sequence_aa) in [4, 5] for sequence_aa in [receptor.alpha.sequence_aa, receptor.beta.sequence_aa])
             self.assertTrue(receptor.metadata["HLA"] in ["A", "B"])
 
         shutil.rmtree(path)
@@ -61,7 +61,7 @@ class TestRandomDatasetGenerator(TestCase):
         self.assertEqual(100, dataset.get_example_count())
 
         for sequence in dataset.get_data():
-            self.assertTrue(len(sequence.amino_acid_sequence) in [4, 5])
+            self.assertTrue(len(sequence.sequence_aa) in [4, 5])
             self.assertTrue(sequence.get_attribute("HLA") in ["A", "B"])
 
         shutil.rmtree(path)

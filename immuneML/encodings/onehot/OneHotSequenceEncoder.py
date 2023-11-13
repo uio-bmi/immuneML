@@ -21,7 +21,7 @@ class OneHotSequenceEncoder(OneHotEncoder):
         encoded_dataset = SequenceDataset(filenames=dataset.get_filenames(),
                                           encoded_data=encoded_data,
                                           labels=dataset.labels,
-                                          file_size=dataset.file_size)
+                                          file_size=dataset.file_size, dataset_file=dataset.dataset_file)
 
         return encoded_dataset
 

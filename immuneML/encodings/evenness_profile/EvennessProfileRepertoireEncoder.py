@@ -1,7 +1,7 @@
 import hashlib
-import math
 from multiprocessing.pool import Pool
 
+import math
 import numpy as np
 
 from immuneML.analysis.entropy_calculations.EntropyCalculator import EntropyCalculator
@@ -50,16 +50,17 @@ class EvennessProfileRepertoireEncoder(EvennessProfileEncoder):
         return CacheHandler.memo_by_params((("encoding_model", params.model),
                                             ("labels", params.label_config.get_labels_by_name()),
                                             ("repertoire_id", repertoire.identifier),
-                                            ("repertoire_data",  hashlib.sha256(np.ascontiguousarray(repertoire.get_sequence_aas())).hexdigest())),
+                                            ("repertoire_data",  hashlib.sha256(np.ascontiguousarray(repertoire.get_sequence_aas().tolist())).hexdigest())),
                                            lambda: self.encode_repertoire(repertoire, params), CacheObjectType.ENCODING_STEP)
 
     def encode_repertoire(self, repertoire, params: EncoderParams):
 
         alphas = np.linspace(start=params.model["min_alpha"], stop=params.model["max_alpha"], num=params.model["dimension"])
 
-        counts = [sequence.metadata.count for sequence in repertoire.sequences if sequence.metadata.frame_type == SequenceFrameType.IN]
-        freqs = np.array(counts)
-        freqs = freqs[np.nonzero(freqs)]
+        data = repertoire.get_attributes(['duplicate_count', 'frame_type'])
+        counts = data['duplicate_count'][[el == 'IN' for el in data['frame_type'].tolist()]]
+
+        freqs = counts[np.nonzero(counts)]
 
         evenness_profile = np.array([np.exp(EntropyCalculator.renyi_entropy(freqs, alpha))/len(freqs) for alpha in alphas])
 

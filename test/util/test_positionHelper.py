@@ -1,55 +1,47 @@
 from unittest import TestCase
 
+import numpy as np
+
+from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.util.PositionHelper import PositionHelper
 
 
-class TestPositionHelper(TestCase):
-    def test_gen_imgt_positions_from_length(self):
-        length = 11
-        positions = PositionHelper.gen_imgt_positions_from_cdr3_length(length)
-        self.assertEqual(positions, ['105', '106', '107', '108', '109', '110', '113', '114', '115', '116', '117'])
-        length = 12
-        positions = PositionHelper.gen_imgt_positions_from_cdr3_length(length)
-        self.assertEqual(positions, ['105', '106', '107', '108', '109', '110', '112', '113', '114', '115', '116', '117'])
-        length = 13
-        positions = PositionHelper.gen_imgt_positions_from_cdr3_length(length)
-        self.assertEqual(positions, ['105', '106', '107', '108', '109', '110', '111', '112', '113', '114', '115', '116', '117'])
-        length = 18
-        positions = PositionHelper.gen_imgt_positions_from_cdr3_length(length)
-        self.assertEqual(positions,
-                         ['105', '106', '107', '108', '109', '110', '111', '111.1', '111.2', '112.3', '112.2', '112.1', '112', '113', '114',
-                          '115', '116', '117'])
+def test_get_imgt_position_weights_from_annotation():
+    weights = PositionHelper.get_imgt_position_weights_for_annotation(len("CASSSKASTDTQYF"), RegionType.IMGT_JUNCTION,
+                                                                      {})
 
-    def test_adjust_position_weights(self):
-        weights = PositionHelper.adjust_position_weights(sequence_position_weights={105: 0.8, 106: 0.1, 109: 0.1},
-                                                         imgt_positions=[105, 106, 107, 108, 109, 113, 114, 115],
-                                                         limit=5)
+    assert np.isclose(sum(list(weights.values())), 1.), weights
+    weights_values = list(weights.values())
+    assert all(weights_values[0] == val for val in weights_values), weights
 
-        self.assertEqual(0.89, round(weights[105], 2))
-        self.assertEqual(0.11, round(weights[106], 2))
-        self.assertTrue(all([weights[key] == 0 for key in weights.keys() if key > 106]))
+    weights = PositionHelper.get_imgt_position_weights_for_annotation(len("CASSSKASTDTQYF"), RegionType.IMGT_JUNCTION,
+                                                                      {'104': 0, '105': 0, '110': 0})
 
-    def test_build_position_weights(self):
-        weights = PositionHelper.build_position_weights(None, [105, 106, 107, 108, 114, 115], 1)
-        self.assertEqual(0.2, weights[105])
-        self.assertEqual(0.2, weights[106])
-        self.assertEqual(0.2, weights[107])
-        self.assertEqual(0.2, weights[108])
-        self.assertEqual(0.2, weights[114])
-        self.assertEqual(0, weights[115])
+    assert np.isclose(sum(list(weights.values())), 1.), weights
+    assert weights['104'] == 0 and weights['105'] == 0 and weights['110'] == 0, weights
 
-        weights = PositionHelper.build_position_weights({105: 0.5}, [105, 106, 107, 108, 114, 115], 1)
-        self.assertEqual(1, weights[105])
-        self.assertEqual(0, weights[106])
-        self.assertEqual(0, weights[107])
-        self.assertEqual(0, weights[108])
-        self.assertEqual(0, weights[114])
-        self.assertEqual(0, weights[115])
 
-        weights = PositionHelper.build_position_weights({105: 0.3, 106: 0.4, 107: 0.3, 115: 0.3}, [105, 106, 107, 108, 114, 115], 1)
-        self.assertEqual(0.3, weights[105])
-        self.assertEqual(0.4, weights[106])
-        self.assertEqual(0.3, weights[107])
-        self.assertEqual(0, weights[108])
-        self.assertEqual(0, weights[114])
-        self.assertEqual(0, weights[115])
+def test_get_imgt_position_weights_for_implanting():
+    weights = PositionHelper.get_imgt_position_weights_for_implanting(7, RegionType.IMGT_JUNCTION,
+                                                                      {'104': 0, '105': 0}, 2)
+
+    assert np.isclose(sum(list(weights.values())), 1), weights
+    assert all(weights[pos] == 0 for pos in ['104', '105', '118'])
+    assert all(np.isclose(weights[pos], 0.25) for pos in ['106', '107', '116', '117'])
+
+    weights = PositionHelper.get_imgt_position_weights_for_implanting(len("CASSSKASTDTQYF"), RegionType.IMGT_JUNCTION,
+                                                                      {}, limit=len("KTC"))
+
+    assert np.isclose(sum(list(weights.values())), 1), weights
+    assert all(weight == 0 for pos, weight in weights.items() if pos in ['117', '118']), weights
+    assert weights['116'] > 0, weights
+
+    weights = PositionHelper.get_imgt_position_weights_for_implanting(34, RegionType.IMGT_JUNCTION,
+                                                                      {'104': 0, '105': 0, '118': 0}, 2)
+
+    assert np.isclose(sum(list(weights.values())), 1), weights
+
+
+def test_get_allowed_positions_for_annotation():
+    allowed_positions = PositionHelper.get_allowed_positions_for_annotation(34, RegionType.IMGT_JUNCTION, {})
+    assert len(allowed_positions) == 34

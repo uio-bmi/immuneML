@@ -12,7 +12,7 @@ from immuneML.util.PathBuilder import PathBuilder
 class TestReferenceSequenceOverlap(TestCase):
     def test__compute_model_overlap(self):
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "ref_sequence_overlap/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "ref_sequence_overlap/")
 
         ref_path = path / "reference.csv"
         pd.DataFrame({"sequence_aas": ["AAA", "ACC", 'TTT', "ACA"], "v_genes": ["V1", "V1", "V1", "V1"], "j_genes": ["J1", "J1", "J1", "J1"]}).to_csv(ref_path, index=False)

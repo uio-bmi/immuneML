@@ -16,8 +16,8 @@ from immuneML.hyperparameter_optimization.config.ReportConfig import ReportConfi
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
 
@@ -51,7 +51,7 @@ class TestSequenceClassification(TestCase):
         instruction = TrainMLModelInstruction(dataset, GridSearch([hp_setting]), [hp_setting],
                                               SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
                                               SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
-                                              {Metric.BALANCED_ACCURACY}, Metric.BALANCED_ACCURACY, lc, path)
+                                              {ClassificationMetric.BALANCED_ACCURACY}, ClassificationMetric.BALANCED_ACCURACY, lc, path)
 
         result = instruction.run(result_path=path)
 

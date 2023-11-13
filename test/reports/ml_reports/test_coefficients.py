@@ -12,7 +12,7 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
 from immuneML.reports.ml_reports.Coefficients import Coefficients
@@ -59,8 +59,8 @@ class TestCoefficients(TestCase):
         return report
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path / "test/tmp/logregcoefsreport/"
-        PathBuilder.build(path)
+        path = EnvironmentSettings.tmp_test_path / "logregcoefsreport/"
+        PathBuilder.remove_old_and_build(path)
 
         report = self._create_report(path)
 

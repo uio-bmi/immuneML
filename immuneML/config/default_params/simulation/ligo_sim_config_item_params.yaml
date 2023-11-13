@@ -1,0 +1,10 @@
+receptors_in_repertoire_count: null
+immune_events: {}
+false_positive_prob_in_receptors: 0
+false_negative_prob_in_receptors: 0
+is_noise: false
+seed: null
+default_clonal_frequency: null
+sequence_len_limits:
+  min: -1 # no limits
+  max: -1 # no limits

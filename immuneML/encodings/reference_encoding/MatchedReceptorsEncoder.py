@@ -1,24 +1,22 @@
 from typing import List
+
 import numpy as np
 import pandas as pd
 
 from immuneML.analysis.SequenceMatcher import SequenceMatcher
+from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.data_model.repertoire.Repertoire import Repertoire
-
-from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.receptor.BCReceptor import BCReceptor
 from immuneML.data_model.receptor.Receptor import Receptor
 from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
 from immuneML.data_model.receptor.TCGDReceptor import TCGDReceptor
+from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.reference_encoding.MatchedReferenceUtil import MatchedReferenceUtil
-from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReadsType import ReadsType
-from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
 class MatchedReceptorsEncoder(DatasetEncoder):
@@ -33,18 +31,31 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     Clinical Immunology Volume 222 (January 2021): 108621. `doi.org/10.1016/j.clim.2020.108621 <https://doi.org/10.1016/j.clim.2020.108621>`_
     with the only exception being that this encoder uses paired receptors, while the original publication used single sequences (see also: :ref:`MatchedSequences` encoder).
 
-    Arguments:
+    Specification arguments:
 
-        reference (dict): A dictionary describing the reference dataset file. Import should be specified the same way as regular dataset import. It is only allowed to import a receptor dataset here (i.e., is_repertoire is False and paired is True by default, and these are not allowed to be changed).
+    - reference (dict): A dictionary describing the reference dataset file. Import should be specified the same way as
+      regular dataset import. It is only allowed to import a receptor dataset here (i.e., is_repertoire is False and
+      paired is True by default, and these are not allowed to be changed).
 
-        max_edit_distances (dict): A dictionary specifying the maximum edit distance between a target sequence (from the repertoire) and the reference sequence. A maximum distance can be specified per chain, for example to allow for less strict matching of TCR alpha and BCR light chains. When only an integer is specified, this distance is applied to all possible chains.
+    - max_edit_distances (dict): A dictionary specifying the maximum edit distance between a target sequence (from the
+      repertoire) and the reference sequence. A maximum distance can be specified per chain, for example to allow for
+      less strict matching of TCR alpha and BCR light chains. When only an integer is specified, this distance is
+      applied to all possible chains.
 
-        reads (:py:mod:`~immuneML.util.ReadsType`): Reads type signify whether the counts of the sequences in the repertoire will be taken into account. If :py:mod:`~immuneML.util.ReadsType.UNIQUE`, only unique sequences (clonotypes) are counted, and if :py:mod:`~immuneML.util.ReadsType.ALL`, the sequence 'count' value is summed when determining the number of matches. The default value for reads is all.
+    - reads (:py:mod:`~immuneML.util.ReadsType`): Reads type signify whether the counts of the sequences in the
+      repertoire will be taken into account. If :py:mod:`~immuneML.util.ReadsType.UNIQUE`, only unique sequences
+      (clonotypes) are counted, and if :py:mod:`~immuneML.util.ReadsType.ALL`, the sequence 'count' value is summed when
+      determining the number of matches. The default value for reads is all.
 
-        sum_matches (bool): When sum_matches is False, the resulting encoded data matrix contains multiple columns with the number of matches per reference receptor chain. When sum_matches is true, the columns representing each of the two chains are summed together, meaning that there are only two aggregated sums of matches (one per chain) per repertoire in the encoded data.
-        To use this encoder in combination with the :ref:`Matches` report, sum_matches must be set to False. When sum_matches is set to True, this encoder behaves similarly to the encoder described by Yao, Y. et al. By default, sum_matches is False.
+    - sum_matches (bool): When sum_matches is False, the resulting encoded data matrix contains multiple columns with
+      the number of matches per reference receptor chain. When sum_matches is true, the columns representing each of the
+      two chains are summed together, meaning that there are only two aggregated sums of matches (one per chain) per
+      repertoire in the encoded data. To use this encoder in combination with the :ref:`Matches` report, sum_matches
+      must be set to False. When sum_matches is set to True, this encoder behaves similarly to the encoder described by
+      Yao, Y. et al. By default, sum_matches is False.
 
-        normalize (bool): If True, the chain matches are divided by the total number of unique receptors in the repertoire (when reads = unique) or the total number of reads in the repertoire (when reads = all).
+    - normalize (bool): If True, the chain matches are divided by the total number of unique receptors in the repertoire
+      (when reads = unique) or the total number of reads in the repertoire (when reads = all).
 
 
     YAML Specification:
@@ -112,7 +123,6 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         else:
             raise ValueError("MatchedSequencesEncoder is not defined for dataset types which are not RepertoireDataset.")
 
-
     def encode(self, dataset, params: EncoderParams):
         cache_key = CacheHandler.generate_cache_key(self._prepare_caching_params(dataset, params))
         encoded_dataset = CacheHandler.memo(cache_key,
@@ -126,9 +136,10 @@ class MatchedReceptorsEncoder(DatasetEncoder):
                   for receptor in self.reference_receptors]
 
         encoding_params_desc = {"max_edit_distance": sorted(self.max_edit_distances.items()),
-                                "reference_receptors": sorted([chain_a.get_sequence() + chain_a.metadata.v_gene + chain_a.metadata.j_gene + "|" +
-                                                                chain_b.get_sequence() + chain_b.metadata.v_gene + chain_b.metadata.j_gene
-                                                                for chain_a, chain_b in chains]),
+                                "reference_receptors": sorted([chain_a.get_sequence() + chain_a.metadata.v_gene +
+                                                               chain_a.metadata.j_gene + "|" + chain_b.get_sequence() +
+                                                               chain_b.metadata.v_gene + chain_b.metadata.j_gene
+                                                               for chain_a, chain_b in chains]),
                                 "reads": self.reads.name,
                                 "sum_matches": self.sum_matches,
                                 "normalize": self.normalize}
@@ -142,6 +153,8 @@ class MatchedReceptorsEncoder(DatasetEncoder):
                 ("encoding_params", encoding_params_desc), )
 
     def _encode_new_dataset(self, dataset, params: EncoderParams):
+        pass
+
         encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires, labels=dataset.labels,
                                             metadata_file=dataset.metadata_file)
 
@@ -208,12 +221,12 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
             features[i * 2] = [id, clonotype_id, chain_names[0],
                                first_dual_chain_id,
-                               first_chain.amino_acid_sequence,
+                               first_chain.sequence_aa,
                                first_chain.metadata.v_gene,
                                first_chain.metadata.j_gene]
             features[i * 2 + 1] = [id, clonotype_id, chain_names[1],
                                    second_dual_chain_id,
-                                   second_chain.amino_acid_sequence,
+                                   second_chain.sequence_aa,
                                    second_chain.metadata.v_gene,
                                    second_chain.metadata.j_gene]
 
@@ -271,7 +284,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
             for rep_seq in rep_seqs:
                 matches_idx = 0 if self.sum_matches else i * 2
-                match_count = 1 if self.reads == ReadsType.UNIQUE else rep_seq.metadata.count
+                match_count = 1 if self.reads == ReadsType.UNIQUE else rep_seq.metadata.duplicate_count
 
                 # Match with first chain: add to even columns in matches.
                 # Match with second chain: add to odd columns
@@ -281,4 +294,3 @@ class MatchedReceptorsEncoder(DatasetEncoder):
                     matches[matches_idx + 1] += match_count
 
         return matches
-

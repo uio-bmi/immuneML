@@ -14,17 +14,17 @@ class CountPerSequenceFilter(Filter):
     Removes all sequences from a Repertoire when they have a count below low_count_limit, or sequences with no count
     value if remove_without_counts is True. This filter can be applied to Repertoires and RepertoireDatasets.
 
-    Arguments:
+    Specification arguments:
 
-        low_count_limit (int): The inclusive minimal count value in order to retain a given sequence.
+    - low_count_limit (int): The inclusive minimal count value in order to retain a given sequence.
 
-        remove_without_count (bool): Whether the sequences without a reported count value should be removed.
+    - remove_without_count (bool): Whether the sequences without a reported count value should be removed.
 
-        remove_empty_repertoires (bool): Whether repertoires without sequences should be removed.
-        Only has an effect when remove_without_count is also set to True. If this is true, this preprocessing cannot be used with :ref:`TrainMLModel`
-        instruction, but only with :ref:`DatasetExport` instruction instead.
+    - remove_empty_repertoires (bool): Whether repertoires without sequences should be removed.
+      Only has an effect when remove_without_count is also set to True. If this is true, this preprocessing cannot be used with :ref:`TrainMLModel`
+      instruction, but only with :ref:`DatasetExport` instruction instead.
 
-        batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed when applying this filter on a RepertoireDataset)
+    - batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed when applying this filter on a RepertoireDataset)
 
 
     YAML specification:

@@ -1,6 +1,7 @@
 import os
 import shutil
-from unittest import TestCase
+
+import pytest
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -14,55 +15,54 @@ from immuneML.preprocessing.filters.DuplicateSequenceFilter import DuplicateSequ
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class TestDuplicateSequenceFilter(TestCase):
+def test_duplicate_seq_filter():
+    path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "duplicate_sequence_filter/")
 
-    def setUp(self) -> None:
-        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+    os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-    def test_process(self):
-        path = EnvironmentSettings.root_path / "test/tmp/duplicatesequencefilter/"
-        PathBuilder.build(path)
+    dataset = RepertoireDataset(
+        repertoires=[Repertoire.build(sequence_aa=["AAA", "AAA", "CCC", "AAA", "CCC", "CCC", "CCC"],
+                                      sequence=["AAAAA", "CCAAA", "AACCC", "AAAAA", "AACCC", "AACCC", "AATTT"],
+                                      v_call=["v1", "v1", "v1", "v1", "v1", "v1", "v1"],
+                                      j_call=["j1", "j1", "j1", "j1", "j1", "j1", "j1"],
+                                      chain=[Chain.ALPHA, Chain.ALPHA, Chain.ALPHA, Chain.ALPHA, Chain.ALPHA,
+                                             Chain.ALPHA, Chain.BETA],
+                                      duplicate_count=[10, 20, 30, 5, 20, None, 40],
+                                      region_type=["IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3",
+                                                   "IMGT_CDR3", "IMGT_CDR3"],
+                                      custom1=["yes", "yes", "yes", "no", "no", "no", "no"],
+                                      custom2=["yes", "yes", "yes", "no", "no", "no", "no"],
+                                      sequence_id=[1, 2, 3, 4, 5, 6, 7],
+                                      path=path)])
 
-        dataset = RepertoireDataset(repertoires=[Repertoire.build(sequence_aas=["AAA", "AAA", "CCC", "AAA", "CCC", "CCC", "CCC"],
-                                                                  sequences=["ntAAA", "ntBBB", "ntCCC", "ntAAA", "ntCCC", "ntCCC", "ntDDD"],
-                                                                  v_genes=["v1", "v1", "v1", "v1", "v1", "v1", "v1"],
-                                                                  j_genes=["j1", "j1", "j1", "j1", "j1", "j1", "j1"],
-                                                                  chains=[Chain.ALPHA, Chain.ALPHA, Chain.ALPHA, Chain.ALPHA, Chain.ALPHA,
-                                                                          Chain.ALPHA, Chain.BETA],
-                                                                  counts=[10, 20, 30, 5, 20, None, 40],
-                                                                  region_types=["IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3"],
-                                                                  custom_lists={"custom1": ["yes", "yes", "yes", "no", "no", "no", "no"],
-                                                                                "custom2": ["yes", "yes", "yes", "no", "no", "no", "no"]},
-                                                                  sequence_identifiers=[1, 2, 3, 4, 5, 6, 7],
-                                                                  path=path)])
+    # collapse by amino acids & use sum counts
+    dupfilter = DuplicateSequenceFilter(filter_sequence_type=SequenceType.AMINO_ACID,
+                                        count_agg=CountAggregationFunction.SUM, batch_size=1)
 
-        # collapse by amino acids & use sum counts
-        dupfilter = DuplicateSequenceFilter(filter_sequence_type=SequenceType.AMINO_ACID,
-                                            count_agg=CountAggregationFunction.SUM, batch_size=1)
+    reduced_repertoire = dupfilter.process_dataset(dataset=dataset, result_path=path).repertoires[0]
 
-        reduced_repertoire = dupfilter.process_dataset(dataset=dataset, result_path=path).repertoires[0]
+    attr = reduced_repertoire.get_attributes(["sequence_id", "sequence_aa", "sequence", "duplicate_count", "chain"],
+                                             as_list=True)
 
-        attr = reduced_repertoire.get_attributes(["sequence_identifiers", "sequence_aas", "sequences", "counts", "chains"])
+    assert 3 == len(reduced_repertoire.get_sequence_identifiers())
+    assert ["AAA", "CCC", "CCC"] == attr["sequence_aa"]
+    assert ["AAAAA", "AACCC", "AATTT"] == attr["sequence"]
+    assert [35, 50, 40] == attr["duplicate_count"]
+    assert ['1', '3', '7'] == attr["sequence_id"]
+    assert ['ALPHA', 'ALPHA', 'BETA'] == attr["chain"]
 
-        self.assertEqual(3, len(reduced_repertoire.get_sequence_identifiers()))
-        self.assertListEqual(["AAA", "CCC", "CCC"], list(attr["sequence_aas"]))
-        self.assertListEqual(["ntAAA", "ntCCC", "ntDDD"], list(attr["sequences"]))
-        self.assertListEqual([35, 50, 40], list(attr["counts"]))
-        self.assertListEqual([1, 3, 7], list(attr["sequence_identifiers"]))
-        self.assertListEqual(['ALPHA', 'ALPHA', 'BETA'], list(attr["chains"]))
+    # collapse by nucleotides & use min counts
+    dupfilter = DuplicateSequenceFilter(filter_sequence_type=SequenceType.NUCLEOTIDE,
+                                        count_agg=CountAggregationFunction.MIN, batch_size=4)
 
-        # collapse by nucleotides & use min counts
-        dupfilter = DuplicateSequenceFilter(filter_sequence_type=SequenceType.NUCLEOTIDE,
-                                            count_agg=CountAggregationFunction.MIN, batch_size=4)
+    reduced_repertoire = dupfilter.process_dataset(dataset=dataset, result_path=path).repertoires[0]
 
-        reduced_repertoire = dupfilter.process_dataset(dataset=dataset, result_path=path).repertoires[0]
+    attr = reduced_repertoire.get_attributes(["sequence_id", "sequence_aa", "sequence", "duplicate_count"], as_list=True)
 
-        attr = reduced_repertoire.get_attributes(["sequence_identifiers", "sequence_aas", "sequences", "counts"])
+    assert 4 == len(reduced_repertoire.get_sequence_identifiers())
+    assert ['1', '2', '3', '7'] == attr["sequence_id"]
+    assert ["AAA", "AAA", "CCC", "CCC"] == attr["sequence_aa"]
+    assert ["AAAAA", "CCAAA", "AACCC", "AATTT"] == attr["sequence"]
+    assert [5, 20, 20, 40] == attr["duplicate_count"]
 
-        self.assertEqual(4, len(reduced_repertoire.get_sequence_identifiers()))
-        self.assertListEqual([1, 2, 3, 7], list(attr["sequence_identifiers"]))
-        self.assertListEqual(["AAA", "AAA", "CCC", "CCC"], list(attr["sequence_aas"]))
-        self.assertListEqual(["ntAAA", "ntBBB", "ntCCC", "ntDDD"], list(attr["sequences"]))
-        self.assertListEqual([5, 20, 20, 40], list(attr["counts"]))
-
-        shutil.rmtree(path)
+    shutil.rmtree(path)
