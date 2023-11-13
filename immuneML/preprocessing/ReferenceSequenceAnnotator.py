@@ -157,6 +157,7 @@ class ReferenceSequenceAnnotator(Preprocessor):
         for seq in self._reference_sequences:
             tmp_seq = copy.deepcopy(seq)
             tmp_seq.metadata.region_type = region_type
+            tmp_seq.metadata.duplicate_count = seq.metadata.duplicate_count if not self._compairr_params.ignore_counts else 1
             reference_sequences.append(tmp_seq)
 
         AIRRExporter.export(SequenceDataset.build_from_objects(reference_sequences, len(self._reference_sequences),
