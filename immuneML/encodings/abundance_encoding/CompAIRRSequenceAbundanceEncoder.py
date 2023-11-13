@@ -345,7 +345,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         attributes = [EnvironmentSettings.get_sequence_type().value]
 
         if not self.compairr_params.ignore_genes:
-            attributes += ["v_genes", "j_genes"]
+            attributes += ["v_call", "j_call"]
 
         return attributes
 

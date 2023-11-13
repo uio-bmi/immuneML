@@ -86,10 +86,9 @@ class AminoAcidFrequencyDistribution(DataReport):
         tables = []
         figures = []
 
-
         tables.append(self._write_output_table(freq_dist,
-                                                 self.result_path / "amino_acid_frequency_distribution.tsv",
-                                                 name="Table of amino acid frequencies"))
+                                               self.result_path / "amino_acid_frequency_distribution.tsv",
+                                               name="Table of amino acid frequencies"))
 
         figures.append(self._safe_plot(freq_dist=freq_dist, plot_callable="_plot_distribution"))
 
@@ -101,9 +100,9 @@ class AminoAcidFrequencyDistribution(DataReport):
                                                    name=f"Frequency change between classes"))
             figures.append(self._safe_plot(frequency_change=frequency_change, plot_callable="_plot_frequency_change"))
 
-
         return ReportResult(name=self.name,
-                            info="A barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.",
+                            info="A barplot showing the relative frequency of each amino acid at each position in "
+                                 "the sequences of a dataset.",
                             output_figures=[fig for fig in figures if fig is not None],
                             output_tables=[table for table in tables if table is not None])
 
@@ -182,7 +181,8 @@ class AminoAcidFrequencyDistribution(DataReport):
             class_names = [0] * self.dataset.get_example_count()
 
         for repertoire, class_name in zip(self.dataset.get_data(), class_names):
-            self._count_aa_frequencies(self._repertoire_class_iterator(repertoire, class_name), raw_count_dict_per_class)
+            self._count_aa_frequencies(self._repertoire_class_iterator(repertoire, class_name),
+                                       raw_count_dict_per_class)
 
         return self._count_dict_per_class_to_df(raw_count_dict_per_class)
 
@@ -204,7 +204,8 @@ class AminoAcidFrequencyDistribution(DataReport):
             for aa, pos in zip(seq_str, seq_pos):
                 if pos not in raw_count_dict[class_name]:
                     raw_count_dict[class_name][pos] = {legal_aa: 0 for legal_aa in
-                                                       EnvironmentSettings.get_sequence_alphabet(SequenceType.AMINO_ACID)}
+                                                       EnvironmentSettings.get_sequence_alphabet(
+                                                           SequenceType.AMINO_ACID)}
 
                 raw_count_dict[class_name][pos][aa] += 1
 
@@ -226,10 +227,11 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     def _get_positions(self, sequence: ReceptorSequence):
         if self.imgt_positions:
-            positions = PositionHelper.gen_imgt_positions_from_length(len(sequence.get_sequence(SequenceType.AMINO_ACID)),
-                                                                      sequence.get_attribute("region_type"))
+            positions = PositionHelper.gen_imgt_positions_from_length(
+                len(sequence.get_sequence(SequenceType.AMINO_ACID)),
+                sequence.get_attribute("region_type"))
         else:
-            positions = list(range(1, len(sequence.get_sequence(SequenceType.AMINO_ACID))+1))
+            positions = list(range(1, len(sequence.get_sequence(SequenceType.AMINO_ACID)) + 1))
 
         return [str(pos) for pos in positions]
 
@@ -271,7 +273,8 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     def _compute_frequency_change(self, freq_dist):
         classes = sorted(set(freq_dist["class"]))
-        assert len(classes) == 2, f"{AminoAcidFrequencyDistribution.__name__}: cannot compute frequency change when the number of classes is not 2: {classes}"
+        assert len(
+            classes) == 2, f"{AminoAcidFrequencyDistribution.__name__}: cannot compute frequency change when the number of classes is not 2: {classes}"
 
         class_a_df = freq_dist[freq_dist["class"] == classes[0]]
         class_b_df = freq_dist[freq_dist["class"] == classes[1]]
@@ -308,7 +311,7 @@ class AminoAcidFrequencyDistribution(DataReport):
                                 "amino acid": "Amino acid"}, template="plotly_white")
 
         figure.update_xaxes(categoryorder='array', categoryarray=self._get_position_order(frequency_change["position"]))
-        figure.update_layout(showlegend=False, yaxis={'categoryorder':'category ascending'})
+        figure.update_layout(showlegend=False, yaxis={'categoryorder': 'category ascending'})
 
         figure.update_yaxes(tickformat=",.0%")
 
@@ -316,7 +319,6 @@ class AminoAcidFrequencyDistribution(DataReport):
         figure.write_html(str(file_path))
 
         return ReportOutput(path=file_path, name="Frequency difference between amino acid usage in the two classes")
-
 
     def _get_label_name(self):
         if self.split_by_label:
@@ -331,11 +333,13 @@ class AminoAcidFrequencyDistribution(DataReport):
         if self.split_by_label:
             if self.label_name is None:
                 if len(self.dataset.get_label_names()) != 1:
-                    warnings.warn(f"{AminoAcidFrequencyDistribution.__name__}: ambiguous label: split_by_label was set to True but no label name was specified, and the number of available labels is {len(self.dataset.get_label_names())}: {self.dataset.get_label_names()}. Skipping this report...")
+                    warnings.warn(
+                        f"{AminoAcidFrequencyDistribution.__name__}: ambiguous label: split_by_label was set to True but no label name was specified, and the number of available labels is {len(self.dataset.get_label_names())}: {self.dataset.get_label_names()}. Skipping this report...")
                     return False
             else:
                 if self.label_name not in self.dataset.get_label_names():
-                    warnings.warn(f"{AminoAcidFrequencyDistribution.__name__}: the specified label name ({self.label_name}) was not available among the dataset labels: {self.dataset.get_label_names()}. Skipping this report...")
+                    warnings.warn(
+                        f"{AminoAcidFrequencyDistribution.__name__}: the specified label name ({self.label_name}) was not available among the dataset labels: {self.dataset.get_label_names()}. Skipping this report...")
                     return False
 
         return True

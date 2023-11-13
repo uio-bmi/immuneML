@@ -133,22 +133,23 @@ class SimpleLSTM(GenerativeModel):
         optimizer = optim.Adam(model.parameters(), self.learning_rate)
         loss_summary = {"loss": [], "epoch": []}
 
-        for epoch in range(self.num_epochs):
-            loss = 0.
-            state = model.init_zero_state()
-            optimizer.zero_grad()
+        with torch.autograd.set_detect_anomaly(True):
+            for epoch in range(self.num_epochs):
+                loss = 0.
+                state = model.init_zero_state()
+                optimizer.zero_grad()
 
-            for x_batch, y_batch in data_loader:
-                state = state[0][:, :x_batch.size(0), :], state[1][:, :x_batch.size(0), :]
+                for x_batch, y_batch in data_loader:
+                    state = state[0][:, :x_batch.size(0), :], state[1][:, :x_batch.size(0), :]
 
-                outputs, state = model(x_batch, state)
-                loss += criterion(outputs, y_batch)
+                    outputs, state = model(x_batch, state)
+                    loss = loss + criterion(outputs, y_batch)
 
-            loss /= len(data_loader.dataset)
-            loss.backward()
-            optimizer.step()
+                loss = loss / len(data_loader.dataset)
+                loss.backward()
+                optimizer.step()
 
-            loss_summary = self._log_training_progress(loss_summary, epoch, loss)
+                loss_summary = self._log_training_progress(loss_summary, epoch, loss)
 
         self._log_training_summary(loss_summary, path)
 
@@ -204,33 +205,28 @@ class SimpleLSTM(GenerativeModel):
 
             inp = input_vector[-1]
             gen_seq_count = 0
-            probability_scores = [1.]
 
             while gen_seq_count <= count:
                 output, state = self._model(inp, state)
 
                 output_dist = output.data.view(-1).div(self.temperature).exp()
                 top_i = torch.multinomial(output_dist, 1)[0].item()
-                probability_scores[-1] *= torch.nn.functional.softmax(output, dim=-1).flatten()[top_i].item()
 
                 predicted_char = self.index_to_letter[top_i]
                 predicted += predicted_char
                 inp = torch.as_tensor(self.letter_to_index[predicted_char], device=self.device).long()
                 if predicted_char == "*":
                     gen_seq_count += 1
-                    probability_scores.append(1.)
 
         print_log(f"{SimpleLSTM.__name__} {self.name}: generated {count} sequences.", True)
 
-        probability_scores = probability_scores[1:-1]
         sequences = predicted.split('*')[1:-1]
-        return self._export_dataset(sequences, probability_scores, count, path)
+        return self._export_dataset(sequences, count, path)
 
-    def _export_dataset(self, sequences, probability_scores, count, path):
+    def _export_dataset(self, sequences, count, path):
         sequence_objs = [ReceptorSequence(**{
             self.sequence_type.value: sequence,
-            'metadata': SequenceMetadata(region_type=self.region_type.name, chain=self.chain.name,
-                                         custom_params={'log_prob': np.log(probability_scores[i]).item()})
+            'metadata': SequenceMetadata(region_type=self.region_type.name, chain=self.chain.name)
         }) for i, sequence in enumerate(sequences)]
 
         dataset = SequenceDataset.build_from_objects(sequence_objs, count, path, 'synthetic_lstm')

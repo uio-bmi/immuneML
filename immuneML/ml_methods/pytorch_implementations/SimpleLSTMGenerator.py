@@ -22,7 +22,7 @@ class SimpleLSTMGenerator(nn.Module):
 
         output, hidden_and_cell_state = self.lstm(embedded, hidden_and_cell_state)
 
-        output.squeeze_(0)
+        output = output.squeeze(0)
         output = self.fc(output)
         return output, hidden_and_cell_state
 

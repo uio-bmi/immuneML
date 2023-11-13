@@ -51,9 +51,9 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
                 ReferenceSequenceOverlap:
                     reference_path: reference_sequences.csv  # example usage with SequenceAbundanceEncoder or CompAIRRSequenceAbundanceEncoder
                     comparison_attributes:
-                        - sequence_aas
-                        - v_genes
-                        - j_genes
+                        - sequence_aa
+                        - v_call
+                        - j_call
             my_reference_overlap_report_with_kmers:
                 ReferenceSequenceOverlap:
                     reference_path: reference_kmers.csv  # example usage with KmerAbundanceEncoder

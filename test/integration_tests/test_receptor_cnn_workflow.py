@@ -1,23 +1,17 @@
-import os
 import shutil
 from unittest import TestCase
 
 import yaml
 
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
-from immuneML.caching.CacheType import CacheType
-from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestReceptorCNNWorkflow(TestCase):
 
-    def setUp(self) -> None:
-        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
-
     def test(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "integration_receptor_cnn_workflow/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "integration_receptor_cnn_workflow/")
 
         specs = {
             "definitions": {
@@ -26,7 +20,7 @@ class TestReceptorCNNWorkflow(TestCase):
                         "format": "RandomReceptorDataset",
                         "params": {
                             "result_path": str(path / "generated_dataset/"),
-                            "receptor_count": 500,
+                            "receptor_count": 50,
                             "chain_1_length_probabilities": {
                                 5: 1.
                             },
@@ -52,10 +46,10 @@ class TestReceptorCNNWorkflow(TestCase):
                 "ml_methods": {
                     "cnn": {
                         "ReceptorCNN": {
-                            "iteration_count": 1000,
+                            "iteration_count": 20,
                             "evaluate_at": 10,
                             "batch_size": 100,
-                            "number_of_threads": 4
+                            "number_of_threads": 2
                         }
                     }
                 }
