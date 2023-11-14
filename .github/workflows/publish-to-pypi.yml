@@ -35,7 +35,7 @@ jobs:
     needs: [ build_python_package ]
     runs-on: ubuntu-latest
     environment:
-      name: iml_env
+      name: pypi_env
       url: https://pypi.org/p/immuneML
     permissions:
       id-token: write
