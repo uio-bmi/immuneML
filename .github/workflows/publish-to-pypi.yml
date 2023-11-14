@@ -1,10 +1,11 @@
-name: Publish Python distribution of dev immuneML to PyPI
+name: Publish to PyPI
 
 on:
   push:
     branches:
       - master
     paths: ['**.py', '**.yaml']
+  workflow_dispatch:
 
 jobs:
   build_python_package:
