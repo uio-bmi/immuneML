@@ -14,16 +14,34 @@ def build_metadata_column_mapping(columns_str):
 
     return {colname: colname for colname in colnames if colname != ""}
 
+def get_dataset_specs(args):
+    dataset_specs = {"format": args.format,
+                     "params": {"region_type": RegionType.IMGT_CDR3.name,
+                                "result_path": "./",
+                                "path": "./"}}
+
+    if args.is_repertoire == "True":
+        dataset_specs["params"]["is_repertoire"] = True
+        dataset_specs["params"]["metadata_file"] = args.metadata_file
+    else:
+        dataset_specs["params"]["is_repertoire"] = False
+
+        paired = True if args.paired == "True" else False
+
+        dataset_specs["params"]["paired"] = paired
+        if paired:
+            dataset_specs["params"]["receptor_chains"] = args.receptor_chains
+
+        if args.metadata_columns != "":
+            dataset_specs["params"]["metadata_column_mapping"] = build_metadata_column_mapping(args.metadata_columns)
+
+    return {args.dataset_name: dataset_specs}
+
 
 def build_specs(args):
     specs = {
         "definitions": {
-            "datasets": {
-                args.dataset_name: {
-                    "format": args.format,
-                    "params": {}
-                }
-            },
+            "datasets": get_dataset_specs(args),
         },
         "instructions": {
             "my_dataset_generation_instruction": {
@@ -34,24 +52,6 @@ def build_specs(args):
         }
     }
 
-    specs["definitions"]["datasets"][args.dataset_name]["params"]["region_type"] = RegionType.IMGT_CDR3.name
-    specs["definitions"]["datasets"][args.dataset_name]["params"]["result_path"] = "./"
-    specs["definitions"]["datasets"][args.dataset_name]["params"]["path"] = "./"
-
-    if args.is_repertoire == "True":
-        specs["definitions"]["datasets"][args.dataset_name]["params"]["is_repertoire"] = True
-        specs["definitions"]["datasets"][args.dataset_name]["params"]["metadata_file"] = args.metadata_file
-    else:
-        specs["definitions"]["datasets"][args.dataset_name]["params"]["is_repertoire"] = False
-
-        paired = True if args.paired == "True" else False
-
-        specs["definitions"]["datasets"][args.dataset_name]["params"]["paired"] = paired
-        if paired:
-            specs["definitions"]["datasets"][args.dataset_name]["params"]["receptor_chains"] = args.receptor_chains
-
-        if args.metadata_columns != "":
-            specs["definitions"]["datasets"][args.dataset_name]["params"]["metadata_column_mapping"] = build_metadata_column_mapping(args.metadata_columns)
 
     return specs
 

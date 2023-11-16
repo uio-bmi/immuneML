@@ -9,9 +9,9 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
 from immuneML.util.Logger import print_log
 from immuneML.util.ReadsType import ReadsType
-from immuneML.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
 
 
 class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
@@ -68,9 +68,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
 
     def _encode_repertoires(self, dataset: RepertoireDataset, params: EncoderParams):
         # Rows = repertoires, Columns = regex matches (one chain per column)
-        encoded_repertoires = np.zeros((dataset.get_example_count(),
-                                        self.feature_count),
-                                       dtype=int)
+        encoded_repertoires = np.zeros((dataset.get_example_count(), self.feature_count), dtype=int)
         labels = {label: [] for label in params.label_config.get_labels_by_name()} if params.encode_labels else None
 
         n_repertoires = dataset.get_example_count()
@@ -102,13 +100,13 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
                         if rep_seq.metadata.chain is not None:
                             if rep_seq.metadata.chain.value == chain_type:
                                 if self._matches(rep_seq, regex, v_gene):
-                                    n_matches = 1 if self.reads == ReadsType.UNIQUE else rep_seq.metadata.count
+                                    n_matches = 1 if self.reads == ReadsType.UNIQUE else rep_seq.metadata.duplicate_count
                                     if n_matches is None:
-                                        warnings.warn(f"MatchedRegexRepertoireEncoder: count not defined for sequence with id {rep_seq.identifier} in repertoire {repertoire.identifier}, ignoring sequence...")
+                                        warnings.warn(f"MatchedRegexRepertoireEncoder: count not defined for sequence with id {rep_seq.sequence_id} in repertoire {repertoire.identifier}, ignoring sequence...")
                                         n_matches = 0
                                     matches[match_idx] += n_matches
                         else:
-                            warnings.warn(f"{MatchedRegexRepertoireEncoder.__class__.__name__}: chain was not set for sequence {rep_seq.identifier}, skipping the sequence for matching...")
+                            warnings.warn(f"{MatchedRegexRepertoireEncoder.__class__.__name__}: chain was not set for sequence {rep_seq.sequence_id}, skipping the sequence for matching...")
                     match_idx += 1
 
         return matches
@@ -117,6 +115,6 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
         if v_gene is not None and receptor_sequence.metadata.v_gene != v_gene:
             matches = False
         else:
-            matches = bool(re.search(regex, receptor_sequence.amino_acid_sequence))
+            matches = bool(re.search(regex, receptor_sequence.sequence_aa))
 
         return matches

@@ -24,21 +24,21 @@ class TestMatchedReceptorsEncoder(TestCase):
         labels = {"subject_id": ["subject_1", "subject_2", "subject_3"],
                   "label": ["yes", "no", "no"]}
 
-        metadata_alpha = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.LIGHT.value}
-        metadata_beta = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.HEAVY.value}
+        metadata_alpha = {"v_call": "V1", "j_call": "J1", "chain": Chain.LIGHT.value}
+        metadata_beta = {"v_call": "V1", "j_call": "J1", "chain": Chain.HEAVY.value}
 
-        repertoires, metadata = RepertoireBuilder.build(sequences=[["XXAGQXGSSNTGKLIXX", "XXAGQXGSSNTGKLIYY", "XXSAGQGETQYXX"],
-                                                                   ["ASSXRXX"],
-                                                                   ["XXIXXNDYKLSXX", "CCCC", "SSSS", "TTTT"]],
+        repertoires, metadata = RepertoireBuilder.build(sequences=[["FFAGQFGSSNTGKLIFF", "FFAGQFGSSNTGKLIYY", "FFSAGQGETQYFF"],
+                                                                   ["ASSFRFF"],
+                                                                   ["FFIFFNDYKLSFF", "CCCC", "SSSS", "TTTT"]],
                                                         path=path, labels=labels,
-                                                        seq_metadata=[[{**metadata_alpha, "count": 10, "v_gene": "IGLV35"},
-                                                                       {**metadata_alpha, "count": 10},
-                                                                       {**metadata_beta, "count": 10, "v_gene": "IGHV29-1"}],
-                                                                      [{**metadata_beta, "count": 10, "v_gene": "IGHV7-3"}],
-                                                                      [{**metadata_alpha, "count": 5, "v_gene": "IGLV26-2"},
-                                                                       {**metadata_alpha, "count": 2},
-                                                                       {**metadata_beta, "count": 1},
-                                                                       {**metadata_beta, "count": 2}]],
+                                                        seq_metadata=[[{**metadata_alpha, "duplicate_count": 10, "v_call": "IGLV35"},
+                                                                       {**metadata_alpha, "duplicate_count": 10},
+                                                                       {**metadata_beta, "duplicate_count": 10, "v_call": "IGHV29-1"}],
+                                                                      [{**metadata_beta, "duplicate_count": 10, "v_call": "IGHV7-3"}],
+                                                                      [{**metadata_alpha, "duplicate_count": 5, "v_call": "IGLV26-2"},
+                                                                       {**metadata_alpha, "duplicate_count": 2},
+                                                                       {**metadata_beta, "duplicate_count": 1},
+                                                                       {**metadata_beta, "duplicate_count": 2}]],
                                                         subject_ids=labels["subject_id"])
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
@@ -61,7 +61,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         return dataset, label_config, filepath, labels
 
     def test_encode_no_v_all(self):
-        path = EnvironmentSettings.root_path / "test/tmp/regex_matches_encoder/"
+        path = EnvironmentSettings.tmp_test_path / "regex_matches_encoder/"
 
         dataset, label_config, motif_filepath, labels = self.create_dummy_data(path)
 
@@ -70,7 +70,6 @@ class TestMatchedReceptorsEncoder(TestCase):
             "match_v_genes": False,
             "reads": "all"
         })
-
 
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
@@ -87,9 +86,8 @@ class TestMatchedReceptorsEncoder(TestCase):
 
         shutil.rmtree(path)
 
-
     def test_encode_no_v_unique(self):
-        path = EnvironmentSettings.root_path / "test/tmp/regex_matches_encoder/"
+        path = EnvironmentSettings.tmp_test_path / "regex_matches_encoder/"
 
         dataset, label_config, motif_filepath, labels = self.create_dummy_data(path)
 
@@ -98,7 +96,6 @@ class TestMatchedReceptorsEncoder(TestCase):
             "match_v_genes": False,
             "reads": "unique"
         })
-
 
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
@@ -115,9 +112,8 @@ class TestMatchedReceptorsEncoder(TestCase):
 
         shutil.rmtree(path)
 
-
     def test_encode_with_v_all(self):
-        path = EnvironmentSettings.root_path / "test/tmp/regex_matches_encoder/"
+        path = EnvironmentSettings.tmp_test_path / "regex_matches_encoder/"
 
         dataset, label_config, motif_filepath, labels = self.create_dummy_data(path)
 
@@ -126,7 +122,6 @@ class TestMatchedReceptorsEncoder(TestCase):
             "match_v_genes": True,
             "reads": "all"
         })
-
 
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,

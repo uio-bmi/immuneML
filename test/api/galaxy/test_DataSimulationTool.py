@@ -14,7 +14,7 @@ class TestDataSimulationTool(TestCase):
     def test_run(self):
 
         path = EnvironmentSettings.tmp_test_path / "galaxy_api_dataset_simulation/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         yaml_path = path / "specs.yaml"
         result_path = path / "results/"
@@ -44,12 +44,10 @@ class TestDataSimulationTool(TestCase):
         with open(yaml_path, "w") as file:
             yaml.dump(specs, file)
 
-        PathBuilder.build(path)
-
         run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path, 'tool': "DataSimulationTool"}))
 
         self.assertTrue(os.path.isfile(result_path / "result/dataset_metadata.csv"))
-        self.assertTrue(os.path.isfile(result_path / "result/dataset.iml_dataset"))
+        self.assertTrue(os.path.isfile(result_path / "result/dataset.yaml"))
         self.assertEqual(200, len([name for name in os.listdir(result_path / "result/repertoires/")
                                    if os.path.isfile(os.path.join(result_path / "result/repertoires/", name))]))
 

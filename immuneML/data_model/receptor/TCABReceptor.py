@@ -1,33 +1,12 @@
-import json
-
-import numpy as np
-
 from immuneML.data_model.receptor.Receptor import Receptor
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 
 
 class TCABReceptor(Receptor):
     FIELDS = {'alpha': object, 'beta': object, 'identifier': str, 'metadata': dict, 'version': str}
-    version = "1"
 
-    @classmethod
-    def create_from_record(cls, record: np.void):
-        if 'version' in record.dtype.names and record['version'] == TCABReceptor.version:
-
-            alpha_record = record[['alpha_' + name for name in ReceptorSequence.get_record_names()]]
-            alpha_record.dtype.names = ReceptorSequence.get_record_names()
-
-            beta_record = record[['beta_' + name for name in ReceptorSequence.get_record_names()]]
-            beta_record.dtype.names = ReceptorSequence.get_record_names()
-            metadata = json.loads(record['metadata']) if record['metadata'] != '' else None
-
-            return TCABReceptor(alpha=ReceptorSequence.create_from_record(alpha_record),
-                                beta=ReceptorSequence.create_from_record(beta_record),
-                                identifier=record['identifier'], metadata=metadata)
-        else:
-            raise NotImplementedError(f"Supported ({TCABReceptor.version}) and available version differ, but there is no converter available.")
-
-    def __init__(self, alpha: ReceptorSequence = None, beta: ReceptorSequence = None, metadata: dict = None, identifier: str = None):
+    def __init__(self, alpha: ReceptorSequence = None, beta: ReceptorSequence = None, metadata: dict = None,
+                 identifier: str = None):
         super().__init__(metadata=metadata, identifier=identifier)
         self.alpha = alpha
         self.beta = beta
@@ -35,9 +14,8 @@ class TCABReceptor(Receptor):
     @classmethod
     def get_record_names(cls):
         return ['alpha_' + name for name in ReceptorSequence.get_record_names()] \
-               + ['beta_' + name for name in ReceptorSequence.get_record_names()] \
-               + [name for name in cls.FIELDS if name not in ['alpha', 'beta']]
+            + ['beta_' + name for name in ReceptorSequence.get_record_names()] \
+            + [name for name in cls.FIELDS if name not in ['alpha', 'beta']]
 
     def get_chains(self):
         return ["alpha", "beta"]
-

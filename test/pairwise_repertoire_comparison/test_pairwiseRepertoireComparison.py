@@ -21,7 +21,7 @@ class TestPairwiseRepertoireComparison(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_dataset(self, path: str) -> RepertoireDataset:
-        repertoires, metadata = RepertoireBuilder.build([["A", "B"], ["D"], ["E", "F"], ["B", "C"], ["A", "D"]], path)
+        repertoires, metadata = RepertoireBuilder.build([["A", "T"], ["D"], ["E", "F"], ["T", "C"], ["A", "D"]], path)
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
         return dataset
 
@@ -32,7 +32,7 @@ class TestPairwiseRepertoireComparison(TestCase):
 
         dataset = self.create_dataset(path)
 
-        comparison = PairwiseRepertoireComparison(["sequence_aas"], ["sequence_aas"], path, 4)
+        comparison = PairwiseRepertoireComparison(["sequence_aa"], ["sequence_aa"], path, 4)
 
         # comparison_fn = lambda rep1, rep2, tmp_vector: np.sum(np.logical_and(rep1, rep2)) / np.sum(np.logical_or(rep1, rep2))
         comparison_fn = DistanceMetrics.jaccard

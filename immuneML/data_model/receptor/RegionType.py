@@ -12,3 +12,6 @@ class RegionType(Enum):
     IMGT_FR4 = "IMGT_FR4"
     IMGT_JUNCTION = "IMGT_JUNCTION"
     FULL_SEQUENCE = "FULL_SEQUENCE"
+
+    def to_string(self):
+        return self.value.lower()

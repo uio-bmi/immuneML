@@ -3,7 +3,8 @@ import shutil
 import unittest
 
 from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
-from immuneML.api.galaxy.build_yaml_from_arguments import build_settings_specs, build_ml_methods_specs, get_sequence_enc_type, \
+from immuneML.api.galaxy.build_yaml_from_arguments import build_settings_specs, build_ml_methods_specs, \
+    get_sequence_enc_type, \
     build_encodings_specs, build_labels
 from immuneML.api.galaxy.build_yaml_from_arguments import main as yamlbuilder_main
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -26,10 +27,10 @@ class MyTestCase(unittest.TestCase):
         dataset.name = "my_dataset"
         ImmuneMLExporter.export(dataset, path)
 
-        return f"{dataset.name}.iml_dataset"
+        return f"{dataset.name}.yaml"
 
     def test_main(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "args_to_yaml")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "args_to_yaml")
         data_path = path / "dummy_pickle_data"
 
         iml_dataset_name = self.create_dummy_dataset(data_path)

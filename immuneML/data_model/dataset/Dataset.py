@@ -1,4 +1,5 @@
 import abc
+from typing import List
 
 
 class Dataset:
@@ -21,6 +22,14 @@ class Dataset:
 
     @abc.abstractmethod
     def make_subset(self, example_indices, path, dataset_type: str):
+        pass
+
+    @abc.abstractmethod
+    def get_attribute(self, attribute: str, as_list: bool = True):
+        pass
+
+    @abc.abstractmethod
+    def get_attributes(self, attributes: List[str], as_list: bool = True):
         pass
 
     @abc.abstractmethod
@@ -49,6 +58,10 @@ class Dataset:
 
     @abc.abstractmethod
     def get_metadata(self, field_names: list, return_df: bool = False):
+        pass
+
+    @abc.abstractmethod
+    def get_data_from_index_range(self, start_index: int, end_index: int):
         pass
 
     def set_example_weights(self, example_weights: list):

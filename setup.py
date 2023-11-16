@@ -20,12 +20,14 @@ setup(
     author="immuneML Team",
     author_email="milenpa@student.matnat.uio.no",
     url="https://github.com/uio-bmi/immuneML",
-    install_requires=["numpy<=1.23.5", "pytest>=4", "pandas>=1,<2.0", "PyYAML>=5.3", "scikit-learn>=0.23",
+    install_requires=["numpy", "pandas>=1,<2.0", "PyYAML>=5.3", "scikit-learn>=0.23",
                       "gensim>=4", "matplotlib>=3.1", "editdistance", "regex", "tzlocal", "airr>=1,<1.4",
                       "fishersapi", "pystache", "torch>=1.5.1", "dill>=0.3", "plotly>=4", "logomaker>=0.8",
-                      "matplotlib-venn>=0.11", "scipy"],
+                      "matplotlib-venn>=0.11", "scipy", "bionumpy>=0.2.31", "umap-learn"],
     extras_require={
         "TCRdist": ["parasail==1.2", "tcrdist3>=0.1.6"],
+        "gen_models": ['olga', 'sonnia', 'torch'],
+        "ligo": ['olga', 'stitchr', 'IMGTgeneDL'],
         "KerasSequenceCNN": ["keras==2.11.0", "tensorflow==2.11.0"]
     },
     classifiers=[
@@ -44,7 +46,8 @@ setup(
     entry_points={
         'console_scripts': [
             'immune-ml = immuneML.app.ImmuneMLApp:main',
-            'immune-ml-quickstart = immuneML.workflows.instructions.quickstart:main'
+            'immune-ml-quickstart = immuneML.workflows.instructions.quickstart:main',
+            'ligo = immuneML.app.LigoApp:main'
         ]
     },
 )

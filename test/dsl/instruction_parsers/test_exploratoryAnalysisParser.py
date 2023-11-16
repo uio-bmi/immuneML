@@ -27,7 +27,7 @@ class TestExploratoryAnalysisParser(TestCase):
     def test_parse(self):
 
         path = EnvironmentSettings.tmp_test_path / "explanalysisparser/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset, weights_path = self.prepare_dataset(path)
         report1 = SequenceLengthDistribution()

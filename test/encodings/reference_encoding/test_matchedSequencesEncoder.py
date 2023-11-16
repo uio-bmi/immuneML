@@ -24,16 +24,16 @@ class TestMatchedSequencesEncoder(TestCase):
         labels = {"subject_id": ["subject_1", "subject_2", "subject_3"],
                   "label": ["yes", "yes", "no"]}
 
-        metadata = {"v_gene": "TRBV1", "j_gene": "TRBJ1", "chain": Chain.BETA.value}
+        metadata = {"v_call": "TRBV1", "j_call": "TRBJ1", "chain": Chain.BETA.value}
 
         repertoires, metadata = RepertoireBuilder.build(sequences=[["AAAA"],
                                                                    ["SSSS"],
                                                                    ["SSSS", "CCCC"]],
                                                         path=path, labels=labels,
-                                                        seq_metadata=[[{**metadata, "count": 10}],
-                                                                      [{**metadata, "count": 10}],
-                                                                      [{**metadata, "count": 5},
-                                                                       {**metadata, "count": 5}]],
+                                                        seq_metadata=[[{**metadata, "duplicate_count": 10}],
+                                                                      [{**metadata, "duplicate_count": 10}],
+                                                                      [{**metadata, "duplicate_count": 5},
+                                                                       {**metadata, "duplicate_count": 5}]],
                                                         subject_ids=labels["subject_id"])
 
         dataset = RepertoireDataset(repertoires=repertoires)
@@ -54,12 +54,8 @@ class TestMatchedSequencesEncoder(TestCase):
         return dataset, label_config, reference_sequences, labels
 
     def test__encode_new_dataset(self):
-        expected_outcomes = {"unique":
-                                 {True: [[1, 0],[0, 1],[0, 0.5]],
-                                  False: [[1, 0],[0, 1],[0, 1]]},
-                             "all":
-                                 {True: [[1, 0],[0, 1],[0, 0.5]],
-                                  False: [[10, 0],[0, 10],[0, 5]]}}
+        expected_outcomes = {"unique": {True: [[1, 0], [0, 1], [0, 0.5]], False: [[1, 0], [0, 1], [0, 1]]},
+                             "all": {True: [[1, 0], [0, 1], [0, 0.5]], False: [[10, 0], [0, 10], [0, 5]]}}
 
         for reads in ["unique", "all"]:
             for normalize in [True, False]:
@@ -97,18 +93,13 @@ class TestMatchedSequencesEncoder(TestCase):
 
                 shutil.rmtree(path)
 
-
     def test__encode_new_dataset_sum(self):
-        expected_outcomes = {"unique":
-                                 {True: [[1],[1],[0.5]],
-                                  False: [[1],[1],[1]]},
-                             "all":
-                                 {True: [[1],[1],[0.5]],
-                                  False:[[10],[10],[5]]}}
+        expected_outcomes = {"unique": {True: [[1], [1], [0.5]], False: [[1], [1], [1]]},
+                             "all": {True: [[1], [1], [0.5]], False: [[10], [10], [5]]}}
 
         for reads in ["unique", "all"]:
             for normalize in [True, False]:
-                path = EnvironmentSettings.root_path / "test/tmp/matched_sequences_encoder_all_sum/"
+                path = EnvironmentSettings.tmp_test_path / "matched_sequences_encoder_all_sum/"
 
                 dataset, label_config, reference_sequences, labels = self.create_dummy_data(path)
 

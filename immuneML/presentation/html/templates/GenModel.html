@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>immuneML: Train generative model overview</title>
+    <style>
+        {{{css_style}}}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div class="container">
+        <div>
+            <h1>{{ function }} generative model: {{name}}</h1>
+            <p>Full specification is available <a href="{{{full_specs}}}">here</a>.</p>
+            <p class="padded-bottom">immuneML version: {{immuneML_version}}</p>
+        </div>
+        {{#show_reports}}
+        <div>
+            <h2>Reports</h2>
+            {{#reports}}
+
+            <h4>Report {{name}}</h4>
+            <p>{{info}}</p>
+            <div class="grid-container">
+                {{#output_figures}}
+                    {{#is_embed}}
+                    <div class="grid-item-full-width"><embed src="{{path}}">{{#name}}<p>{{name}}</p>{{/name}}</div>
+                    {{/is_embed}}
+                    {{^is_embed}}
+                    <div><img src="{{path}}">{{#name}}<p>{{name}}</p>{{/name}}</div>
+                    {{/is_embed}}
+                {{/output_figures}}
+            </div>
+            <ul>
+            {{#output_tables}}
+                <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
+            {{/output_tables}}
+            {{#output_text}}
+                <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
+            {{/output_text}}
+            </ul>
+
+            {{/reports}}
+        </div>
+        {{/show_reports}}
+    </div>
+</body>
+</html>

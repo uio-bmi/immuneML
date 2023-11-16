@@ -1,29 +1,9 @@
-import json
-
 from immuneML.data_model.receptor.Receptor import Receptor
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 
 
 class BCReceptor(Receptor):
-    FIELDS = {'heavy': object, 'light': object, 'identifier': str, 'metadata': dict, 'version': str}
-    version = "1"
-
-    @classmethod
-    def create_from_record(cls, record):
-        if 'version' in record.dtype.names and record['version'] == BCReceptor.version:
-
-            heavy_record = record[['heavy_' + name for name in ReceptorSequence.get_record_names()]]
-            heavy_record.dtype.names = ReceptorSequence.get_record_names()
-
-            light_record = record[['light_' + name for name in ReceptorSequence.get_record_names()]]
-            light_record.dtype.names = ReceptorSequence.get_record_names()
-            metadata = json.loads(record['metadata']) if record['metadata'] != '' else None
-
-            return BCReceptor(heavy=ReceptorSequence.create_from_record(heavy_record),
-                              light=ReceptorSequence.create_from_record(light_record),
-                              identifier=record['identifier'], metadata=metadata)
-        else:
-            raise NotImplementedError(f"Supported ({BCReceptor.version}) and available version differ, but there is no converter available.")
+    FIELDS = {'heavy': object, 'light': object, 'identifier': str, 'metadata': dict}
 
     @classmethod
     def get_record_names(cls):

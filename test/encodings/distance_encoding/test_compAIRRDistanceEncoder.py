@@ -1,6 +1,5 @@
 import os
 import shutil
-from pathlib import Path
 from unittest import TestCase
 
 import numpy as np
@@ -24,8 +23,9 @@ class TestCompAIRRDistanceEncoder(TestCase):
 
     def create_dataset(self, path: str) -> RepertoireDataset:
         repertoires, metadata = RepertoireBuilder.build([["A", "Q"], ["Q", "C"], ["D"], ["E", "F"],
-                                                       ["A", "Q"], ["Q", "C"], ["D"], ["E", "F"]], path,
-                                                      {"l1": [1, 0, 1, 0, 1, 0, 1, 0], "l2": [2, 3, 2, 3, 2, 3, 3, 3]})
+                                                         ["A", "Q"], ["Q", "C"], ["D"], ["E", "F"]], path,
+                                                        {"l1": [1, 0, 1, 0, 1, 0, 1, 0],
+                                                         "l2": [2, 3, 2, 3, 2, 3, 3, 3]})
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
         return dataset
 
@@ -41,23 +41,22 @@ class TestCompAIRRDistanceEncoder(TestCase):
 
     def _run_test(self, compairr_path):
 
-        path = EnvironmentSettings.tmp_test_path / "compairr_distance_encoder/"
-
-        PathBuilder.build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "compairr_distance_encoder/")
 
         dataset = self.create_dataset(path)
 
         enc = CompAIRRDistanceEncoder.build_object(dataset, **{"compairr_path": compairr_path,
-                                                           "keep_compairr_input": True,
-                                                        "differences": 0,
-                                                        "indels": False,
-                                                        "ignore_counts": False,
-                                                        "threads": 8,
-                                                        "ignore_genes": False})
+                                                               "keep_compairr_input": True,
+                                                               "differences": 0,
+                                                               "indels": False,
+                                                               "ignore_counts": False,
+                                                               "threads": 8,
+                                                               "ignore_genes": False})
 
         enc.set_context({"dataset": dataset})
         encoded = enc.encode(dataset, EncoderParams(result_path=path,
-                                                    label_config=LabelConfiguration([Label("l1", [0, 1]), Label("l2", [2, 3])]),
+                                                    label_config=LabelConfiguration(
+                                                        [Label("l1", [0, 1]), Label("l2", [2, 3])]),
                                                     pool_size=4))
 
         self.assertEqual(8, encoded.encoded_data.examples.shape[0])

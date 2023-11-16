@@ -8,8 +8,10 @@ from immuneML.util.ReflectionHandler import ReflectionHandler
 
 class ReportParser:
 
+    keyword = "reports"
+
     @staticmethod
-    def parse_reports(reports: dict, symbol_table: SymbolTable):
+    def parse(reports: dict, symbol_table: SymbolTable):
         if reports is None or len(reports) == 0:
             reports = {}
 

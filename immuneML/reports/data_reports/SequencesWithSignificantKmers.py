@@ -22,17 +22,20 @@ class SequencesWithSignificantKmers(DataReport):
     For each combination of p-value and k-mer size given, a file is written containing all sequences containing a significant
     k-mer of the given size at the given p-value.
 
-    Arguments:
+    Specification arguments:
 
-        reference_sequences_path (str): Path to a file containing the reference sequences,
-        The file should contain one sequence per line, without a header, and without V or J genes.
+    - reference_sequences_path (str): Path to a file containing the reference sequences,
+      The file should contain one sequence per line, without a header, and without V or J genes.
 
-        p_values (list): The p value thresholds to be used by Fisher's exact test. Each p-value specified here will become one panel in the output figure.
+    - p_values (list): The p value thresholds to be used by Fisher's exact test. Each p-value specified here will become
+      one panel in the output figure.
 
-        k_values (list): Length of the k-mers (number of amino acids) created by the :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder`.
-        Each k-mer length will become one panel in the output figure.
+    - k_values (list): Length of the k-mers (number of amino acids) created by the
+      :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder`.
+      Each k-mer length will become one panel in the output figure.
 
-        label (dict): A label configuration. One label should be specified, and the positive_class for this label should be defined. See the YAML specification below for an example.
+    - label (dict): A label configuration. One label should be specified, and the positive_class for this label should
+      be defined. See the YAML specification below for an example.
 
 
     YAML specification:
@@ -55,6 +58,7 @@ class SequencesWithSignificantKmers(DataReport):
                 label: # Define a label, and the positive class for that given label
                     CMV:
                         positive_class: +
+
     """
 
     @classmethod

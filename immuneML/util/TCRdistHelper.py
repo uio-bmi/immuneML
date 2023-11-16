@@ -75,17 +75,17 @@ class TCRdistHelper:
         for receptor in dataset.get_data():
             subject.append(receptor.metadata["subject"] if "subject" in receptor.metadata else "sub" + receptor.identifier)
             epitope.append(receptor.metadata[label_name])
-            count.append(receptor.get_chain("alpha").metadata.count
-                         if receptor.get_chain("alpha").metadata.count == receptor.get_chain("beta").metadata.count
-                            and receptor.get_chain("beta").metadata.count is not None else 1)
-            v_a_gene.append(TCRdistHelper.add_default_allele_to_v_gene(receptor.get_chain('alpha').metadata.v_allele))
-            j_a_gene.append(receptor.get_chain('alpha').metadata.j_allele)
-            cdr3_a_aa.append(receptor.get_chain('alpha').amino_acid_sequence)
-            cdr3_a_nucseq.append(receptor.get_chain("alpha").nucleotide_sequence)
-            v_b_gene.append(TCRdistHelper.add_default_allele_to_v_gene(receptor.get_chain('beta').metadata.v_allele))
-            j_b_gene.append(receptor.get_chain('beta').metadata.j_allele)
-            cdr3_b_aa.append(receptor.get_chain('beta').amino_acid_sequence)
-            cdr3_b_nucseq.append(receptor.get_chain("beta").nucleotide_sequence)
+            count.append(receptor.get_chain("alpha").metadata.duplicate_count
+                         if receptor.get_chain("alpha").metadata.duplicate_count == receptor.get_chain("beta").metadata.duplicate_count
+                            and receptor.get_chain("beta").metadata.duplicate_count is not None else 1)
+            v_a_gene.append(TCRdistHelper.add_default_allele_to_v_gene(receptor.get_chain('alpha').metadata.v_call))
+            j_a_gene.append(receptor.get_chain('alpha').metadata.j_call)
+            cdr3_a_aa.append(receptor.get_chain('alpha').sequence_aa)
+            cdr3_a_nucseq.append(receptor.get_chain("alpha").sequence)
+            v_b_gene.append(TCRdistHelper.add_default_allele_to_v_gene(receptor.get_chain('beta').metadata.v_call))
+            j_b_gene.append(receptor.get_chain('beta').metadata.v_call)
+            cdr3_b_aa.append(receptor.get_chain('beta').sequence_aa)
+            cdr3_b_nucseq.append(receptor.get_chain("beta").sequence)
             clone_id.append(receptor.identifier)
 
         if all(item is not None for item in cdr3_a_nucseq) and all(item is not None for item in cdr3_b_nucseq):

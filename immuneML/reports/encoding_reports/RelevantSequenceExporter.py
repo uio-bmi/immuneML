@@ -19,7 +19,7 @@ class RelevantSequenceExporter(EncodingReport):
     Exports the sequences that are extracted as label-associated when using the :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder` or
     :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder` in AIRR-compliant format.
 
-    Arguments: there are no arguments for this report.
+    Specification arguments: there are no arguments for this report.
 
     YAML specification:
 
@@ -31,10 +31,10 @@ class RelevantSequenceExporter(EncodingReport):
     """
 
     COLUMN_MAPPING = {
-        "v_genes": "v_call",
-        "j_genes": "j_call",
-        "sequences": "cdr3",
-        'sequence_aas': "cdr3_aa"
+        "v_gene": "v_call",
+        "j_gene": "j_call",
+        "sequence": "cdr3",
+        'sequence_aa': "cdr3_aa"
     }
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, name: str = None, number_of_processes: int = 1):
@@ -62,10 +62,10 @@ class RelevantSequenceExporter(EncodingReport):
         columns = df.columns.values.tolist()
         column_mapping = {}
         region_type = self.dataset.get_repertoire(0).get_region_type()
-        if "sequence_aas" in columns and (region_type != RegionType.IMGT_CDR3 and region_type != RegionType.IMGT_CDR3.name):
-            column_mapping["sequence_aas"] = "sequence_aa"
-        if "sequences" in columns and (region_type != RegionType.IMGT_CDR3 and region_type != RegionType.IMGT_CDR3.name):
-            column_mapping['sequences'] = "sequence"
+        if "sequence_aa" in columns and (region_type != RegionType.IMGT_CDR3 and region_type != RegionType.IMGT_CDR3.name):
+            column_mapping["sequence_aa"] = "sequence_aa"
+        if "sequence" in columns and (region_type != RegionType.IMGT_CDR3 and region_type != RegionType.IMGT_CDR3.name):
+            column_mapping['sequence'] = "sequence"
 
         return {**RelevantSequenceExporter.COLUMN_MAPPING, **column_mapping}
 

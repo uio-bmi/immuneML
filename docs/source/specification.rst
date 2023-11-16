@@ -15,9 +15,9 @@ YAML specification
 
 The YAML specification defines which analysis should be performed by immuneML. It is defined under three main keywords:
 
-  - :code:`definitions` - describing the settings of :code:`datasets`, :code:`encodings`, :code:`ml_methods`, :code:`preprocessing_sequences`, :code:`reports`, :code:`simulations` and other components,
-  - :code:`instructions` - describing the parameters of the analysis that will be performed and which of the analysis components (defined under :code:`definitions`) will be used for this
-  - :code:`output` - describing how to format the results of the analysis (currently, only HTML output is supported).
+- :code:`definitions` - describing the settings of :code:`datasets`, :code:`encodings`, :code:`ml_methods`, :code:`preprocessing_sequences`, :code:`reports`, :code:`simulations` and other components,
+- :code:`instructions` - describing the parameters of the analysis that will be performed and which of the analysis components (defined under :code:`definitions`) will be used for this
+- :code:`output` - describing how to format the results of the analysis (currently, only HTML output is supported).
 
 The purpose of this page is to list all the YAML specification options. If you are not familiar with the YAML specification and get started, see
 :ref:`How to specify an analysis with YAML`.
@@ -89,10 +89,13 @@ Reports
 ML methods
 -----------
 
+From version 3.x, immuneML includes both various types of classifiers and generative models.
+
 When choosing which ML method(s) are most suitable for your use-case, please consider the following table.
 The table describes which of the ML methods can be used for binary classification (two classes per label), and which
 can be used for multi-class classification. Note that all classifiers can automatically be used for multi-label classification
 in immuneML.
+
 Furthermore, it describes what type of dataset the classifier can be applied to, and whether a third level of nested cross-validation
 can be used for the selection of model parameters (scikit-learn classifiers).
 
@@ -100,11 +103,10 @@ can be used for the selection of model parameters (scikit-learn classifiers).
    :file: _static/files/ml_methods_properties.csv
    :header-rows: 1
 
-
 .. include:: ../specs/definitions/ml_methods.rst
 
 Preprocessings
---------------
+---------------
 
 .. include:: ../specs/definitions/preprocessings.rst
 

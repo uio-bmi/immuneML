@@ -45,8 +45,8 @@ we are working on a solution to make this possible in the future.
             dataset: # user-defined dataset name
               format: ImmuneML # the default format used by the 'Create dataset' galaxy tool is ImmuneML
               params:
-                path: dataset.iml_dataset # specify the dataset name, the default name used by
-                                          # the 'Create dataset' galaxy tool is dataset.iml_dataset
+                path: dataset.yaml # specify the dataset name, the default name used by
+                                          # the 'Create dataset' galaxy tool is dataset.yaml
         instructions:
           instruction_name:
             type: MLApplication

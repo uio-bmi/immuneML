@@ -8,11 +8,11 @@ import yaml
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
-from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.ml_methods.RandomForestClassifier import RandomForestClassifier
-from immuneML.ml_methods.SVC import SVC
-from immuneML.ml_methods.SVM import SVM
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.RandomForestClassifier import RandomForestClassifier
+from immuneML.ml_methods.classifiers.SVC import SVC
+from immuneML.ml_methods.classifiers.SVM import SVM
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
@@ -36,13 +36,14 @@ class Coefficients(MLReport):
     The full set of coefficients will also be exported as a csv file.
 
 
-    Arguments:
+    Specification arguments:
 
-        coefs_to_plot (list): A list specifying which coefficients should be plotted. For options see :py:obj:`~immuneML.reports.ml_reports.CoefficientPlottingSetting.CoefficientPlottingSetting`.
+    - coefs_to_plot (list): A list specifying which coefficients should be plotted. For options see :py:obj:`~immuneML.reports.ml_reports.CoefficientPlottingSetting.CoefficientPlottingSetting`.
 
-        cutoff (list): If 'cutoff' is specified under 'coefs_to_plot', the cutoff values can be specified here. The coefficients which have an absolute value equal to or greater than the cutoff will be plotted.
+    - cutoff (list): If 'cutoff' is specified under 'coefs_to_plot', the cutoff values can be specified here. The coefficients which have an absolute value equal to or greater than the cutoff will be plotted.
 
-        n_largest (list): If 'n_largest' is specified under 'coefs_to_plot', the values for n can be specified here. These should be integer values. The n largest coefficients are determined based on their absolute values.
+    - n_largest (list): If 'n_largest' is specified under 'coefs_to_plot', the values for n can be specified here. These should be integer values. The n largest coefficients are determined based on their absolute values.
+
 
     YAML specification:
 

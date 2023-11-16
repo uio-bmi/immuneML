@@ -24,25 +24,25 @@ class FeatureValueBarplot(FeatureReport):
     please consider using :ref:`FeatureDistribution` instead.
     When comparing the feature values between two subsets of the data, please use :ref:`FeatureComparison`.
 
-    Arguments:
+    Specification arguments:
 
-        color_grouping_label (str): The label that is used to color each bar, at each level of the grouping_label.
+    - color_grouping_label (str): The label that is used to color each bar, at each level of the grouping_label.
 
-        row_grouping_label (str): The label that is used to group bars into different row facets.
+    - row_grouping_label (str): The label that is used to group bars into different row facets.
 
-        column_grouping_label (str): The label that is used to group bars into different column facets.
+    - column_grouping_label (str): The label that is used to group bars into different column facets.
 
-        show_error_bar (bool): Whether to show the error bar (standard deviation) for the bars.
+    - show_error_bar (bool): Whether to show the error bar (standard deviation) for the bars.
 
-        x_title (str): x-axis label
+    - x_title (str): x-axis label
 
-        y_title (str): y-axis label
+    - y_title (str): y-axis label
 
-        plot_top_n (int): plot n of the largest features on average separately (useful when there are too many features to plot at the same time)
+    - plot_top_n (int): plot n of the largest features on average separately (useful when there are too many features to plot at the same time)
 
-        plot_bottom_n (int): plot n of the smallest features on average separately (useful when there are too many features to plot at the same time)
+    - plot_bottom_n (int): plot n of the smallest features on average separately (useful when there are too many features to plot at the same time)
 
-        plot_all_features (bool): whether to plot all (might be slow for large number of features)
+    - plot_all_features (bool): whether to plot all (might be slow for large number of features)
 
 
     YAML specification:

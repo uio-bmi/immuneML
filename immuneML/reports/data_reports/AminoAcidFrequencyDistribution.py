@@ -6,6 +6,7 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 
+from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
@@ -25,15 +26,21 @@ class AminoAcidFrequencyDistribution(DataReport):
     """
     Generates a barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.
 
-    Arguments:
+    Specification arguments:
 
-        imgt_positions (bool): Whether to use IMGT positional numbering or sequence index numbering. When imgt_positions is True, IMGT positions are used, meaning sequences of unequal length are aligned according to their IMGT positions. By default imgt_positions is True.
+    - imgt_positions (bool): Whether to use IMGT positional numbering or sequence index numbering. When imgt_positions
+      is True, IMGT positions are used, meaning sequences of unequal length are aligned according to their IMGT
+      positions. By default, imgt_positions is True.
 
-        relative_frequency (bool): Whether to plot relative frequencies (true) or absolute counts (false) of the positional amino acids. By default, relative_frequency is True.
+    - relative_frequency (bool): Whether to plot relative frequencies (true) or absolute counts (false) of the
+      positional amino acids. By default, relative_frequency is True.
 
-        split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a single label, or alternatively the label of interest can be specified under 'label'. If split_by_label is set to true, the percentage-wise frequency difference between classes is plotted additionally. By default, split_by_label is False.
+    - split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a
+      single label, or alternatively the label of interest can be specified under 'label'. If split_by_label is set to
+      true, the percentage-wise frequency difference between classes is plotted additionally. By default,
+      split_by_label is False.
 
-        label (str): if split_by_label is set to True, a label can be specified here.
+    - label (str): if split_by_label is set to True, a label can be specified here.
 
     YAML specification:
 
@@ -64,7 +71,7 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         return AminoAcidFrequencyDistribution(**kwargs)
 
-    def __init__(self, dataset: SequenceDataset = None, imgt_positions: bool = None, relative_frequency: bool = None,
+    def __init__(self, dataset: Dataset = None, imgt_positions: bool = None, relative_frequency: bool = None,
                  split_by_label: bool = None, label: str = None,
                  result_path: Path = None, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
@@ -81,10 +88,9 @@ class AminoAcidFrequencyDistribution(DataReport):
         tables = []
         figures = []
 
-
         tables.append(self._write_output_table(freq_dist,
-                                                 self.result_path / "amino_acid_frequency_distribution.tsv",
-                                                 name="Table of amino acid frequencies"))
+                                               self.result_path / "amino_acid_frequency_distribution.tsv",
+                                               name="Table of amino acid frequencies"))
 
         figures.append(self._safe_plot(freq_dist=freq_dist, plot_callable="_plot_distribution"))
 
@@ -93,9 +99,8 @@ class AminoAcidFrequencyDistribution(DataReport):
 
             tables.append(self._write_output_table(frequency_change,
                                                    self.result_path / f"frequency_change.tsv",
-                                                   name=f"Log-fold change between classes"))
+                                                   name=f"Frequency change between classes"))
             figures.append(self._safe_plot(frequency_change=frequency_change, plot_callable="_plot_frequency_change"))
-
 
         return ReportResult(name=self.name,
                             info="A barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.",
@@ -150,7 +155,7 @@ class AminoAcidFrequencyDistribution(DataReport):
 
             for class_name, raw_count_dict in raw_count_dict_per_class.items():
                 result_df = self._count_dict_to_df(raw_count_dict)
-                result_df["chain"] = chain  # todo facet rows/cols when chain is available
+                result_df["chain"] = chain
                 result_df["class"] = class_name
                 result_dfs.append(result_df)
 
@@ -177,7 +182,8 @@ class AminoAcidFrequencyDistribution(DataReport):
             class_names = [0] * self.dataset.get_example_count()
 
         for repertoire, class_name in zip(self.dataset.get_data(), class_names):
-            self._count_aa_frequencies(self._repertoire_class_iterator(repertoire, class_name), raw_count_dict_per_class)
+            self._count_aa_frequencies(self._repertoire_class_iterator(repertoire, class_name),
+                                       raw_count_dict_per_class)
 
         return self._count_dict_per_class_to_df(raw_count_dict_per_class)
 
@@ -199,7 +205,8 @@ class AminoAcidFrequencyDistribution(DataReport):
             for aa, pos in zip(seq_str, seq_pos):
                 if pos not in raw_count_dict[class_name]:
                     raw_count_dict[class_name][pos] = {legal_aa: 0 for legal_aa in
-                                                       EnvironmentSettings.get_sequence_alphabet(SequenceType.AMINO_ACID)}
+                                                       EnvironmentSettings.get_sequence_alphabet(
+                                                           SequenceType.AMINO_ACID)}
 
                 raw_count_dict[class_name][pos][aa] += 1
 
@@ -221,10 +228,11 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     def _get_positions(self, sequence: ReceptorSequence):
         if self.imgt_positions:
-            positions = PositionHelper.gen_imgt_positions_from_length(len(sequence.get_sequence(SequenceType.AMINO_ACID)),
-                                                                      sequence.get_attribute("region_type"))
+            positions = PositionHelper.gen_imgt_positions_from_length(
+                len(sequence.get_sequence(SequenceType.AMINO_ACID)),
+                sequence.get_attribute("region_type"))
         else:
-            positions = list(range(1, len(sequence.get_sequence(SequenceType.AMINO_ACID))+1))
+            positions = list(range(1, len(sequence.get_sequence(SequenceType.AMINO_ACID)) + 1))
 
         return [str(pos) for pos in positions]
 
@@ -234,16 +242,6 @@ class AminoAcidFrequencyDistribution(DataReport):
         results_table.to_csv(file_path, index=False)
 
         return ReportOutput(path=file_path, name="Table of amino acid frequencies")
-
-
-    def _get_colors(self):
-        return {'Y': 'rgb(102, 197, 204)', 'W': 'rgb(179,222,105)', 'V': 'rgb(220, 176, 242)',
-                'T': 'rgb(217,217,217)', 'S': 'rgb(141,211,199)', 'R': 'rgb(251,128,114)',
-                'Q': 'rgb(158, 185, 243)', 'P': 'rgb(248, 156, 116)', 'N': 'rgb(135, 197, 95)',
-                'M': 'rgb(254, 136, 177)', 'L': 'rgb(201, 219, 116)', 'K': 'rgb(255,237,111)',
-                'I': 'rgb(180, 151, 231)', 'H': 'rgb(246, 207, 113)', 'G': 'rgb(190,186,218)',
-                'F': 'rgb(128,177,211)', 'E': 'rgb(253,180,98)',  'D': 'rgb(252,205,229)',
-                'C': 'rgb(188,128,189)', 'A': 'rgb(204,235,197)'}
 
     def _plot_distribution(self, freq_dist):
         freq_dist.sort_values(by=["amino acid"], ascending=False, inplace=True)
@@ -276,7 +274,7 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     def _compute_frequency_change(self, freq_dist):
         classes = sorted(set(freq_dist["class"]))
-        assert len(classes) == 2, f"{AminoAcidFrequencyDistribution.__name__}: cannot compute log fold change when the number of classes is not 2: {classes}"
+        assert len(classes) == 2, f"{AminoAcidFrequencyDistribution.__name__}: cannot compute frequency change when the number of classes is not 2: {classes}"
 
         class_a_df = freq_dist[freq_dist["class"] == classes[0]]
         class_b_df = freq_dist[freq_dist["class"] == classes[1]]
@@ -313,7 +311,7 @@ class AminoAcidFrequencyDistribution(DataReport):
                                 "amino acid": "Amino acid"}, template="plotly_white")
 
         figure.update_xaxes(categoryorder='array', categoryarray=self._get_position_order(frequency_change["position"]))
-        figure.update_layout(showlegend=False, yaxis={'categoryorder':'category ascending'})
+        figure.update_layout(showlegend=False, yaxis={'categoryorder': 'category ascending'})
 
         figure.update_yaxes(tickformat=",.0%")
 
@@ -321,7 +319,6 @@ class AminoAcidFrequencyDistribution(DataReport):
         figure.write_html(str(file_path))
 
         return ReportOutput(path=file_path, name="Frequency difference between amino acid usage in the two classes")
-
 
     def _get_label_name(self):
         if self.split_by_label:
@@ -344,4 +341,3 @@ class AminoAcidFrequencyDistribution(DataReport):
                     return False
 
         return True
-

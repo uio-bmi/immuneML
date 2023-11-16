@@ -8,8 +8,8 @@ from immuneML.environment.SequenceType import SequenceType
 class TestSequence(TestCase):
     def test_get_sequence(self):
 
-        sequence = ReceptorSequence(amino_acid_sequence="CAS",
-                                    nucleotide_sequence="TGTGCTTCC")
+        sequence = ReceptorSequence(sequence_aa="CAS",
+                                    sequence="TGTGCTTCC")
 
         EnvironmentSettings.set_sequence_type(SequenceType.AMINO_ACID)
 

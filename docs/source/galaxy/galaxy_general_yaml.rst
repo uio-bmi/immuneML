@@ -42,8 +42,8 @@ The following YAML specification shows an example of how to run the ExploratoryA
         dataset: # user-defined dataset name
           format: ImmuneML # the default format used by the 'Create dataset' galaxy tool is Pickle
           params:
-            path: dataset.iml_dataset # specify the dataset name, the default name used by
-                                      # the 'Create dataset' galaxy tool is dataset.iml_dataset
+            path: dataset.yaml # specify the dataset name, the default name used by
+                                      # the 'Create dataset' galaxy tool is dataset.yaml
       encodings:
         my_sequence_matches:
           MatchedSequences:

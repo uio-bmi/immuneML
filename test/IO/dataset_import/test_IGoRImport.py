@@ -39,9 +39,8 @@ rep2.tsv,2""")
 
     def test_load_repertoire(self):
         """Test dataset content with and without a header included in the input file"""
-        path = EnvironmentSettings.root_path / "test/tmp/io_igor_load/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "io_igor_load/")
 
-        PathBuilder.build(path)
         self.write_dummy_files(path, True)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "igor")
@@ -52,12 +51,11 @@ rep2.tsv,2""")
 
         dataset = IGoRImport.import_dataset(params, "igor_repertoire_dataset")
 
-
         self.assertEqual(2, dataset.get_example_count())
         self.assertEqual(len(dataset.repertoires[0].sequences), 1)
         self.assertEqual(len(dataset.repertoires[1].sequences), 1)
 
-        self.assertEqual(dataset.repertoires[0].sequences[0].amino_acid_sequence, "ARDRWSTPVLRYFDWWTPPYYYYMDV")
+        self.assertEqual(dataset.repertoires[0].sequences[0].sequence_aa, "ARDRWSTPVLRYFDWWTPPYYYYMDV")
 
         self.assertListEqual(list(dataset.repertoires[0].get_counts()), [1])
         self.assertEqual(dataset.repertoires[0].get_chains(), None)
@@ -65,9 +63,9 @@ rep2.tsv,2""")
         shutil.rmtree(path)
 
     def test_load_repertoire_with_stop_codon(self):
-        path = EnvironmentSettings.root_path / "test/tmp/io_igor_load/"
+        path = EnvironmentSettings.tmp_test_path / "io_igor_load/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         self.write_dummy_files(path, True)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "igor")
@@ -79,20 +77,19 @@ rep2.tsv,2""")
 
         dataset_stop_codons = IGoRImport.import_dataset(params, "igor_dataset_stop")
 
-
         self.assertEqual(2, dataset_stop_codons.get_example_count())
         self.assertEqual(len(dataset_stop_codons.repertoires[0].sequences), 2)
         self.assertEqual(len(dataset_stop_codons.repertoires[1].sequences), 2)
 
-        self.assertEqual(dataset_stop_codons.repertoires[0].sequences[0].amino_acid_sequence, "ARVNRHIVVVTAIMTG*NWFDP")
+        self.assertEqual(dataset_stop_codons.repertoires[0].sequences[0].sequence_aa, "ARVNRHIVVVTAIMTG*NWFDP")
 
         shutil.rmtree(path)
 
     def test_load_sequence_dataset(self):
         """Test dataset content with and without a header included in the input file"""
-        path = EnvironmentSettings.root_path / "test/tmp/io_igor_load/"
+        path = EnvironmentSettings.tmp_test_path / "io_igor_load_seq/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         self.write_dummy_files(path, False)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "igor")
@@ -109,9 +106,9 @@ rep2.tsv,2""")
         self.assertEqual(4, dataset.get_example_count())
 
         self.assertListEqual(sorted(["GCGAGACGTGTCTAGGGAGGATATTGTAGTAGTACCAGCTGCTATGACGGGCGGTCCGGTAGTACTACTTTGACTAC",
-                              "GCGAGAGGCTTCCATGGAACTACAGTAACTACGTTTGTAGGCTGTAGTACTACATGGACGTC",
-                              "GCGAGAGTTAATCGGCATATTGTGGTGGTGACTGCTATTATGACCGGGTAAAACTGGTTCGACCCC",
-                              "GCGAGAGATAGGTGGTCAACCCCAGTATTACGATATTTTGACTGGTGGACCCCGCCCTACTACTACTACATGGACGTC"]),
-                             sorted([seq.nucleotide_sequence for seq in seqs]))
+                                     "GCGAGAGGCTTCCATGGAACTACAGTAACTACGTTTGTAGGCTGTAGTACTACATGGACGTC",
+                                     "GCGAGAGTTAATCGGCATATTGTGGTGGTGACTGCTATTATGACCGGGTAAAACTGGTTCGACCCC",
+                                     "GCGAGAGATAGGTGGTCAACCCCAGTATTACGATATTTTGACTGGTGGACCCCGCCCTACTACTACTACATGGACGTC"]),
+                             sorted([seq.sequence for seq in seqs]))
 
         shutil.rmtree(path)

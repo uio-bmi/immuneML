@@ -135,7 +135,7 @@ The complete YAML specification for this analysis looks like this and can be dow
         my_dataset: # user-defined dataset name
           format: ImmuneML
           params:
-            path: dataset.iml_dataset # 'dataset' is the default name given by the Create dataset tool
+            path: dataset.yaml # 'dataset' is the default name given by the Create dataset tool
 
       encodings:
         my_kmer_frequency: # user-defined encoding name

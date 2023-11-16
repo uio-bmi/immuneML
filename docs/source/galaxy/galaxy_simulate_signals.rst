@@ -52,8 +52,8 @@ A complete YAML specification for immune event simulation in Galaxy is show here
       dataset: # user-defined dataset name
         format: ImmuneML # the default format used by the 'Create dataset' galaxy tool is ImmuneML
         params:
-          path: dataset.iml_dataset # specify the dataset name, the default name used by
-                                    # the 'Create dataset' galaxy tool is dataset.iml_dataset
+          path: dataset.yaml # specify the dataset name, the default name used by
+                                    # the 'Create dataset' galaxy tool is dataset.yaml
 
     motifs:
       my_simple_motif: # a simple motif without gaps or hamming distance

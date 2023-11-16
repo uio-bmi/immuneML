@@ -26,18 +26,18 @@ class DistanceEncoder(DatasetEncoder):
     if they contain the same set of sequence_aas, and the distance is minimal if none of the sequence_aas are shared between
     two repertoires.
 
-    Arguments:
+    Specification arguments:
 
-        distance_metric (:py:mod:`~immuneML.encodings.distance_encoding.DistanceMetricType`): The metric used to calculate the
-        distance between two repertoires. Names of different distance metric types are allowed values in the specification.
-        The default distance metric is JACCARD (inverse Jaccard).
+    - distance_metric (:py:mod:`~immuneML.encodings.distance_encoding.DistanceMetricType`): The metric used to calculate the
+      distance between two repertoires. Names of different distance metric types are allowed values in the specification.
+      The default distance metric is JACCARD (inverse Jaccard).
 
-        sequence_batch_size (int): The number of sequences to be processed at once. Increasing this number increases the memory use.
-        The default value is 1000.
+    - sequence_batch_size (int): The number of sequences to be processed at once. Increasing this number increases the memory use.
+      The default value is 1000.
 
-        attributes_to_match (list): The attributes to consider when determining whether a sequence is present in both repertoires.
-        Only the fields defined under attributes_to_match will be considered, all other fields are ignored.
-        Valid values include any repertoire attribute (sequence, amino acid sequence, V gene etc). The default value is ['sequence_aas']
+    - attributes_to_match (list): The attributes to consider when determining whether a sequence is present in both repertoires.
+      Only the fields defined under attributes_to_match will be considered, all other fields are ignored.
+      Valid values include any repertoire attribute (sequence, amino acid sequence, V gene etc). The default value is ['sequence_aas']
 
     YAML specification:
 
@@ -49,11 +49,11 @@ class DistanceEncoder(DatasetEncoder):
                 distance_metric: JACCARD
                 sequence_batch_size: 1000
                 attributes_to_match:
-                    - sequence_aas
-                    - v_genes
-                    - j_genes
-                    - chains
-                    - region_types
+                    - sequence_aa
+                    - v_call
+                    - j_call
+                    - chain
+                    - region_type
 
     """
 

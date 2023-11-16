@@ -2,7 +2,7 @@ import copy
 
 import pandas as pd
 
-from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.util.Logger import print_log
 from immuneML.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
 from immuneML.workflows.steps.Step import Step

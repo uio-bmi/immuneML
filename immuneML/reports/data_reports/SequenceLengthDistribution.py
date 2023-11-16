@@ -21,9 +21,9 @@ class SequenceLengthDistribution(DataReport):
     """
     Generates a histogram of the lengths of the sequences in a repertoire or sequence dataset.
 
-    Arguments:
+    Specification arguments:
 
-        sequence_type (str): whether to check the length of amino acid or nucletoide sequences; default value is 'amino_acid'
+    - sequence_type (str): whether to check the length of amino acid or nucleotide sequences; default value is 'amino_acid'
 
     YAML specification:
 
@@ -95,11 +95,11 @@ class SequenceLengthDistribution(DataReport):
 
         figure = px.bar(df, x="sequence_lengths", y="counts")
         figure.update_layout(xaxis=dict(tickmode='array', tickvals=df["sequence_lengths"]), yaxis=dict(tickmode='array', tickvals=df["counts"]),
-                             title="Sequence length distribution", template="plotly_white")
+                             template="plotly_white")
         figure.update_traces(marker_color=px.colors.diverging.Tealrose[0])
         PathBuilder.build(self.result_path)
 
         file_path = self.result_path / "sequence_length_distribution.html"
         figure.write_html(str(file_path))
-        return ReportOutput(path=file_path, name="sequence length distribution plot")
+        return ReportOutput(path=file_path, name="Sequence length distribution plot")
 

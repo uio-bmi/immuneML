@@ -6,7 +6,7 @@ import yaml
 
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
 from immuneML.api.galaxy.Util import Util
-from immuneML.workflows.instructions.SimulationInstruction import SimulationInstruction
+from immuneML.workflows.instructions.ligo_simulation.LigoSimInstruction import LigoSimInstruction
 
 
 class GalaxySimulationTool(GalaxyTool):
@@ -25,63 +25,59 @@ class GalaxySimulationTool(GalaxyTool):
     .. code-block: yaml
 
         definitions:
-            datasets:
-                my_synthetic_dataset:
-                    format: RandomRepertoireDataset
-                    params:
-                        repertoire_count: 100
-                        labels: {}
-            motifs:
-                my_simple_motif: # a simple motif without gaps or hamming distance
-                  seed: AAA
-                  instantiation: GappedKmer
-
-                my_complex_motif: # complex motif containing a gap + hamming distance
-                    seed: AA/A  # ‘/’ denotes gap position if present, if not, there’s no gap
-                    instantiation:
-                        GappedKmer:
-                            min_gap: 1
-                            max_gap: 2
-                            hamming_distance_probabilities: # probabilities for each number of
-                                0: 0.7                    # modification to the seed
-                                1: 0.3
-                            position_weights: # probabilities for modification per position
-                                0: 1
-                                1: 0 # note that index 2, the position of the gap,
-                                3: 0 # is excluded from position_weights
-                            alphabet_weights: # probabilities for using each amino acid in
-                                A: 0.2      # a hamming distance modification
-                                C: 0.2
-                                D: 0.4
-                                E: 0.2
-
-            signals:
-                my_signal:
-                    motifs:
-                    - my_simple_motif
-                    - my_complex_motif
-                    implanting: HealthySequence
-                    sequence_position_weights:
-                        109: 1
-                        110: 2
-                        111: 5
-                        112: 1
-            simulations:
-                my_simulation:
-                    my_implanting:
-                        signals:
-                        - my_signal
-                        dataset_implanting_rate: 0.5
-                        repertoire_implanting_rate: 0.25
-        instructions:
-            my_simulation_instruction: # user-defined name of the instruction
-                type: Simulation # which instruction to execute
-                dataset: my_dataset # which dataset to use for implanting the signals
-                simulation: my_simulation # how to implanting the signals - definition of the simulation
-                number_of_processes: 4 # how many parallel processes to use during execution
-                export_formats: [AIRR] # in which formats to export the dataset, ImmuneML format will be added automatically
-        output: # the output format
-            format: HTML
+          motifs:
+            motif1:
+              seed: AA
+            motif2:
+              seed: GG
+          signals:
+            signal1:
+              motifs: [motif1]
+            signal2:
+              motifs: [motif2]
+          simulations:
+            sim1:
+              is_repertoire: true
+              paired: false
+              sequence_type: amino_acid
+              simulation_strategy: Implanting
+              remove_seqs_with_signals: true # remove signal-specific AIRs from the background
+              sim_items:
+                sim_item: # group of AIRs with the same parameters
+                  AIRR1:
+                    immune_events:
+                      ievent1: True
+                      ievent1: False
+                    signals: [signal1: 0.3, signal2: 0.3]
+                    number_of_examples: 10
+                    is_noise: False
+                    receptors_in_repertoire_count: 6,
+                    generative_model:
+                      chain: heavy
+                      default_model_name: humanIGH
+                      model_path: null
+                      type: OLGA
+                  AIRR2:
+                    immune_events:
+                      ievent1: False
+                      ievent1: True
+                    signals: [signal1: 0.5, signal2: 0.5]
+                    number_of_examples: 10
+                    is_noise: False
+                    receptors_in_repertoire_count: 6,
+                    generative_model:
+                      chain: heavy
+                      default_model_name: humanIGH
+                      model_path: null
+                      type: OLGA
+          instructions:
+            my_sim_inst:
+              export_p_gens: false
+              max_iterations: 100
+              number_of_processes: 4
+              sequence_batch_size: 1000
+              simulation: sim1
+              type: LigoSim
 
     """
 
@@ -97,15 +93,11 @@ class GalaxySimulationTool(GalaxyTool):
         dataset_location = list(self.result_path.glob("*/exported_dataset/*/"))[0]
         shutil.copytree(dataset_location, self.result_path / 'result/')
 
-        logging.info(f"{GalaxySimulationTool.__name__}: immuneML has finished and the signals were implanted in the dataset.")
+        logging.info(f"{GalaxySimulationTool.__name__}: the simulation is finished.")
 
     def prepare_specs(self):
         with self.yaml_path.open("r") as file:
             specs = yaml.safe_load(file)
 
-        instruction_name = Util.check_instruction_type(specs, GalaxySimulationTool.__name__, SimulationInstruction.__name__[:-11])
-        Util.check_export_format(specs, GalaxySimulationTool.__name__, instruction_name)
-
-        Util.update_dataset_key(specs, GalaxySimulationTool.__name__)
         Util.check_paths(specs, "GalaxySimulationTool")
         Util.update_result_paths(specs, self.result_path, self.yaml_path)

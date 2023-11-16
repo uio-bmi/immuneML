@@ -1,3 +1,4 @@
+from inspect import signature
 from pathlib import Path
 
 from immuneML.IO.dataset_import.DataImport import DataImport
@@ -14,18 +15,21 @@ from immuneML.dsl.definition_parsers.SimulationParser import SimulationParser
 from immuneML.dsl.import_parsers.ImportParser import ImportParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
-from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
+from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
+from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.reports.ml_reports.MLReport import MLReport
 from immuneML.reports.multi_dataset_reports.MultiDatasetReport import MultiDatasetReport
 from immuneML.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
-from immuneML.simulation.Implanting import Implanting
+from immuneML.simulation.SimConfig import SimConfig
+from immuneML.simulation.SimConfigItem import SimConfigItem
+from immuneML.simulation.implants.LigoPWM import LigoPWM
 from immuneML.simulation.implants.Motif import Motif
+from immuneML.simulation.implants.SeedMotif import SeedMotif
 from immuneML.simulation.implants.Signal import Signal
-from immuneML.simulation.motif_instantiation_strategy.MotifInstantiationStrategy import MotifInstantiationStrategy
-from immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from scripts.DocumentatonFormat import DocumentationFormat
@@ -39,36 +43,25 @@ class DefinitionParser:
 
         specs = workflow_specification["definitions"]
 
-        symbol_table, specs_motifs = DefinitionParser._call_if_exists("motifs", MotifParser.parse_motifs, specs, symbol_table)
-        symbol_table, specs_signals = DefinitionParser._call_if_exists("signals", SignalParser.parse_signals, specs, symbol_table)
-        symbol_table, specs_simulation = DefinitionParser._call_if_exists("simulations", SimulationParser.parse_simulations, specs, symbol_table)
-        symbol_table, specs_preprocessing = DefinitionParser._call_if_exists(PreprocessingParser.keyword, PreprocessingParser.parse, specs, symbol_table)
-        symbol_table, specs_encoding = DefinitionParser._call_if_exists("encodings", EncodingParser.parse, specs, symbol_table)
-        symbol_table, specs_weighting = DefinitionParser._call_if_exists(ExampleWeightingParser.keyword, ExampleWeightingParser.parse, specs, symbol_table)
-        symbol_table, specs_ml = DefinitionParser._call_if_exists("ml_methods", MLParser.parse, specs, symbol_table)
-        symbol_table, specs_report = DefinitionParser._call_if_exists("reports", ReportParser.parse_reports, specs, symbol_table)
-        symbol_table, specs_import = ImportParser.parse(specs, symbol_table, result_path)
+        specs_defs = {}
 
-        specs_defs = DefinitionParser.create_specs_defs(specs_import, specs_simulation, specs_preprocessing, specs_motifs, specs_signals,
-                                                        specs_encoding, specs_ml, specs_report, specs_weighting)
+        for parser in [MotifParser, SignalParser, SimulationParser, PreprocessingParser, EncodingParser, ExampleWeightingParser,
+                       MLParser, ReportParser, ImportParser]:
+            symbol_table, new_specs = DefinitionParser._call_if_exists(parser.keyword, parser.parse, specs,
+                                                                       symbol_table, result_path)
+            specs_defs[parser.keyword] = new_specs
 
         return DefinitionParserOutput(symbol_table=symbol_table, specification=workflow_specification), specs_defs
 
     @staticmethod
-    def _call_if_exists(key: str, method, specs: dict, symbol_table: SymbolTable):
+    def _call_if_exists(key: str, method, specs: dict, symbol_table: SymbolTable, path=None):
         if key in specs:
-            return method(specs[key], symbol_table)
+            if "path" in signature(method).parameters:
+                return method(specs[key], symbol_table, path)
+            else:
+                return method(specs[key], symbol_table)
         else:
             return symbol_table, {}
-
-    @staticmethod
-    def create_specs_defs(specs_datasets: dict, simulation: dict, preprocessings: dict, motifs: dict, signals: dict,
-                          encodings: dict, ml_methods: dict, reports: dict, example_weighting: dict):
-
-        return {
-            "datasets": specs_datasets, "simulations": simulation, PreprocessingParser.keyword: preprocessings, "motifs": motifs, "signals": signals,
-            "encodings": encodings, "ml_methods": ml_methods, "reports": reports, ExampleWeightingParser.keyword: example_weighting
-        }
 
     @staticmethod
     def generate_docs(path: Path):
@@ -82,17 +75,12 @@ class DefinitionParser:
 
     @staticmethod
     def make_simulation_docs(path: Path):
-        instantiations = ReflectionHandler.all_nonabstract_subclasses(MotifInstantiationStrategy, "Instantiation", "motif_instantiation_strategy/")
-        instantiations = [DocumentationFormat(inst, inst.__name__.replace('Instantiation', ""), DocumentationFormat.LEVELS[2])
-                          for inst in instantiations]
-
-        implanting_strategies = ReflectionHandler.all_nonabstract_subclasses(SignalImplantingStrategy, 'Implanting', 'signal_implanting_strategy/')
-        implanting_strategies = [DocumentationFormat(implanting, implanting.__name__.replace('Implanting', ""), DocumentationFormat.LEVELS[2])
-                                 for implanting in implanting_strategies]
-
-        classes_to_document = [DocumentationFormat(Motif, Motif.__name__, DocumentationFormat.LEVELS[1])] + instantiations + \
-                              [DocumentationFormat(Signal, Signal.__name__, DocumentationFormat.LEVELS[1])] + implanting_strategies + \
-                               [DocumentationFormat(Implanting, Implanting.__name__, DocumentationFormat.LEVELS[1])]
+        classes_to_document = [DocumentationFormat(SeedMotif, SeedMotif.__name__, DocumentationFormat.LEVELS[1]),
+                               DocumentationFormat(LigoPWM, "PWM", DocumentationFormat.LEVELS[1]),
+                               DocumentationFormat(Signal, Signal.__name__, DocumentationFormat.LEVELS[1]),
+                               DocumentationFormat(SimConfig, "Simulation config", DocumentationFormat.LEVELS[1]),
+                               DocumentationFormat(SimConfigItem, "Simulation config item",
+                                                   DocumentationFormat.LEVELS[1])]
 
         file_path = path / "simulation.rst"
         with file_path.open("w") as file:
@@ -114,9 +102,6 @@ class DefinitionParser:
         filename = "reports.rst"
         file_path = path / filename
 
-        with file_path.open("w") as file:
-            pass
-
         for report_type_class in [DataReport, EncodingReport, MLReport, TrainMLModelReport, MultiDatasetReport]:
             with file_path.open("a") as file:
                 doc_format = DocumentationFormat(cls=report_type_class,
@@ -131,8 +116,24 @@ class DefinitionParser:
 
     @staticmethod
     def make_ml_methods_docs(path: Path):
-        classes = ReflectionHandler.all_nonabstract_subclasses(MLMethod, "", "ml_methods/")
-        make_docs(path, classes, "ml_methods.rst", "")
+        filename = 'ml_methods.rst'
+        file_path = path / filename
+
+        method_mapping = [{'method_type': MLMethod, 'subdir': 'classifiers', 'title': 'Classifiers'},
+                          {'method_type': GenerativeModel, 'subdir': 'generative_models', 'title': 'Generative models'},
+                          {'method_type': DimRedMethod, 'subdir': 'dim_reduction',
+                           'title': 'Dimensionality reduction methods'}]
+
+        for method in method_mapping:
+            with file_path.open('a') as file:
+                doc_format = DocumentationFormat(cls=method['method_type'],
+                                                 cls_name=f"**{method['title']}**",
+                                                 level_heading=DocumentationFormat.LEVELS[1])
+                write_class_docs(doc_format, file)
+
+            classes = ReflectionHandler.all_nonabstract_subclasses(method['method_type'], "",
+                                                                   f"ml_methods/{method['subdir']}/")
+            make_docs(path, classes, filename, "", "a")
 
     @staticmethod
     def make_preprocessing_docs(path: Path):

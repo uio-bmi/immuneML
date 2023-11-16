@@ -1,5 +1,4 @@
 import warnings
-from typing import List
 
 from immuneML.dsl.symbol_table.SymbolTableEntry import SymbolTableEntry
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
@@ -58,12 +57,15 @@ class SymbolTable:
     def contains(self, symbol):
         return symbol in self._items
 
-    def get_by_type(self, symbol_type: SymbolType) -> List[SymbolTableEntry]:
+    def get_by_type(self, symbol_type: SymbolType) -> list:
         items = [self._items[key] for key in self._items.keys() if self._items[key].symbol_type == symbol_type]
         return items
 
     def get_keys_by_type(self, symbol_type: SymbolType) -> list:
         return [key for key in self._items.keys() if self._items[key].symbol_type == symbol_type]
+
+    def get_signals(self):
+        return [signal.item for signal in self.get_by_type(SymbolType.SIGNAL)]
 
     def __str__(self):
         return f"SymbolTable()"

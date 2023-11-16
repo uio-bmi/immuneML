@@ -77,7 +77,7 @@ In subsequent YAML-based analyses, the dataset created through the simplified in
         my_analysis_dataset: # user-defined dataset name
           format: ImmuneML
           params:
-            path: dataset.iml_dataset
+            path: dataset.yaml
 
 Note: if an immuneML dataset history element suddenly gives you errors when you use it as an input to other tools
 (while it used to work before), it could be due to an immuneML version update.
@@ -166,7 +166,7 @@ If ImmuneML is chosen as the export format, the dataset definition for subsequen
           format: ImmuneML
           params:
             # note that my_dataset is the name given earlier in the 'Create dataset' YAML
-            path: my_dataset.iml_dataset
+            path: my_dataset.yaml
 
 Alternatively, AIRR format may be specified as it is human-readable. When AIRR format is used, all relevant import
 parameters need to be specified in subsequent analyses:

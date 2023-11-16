@@ -24,9 +24,9 @@ class FilenameHandler:
     @staticmethod
     def get_dataset_name(class_name: str):
         if "Encoder" in class_name:
-            name = "encoded_dataset.iml_dataset"
+            name = "encoded_dataset.yaml"
         else:
-            name = "dataset.iml_dataset"
+            name = "dataset.yaml"
 
         return name
 

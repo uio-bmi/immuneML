@@ -15,7 +15,7 @@ from immuneML.util.PathBuilder import PathBuilder
 class TestGalaxyYamlTool(TestCase):
     def test_run1(self):
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "api_galaxy_yaml_tool1/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "api_galaxy_yaml_tool1/")
         result_path = path / "result/"
 
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {10: 1}, {12: 1}, {}, result_path)
@@ -54,7 +54,7 @@ class TestGalaxyYamlTool(TestCase):
 
     def test_run2(self):
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "api_galaxy_yaml_tool2/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "api_galaxy_yaml_tool2/")
         result_path = path / "result/"
 
         specs = {

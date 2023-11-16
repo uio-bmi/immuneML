@@ -21,14 +21,14 @@ class DesignMatrixExporter(EncodingReport):
     """
     Exports the design matrix and related information of a given encoded Dataset to csv files.
     If the encoded data has more than 2 dimensions (such as when using the OneHot encoder with option Flatten=False),
-    the data are then exported to different formats to facilitate
-    their import with external software.
+    the data are then exported to different formats to facilitate their import with external software.
 
-    Arguments:
+    Specification arguments:
 
-        file_format (str): the format and extension of the file to store the design matrix. The supported formats are:
-        npy, csv, hdf5, npy.zip, csv.zip or hdf5.zip.
-        Note: when using hdf5 or hdf5.zip output formats, make sure the 'hdf5' dependency is installed.
+    - file_format (str): the format and extension of the file to store the design matrix. The supported formats are:
+      npy, csv, hdf5, npy.zip, csv.zip or hdf5.zip.
+
+    Note: when using hdf5 or hdf5.zip output formats, make sure the 'hdf5' dependency is installed.
 
 
     YAML specification:

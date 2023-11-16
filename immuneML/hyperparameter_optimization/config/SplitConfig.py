@@ -9,41 +9,41 @@ class SplitConfig:
     """
     SplitConfig describes how to split the data for cross-validation. It allows for the following combinations:
 
-        - loocv (leave-one-out cross-validation)
+    - loocv (leave-one-out cross-validation)
 
-        - k_fold (k-fold cross-validation)
+    - k_fold (k-fold cross-validation)
 
-        - stratified_k_fold (stratified k-fold cross-validation that can be used when immuneML is used for single-label classification, see `this documentation<https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html>`_ for more details on how this is implemented)
+    - stratified_k_fold (stratified k-fold cross-validation that can be used when immuneML is used for single-label classification, see `this documentation <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html>`_ for more details on how this is implemented)
 
-        - random (Monte Carlo cross-validation - randomly splitting the dataset to training and test datasets)
+    - random (Monte Carlo cross-validation - randomly splitting the dataset to training and test datasets)
 
-        - manual (train and test dataset are explicitly specified by providing metadata files for the two datasets)
+    - manual (train and test dataset are explicitly specified by providing metadata files for the two datasets)
 
-        - leave_one_out_stratification (leave-one-out CV where one refers to a specific parameter, e.g. if subject is known in a receptor dataset, it is possible to have leave-subject-out CV - currently only available for receptor and sequence datasets).
+    - leave_one_out_stratification (leave-one-out CV where one refers to a specific parameter, e.g. if subject is known in a receptor dataset, it is possible to have leave-subject-out CV - currently only available for receptor and sequence datasets).
 
-    Arguments:
+    Specification arguments:
 
-        split_strategy (SplitType): one of the types of cross-validation listed above (`LOOCV`, `K_FOLD`, `STRATIFIED_K_FOLD`, `MANUAL`, ``  or `RANDOM`)
+    - split_strategy (SplitType): one of the types of cross-validation listed above (`LOOCV`, `K_FOLD`, `STRATIFIED_K_FOLD`, `MANUAL`, ``  or `RANDOM`)
 
-        split_count (int): if split_strategy is `K_FOLD`, then this defined how many splits to make (K), if split_strategy is RANDOM, split_count defines how many random splits to make, resulting in split_count training/test dataset pairs, or if split_strategy is `LOOCV`, `MANUAL` or `LEAVE_ONE_OUT_STRATIFICATION`, split_count does not need to be specified.
+    - split_count (int): if split_strategy is `K_FOLD`, then this defined how many splits to make (K), if split_strategy is RANDOM, split_count defines how many random splits to make, resulting in split_count training/test dataset pairs, or if split_strategy is `LOOCV`, `MANUAL` or `LEAVE_ONE_OUT_STRATIFICATION`, split_count does not need to be specified.
 
-        training_percentage: if split_strategy is RANDOM, this defines which portion of the original dataset to use for creating the training dataset; for other values of split_strategy, this parameter is not used.
+    - training_percentage: if split_strategy is RANDOM, this defines which portion of the original dataset to use for creating the training dataset; for other values of split_strategy, this parameter is not used.
 
-        reports (ReportConfig): defines which reports to execute on which datasets or settings. See :ref:`ReportConfig` for more details.
+    - reports (ReportConfig): defines which reports to execute on which datasets or settings. See :ref:`ReportConfig` for more details.
 
-        manual_config (:py:obj:`~immuneML.hyperparameter_optimization.config.ManualSplitConfig.ManualSplitConfig`): if split strategy is `MANUAL`,
-        here the paths to metadata files should be given (fields `train_metadata_path` and `test_metadata_path`). The matching of examples is done
-        using the "subject_id" field in for repertoire datasets so it has to be present in both the original dataset and the metadata files provided
-        here. For receptor and sequence datasets, "example_id" field needs to be provided in the metadata files and it will be mapped to either
-        'sequence_identifiers' or 'receptor_identifiers' in the original dataset. If split strategy is anything other than `MANUAL`, this field has
-        no effect and can be omitted.
+    - manual_config (:py:obj:`~immuneML.hyperparameter_optimization.config.ManualSplitConfig.ManualSplitConfig`): if split strategy is `MANUAL`,
+      here the paths to metadata files should be given (fields `train_metadata_path` and `test_metadata_path`). The matching of examples is done
+      using the "subject_id" field in for repertoire datasets so it has to be present in both the original dataset and the metadata files provided
+      here. For receptor and sequence datasets, "example_id" field needs to be provided in the metadata files and it will be mapped to either
+      'sequence_identifiers' or 'receptor_identifiers' in the original dataset. If split strategy is anything other than `MANUAL`, this field has
+      no effect and can be omitted.
 
-        leave_one_out_config (:py:obj:`~immuneML.hyperparameter_optimization.config.LeaveOneOutConfig.LeaveOneOutConfig`): if split strategy is
-        `LEAVE_ONE_OUT_STRATIFICATION`, this config describes which parameter to use for stratification thus making a list of train/test dataset
-        combinations in which in the test set there are examples with only one value of the specified parameter. `leave_one_out_config` argument
-        accepts two inputs: `parameter` which is the name of the parameter to use for stratification and `min_count` which defines the minimum
-        number of examples that can be present in the test dataset. This type of generating train and test datasets is only supported for receptor
-        and sequence datasets so far. If split strategy is anything else, this field has no effect and can be omitted.
+    - leave_one_out_config (:py:obj:`~immuneML.hyperparameter_optimization.config.LeaveOneOutConfig.LeaveOneOutConfig`): if split strategy is
+      `LEAVE_ONE_OUT_STRATIFICATION`, this config describes which parameter to use for stratification thus making a list of train/test dataset
+      combinations in which in the test set there are examples with only one value of the specified parameter. `leave_one_out_config` argument
+      accepts two inputs: `parameter` which is the name of the parameter to use for stratification and `min_count` which defines the minimum
+      number of examples that can be present in the test dataset. This type of generating train and test datasets is only supported for receptor
+      and sequence datasets so far. If split strategy is anything else, this field has no effect and can be omitted.
 
     YAML specification:
 

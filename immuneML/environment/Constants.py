@@ -1,6 +1,6 @@
 class Constants:
 
-    VERSION = "2.3.0"
+    VERSION = "3.0.0a1"
 
     # encoding constants
     FEATURE_DELIMITER = "-"
@@ -14,6 +14,8 @@ class Constants:
     CACHE_PATH = 'cache_path'
     COMMENT_SIGN = "#"
     NOT_COMPUTED = "not computed"
+    SIGNAL_DELIMITER = "__"
+    GAP_LETTER = "-"
 
     # plotting constants
     PLOTLY_BLACK = "#2A3F5E"

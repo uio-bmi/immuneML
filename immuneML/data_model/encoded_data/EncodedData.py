@@ -1,5 +1,5 @@
 import pandas as pd
-
+import numpy as np
 
 class EncodedData:
     """
@@ -17,7 +17,8 @@ class EncodedData:
     """
 
     def __init__(self, examples, labels: dict = None, example_ids: list = None, feature_names: list = None,
-                 feature_annotations: pd.DataFrame = None, encoding: str = None, example_weights: list = None, info: dict = None):
+                 feature_annotations: pd.DataFrame = None, encoding: str = None, example_weights: list = None, info: dict = None,
+                 dimensionality_reduced_data: np.ndarray = None):
 
         assert feature_names is None or examples.shape[1] == len(feature_names)
         if feature_names is not None:
@@ -45,3 +46,4 @@ class EncodedData:
         self.encoding = encoding
         self.example_weights = example_weights
         self.info = info
+        self.dimensionality_reduced_data = dimensionality_reduced_data

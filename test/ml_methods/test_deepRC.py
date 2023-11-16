@@ -53,7 +53,7 @@ class TestDeepRC(TestCase):
         pass
 
     def internal_deep_RC_test(self):
-        from immuneML.ml_methods.DeepRC import DeepRC
+        from immuneML.ml_methods.classifiers.DeepRC import DeepRC
         from deeprc.architectures import DeepRC as DeepRCInternal
 
         logging.warning("DeepRC test is temporarily excluded")

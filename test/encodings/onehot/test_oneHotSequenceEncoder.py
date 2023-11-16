@@ -16,9 +16,9 @@ class TestOneHotSequenceEncoder(TestCase):
 
     def _construct_test_dataset(self, path):
         sequences = [
-            ReceptorSequence(amino_acid_sequence="AAAA", identifier="1", metadata=SequenceMetadata(custom_params={"l1": 1, "l2": 1})),
-            ReceptorSequence(amino_acid_sequence="ATA", identifier="2", metadata=SequenceMetadata(custom_params={"l1": 2, "l2": 1})),
-            ReceptorSequence(amino_acid_sequence="ATT", identifier="3", metadata=SequenceMetadata(custom_params={"l1": 1, "l2": 2}))]
+            ReceptorSequence(sequence_aa="AAAA", sequence_id="1", metadata=SequenceMetadata(custom_params={"l1": 1, "l2": 1})),
+            ReceptorSequence(sequence_aa="ATA", sequence_id="2", metadata=SequenceMetadata(custom_params={"l1": 2, "l2": 1})),
+            ReceptorSequence(sequence_aa="ATT", sequence_id="3", metadata=SequenceMetadata(custom_params={"l1": 1, "l2": 2}))]
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
@@ -30,7 +30,7 @@ class TestOneHotSequenceEncoder(TestCase):
 
     def test(self):
         path = EnvironmentSettings.tmp_test_path / "onehot_sequence/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset, lc = self._construct_test_dataset(path)
 
@@ -54,7 +54,7 @@ class TestOneHotSequenceEncoder(TestCase):
         self.assertListEqual([list(item) for item in encoded_data.encoded_data.examples[1]], [onehot_a, onehot_t, onehot_a, onehot_empty])
         self.assertListEqual([list(item) for item in encoded_data.encoded_data.examples[2]], [onehot_a, onehot_t, onehot_t, onehot_empty])
 
-        self.assertListEqual(encoded_data.encoded_data.example_ids, [receptor.identifier for receptor in dataset.get_data()])
+        self.assertListEqual(encoded_data.encoded_data.example_ids, [receptor.sequence_id for receptor in dataset.get_data()])
         self.assertDictEqual(encoded_data.encoded_data.labels,
                              {"l1": [receptor_seq.get_attribute("l1") for receptor_seq in dataset.get_data()],
                               "l2": [receptor_seq.get_attribute("l2") for receptor_seq in dataset.get_data()]})
@@ -62,8 +62,8 @@ class TestOneHotSequenceEncoder(TestCase):
         shutil.rmtree(path)
 
     def construct_test_flatten_dataset(self, path):
-        sequences = [ReceptorSequence(amino_acid_sequence="AAATTT", identifier="1", metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(amino_acid_sequence="ATATAT", identifier="2", metadata=SequenceMetadata(custom_params={"l1": 2}))]
+        sequences = [ReceptorSequence(sequence_aa="AAATTT", sequence_id="1", metadata=SequenceMetadata(custom_params={"l1": 1})),
+                     ReceptorSequence(sequence_aa="ATATAT", sequence_id="2", metadata=SequenceMetadata(custom_params={"l1": 2}))]
 
         PathBuilder.build(path)
 
@@ -71,9 +71,9 @@ class TestOneHotSequenceEncoder(TestCase):
 
 
     def test_sequence_flattened(self):
-        path = EnvironmentSettings.root_path / "test/tmp/onehot_seq_flat/"
+        path = EnvironmentSettings.tmp_test_path / "onehot_seq_flat/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset = self.construct_test_flatten_dataset(path)
 

@@ -24,14 +24,8 @@ class TestDataSplitter(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_run(self):
-        dataset = RepertoireDataset(repertoires=[Repertoire(Path("0.npy"), None, "0"), Repertoire(Path("0.npy"), None, "8"),
-                                                 Repertoire(Path("0.npy"), None, "1"), Repertoire(Path("0.npy"), None, "9"),
-                                                 Repertoire(Path("0.npy"), None, "2"), Repertoire(Path("0.npy"), None, "10"),
-                                                 Repertoire(Path("0.npy"), None, "3"), Repertoire(Path("0.npy"), None, "11"),
-                                                 Repertoire(Path("0.npy"), None, "4"), Repertoire(Path("0.npy"), None, "12"),
-                                                 Repertoire(Path("0.npy"), None, "5"), Repertoire(Path("0.npy"), None, "13"),
-                                                 Repertoire(Path("0.npy"), None, "6"), Repertoire(Path("0.npy"), None, "14"),
-                                                 Repertoire(Path("0.npy"), None, "7")])
+        dataset = RepertoireDataset(repertoires=[Repertoire(Path(f"{index}.tsv"), None, str(index))
+                                                 for index in range(15)])
 
         paths = [EnvironmentSettings.root_path / "test/tmp/datasplitter/split_{}".format(i) for i in range(5)]
         for path in paths:

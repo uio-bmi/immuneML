@@ -24,25 +24,22 @@ class TestMatchedReceptorsEncoder(TestCase):
         labels = {"subject_id": ["subject_1", "subject_1", "subject_2", "subject_2", "subject_3"],
                   "label": ["yes", "yes", "no", "no", "no"]}
 
-        metadata_alpha = {"v_gene": "TRAV1", "j_gene": "TRAJ1", "chain": Chain.ALPHA.value}
-        metadata_beta = {"v_gene": "TRBV1", "j_gene": "TRBJ1", "chain": Chain.BETA.value}
+        metadata_alpha = {"v_call": "TRAV1", "j_call": "TRAJ1", "chain": Chain.ALPHA.value}
+        metadata_beta = {"v_call": "TRBV1", "j_call": "TRBJ1", "chain": Chain.BETA.value}
 
-        repertoires, metadata = RepertoireBuilder.build(sequences=[["AAAA"],
-                                                                   ["SSSS"],
-                                                                   ["AAAA", "CCCC"],
-                                                                   ["SSSS", "TTTT"],
-                                                                   ["AAAA", "CCCC", "SSSS", "TTTT"]],
+        repertoires, metadata = RepertoireBuilder.build(sequences=[["AAAA"], ["SSSS"], ["AAAA", "CCCC"],
+                                                                   ["SSSS", "TTTT"], ["AAAA", "CCCC", "SSSS", "TTTT"]],
                                                         path=path, labels=labels,
-                                                        seq_metadata=[[{**metadata_alpha, "count": 10}],
-                                                                      [{**metadata_beta, "count": 10}],
-                                                                      [{**metadata_alpha, "count": 5},
-                                                                       {**metadata_alpha, "count": 5}],
-                                                                      [{**metadata_beta, "count": 5},
-                                                                       {**metadata_beta, "count": 5}],
-                                                                      [{**metadata_alpha, "count": 1},
-                                                                       {**metadata_alpha, "count": 2},
-                                                                       {**metadata_beta, "count": 1},
-                                                                       {**metadata_beta, "count": 2}]],
+                                                        seq_metadata=[[{**metadata_alpha, "duplicate_count": 10}],
+                                                                      [{**metadata_beta, "duplicate_count": 10}],
+                                                                      [{**metadata_alpha, "duplicate_count": 5},
+                                                                       {**metadata_alpha, "duplicate_count": 5}],
+                                                                      [{**metadata_beta, "duplicate_count": 5},
+                                                                       {**metadata_beta, "duplicate_count": 5}],
+                                                                      [{**metadata_alpha, "duplicate_count": 1},
+                                                                       {**metadata_alpha, "duplicate_count": 2},
+                                                                       {**metadata_beta, "duplicate_count": 1},
+                                                                       {**metadata_beta, "duplicate_count": 2}]],
                                                         subject_ids=labels["subject_id"])
 
         dataset = RepertoireDataset(repertoires=repertoires)
@@ -67,16 +64,16 @@ class TestMatchedReceptorsEncoder(TestCase):
         return dataset, label_config, reference_receptors, labels
 
     def test__encode_new_dataset(self):
-        expected_outcomes = {"all": {True: [[1, 0, 0, 0],[0, 1, 0, 0],[0.5, 0, 0.5, 0], [0, 0.5, 0, 0.5], [0.16666666666666666, 0.16666666666666666, 0.3333333333333333, 0.3333333333333333]],
-                                     False: [[10, 0, 0, 0],[0, 10, 0, 0],[5, 0, 5, 0], [0, 5, 0, 5], [1, 1, 2, 2]]},
-                             "unique": {True: [[1, 0, 0, 0],[0, 1, 0, 0],[0.5, 0, 0.5, 0], [0, 0.5, 0, 0.5], [0.25, 0.25, 0.25, 0.25]],
-                                        False: [[1, 0, 0, 0],[0, 1, 0, 0],[1, 0, 1, 0], [0, 1, 0, 1], [1, 1, 1, 1]]}}
+        expected_outcomes = {"all": {True: [[1, 0, 0, 0], [0, 1, 0, 0], [0.5, 0, 0.5, 0], [0, 0.5, 0, 0.5],
+                                            [0.16666666666666666, 0.16666666666666666, 0.3333333333333333, 0.3333333333333333]],
+                                     False: [[10, 0, 0, 0], [0, 10, 0, 0], [5, 0, 5, 0], [0, 5, 0, 5], [1, 1, 2, 2]]},
+                             "unique": {True: [[1, 0, 0, 0], [0, 1, 0, 0], [0.5, 0, 0.5, 0], [0, 0.5, 0, 0.5], [0.25, 0.25, 0.25, 0.25]],
+                                        False: [[1, 0, 0, 0], [0, 1, 0, 0], [1, 0, 1, 0], [0, 1, 0, 1], [1, 1, 1, 1]]}}
 
         for reads in ["all", "unique"]:
             for normalize in [True, False]:
 
-
-                path = EnvironmentSettings.root_path / "test/tmp/matched_receptors_encoder_all/"
+                path = EnvironmentSettings.tmp_test_path / "matched_receptors_encoder_all/"
 
                 dataset, label_config, reference_receptors, labels = self.create_dummy_data(path)
 
@@ -109,12 +106,11 @@ class TestMatchedReceptorsEncoder(TestCase):
 
                 shutil.rmtree(path)
 
-
     def test__encode_new_dataset_sum(self):
-        expected_outcomes = {"all": {True: [[1, 0],[0, 1],[1, 0], [0, 1], [0.5, 0.5]],
-                                     False: [[10, 0],[0, 10],[10, 0], [0, 10], [3, 3]]},
-                             "unique": {True: [[1, 0],[0, 1],[1, 0], [0, 1], [0.5, 0.5]],
-                                        False: [[1, 0],[0, 1],[2, 0], [0, 2], [2, 2]]}}
+        expected_outcomes = {"all": {True: [[1, 0], [0, 1], [1, 0], [0, 1], [0.5, 0.5]],
+                                     False: [[10, 0], [0, 10], [10, 0], [0, 10], [3, 3]]},
+                             "unique": {True: [[1, 0], [0, 1], [1, 0], [0, 1], [0.5, 0.5]],
+                                        False: [[1, 0], [0, 1], [2, 0], [0, 2], [2, 2]]}}
 
         for reads in ["all", "unique"]:
             for normalize in [True, False]:
@@ -148,4 +144,3 @@ class TestMatchedReceptorsEncoder(TestCase):
                 self.assertIsNone(encoded.encoded_data.feature_annotations)
 
                 shutil.rmtree(path)
-

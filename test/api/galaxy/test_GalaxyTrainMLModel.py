@@ -12,7 +12,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TestGalaxyTrainMLModel(TestCase):
     def test_run(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "api_galaxy_trainmlmodel_tool/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "api_galaxy_trainmlmodel_tool/")
         result_path = path / "result/"
 
         specs = {

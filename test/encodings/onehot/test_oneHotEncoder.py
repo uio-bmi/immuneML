@@ -24,15 +24,15 @@ class TestOneHotEncoder(unittest.TestCase):
     def _construct_test_repertoiredataset(self, path, positional):
 
         if positional:
-            receptors1 = [ReceptorSequence("AAAAAAAAAAAAAAAAA", nucleotide_sequence="AAAAAAAAAAAAAAAAA", identifier="1"),
-                          ReceptorSequence("AAAAAAAAAAAAAAAAA", nucleotide_sequence="AAAAAAAAAAAAAAAAA", identifier="1")]
-            receptors2 = [ReceptorSequence("TTTTTTTTTTTTT", nucleotide_sequence='TTTTTTTTTTTTT', identifier="1")]
+            receptors1 = [ReceptorSequence("AAAAAAAAAAAAAAAAA", sequence="AAAAAAAAAAAAAAAAA", sequence_id="1"),
+                          ReceptorSequence("AAAAAAAAAAAAAAAAA", sequence="AAAAAAAAAAAAAAAAA", sequence_id="1")]
+            receptors2 = [ReceptorSequence("TTTTTTTTTTTTT", sequence='TTTTTTTTTTTTT', sequence_id="1")]
         else:
-            receptors1 = [ReceptorSequence("AAAA", nucleotide_sequence="AAAA", identifier="1"),
-                          ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier="2"),
-                          ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier='3')]
-            receptors2 = [ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier="1"),
-                          ReceptorSequence("TAA", nucleotide_sequence="TAA", identifier="2")]
+            receptors1 = [ReceptorSequence("AAAA", sequence="AAAA", sequence_id="1"),
+                          ReceptorSequence("ATA", sequence="ATA", sequence_id="2"),
+                          ReceptorSequence("ATA", sequence="ATA", sequence_id='3')]
+            receptors2 = [ReceptorSequence("ATA", sequence="ATA", sequence_id="1"),
+                          ReceptorSequence("TAA", sequence="TAA", sequence_id="2")]
 
         rep1 = Repertoire.build_from_sequence_objects(receptors1, metadata={"l1": 1, "l2": 2, "subject_id": "1"}, path=path)
         rep2 = Repertoire.build_from_sequence_objects(receptors2, metadata={"l1": 0, "l2": 3, "subject_id": "2"}, path=path)
@@ -41,15 +41,13 @@ class TestOneHotEncoder(unittest.TestCase):
         lc.add_label("l1", [1, 2])
         lc.add_label("l2", [0, 3])
 
-        dataset = RepertoireDataset(repertoires=[rep1, rep2])
+        dataset = RepertoireDataset.build_from_objects(repertoires=[rep1, rep2], path=path)
 
         return dataset, lc
 
     def test_not_positional(self):
 
-        path = EnvironmentSettings.root_path / "test/tmp/onehot_vanilla/"
-
-        PathBuilder.build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "onehot_vanilla/")
 
         dataset, lc = self._construct_test_repertoiredataset(path, positional=False)
 
@@ -60,7 +58,7 @@ class TestOneHotEncoder(unittest.TestCase):
             result_path=path,
             label_config=lc,
             learn_model=True,
-            model={},
+            model={}
         ))
 
         self.assertTrue(isinstance(encoded_data, RepertoireDataset))
@@ -90,9 +88,9 @@ class TestOneHotEncoder(unittest.TestCase):
 
     def test_positional(self):
 
-        path = EnvironmentSettings.root_path / "test/tmp/onehot_positional/"
+        path = EnvironmentSettings.tmp_test_path / "onehot_positional/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset, lc = self._construct_test_repertoiredataset(path, positional=True)
 

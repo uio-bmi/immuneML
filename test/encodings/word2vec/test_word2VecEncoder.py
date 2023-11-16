@@ -23,10 +23,10 @@ class TestWord2VecEncoder(TestCase):
 
     def test_encode_repertoire(self):
 
-        test_path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "w2v_repertoire/")
+        test_path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "w2v_repertoire/")
 
-        sequence1 = ReceptorSequence("CASSVFA", identifier="1")
-        sequence2 = ReceptorSequence("CASSCCC", identifier="2")
+        sequence1 = ReceptorSequence("CASSVFA", sequence_id="1")
+        sequence2 = ReceptorSequence("CASSCCC", sequence_id="2")
 
         metadata1 = {"T1D": "T1D", "subject_id": "1"}
         rep1 = Repertoire.build_from_sequence_objects([sequence1, sequence2], test_path, metadata1)
@@ -67,7 +67,7 @@ class TestWord2VecEncoder(TestCase):
 
     def test_encode_sequences(self):
 
-        test_path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "w2v_seqs/")
+        test_path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "w2v_seqs/")
 
         dataset = RandomDatasetGenerator.generate_sequence_dataset(10, {6: 1.}, {"l1": {True: 0.5, False: 0.5}}, path=test_path)
 

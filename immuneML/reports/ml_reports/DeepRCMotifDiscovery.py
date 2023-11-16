@@ -7,8 +7,8 @@ from matplotlib import pyplot as plt
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
-from immuneML.ml_methods.DeepRC import DeepRC
-from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.DeepRC import DeepRC
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
@@ -33,16 +33,17 @@ class DeepRCMotifDiscovery(MLReport):
     See :ref:`DeepRCMotifDiscovery for repertoire classification` for a usage example.
 
     Reference:
-    Michael Widrich, Bernhard Schäfl, Milena Pavlović, Geir Kjetil Sandve, Sepp Hochreiter, Victor Greiff, Günter Klambauer
-    ‘DeepRC: Immune repertoire classification with attention-based deep massive multiple instance learning’.
-    bioRxiv preprint doi: `https://doi.org/10.1101/2020.04.12.03815 <https://doi.org/10.1101/2020.04.12.038158>`_
+
+    Widrich, M., et al. (2020). Modern Hopfield Networks and Attention for Immune Repertoire Classification. Advances in
+    Neural Information Processing Systems, 33. https://proceedings.neurips.cc//paper/2020/hash/da4902cb0bc38210839714ebdcf0efc3-Abstract.html
 
 
-    Arguments:
+    Specification arguments:
 
-        n_steps (int): Number of IG steps (more steps -> better path integral -> finer contribution values). 50 is usually good enough.
+    - n_steps (int): Number of IG steps (more steps -> better path integral -> finer contribution values). 50 is usually good enough.
 
-        threshold (float): Only applies to the plotting of kernels. Contributions are normalized to range [0, 1], and only kernels with normalized contributions above threshold are plotted.
+    - threshold (float): Only applies to the plotting of kernels. Contributions are normalized to range [0, 1], and only kernels with normalized contributions above threshold are plotted.
+
 
     YAML specification:
 

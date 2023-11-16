@@ -18,10 +18,10 @@ class GLIPH2Exporter(DataReport):
     clustering with GLIPH2 and genome-wide antigen screening. Nature Biotechnology. Published online April 27,
     2020:1-9. `doi:10.1038/s41587-020-0505-4 <https://www.nature.com/articles/s41587-020-0505-4>`_
 
-    Arguments:
+    Specification arguments:
 
-        condition (str): name of the parameter present in the receptor metadata in the dataset; condition can be anything which can be processed in
-        GLIPH2, such as tissue type or treatment.
+    - condition (str): name of the parameter present in the receptor metadata in the dataset; condition can be anything which can be processed in
+      GLIPH2, such as tissue type or treatment.
 
     YAML specification:
 
@@ -46,13 +46,13 @@ class GLIPH2Exporter(DataReport):
         PathBuilder.build(self.result_path)
         alpha_chains, beta_chains, trbv, trbj, subject_condition, count = [], [], [], [], [], []
         for index, receptor in enumerate(self.dataset.get_data()):
-            alpha_chains.append(receptor.get_chain("alpha").amino_acid_sequence)
-            beta_chains.append(receptor.get_chain("beta").amino_acid_sequence)
-            trbv.append(receptor.get_chain("beta").metadata.v_gene)
-            trbj.append(receptor.get_chain("beta").metadata.j_gene)
+            alpha_chains.append(receptor.get_chain("alpha").sequence_aa)
+            beta_chains.append(receptor.get_chain("beta").sequence_aa)
+            trbv.append(receptor.get_chain("beta").metadata.v_call)
+            trbj.append(receptor.get_chain("beta").metadata.j_call)
             subject_condition.append(f"{getattr(receptor.metadata, 'subject_id', str(index))}:{receptor.metadata[self.condition]}")
-            count.append(receptor.get_chain("beta").metadata.count
-                         if receptor.get_chain('beta').metadata is not None and receptor.get_chain('beta').metadata.count is not None else 1)
+            count.append(receptor.get_chain("beta").metadata.duplicate_count
+                         if receptor.get_chain('beta').metadata is not None and receptor.get_chain('beta').metadata.duplicate_count is not None else 1)
 
         df = pd.DataFrame({"CDR3b": beta_chains, "TRBV": trbv, "TRBJ": trbj, "CDR3a": alpha_chains, "subject:condition": subject_condition,
                            "count": count})

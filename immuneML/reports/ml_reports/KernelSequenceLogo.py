@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.ml_methods.ReceptorCNN import ReceptorCNN
+from immuneML.ml_methods.classifiers.ReceptorCNN import ReceptorCNN
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
@@ -25,8 +25,8 @@ class KernelSequenceLogo(MLReport):
     The kernels are visualized using Logomaker. Original publication: Tareen A, Kinney JB. Logomaker: beautiful sequence logos in Python.
     Bioinformatics. 2020; 36(7):2272-2274. `doi:10.1093/bioinformatics/btz921 <https://academic.oup.com/bioinformatics/article/36/7/2272/5671693>`_.
 
+    Specification arguments: this report does not take any arguments as input.
 
-    Arguments: this report does not take any arguments as input.
 
     YAML specification:
 

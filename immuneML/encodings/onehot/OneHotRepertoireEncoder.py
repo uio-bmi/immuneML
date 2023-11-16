@@ -1,7 +1,7 @@
 import hashlib
-import math
 from multiprocessing.pool import Pool
 
+import math
 import numpy as np
 
 from immuneML.caching.CacheHandler import CacheHandler
@@ -92,11 +92,11 @@ class OneHotRepertoireEncoder(OneHotEncoder):
         return CacheHandler.memo_by_params((("encoding_model", params.model),
                                             ("labels", params.label_config.get_labels_by_name()),
                                             ("repertoire_id", repertoire.identifier),
-                                            ("repertoire_data", hashlib.sha256(np.ascontiguousarray(repertoire.get_attribute(self.sequence_type.value))).hexdigest())),
+                                            ("repertoire_data", hashlib.sha256(np.ascontiguousarray(repertoire.get_attribute(self.sequence_type.value, as_list=True))).hexdigest())),
                                            lambda: self._encode_repertoire(repertoire, params), CacheObjectType.ENCODING)
 
     def _encode_repertoire(self, repertoire, params: EncoderParams):
-        sequences = repertoire.get_attribute(self.sequence_type.value)
+        sequences = repertoire.get_attribute(self.sequence_type.value, as_list=True)
 
         onehot_encoded = self._encode_sequence_list(sequences, pad_n_sequences=self.max_rep_len, pad_sequence_len=self.max_seq_len)
         example_id = repertoire.identifier

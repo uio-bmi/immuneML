@@ -11,13 +11,13 @@ from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import Rece
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
-from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.ReadsType import ReadsType
 
 
 class TestKmerFrequencyEncoder(TestCase):
@@ -26,18 +26,18 @@ class TestKmerFrequencyEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode(self):
-        path = EnvironmentSettings.root_path / "test/tmp/kmerfreqenc/"
+        path = EnvironmentSettings.tmp_test_path / "kmerfreqenc/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
-        rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", nucleotide_sequence="AAA", identifier="1"),
-                                                       ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier="2"),
-                                                       ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier='3')],
+        rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", sequence="AAA", sequence_id="1"),
+                                                       ReceptorSequence("ATA", sequence="ATA", sequence_id="2"),
+                                                       ReceptorSequence("ATA", sequence="ATA", sequence_id='3')],
                                                       metadata={"l1": 1, "l2": 2, "subject_id": "1"}, path=path)
 
-        rep2 = Repertoire.build_from_sequence_objects([ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier="1"),
-                                                       ReceptorSequence("TAA", nucleotide_sequence="TAA", identifier="2"),
-                                                       ReceptorSequence("AAC", nucleotide_sequence="AAC", identifier="3")],
+        rep2 = Repertoire.build_from_sequence_objects([ReceptorSequence("ATA", sequence="ATA", sequence_id="1"),
+                                                       ReceptorSequence("TAA", sequence="TAA", sequence_id="2"),
+                                                       ReceptorSequence("AAC", sequence="AAC", sequence_id="3")],
                                                       metadata={"l1": 0, "l2": 3, "subject_id": "2"}, path=path)
 
         lc = LabelConfiguration()

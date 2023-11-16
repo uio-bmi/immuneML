@@ -12,7 +12,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TestPerformanceOverview(TestCase):
     def test_run(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "performance_overview/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "performance_overview/")
         specs_file = self._prepare_specs(path)
 
         tool = MultiDatasetBenchmarkTool(specs_file, path / "result/")
@@ -64,7 +64,7 @@ class TestPerformanceOverview(TestCase):
                     "e1": "SequenceAbundance",
                     "e2": {
                         "SequenceAbundance": {
-                            "comparison_attributes": ["sequence_aas"],
+                            "comparison_attributes": ["sequence_aa"],
                             "p_value_threshold": 0.25,
                             "sequence_batch_size": 500
                         }
