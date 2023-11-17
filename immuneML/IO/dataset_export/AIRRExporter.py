@@ -151,7 +151,7 @@ class AIRRExporter(DataExporter):
     def _get_sequence_list_region_type(sequences: List[ReceptorSequence]):
         region_types = set([sequence.get_attribute("region_type") for sequence in sequences])
 
-        assert len(region_types) == 1, f"AIRRExporter: expected one region_type, found: {region_types}"
+        assert len(region_types) == 1, f"AIRRExporter: expected one region_type in the dataset, found: {region_types}."
 
         return RegionType(region_types.pop())
 

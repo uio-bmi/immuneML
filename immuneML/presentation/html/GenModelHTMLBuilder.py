@@ -1,4 +1,5 @@
 import itertools
+import os
 from pathlib import Path
 
 from immuneML.workflows.instructions.apply_gen_model.ApplyGenModelInstruction import ApplyGenModelState
@@ -17,7 +18,7 @@ class GenModelHTMLBuilder:
     def build(state: GenModelState) -> Path:
         base_path = PathBuilder.build(state.result_path / "../HTML_output/")
         html_map = GenModelHTMLBuilder.make_html_map(state, base_path)
-        result_file = base_path / f"DatasetExport_{state.name}.html"
+        result_file = base_path / f"GenModel_{state.name}.html"
 
         TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "GenModel.html",
                              template_map=html_map, result_path=result_file)
@@ -26,12 +27,18 @@ class GenModelHTMLBuilder:
 
     @staticmethod
     def make_html_map(state, base_path: Path) -> dict:
+        exported_datasets = [{'name': key,
+                              'path': os.path.relpath(path=Util.make_downloadable_zip(state.result_path, path),
+                                                      start=base_path)}
+                             for key, path in state.exported_datasets.items()]
         html_map = {
             "css_style": Util.get_css_content(GenModelHTMLBuilder.CSS_PATH),
             "name": state.name,
             'immuneML_version': MLUtil.get_immuneML_version(),
             "full_specs": Util.get_full_specs_path(base_path),
             "function": "Applied" if isinstance(state, ApplyGenModelState) else "Trained",
+            'exported_datasets': exported_datasets,
+            "show_exported_datasets": len(exported_datasets) > 0
         }
 
         html_map = {**html_map, **{

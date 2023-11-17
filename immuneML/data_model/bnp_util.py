@@ -1,4 +1,5 @@
 import dataclasses
+import logging
 from dataclasses import fields as get_fields
 from enum import Enum
 from itertools import chain
@@ -115,9 +116,12 @@ def get_receptor_attributes_for_bnp(receptors, receptor_dc, types) -> dict:
     field_vals = {}
     for field_obj in dataclasses.fields(receptor_dc):
         if receptors[0].metadata and field_obj.name in receptors[0].metadata:
-            field_vals[field_obj.name] = list(chain.from_iterable((receptor.get_attribute(field_obj.name), receptor.get_attribute(field_obj.name)) for receptor in receptors))
+            field_vals[field_obj.name] = list(chain.from_iterable(
+                (receptor.get_attribute(field_obj.name), receptor.get_attribute(field_obj.name)) for receptor in
+                receptors))
         elif field_obj.name == 'identifier':
-            field_vals[field_obj.name] = list(chain.from_iterable((receptor.identifier, receptor.identifier) for receptor in receptors))
+            field_vals[field_obj.name] = list(
+                chain.from_iterable((receptor.identifier, receptor.identifier) for receptor in receptors))
         else:
             field_vals[field_obj.name] = list(chain.from_iterable([receptor.get_chain(ch).get_attribute(field_obj.name)
                                                                    for ch in receptor.get_chains()]
@@ -141,7 +145,6 @@ def make_dynamic_seq_set_from_objs(objs: list):
 
 
 def get_field_type_from_values(values):
-    t = None
     if isinstance(values, np.ndarray):
         t = type(values[0].item())
     elif len(values) == 0:
@@ -213,14 +216,29 @@ def make_buffer_type_from_dataset_file(dataset_file: Path):
         raise RuntimeError(f"Dataset file {dataset_file} doesn't exist, cannot load the dataset.")
 
 
-def merge_dataclass_objects(objects: list):
-    field_names = sorted(
-        list(set(chain.from_iterable([field.name for field in get_fields(obj)] for obj in objects))))
+def merge_dataclass_objects(objects: list, fill_unmatched: bool = False):
+    fields = {k: v for d in [{field.name: field.type for field in get_fields(obj)} for obj in objects] for k, v in
+              d.items()}
+    fields = {k: fields[k] for k in sorted(list(fields.keys()))}
+
+    tmp_objs = []
 
     for obj in objects:
-        assert all(hasattr(obj, field) for field in field_names), (obj, field_names)
+        missing_fields = [field for field in fields.keys() if not hasattr(obj, field)]
 
-    cls = type(objects[0])
+        if not fill_unmatched or len(missing_fields) == 0:
+            assert all(hasattr(obj, field) for field in fields.keys()), (obj, list(fields.keys()))
+            tmp_objs.append(obj)
+        else:
+            logging.info(f"Filling in missing fields when merging dataclass objects: {missing_fields}\nObject:\n{obj}")
+            tmp_objs.append(obj.add_fields({field_name: [SequenceSet.get_neutral_value(fields[field_name])] * len(obj)
+                                            for field_name in missing_fields}))
+
+    cls = make_dynamic_seq_set_dataclass(fields)
     return cls(
-        **{field_name: list(chain.from_iterable([getattr(obj, field_name) for obj in objects])) for field_name in
-           field_names})
+        **{field_name: list(chain.from_iterable([getattr(obj, field_name) for obj in tmp_objs])) for field_name in
+           fields.keys()})
+
+
+def get_type_dict_from_bnp_object(bnp_object) -> dict:
+    return {field.name: field.type for field in get_fields(bnp_object)}

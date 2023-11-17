@@ -12,7 +12,7 @@ def test_fit_apply_gen_model():
             "PWM": {
                 'chain': 'beta',
                 'sequence_type': 'amino_acid',
-                'region_type': 'IMGT_CDR3'
+                'region_type': 'IMGT_JUNCTION'
             }
         },
         {
@@ -22,7 +22,7 @@ def test_fit_apply_gen_model():
                 'default_model_name': 'humanTRB',
                 'deep': False,
                 'include_joint_genes': True,
-                'n_gen_seqs': 1000
+                'n_gen_seqs': 100
             }
         },
         {
@@ -69,10 +69,11 @@ def fit_and_apply_gen_model(gen_model):
                     "format": "RandomSequenceDataset",
                     "params": {
                         'length_probabilities': {
-                            3: 0.5,
-                            4: 0.5
+                            11: 0.5,
+                            10: 0.5
                         },
-                        'sequence_count': 10
+                        'sequence_count': 10,
+                        'region_type': 'IMGT_JUNCTION' if model_name not in ['SimpleVAE'] else 'IMGT_CDR3'
                     }
                 }
             },
@@ -90,7 +91,8 @@ def fit_and_apply_gen_model(gen_model):
                 "gen_examples_count": 100,
                 "dataset": "d1",
                 "method": "gen_model",
-                "reports": ['sld_rep', 'aa_freq']
+                "reports": ['sld_rep', 'aa_freq'],
+                'export_combined_dataset': True
             }
         }
     }
