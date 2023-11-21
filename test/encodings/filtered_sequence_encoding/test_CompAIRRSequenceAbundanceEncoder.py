@@ -74,7 +74,7 @@ class TestCompAIRRSequenceAbundanceEncoder(TestCase):
             self.assertListEqual(sorted(list(contingency["negative_absent"])), sorted([1, 0, 2, 1, 0, 2, 2, 1, 0]))
 
             self.assertListEqual(sorted([round(val, 1) for val in p_values["p_values"]]), sorted([2.0, 1.0, 2.0, 0.8, 1.0, 2.0, 0.2, 0.5, 1.0]))
-            self.assertListEqual(list(relevant_sequences["sequence_aas"]), ["III"])
+            self.assertListEqual(list(relevant_sequences["sequence_aa"]), ["III"])
 
             encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=result_path, label_config=label_config))
 

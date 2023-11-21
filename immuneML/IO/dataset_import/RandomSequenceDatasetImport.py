@@ -31,6 +31,8 @@ class RandomSequenceDatasetImport(DataImport):
                     binding: 0.7
                     not_binding: 0.3
 
+    - region_type (str): which region_type to assign to all randomly generated sequences
+
 
     YAML specification:
 
@@ -74,10 +76,11 @@ class RandomSequenceDatasetImport(DataImport):
                     0: 0.7 # 70% of the generated sequences will have class 0
 
         """
-        valid_keys = ["sequence_count", "length_probabilities", "labels", "result_path"]
+        valid_keys = ["sequence_count", "length_probabilities", "labels", "result_path", 'region_type']
         ParameterValidator.assert_all_in_valid_list(list(params.keys()), valid_keys, "RandomSequenceDatasetImport", "params")
 
         return RandomDatasetGenerator.generate_sequence_dataset(sequence_count=params["sequence_count"],
                                                                 length_probabilities=params["length_probabilities"],
                                                                 labels=params["labels"],
-                                                                path=params["result_path"])
+                                                                path=params["result_path"],
+                                                                region_type=params['region_type'])

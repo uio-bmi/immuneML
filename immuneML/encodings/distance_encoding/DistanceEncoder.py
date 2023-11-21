@@ -48,11 +48,11 @@ class DistanceEncoder(DatasetEncoder):
                 distance_metric: JACCARD
                 sequence_batch_size: 1000
                 attributes_to_match:
-                    - sequence_aas
-                    - v_genes
-                    - j_genes
-                    - chains
-                    - region_types
+                    - sequence_aa
+                    - v_call
+                    - j_call
+                    - chain
+                    - region_type
 
     """
 

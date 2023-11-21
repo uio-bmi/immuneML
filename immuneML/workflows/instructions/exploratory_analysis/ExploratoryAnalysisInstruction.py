@@ -92,14 +92,14 @@ class ExploratoryAnalysisInstruction(Instruction):
     def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> ReportResult:
         unit.dataset = self.preprocess_dataset(unit, result_path / "preprocessed_dataset")
         unit.dataset = self.encode(unit, result_path / "encoded_dataset")
-        unit.report.result_path = result_path / "report"
-        unit.report.number_of_processes = unit.number_of_processes
 
         if unit.dim_reduction is not None:
             self._run_dimensionality_reduction(unit)
 
-        unit.report.dataset = unit.dataset
-        report_result = unit.report.generate_report()
+        if unit.report is not None:
+            report_result = self.run_report(unit, result_path)
+        else:
+            report_result = None
 
         return report_result
 
@@ -129,3 +129,11 @@ class ExploratoryAnalysisInstruction(Instruction):
         else:
             encoded_dataset = unit.dataset
         return encoded_dataset
+
+    def run_report(self, unit: ExploratoryAnalysisUnit, result_path: Path):
+        unit.report.result_path = result_path / "report"
+        unit.report.number_of_processes = unit.number_of_processes
+
+        unit.report.dataset = unit.dataset
+        return unit.report.generate_report()
+

@@ -11,7 +11,7 @@ from immuneML.util.RepertoireBuilder import RepertoireBuilder
 class TestRepertoireBuilder(TestCase):
     def test_build(self):
         path = EnvironmentSettings.tmp_test_path / "repbuilder/"
-        repertoires, metadata = RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path, {"default": [1, 2]})
+        repertoires, metadata = RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path / "rep1", {"default": [1, 2]})
 
         self.assertEqual(2, len(repertoires))
         self.assertEqual((2, 4), pd.read_csv(metadata).shape)
@@ -26,7 +26,7 @@ class TestRepertoireBuilder(TestCase):
         self.assertEqual("rep_1", repertoires[1].metadata["subject_id"])
 
         # Testing with custom metadata
-        repertoires, metadata = RepertoireBuilder.build([["AAA", "CCC"]], path,
+        repertoires, metadata = RepertoireBuilder.build([["AAA", "CCC"]], path / "rep2",
                                                         seq_metadata=[[{"v_call": "v5", "j_call": "j5"}, {"v_call": "v2", "j_call": "j2"}]])
 
         self.assertEqual(repertoires[0].sequences[0].metadata.v_call, "v5")

@@ -41,35 +41,46 @@ class ExploratoryAnalysisHTMLBuilder:
             "css_style": Util.get_css_content(ExploratoryAnalysisHTMLBuilder.CSS_PATH),
             "full_specs": Util.get_full_specs_path(base_path),
             'immuneML_version': MLUtil.get_immuneML_version(),
-            "analyses": [{
-                "name": name,
-                "dataset_name": analysis.dataset.name if analysis.dataset.name is not None else analysis.dataset.identifier,
-                "dataset_type": StringHelper.camel_case_to_word_string(type(analysis.dataset).__name__),
-                "example_count": analysis.dataset.get_example_count(),
-                "dataset_size": f"{analysis.dataset.get_example_count()} {type(analysis.dataset).__name__.replace('Dataset', 's').lower()}",
-                "preprocessing_sequence": [
-                    {
-                        "preprocessing_name": preprocessing.__class__.__name__,
-                        "preprocessing_params": ", ".join(
-                            [f"{key}: {value}" for key, value in vars(preprocessing).items()])
-                    } for preprocessing in analysis.preprocessing_sequence
-                ] if analysis.preprocessing_sequence is not None else [],
-                "show_preprocessing": analysis.preprocessing_sequence is not None and len(analysis.preprocessing_sequence) > 0,
-                "show_labels": analysis.label_config is not None and len(analysis.label_config.get_labels_by_name()) > 0,
-                "labels": [{"name": label.name, "values": str(label.values)[1:-1]}
-                           for label in analysis.label_config.get_label_objects()] if analysis.label_config else None,
-                "encoding_key": analysis.encoder.name if analysis.encoder is not None else None,
-                "encoding_name": StringHelper.camel_case_to_word_string(type(analysis.encoder).__name__) if analysis.encoder is not None
-                else None,
-                "encoding_params": [{"param_name": key, "param_value": str(value)} for key, value in vars(analysis.encoder).items()] if analysis.encoder is not None else None,
-                "show_encoding": analysis.encoder is not None,
-                "report": Util.to_dict_recursive(Util.update_report_paths(analysis.report_result, base_path), base_path)
-            } for name, analysis in state.exploratory_analysis_units.items()]
+            "analyses": [
+                {
+                    **Util.make_dataset_html_map(analysis.dataset),
+                    **{
+                        "name": name,
+                        "preprocessing_sequence": [
+                            {
+                                "preprocessing_name": preprocessing.__class__.__name__,
+                                "preprocessing_params": ", ".join(
+                                    [f"{key}: {value}" for key, value in vars(preprocessing).items()])
+                            } for preprocessing in analysis.preprocessing_sequence
+                        ] if analysis.preprocessing_sequence is not None else [],
+                        "show_preprocessing": analysis.preprocessing_sequence is not None and len(
+                            analysis.preprocessing_sequence) > 0,
+                        "show_labels": analysis.label_config is not None and len(
+                            analysis.label_config.get_labels_by_name()) > 0,
+                        "analysis_labels": [{"name": label.name, "values": str(label.values)[1:-1]}
+                                   for label in
+                                   analysis.label_config.get_label_objects()] if analysis.label_config else None,
+                        "encoding_key": analysis.encoder.name if analysis.encoder is not None else None,
+                        "encoding_name": StringHelper.camel_case_to_word_string(
+                            type(analysis.encoder).__name__) if analysis.encoder is not None
+                        else None,
+                        "encoding_params": [{"param_name": key, "param_value": str(value)} for key, value in
+                                            vars(analysis.encoder).items()] if analysis.encoder is not None else None,
+                        "show_encoding": analysis.encoder is not None,
+                        "report": Util.to_dict_recursive(Util.update_report_paths(analysis.report_result, base_path),
+                                                         base_path) if analysis.report_result is not None else None
+                    }
+                } for name, analysis in state.exploratory_analysis_units.items()]
         }
 
         for analysis in html_map["analyses"]:
-            analysis["show_tables"] = len(analysis["report"]["output_tables"]) > 0 if "output_tables" in analysis["report"] else False
-            analysis["show_text"] = len(analysis["report"]["output_text"]) > 0 if "output_text" in analysis["report"] else False
-            analysis["show_info"] = analysis["report"]["info"] is not None and len(analysis["report"]["info"]) > 0 if "info" in analysis["report"] else False
+            if analysis["report"] is not None:
+                analysis["show_tables"] = len(analysis["report"]["output_tables"]) > 0 if "output_tables" in analysis["report"] else False
+                analysis["show_text"] = len(analysis["report"]["output_text"]) > 0 if "output_text" in analysis["report"] else False
+                analysis["show_info"] = analysis["report"]["info"] is not None and len(analysis["report"]["info"]) > 0 if "info" in analysis["report"] else False
+            else:
+                analysis["show_tables"] = False
+                analysis["show_text"] = False
+                analysis["show_info"] = False
 
         return html_map

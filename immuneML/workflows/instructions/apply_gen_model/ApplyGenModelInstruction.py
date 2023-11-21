@@ -55,3 +55,7 @@ class ApplyGenModelInstruction(GenModelInstruction):
         self._run_reports()
 
         return self.state
+
+    def _run_reports(self):
+        super()._run_reports()
+        super()._print_report_summary_log()

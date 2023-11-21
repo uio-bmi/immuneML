@@ -32,8 +32,8 @@ class TestMLApplicationInstruction(TestCase):
         path = EnvironmentSettings.tmp_test_path / "mlapplicationtest/"
         PathBuilder.build(path)
 
-        dataset = RandomDatasetGenerator.generate_repertoire_dataset(50, {5: 1}, {5: 1}, {"l1": {1: 0.5, 2: 0.5}}, path / 'dataset/')
-        test_dataset = RandomDatasetGenerator.generate_repertoire_dataset(20, {5: 1}, {5: 1}, {"l1": {1: 0.5, 2: 0.5}}, path / 'dataset/')
+        dataset = RandomDatasetGenerator.generate_repertoire_dataset(50, {5: 1}, {5: 1}, {"l1": {1: 0.5, 2: 0.5}}, path / 'training_dataset/')
+        test_dataset = RandomDatasetGenerator.generate_repertoire_dataset(20, {5: 1}, {5: 1}, {"l1": {1: 0.5, 2: 0.5}}, path / 'test_dataset/')
         ml_method = LogisticRegression()
         encoder = KmerFreqRepertoireEncoder(NormalizationType.RELATIVE_FREQUENCY, ReadsType.UNIQUE, SequenceEncodingType.CONTINUOUS_KMER, 3,
                                             scale_to_zero_mean=True, scale_to_unit_variance=True)
@@ -49,7 +49,8 @@ class TestMLApplicationInstruction(TestCase):
         PathBuilder.build(path / 'result/instr1/')
 
         ml_app = MLApplicationInstruction(test_dataset, label_config, hp_setting,
-                                          [ClassificationMetric.get_metric("accuracy"), ClassificationMetric.get_metric("precision"), ClassificationMetric.get_metric("recall"), ClassificationMetric.get_metric("auc")], 4, "instr1")
+                                          [ClassificationMetric.get_metric("accuracy"), ClassificationMetric.get_metric("precision"),
+                                           ClassificationMetric.get_metric("recall"), ClassificationMetric.get_metric("auc")], 4, "instr1")
         ml_app.run(path / 'result/')
 
         predictions_path = path / "result/instr1/predictions.csv"

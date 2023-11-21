@@ -38,6 +38,29 @@
                             </tr>
                         </table>
                         </div>
+
+                        <h4>Dataset labels</h4>
+                        <p>The following label(s) are available for this dataset, and may for example be used for classification:</p>
+
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th><b>Label name</b></th>
+                                    <th><b>Label classes</b></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {{#dataset_labels}}
+                                <tr>
+                                    <td>{{dataset_label_name}}</td>
+                                    <td>{{dataset_label_classes}}</td>
+                                </tr>
+                                {{/dataset_labels}}
+                                </tbody>
+                            </table>
+                        </div>
+
                         {{#show_preprocessing}}
                         <h4>Preprocessings</h4>
                         <p>The following preprocessing steps have been applied to the dataset:</p>
@@ -79,21 +102,22 @@
                         {{/show_encoding}}
                         {{#show_labels}}
                         <h3>Analysis labels</h3>
+                        <p>The following label(s) were used in this specific analysis:</p>
                         <div class="table-container">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Label name</th>
-                                        <th>Label values (classes)</th>
+                                        <th><b>Label name</b></th>
+                                        <th><b>Label classes</b></th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {{#labels}}
+                                    {{#analysis_labels}}
                                     <tr>
                                         <td>{{name}}</td>
                                         <td>{{values}}</td>
                                     </tr>
-                                    {{/labels}}
+                                    {{/analysis_labels}}
                                 </tbody>
                             </table>
                         </div>
@@ -108,8 +132,8 @@
                     {{/show_info}}
 
                     {{#output_figures}}
-                    <div class="center padded">
-                        {{#name}}<p>{{name}}</p>{{/name}}
+                    <div>
+                        {{#name}}<h4>{{name}}</h4>{{/name}}
                         {{#is_embed}}
                         <embed src="{{path}}">
                         {{/is_embed}}

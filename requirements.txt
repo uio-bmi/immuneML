@@ -1,5 +1,5 @@
 # main packages
-numpy<=1.23.5
+numpy
 pytest>=4
 pandas
 PyYAML>=5.3
@@ -24,7 +24,6 @@ umap-learn
 bionumpy>=0.2.31
 fisher>=0.1.9
 olga>=1.2.4
-npstructures>=0.2.0
 
 # export full sequence in AIRR format
 stitchr

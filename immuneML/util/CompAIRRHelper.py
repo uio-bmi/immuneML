@@ -91,7 +91,7 @@ class CompAIRRHelper:
         repertoire_contents = repertoire.get_attributes(attributes)
         repertoire_contents = pd.DataFrame({**repertoire_contents, "identifier": repertoire.identifier})
         if export_sequence_id:
-            repertoire_contents['sequence_id'] = repertoire.get_attribute('sequence_identifiers')
+            repertoire_contents['sequence_id'] = repertoire.get_attribute('sequence_id')
 
         check_na_rows = [EnvironmentSettings.get_sequence_type().value]
         check_na_rows += [] if compairr_params.ignore_counts else ["duplicate_count"]
@@ -107,6 +107,8 @@ class CompAIRRHelper:
 
         if compairr_params.ignore_counts:
             repertoire_contents["duplicate_count"] = 1
+        else:
+            repertoire_contents['duplicate_count'] = [count if count >= 0 else pd.NA for count in repertoire_contents['duplicate_count']]
 
         repertoire_contents.rename(columns={EnvironmentSettings.get_sequence_type().value: "cdr3_aa" if repertoire.get_region_type() == RegionType.IMGT_CDR3 else 'junction_aa',
                                             "identifier": "repertoire_id"},

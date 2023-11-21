@@ -102,9 +102,7 @@ class ImplantingStrategy(SimulationStrategy):
         return remaining_seq_mask, implanted_sequences
 
     def _implant_in_sequence(self, sequence_row: BackgroundSequences, signal: Signal, motif_instance: MotifInstance,
-                             use_p_gens: bool,
-                             sequence_type: SequenceType, sim_item: SimConfigItem, all_signals: List[Signal]) \
-            -> dict | None:
+                             use_p_gens: bool, sequence_type: SequenceType, sim_item: SimConfigItem, all_signals: List[Signal]):
 
         limit = len(motif_instance)
         if sequence_type == SequenceType.NUCLEOTIDE:

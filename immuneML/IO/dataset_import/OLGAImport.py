@@ -57,10 +57,10 @@ class OLGAImport(DataImport):
                 region_type: IMGT_CDR3 # what part of the sequence to import
                 columns_to_load: [0, 1, 2, 3]
                 column_mapping:
-                    0: sequences
-                    1: sequence_aas
-                    2: v_genes
-                    3: j_genes
+                    0: sequence
+                    1: sequence_aa
+                    2: v_call
+                    3: j_call
 
     """
 

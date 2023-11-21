@@ -86,6 +86,9 @@ class SoNNia(GenerativeModel):
             self._model_path = custom_model_path
 
     def fit(self, dataset: Dataset, path: Path = None):
+        region_types = list(set(dataset.get_attribute('region_type', as_list=True)))
+        assert len(region_types) == 1 and RegionType[region_types[0].upper()] == RegionType.IMGT_JUNCTION, \
+            f"SoNNia supports only IMGT_JUNCTION for the input sequences, got {region_types}"
         print_log(f"{SoNNia.__name__}: fitting a selection model...", True)
 
         data = dataset.get_attributes(['sequence_aa', 'v_call', 'j_call'], as_list=True)

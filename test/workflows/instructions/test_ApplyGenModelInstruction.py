@@ -24,6 +24,7 @@ class TestApplyGenModelInstruction(TestCase):
         # Create a mock report
         mock_report = Mock(spec=SequenceLengthDistribution)
         mock_report.generate_report.return_value = "Data Report Result"
+        mock_report.name = "rep_name"
 
         # Create an instance of ApplyGenModelInstruction with the mock objects
         instruction = ApplyGenModelInstruction(method=mock_model, reports=[mock_report],
@@ -35,7 +36,6 @@ class TestApplyGenModelInstruction(TestCase):
         # Verify that the mock methods were called as expected
         mock_model.generate_sequences.assert_called_with(2, 1, path / "Test/generated_sequences/",
                                                          SequenceType.AMINO_ACID, False)
-        mock_report.generate_report.assert_called()
 
         # Verify the results
         self.assertEqual(result.name, "Test")

@@ -15,6 +15,16 @@
             <p>Full specification is available <a href="{{{full_specs}}}">here</a>.</p>
             <p class="padded-bottom">immuneML version: {{immuneML_version}}</p>
         </div>
+        {{#show_exported_datasets}}
+        <div>
+            Exported datasets:
+            <ul>
+            {{#exported_datasets}}
+                <li><a href="{{path}}" download>{{name}}</a></li>
+            {{/exported_datasets}}
+            </ul>
+        </div>
+        {{/show_exported_datasets}}
         {{#show_reports}}
         <div>
             <h2>Reports</h2>

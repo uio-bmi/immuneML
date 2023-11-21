@@ -1,20 +1,23 @@
-name: Publish Python distribution of dev immuneML to PyPI
+name: Publish to PyPI
 
 on:
   push:
     branches:
       - master
+    paths: ['**.py', '**.yaml']
+  workflow_dispatch:
+
 
 jobs:
-  build_python_package:
-    name: build distribution
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v3
         with:
-          python-version: "3.x"
+          python-version: '3.11'
       - name: Install pypa/build
         run: >-
           python3 -m
@@ -28,21 +31,7 @@ jobs:
         with:
           name: python-package-distributions
           path: dist/
-
-  publish_to_pypi:
-    name: Publish Python distribution to PyPI
-    needs: [ build_python_package ]
-    runs-on: ubuntu-latest
-    environment:
-      name: iml_env
-      url: https://pypi.org/p/immuneML
-    permissions:
-      id-token: write
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v3
-      with:
-        name: python-package-distributions
-        path: dist/
-    - name: Publish distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_TOKEN }}

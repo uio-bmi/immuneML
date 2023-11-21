@@ -194,7 +194,8 @@ class SimpleVAE(GenerativeModel):
             if min(losses) == loss.item():
                 store_weights(model, path / 'state_dict.yaml')
 
-            if epoch > self.patience and all(x <= y for x, y in zip(losses[-self.patience:], losses[-self.patience:][1:])):
+            if epoch > self.patience and all(
+                    x <= y for x, y in zip(losses[-self.patience:], losses[-self.patience:][1:])):
                 loss_decreasing = False
 
             epoch += 1
@@ -293,11 +294,11 @@ class SimpleVAE(GenerativeModel):
                                          region_type=self.region_type.name)
         }) for i in range(count)]
 
-        for obj in seq_objs:
-            log_prob = self.compute_p_gen({self.sequence_type.value: obj.get_attribute(self.sequence_type.value),
-                                           'v_call': obj.metadata.v_call, 'j_call': obj.metadata.j_call},
-                                          self.sequence_type)
-            obj.metadata.custom_params = {'log_prob': log_prob}
+        # for obj in seq_objs:
+        #     log_prob = self.compute_p_gen({self.sequence_type.value: obj.get_attribute(self.sequence_type.value),
+        #                                    'v_call': obj.metadata.v_call, 'j_call': obj.metadata.j_call},
+        #                                   self.sequence_type)
+        #     obj.metadata.custom_params = {'log_prob': log_prob}
 
         dataset = SequenceDataset.build_from_objects(seq_objs, count, path, 'synthetic_vae')
 
