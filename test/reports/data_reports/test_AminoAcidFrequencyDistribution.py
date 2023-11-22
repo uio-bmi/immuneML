@@ -9,6 +9,10 @@ from immuneML.reports.data_reports.AminoAcidFrequencyDistribution import AminoAc
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
 
+'''
+Write one of these tests
+'''
+
 
 class TestAminoAcidFrequencyDistribution(TestCase):
     def test_generate_sequence_dataset(self):
