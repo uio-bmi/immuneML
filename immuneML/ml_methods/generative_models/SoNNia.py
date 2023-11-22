@@ -1,3 +1,4 @@
+import json
 import shutil
 from pathlib import Path
 
@@ -61,7 +62,16 @@ class SoNNia(GenerativeModel):
 
         model_overview = read_yaml(model_overview_file)
         sonnia = SoNNia(**{k: v for k, v in model_overview.items() if k != 'type'})
-        sonnia._model = InternalSoNNia(load_dir=path)
+        with open(path / 'model.json', 'r') as json_file:
+            model_data = json.load(json_file)
+
+        sonnia._model = InternalSoNNia(custom_pgen_model=sonnia._model_path,
+                                       vj=sonnia.chain in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
+                                       include_joint_genes=sonnia.include_joint_genes,
+                                       include_indep_genes=not sonnia.include_joint_genes)
+
+        sonnia._model.model.set_weights([np.array(w) for w in model_data['model_weights']])
+
         return sonnia
 
     def __init__(self, chain=None, batch_size: int = None, epochs: int = None, deep: bool = False, name: str = None,
@@ -145,6 +155,13 @@ class SoNNia(GenerativeModel):
         write_yaml(path / 'model/model_overview.yaml', {'type': 'SoNNia', 'chain': self.chain.name,
                                                         **{k: v for k, v in vars(self).items()
                                                            if k not in ['_model', 'chain', '_model_path']}})
-        self._model.save_model(path / 'model')
+        attributes_to_save = ['data_seqs', 'gen_seqs', 'log']
+        self._model.save_model(path / 'model', attributes_to_save)
+
+        model_json = self._model.model.to_json()
+        model_weights = [w.tolist() for w in self._model.model.get_weights()]
+        model_data = {'model_config': model_json, 'model_weights': model_weights}
+        with open(path / 'model' / 'model.json', 'w') as json_file:
+            json.dump(model_data, json_file)
 
         return Path(shutil.make_archive(str(path / 'trained_model'), "zip", str(path / 'model'))).absolute()
