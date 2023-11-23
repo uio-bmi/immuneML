@@ -103,18 +103,6 @@ def fit_and_apply_gen_model(gen_model):
 
     specs = {
         "definitions": {
-            "datasets": {
-                "d1": {
-                    "format": "RandomSequenceDataset",
-                    "params": {
-                        'length_probabilities': {
-                            3: 0.5,
-                            4: 0.5
-                        },
-                        'sequence_count': 10
-                    }
-                }
-            },
             "reports": {
                 "sld_rep": "SequenceLengthDistribution",
                 "aa_freq": "AminoAcidFrequencyDistribution"

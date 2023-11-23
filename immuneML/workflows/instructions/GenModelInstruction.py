@@ -20,7 +20,6 @@ class GenModelState:
     result_path: Path
     name: str
     gen_examples_count: int
-    sequence_examples: list = None
     model_path: Path = None
     exported_datasets: Dict[str, Path] = field(default_factory=dict)
     report_results: Dict[str, List[ReportResult]] = field(

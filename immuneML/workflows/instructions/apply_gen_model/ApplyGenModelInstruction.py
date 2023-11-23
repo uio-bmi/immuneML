@@ -31,7 +31,7 @@ class ApplyGenModelInstruction(GenModelInstruction):
       gen_examples_count examples; these can be data reports (to be run on generated examples), ML reports (to be run
       on the fitted model)
 
-    - config_path (str): path to the trained model in zip format (as provided by TrainGenModel instruction)
+    - ml_config_path (str): path to the trained model in zip format (as provided by TrainGenModel instruction)
 
     YAML specification:
 
