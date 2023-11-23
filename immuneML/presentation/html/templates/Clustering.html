@@ -11,7 +11,70 @@
 <body>
     <div class="container">
         <div>
-            <h1>Clustering!</h1>
+            <h1>Clustering workflow: {{name}}</h1>
+            <div>Full specification is available <a href="{{full_specs}}">here</a>.</div>
+            <div class="padded-bottom padded-top">immuneML version: {{immuneML_version}}</div>
+            <details>
+            <summary>Dataset details</summary>
+            <div class="grid-container">
+                <div class="">
+                    <div class="table-container padded-top padded-bottom">
+                        <table>
+                        <tr>
+                            <td><b>Name</b></td>
+                            <td>{{dataset_name}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Type</b></td>
+                            <td>{{dataset_type}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Dataset size</b></td>
+                            <td>{{dataset_size}}</td>
+                        </tr>
+                    </table>
+                    </div>
+                </div>
+            </div>
+        </details>
+            <div class="padded-top padded-bottom"><a href="{{predictions_path}}">Download all cluster predictions here.</a></div>
+            <h2>Performances</h2>
+            {{ #show_internal_eval }}
+            <h3>Internal evaluation</h3>
+            <p>
+                The table below shows performance measured by internal performance metrics. This means that only the
+                quality of the clusters was measured, without reference to any additional (labeled) information.
+            </p>
+            <div class="table-container padded">
+                    {{{performance_table_internal_val}}}
+            </div>
+            {{ /show_internal_eval }}
+            {{ #show_external_eval }}
+            <h3>External evaluation</h3>
+            <p>
+                The tables below show performance measured by external performance metrics. This means that for each
+                potential label of interest that was provided as input to the instruction, it was measured how well the
+                clusters correspond to the label.
+            </p>
+            {{ #label_eval_tables }}
+            <h4>Label: {{ label }}</h4>
+            <div class="table-container padded">
+                    {{{performance_table}}}
+            </div>
+            {{ /label_eval_tables }}
+            {{ /show_external_eval }}
+            {{ #show_cluster_setting_pages }}
+            <h2>Detailed information per cluster setting</h2>
+            <p>
+                Reports for each combination of encoding, dimensionality reduction and clustering method are shown in
+                pages linked below.
+            </p>
+            <ul>
+            {{#cluster_setting_pages}}
+            <li><a href="{{path}}">{{ name }}</a></li>
+            {{/cluster_setting_pages}}
+            </ul>
+            {{ /show_cluster_setting_pages }}
         </div>
     </div>
 </body>

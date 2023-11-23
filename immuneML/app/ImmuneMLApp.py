@@ -59,10 +59,12 @@ class ImmuneMLApp:
 
 def run_immuneML(namespace: argparse.Namespace):
     if os.path.isdir(namespace.result_path) and len(os.listdir(namespace.result_path)) != 0:
-        raise ValueError(f"Directory {namespace.result_path} already exists. Please specify a new output directory for the analysis.")
+        raise ValueError(f"Directory {namespace.result_path} already exists. Please specify a new output directory "
+                         f"for the analysis.")
     PathBuilder.build(namespace.result_path)
 
-    logging.basicConfig(filename=Path(namespace.result_path) / "log.txt", level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
+    logging.basicConfig(filename=Path(namespace.result_path) / "log.txt", level=logging.INFO,
+                        format='%(asctime)s %(levelname)s: %(message)s')
     warnings.showwarning = lambda message, category, filename, lineno, file=None, line=None: logging.warning(message)
 
     if namespace.tool is None:
@@ -76,10 +78,12 @@ def run_immuneML(namespace: argparse.Namespace):
 
 def main():
     parser = argparse.ArgumentParser(description="immuneML command line tool")
-    parser.add_argument("specification_path", help="Path to specification YAML file. Always used to define the analysis.")
+    parser.add_argument("specification_path", help="Path to specification YAML file. Always used to define the "
+                                                   "analysis.")
     parser.add_argument("result_path", help="Output directory path.")
-    parser.add_argument("--tool", help="Name of the tool which calls immuneML. This name will be used to invoke appropriate API call, "
-                                       "which will then do additional work in tool-dependent way before running standard immuneML.")
+    parser.add_argument("--tool", help="Name of the tool which calls immuneML. This name will be used to invoke "
+                                       "appropriate API call, which will then do additional work in tool-dependent "
+                                       "way before running standard immuneML.")
     parser.add_argument("--version", action="version", version=Constants.VERSION)
 
     namespace = parser.parse_args()

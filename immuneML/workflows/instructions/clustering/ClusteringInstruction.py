@@ -17,7 +17,8 @@ from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
-from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringSetting, ClusteringItem
+from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringSetting, ClusteringItem, \
+    DataFrameWrapper
 from immuneML.workflows.steps.DataEncoder import DataEncoder
 from immuneML.workflows.steps.DataEncoderParams import DataEncoderParams
 
@@ -28,7 +29,7 @@ class ClusteringState:
     dataset: Dataset
     metrics: List[str]
     clustering_settings: List[ClusteringSetting]
-    clustering_items: List[ClusteringItem] = field(default_factory=list)
+    clustering_items: Dict[str, ClusteringItem] = field(default_factory=dict)
     result_path: Path = None
     label_config: LabelConfiguration = None
     predictions_path: Path = None
@@ -99,7 +100,7 @@ class ClusteringInstruction(Instruction):
 
         for cl_setting in self.state.clustering_settings:
             cl_item, predictions_df = self._run_clustering_setting(cl_setting, predictions_df)
-            self.state.clustering_items.append(cl_item)
+            self.state.clustering_items[cl_setting.get_key()] = cl_item
 
         predictions_df.to_csv(self.state.predictions_path, index=False)
         self._run_clustering_reports()
@@ -107,17 +108,17 @@ class ClusteringInstruction(Instruction):
         return self.state
 
     def _setup_paths(self, result_path: Path):
-        self.state.result_path = PathBuilder.build(result_path)
+        self.state.result_path = PathBuilder.build(result_path / self.state.name)
         self.state.predictions_path = self.state.result_path / 'predictions.csv'
 
     def _run_clustering_setting(self, cl_setting: ClusteringSetting, predictions_df: pd.DataFrame) \
             -> Tuple[ClusteringItem, pd.DataFrame]:
 
-        cl_setting_path = PathBuilder.build(self.state.result_path / cl_setting.get_key())
+        cl_setting.path = PathBuilder.build(self.state.result_path / cl_setting.get_key())
 
         dataset = DataEncoder.run(DataEncoderParams(dataset=self.state.dataset, encoder=cl_setting.encoder,
                                                     encoder_params=EncoderParams(model=cl_setting.encoder_params,
-                                                                                 result_path=cl_setting_path,
+                                                                                 result_path=cl_setting.path,
                                                                                  pool_size=self.number_of_processes,
                                                                                  label_config=self.state.label_config,
                                                                                  learn_model=True,
@@ -131,38 +132,50 @@ class ClusteringInstruction(Instruction):
 
         features = dataset.encoded_data.examples if cl_setting.dim_reduction_method is None \
             else dataset.encoded_data.dimensionality_reduced_data
-        ext_performances, int_performances = self._evaluate_clustering(predictions_df, cl_setting.get_key(), features)
+        performance_paths = self._evaluate_clustering(predictions_df, cl_setting, features)
 
         cl_item = ClusteringItem(cl_setting=cl_setting, dataset=dataset, predictions=predictions,
-                                 performance=None)
+                                 external_performance=DataFrameWrapper(path=performance_paths['external']),
+                                 internal_performance=DataFrameWrapper(path=performance_paths['internal']))
 
-        # performances.to_csv(str(cl_setting_path / 'performances.csv'), index=False)
         self._run_reports(cl_item)
 
         cl_item.dataset.encoded_data = None
 
         return cl_item, predictions_df
 
-    def _evaluate_clustering(self, predictions: pd.DataFrame, cl_setting_name: str, features) \
-            -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def _evaluate_clustering(self, predictions: pd.DataFrame, cl_setting: ClusteringSetting, features) -> Dict[
+        str, Path]:
+
+        result = {'internal': None, 'external': None}
+
+        internal_performances = {}
+
+        for metric in [m for m in self.state.metrics if is_internal(m)]:
+            metric_fn = getattr(sklearn.metrics, metric)
+            internal_performances[metric] = [metric_fn(features,
+                                                       predictions[f'predictions_{cl_setting.get_key()}'].values)]
+
+        pd.DataFrame(internal_performances).to_csv(str(cl_setting.path / 'internal_performances.csv'), index=False)
+        result['internal'] = cl_setting.path / 'internal_performances.csv'
+
         if self.state.label_config is not None and self.state.label_config.get_label_count() > 0:
 
             external_performances = {label: {} for label in self.state.label_config.get_labels_by_name()}
-            internal_performances = {}
-
-            for metric in [m for m in self.state.metrics if is_internal(m)]:
-                metric_fn = getattr(sklearn.metrics, metric)
-                internal_performances[metric] = metric_fn(features, predictions[f'predictions_{cl_setting_name}'].values)
 
             for metric in [m for m in self.state.metrics if is_external(m)]:
                 metric_fn = getattr(sklearn.metrics, metric)
                 for label in self.state.label_config.get_labels_by_name():
                     external_performances[label][metric] = metric_fn(predictions[label].values,
                                                                      predictions[
-                                                                         f'predictions_{cl_setting_name}'].values)
+                                                                         f'predictions_{cl_setting.get_key()}'].values)
 
-            return (pd.DataFrame(external_performances).reset_index().rename(columns={'index': 'metric'}),
-                    pd.DataFrame(internal_performances))
+            (pd.DataFrame(external_performances).reset_index().rename(columns={'index': 'metric'})
+             .to_csv(str(cl_setting.path / 'external_performances.csv'), index=False))
+
+            result['external'] = cl_setting.path / 'external_performances.csv'
+
+        return result
 
     def _run_clustering_reports(self):
         report_path = PathBuilder.build(self.state.result_path / f'reports/')

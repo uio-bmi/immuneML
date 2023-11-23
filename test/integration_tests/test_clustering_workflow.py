@@ -56,7 +56,7 @@ def test_clustering_workflow():
             'clustering': {
                 'type': 'Clustering',
                 'dataset': 'd1',
-                'metrics': ['adjusted_rand_score', 'adjusted_mutual_info_score'],
+                'metrics': ['adjusted_rand_score', 'adjusted_mutual_info_score', 'silhouette_score'],
                 'labels': ['epitope'],
                 'clustering_settings': [
                     {'encoding': 'kmer', 'dim_reduction': 'pca', 'method': 'kmeans2'},

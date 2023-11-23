@@ -112,8 +112,8 @@ class Util:
                             shutil.copyfile(src=str(output.path), dst=new_path)
                             output.path = new_path
                     else:
-                        logging.warning(f"HTML util: one of the report outputs was not returned properly from the report {report_result.name}, "
-                                        f"and it will not be moved to HTML output folder.")
+                        logging.warning(f"HTML util: one of the report outputs was not returned properly from the "
+                                        f"report {report_result.name}, and it will not be moved to HTML output folder.")
 
         return report_result
 

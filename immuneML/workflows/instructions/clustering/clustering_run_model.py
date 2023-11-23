@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -8,7 +8,22 @@ from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
-from immuneML.reports.ReportResult import ReportResult
+
+
+class DataFrameWrapper:
+
+    def __init__(self, path: Path, df: pd.DataFrame = None):
+        self.path = path
+        self.df = df
+
+        if df is not None and not path.exists():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            df.to_csv(str(path), index=False)
+
+    def get_df(self):
+        if self.df is None and self.path.exists():
+            self.df = pd.read_csv(str(self.path))
+        return self.df
 
 
 @dataclass
@@ -22,6 +37,7 @@ class ClusteringSetting:
     dim_reduction_method: DimRedMethod = None
     dim_red_params: dict = None
     dim_red_name: str = None
+    path: Path = None
 
     def get_key(self) -> str:
         key = self.encoder_name
@@ -39,7 +55,7 @@ class ClusteringItem:
     dataset: Dataset = None
     method: ClusteringMethod = None
     encoder: DatasetEncoder = None
-    performance: pd.DataFrame = None
+    internal_performance: DataFrameWrapper = None
+    external_performance: DataFrameWrapper = None
     predictions: np.ndarray = None
     cl_setting: ClusteringSetting = None
-

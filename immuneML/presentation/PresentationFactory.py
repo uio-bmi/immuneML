@@ -42,5 +42,5 @@ class PresentationFactory:
         elif isinstance(state, ClusteringState) and presentation_format == PresentationFormat.HTML:
             return ClusteringHTMLBuilder
         else:
-            raise ValueError(f"PresentationFactory: state and format combination ({type(state).__name__}, {presentation_format.name}) "
-                             f"is not supported.")
+            raise ValueError(f"PresentationFactory: state and format combination ({type(state).__name__}, "
+                             f"{presentation_format.name}) is not supported.")

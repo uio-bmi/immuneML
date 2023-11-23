@@ -18,7 +18,9 @@ def test_train_gen_model_run():
             "datasets": {
                 "d1": {
                     "format": "RandomSequenceDataset",
-                    "params": {}
+                    "params": {
+                        'region_type': 'IMGT_JUNCTION'test
+                    }
                 }
             },
             "ml_methods": {
