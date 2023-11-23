@@ -19,9 +19,7 @@ def dataset2():
 
 @pytest.fixture
 def kl_gen_model_report(dataset1, dataset2):
-
-
-    return KLGenModelReport(dataset1, dataset2)
+    return KLGenModelReport(dataset1, dataset2, result_path=Path('tmp/gen_test_report'))
 
 
 def test_get_title(kl_gen_model_report):

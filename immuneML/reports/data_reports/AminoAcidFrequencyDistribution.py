@@ -35,7 +35,7 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     - split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a
       single label, or alternatively the label of interest can be specified under 'label'. If split_by_label is set to
-      true, the percentage-wise frequency difference between classes is plotted additionally. By default,
+      true, the percentage-wise frequency differennce between classes is plotted additionally. By default,
       split_by_label is False.
 
     - label (str): if split_by_label is set to True, a label can be specified here.

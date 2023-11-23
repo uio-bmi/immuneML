@@ -4,6 +4,7 @@ from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.reports.Report import Report
 from immuneML.reports.ReportResult import ReportResult
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TrainGenModelReport(Report):
@@ -49,51 +50,3 @@ class TrainGenModelReport(Report):
     @staticmethod
     def get_title():
         return "TrainGenModel reports"
-
-    @classmethod
-    def build_object(cls, **kwargs):
-        """
-        Creates the object of the subclass of the Report class from the parameters so that it can be used in the analysis. Depending on the type of
-        the report, the parameters provided here will be provided in parsing time, while the other necessary parameters (e.g., subset of the data from
-        which the report should be created) will be provided at runtime. For more details, see specific direct subclasses of this class, describing
-        different types of reports.
-
-        Args:
-
-            **kwargs: keyword arguments that will be provided by users in the specification (if immuneML is used as a command line tool) or in the
-             dictionary when calling the method from the code, and which should be used to create the report object
-
-        Returns:
-
-            the object of the appropriate report class
-
-        """
-        location = cls.__name__
-        # ParameterValidator.assert_type_and_value(kwargs["imgt_positions"], bool, location, "imgt_positions")
-        # ParameterValidator.assert_type_and_value(kwargs["relative_frequency"], bool, location, "relative_frequency")
-        # ParameterValidator.assert_type_and_value(kwargs["split_by_label"], bool, location, "split_by_label")
-        #
-        # if kwargs["label"] is not None:
-        #     ParameterValidator.assert_type_and_value(kwargs["label"], str, location, "label")
-        #
-        #     if kwargs["split_by_label"] is False:
-        #         warnings.warn(f"{location}: label is set but split_by_label was False, setting split_by_label to True")
-        #         kwargs["split_by_label"] = True
-        #
-        # return AminoAcidFrequencyDistribution(**kwargs)
-        #
-        # pass
-
-    def _generate(self) -> ReportResult:
-        """
-        The function that needs to be implemented by the Report subclasses which actually creates the report (figures, tables, text files), depending
-        on the specific aim of the report. After checking all prerequisites (e.g., if all parameters were set properly), generate_report() will call
-        this function and return its result.
-
-        Returns:
-
-            ReportResult object which encapsulates all outputs (figure, table, and text files) so that they can be conveniently linked to in the
-            final output of instructions
-
-        """
-        pass
