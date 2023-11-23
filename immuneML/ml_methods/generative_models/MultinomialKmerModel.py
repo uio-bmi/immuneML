@@ -4,7 +4,7 @@ from scipy.stats import poisson
 import numpy as np
 from bionumpy import EncodedRaggedArray, EncodedArray, count_encoded
 
-from immuneML.ml_methods.generative_models.transition_distribution import EncodedLookup
+from immuneML.ml_methods.generative_models.SequenceTransitionDistribution import EncodedLookup
 
 @dataclasses.dataclass
 class Poisson:

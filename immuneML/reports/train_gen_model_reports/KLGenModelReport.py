@@ -6,7 +6,7 @@ from ..ReportResult import ReportResult
 from ...data_model.dataset.Dataset import Dataset
 from ...ml_methods.generative_models.GenerativeModel import GenerativeModel
 from ...ml_methods.generative_models.evalutation import evaluate_similarities, KLEvaluator
-from ...ml_methods.generative_models.multinomial_kmer_distribution import estimate_kmer_model
+from ...ml_methods.generative_models.MultinomialKmerModel import estimate_kmer_model
 from ...util.PathBuilder import PathBuilder
 
 
@@ -118,7 +118,6 @@ class KLGenModelReport(TrainGenModelReport):
         o_kmers, g_kmers = (bnp.sequence.get_kmers(dataset.get_attribute("sequence_aa"), 3)
                             for dataset in (self.original_dataset, self.generated_dataset))
         estimator = partial(estimate_kmer_model, prior_count=1.0)
-
 
     def _generate(self) -> ReportResult:
         """

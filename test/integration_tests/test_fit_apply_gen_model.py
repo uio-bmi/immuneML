@@ -84,7 +84,8 @@ def fit_and_apply_gen_model(gen_model):
             },
             "reports": {
                 "sld_rep": "SequenceLengthDistribution",
-                "aa_freq": "AminoAcidFrequencyDistribution"
+                "aa_freq": "AminoAcidFrequencyDistribution",
+                "kl_gen_model": "KLGenModelReport"
             }
         },
         "instructions": {
