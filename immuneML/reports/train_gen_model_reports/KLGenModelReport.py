@@ -1,9 +1,12 @@
+from functools import partial
 from pathlib import Path
-
+import bionumpy as bnp
 from .TrainGenModelReport import TrainGenModelReport
 from ..ReportResult import ReportResult
 from ...data_model.dataset.Dataset import Dataset
 from ...ml_methods.generative_models.GenerativeModel import GenerativeModel
+from ...ml_methods.generative_models.evalutation import evaluate_similarities, KLEvaluator
+from ...ml_methods.generative_models.multinomial_kmer_distribution import estimate_kmer_model
 from ...util.PathBuilder import PathBuilder
 
 
@@ -94,12 +97,27 @@ class KLGenModelReport(TrainGenModelReport):
         Returns:
             KL divergence value
         """
-        original_data = self.original_dataset.get_data()
-        generated_data = self.generated_dataset.get_data()
+        return self._get_kmer_kl_evaluator()
 
-        for sequence in generated_data:
-            print(sequence)
-        # print(original_data)
+
+    # def _get_kmer_model(self, sequences):
+    #     sequences = data_set.get_attribute("sequence_aa")
+    #     kmers = bnp.sequence.get_kmers(sequences, 3)
+    #     model = estimate_kmer_model(kmers)
+    #     return model
+
+    def _get_kmer_kl_evaluator(self):
+        o_kmers, g_kmers = (bnp.sequence.get_kmers(dataset.get_attribute("sequence_aa"), 3)
+                            for dataset in (self.original_dataset, self.generated_dataset))
+        estimator = partial(estimate_kmer_model, prior_count=1.0)
+        return KLEvaluator(o_kmers, g_kmers, estimator)
+        # kls = evaluate_similarities(o_kmers, g_kmers, estimator)
+        # return kls
+
+    def _get_transitions_kl(self):
+        o_kmers, g_kmers = (bnp.sequence.get_kmers(dataset.get_attribute("sequence_aa"), 3)
+                            for dataset in (self.original_dataset, self.generated_dataset))
+        estimator = partial(estimate_kmer_model, prior_count=1.0)
 
 
     def _generate(self) -> ReportResult:
@@ -115,30 +133,33 @@ class KLGenModelReport(TrainGenModelReport):
 
         """
         PathBuilder.build(self.result_path)
-        kl = self._compute_kl_divergence()
-        return
+        evaluator = self._get_kmer_kl_evaluator()
+        tables = [self._write_output_table(evaluator.get_worst_true_sequences(),
+                                           self.result_path / "worst_true_sequences.tsv",
+                                           name="Worst true sequences"),
+                  self._write_output_table(evaluator.get_worst_simulated_sequences(),
+                                           self.result_path / "worst_simulated_sequences.tsv",
+                                           name="Worst simulated sequences")]
+        # tables = []
+        # figures = []
+        #
+        # tables.append(self._write_output_table(freq_dist,
+        #                                        self.result_path / "amino_acid_frequency_distribution.tsv",
+        #                                        name="Table of amino acid frequencies"))
+        #
+        # figures.append(self._safe_plot(freq_dist=freq_dist, plot_callable="_plot_distribution"))
+        #
+        # if self.split_by_label:
+        #     frequency_change = self._compute_frequency_change(freq_dist)
+        #
+        #     tables.append(self._write_output_table(frequency_change,
+        #                                            self.result_path / f"frequency_change.tsv",
+        #                                            name=f"Frequency change between classes"))
+        #     figures.append(self._safe_plot(frequency_change=frequency_change, plot_callable="_plot_frequency_change"))
 
-        #freq_dist = self._get_plotting_data()
-
-        tables = []
-        figures = []
-
-        tables.append(self._write_output_table(freq_dist,
-                                               self.result_path / "amino_acid_frequency_distribution.tsv",
-                                               name="Table of amino acid frequencies"))
-
-        figures.append(self._safe_plot(freq_dist=freq_dist, plot_callable="_plot_distribution"))
-
-        if self.split_by_label:
-            frequency_change = self._compute_frequency_change(freq_dist)
-
-            tables.append(self._write_output_table(frequency_change,
-                                                   self.result_path / f"frequency_change.tsv",
-                                                   name=f"Frequency change between classes"))
-            figures.append(self._safe_plot(frequency_change=frequency_change, plot_callable="_plot_frequency_change"))
-
+        info_text = '''\
+        Empirical KL divergence between the kmer distributions in the original and generated datasets. Toghether with the sequences that contribute the most to the divergence.'''
         return ReportResult(name=self.name,
-                            info="A barplot showing the relative frequency of each amino acid at each position in "
-                                 "the sequences of a dataset.",
-                            output_figures=[fig for fig in figures if fig is not None],
+                            info=info_text,
+                            output_figures=[],
                             output_tables=[table for table in tables if table is not None])

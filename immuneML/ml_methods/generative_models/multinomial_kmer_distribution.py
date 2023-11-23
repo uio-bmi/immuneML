@@ -1,10 +1,20 @@
+import dataclasses
 from typing import Protocol
-
+from scipy.stats import poisson
 import numpy as np
 from bionumpy import EncodedRaggedArray, EncodedArray, count_encoded
 
 from immuneML.ml_methods.generative_models.transition_distribution import EncodedLookup
 
+@dataclasses.dataclass
+class Poisson:
+    mu: float
+
+    def log_prob(self, x):
+        return poisson.logpmf(x, self.mu)
+
+    def sample(self, n_samples):
+        return poisson.rvs(self.mu, size=n_samples)
 
 class KmerDistribution(Protocol):
     def sample(self, count: int) -> EncodedRaggedArray:
@@ -26,6 +36,22 @@ class EmpiricalLengthDistribution:
         probs = np.zeros_like(lengths, dtype=float)
         probs[mask] = self.lengths_frequencies[lengths[mask]]
         return np.log(probs)
+
+
+class SmoothedLengthDistribution:
+    def __init__(self, empirical_distribution, smooth_distribution, p_smooth):
+        self.empirical_distribution = empirical_distribution
+        self.smooth_distribution = smooth_distribution
+        self.p_smooth = p_smooth
+
+    def sample(self, count: int) -> np.ndarray:
+        is_smooth = np.random.rand(count) < self.p_smooth
+        smooth_samples = self.smooth_distribution.sample(count)
+        empirical_samples = self.empirical_distribution.sample(count)
+        return np.where(is_smooth, smooth_samples, empirical_samples)
+
+    def log_prob(self, lengths: np.ndarray) -> np.ndarray:
+        return np.logaddexp(np.log(1-self.p_smooth) + self.empirical_distribution.log_prob(lengths), np.log(self.p_smooth) + self.smooth_distribution.log_prob(lengths))
 
 
 class MultinomialKmerModel:
@@ -61,8 +87,15 @@ def estimate_length_distribution(lengths: np.ndarray) -> EmpiricalLengthDistribu
     return EmpiricalLengthDistribution(counts / counts.sum())
 
 
-def estimate_kmer_model(kmers: EncodedRaggedArray) -> MultinomialKmerModel:
-    length_distribution = estimate_length_distribution(kmers.lengths)
+def estimate_smoothed_length_distribution(lengths: np.ndarray, prior_count=1) -> SmoothedLengthDistribution:
+    empirical = estimate_length_distribution(lengths)
+    smooth = Poisson(np.mean(lengths))
+    return SmoothedLengthDistribution(empirical, smooth, prior_count / (prior_count + len(lengths)))
+
+
+def estimate_kmer_model(kmers: EncodedRaggedArray, prior_count=1) -> MultinomialKmerModel:
+    length_distribution = estimate_smoothed_length_distribution(kmers.lengths, prior_count=prior_count)
     kmer_counts = count_encoded(kmers, axis=None)
-    lookup = EncodedLookup(kmer_counts.counts / kmers.size, kmers.encoding)
+    lookup = EncodedLookup((kmer_counts.counts+prior_count/len(kmer_counts.counts)) / (kmers.size+prior_count), kmers.encoding)
+
     return MultinomialKmerModel(lookup, length_distribution)
