@@ -24,4 +24,3 @@ def kl_gen_model_report(dataset1, dataset2):
 
 def test_get_title(kl_gen_model_report):
     kl_gen_model_report._generate()
-

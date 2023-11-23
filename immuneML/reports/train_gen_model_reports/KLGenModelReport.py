@@ -136,10 +136,10 @@ class KLGenModelReport(TrainGenModelReport):
         evaluator = self._get_kmer_kl_evaluator()
         tables = [self._write_output_table(evaluator.get_worst_true_sequences(),
                                            self.result_path / "worst_true_sequences.tsv",
-                                           name="Worst true sequences"),
+                                           name="Original sequences that don't fit the generated model"),
                   self._write_output_table(evaluator.get_worst_simulated_sequences(),
                                            self.result_path / "worst_simulated_sequences.tsv",
-                                           name="Worst simulated sequences")]
+                                           name="Generated sequences that don't fit with the original model")]
         # tables = []
         # figures = []
         #
@@ -157,8 +157,7 @@ class KLGenModelReport(TrainGenModelReport):
         #                                            name=f"Frequency change between classes"))
         #     figures.append(self._safe_plot(frequency_change=frequency_change, plot_callable="_plot_frequency_change"))
 
-        info_text = '''\
-        Empirical KL divergence between the kmer distributions in the original and generated datasets. Toghether with the sequences that contribute the most to the divergence.'''
+        info_text = '''Empirical KL divergence between the kmer distributions in the original and generated datasets. Toghether with the sequences that contribute the most to the divergence.'''
         return ReportResult(name=self.name,
                             info=info_text,
                             output_figures=[],
