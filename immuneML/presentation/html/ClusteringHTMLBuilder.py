@@ -143,6 +143,7 @@ class ClusteringHTMLBuilder:
                         for output in attribute_value:
                             if isinstance(output, ReportOutput):
                                 output.path = output.path.relative_to(path)
+                rep_result = Util.to_dict_recursive(rep_result, path)
                 new_obj.append(rep_result)
             return new_obj
         else:
