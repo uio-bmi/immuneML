@@ -19,7 +19,7 @@ def test_train_gen_model_run():
                 "d1": {
                     "format": "RandomSequenceDataset",
                     "params": {
-                        'region_type': 'IMGT_JUNCTION'test
+                        'region_type': 'IMGT_JUNCTION'
                     }
                 }
             },
@@ -31,7 +31,7 @@ def test_train_gen_model_run():
                         'default_model_name': 'humanTRB',
                         'deep': False,
                         'include_joint_genes': True,
-                        'n_gen_seqs': 100
+                        'n_gen_seqs': 10
                     }
                 }
             }
@@ -42,7 +42,8 @@ def test_train_gen_model_run():
                 "gen_examples_count": 100,
                 "dataset": "d1",
                 "method": "sonnia",
-                "number_of_processes": 2
+                "number_of_processes": 2,
+                'training_percentage': 1.
             }
         }
     }

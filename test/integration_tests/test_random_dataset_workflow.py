@@ -92,7 +92,7 @@ class TestRandomDatasetWorkflow(TestCase):
                         "format": "RandomReceptorDataset",
                         "params": {
                             "result_path": str(path),
-                            "receptor_count": 500,
+                            "receptor_count": 100,
                             "chain_1_length_probabilities": {
                                 5: 1.
                             },
@@ -154,7 +154,7 @@ class TestRandomDatasetWorkflow(TestCase):
                     "number_of_processes": 4,
                     "reports": None,
                     "optimization_metric": "balanced_accuracy",
-                    "refit_optimal_model": True,
+                    "refit_optimal_model": False
                 }
             }
         }

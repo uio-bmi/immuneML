@@ -8,16 +8,22 @@ from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.data_model.bnp_util import merge_dataclass_objects, bnp_write_to_file, get_type_dict_from_bnp_object
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.reports.train_gen_model_reports.TrainGenModelReport import TrainGenModelReport
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.GenModelInstruction import GenModelState, GenModelInstruction
+from immuneML.workflows.steps.data_splitter.DataSplitter import DataSplitter
+from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
 
 
 class TrainGenModelState(GenModelState):
     combined_dataset: Dataset = None
+    train_dataset: Dataset = None
+    test_dataset: Dataset = None
+    training_percentage: float = None
 
 
 class TrainGenModelInstruction(GenModelInstruction):
@@ -45,6 +51,9 @@ class TrainGenModelInstruction(GenModelInstruction):
 
     - gen_examples_count (int): how many examples (sequences, repertoires) to generate from the fitted model
 
+    - training_percentage (int): which percentage (0-1) of the original dataset to use for fitting the model while the
+      remaining will be used only for comparison with generated sequences
+
     - reports (list): list of report ids (defined under definitions/reports) to apply after fitting a generative model
       and generating gen_examples_count examples; these can be data reports (to be run on generated examples), ML
       reports (to be run on the fitted model)
@@ -60,6 +69,7 @@ class TrainGenModelInstruction(GenModelInstruction):
             model: model1 # defined previously under definitions/ml_methods
             gen_examples_count: 100
             number_of_processes: 4
+            training_percentage: 0.7
             reports: [data_rep1, ml_rep2]
 
     """
@@ -68,14 +78,16 @@ class TrainGenModelInstruction(GenModelInstruction):
 
     def __init__(self, dataset: Dataset = None, method: GenerativeModel = None, number_of_processes: int = 1,
                  gen_examples_count: int = 100, result_path: Path = None, name: str = None, reports: list = None,
-                 export_combined_dataset: bool = False):
+                 export_combined_dataset: bool = False, training_percentage: float = None):
         super().__init__(TrainGenModelState(result_path, name, gen_examples_count), method, reports)
         self.dataset = dataset
         self.number_of_processes = number_of_processes
         self.export_combined_dataset = export_combined_dataset
+        self.state.training_percentage = training_percentage
 
     def run(self, result_path: Path) -> TrainGenModelState:
         self._set_path(result_path)
+        self._split_dataset()
         self._fit_model()
         self._save_model()
         self._gen_data()
@@ -83,9 +95,25 @@ class TrainGenModelInstruction(GenModelInstruction):
 
         return self.state
 
+    def _split_dataset(self):
+        if self.state.training_percentage != 1:
+            split_params = DataSplitterParams(dataset=self.dataset, split_strategy=SplitType.RANDOM, split_count=1,
+                                              training_percentage=self.state.training_percentage,
+                                              paths=[self.state.result_path])
+            train_datasets, test_datasets = DataSplitter.run(split_params)
+            self.state.train_dataset = train_datasets[0]
+            self.state.test_dataset = test_datasets[0]
+        else:
+            logging.info(f"{TrainGenModelInstruction.__name__}: training_percentage was set to 1 meaning that the full "
+                         f"dataset will be used for fitting the generative model. All resulting comparison reports "
+                         f"will then use the full original dataset as compared to independent test dataset if the "
+                         f"training percentage was less than 1.")
+            self.state.train_dataset = self.dataset
+            self.state.test_dataset = self.dataset
+
     def _fit_model(self):
         print_log(f"{self.state.name}: starting to fit the model", True)
-        self.method.fit(self.dataset, self.state.result_path)
+        self.method.fit(self.state.train_dataset, self.state.result_path)
         print_log(f"{self.state.name}: fitted the model", True)
 
     def _gen_data(self):
@@ -94,23 +122,40 @@ class TrainGenModelInstruction(GenModelInstruction):
 
     def _make_combined_dataset(self):
         path = PathBuilder.build(self.state.result_path / 'combined_dataset')
-        data = merge_dataclass_objects(list(self.dataset.get_data(batch_size=self.dataset.get_example_count(),
-                                                                  return_objects=False)))
-        org_data = data.add_fields({'from_gen_model': np.zeros(len(data))}, {'from_gen_model': bool})
 
-        data = merge_dataclass_objects(list(
-            self.generated_dataset.get_data(batch_size=self.generated_dataset.get_example_count(),
-                                            return_objects=False)))
-        gen_data = data.add_fields({'from_gen_model': np.ones(len(data))}, {'from_gen_model': bool})
+        gen_data = self._get_dataclass_object_from_dataset(self.generated_dataset,
+                                                           np.ones(self.state.gen_examples_count),
+                                                           np.zeros(self.state.gen_examples_count))
 
-        combined_data = merge_dataclass_objects([org_data, gen_data], fill_unmatched=True)
+        if self.state.training_percentage < 1:
+
+            org_data = self._get_dataclass_object_from_dataset(self.state.train_dataset,
+                                                               np.zeros(self.state.train_dataset.get_example_count()),
+                                                               np.ones(self.state.train_dataset.get_example_count()))
+            test_data = self._get_dataclass_object_from_dataset(self.state.test_dataset,
+                                                                np.zeros(self.state.test_dataset.get_example_count()),
+                                                                np.zeros(self.state.test_dataset.get_example_count()))
+
+            combined_data = merge_dataclass_objects([org_data, test_data, gen_data], fill_unmatched=True)
+        else:
+            org_data = self._get_dataclass_object_from_dataset(self.dataset, np.zeros(self.dataset.get_example_count()),
+                                                               np.ones(self.dataset.get_example_count()))
+            combined_data = merge_dataclass_objects([org_data, gen_data], fill_unmatched=True)
+
         bnp_write_to_file(path / 'batch1.tsv', combined_data)
 
         self.state.combined_dataset = SequenceDataset.build(
-            dataset_file=path / f'combined_{self.state.name}_dataset.yaml',
-            types=get_type_dict_from_bnp_object(combined_data),
-            filenames=[path / 'batch1.tsv'],
-            element_class_name='ReceptorSequence')
+            dataset_file=path / f'combined_{self.state.name}_dataset.yaml', filenames=[path / 'batch1.tsv'],
+            types=get_type_dict_from_bnp_object(combined_data), element_class_name='ReceptorSequence')
+
+    def _get_dataclass_object_from_dataset(self, dataset: Dataset, from_gen_model_vals: np.ndarray,
+                                           used_for_training_vals: np.ndarray):
+        data = merge_dataclass_objects(list(dataset.get_data(batch_size=dataset.get_example_count(),
+                                                             return_objects=False)))
+        data = data.add_fields({'from_gen_model': from_gen_model_vals, 'used_for_training': used_for_training_vals},
+                               {'from_gen_model': bool, 'used_for_training': bool})
+
+        return data
 
     def _make_and_export_combined_dataset(self):
         if self.export_combined_dataset and isinstance(self.dataset, SequenceDataset):
@@ -131,16 +176,17 @@ class TrainGenModelInstruction(GenModelInstruction):
 
         report_path = self._get_reports_path()
         for report in self.reports:
+            original_dataset = self.state.train_dataset if self.state.training_percentage != 1 else self.dataset
             report.result_path = report_path
             if isinstance(report, TrainGenModelReport):
                 report.generated_dataset = self.generated_dataset
-                report.original_dataset = self.dataset
+                report.original_dataset = original_dataset
                 report.model = self.method
                 self.state.report_results['instruction_reports'].append(report.generate_report())
             elif isinstance(report, DataReport):
                 rep = copy.deepcopy(report)
                 rep.result_path = PathBuilder.build(rep.result_path.parent / f"{rep.result_path.name}_original_dataset")
-                rep.dataset = self.dataset
+                rep.dataset = original_dataset
                 rep.name = rep.name + " (original dataset)"
                 self.state.report_results['data_reports'].append(rep.generate_report())
 

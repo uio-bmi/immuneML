@@ -97,6 +97,7 @@ class ElementGenerator:
         elements = None
         file_count = 1
         tmp_file_size = self.file_size if not paired else self.file_size * 2
+        id_attr_name = 'identifier' if paired else 'sequence_id'
 
         example_indices.sort()
 
@@ -106,7 +107,7 @@ class ElementGenerator:
             extracted_elements = self._extract_elements_from_batch(index, batch, example_indices, paired=paired)
             elements = merge_dataclass_objects([elements, extracted_elements]) if elements else extracted_elements
 
-            if len(elements) >= tmp_file_size or len(elements) == len(example_indices):
+            if len(elements) >= tmp_file_size or len(set(getattr(elements, id_attr_name).tolist())) == len(example_indices):
                 bnp_write_to_file(batch_filenames[file_count - 1], elements[:tmp_file_size])
                 file_count += 1
                 elements = elements[tmp_file_size:]

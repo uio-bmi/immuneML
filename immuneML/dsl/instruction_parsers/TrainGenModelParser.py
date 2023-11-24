@@ -22,6 +22,8 @@ class TrainGenModelParser:
                                                  'gen_examples_count', 0)
         ParameterValidator.assert_type_and_value(instruction['number_of_processes'], int, TrainGenModelParser.__name__,
                                                  'number_of_processes', 1)
+        ParameterValidator.assert_type_and_value(float(instruction['training_percentage']), float, TrainGenModelParser.__name__,
+                                                 'training_percentage', 0, 1)
 
         valid_report_ids = symbol_table.get_keys_by_type(SymbolType.REPORT)
         ParameterValidator.assert_all_in_valid_list(instruction['reports'], valid_report_ids, TrainGenModelParser.__name__, 'reports')
