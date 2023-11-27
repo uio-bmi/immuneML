@@ -2,10 +2,11 @@ from functools import partial
 from pathlib import Path
 import bionumpy as bnp
 from .TrainGenModelReport import TrainGenModelReport
+from ..ReportOutput import ReportOutput
 from ..ReportResult import ReportResult
 from ...data_model.dataset.Dataset import Dataset
 from ...ml_methods.generative_models.GenerativeModel import GenerativeModel
-from ...ml_methods.generative_models.evalutation import evaluate_similarities, KLEvaluator
+from ...ml_methods.generative_models.KLEvaluator import evaluate_similarities, KLEvaluator
 from ...ml_methods.generative_models.MultinomialKmerModel import estimate_kmer_model
 from ...util.PathBuilder import PathBuilder
 
@@ -75,6 +76,7 @@ class KLGenModelReport(TrainGenModelReport):
 
         """
         location = cls.__name__
+        return cls(**kwargs)
         # ParameterValidator.assert_type_and_value(kwargs["imgt_positions"], bool, location, "imgt_positions")
         # ParameterValidator.assert_type_and_value(kwargs["relative_frequency"], bool, location, "relative_frequency")
         # ParameterValidator.assert_type_and_value(kwargs["split_by_label"], bool, location, "split_by_label")
@@ -140,13 +142,15 @@ class KLGenModelReport(TrainGenModelReport):
                                            self.result_path / "worst_simulated_sequences.tsv",
                                            name="Generated sequences that don't fit with the original model")]
         # tables = []
-        # figures = []
+        figures = []
         #
         # tables.append(self._write_output_table(freq_dist,
         #                                        self.result_path / "amino_acid_frequency_distribution.tsv",
         #                                        name="Table of amino acid frequencies"))
         #
-        # figures.append(self._safe_plot(freq_dist=freq_dist, plot_callable="_plot_distribution"))
+        figures.append(self._plot_simulated(evaluator=evaluator))
+        figures.append(self._plot_original(evaluator=evaluator))
+        # self._safe_plot(plot_callable="_plot_distribution"))
         #
         # if self.split_by_label:
         #     frequency_change = self._compute_frequency_change(freq_dist)
@@ -156,8 +160,22 @@ class KLGenModelReport(TrainGenModelReport):
         #                                            name=f"Frequency change between classes"))
         #     figures.append(self._safe_plot(frequency_change=frequency_change, plot_callable="_plot_frequency_change"))
 
-        info_text = '''Empirical KL divergence between the kmer distributions in the original and generated datasets. Toghether with the sequences that contribute the most to the divergence.'''
+        info_text = '''Estimated KL divergence between the kmer distributions in the original and generated datasets. Toghether with the sequences that contribute the most to the divergence.'''
         return ReportResult(name=self.name,
                             info=info_text,
-                            output_figures=[],
+                            output_figures=figures,
                             output_tables=[table for table in tables if table is not None])
+
+    def _plot_simulated(self, evaluator: KLEvaluator):
+        file_path = self.result_path / "bad_simulated_sequences.html"
+        figure = evaluator.simulated_plot()
+        figure.write_html(str(file_path))
+
+        return ReportOutput(path=file_path, name="Generated Sequences that contributes most to the KL divergence")
+
+    def _plot_original(self, evaluator: KLEvaluator):
+        file_path = self.result_path / "bad_original_sequences.html"
+        figure = evaluator.original_plot()
+        figure.write_html(str(file_path))
+
+        return ReportOutput(path=file_path, name="Original Sequences that contributes most to the KL divergence")

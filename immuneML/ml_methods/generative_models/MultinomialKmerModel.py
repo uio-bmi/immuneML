@@ -54,12 +54,24 @@ class SmoothedLengthDistribution:
         return np.logaddexp(np.log(1-self.p_smooth) + self.empirical_distribution.log_prob(lengths), np.log(self.p_smooth) + self.smooth_distribution.log_prob(lengths))
 
 
-class MultinomialKmerModel:
-    def __init__(self, kmer_probs: EncodedLookup, sequence_length: int):
+class KmerModel:
+    def __init__(self, kmer_probs: EncodedLookup):
         self.kmer_probs = kmer_probs
-        self.sequence_length = sequence_length
         self._raw_values = np.arange(kmer_probs.alphabet_size, dtype=np.uint8)
         self._log_probs = np.log(kmer_probs)
+
+    def sample(self, count: int) -> EncodedRaggedArray:
+        kmer_hashes = np.random.choice(self._raw_values, size=count, p=self.kmer_probs.raw())
+        return EncodedArray(kmer_hashes, self.kmer_probs.encoding)
+
+    def log_prob(self, kmers: EncodedRaggedArray) -> np.ndarray:
+        return self._log_probs[kmers]
+
+
+class MultinomialKmerModel:
+    def __init__(self, kmer_probs: EncodedLookup, sequence_length: int):
+        self.kmer_model = KmerModel(kmer_probs)
+        self.sequence_length = sequence_length
 
     def sample(self, count: int) -> EncodedRaggedArray:
         if hasattr(self.sequence_length, 'sample'):
@@ -67,9 +79,10 @@ class MultinomialKmerModel:
         else:
             sequence_length = np.full((count,), self.sequence_length, dtype=int)
         total_kmers = sequence_length.sum()
-        kmer_hashes = np.random.choice(self._raw_values, size=total_kmers,
-                                       p=self.kmer_probs.raw())
-        kmers = EncodedArray(kmer_hashes, self.kmer_probs.encoding)
+        kmers = self.kmer_model.sample(total_kmers)
+        #kmer_hashes = np.random.choice(self._raw_values, size=total_kmers,
+        # p=self.kmer_probs.raw())
+        # kmers = EncodedArray(kmer_hashes, self.kmer_probs.encoding)
         return EncodedRaggedArray(kmers, sequence_length)
 
     def log_prob(self, kmers: EncodedRaggedArray) -> np.ndarray:
@@ -79,7 +92,7 @@ class MultinomialKmerModel:
         else:
             assert np.all(lengths == self.sequence_length)
             length_log_probs = 0
-        return self._log_probs[kmers].sum(axis=-1) + length_log_probs
+        return self.kmer_model.log_prob(kmers).sum(axis=-1) + length_log_probs
 
 
 def estimate_length_distribution(lengths: np.ndarray) -> EmpiricalLengthDistribution:
