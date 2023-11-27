@@ -3,8 +3,6 @@ from pathlib import Path
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.reports.Report import Report
-from immuneML.reports.ReportResult import ReportResult
-from immuneML.util.PathBuilder import PathBuilder
 
 
 class TrainGenModelReport(Report):

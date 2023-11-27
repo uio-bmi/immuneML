@@ -12,7 +12,3 @@ class ReportResult:
     output_tables: List[ReportOutput] = field(default_factory=lambda: [])
     output_text: List[ReportOutput] = field(default_factory=lambda: [])
 
-
-'''
-This is what I should make
-'''
