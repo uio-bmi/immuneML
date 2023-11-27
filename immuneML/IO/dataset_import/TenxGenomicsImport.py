@@ -38,6 +38,12 @@ class TenxGenomicsImport(DataImport):
 
     - receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor.  Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum. If receptor_chains is not provided, the chain pair is automatically detected (only one chain pair type allowed per repertoire).
 
+    - import_productive (bool): Whether productive sequences (with value 'True' in column productive) should be included in the imported sequences. By default, import_productive is True.
+
+    - import_unproductive (bool): Whether productive sequences (with value 'Fale' in column productive) should be included in the imported sequences. By default, import_unproductive is False.
+
+    - import_unknown_productivity (bool): Whether sequences with unknown productivity (missing or 'NA' value in column productive) should be included in the imported sequences. By default, import_unknown_productivity is True.
+
     - import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.
 
     - import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.
@@ -105,17 +111,21 @@ class TenxGenomicsImport(DataImport):
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        df["frame_type"] = None
-        df['productive'] = df['productive'] == 'True'
-        df.loc[df['productive'], "frame_type"] = SequenceFrameType.IN.name
+        df["frame_type"] = SequenceFrameType.UNDEFINED.value
+        df.loc[df['productive']=="True", "frame_type"] = SequenceFrameType.IN.value
+        df.loc[df['productive']=="False", "frame_type"] = SequenceFrameType.OUT.value
 
         allowed_productive_values = []
         if params.import_productive:
-            allowed_productive_values.append(True)
+            allowed_productive_values.append('True')
         if params.import_unproductive:
-            allowed_productive_values.append(False)
+            allowed_productive_values.append('False')
+        if params.import_unknown_productivity:
+            allowed_productive_values.append('')
+            allowed_productive_values.append('NA')
 
         df = df[df.productive.isin(allowed_productive_values)]
+        df.drop(columns=["productive"], inplace=True)
 
         ImportHelper.junction_to_cdr3(df, params.region_type)
         df.loc[:, "region_type"] = params.region_type.name

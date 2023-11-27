@@ -207,14 +207,14 @@ class AIRRExporter(DataExporter):
         if "frame_type" in df.columns:
             AIRRExporter._enums_to_strings(df, "frame_type")
 
-            df["productive"] = df["frame_type"] == SequenceFrameType.IN.name
+            df["productive"] = df["frame_type"] == SequenceFrameType.IN.value
             df.loc[df["frame_type"].isnull(), "productive"] = ""
             df.loc[df["frame_type"] == "", "productive"] = ""
-            df.loc[df["frame_type"] == SequenceFrameType.UNDEFINED.name, "productive"] = ""
+            df.loc[df["frame_type"] == SequenceFrameType.UNDEFINED.value, "productive"] = ""
 
             df["vj_in_frame"] = df["productive"]
 
-            df["stop_codon"] = df["frame_type"] == SequenceFrameType.STOP.name
+            df["stop_codon"] = df["frame_type"] == SequenceFrameType.STOP.value
             df.loc[df["frame_type"].isnull(), "stop_codon"] = ''
 
             df.drop(columns=["frame_type"], inplace=True)

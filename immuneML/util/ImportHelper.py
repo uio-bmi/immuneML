@@ -142,7 +142,7 @@ class ImportHelper:
             return repertoire
         except Exception as exception:
             raise RuntimeError(
-                f"{ImportHelper.__name__}: error when importing file {metadata_row['filename']}.") from exception
+                f"{ImportHelper.__name__}: error when importing file {metadata_row['filename']}: {exception}") from exception
 
     @staticmethod
     def load_sequence_dataframe(filepath, params, alternative_load_func=None):
@@ -293,11 +293,13 @@ class ImportHelper:
     def prepare_frame_type_list(params: DatasetImportParams) -> list:
         frame_type_list = []
         if params.import_productive:
-            frame_type_list.append(SequenceFrameType.IN.name)
+            frame_type_list.append(SequenceFrameType.IN.value)
+        if params.import_unknown_productivity:
+            frame_type_list.append(SequenceFrameType.UNDEFINED.value)
         if params.import_out_of_frame:
-            frame_type_list.append(SequenceFrameType.OUT.name)
+            frame_type_list.append(SequenceFrameType.OUT.value)
         if params.import_with_stop_codon:
-            frame_type_list.append(SequenceFrameType.STOP.name)
+            frame_type_list.append(SequenceFrameType.STOP.value)
         return frame_type_list
 
     @staticmethod
