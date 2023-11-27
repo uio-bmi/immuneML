@@ -13,13 +13,15 @@ from ...util.PathBuilder import PathBuilder
 
 class KLGenModelReport(TrainGenModelReport):
     """
-    Estimates the KL divergence between the kmer-distributions of the original and generated dataset, and makes a plots that shows which sequences (and which kmers) contribute the most to the divergence.
+    Estimates the KL divergence between the kmer-distributions of the original and generated dataset, and makes a plots
+    that shows which sequences (and which kmers) contribute the most to the divergence.
 
     Specification arguments:
 
     - k (int): The kmer length to use for the KL divergence estimation. By default, k is set to 3.
 
-    - n_sequences (int): The number of sequences to make the plot from (the sequences that contribute the most to the KL divergence). By default, n_sequences is set to 50.
+    - n_sequences (int): The number of sequences to make the plot from (the sequences that contribute the most to the
+      KL divergence). By default, n_sequences is set to 50.
 
 
     YAML specification:
@@ -35,11 +37,10 @@ class KLGenModelReport(TrainGenModelReport):
     """
 
     def __init__(self, original_dataset: Dataset = None, generated_dataset: Dataset = None, result_path: Path = None,
-                 name: str = None, number_of_processes: int = 1, model: GenerativeModel = None, k: int =3, n_sequences:int = 50):
+                 name: str = None, number_of_processes: int = 1, model: GenerativeModel = None, k: int = 3,
+                 n_sequences: int = 50):
         """
         The arguments defined below are set at runtime by the instruction.
-        Concrete classes inheriting DataComparisonReport may include additional parameters that will be set by the user
-        in the form of input arguments (e.g., from the YAML file).
 
         Args:
 
@@ -71,8 +72,6 @@ class KLGenModelReport(TrainGenModelReport):
     @staticmethod
     def get_title():
         return "KLTrainGenModel reports"
-
-
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -135,7 +134,8 @@ class KLGenModelReport(TrainGenModelReport):
         figures.append(self._plot_original(evaluator=evaluator))
 
         info_text = '''Estimated KL divergence between the kmer distributions in the original and generated datasets. Toghether with the sequences that contribute the most to the divergence.
-        KL(original || generated) = {:.2f},  KL(generated || original) = {:.2f}'''.format(evaluator.true_kl(), evaluator.simulated_kl())
+        KL(original || generated) = {:.2f},  KL(generated || original) = {:.2f}'''.format(evaluator.true_kl(),
+                                                                                          evaluator.simulated_kl())
         return ReportResult(name=self.name,
                             info=info_text,
                             output_figures=figures,
