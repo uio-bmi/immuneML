@@ -11,3 +11,4 @@ class ReportResult:
     output_figures: List[ReportOutput] = field(default_factory=lambda: [])
     output_tables: List[ReportOutput] = field(default_factory=lambda: [])
     output_text: List[ReportOutput] = field(default_factory=lambda: [])
+

@@ -82,7 +82,8 @@ def fit_and_apply_gen_model(gen_model):
             },
             "reports": {
                 "sld_rep": "SequenceLengthDistribution",
-                "aa_freq": "AminoAcidFrequencyDistribution"
+                "aa_freq": "AminoAcidFrequencyDistribution",
+                "kl_gen_model": "KLGenModelReport"
             }
         },
         "instructions": {
@@ -91,7 +92,7 @@ def fit_and_apply_gen_model(gen_model):
                 "gen_examples_count": 100,
                 "dataset": "d1",
                 "method": "gen_model",
-                "reports": ['sld_rep', 'aa_freq'],
+                "reports": ['sld_rep', 'aa_freq', 'kl_gen_model'],
                 'export_combined_dataset': True
             }
         }
@@ -105,14 +106,15 @@ def fit_and_apply_gen_model(gen_model):
         "definitions": {
             "reports": {
                 "sld_rep": "SequenceLengthDistribution",
-                "aa_freq": "AminoAcidFrequencyDistribution"
+                "aa_freq": "AminoAcidFrequencyDistribution",
+                "kl_gen_model": "KLGenModelReport"
             }
         },
         "instructions": {
             "inst1": {
                 "type": "ApplyGenModel",
                 "gen_examples_count": 100,
-                "reports": ['sld_rep', 'aa_freq'],
+                "reports": ['sld_rep', 'aa_freq', 'kl_gen_model'],
                 "ml_config_path": str(generated_model_path / "output/inst1/trained_model/trained_model.zip"),
             }
         }
