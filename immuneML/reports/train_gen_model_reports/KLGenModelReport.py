@@ -13,14 +13,29 @@ from ...util.PathBuilder import PathBuilder
 
 class KLGenModelReport(TrainGenModelReport):
     """
-    TrainGenModel reports show some type of features or statistics comparing two datasets: the original and generated
-    one, potentially in combination with the trained model. These reports can only be used inside TrainGenModel
-    instruction with the aim of comparing two datasets: the dataset used to train a generative model and the dataset
-    created from the trained model.
+    Estimates the KL divergence between the kmer-distributions of the original and generated dataset, and makes a plots that shows which sequences (and which kmers) contribute the most to the divergence.
+
+    Specification arguments:
+
+    - k (int): The kmer length to use for the KL divergence estimation. By default, k is set to 3.
+
+    - n_sequences (int): The number of sequences to make the plot from (the sequences that contribute the most to the KL divergence). By default, n_sequences is set to 50.
+
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_kl_report:
+          KLGenModelReport:
+            k: 3
+            n_sequences: 50
+
     """
 
     def __init__(self, original_dataset: Dataset = None, generated_dataset: Dataset = None, result_path: Path = None,
-                 name: str = None, number_of_processes: int = 1, model: GenerativeModel = None):
+                 name: str = None, number_of_processes: int = 1, model: GenerativeModel = None, k: int =3, n_sequences:int = 50):
         """
         The arguments defined below are set at runtime by the instruction.
         Concrete classes inheriting DataComparisonReport may include additional parameters that will be set by the user
@@ -50,6 +65,8 @@ class KLGenModelReport(TrainGenModelReport):
         self.generated_dataset = generated_dataset
         self.model = model
         self.result_path = result_path
+        self.k = k
+        self.n_sequences = n_sequences
 
     @staticmethod
     def get_title():
@@ -77,20 +94,6 @@ class KLGenModelReport(TrainGenModelReport):
         """
         location = cls.__name__
         return cls(**kwargs)
-        # ParameterValidator.assert_type_and_value(kwargs["imgt_positions"], bool, location, "imgt_positions")
-        # ParameterValidator.assert_type_and_value(kwargs["relative_frequency"], bool, location, "relative_frequency")
-        # ParameterValidator.assert_type_and_value(kwargs["split_by_label"], bool, location, "split_by_label")
-        #
-        # if kwargs["label"] is not None:
-        #     ParameterValidator.assert_type_and_value(kwargs["label"], str, location, "label")
-        #
-        #     if kwargs["split_by_label"] is False:
-        #         warnings.warn(f"{location}: label is set but split_by_label was False, setting split_by_label to True")
-        #         kwargs["split_by_label"] = True
-        #
-        # return AminoAcidFrequencyDistribution(**kwargs)
-        #
-        # pass
 
     def _compute_kl_divergence(self):
         """
@@ -101,25 +104,11 @@ class KLGenModelReport(TrainGenModelReport):
         """
         return self._get_kmer_kl_evaluator()
 
-
-    # def _get_kmer_model(self, sequences):
-    #     sequences = data_set.get_attribute("sequence_aa")
-    #     kmers = bnp.sequence.get_kmers(sequences, 3)
-    #     model = estimate_kmer_model(kmers)
-    #     return model
-
     def _get_kmer_kl_evaluator(self):
-        o_kmers, g_kmers = (bnp.sequence.get_kmers(dataset.get_attribute("sequence_aa"), 3)
+        o_kmers, g_kmers = (bnp.sequence.get_kmers(dataset.get_attribute("sequence_aa"), self.k)
                             for dataset in (self.original_dataset, self.generated_dataset))
         estimator = partial(estimate_kmer_model, prior_count=1.0)
-        return KLEvaluator(o_kmers, g_kmers, estimator)
-        # kls = evaluate_similarities(o_kmers, g_kmers, estimator)
-        # return kls
-
-    def _get_transitions_kl(self):
-        o_kmers, g_kmers = (bnp.sequence.get_kmers(dataset.get_attribute("sequence_aa"), 3)
-                            for dataset in (self.original_dataset, self.generated_dataset))
-        estimator = partial(estimate_kmer_model, prior_count=1.0)
+        return KLEvaluator(o_kmers, g_kmers, estimator, n_sequences=self.n_sequences)
 
     def _generate(self) -> ReportResult:
         """
@@ -141,24 +130,9 @@ class KLGenModelReport(TrainGenModelReport):
                   self._write_output_table(evaluator.get_worst_simulated_sequences(),
                                            self.result_path / "worst_simulated_sequences.tsv",
                                            name="Generated sequences that don't fit with the original model")]
-        # tables = []
         figures = []
-        #
-        # tables.append(self._write_output_table(freq_dist,
-        #                                        self.result_path / "amino_acid_frequency_distribution.tsv",
-        #                                        name="Table of amino acid frequencies"))
-        #
         figures.append(self._plot_simulated(evaluator=evaluator))
         figures.append(self._plot_original(evaluator=evaluator))
-        # self._safe_plot(plot_callable="_plot_distribution"))
-        #
-        # if self.split_by_label:
-        #     frequency_change = self._compute_frequency_change(freq_dist)
-        #
-        #     tables.append(self._write_output_table(frequency_change,
-        #                                            self.result_path / f"frequency_change.tsv",
-        #                                            name=f"Frequency change between classes"))
-        #     figures.append(self._safe_plot(frequency_change=frequency_change, plot_callable="_plot_frequency_change"))
 
         info_text = '''Estimated KL divergence between the kmer distributions in the original and generated datasets. Toghether with the sequences that contribute the most to the divergence.
         KL(original || generated) = {:.2f},  KL(generated || original) = {:.2f}'''.format(evaluator.true_kl(), evaluator.simulated_kl())

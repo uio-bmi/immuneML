@@ -32,12 +32,13 @@ def evaluate_similarities(true_sequences, simulated_sequences, estimator):
 
 
 class KLEvaluator:
-    def __init__(self, true_sequences, simulated_sequences, estimator):
+    def __init__(self, true_sequences, simulated_sequences, estimator, n_sequences):
         self.true_sequences = true_sequences
         self.simulated_sequences = simulated_sequences
         self.true_model = estimator(true_sequences)
         self.simulated_model = estimator(simulated_sequences)
         self.estimator = estimator
+        self._n_sequences = n_sequences
 
     @lru_cache()
     def true_kl_weights(self):
@@ -68,7 +69,7 @@ class KLEvaluator:
         return np.argsort(self.simulated_kl_weights())[-n:][::-1]
 
     def simulated_plot(self):
-        n_sequences = 50
+        n_sequences = self._n_sequences
         indices = self._simulated_indices(n_sequences)
         kmers = self.simulated_sequences[indices]
         weights = self.simulated_model.kmer_model.log_prob(kmers) - self.true_model.kmer_model.log_prob(kmers)
@@ -79,7 +80,7 @@ class KLEvaluator:
         return fig
 
     def original_plot(self):
-        n_sequences = 50
+        n_sequences = self._n_sequences
         indices = np.argsort(self.true_kl_weights())[-n_sequences:][::-1]
         kmers = self.true_sequences[indices]
         weights = self.true_model.kmer_model.log_prob(kmers) - self.simulated_model.kmer_model.log_prob(kmers)

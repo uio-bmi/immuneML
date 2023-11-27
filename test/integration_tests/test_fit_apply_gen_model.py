@@ -4,9 +4,7 @@ from immuneML.app.ImmuneMLApp import ImmuneMLApp
 from immuneML.data_model.bnp_util import write_yaml
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
-'''
-Insert my stuff here
-'''
+
 
 def test_fit_apply_gen_model():
     gen_models = [
