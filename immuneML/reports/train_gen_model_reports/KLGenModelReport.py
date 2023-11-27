@@ -160,7 +160,8 @@ class KLGenModelReport(TrainGenModelReport):
         #                                            name=f"Frequency change between classes"))
         #     figures.append(self._safe_plot(frequency_change=frequency_change, plot_callable="_plot_frequency_change"))
 
-        info_text = '''Estimated KL divergence between the kmer distributions in the original and generated datasets. Toghether with the sequences that contribute the most to the divergence.'''
+        info_text = '''Estimated KL divergence between the kmer distributions in the original and generated datasets. Toghether with the sequences that contribute the most to the divergence.
+        KL(original || generated) = {:.2f},  KL(generated || original) = {:.2f}'''.format(evaluator.true_kl(), evaluator.simulated_kl())
         return ReportResult(name=self.name,
                             info=info_text,
                             output_figures=figures,
