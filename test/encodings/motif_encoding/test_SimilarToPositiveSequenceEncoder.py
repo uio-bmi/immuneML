@@ -23,17 +23,17 @@ class TestSimilarToPositiveSequenceEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def _prepare_dataset(self, path):
-        sequences = [ReceptorSequence(amino_acid_sequence="AACC", identifier="5",
+        sequences = [ReceptorSequence(sequence_aa="AACC", sequence_id="5",
                                       metadata=SequenceMetadata(custom_params={"l1": "yes"})),
-                     ReceptorSequence(amino_acid_sequence="AGDD", identifier="3",
+                     ReceptorSequence(sequence_aa="AGDD", sequence_id="3",
                                       metadata=SequenceMetadata(custom_params={"l1": "yes"})),
-                     ReceptorSequence(amino_acid_sequence="AAEE", identifier="4",
+                     ReceptorSequence(sequence_aa="AAEE", sequence_id="4",
                                       metadata=SequenceMetadata(custom_params={"l1": "yes"})),
-                     ReceptorSequence(amino_acid_sequence="CCCC", identifier="1",
+                     ReceptorSequence(sequence_aa="CCCC", sequence_id="1",
                                       metadata=SequenceMetadata(custom_params={"l1": "no"})),
-                     ReceptorSequence(amino_acid_sequence="AGDE", identifier="2",
+                     ReceptorSequence(sequence_aa="AGDE", sequence_id="2",
                                       metadata=SequenceMetadata(custom_params={"l1": "no"})),
-                     ReceptorSequence(amino_acid_sequence="EEEE", identifier="6",
+                     ReceptorSequence(sequence_aa="EEEE", sequence_id="6",
                                       metadata=SequenceMetadata(custom_params={"l1": "no"}))]
 
 

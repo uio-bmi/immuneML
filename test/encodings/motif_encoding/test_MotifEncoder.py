@@ -21,21 +21,21 @@ class TestMotifEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def _prepare_dataset(self, path):
-        sequences = [ReceptorSequence(amino_acid_sequence="AACC", identifier="1",
+        sequences = [ReceptorSequence(sequence_aa="AACC", sequence_id="1",
                                       metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(amino_acid_sequence="AGDD", identifier="2",
+                     ReceptorSequence(sequence_aa="AGDD", sequence_id="2",
                                       metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(amino_acid_sequence="AAEE", identifier="3",
+                     ReceptorSequence(sequence_aa="AAEE", sequence_id="3",
                                       metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(amino_acid_sequence="AGFF", identifier="4",
+                     ReceptorSequence(sequence_aa="AGFF", sequence_id="4",
                                       metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(amino_acid_sequence="CCCC", identifier="5",
+                     ReceptorSequence(sequence_aa="CCCC", sequence_id="5",
                                       metadata=SequenceMetadata(custom_params={"l1": 2})),
-                     ReceptorSequence(amino_acid_sequence="DDDD", identifier="6",
+                     ReceptorSequence(sequence_aa="DDDD", sequence_id="6",
                                       metadata=SequenceMetadata(custom_params={"l1": 2})),
-                     ReceptorSequence(amino_acid_sequence="EEEE", identifier="7",
+                     ReceptorSequence(sequence_aa="EEEE", sequence_id="7",
                                       metadata=SequenceMetadata(custom_params={"l1": 2})),
-                     ReceptorSequence(amino_acid_sequence="FFFF", identifier="8",
+                     ReceptorSequence(sequence_aa="FFFF", sequence_id="8",
                                       metadata=SequenceMetadata(custom_params={"l1": 2}))]
 
 

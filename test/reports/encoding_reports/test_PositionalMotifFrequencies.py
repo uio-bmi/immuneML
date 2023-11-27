@@ -24,43 +24,43 @@ class TestPositionalMotifFrequencies(TestCase):
     def _create_dummy_encoded_data(self, path):
         sequences = [
             ReceptorSequence(
-                amino_acid_sequence="AACC",
-                identifier="1",
+                sequence_aa="AACC",
+                sequence_id="1",
                 metadata=SequenceMetadata(custom_params={"l1": 1}),
             ),
             ReceptorSequence(
-                amino_acid_sequence="AGDD",
-                identifier="2",
+                sequence_aa="AGDD",
+                sequence_id="2",
                 metadata=SequenceMetadata(custom_params={"l1": 1}),
             ),
             ReceptorSequence(
-                amino_acid_sequence="AAEE",
-                identifier="3",
+                sequence_aa="AAEE",
+                sequence_id="3",
                 metadata=SequenceMetadata(custom_params={"l1": 1}),
             ),
             ReceptorSequence(
-                amino_acid_sequence="AGFF",
-                identifier="4",
+                sequence_aa="AGFF",
+                sequence_id="4",
                 metadata=SequenceMetadata(custom_params={"l1": 1}),
             ),
             ReceptorSequence(
-                amino_acid_sequence="CCCC",
-                identifier="5",
+                sequence_aa="CCCC",
+                sequence_id="5",
                 metadata=SequenceMetadata(custom_params={"l1": 2}),
             ),
             ReceptorSequence(
-                amino_acid_sequence="DDDD",
-                identifier="6",
+                sequence_aa="DDDD",
+                sequence_id="6",
                 metadata=SequenceMetadata(custom_params={"l1": 2}),
             ),
             ReceptorSequence(
-                amino_acid_sequence="EEEE",
-                identifier="7",
+                sequence_aa="EEEE",
+                sequence_id="7",
                 metadata=SequenceMetadata(custom_params={"l1": 2}),
             ),
             ReceptorSequence(
-                amino_acid_sequence="FFFF",
-                identifier="8",
+                sequence_aa="FFFF",
+                sequence_id="8",
                 metadata=SequenceMetadata(custom_params={"l1": 2}),
             ),
         ]

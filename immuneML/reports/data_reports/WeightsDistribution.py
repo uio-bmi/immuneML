@@ -98,7 +98,7 @@ class WeightsDistribution(DataReport):
 
         # todo remove this, this was temporary
         if isinstance(self.dataset, SequenceDataset):
-            data["seq"] = [seq.amino_acid_sequence for seq in self.dataset.get_data()]
+            data["seq"] = [seq.sequence_aa for seq in self.dataset.get_data()]
 
         if self.split_classes:
             data = self.get_weights_by_class_df(data, weights)

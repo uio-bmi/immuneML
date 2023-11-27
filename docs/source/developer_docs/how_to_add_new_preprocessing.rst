@@ -35,7 +35,7 @@ It includes implementations of the abstract methods and class documentation at t
         lower_limit, or more clonotypes than specified by the upper_limit.
         Note that this filter filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
 
-        Arguments:
+        Specification arguments:
 
             lower_limit (int): The minimal inclusive lower limit for the number of clonotypes allowed in a repertoire.
 
@@ -260,7 +260,7 @@ This is the example of documentation for :py:obj:`~immuneML.preprocessing.filter
     lower_limit, or more clonotypes than specified by the upper_limit.
     Note that this filter filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
 
-    Arguments:
+    Specification arguments:
 
         lower_limit (int): The minimal inclusive lower limit for the number of clonotypes allowed in a repertoire.
 

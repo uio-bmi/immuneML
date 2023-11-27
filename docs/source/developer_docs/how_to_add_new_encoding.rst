@@ -50,7 +50,7 @@ An example of the implementation of :code:`NewKmerFrequencyEncoder` for the :py:
         """
         Encodes the repertoires of the dataset by k-mer frequencies and normalizes the frequencies to zero mean and unit variance.
 
-        Arguments:
+        Specification arguments:
 
             k (int): k-mer length
 
@@ -324,7 +324,7 @@ This is the example of documentation for :py:obj:`~immuneML.encodings.filtered_s
     Nature Genetics 49, no. 5 (May 2017): 659–65. `doi.org/10.1038/ng.3822 <https://doi.org/10.1038/ng.3822>`_.
 
 
-    Arguments:
+    Specification arguments:
 
         comparison_attributes (list): The attributes to be considered to group receptors into clonotypes. Only the fields specified in
         comparison_attributes will be considered, all other fields are ignored. Valid comparison value can be any repertoire field name.

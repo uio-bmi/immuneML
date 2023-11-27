@@ -8,7 +8,7 @@ from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 from immuneML.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder

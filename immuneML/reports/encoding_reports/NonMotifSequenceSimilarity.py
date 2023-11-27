@@ -29,14 +29,23 @@ class NonMotifSequenceSimilarity(EncodingReport):
     will lean towards small hamming distances. Likewise, for motifs occurring in a very diverse set of sequences, the
     distribution will lean towards containing more large hamming distances.
 
-    motif_color_map # todo
+
+    Specification arguments:
+
+        motif_color_map (dict): An optional mapping between motif sizes and colors. If no mapping is given, default colors will be chosen.
+
 
     YAML specification example:
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_motif_sim: NonMotifSimilarity
+        my_motif_sim:
+            NonMotifSimilarity:
+                motif_color_map:
+                    3: "#66C5CC"
+                    4: "#F6CF71"
+                    5: "#F89C74"
 
     """
 

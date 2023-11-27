@@ -12,9 +12,9 @@ from multiprocessing.pool import Pool
 
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.util.Util import Util
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.ml_metrics.MetricUtil import MetricUtil
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -118,7 +118,7 @@ class BinaryFeatureClassifier(MLMethod):
         logging.info(f"{BinaryFeatureClassifier.__name__}: finished training.")
 
     def _get_optimization_scoring_fn(self):
-        return MetricUtil.get_metric_fn(Metric[self.optimization_metric.upper()])
+        return MetricUtil.get_metric_fn(ClassificationMetric[self.optimization_metric.upper()])
 
     def _build_rule_tree(self, encoded_data, cores_for_training):
         if self.keep_all:

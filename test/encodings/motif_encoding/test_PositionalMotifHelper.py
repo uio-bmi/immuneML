@@ -21,13 +21,13 @@ class TestPositionalMotifHelper(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def _prepare_dataset(self, path):
-        sequences = [ReceptorSequence(amino_acid_sequence="AA", identifier="1",
+        sequences = [ReceptorSequence(sequence_aa="AA", sequence_id="1",
                                       metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(amino_acid_sequence="CC", identifier="2",
+                     ReceptorSequence(sequence_aa="CC", sequence_id="2",
                                       metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(amino_acid_sequence="AC", identifier="3",
+                     ReceptorSequence(sequence_aa="AC", sequence_id="3",
                                       metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(amino_acid_sequence="CA", identifier="4",
+                     ReceptorSequence(sequence_aa="CA", sequence_id="4",
                                       metadata=SequenceMetadata(custom_params={"l1": 1}))]
 
         PathBuilder.build(path)

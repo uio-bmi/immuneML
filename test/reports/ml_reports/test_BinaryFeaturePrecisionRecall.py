@@ -19,7 +19,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 
 
-class TestCoefficients(TestCase):
+class TestBinaryFeaturePrecisionRecall(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -65,8 +65,8 @@ class TestCoefficients(TestCase):
         report.method = motif_classifier
         report.label = label
         report.result_path = path
-        report.train_dataset = SequenceDataset()
-        report.test_dataset = SequenceDataset()
+        report.train_dataset = SequenceDataset(buffer_type="NA", dataset_file="")
+        report.test_dataset = SequenceDataset(buffer_type="NA", dataset_file="")
         report.train_dataset.encoded_data = enc_data_train
         report.test_dataset.encoded_data = enc_data_test
 

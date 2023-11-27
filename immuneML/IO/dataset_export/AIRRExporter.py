@@ -208,7 +208,9 @@ class AIRRExporter(DataExporter):
             AIRRExporter._enums_to_strings(df, "frame_type")
 
             df["productive"] = df["frame_type"] == SequenceFrameType.IN.name
-            df.loc[df["frame_type"].isnull(), "productive"] = ''
+            df.loc[df["frame_type"].isnull(), "productive"] = ""
+            df.loc[df["frame_type"] == "", "productive"] = ""
+            df.loc[df["frame_type"] == SequenceFrameType.UNDEFINED.name, "productive"] = ""
 
             df["vj_in_frame"] = df["productive"]
 
