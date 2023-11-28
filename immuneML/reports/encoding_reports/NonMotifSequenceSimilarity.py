@@ -83,17 +83,17 @@ class NonMotifSequenceSimilarity(EncodingReport):
         )
 
     def get_hamming_distance_counts(self):
-        # np_sequences, y_true, _ = read_data_file(data_file=data_file, calculate_weights=False)
-        # motifs = filter_single_motifs(read_motifs_from_file(motifs_file))
-
         np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(self.dataset)
         self.sequence_length = len(np_sequences[0])
 
-        with Pool(processes=self.number_of_processes) as pool:
-            partial_func = partial(self._make_hamming_distance_hist_for_motif,  np_sequences=np_sequences)
-            raw_counts = pd.DataFrame(pool.map(partial_func, self.dataset.encoded_data.examples.T))
+        raw_counts = pd.DataFrame([self._make_hamming_distance_hist_for_motif(motif_presence, np_sequences)
+                                   for motif_presence in self.dataset.encoded_data.examples.T])
 
-        # df = pd.DataFrame(hd_counts)
+        ### Original code with multiprocessing (fails with bionumpy + pickle error?)
+        # with Pool(processes=self.number_of_processes) as pool:
+        #     partial_func = partial(self._make_hamming_distance_hist_for_motif,  np_sequences=np_sequences)
+        #     raw_counts = pd.DataFrame(pool.map(partial_func, self.dataset.encoded_data.examples.T))
+
         raw_counts["motif"] = self.dataset.encoded_data.feature_names
 
         return raw_counts
