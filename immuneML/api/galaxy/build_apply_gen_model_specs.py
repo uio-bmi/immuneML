@@ -12,9 +12,9 @@ def parse_command_line_arguments(args):
     parser = argparse.ArgumentParser(description="Tool for building specification for applying trained generative "
                                                  "model in Galaxy")
 
-    parser.add_argument("-m", "--ml_config_path", reqiured=True,
+    parser.add_argument("-m", "--ml_config_path", required=True,
                         help="Path to the exported ml_config zip file with the trained model.")
-    parser.add_argument("-e", "--gen_example_count", reqiured=True,
+    parser.add_argument("-e", "--gen_example_count", required=True,
                         help="Number of examples to generate.")
     parser.add_argument("-s", "--sequence_length_report", choices=["True", "False"], default="False",
                         help="Whether to run the SequenceLengthDistribution report.")
