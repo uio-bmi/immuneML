@@ -33,7 +33,7 @@ class TestFeatureDistribution(TestCase):
             'examples': sparse.csr_matrix(
                 np.random.normal(50, 10, n_subjects * n_features).reshape((n_subjects, n_features))),
             'example_ids': [''.join(random.choices(string.ascii_uppercase, k=4)) for i in range(n_subjects)],
-            'labels': {
+            'labels': {"l1": [i % 2 for i in range(n_subjects)]
             },
             'feature_names': kmers,
             'feature_annotations': pd.DataFrame({
@@ -44,7 +44,8 @@ class TestFeatureDistribution(TestCase):
 
         metadata_filepath = path / "metadata.csv"
 
-        metadata = pd.DataFrame({"patient": np.array([i for i in range(n_subjects)])})
+        metadata = pd.DataFrame({"patient": np.array([i for i in range(n_subjects)]),
+                                 "l1": encoded_data["labels"]["l1"]})
 
         metadata.to_csv(metadata_filepath, index=False)
 
@@ -61,7 +62,7 @@ class TestFeatureDistribution(TestCase):
         report = FeatureDistribution.build_object(**{"dataset": dataset,
                                                      "result_path": path,
                                                      "mode": "sparse",
-                                                     "color_grouping_label": "patient"})
+                                                     "color_grouping_label": "l1"})
 
         self.assertTrue(report.check_prerequisites())
 
@@ -74,7 +75,7 @@ class TestFeatureDistribution(TestCase):
 
         content = pd.read_csv(path / "feature_values.csv")
         self.assertListEqual(list(content.columns),
-                             ["patient", "example_id", "sequence", "feature", "value"])
+                             ["patient", "l1", "example_id", "sequence", "feature", "value"])
 
         # report should succeed to build_from_objects but check_prerequisites should be false when data is not encoded
         report = FeatureDistribution.build_object(**{"dataset": RepertoireDataset(),
@@ -83,3 +84,4 @@ class TestFeatureDistribution(TestCase):
         self.assertFalse(report.check_prerequisites())
 
         shutil.rmtree(path)
+#

@@ -13,18 +13,22 @@ from immuneML.util.ParameterValidator import ParameterValidator
 
 class FeatureComparison(FeatureReport):
     """
-    Compares the feature values in a given encoded data matrix across two values for a metadata label.
-    These labels are specified in the metadata file for repertoire datasets, or as metadata columns for sequence and receptor datasets.
-    Can be used in combination with any encoding and dataset type. This report produces a scatterplot, where each
-    point represents one feature, and the values on the x and y axes are the average feature values across two
-    subsets of the data. For example, when :ref:`KmerFrequency` encoder is used, and the comparison_label is used to
-    represent a disease (true/false), then the features are the k-mers (AAA, AAC, etc..) and their x and y position in the
-    scatterplot is determined by their frequency in the subset of the data where disease=true and disease=false.
+    Encoding a dataset results in a numeric matrix, where the rows are examples (e.g., sequences, receptors, repertoires)
+    and the columns are features. For example, when :ref:`KmerFrequency` encoder is used, the features are the
+    k-mers (AAA, AAC, etc..) and the feature values are the frequencies per k-mer.
 
-    Optional metadata labels can be specified to divide the scatterplot into groups based on color, row facets or column facets.
+    This report separates the examples based on a binary metadata label, and plots the mean feature value
+    of each feature in one example group against the other example group (for example: plot the feature
+    value of 'sick' repertoires on the x axis, and 'healthy' repertoires on the y axis to spot consistent differences).
+    The plot can be separated into different colors or facets using other metadata labels
+    (for example: plot the average feature values of 'cohort1', 'cohort2' and 'cohort3' in different colors to spot biases).
 
-    Alternatively, when the feature values are of interest without comparing them between labelled subgroups of the data, please
-    use :ref:`FeatureValueBarplot` or :ref:`FeatureDistribution` instead.
+    Alternatively, when plotting features without comparing them across a binary label, see:
+    :py:obj:`~immuneML.reports.encoding_reports.FeatureValueBarplot.FeatureValueBarplot` report to plot
+    a simple bar chart per feature (average across examples).
+    Or :py:obj:`~immuneML.reports.encoding_reports.FeatureDistribution.FeatureDistribution` report to plot
+    the distribution of each feature across examples, rather than only showing the mean value in a bar plot.
+
 
     Specification arguments:
 
