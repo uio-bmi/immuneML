@@ -34,11 +34,11 @@ class VJGeneDistribution(DataReport):
     case only the average value for the normalised gene usage frequencies are shown (original count values are additionaly exported in tsv files).
 
 
-    Arguments:
+    Specification arguments:
 
-        split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a single label, or alternatively the label of interest can be specified under 'label'. By default, split_by_label is False.
+    - split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a single label, or alternatively the label of interest can be specified under 'label'. By default, split_by_label is False.
 
-        label (str): Optional label for separating the results by color/creating separate plots. Note that this should the name of a valid dataset label.
+    - label (str): Optional label for separating the results by color/creating separate plots. Note that this should the name of a valid dataset label.
 
 
     YAML specification:

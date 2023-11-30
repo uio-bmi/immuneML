@@ -19,7 +19,7 @@ class TestSequenceLengthDistribution(TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-    def test_get_normalized_sequence_lengths(self):
+    def test_sequence_lengths_rep_dataset(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "seq_len_rep")
 
         rep1 = Repertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence(sequence_aa="AAA", sequence_id="1"),
@@ -42,10 +42,27 @@ class TestSequenceLengthDistribution(TestCase):
 
         shutil.rmtree(path)
 
+
     def test_sequence_lengths_seq_dataset(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "seq_len_seq")
 
         dataset = RandomDatasetGenerator.generate_sequence_dataset(50, {4: 0.33, 5: 0.33, 7: 0.33}, {}, path / 'dataset')
+
+        sld = SequenceLengthDistribution(dataset, 1, path, sequence_type=SequenceType.AMINO_ACID)
+
+        result = sld.generate_report()
+        self.assertTrue(os.path.isfile(result.output_figures[0].path))
+
+        shutil.rmtree(path)
+
+    def test_sequence_lengths_receptor_dataset(self):
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "seq_len_rec")
+
+
+        dataset = RandomDatasetGenerator.generate_receptor_dataset(receptor_count=50,
+                                                                   chain_1_length_probabilities={4: 0.33, 5: 0.33, 7: 0.33},
+                                                                   chain_2_length_probabilities={7: 0.33, 8: 0.33, 9: 0.33},
+                                                                   labels={}, path=path / 'dataset')
 
         sld = SequenceLengthDistribution(dataset, 1, path, sequence_type=SequenceType.AMINO_ACID)
 
