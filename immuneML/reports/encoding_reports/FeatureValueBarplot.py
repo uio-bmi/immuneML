@@ -27,6 +27,13 @@ class FeatureValueBarplot(FeatureReport):
     and 'healthy' repertoires on the y axis.).
 
 
+    Example output:
+
+    .. image:: _static/images/reports/feature_value_barplot.png
+       :alt: Feature value barplot report example
+       :width: 750
+
+
     Specification arguments:
 
     - color_grouping_label (str): The label that is used to color each bar, at each level of the grouping_label.
@@ -109,7 +116,7 @@ class FeatureValueBarplot(FeatureReport):
             plotting_data_dict[f'bottom_{self.plot_bottom_n}'] = plotting_data.iloc[np.argpartition(plotting_data['valuemean'].values, self.plot_bottom_n)[:self.plot_bottom_n]]
 
         for key, data in plotting_data_dict.items():
-            figure = px.bar(data, x=self.x, y="valuemean", color=self.color, barmode="relative",
+            figure = px.bar(data, x=self.x, y="valuemean", color=self.color, barmode="group",
                             facet_row=self.facet_row, facet_col=self.facet_column, error_y=error_y,
                             labels={
                                 "valuemean": self.y_title,

@@ -4,7 +4,6 @@ import plotly.express as px
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.reports.ReportOutput import ReportOutput
-from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.reports.encoding_reports.FeatureReport import FeatureReport
 
 
@@ -24,6 +23,13 @@ class FeatureDistribution(FeatureReport):
     Or :py:obj:`~immuneML.reports.encoding_reports.FeatureDistribution.FeatureComparison` report to compare
     features across binary metadata labels (e.g., plot the feature value of 'sick' repertoires on the x axis,
     and 'healthy' repertoires on the y axis).
+
+
+    Example output:
+
+    .. image:: _static/images/reports/feature_distribution.png
+       :alt: Feature distribution report example
+       :width: 750
 
 
     Specification arguments:
@@ -119,10 +125,10 @@ class FeatureDistribution(FeatureReport):
 
         figure.write_html(str(file_path))
 
-        return ReportOutput(path=file_path, name="feature boxplots")
+        return ReportOutput(path=file_path, name="Distributions of feature values (sparse data, zero values filtered)")
 
     def _plot_normal(self, data_long_format) -> ReportOutput:
-        figure = px.box(data_long_format, x=self.x, y="value", color=self.color,
+        figure = px.violin(data_long_format, x=self.x, y="value", color=self.color,
                         facet_row=self.facet_row, facet_col=self.facet_column,
                         labels={
                             "value": self.y_title,

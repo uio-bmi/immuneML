@@ -36,6 +36,13 @@ class Coefficients(MLReport):
     The full set of coefficients will also be exported as a csv file.
 
 
+    Example output:
+
+    .. image:: _static/images/reports/coefficients_logistic_regression.png
+       :alt: Coefficients report
+       :width: 650
+
+
     Specification arguments:
 
     - coefs_to_plot (list): A list specifying which coefficients should be plotted. For options see :py:obj:`~immuneML.reports.ml_reports.CoefficientPlottingSetting.CoefficientPlottingSetting`.

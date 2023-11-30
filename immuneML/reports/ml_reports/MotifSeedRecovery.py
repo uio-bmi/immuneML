@@ -65,7 +65,14 @@ class MotifSeedRecovery(MLReport):
         Feature: xAxAAx
                   ^/^^
 
-    See :ref:`Recovering simulated immune signals` for more details and an example plot.
+    See :ref:`Recovering simulated immune signals` for more details.
+
+
+    Example output:
+
+    .. image:: _static/images/reports/motif_seed_recovery.png
+       :alt: Motif seed recovery report
+       :width: 650
 
 
     Specification arguments:

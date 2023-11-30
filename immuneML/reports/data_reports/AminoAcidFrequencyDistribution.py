@@ -24,6 +24,16 @@ class AminoAcidFrequencyDistribution(DataReport):
     """
     Generates a barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.
 
+    Example output:
+
+    .. image:: _static/images/reports/amino_acid_frequency.png
+       :alt: Coefficients report
+       :width: 800
+
+    .. image:: _static/images/reports/amino_acid_frequency_change.png
+       :alt: Coefficients report
+       :width: 800
+
     Specification arguments:
 
     - imgt_positions (bool): Whether to use IMGT positional numbering or sequence index numbering. When imgt_positions

@@ -30,12 +30,24 @@ class DeepRCMotifDiscovery(MLReport):
     For kernels only: contributions to positional encoding are indicated by < (beginning of sequence),
     ∧ (center of sequence), and > (end of sequence).
 
-    See :ref:`DeepRCMotifDiscovery for repertoire classification` for a usage example.
+    See :ref:`DeepRCMotifDiscovery for repertoire classification` for a more detailed example.
 
     Reference:
 
     Widrich, M., et al. (2020). Modern Hopfield Networks and Attention for Immune Repertoire Classification. Advances in
     Neural Information Processing Systems, 33. https://proceedings.neurips.cc//paper/2020/hash/da4902cb0bc38210839714ebdcf0efc3-Abstract.html
+
+
+    Example output:
+
+    .. image:: _static/images/reports/deeprc_ig_inputs.png
+       :alt: DeepRC IG over inputs
+       :height: 150px
+
+
+    .. image:: _static/images/reports/deeprc_ig_kernels.png
+       :alt: DeepRC IG over kernels
+       :height: 150px
 
 
     Specification arguments:

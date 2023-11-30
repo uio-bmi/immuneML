@@ -30,6 +30,13 @@ class FeatureComparison(FeatureReport):
     the distribution of each feature across examples, rather than only showing the mean value in a bar plot.
 
 
+    Example output:
+
+    .. image:: _static/images/reports/feature_comparison_zoom.png
+       :alt: Feature comparison zoomed in plot with VLEQ highlighted
+       :width: 650
+
+
     Specification arguments:
 
     - comparison_label (str): Mandatory label. This label is used to split the encoded data matrix and define the x and y axes of the plot.

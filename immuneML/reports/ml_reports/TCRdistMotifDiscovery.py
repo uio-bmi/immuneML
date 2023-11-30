@@ -33,6 +33,18 @@ class TCRdistMotifDiscovery(MLReport):
     `doi:10.1101/2020.12.24.424260 <https://www.biorxiv.org/content/10.1101/2020.12.24.424260v1>`_
 
 
+    Example output:
+
+    .. image:: _static/images/reports/tcrdist_motif_a.svg
+       :alt: TCRdist alpha chain logo plot
+       :width: 300px
+
+
+    .. image:: _static/images/reports/tcrdist_motif_b.svg
+       :alt: TCRdist beta chain logo plot
+       :width: 300px
+
+
     Specification arguments:
 
     - positive_class_name (str): the class value (e.g., epitope) used to select only the receptors that are specific to the given epitope so that
