@@ -25,7 +25,7 @@ setup(
                       "fishersapi", "pystache", "torch>=1.5.1", "dill>=0.3", "plotly>=4", "logomaker>=0.8",
                       "matplotlib-venn>=0.11", "scipy", "bionumpy>=0.2.31", "umap-learn"],
     extras_require={
-        "TCRdist": ["parasail==1.2", "tcrdist3>=0.1.6"],
+        "TCRdist": ["tcrdist3>=0.1.6"],
         "gen_models": ['olga', 'sonnia', 'torch'],
         "ligo": ['olga', 'stitchr', 'IMGTgeneDL'],
         "KerasSequenceCNN": ["keras==2.11.0", "tensorflow==2.11.0"]
