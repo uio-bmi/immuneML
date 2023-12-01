@@ -10,6 +10,8 @@ from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisSta
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
 from immuneML.workflows.steps.DataEncoder import DataEncoder
 from immuneML.workflows.steps.DataEncoderParams import DataEncoderParams
+from immuneML.workflows.steps.DataWeighter import DataWeighter
+from immuneML.workflows.steps.DataWeighterParams import DataWeighterParams
 
 
 class ExploratoryAnalysisInstruction(Instruction):
@@ -28,6 +30,8 @@ class ExploratoryAnalysisInstruction(Instruction):
       - dataset: dataset on which to perform the exploratory analysis
 
       - preprocessing_sequence: which preprocessings to use on the dataset, this item is optional and does not have to be specified.
+
+      - example_weighting: which example weighting strategy to use before encoding the data, this item is optional and does not have to be specified.
 
       - encoding: how to encode the dataset before running the report, this item is optional and does not have to be specified.
 
@@ -91,6 +95,7 @@ class ExploratoryAnalysisInstruction(Instruction):
 
     def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> ReportResult:
         unit.dataset = self.preprocess_dataset(unit, result_path / "preprocessed_dataset")
+        unit.dataset = self.weight_examples(unit, result_path / "weighted_dataset")
         unit.dataset = self.encode(unit, result_path / "encoded_dataset")
 
         if unit.dim_reduction is not None:
@@ -116,12 +121,23 @@ class ExploratoryAnalysisInstruction(Instruction):
             dataset = unit.dataset
         return dataset
 
+    def weight_examples(self, unit: ExploratoryAnalysisUnit, result_path: Path):
+        if unit.example_weighting is not None:
+            weighted_dataset = DataWeighter.run(DataWeighterParams(dataset=unit.dataset, weighting_strategy=unit.example_weighting,
+                                                                   weighting_params=ExampleWeightingParams(result_path=result_path,
+                                                                                                           pool_size=unit.number_of_processes,
+                                                                                                           learn_model=True),
+                                                                   ))
+        else:
+            weighted_dataset = unit.dataset
+
+        return weighted_dataset
+
     def encode(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> Dataset:
         if unit.encoder is not None:
             encoded_dataset = DataEncoder.run(DataEncoderParams(dataset=unit.dataset, encoder=unit.encoder,
                                                                 encoder_params=EncoderParams(result_path=result_path,
                                                                                              label_config=unit.label_config,
-                                                                                             filename="encoded_dataset.pkl",
                                                                                              pool_size=unit.number_of_processes,
                                                                                              learn_model=True,
                                                                                              encode_labels=unit.label_config is not None),

@@ -5,6 +5,7 @@ from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.definition_parsers.DefinitionParserOutput import DefinitionParserOutput
 from immuneML.dsl.definition_parsers.EncodingParser import EncodingParser
+from immuneML.dsl.definition_parsers.ExampleWeightingParser import ExampleWeightingParser
 from immuneML.dsl.definition_parsers.MLParser import MLParser
 from immuneML.dsl.definition_parsers.MotifParser import MotifParser
 from immuneML.dsl.definition_parsers.PreprocessingParser import PreprocessingParser
@@ -44,8 +45,8 @@ class DefinitionParser:
 
         specs_defs = {}
 
-        for parser in [MotifParser, SignalParser, SimulationParser, PreprocessingParser, EncodingParser, MLParser,
-                       ReportParser, ImportParser]:
+        for parser in [MotifParser, SignalParser, SimulationParser, PreprocessingParser, EncodingParser, ExampleWeightingParser,
+                       MLParser, ReportParser, ImportParser]:
             symbol_table, new_specs = DefinitionParser._call_if_exists(parser.keyword, parser.parse, specs,
                                                                        symbol_table, result_path)
             specs_defs[parser.keyword] = new_specs

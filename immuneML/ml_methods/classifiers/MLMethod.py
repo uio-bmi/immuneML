@@ -30,7 +30,7 @@ class MLMethod(metaclass=abc.ABCMeta):
         self.label = None
 
     @abc.abstractmethod
-    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, label: Label, optimization_metric: str, cores_for_training: int = 2):
         """
         The fit function fits the parameters of the machine learning model.
 
@@ -45,8 +45,13 @@ class MLMethod(metaclass=abc.ABCMeta):
             label (Label): the label for which the classifier will be created. immuneML also supports multi-label classification, but it is
                 handled outside MLMethod class by creating an MLMethod instance for each label. This means that each MLMethod should handle only one label.
 
+            optimization_metric (str): the name of the optimization metric to be used to select the best model during cross-validation; when used with
+                TrainMLModel instruction which is almost exclusively the case when the immuneML is run from the specification, this maps to the
+                optimization metric in the instruction.
+
             cores_for_training (int): if parallelization is available in the MLMethod (and the availability depends on the specific classifier), this
                 is the number of processes that will be creating when fitting the model to speed up the computation.
+
 
         Returns:
 
@@ -80,8 +85,7 @@ class MLMethod(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None, cores_for_training: int = -1,
-                                optimization_metric=None):
+    def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label, optimization_metric: str, number_of_splits: int = 5, cores_for_training: int = -1):
         """
         The fit_by_cross_validation function should implement finding the best model hyperparameters through cross-validation. In immuneML,
         preprocessing, encoding and ML hyperparameters can be optimized by using nested cross-validation (see TrainMLModelInstruction for more
@@ -98,18 +102,19 @@ class MLMethod(metaclass=abc.ABCMeta):
                 which make multidimensional outputs that do not follow this pattern, but they are tailored to specific ML methods which require such input
                 (for instance, one hot encoding and ReceptorCNN method).
 
-            number_of_splits (int): number of splits for the cross-validation to be performed for selection the best hyperparameters of the ML model;
-                note that if this is used in combination with nested cross-validation in TrainMLModel instruction, it can result in very few examples in
-                each split depending on the orginal dataset size and the nested cross-validation setup.
-
             label (Label): the label for which the classifier will be created. immuneML also supports multi-label classification, but it is
                 handled outside MLMethod class by creating an MLMethod instance for each label. This means that each MLMethod should handle only one label.
-
-            cores_for_training (int): number of processes to be used during the cross-validation for model selection
 
             optimization_metric (str): the name of the optimization metric to be used to select the best model during cross-validation; when used with
                 TrainMLModel instruction which is almost exclusively the case when the immuneML is run from the specification, this maps to the
                 optimization metric in the instruction.
+
+            number_of_splits (int): number of splits for the cross-validation to be performed for selection the best hyperparameters of the ML model;
+                note that if this is used in combination with nested cross-validation in TrainMLModel instruction, it can result in very few examples in
+                each split depending on the orginal dataset size and the nested cross-validation setup.
+
+            cores_for_training (int): number of processes to be used during the cross-validation for model selection
+
 
         Returns:
 

@@ -4,6 +4,7 @@ from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
+from immuneML.util.EncoderHelper import EncoderHelper
 
 
 class OneHotReceptorEncoder(OneHotEncoder):
@@ -36,7 +37,6 @@ class OneHotReceptorEncoder(OneHotEncoder):
 
         max_seq_len = max(max([len(seq) for seq in first_chain_seqs]), max([len(seq) for seq in second_chain_seqs]))
 
-        example_ids = dataset.get_example_ids()
         labels = self._get_labels(receptor_objs, params) if params.encode_labels else None
 
         examples_first_chain = self._encode_sequence_list(first_chain_seqs, pad_n_sequences=len(receptor_objs),
@@ -54,9 +54,10 @@ class OneHotReceptorEncoder(OneHotEncoder):
 
         encoded_data = EncodedData(examples=examples,
                                    labels=labels,
-                                   example_ids=example_ids,
+                                   example_ids=dataset.get_example_ids(),
                                    feature_names=feature_names,
                                    encoding=OneHotEncoder.__name__,
+                                   example_weights=dataset.get_example_weights(),
                                    info={"chain_names": receptor_objs[0].get_chains() if all(receptor_obj.get_chains() == receptor_objs[0].get_chains() for receptor_obj in receptor_objs) else None})
 
         return encoded_data

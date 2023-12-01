@@ -57,7 +57,7 @@ class TestCompAIRRDistanceEncoder(TestCase):
         encoded = enc.encode(dataset, EncoderParams(result_path=path,
                                                     label_config=LabelConfiguration(
                                                         [Label("l1", [0, 1]), Label("l2", [2, 3])]),
-                                                    pool_size=4, filename="dataset.pkl"))
+                                                    pool_size=4))
 
         self.assertEqual(8, encoded.encoded_data.examples.shape[0])
         self.assertEqual(8, encoded.encoded_data.examples.shape[1])

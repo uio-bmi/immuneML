@@ -53,7 +53,6 @@ class TestDataEncoder(TestCase):
                 pool_size=2,
                 label_config=lc,
                 result_path=path,
-                filename="dataset.csv"
             )
         ))
 

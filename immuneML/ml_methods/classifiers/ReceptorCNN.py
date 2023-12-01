@@ -1,7 +1,7 @@
 import copy
 import logging
 import math
-import random
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -122,7 +122,7 @@ class ReceptorCNN(MLMethod):
         self.feature_names = None
 
     def predict(self, encoded_data: EncodedData, label: Label):
-        predictions_proba = self.predict_proba(encoded_data, label)[label.name][self.label.positive_class]
+        predictions_proba = self.predict_proba(encoded_data, label)[label.name][label.positive_class]
         return {label.name: [self.class_mapping[val] for val in (predictions_proba > 0.5).tolist()]}
 
     def set_background_probabilities(self):
@@ -147,7 +147,9 @@ class ReceptorCNN(MLMethod):
         return {self.label.name: {self.label.positive_class: np.array(predictions),
                                   self.label.get_binary_negative_class(): 1 - np.array(predictions)}}
 
-    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, label: Label, optimization_metric=None, cores_for_training: int = 2):
+        if encoded_data.example_weights is not None:
+            warnings.warn(f"{self.__class__.__name__}: cannot fit this classifier with example weights, fitting without example weights instead... Example weights will still be applied when computing evaluation metrics after fitting.")
 
         self.feature_names = encoded_data.feature_names
 
@@ -203,8 +205,8 @@ class ReceptorCNN(MLMethod):
 
         logging.info("ReceptorCNN: finished training.")
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None, cores_for_training: int = -1,
-                                optimization_metric=None):
+    def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric: str = None,
+                                number_of_splits: int = 5, cores_for_training: int = -1):
         logging.warning(f"{ReceptorCNN.__name__}: cross_validation is not implemented for this method. Using standard fitting instead...")
         self.fit(encoded_data=encoded_data, label=label)
 
@@ -216,12 +218,7 @@ class ReceptorCNN(MLMethod):
                   encoded_data.example_ids[start_index: end_index]
 
     def _prepare_and_split_data(self, encoded_data: EncodedData):
-        indices = list(range(len(encoded_data.example_ids)))
-        random.shuffle(indices)
-
-        limit = int(len(encoded_data.example_ids) * self.training_percentage)
-        train_indices = indices[:limit]
-        val_indices = indices[limit:]
+        train_indices, val_indices = Util.get_train_val_indices(len(encoded_data.example_ids), self.training_percentage)
 
         train_data = self._make_encoded_data(encoded_data, train_indices)
         val_data = self._make_encoded_data(encoded_data, val_indices)

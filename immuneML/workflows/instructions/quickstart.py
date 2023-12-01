@@ -56,7 +56,7 @@ class Quickstart:
                     },
                     "hprep": "MLSettingsPerformance",
                     "coef": "Coefficients"
-                }
+                },
             },
             "instructions": {
                 "machine_learning_instruction": {

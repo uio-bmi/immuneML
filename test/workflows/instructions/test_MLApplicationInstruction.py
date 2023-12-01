@@ -40,7 +40,7 @@ class TestMLApplicationInstruction(TestCase):
         label = Label("l1", [1, 2])
         label_config = LabelConfiguration([label])
 
-        enc_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=label_config, filename="tmp_enc_dataset.pickle", pool_size=4))
+        enc_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=label_config, pool_size=4))
         ml_method.fit(enc_dataset.encoded_data, label)
 
         hp_setting = HPSetting(encoder, {"normalization_type": "relative_frequency", "reads": "unique", "sequence_encoding": "continuous_kmer",

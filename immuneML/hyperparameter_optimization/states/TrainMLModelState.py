@@ -4,6 +4,7 @@ from typing import List, Set, Dict
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeightingStrategy
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
@@ -29,6 +30,8 @@ class TrainMLModelState:
     reports: dict = field(default_factory=dict)
     name: str = None
     refit_optimal_model: bool = None
+    export_all_ml_settings: bool = None
+    example_weighting: ExampleWeightingStrategy = None
     optimal_hp_items: Dict[str, HPItem] = field(default_factory=dict)
     optimal_hp_item_paths: Dict[str, str] = field(default_factory=dict)
     assessment_states: List[HPAssessmentState] = field(default_factory=list)

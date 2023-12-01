@@ -34,7 +34,10 @@ class MLMethodTrainer(Step):
                                            cores_for_training=input_params.cores_for_training,
                                            optimization_metric=input_params.optimization_metric)
         else:
-            method.fit(encoded_data=input_params.dataset.encoded_data, label=input_params.label, cores_for_training=input_params.cores_for_training)
+            method.fit(encoded_data=input_params.dataset.encoded_data,
+                       label=input_params.label,
+                       cores_for_training=input_params.cores_for_training,
+                       optimization_metric=input_params.optimization_metric)
 
         return method
 

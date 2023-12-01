@@ -249,7 +249,10 @@ class DeepRC(MLMethod):
                 ("evaluate_at", self.evaluate_at),
                 ("pytorch_device_name", self.pytorch_device_name))
 
-    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, label: Label, optimization_metric=None, cores_for_training: int = 2):
+        if encoded_data.example_weights is not None:
+            warnings.warn(f"{self.__class__.__name__}: cannot fit this classifier with example weights, fitting without example weights instead... Example weights will still be applied when computing evaluation metrics after fitting.")
+
         self.feature_names = encoded_data.feature_names
         self.label = label
         self.model = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, "fit", label.name),
@@ -349,9 +352,8 @@ class DeepRC(MLMethod):
                                show_progress=False, device=self.pytorch_device, evaluate_at=self.evaluate_at,
                                task_definition=task_definition, early_stopping_target_id=label.name)
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None,
-                                cores_for_training: int = -1,
-                                optimization_metric=None):
+    def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric: str = None,
+                                number_of_splits: int = 5,  cores_for_training: int = -1):
         warnings.warn("DeepRC: cross-validation on this classifier is not defined: fitting one model instead...")
         self.fit(encoded_data, label)
 

@@ -74,7 +74,6 @@ class TestMatchedReceptorsEncoder(TestCase):
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_config=label_config,
-            filename="dataset.csv"
         ))
 
         expected_outcome = [[20, 10, 0, 0], [0, 0, 10, 0], [0, 0, 0, 5]]
@@ -83,7 +82,7 @@ class TestMatchedReceptorsEncoder(TestCase):
             self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
         self.assertListEqual(["1_IGL", "1_IGH", "2_IGH", "3_IGL"], encoded.encoded_data.feature_names)
-        self.assertListEqual(["subject_1", "subject_2", "subject_3"], encoded.encoded_data.example_ids)
+        self.assertListEqual(dataset.get_example_ids(), encoded.encoded_data.example_ids)
 
         shutil.rmtree(path)
 
@@ -101,7 +100,6 @@ class TestMatchedReceptorsEncoder(TestCase):
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_config=label_config,
-            filename="dataset.csv"
         ))
 
         expected_outcome = [[2, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
@@ -110,7 +108,7 @@ class TestMatchedReceptorsEncoder(TestCase):
             self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
         self.assertListEqual(["1_IGL", "1_IGH", "2_IGH", "3_IGL"], encoded.encoded_data.feature_names)
-        self.assertListEqual(["subject_1", "subject_2", "subject_3"], encoded.encoded_data.example_ids)
+        self.assertListEqual(dataset.get_example_ids(), encoded.encoded_data.example_ids)
 
         shutil.rmtree(path)
 
@@ -128,7 +126,6 @@ class TestMatchedReceptorsEncoder(TestCase):
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_config=label_config,
-            filename="dataset.csv"
         ))
 
         expected_outcome = [[10, 10, 0, 0, 0], [0, 0, 10, 0, 0], [0, 0, 0, 0, 5]]
@@ -137,6 +134,6 @@ class TestMatchedReceptorsEncoder(TestCase):
             self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
         self.assertListEqual(["1_IGL", "1_IGH", "2_IGH", "3_IGL", "4_IGL"], encoded.encoded_data.feature_names)
-        self.assertListEqual(["subject_1", "subject_2", "subject_3"], encoded.encoded_data.example_ids)
+        self.assertListEqual(dataset.get_example_ids(), encoded.encoded_data.example_ids)
 
         shutil.rmtree(path)

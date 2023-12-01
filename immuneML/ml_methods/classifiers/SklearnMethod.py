@@ -1,6 +1,7 @@
 import abc
 import os
 import warnings
+import inspect
 from pathlib import Path
 
 import dill
@@ -87,7 +88,7 @@ class SklearnMethod(MLMethod):
         self.class_mapping = None
         self.label = None
 
-    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, label: Label, optimization_metric=None, cores_for_training: int = 2):
 
         self.label = label
         self.class_mapping = Util.make_class_mapping(encoded_data.labels[self.label.name], self.label.positive_class)
@@ -95,35 +96,60 @@ class SklearnMethod(MLMethod):
 
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
-        self.model = self._fit(encoded_data.examples, mapped_y, cores_for_training)
+        self.model = self._fit(encoded_data.examples, mapped_y, encoded_data.example_weights, cores_for_training)
 
     def predict(self, encoded_data: EncodedData, label: Label):
         self.check_is_fitted(label.name)
-        predictions = self.model.predict(encoded_data.examples)
+
+        predictions = self.apply_with_weights(self.model.predict,
+                                              encoded_data.example_weights,
+                                              X=encoded_data.examples)
+
         return {label.name: Util.map_to_old_class_values(np.array(predictions), self.class_mapping)}
 
     def predict_proba(self, encoded_data: EncodedData, label: Label):
         if self.can_predict_proba():
-            probabilities = self.model.predict_proba(encoded_data.examples)
+            probabilities = self.apply_with_weights(self.model.predict_proba, encoded_data.example_weights, X=encoded_data.examples)
             class_names = Util.map_to_old_class_values(self.model.classes_, self.class_mapping)
 
             return {label.name: {class_name: probabilities[:, i] for i, class_name in enumerate(class_names)}}
         else:
+            warnings.warn(f"{self.__class__.__name__}: cannot predict probabilities.")
             return None
 
-    def _fit(self, X, y, cores_for_training: int = 1):
+    def _fit(self, X, y, w=None, cores_for_training: int = 1):
+        self.model = self._get_ml_model(cores_for_training, X)
+
+        if w is not None and not self.supports_example_weight(self.model.fit) and not self.supports_example_weight(self.model.predict):
+            warnings.warn(f"{self.__class__.__name__}: cannot fit this classifier with example weights, fitting without example weights instead... Example weights will still be applied when computing evaluation metrics after fitting.")
+
         if not self.show_warnings:
             warnings.simplefilter("ignore")
             os.environ["PYTHONWARNINGS"] = "ignore"
 
         self.model = self._get_ml_model(cores_for_training, X)
-        self.model.fit(X, y)
+        self.apply_with_weights(self.model.fit, w, X=X, y=y)
 
         if not self.show_warnings:
             del os.environ["PYTHONWARNINGS"]
             warnings.simplefilter("always")
 
         return self.model
+
+    def apply_with_weights(self, method, weights, **kwargs):
+        '''
+        Can be used to run self.model.fit, self.model.predict or self.model.predict_proba with sample weights if supported
+
+        :param method: self.model.fit, self.model.predict or self.model.predict_proba
+        :return: the result of the supplied method
+        '''
+        if weights is not None and self.supports_example_weight(method):
+            return method(**kwargs, sample_weight=weights)
+        else:
+            return method(**kwargs)
+
+    def supports_example_weight(self, method):
+        return "sample_weight" in inspect.signature(method).parameters
 
     def can_predict_proba(self) -> bool:
         return False
@@ -132,19 +158,20 @@ class SklearnMethod(MLMethod):
         if self.label.name == label_name or label_name is None:
             return check_is_fitted(self.model, ["estimators_", "coef_", "estimator", "_fit_X", "dual_coef_"], all_or_any=any)
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None, cores_for_training: int = -1,
-                                optimization_metric='balanced_accuracy'):
+    def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric="balanced_accuracy",
+                                number_of_splits: int = 5, cores_for_training: int = -1):
 
         self.class_mapping = Util.make_class_mapping(encoded_data.labels[label.name], label.positive_class)
         self.feature_names = encoded_data.feature_names
         self.label = label
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
-        self.model = self._fit_by_cross_validation(encoded_data.examples, mapped_y, number_of_splits, label, cores_for_training,
-                                                   optimization_metric)
+        self.model = self._fit_by_cross_validation(X=encoded_data.examples, y=mapped_y, w=encoded_data.example_weights,
+                                                   label=label, optimization_metric=optimization_metric,
+                                                   number_of_splits=number_of_splits, cores_for_training=cores_for_training)
 
-    def _fit_by_cross_validation(self, X, y, number_of_splits: int = 5, label: Label = None, cores_for_training: int = 1,
-                                 optimization_metric: str = "balanced_accuracy"):
+    def _fit_by_cross_validation(self, X, y, w, label: Label = None, optimization_metric: str = "balanced_accuracy",
+                                 number_of_splits: int = 5, cores_for_training: int = 1):
 
         model = self._get_ml_model()
         scoring = ClassificationMetric.get_sklearn_score_name(ClassificationMetric.get_metric(optimization_metric.upper()))
@@ -160,7 +187,8 @@ class SklearnMethod(MLMethod):
 
         self.model = RandomizedSearchCV(model, param_distributions=self._parameter_grid, cv=number_of_splits, n_jobs=cores_for_training,
                                         scoring=scoring, refit=True)
-        self.model.fit(X, y)
+
+        self.apply_with_weights(self.model.fit, w, X=X, y=y)
 
         if not self.show_warnings:
             del os.environ["PYTHONWARNINGS"]
@@ -255,9 +283,10 @@ class SklearnMethod(MLMethod):
         from immuneML.encodings.reference_encoding.MatchedSequencesEncoder import MatchedSequencesEncoder
         from immuneML.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedReceptorsEncoder
         from immuneML.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
+        from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 
         return [KmerFrequencyEncoder, OneHotEncoder, Word2VecEncoder, EvennessProfileEncoder,
-                MatchedSequencesEncoder, MatchedReceptorsEncoder, MatchedRegexEncoder]
+                MatchedSequencesEncoder, MatchedReceptorsEncoder, MatchedRegexEncoder, MotifEncoder]
 
     @staticmethod
     def get_usage_documentation(model_name):

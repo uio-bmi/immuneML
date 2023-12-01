@@ -94,7 +94,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         return SequenceAbundanceEncoder(**params)
 
     def encode(self, dataset, params: EncoderParams):
-        AbundanceEncoderHelper.check_labels(params.label_config, SequenceAbundanceEncoder.__name__)
+        EncoderHelper.check_positive_class_labels(params.label_config, SequenceAbundanceEncoder.__name__)
 
         self.comparison_data = self._build_comparison_data(dataset, params)
         return self._encode_data(dataset, params)
@@ -118,6 +118,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
         encoded_data = EncodedData(examples, dataset.get_metadata([label_name]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [SequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE, SequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
+                                   example_weights=dataset.get_example_weights(),
                                    encoding=SequenceAbundanceEncoder.__name__, info={'relevant_sequence_path': self.relevant_sequence_path,
                                                                                      "contingency_table_path": self.contingency_table_path,
                                                                                      "p_values_path": self.p_values_path})

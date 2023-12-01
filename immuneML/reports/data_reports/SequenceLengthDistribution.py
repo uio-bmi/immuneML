@@ -38,7 +38,6 @@ class SequenceLengthDistribution(DataReport):
 
     @classmethod
     def build_object(cls, **kwargs):
-
         ParameterValidator.assert_sequence_type(kwargs)
 
         return SequenceLengthDistribution(**{**kwargs, 'sequence_type': SequenceType[kwargs['sequence_type'].upper()]})

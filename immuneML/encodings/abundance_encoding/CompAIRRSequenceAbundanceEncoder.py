@@ -105,11 +105,17 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         self.context = None
         self.compairr_sequence_presence = None
 
-        self.compairr_params = CompAIRRParams(compairr_path=Path(compairr_path), keep_compairr_input=True,
-                                              differences=0, indels=False,
-                                              ignore_counts=True, ignore_genes=ignore_genes,
-                                              threads=threads, output_filename=None,
-                                              log_filename=None, output_pairs=False, pairs_filename=None)
+        self.compairr_params = CompAIRRParams(compairr_path=Path(compairr_path),
+                                              keep_compairr_input=True,
+                                              differences=0,
+                                              indels=False,
+                                              ignore_counts=True,
+                                              ignore_genes=ignore_genes,
+                                              threads=threads,
+                                              output_filename=None,
+                                              log_filename=None,
+                                              output_pairs=False,
+                                              pairs_filename=None)
 
     @staticmethod
     def _prepare_parameters(p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, keep_temporary_files: bool,
@@ -141,7 +147,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         return CompAIRRSequenceAbundanceEncoder(**prepared_params)
 
     def encode(self, dataset, params: EncoderParams):
-        AbundanceEncoderHelper.check_labels(params.label_config, CompAIRRSequenceAbundanceEncoder.__name__)
+        EncoderHelper.check_positive_class_labels(params.label_config, CompAIRRSequenceAbundanceEncoder.__name__)
         self.compairr_params.is_cdr3 = dataset.repertoires[0].get_region_type() == RegionType.IMGT_CDR3
 
         self.compairr_sequence_presence = self._prepare_sequence_presence_data(dataset, params)
@@ -278,6 +284,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         encoded_data = EncodedData(examples, dataset.get_metadata([label.name]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [CompAIRRSequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE,
                                     CompAIRRSequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
+                                   example_weights=dataset.get_example_weights(),
                                    encoding=CompAIRRSequenceAbundanceEncoder.__name__,
                                    info={"relevant_sequence_path": self.relevant_sequence_path,
                                          "contingency_table_path": self.contingency_table_path,

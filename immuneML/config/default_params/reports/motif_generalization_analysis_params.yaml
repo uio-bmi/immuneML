@@ -1,0 +1,15 @@
+training_set_identifier_path: null
+training_percentage: 0.7
+split_by_motif_size: true
+max_positions: 4
+min_positions: 1
+min_precision: 0.9
+min_recall: 0
+min_true_positives: 1
+test_precision_threshold: 0.8
+highlight_motifs_name: Highlighted motif
+min_points_in_window: 50
+smoothing_constant1: 5
+smoothing_constant2: 10
+training_set_name: training set
+test_set_name: test set

@@ -27,7 +27,8 @@ setup(
     extras_require={
         "TCRdist": ["tcrdist3>=0.1.6"],
         "gen_models": ['olga', 'sonnia', 'torch'],
-        "ligo": ['olga', 'stitchr', 'IMGTgeneDL']
+        "ligo": ['olga', 'stitchr', 'IMGTgeneDL'],
+        "KerasSequenceCNN": ["keras==2.11.0", "tensorflow==2.11.0"]
     },
     classifiers=[
         "Programming Language :: Python :: 3",

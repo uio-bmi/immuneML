@@ -50,14 +50,6 @@ Note: when creating a python virtual environment, it will automatically use the 
 
   pip install immuneML
 
-Alternatively, if you want to use the :ref:`TCRdistClassifier` ML method and corresponding :ref:`TCRdistMotifDiscovery` report, include the optional extra :code:`TCRdist`:
-
-.. code-block:: console
-
-  pip install immuneML[TCRdist]
-
-See also this question under 'Troubleshooting': :ref:`I get an error when installing PyTorch (could not find a version that satisfies the requirement torch)`
-
 
 
 Install immuneML with conda
@@ -95,6 +87,25 @@ Install immuneML with conda
 Installing optional dependencies
 ----------------------------------
 
+TCRDist
+*******
+
+If you want to use the :ref:`TCRdistClassifier` ML method and corresponding :ref:`TCRdistMotifDiscovery` report, you can include the optional extra :code:`TCRdist`:
+
+.. code-block:: console
+
+  pip install immuneML[TCRdist]
+
+The TCRdist dependencies can also be installed manually using the :download:`requirements_TCRdist.txt <https://raw.githubusercontent.com/uio-bmi/immuneML/master/requirements_TCRdist.txt>` file:
+
+.. code-block:: console
+
+  pip install -r requirements_TCRdist.txt
+
+
+DeepRC
+******
+
 Optionally, if you want to use the :ref:`DeepRC` ML method and and corresponding :ref:`DeepRCMotifDiscovery` report, you also
 have to install DeepRC dependencies using the :download:`requirements_DeepRC.txt <https://raw.githubusercontent.com/uio-bmi/immuneML/master/requirements_DeepRC.txt>` file.
 Important note: DeepRC uses PyTorch functionalities that depend on GPU. Therefore, DeepRC does not work on a CPU.
@@ -104,8 +115,38 @@ To install the DeepRC dependencies, run:
 
   pip install -r requirements_DeepRC.txt --no-dependencies
 
+See also this question under 'Troubleshooting': :ref:`I get an error when installing PyTorch (could not find a version that satisfies the requirement torch)`
+
+
+Keras-based sequence CNN
+************************
+
+In order to use the :ref:`KerasSequenceCNN`, optional dependencies :code:`keras` and :code:`tensorflow` need to be installed.
+By default, version 2.11.0 of both dependencies are used.
+Other versions may work as well, as long as the used versions of :code:`keras` and :code:`tensorflow` are compatible with eachother.
+
+To install the default versions of these packages, you can include the optional extra :code:`KerasSequenceCNN`:
+
+.. code-block:: console
+
+  pip install immuneML[KerasSequenceCNN]
+
+Or install the dependencies manually using the :download:`requirements_KerasSequenceCNN.txt <https://raw.githubusercontent.com/uio-bmi/immuneML/master/requirements_KerasSequenceCNN.txt>` file:
+
+.. code-block:: console
+
+  pip install -r requirements_KerasSequenceCNN.txt
+
+
+The :ref:`KerasSequenceCNN` uses CPU, it does *not* rely on GPU.
+
+CompAIRR
+********
+
 If you want to use the :ref:`CompAIRRDistance` or :ref:`CompAIRRSequenceAbundance` encoder, you have to install the C++ tool `CompAIRR <https://github.com/uio-bmi/compairr>`_.
-The easiest way to do this is by cloning CompAIRR from GitHub and installing it using :code:`make` in the main folder:
+Furthermore, the :ref:`SimilarToPositiveSequence` encoder can be run both with and without CompAIRR, but the CompAIRR-based version is faster.
+
+The easiest way to install CompAIRR is by cloning CompAIRR from GitHub and installing it using :code:`make` in the main folder:
 
 .. code-block:: console
 

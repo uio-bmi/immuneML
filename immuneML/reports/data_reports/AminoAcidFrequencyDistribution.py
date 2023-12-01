@@ -1,8 +1,10 @@
 import warnings
+from collections import Counter
 from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
+import numpy as np
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
@@ -101,8 +103,7 @@ class AminoAcidFrequencyDistribution(DataReport):
             figures.append(self._safe_plot(frequency_change=frequency_change, plot_callable="_plot_frequency_change"))
 
         return ReportResult(name=self.name,
-                            info="A barplot showing the relative frequency of each amino acid at each position in "
-                                 "the sequences of a dataset.",
+                            info="A barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.",
                             output_figures=[fig for fig in figures if fig is not None],
                             output_tables=[table for table in tables if table is not None])
 
@@ -273,8 +274,7 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     def _compute_frequency_change(self, freq_dist):
         classes = sorted(set(freq_dist["class"]))
-        assert len(
-            classes) == 2, f"{AminoAcidFrequencyDistribution.__name__}: cannot compute frequency change when the number of classes is not 2: {classes}"
+        assert len(classes) == 2, f"{AminoAcidFrequencyDistribution.__name__}: cannot compute frequency change when the number of classes is not 2: {classes}"
 
         class_a_df = freq_dist[freq_dist["class"] == classes[0]]
         class_b_df = freq_dist[freq_dist["class"] == classes[1]]
@@ -333,13 +333,11 @@ class AminoAcidFrequencyDistribution(DataReport):
         if self.split_by_label:
             if self.label_name is None:
                 if len(self.dataset.get_label_names()) != 1:
-                    warnings.warn(
-                        f"{AminoAcidFrequencyDistribution.__name__}: ambiguous label: split_by_label was set to True but no label name was specified, and the number of available labels is {len(self.dataset.get_label_names())}: {self.dataset.get_label_names()}. Skipping this report...")
+                    warnings.warn(f"{AminoAcidFrequencyDistribution.__name__}: ambiguous label: split_by_label was set to True but no label name was specified, and the number of available labels is {len(self.dataset.get_label_names())}: {self.dataset.get_label_names()}. Skipping this report...")
                     return False
             else:
                 if self.label_name not in self.dataset.get_label_names():
-                    warnings.warn(
-                        f"{AminoAcidFrequencyDistribution.__name__}: the specified label name ({self.label_name}) was not available among the dataset labels: {self.dataset.get_label_names()}. Skipping this report...")
+                    warnings.warn(f"{AminoAcidFrequencyDistribution.__name__}: the specified label name ({self.label_name}) was not available among the dataset labels: {self.dataset.get_label_names()}. Skipping this report...")
                     return False
 
         return True

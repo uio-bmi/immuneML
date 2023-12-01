@@ -80,6 +80,7 @@ class SignificantKmerPositions(DataReport):
         self.k_values = k_values
         self.label = label
         self.compairr_path = compairr_path
+        self.label_config = None
 
     def check_prerequisites(self):
         if isinstance(self.dataset, RepertoireDataset):

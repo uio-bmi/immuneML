@@ -109,7 +109,7 @@ class VDJdbImport(DataImport):
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        df["frame_type"] = SequenceFrameType.IN.name
+        df["frame_type"] = SequenceFrameType.IN.value
         ImportHelper.junction_to_cdr3(df, params.region_type)
         df.loc[:, "region_type"] = params.region_type.name
 

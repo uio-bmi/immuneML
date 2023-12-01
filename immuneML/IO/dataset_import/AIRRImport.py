@@ -38,6 +38,8 @@ class AIRRImport(DataImport):
 
     - import_productive (bool): Whether productive sequences (with value 'T' in column productive) should be included in the imported sequences. By default, import_productive is True.
 
+    - import_unknown_productivity (bool): Whether sequences with unknown productivity (missing value in column productive) should be included in the imported sequences. By default, import_unknown_productivity is True.
+
     - import_with_stop_codon (bool): Whether sequences with stop codons (with value 'T' in column stop_codon) should be included in the imported sequences. This only applies if column stop_codon is present. By default, import_with_stop_codon is False.
 
     - import_out_of_frame (bool): Whether out of frame sequences (with value 'F' in column vj_in_frame) should be included in the imported sequences. This only applies if column vj_in_frame is present. By default, import_out_of_frame is False.
@@ -110,15 +112,16 @@ class AIRRImport(DataImport):
             - the allele information is removed from the V and J genes
         """
         if "productive" in df.columns:
-            df["frame_type"] = SequenceFrameType.OUT.name
-            df.loc[df["productive"], "frame_type"] = SequenceFrameType.IN.name
+            df["frame_type"] = SequenceFrameType.UNDEFINED.value
+            df.loc[df["productive"]==True, "frame_type"] = SequenceFrameType.IN.value
+            df.loc[df["productive"]==False, "frame_type"] = SequenceFrameType.OUT.value
         else:
             df["frame_type"] = None
 
         if "vj_in_frame" in df.columns:
-            df.loc[df["vj_in_frame"], "frame_type"] = SequenceFrameType.IN.name
+            df.loc[df["vj_in_frame"]==True, "frame_type"] = SequenceFrameType.IN.value
         if "stop_codon" in df.columns:
-            df.loc[df["stop_codon"], "frame_type"] = SequenceFrameType.STOP.name
+            df.loc[df["stop_codon"]==True, "frame_type"] = SequenceFrameType.STOP.value
 
         if "productive" in df.columns:
             frame_type_list = ImportHelper.prepare_frame_type_list(params)

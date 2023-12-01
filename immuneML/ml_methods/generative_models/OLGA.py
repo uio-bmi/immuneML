@@ -185,7 +185,7 @@ class OLGA(GenerativeModel):
 
             sequences.loc[i] = (
             seq_row[0], seq_row[1], olga_model.v_gene_mapping[seq_row[2]], olga_model.j_gene_mapping[seq_row[3]],
-            RegionType.IMGT_JUNCTION.name, SequenceFrameType.IN.name, p_gen, int(olga_model == self._olga_model),
+            RegionType.IMGT_JUNCTION.name, SequenceFrameType.IN.value, p_gen, int(olga_model == self._olga_model),
             -1, self.chain.value)
 
         sequences.to_csv(path, index=False, sep='\t')

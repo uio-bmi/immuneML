@@ -46,6 +46,7 @@ class ROCCurve(MLReport):
         fpr, tpr, _ = roc_curve(true_y, predicted_y)
         roc_auc = auc(fpr, tpr)
 
+
         trace1 = go.Scatter(x=fpr, y=tpr,
                             mode='lines',
                             line=dict(color='darkorange', width=2),

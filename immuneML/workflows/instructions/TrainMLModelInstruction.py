@@ -1,11 +1,13 @@
 from collections import Counter
 from pathlib import Path
 
+import logging
 import pandas as pd
 
 from immuneML.IO.ml_method.MLExporter import MLExporter
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeightingStrategy
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.hyperparameter_optimization.core.HPAssessment import HPAssessment
@@ -53,6 +55,8 @@ class TrainMLModelInstruction(Instruction):
 
     - optimization_metric (Metric): a metric to use for optimization and assessment in the nested cross-validation.
 
+    - example_weighting: which example weighting strategy to use. Example weighting can be used to up-weight or down-weight the importance of each example in the dataset. These weights will be applied when computing (optimization) metrics, and are used by some encoders and ML methods.
+
     - label_configuration (LabelConfiguration): a list of labels for which to train the classifiers. The goal of the nested CV is to find the
       setting which will have best performance in predicting the given label (e.g., if a subject has experienced an immune event or not).
       Performance and optimal settings will be reported for each label separately. If a label is binary, instead of specifying only its name, one
@@ -66,6 +70,9 @@ class TrainMLModelInstruction(Instruction):
 
     - refit_optimal_model (bool): if the final combination of preprocessing-encoding-ML model should be refitted on the full dataset thus providing
       the final model to be exported from instruction; alternatively, train combination from one of the assessment folds will be used
+
+    - export_all_models (bool): if set to True, all trained models in the assessment split are exported as .zip files.
+      If False, only the optimal model is exported. By default, export_all_models is False.
 
 
     YAML specification:
@@ -117,24 +124,36 @@ class TrainMLModelInstruction(Instruction):
             number_of_processes: 4 # number of parallel processes to create (could speed up the computation)
             optimization_metric: balanced_accuracy # the metric to use for choosing the optimal model and during training
             refit_optimal_model: False # use trained model, do not refit on the full dataset
+            export_all_ml_settings: False # only export the optimal setting
 
     """
 
     def __init__(self, dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list, assessment: SplitConfig, selection: SplitConfig,
                  metrics: set, optimization_metric: ClassificationMetric, label_configuration: LabelConfiguration, path: Path = None, context: dict = None,
-                 number_of_processes: int = 1, reports: dict = None, name: str = None, refit_optimal_model: bool = False):
+                 number_of_processes: int = 1, reports: dict = None, name: str = None, refit_optimal_model: bool = False,
+                 export_all_ml_settings: bool = False, example_weighting: ExampleWeightingStrategy = None):
         self.state = TrainMLModelState(dataset, hp_strategy, hp_settings, assessment, selection, metrics,
                                        optimization_metric, label_configuration, path, context, number_of_processes,
-                                       reports if reports is not None else {}, name, refit_optimal_model)
+                                       reports if reports is not None else {}, name, refit_optimal_model,
+                                       export_all_ml_settings, example_weighting)
 
     def run(self, result_path: Path):
         self.state.path = result_path
         self.state = HPAssessment.run_assessment(self.state)
+        self._export_all_ml_settings()
         self._compute_optimal_hp_item_per_label()
         self.state.report_results = HPUtil.run_hyperparameter_reports(self.state, self.state.path / "reports")
         self.print_performances(self.state)
         self._export_all_performances_to_csv()
         return self.state
+
+    def _export_all_ml_settings(self):
+        if self.state.export_all_ml_settings:
+            for label in self.state.label_configuration.get_label_objects():
+                for assessment_state in self.state.assessment_states:
+                    for name, hp_item in assessment_state.label_states[label.name].assessment_items.items():
+                        zip_path = MLExporter.export_zip(hp_item=hp_item, path=hp_item.ml_settings_export_path, label_name=label.name)
+                        logging.info(f"TrainMLModelInstruction: config for {name} for label {label.name} was exported to: {zip_path}")
 
     def _compute_optimal_hp_item_per_label(self):
         n_labels = self.state.label_configuration.get_label_count()
@@ -150,8 +169,9 @@ class TrainMLModelInstruction(Instruction):
         if self.state.refit_optimal_model:
             print_log(f"TrainMLModel: retraining optimal model for label {label.name} {index_repr}.\n", include_datetime=True)
             self.state.optimal_hp_items[label.name] = MLProcess(self.state.dataset, None, label, self.state.metrics, self.state.optimization_metric,
-                                                           self.state.path / f"optimal_{label.name}", number_of_processes=self.state.number_of_processes,
-                                                           label_config=self.state.label_configuration, hp_setting=optimal_hp_setting).run(0)
+                                                                self.state.path / f"optimal_{label.name}", number_of_processes=self.state.number_of_processes,
+                                                                label_config=self.state.label_configuration, hp_setting=optimal_hp_setting,
+                                                                example_weighting=self.state.example_weighting).run(0)
             print_log(f"TrainMLModel: finished retraining optimal model for label {label.name} {index_repr}.\n", include_datetime=True)
 
         else:

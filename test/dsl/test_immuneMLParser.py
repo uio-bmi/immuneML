@@ -8,6 +8,8 @@ from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
+from immuneML.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
@@ -51,6 +53,12 @@ def test_parse_iml_yaml_file():
             "reports": {
                 "rep1": "SequenceLengthDistribution"
 
+            },
+            "example_weightings": {
+                "w1": {
+                    "PredefinedWeighting":
+                        {"file_path": "test"}
+                }
             }
         },
         "instructions": {}
@@ -65,6 +73,8 @@ def test_parse_iml_yaml_file():
 
     assert all([symbol_table.contains(key) for key in ["simpleLR", "rep1", "a1", "d1"]])
     assert isinstance(symbol_table.get("d1"), RepertoireDataset)
+    assert isinstance(symbol_table.get("rep1"), SequenceLengthDistribution)
+    assert isinstance(symbol_table.get("simpleLR2"), LogisticRegression)
 
     with pytest.raises(YAMLError):
         with specs_filename.open("r") as file:

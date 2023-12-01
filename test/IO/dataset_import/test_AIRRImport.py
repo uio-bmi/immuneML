@@ -49,7 +49,8 @@ IVKNQEJ01AJ44V	1	IVKNQEJ01AJ44V	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCT
         column_mapping = self.get_column_mapping()
         params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path / "metadata.csv",
                   "import_out_of_frame": False, "import_with_stop_codon": False, "import_illegal_characters": False,
-                  "import_productive": True, "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
+                  "import_productive": True, "import_unknown_productivity": True,
+                  "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
                   "column_mapping": column_mapping,
                   "separator": "\t"}
 
@@ -78,7 +79,8 @@ IVKNQEJ01AJ44V	1	IVKNQEJ01AJ44V	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCT
         column_mapping = self.get_column_mapping()
         params = {"is_repertoire": False, "result_path": path, "path": path,
                   "import_out_of_frame": False, "import_with_stop_codon": False,
-                  "import_productive": True, "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
+                  "import_productive": True, "import_unknown_productivity": True,
+                  "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
                   "column_mapping": column_mapping, "import_illegal_characters": False,
                   "separator": "\t", "sequence_file_size": 1}
 
@@ -111,7 +113,9 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         params = {"is_repertoire": False, "result_path": path, "path": path,
                   "paired": True, "import_illegal_characters": False,
                   "import_out_of_frame": False, "import_with_stop_codon": False,
-                  "import_productive": True, "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
+                  "import_productive": True, "import_unknown_productivity": True,
+                  "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True,
+                  "import_empty_aa_sequences": False,
                   "column_mapping": column_mapping, "receptor_chains": "IGH_IGL",
                   "separator": "\t", "sequence_file_size": 1}
 
@@ -133,7 +137,8 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         column_mapping = self.get_column_mapping()
         params = {"is_repertoire": True, "result_path": path / 'imported', "path": path / 'initial', "metadata_file": path / "initial/metadata.csv",
                   "import_out_of_frame": False, "import_with_stop_codon": False,
-                  "import_productive": True, "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
+                  "import_productive": True, "import_unknown_productivity": True,
+                  "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
                   "column_mapping": column_mapping, "import_illegal_characters": False,
                   "separator": "\t"}
 
@@ -175,7 +180,8 @@ rep1.tsv,1""")
 
         params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path / "metadata.csv",
                   "import_out_of_frame": False, "import_with_stop_codon": False,
-                  "import_productive": True, "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
+                  "import_productive": True,"import_unknown_productivity": True,
+                  "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
                   "column_mapping": column_mapping, "import_illegal_characters": False,
                   "separator": "\t"}
 

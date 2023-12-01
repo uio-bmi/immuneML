@@ -122,6 +122,7 @@ class FeatureDistribution(FeatureReport):
         return ReportOutput(path=file_path, name="feature boxplots")
 
     def _plot_normal(self, data_long_format) -> ReportOutput:
+
         figure = px.box(data_long_format, x=self.x, y="value", color=self.color,
                         facet_row=self.facet_row, facet_col=self.facet_column,
                         labels={
