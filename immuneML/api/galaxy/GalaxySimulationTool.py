@@ -6,7 +6,6 @@ import yaml
 
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
 from immuneML.api.galaxy.Util import Util
-from immuneML.workflows.instructions.ligo_simulation.LigoSimInstruction import LigoSimInstruction
 
 
 class GalaxySimulationTool(GalaxyTool):
@@ -86,8 +85,9 @@ class GalaxySimulationTool(GalaxyTool):
         super().__init__(specification_path, result_path, **kwargs)
 
     def _run(self):
-        self.prepare_specs()
+        specs = self.prepare_specs()
 
+        Util.check_instruction_type(specs, 'GalaxySimulationTool', "LigoSim")
         Util.run_tool(self.yaml_path, self.result_path)
 
         dataset_location = list(self.result_path.glob("*/exported_dataset/*/"))[0]
@@ -95,9 +95,10 @@ class GalaxySimulationTool(GalaxyTool):
 
         logging.info(f"{GalaxySimulationTool.__name__}: the simulation is finished.")
 
-    def prepare_specs(self):
+    def prepare_specs(self) -> dict:
         with self.yaml_path.open("r") as file:
             specs = yaml.safe_load(file)
 
         Util.check_paths(specs, "GalaxySimulationTool")
         Util.update_result_paths(specs, self.result_path, self.yaml_path)
+        return specs

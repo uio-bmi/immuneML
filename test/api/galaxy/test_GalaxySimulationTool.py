@@ -1,7 +1,6 @@
 import shutil
 from argparse import Namespace
 
-import pytest
 import yaml
 
 from immuneML.app.ImmuneMLApp import run_immuneML
