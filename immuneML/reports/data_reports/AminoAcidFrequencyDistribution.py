@@ -14,6 +14,7 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
+from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
@@ -70,12 +71,7 @@ class AminoAcidFrequencyDistribution(DataReport):
         ParameterValidator.assert_type_and_value(kwargs["relative_frequency"], bool, location, "relative_frequency")
         ParameterValidator.assert_type_and_value(kwargs["split_by_label"], bool, location, "split_by_label")
 
-        if kwargs["label"] is not None:
-            ParameterValidator.assert_type_and_value(kwargs["label"], str, location, "label")
-
-            if kwargs["split_by_label"] is False:
-                warnings.warn(f"{location}: label is set but split_by_label was False, setting split_by_label to True")
-                kwargs["split_by_label"] = True
+        ReportUtil.update_split_by_label_kwargs(kwargs, location)
 
         return AminoAcidFrequencyDistribution(**kwargs)
 

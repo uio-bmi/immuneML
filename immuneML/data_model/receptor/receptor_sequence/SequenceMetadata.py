@@ -14,7 +14,7 @@ class SequenceMetadata:
         - v call
         - j call
         - chain
-        - count
+        - duplicate_count
         - region_type (e.g. IMGT_CDR3, IMGT_CDR1, FULL_SEQUENCE)
         - frame_type (e.g. IN, OUT, STOP)
         - sample

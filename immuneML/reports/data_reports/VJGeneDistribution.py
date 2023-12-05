@@ -4,7 +4,6 @@ from collections import Counter
 
 import pandas as pd
 import plotly.express as px
-import numpy as np
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
@@ -12,8 +11,8 @@ from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
+from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.reports.data_reports.DataReport import DataReport
-from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -56,12 +55,7 @@ class VJGeneDistribution(DataReport):
     def build_object(cls, **kwargs):
         location = VJGeneDistribution.__name__
 
-        if kwargs["label"] is not None:
-            ParameterValidator.assert_type_and_value(kwargs["label"], str, location, "label")
-
-            if kwargs["split_by_label"] is False:
-                warnings.warn(f"{location}: label is set but split_by_label was False, setting split_by_label to True")
-                kwargs["split_by_label"] = True
+        ReportUtil.update_split_by_label_kwargs(kwargs, location)
 
         return VJGeneDistribution(**kwargs)
 

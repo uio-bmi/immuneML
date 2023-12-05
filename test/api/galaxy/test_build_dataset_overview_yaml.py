@@ -45,7 +45,8 @@ class MyTestCase(unittest.TestCase):
 
         yamlbuilder_main(["--format", "VDJdb", "--output_path", str(path), "--file_name", "sequence.yaml",
                           "--paired", "False", "--metadata_columns", "a,b", "--is_repertoire", "False",
-                          "--label_name", "a", "--sequence_length_report", "True", "--vj_gene_report", "True"])
+                          "--label_name", "a", "--sequence_length_report", "True",
+                          "--sequence_count_report", "True", "--vj_gene_report", "True"])
 
         with open(path / "sequence.yaml", "r") as file:
             loaded_specs = yaml.load(file, Loader=yaml.FullLoader)
@@ -60,6 +61,9 @@ class MyTestCase(unittest.TestCase):
                                                                                      "result_path": "./"}}})
 
             self.assertDictEqual(loaded_specs["definitions"]["reports"], {"sequence_length_report": "SequenceLengthDistribution",
+                                                                          "sequence_count_report":
+                                                                              {"SequenceCountDistribution":
+                                                                                   {"label": "a"}},
                                                                           "vj_gene_report":
                                                                               {"VJGeneDistribution":
                                                                                    {"label": "a"}}})
@@ -70,6 +74,9 @@ class MyTestCase(unittest.TestCase):
                                                                          "sequence_length_analysis":
                                                                               {"dataset": "dataset",
                                                                                "report": "sequence_length_report"},
+                                                                         "sequence_count_analysis":
+                                                                              {"dataset": "dataset",
+                                                                               "report": "sequence_count_report"},
                                                                           "vj_gene_analysis":
                                                                               {"dataset": "dataset",
                                                                                "report": "vj_gene_report"}}}})
@@ -123,7 +130,8 @@ class MyTestCase(unittest.TestCase):
 
         os.chdir(path)
 
-        yamlbuilder_main(["-r", "VDJdb", "-o", str(path), "-f", "repertoire.yaml", "-m", "metadata.csv", "-i", "True", "-q", "True"])
+        yamlbuilder_main(["-r", "VDJdb", "-o", str(path), "-f", "repertoire.yaml", "-m", "metadata.csv", "-i", "True", "-q", "True",
+                          "-u", "True"])
 
         with open(path / "repertoire.yaml", "r") as file:
             loaded_specs = yaml.load(file, Loader=yaml.FullLoader)
@@ -132,14 +140,22 @@ class MyTestCase(unittest.TestCase):
                 {"path": "./", "metadata_file": "metadata.csv", "is_repertoire": True, "region_type": RegionType.IMGT_CDR3.name,
                  "result_path": "./"}}})
 
-            self.assertDictEqual(loaded_specs["definitions"]["reports"], {"amino_acid_report": "AminoAcidFrequencyDistribution"})
+            self.assertDictEqual(loaded_specs["definitions"]["reports"], {"amino_acid_report": "AminoAcidFrequencyDistribution",
+                                                                          "sequence_count_report": "SequenceCountDistribution",
+                                                                          "repertoire_clone_count_report": "RepertoireClonotypeSummary"})
 
             self.assertDictEqual(loaded_specs["instructions"], {"my_dataset_generation_instruction":
                                                                     {"type": "ExploratoryAnalysis",
                                                                      "analyses":
                                                                          {"amino_acid_analysis":
                                                                               {"dataset": "dataset",
-                                                                               "report": "amino_acid_report"}}}})
+                                                                               "report": "amino_acid_report"},
+                                                                          "sequence_count_analysis":
+                                                                              {"dataset": "dataset",
+                                                                               "report": "sequence_count_report"},
+                                                                          "repertoire_clone_count_analysis":
+                                                                              {"dataset": "dataset",
+                                                                               "report": "repertoire_clone_count_report"}}}})
 
         ImmuneMLParser.parse_yaml_file(path / "repertoire.yaml")
 

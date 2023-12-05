@@ -46,6 +46,16 @@ def build_specs(args):
         specs["instructions"]["my_dataset_generation_instruction"]["analyses"]["sequence_length_analysis"] = {
             "dataset": args.dataset_name, "report": "sequence_length_report"}
 
+    if args.sequence_count_report == "True":
+        add_report_with_label(specs, args, report_name="SequenceCountDistribution", report_key="sequence_count")
+
+        # Note: if 'existing' dataset is used, it is not known beforehand whether this is a repertoire dataset
+        # however, 'is_repertoire' is True by default in Galaxy, and even when running the repertoire report
+        # on a non-repertoire dataset, the worst thing that happens is that the report fails with a warning
+        if args.is_repertoire == "True":
+            add_report_with_label(specs, args, report_name="RepertoireClonotypeSummary", report_key="repertoire_clone_count")
+
+
     if args.vj_gene_report == "True":
         add_report_with_label(specs, args, report_name="VJGeneDistribution", report_key="vj_gene")
 
@@ -82,6 +92,9 @@ def parse_commandline_arguments(args):
     parser.add_argument("-l", "--label_name", default="", help="The label name to be used for reports.")
     parser.add_argument("-s", "--sequence_length_report", choices=["True", "False"], default="False",
                         help="Whether to run the SequenceLengthDistribution report.")
+    parser.add_argument("-u", "--sequence_count_report", choices=["True", "False"], default="False",
+                        help="Whether to run the SequenceCountDistribution report.")
+
     parser.add_argument("-g", "--vj_gene_report", choices=["True", "False"], default="False",
                         help="Whether to run the VJGeneDistribution report.")
     parser.add_argument("-q", "--amino_acid_report", choices=["True", "False"], default="False",

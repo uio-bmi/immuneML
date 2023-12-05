@@ -22,7 +22,8 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class SequenceLengthDistribution(DataReport):
     """
-    Generates a histogram of the lengths of the sequences in a repertoire or sequence dataset.
+    Generates a histogram of the lengths of the sequences in a dataset.
+
 
     Specification arguments:
 
