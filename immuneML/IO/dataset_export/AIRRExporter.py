@@ -8,7 +8,6 @@ from typing import List
 
 import airr
 import pandas as pd
-from olga.utils import nt2aa
 
 from immuneML.IO.dataset_export.DataExporter import DataExporter
 from immuneML.data_model.dataset import Dataset
@@ -120,6 +119,7 @@ class AIRRExporter(DataExporter):
             try:
                 from Stitchr import stitchr as st
                 from Stitchr import stitchrfunctions as fxn
+                from olga.utils import nt2aa
 
                 tcr_dat, functionality, partial = {}, {}, {}
 
