@@ -11,10 +11,8 @@ def parse_command_line_arguments(args):
     parser = argparse.ArgumentParser(description="Tool for building specification for training generative "
                                                  "models in Galaxy")
 
-    parser.add_argument("-d", "--dataset_name", default="dataset", help="The name of the dataset to import.")
     parser.add_argument("-e", "--gen_example_count", required=True,
                         help="Number of examples to generate.")
-
     parser.add_argument("-m", "--generative_method", choices=["SoNNia", "SimpleLSTM", "PWM", "SimpleVAE"],
                         required=True, help="Which generative model should be trained.")
 

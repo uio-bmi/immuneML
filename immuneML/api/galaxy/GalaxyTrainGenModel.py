@@ -35,7 +35,6 @@ class GalaxyTrainGenModel(GalaxyTool):
 
         model_export_path = PathBuilder.build(self.result_path / 'exported_models/')
 
-
         for model_location in model_locations:
             shutil.copyfile(model_location, model_export_path / model_location.name)
 
