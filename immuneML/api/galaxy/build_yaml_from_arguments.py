@@ -188,7 +188,7 @@ def build_specs(args):
                 "dataset": "dataset",
                 "strategy": "GridSearch",
                 "metrics": [],
-                "number_of_processes": 10,
+                "number_of_processes": 8,
                 "reports": ["benchmark"],
                 "optimization_metric": "accuracy",
                 'refit_optimal_model': True

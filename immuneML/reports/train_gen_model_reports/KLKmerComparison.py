@@ -11,7 +11,7 @@ from ...ml_methods.generative_models.MultinomialKmerModel import estimate_kmer_m
 from ...util.PathBuilder import PathBuilder
 
 
-class KLGenModelReport(TrainGenModelReport):
+class KLKmerComparison(TrainGenModelReport):
     """
     Estimates the KL divergence between the kmer-distributions of the original and generated dataset, and makes a plots
     that shows which sequences (and which kmers) contribute the most to the divergence.
@@ -30,7 +30,7 @@ class KLGenModelReport(TrainGenModelReport):
     .. code-block:: yaml
 
         my_kl_report:
-          KLGenModelReport:
+          KLKmerComparison:
             k: 3
             n_sequences: 50
 

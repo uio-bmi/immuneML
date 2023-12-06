@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
+from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models import GenerativeModel
 from immuneML.reports.ReportResult import ReportResult
@@ -21,6 +22,7 @@ class GenModelState:
     name: str
     gen_examples_count: int
     model_path: Path = None
+    generated_dataset: Dataset = None
     exported_datasets: Dict[str, Path] = field(default_factory=dict)
     report_results: Dict[str, List[ReportResult]] = field(
         default_factory=lambda: {'data_reports': [], 'ml_reports': [], 'instruction_reports': []})
@@ -41,6 +43,7 @@ class GenModelInstruction(Instruction, ABC):
 
         print_log(f"{self.state.name}: generated {self.state.gen_examples_count} examples from the fitted model", True)
         self.generated_dataset = dataset
+        self.state.generated_dataset = self.generated_dataset
 
         AIRRExporter.export(dataset, self.state.result_path / 'exported_gen_dataset')
         self.state.exported_datasets['generated_dataset'] = self.state.result_path / 'exported_gen_dataset'

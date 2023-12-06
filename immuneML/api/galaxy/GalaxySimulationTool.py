@@ -91,7 +91,7 @@ class GalaxySimulationTool(GalaxyTool):
         Util.run_tool(self.yaml_path, self.result_path)
 
         dataset_location = list(self.result_path.glob("*/exported_dataset/*/"))[0]
-        shutil.copytree(dataset_location, self.result_path / 'result/')
+        shutil.copytree(dataset_location, self.result_path / 'galaxy_dataset/')
 
         logging.info(f"{GalaxySimulationTool.__name__}: the simulation is finished.")
 

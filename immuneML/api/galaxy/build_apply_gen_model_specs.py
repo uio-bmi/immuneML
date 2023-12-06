@@ -31,18 +31,18 @@ def parse_command_line_arguments(args):
 
 
 def build_specs(parsed_args):
+    reports = {}
+    if parsed_args.sequence_length_report == "True":
+        reports['sequence_length_distribution'] = "SequenceLengthDistribution"
+    if parsed_args.amino_acid_report == "True":
+        reports['amino_acid_frequency_distribution'] = "AminoAcidFrequencyDistribution"
 
     model_overview_reports = {
         "PWM": "PWMSummary",
         "SimpleVAE": "VAESummary"
     }
 
-    reports = {}
-    if parsed_args.sequence_length_report:
-        reports['sequence_length_distribution'] = "SequenceLengthDistribution"
-    if parsed_args.amino_acid_report:
-        reports['amino_acid_frequency_distribution'] = "AminoAcidFrequencyDistribution"
-    if parsed_args.gen_model_overview:
+    if parsed_args.gen_model_overview == "True":
         shutil.unpack_archive(parsed_args.ml_config_path, "./unpacked", 'zip')
         model_overview = read_yaml(Path('unpacked/model_overview.yaml'))
         if model_overview['type'] in model_overview_reports:

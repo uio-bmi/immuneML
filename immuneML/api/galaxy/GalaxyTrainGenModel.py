@@ -4,6 +4,7 @@ from pathlib import Path
 
 import yaml
 
+from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
 from immuneML.api.galaxy.Util import Util
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
@@ -23,16 +24,22 @@ class GalaxyTrainGenModel(GalaxyTool):
         PathBuilder.build(self.result_path)
         self._prepare_specs()
         app = ImmuneMLApp(self.yaml_path, self.result_path)
-        app.run()
+        state = app.run()[0]
 
         model_locations = list(self.result_path.glob(f"{self.instruction_name}/trained_model/*.zip"))
 
+        if state.combined_dataset is None:
+            ImmuneMLExporter.export(state.generated_dataset, self.result_path / "galaxy_dataset/")
+        else:
+            ImmuneMLExporter.export(state.combined_dataset, self.result_path / "galaxy_dataset/")
+
         model_export_path = PathBuilder.build(self.result_path / 'exported_models/')
+
 
         for model_location in model_locations:
             shutil.copyfile(model_location, model_export_path / model_location.name)
 
-        logging.info(f"{GalaxyTrainGenModel.__name__}: immuneML has finished and the trained models were exported.")
+        logging.info(f"{GalaxyTrainGenModel.__name__}: immuneML has finished and the trained models and dataset were exported.")
 
     def _prepare_specs(self):
         with self.yaml_path.open("r") as file:

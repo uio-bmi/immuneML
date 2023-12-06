@@ -25,7 +25,7 @@ class ApplyGenModelTool(GalaxyTool):
         self._check_specs()
         state = ImmuneMLApp(self.yaml_path, self.result_path).run()[0]
         exported_dataset_path = state.exported_datasets['generated_dataset']
-        shutil.copytree(exported_dataset_path, self.result_path / "result/")
+        shutil.copytree(exported_dataset_path, self.result_path / "galaxy_dataset/")
 
         print_log("Run the generative model, the resulting dataset is exported.")
 

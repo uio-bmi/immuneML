@@ -54,6 +54,10 @@ class TrainGenModelInstruction(GenModelInstruction):
     - training_percentage (int): which percentage (0-1) of the original dataset to use for fitting the model while the
       remaining will be used only for comparison with generated sequences
 
+    - export_combined_dataset (bool): When set to true, the combined training+(test+)generated dataset is exported as one dataset.
+      The original and generated examples are labelled differently such that they can be further analysed and compared.
+      When false, only the generated data is exported. By default, export_combined_dataset is False.
+
     - reports (list): list of report ids (defined under definitions/reports) to apply after fitting a generative model
       and generating gen_examples_count examples; these can be data reports (to be run on generated examples), ML
       reports (to be run on the fitted model)
@@ -106,7 +110,7 @@ class TrainGenModelInstruction(GenModelInstruction):
         else:
             logging.info(f"{TrainGenModelInstruction.__name__}: training_percentage was set to 1 meaning that the full "
                          f"dataset will be used for fitting the generative model. All resulting comparison reports "
-                         f"will then use the full original dataset as compared to independent test dataset if the "
+                         f"will then use the full original dataset as opposed to independent test dataset if the "
                          f"training percentage was less than 1.")
             self.state.train_dataset = self.dataset
             self.state.test_dataset = self.dataset
