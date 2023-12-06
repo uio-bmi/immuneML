@@ -1,0 +1,9 @@
+sequence_type: amino_acid
+num_epochs: 10
+hidden_size: 8
+learning_rate: 0.001
+batch_size: 10
+embed_size: 4
+temperature: 0.4
+num_layers: 2
+device: cpu

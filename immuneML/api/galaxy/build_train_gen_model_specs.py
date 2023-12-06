@@ -13,6 +13,8 @@ def parse_command_line_arguments(args):
 
     parser.add_argument("-e", "--gen_example_count", required=True,
                         help="Number of examples to generate.")
+    parser.add_argument("-c", "--chain_type", required=True, choices=["TRA", "TRB", "IGH", "IGK", "IGL", "TRD", "TRG"],
+                        help="Chain type of the sequences to generate.")
     parser.add_argument("-m", "--generative_method", choices=["SoNNia", "SimpleLSTM", "PWM", "SimpleVAE"],
                         required=True, help="Which generative model should be trained.")
 
@@ -53,6 +55,11 @@ def build_specs(parsed_args):
     elif parsed_args.generative_method == "PWM":
         reports['generative_model_overview'] = "PWMSummary"
 
+    gen_model_args = {"chain": parsed_args.chain_type}
+
+    if parsed_args.generative_method == "SoNNia":
+        gen_model_args["default_model_name"] = f"human{parsed_args.chain_type}"
+
     specs = {
         "definitions": {
             "datasets": {
@@ -63,7 +70,9 @@ def build_specs(parsed_args):
             },
             "reports": reports,
             "ml_methods": {
-                "generative_model": parsed_args.generative_method
+                "generative_model": {
+                    parsed_args.generative_method: gen_model_args
+                }
             }
         },
         "instructions": {
@@ -79,6 +88,8 @@ def build_specs(parsed_args):
             }
         }
     }
+
+
 
     return specs
 

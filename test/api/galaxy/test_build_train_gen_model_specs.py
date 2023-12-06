@@ -37,7 +37,8 @@ class MyTestCase(unittest.TestCase):
         os.chdir(data_path)
 
         yamlbuilder_main(["-o", str(output_dir), "-f", output_filename,
-                          "-e", "10", "-m", "PWM", "-s", "True", "-q", "True",
+                          "-c", "TRA",
+                          "-e", "10", "-m", "SoNNia", "-s", "True", "-q", "True",
                           "-w", "True", "-k", "True", "-t", "70",
                           "-x", "generated_dataset"])
 
