@@ -22,8 +22,6 @@ def parse_command_line_arguments(args):
                         help="Whether to run the SequenceLengthDistribution report.")
     parser.add_argument("-q", "--amino_acid_report", choices=["True", "False"], default="False",
                         help="Whether to run the AminoAcidFrequencyDistribution report.")
-    parser.add_argument("-w", "--gen_model_overview", choices=["True", "False"], default="False",
-                        help="Whether to run the model report.")
     parser.add_argument("-k", "--kl_gen_model_report", choices=["True", "False"], default="False",
                         help="Whether to run the KLKmerComparison report.")
 
