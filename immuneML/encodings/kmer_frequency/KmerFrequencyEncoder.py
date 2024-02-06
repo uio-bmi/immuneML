@@ -287,7 +287,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
                 if self.reads == ReadsType.UNIQUE:
                     counts[i] += 1
                 elif self.reads == ReadsType.ALL:
-                    counts[i] += sequence.metadata.count
+                    counts[i] += sequence.metadata.duplicate_count
         return counts
 
     def get_additional_files(self) -> List[str]:
