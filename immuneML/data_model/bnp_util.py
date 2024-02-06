@@ -163,9 +163,19 @@ def get_field_type_from_values(values):
 
 def get_row_by_index(self, index) -> dict:
     field_names = [f.name for f in dataclasses.fields(self)]
-    return {
-        field_name: getattr(self, field_name).tolist()[index] for field_name in field_names
-    }
+    d = dict()
+
+    for field_name in field_names:
+        field_value = getattr(self, field_name)[index]
+
+        if isinstance(field_value, EncodedArray):
+            field_value = field_value.to_string()
+        else:
+            field_value = field_value.item()
+
+        d[field_name] = field_value
+
+    return d
 
 
 def get_rows_by_indices(self, index1, index2) -> dict:
