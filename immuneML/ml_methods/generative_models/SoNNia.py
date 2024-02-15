@@ -3,8 +3,6 @@ from pathlib import Path
 
 import numpy as np
 from olga import load_model
-from sonia.sequence_generation import SequenceGeneration
-from sonnia.sonnia import SoNNia as InternalSoNNia
 
 from immuneML.data_model.bnp_util import write_yaml, read_yaml
 from immuneML.data_model.dataset.Dataset import Dataset
@@ -52,6 +50,8 @@ class SoNNia(GenerativeModel):
 
     @classmethod
     def load_model(cls, path: Path):
+        from sonnia.sonnia import SoNNia as InternalSoNNia
+
         assert path.exists(), f"{cls.__name__}: {path} does not exist."
 
         model_overview_file = path / 'model_overview.yaml'
@@ -86,6 +86,8 @@ class SoNNia(GenerativeModel):
             self._model_path = custom_model_path
 
     def fit(self, dataset: Dataset, path: Path = None):
+        from sonnia.sonnia import SoNNia as InternalSoNNia
+
         print_log(f"{SoNNia.__name__}: fitting a selection model...", True)
 
         data = dataset.get_attributes(['sequence_aa', 'v_call', 'j_call'], as_list=True)
@@ -109,6 +111,8 @@ class SoNNia(GenerativeModel):
         raise NotImplementedError
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
+        from sonia.sequence_generation import SequenceGeneration
+
         gen_model = SequenceGeneration(self._model)
         sequences = gen_model.generate_sequences_post(count)
         return SequenceDataset.build_from_objects(sequences=[ReceptorSequence(sequence_aa=seq[0], sequence=seq[3],
