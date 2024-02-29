@@ -293,12 +293,3 @@ class KmerFrequencyEncoder(DatasetEncoder):
     def get_additional_files(self) -> List[str]:
         return []
 
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> Path:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file
-
-    @staticmethod
-    def load_encoder(encoder_file: Path):
-        encoder = DatasetEncoder.load_encoder(encoder_file)
-        return encoder

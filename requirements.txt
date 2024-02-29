@@ -26,11 +26,11 @@ fisher>=0.1.9
 olga>=1.2.4
 npstructures>=0.2.0
 
-# export full sequence in AIRR format
-stitchr
-IMGTgeneDL
-
-# gen models
-olga
-sonia
-sonnia
+# # export full sequence in AIRR format
+# stitchr
+# IMGTgeneDL
+#
+# # gen models
+# olga
+# sonia
+# sonnia

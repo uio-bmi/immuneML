@@ -53,10 +53,6 @@ class EncoderHelper:
         return comp_data
 
     @staticmethod
-    def store(encoded_dataset, params: EncoderParams):
-        ImmuneMLExporter.export(encoded_dataset, params.result_path)
-
-    @staticmethod
     def sync_encoder_with_cache(cache_params: tuple, encoder_memo_func, encoder, param_names):
         encoder_cache_params = tuple((key, val) for key, val in dict(cache_params).items() if key != 'learn_model')
         encoder_cache_params = (encoder_cache_params, "encoder")

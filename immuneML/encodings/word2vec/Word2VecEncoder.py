@@ -235,11 +235,6 @@ class Word2VecEncoder(DatasetEncoder):
         return [self.model_path]
 
     @staticmethod
-    def export_encoder(path: Path, encoder) -> str:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file
-
-    @staticmethod
     def load_encoder(encoder_file: Path):
         encoder = DatasetEncoder.load_encoder(encoder_file)
         encoder = DatasetEncoder.load_attribute(encoder, encoder_file, "model_path")

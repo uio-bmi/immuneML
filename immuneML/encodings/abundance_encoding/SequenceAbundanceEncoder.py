@@ -179,15 +179,6 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         self.context = context
         return self
 
-    def store(self, encoded_dataset, params: EncoderParams):
-        EncoderHelper.store(encoded_dataset, params)
-
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> Path:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        UtilIO.export_comparison_data(encoder.comparison_data, path)
-        return encoder_file
-
     def get_additional_files(self) -> List[Path]:
         return [self.relevant_indices_path]
 
