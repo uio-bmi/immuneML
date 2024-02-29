@@ -1,26 +1,5 @@
-How to simulate antigen or disease-associated signals in AIRR datasets
-======================================================================
-
-.. meta::
-
-   :twitter:card: summary
-   :twitter:site: @immuneml
-   :twitter:title: immuneML: simulate antigen or disease-associated signals in AIRR datasets
-   :twitter:description: See tutorials on how to simulate antigen or disease-associated signals in AIRR datasets.
-   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
-
-
-For simulation of AIRR datasets with user-defined signals, immuneML uses LIgO. It supports simulation on both
-repertoire and receptor level. For more details on the decisions behind simulation, see the Methods section of the
-original paper:
-
-Chernigovskaya, M., et al. (2023). Simulation of adaptive immune receptors and repertoires with complex immune
-information to guide the development and benchmarking of AIRR machine learning (p. 2023.10.20.562936).
-bioRxiv. https://doi.org/10.1101/2023.10.20.562936
-
-
 YAML specification of the LigoSim instruction for introducing immune signals
----------------------------------------------------------------------------------
+=======================================================================================
 
 The YAML definition consists of three components: motif, signal and simulation definitions.
 
@@ -30,7 +9,7 @@ The YAML definition consists of three components: motif, signal and simulation d
 - :code:`signals` (see: :ref:`Signal`): defined as a union of a set of motifs and AIR-specific information, such
   as V or J gene or IMGT position of the motif in the CDR3 sequence. Immune signals correspond to e.g., antigen-specificity.
 
-- :code:`immune events`: immune events are sets of immune signals and their proportion in an AIRR. They correspond to
+- :code:`immune_events`: immune events are sets of immune signals and their proportion in an AIRR. They correspond to
   diseases, vaccination, allergies. In practice, we define which signals are present and how often in a set of examples,
   and the immune event is assigned as a label for that example set.
 

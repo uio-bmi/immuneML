@@ -1,4 +1,4 @@
-How to generate a random sequence, receptor or repertoire dataset
+How to generate a dataset with random sequences
 =================================================================
 
 .. meta::
@@ -6,7 +6,7 @@ How to generate a random sequence, receptor or repertoire dataset
    :twitter:card: summary
    :twitter:site: @immuneml
    :twitter:title: immuneML: generate a random dataset
-   :twitter:description: See tutorials on how to generate a random sequence, receptor or repertoire dataset
+   :twitter:description: See tutorials on how to generate a dataset with random sequences
    :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
 
 

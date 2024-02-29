@@ -32,28 +32,32 @@ immuneML can be used for:
 
 - **Applying trained ML models** to new datasets with unknown class labels.
 
+- **And more!**
+
 The starting point for any immuneML analysis is the YAML specification file. In this file, the settings of the analysis
-components are defined (also known as *definitions*), which are shown in six different colors in the figure below. Additionally, the YAML file
-describes one or more *instructions*, which corresponds to one of the applications listed above (and some additional instructions).
+components are defined (also known as :code:`definitions`), which are shown in six different colors in the figure below. Additionally, the YAML file
+describes one or more :code:`instructions`, which corresponds to one of the applications listed above (and some additional instructions).
 
 
 .. figure:: _static/images/definitions_instructions_overview.png
    :alt: immuneML usage overview
 
-   An overview of immuneML usage: analysis components and instructions are specified in a YAML file. Each use case corresponds to a different instruction. The results of the instructions are summarized and presented in an HTML file.
+   *An overview of immuneML usage: analysis components and instructions are specified in a YAML file. Each use case corresponds to a different instruction. The results of the instructions are summarized and presented in an HTML file.*
+
+
+Getting started
+-------------------
 
 If you want to **use immuneML locally**, see :ref:`Installing immuneML`.
 
+To become familiar with the **YAML specification**, you can find a concrete example in our :ref:`Quickstart` guide, or read about the overall YAML structure and options in :ref:`How to specify an analysis with YAML`.
+
 Alternatively, to **run immuneML in a web browser**, go to our `Galaxy Portal <https://galaxy.immuneml.uiocloud.no/>`_.
-Here, we offer the same functionalities as in the command-line interface, and in addition simplified button-based interfaces for training classifiers.
+Here, we offer the same functionalities as in the command-line interface (using YAML specifications), and in addition simplified button-based interfaces for training classifiers.
+See the :ref:`immuneML & Galaxy` tutorials for more information.
 
-To become familiar with the **YAML-based specification**, you can find a concrete example in our :ref:`Quickstart` guide, or read about the overall YAML structure and options in :ref:`How to specify an analysis with YAML`.
-
-- YAML specifications are equivalent between the Galaxy and command-line interfaces. However, in Galaxy datasets must first be converted to a dataset collection (see :ref:`How to make an immuneML dataset in Galaxy`).
-
-We offer :ref:`Tutorials` for specific use cases (e.g., how to train and assess classifiers, or how to generate synthetic immune repertoire data for benchmarking purposes), and under :ref:`immuneML & Galaxy` you will find tutorials using Galaxy as a starting point.
-
-If you are wondering about all the possible **analysis components** and their options, you can find the complete list and
+immuneML can be applied to a wide variety of **use cases**. To help you get started, we offer :ref:`Tutorials` for some common applications (e.g., how to train models, or how to simulate synthetic data for benchmarking).
+For more experienced users who want to customize their analysis and are wondering about all the possible **analysis components** and their options, you can find the complete list and
 documentation under :ref:`YAML specification`.
 
 Our open-source code can be found on `GitHub <https://github.com/uio-bmi/ImmuneML>`_ :)
@@ -63,6 +67,7 @@ Previous versions
 
 Documentation for previous immuneML versions can be found here:
 
+- `v2.2.6 <https://docs.immuneml.uio.no/v2.2.6/>`_
 - `v2.1.2 <https://docs.immuneml.uio.no/v2.1.2/>`_
 - `v2.1.0 <https://docs.immuneml.uio.no/v2.1.0/>`_
 - `v2.0.4 <https://docs.immuneml.uio.no/v2.0.4/>`_
@@ -71,22 +76,14 @@ Documentation for previous immuneML versions can be found here:
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contents:
+   :hidden:
 
    quickstart
    installation
+   specification
    tutorials
    galaxy
-   specification
    usecases
    troubleshooting
    developer_docs
-   airrc_tutorial
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

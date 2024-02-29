@@ -42,7 +42,7 @@ To exit the Docker container, use the following command:
 
 Using the Docker container for longer immuneML runs
 ----------------------------------------------------
-
+Ï
 If you expect the analysis to take more time, you can start the container as a background process. The command to run in that case would be the following:
 
 .. code-block:: console

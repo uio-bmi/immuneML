@@ -9,21 +9,42 @@ How to specify an analysis with YAML
    :twitter:description: See tutorials on how to specify analysis in immuneML through YAML specification file.
    :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
 
-Analyses in immuneML are specified through a YAML specification file with a fixed structure.
-Depending on the specification, immuneML can execute different tasks, such as training ML models for receptor or repertoire
-classification, simulate data or perform exploratory analyses.
-For all the options that can be specified, see :ref:`YAML specification`.
+Analyses in immuneML are specified through a YAML specification file. This is a text file with nested keys and values.
+Since immuneML can be used for a variety of different tasks, different parameters need to be set depending on the use case.
+The keys are essentially the input parameters to immuneML, except the values to these parameters can consist of more key-value pairs.
+Throughout the documentation, the names of keys (which have a specific meaning) will be formatted like :code:`this`.
+
+
+The immuneML YAML specification reflects two main sets of keys:
+
+- Under :code:`definitions` the different analysis components are defined, such as a specific ML method, or the import parameters for a dataset.
+
+- The :code:`instructions` describe what kind of workflow is executed using the components defined under definitions. For example, whether to train ML models, or simulate a dataset for benchmarking.
+
+
+This page gives a general overview of the YAML specification structure, and the keys that should be present.
+For an exhaustive list of all the options that can be specified, see :ref:`YAML specification`.
 
 
 Structure of the analysis specification
 ---------------------------------------
 
-The analysis specification consists of three main parts: :code:`definitions`, :code:`instructions` and :code:`output`.
+
+The following figure outlines the general structure of the YAML specification file. Note that depending on the specific analysis,
+the components and parameters that need to be specified may not be the same.
+On the highest level, the analysis specification always consists of :code:`definitions` and :code:`instructions`.
+
+
+
+.. figure:: ../_static/images/yaml_structure.png
+   :alt: structure of the YAML specification
+
+
 
 Specifying Definitions
 ^^^^^^^^^^^^^^^^^^^^^^
 
-:code:`definitions` refer to components, which will be used within the instructions. They include:
+Under :code:`definitions`, the following analysis components may be defined:
 
 - :code:`datasets`: specifying where data is located, what format the data is in, and how it should be imported (see :ref:`How to import data into immuneML` for more details),
 
@@ -44,37 +65,10 @@ Simulation-specific components (only relevant when running a :ref:`Simulation in
 - :code:`simulations`: define how to combine different signals and how to implant them in the dataset.
 
 
-Under definitions, each analysis sub-component is defined using a user-specifiable key.
-In the examples below, we will use the prefix 'my\_' to identify these keys, but in practice it is possible
-to specify any kind of name here. These keys are unique names that identify the settings for a component, and they are
-later on referenced in the :ref:`instructions <Specifying Instructions>`
-(for example: to specify which of the imported datasets to use in a given instruction).
-
-
-The :ref:`import of two datasets <How to import data into immuneML>` may be defined as follows:
-
-.. highlight:: yaml
-.. code-block:: yaml
-
-  definitions:
-    datasets:
-      my_repertoire_dataset: # user-defined key for the first dataset
-        format: AIRR         # import of a repertoire dataset
-        params:
-          path: path/to/first/data/
-          metadata_file: path/to/first/metadata.csv
-      my_receptor_dataset: # user-defined key for the second dataset
-        format: AIRR       # import of a receptor dataset
-        params:
-          path: path/to/second/data/
-          is_repertoire: false
-          paired: true
-          receptor_chains: TRA_TRB
-          metadata_column_mapping:          # map column names of the file to label names
-            epitope_column_name: my_epitope # my_epitope can be used as label
-
-Where the imported datasets can under :code:`instructions` be referenced using the keys :code:`my_repertoire_dataset` and :code:`my_receptor_dataset`.
-Note that in practice, most analyses use just one dataset.
+Under definitions, each analysis sub-component is defined using a user-defined key.
+Throughout the documentation, we use the prefix 'my\_' to identify these keys, but any kind of name may be used here.
+These keys are unique names that identify the settings for a component, and they are
+later referenced in the :ref:`instructions <Specifying Instructions>`.
 
 An example of a full :code:`definitions` section which may be used for a machine learning task is given below.
 See also :ref:`How to train and assess a receptor or repertoire-level ML classifier` for more details.
@@ -105,53 +99,20 @@ See also :ref:`How to train and assess a receptor or repertoire-level ML classif
     reports:
       my_seq_length_distribution: SequenceLengthDistribution
 
-The :code:`definitions` section used for Simulation contains different components, as shown in the example below.
-See also :ref:`How to simulate antigen or disease-associated signals in AIRR datasets` for more details.
+The :code:`definitions` section used for Simulation contains different components (:code:`motifs`, :code:`signals`, :code:`simulations`).
+These are discussed in more detail in the following tutorial: :ref:`How to simulate antigen or disease-associated signals in AIRR datasets`.
 
-.. highlight:: yaml
-.. code-block:: yaml
-
-  definitions:
-    datasets: # every instruction uses a dataset
-      my_dataset:
-        format: AIRR
-        params:
-          path: path/to/data/
-          metadata_file: path/to/metadata.csv
-    motifs:
-      my_simple_motif:
-        seed: AAA
-        instantiation: GappedKmer
-    signals:
-      my_simple_signal:
-        motifs:
-          - my_simple_motif
-        implanting: HealthySequence
-    simulations:
-      my_simulation:
-        my_implanting:
-          signals:
-            - my_simple_signal
-          dataset_implanting_rate: 0.5
-          repertoire_implanting_rate: 0.1
-
-A diagram of all the different dataset types, preprocessing steps, encodings, ML methods and reports, and how they can be
-combined in different analyses is shown below. The solid lines represent components that are intended to be used together, and the
-dashed lines indicate optional combinations.
-
-.. image:: ../_static/images/analysis_paths.png
-    :alt: Analysis paths
 
 
 Specifying Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Similarly to analysis components, :code:`instructions` are defined under a user-specifiable key.
+Similarly to analysis components, :code:`instructions` are defined under a user-defined key.
 Under this key, you should define the instruction :code:`type`, which defines the type
 of analysis that will be done. All other settings are instruction-specific.
 
-Some of the possible instruction types are (see :ref:`Instructions` for the complete list):
+The following instruction types may be used:
 
 - :ref:`TrainMLModel`
 
@@ -159,7 +120,11 @@ Some of the possible instruction types are (see :ref:`Instructions` for the comp
 
 - :ref:`Simulation`
 
-The components defined under definitions can be referenced inside the instruction, but anything generated from the
+- :ref:`MLApplication`
+
+- and few others; :ref:`Instructions` for the complete list.
+
+The components defined under definitions can be referenced inside the instruction, but any result from the
 instructions is not available to other instructions. If the output of one instruction needs to be used in another
 other instruction, two separate immuneML runs need to be made (e.g, running immuneML once with the Simulation
 instruction to generate a dataset, and subsequently using that dataset as an input to a second immuneML
@@ -201,8 +166,8 @@ See the tutorial :ref:`How to train and assess a receptor or repertoire-level ML
 Specifying output
 ^^^^^^^^^^^^^^^^^
 
-The third and final section of the YAML specification is :code:`output`, which currently only supports one :code:`format`: :code:`HTML`.
-The :code:`output` section may be omitted from the YAML, but if included, it should look like this:
+Optionally, the key :code:`output` may be specified on the base level (next to :code:`definitions` and :code:`instructions`). However,
+the only supported output format is currently HTML. The :code:`output` section may be omitted from the YAML, but if included, it should look like this:
 
 .. highlight:: yaml
 .. code-block:: yaml
@@ -212,7 +177,16 @@ The :code:`output` section may be omitted from the YAML, but if included, it sho
 
 
 Putting all parts together
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------------
+
+A diagram of all the different dataset types, preprocessing steps, encodings, ML methods and reports, and how they can be
+combined in different analyses is shown below. The solid lines represent components that are intended to be used together, and the
+dashed lines indicate optional combinations.
+
+.. image:: ../_static/images/analysis_paths.png
+    :alt: Analysis paths
+
+
 
 An example of a complete YAML specification for training an ML model through nested cross-validation is given here:
 

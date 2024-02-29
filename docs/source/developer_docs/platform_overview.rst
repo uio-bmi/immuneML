@@ -18,7 +18,7 @@ describes what happens internally when immuneML is run like this. We assume fami
   :width: 70%
   :alt: Overview of the classes involved in running immuneML
 
-  Overview of classes involved in running immuneML
+  *Overview of classes involved in running immuneML*
 
 When immuneML is run from the command line, the `immune-ml` command is mapped to the `main()` method in ImmuneMLApp.py. The ImmuneMLApp class is then
 instantiated with the specification path and output path. Running immuneML then corresponds to two main steps: parsing the specification file and
@@ -57,7 +57,7 @@ necessary to follow the tutorials without the need to go into all platform detai
   :width: 70%
   :alt: UML diagram of the immuneML's packages and dependencies between them
 
-  UML diagram showing the immuneML packages and the dependencies between them
+  *UML diagram showing the immuneML packages and the dependencies between them*
 
 For more details on the data model, see :ref:`immuneML data model`.
 
@@ -71,5 +71,5 @@ shown in the diagram below.
   :width: 70%
   :alt: UML diagram showing existing components and how the platform could be extended
 
-  UML diagram showing existing components and how the platform could be extended by implementing functionalities defined by corresponding abstract
-  classes
+  *UML diagram showing existing components and how the platform could be extended by implementing functionalities defined by corresponding abstract
+  classes*

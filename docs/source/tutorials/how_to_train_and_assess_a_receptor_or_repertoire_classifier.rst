@@ -34,7 +34,7 @@ This process is shown in the figure below:
   optimization is done on training and validation data and the model performance is
   assessed on test data
 
-See also :ref:`How to discover disease- or antigen specificity-associated motifs` to read more about ML interpretability.
+See also :ref:`Discovering motifs learned by classifiers` to read more about ML interpretability.
 
 YAML specification of TrainMLModel
 ------------------------------------------------------------------
