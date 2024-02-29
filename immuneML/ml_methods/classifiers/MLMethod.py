@@ -184,8 +184,10 @@ class MLMethod(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def get_params(self):
-        """Returns the model parameters in a readable yaml-friendly way (consisting of lists, dictionaries and strings)."""
+    def get_params(self) -> dict:
+        """
+        Returns the model parameters and their values in a readable yaml-friendly way (a dictionary consisting of strings, lists and dictionaries).
+        """
         pass
 
     @abc.abstractmethod
@@ -222,7 +224,11 @@ class MLMethod(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_label_name(self) -> str:
-        """Returns the name of the label for which the model was fitted."""
+        """
+        Returns the name of the label for which the model was fitted.
+        In immuneML, all models are fitted for only one label at a time.
+        If multiple labels are supplied during training, a model is trained for each label.
+        """
         pass
 
     @abc.abstractmethod
@@ -256,6 +262,12 @@ class MLMethod(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_compatible_encoders(self):
+        """Returns a list of compatible encoders, for example:
+
+        from immuneML.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
+
+        return [EvennessProfileEncoder]
+        """
         pass
 
     def check_encoder_compatibility(self, encoder):

@@ -81,7 +81,3 @@ class TCRdistEncoder(DatasetEncoder):
                 labels[label_name].append(receptor.metadata[label_name])
         return labels
 
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> str:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file

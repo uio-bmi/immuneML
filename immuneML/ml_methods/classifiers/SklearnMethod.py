@@ -156,7 +156,7 @@ class SklearnMethod(MLMethod):
 
     def check_is_fitted(self, label_name: str):
         if self.label.name == label_name or label_name is None:
-            return check_is_fitted(self.model, ["estimators_", "coef_", "estimator", "_fit_X", "dual_coef_"], all_or_any=any)
+            return check_is_fitted(self.model, ["estimators_", "coef_", "estimator", "_fit_X", "dual_coef_", "classes_"], all_or_any=any)
 
     def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric="balanced_accuracy",
                                 number_of_splits: int = 5, cores_for_training: int = -1):

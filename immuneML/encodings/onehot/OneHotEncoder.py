@@ -163,9 +163,6 @@ class OneHotEncoder(DatasetEncoder):
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         pass
 
-    def store(self, encoded_dataset, params: EncoderParams):
-        ImmuneMLExporter.export(encoded_dataset, params.result_path)
-
     def _encode_sequence_list(self, sequences, pad_n_sequences, pad_sequence_len):
         char_array = np.array(sequences, dtype=str)
         char_array = char_array.view('U1').reshape((char_array.size, -1))

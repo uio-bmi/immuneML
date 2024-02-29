@@ -9,7 +9,7 @@ from immuneML.reports.Report import Report
 
 class MLReport(Report):
     """
-    ML model reports show some type of features or statistics about one trained ML model.
+    ML model reports show some type of features or statistics about a single trained ML model.
 
     In the :ref:`TrainMLModel` instruction, ML model reports can be specified inside the 'selection' or 'assessment' specification under the key 'reports/models'.
     Example:

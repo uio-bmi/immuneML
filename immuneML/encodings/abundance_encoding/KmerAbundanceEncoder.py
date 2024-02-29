@@ -220,14 +220,6 @@ class KmerAbundanceEncoder(DatasetEncoder):
         self.context = context
         return self
 
-    def store(self, encoded_dataset, params: EncoderParams):
-        EncoderHelper.store(encoded_dataset, params)
-
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> Path:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file
-
     def get_additional_files(self) -> List[Path]:
         return [file for file in [self.relevant_indices_path, self.relevant_sequence_path, self.contingency_table_path, self.p_values_path] if file]
 
