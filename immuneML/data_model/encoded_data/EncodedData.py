@@ -1,20 +1,29 @@
 import pandas as pd
 import numpy as np
+from scipy.sparse import issparse
+import torch
+
 
 class EncodedData:
     """
     When a dataset is encoded, it is stored in an object of EncodedData class.
 
     Arguments:
-      examples: a matrix of example_count x feature_count elements (can be a numpy array or a sparse matrix); there are some exceptions to this, for
-        instance, :py:obj:`source.encodings.onehot.OneHotEncoder.OneHotEncoder` where the numpy array has more than two dimensions, but most of the
-        encodings follow the matrix format.
-      feature_names: a list of feature names with feature_count elements
-      feature_annotations: a data frame consisting of annotations for each unique feature
-      example_ids: a list of example (repertoire/sequence/receptor) IDs; it must be the same length as the example_count in the examples matrix
-      labels: a dict of labels where label names are keys and the values are lists of values for the label across examples: {label_name1: [...], label_name2: [...]}. Each list associated with a label has to have values for all examples.
 
-    """
+      examples: a design matrix containing the encoded data. This is typically a numpy array, although other matrix formats such as scipy sparse matrix, pandas dataframe
+                or pytorch tensors are also permitted as long as the numpy matrix can be retrieved using 'get_examples_as_np_matrix()'.
+                The matrix is usually two-dimensional. The first dimension should be the examples, and the second (and higher) dimensions represent features.
+
+
+      feature_names: a list of feature names. The length (dimensions) of this list should match the number of features in the examples matrix.
+
+      feature_annotations: a data frame consisting of additional annotations for each feature. This can be used to add more information fields if feature_names is not sufficient. This data field is not used for machine learning, but may be used by some Reports.
+
+      example_ids: a list of example (repertoire/sequence/receptor) IDs; it must be the same length as the example_count in the examples matrix. These can be retrieved using Dataset.get_example_ids()
+
+      labels: a dict of labels where label names are keys and the values are lists of values for the label across examples: {'disease1': ['sick', 'healthy', 'sick']}.
+              During encoding, the labels can be computed using EncoderHelper.encode_dataset_labels()
+      """
 
     def __init__(self, examples, labels: dict = None, example_ids: list = None, feature_names: list = None,
                  feature_annotations: pd.DataFrame = None, encoding: str = None, example_weights: list = None, info: dict = None,
@@ -47,3 +56,15 @@ class EncodedData:
         self.example_weights = example_weights
         self.info = info
         self.dimensionality_reduced_data = dimensionality_reduced_data
+
+    def get_examples_as_np_matrix(self):
+        if isinstance(self.examples, np.ndarray):
+            return self.examples
+        elif isinstance(self.examples, pd.DataFrame):
+            return self.examples.to_numpy()
+        elif issparse(self.examples):
+            return self.examples.toarray()
+        elif torch.is_tensor(self.examples):
+            return self.examples.numpy()
+        else:
+            raise ValueError(f"EncodedData: examples matrix of type '{type(self.examples)}' cannot be converted to a numpy matrix.")
