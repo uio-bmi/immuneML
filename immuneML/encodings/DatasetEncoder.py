@@ -24,7 +24,7 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def build_object(dataset, **params):
+    def build_object(dataset: Dataset, **params):
         """
         Creates an instance of the relevant subclass of the DatasetEncoder class using the given parameters.
         This method will be called during parsing time (early in the immuneML run), such that parameters and dataset type can be tested here.
@@ -36,6 +36,8 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
           2. Check the dataset type: immuneML should crash if the wrong dataset type is specified for this encoder. For example, DeepRCEncoder should only work for RepertoireDatasets and crash if the dataset is of another type.
 
           3. Create an instance of the correct Encoder class, using the given parameters. Return this object.
+             Some encoders have different subclasses depending on the dataset type. Make sure to return an instance of the correct subclass.
+             For instance: KmerFrequencyEncoder has different subclasses for each dataset type. When the dataset is a Repertoire dataset, KmerFreqRepertoireEncoder should be returned.
 
 
         Args:
@@ -98,6 +100,10 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
 
     @staticmethod
     def load_attribute(encoder, encoder_file: Path, attribute: str):
+        """
+        Utility method for loading correct file paths when loading an encoder (see: load_encoder).
+        This method should not be overwritten.
+        """
         if encoder_file is not None:
             file_path = encoder_file.parent / getattr(encoder, attribute).name
             setattr(encoder, attribute, file_path)
@@ -164,9 +170,10 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
         improve the computation of distances. The distances to test examples are determined by an algorithm which does
         not 'learn' from test data.
 
-        To explicitly enable using the full dataset in the encoder, the following line should be added:
+        To explicitly enable using the full dataset in the encoder, the contents of this method should be as follows:
 
         self.context = context
+        return self
 
 
         Args:

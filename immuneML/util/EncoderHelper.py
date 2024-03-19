@@ -71,6 +71,9 @@ class EncoderHelper:
 
     @staticmethod
     def encode_element_dataset_labels(dataset: ElementDataset, label_config: LabelConfiguration):
+        '''
+        Automatically generates the encoded labels for an ElementDataset (= SequenceDataset or ReceptorDataset)
+        '''
 
         labels = {name: [] for name in label_config.get_labels_by_name()}
 
