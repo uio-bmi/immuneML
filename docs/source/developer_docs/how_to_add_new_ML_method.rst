@@ -9,6 +9,9 @@ How to add a new machine learning method
    :twitter:description: See how to add a new machine learning method to the immuneML platform.
    :twitter:image: https://docs.immuneml.uio.no/_images/extending_immuneML.png
 
+.. include:: ./coding_conventions_and_tips.rst
+
+
 In this tutorial, we will add a new machine learning method. This tutorial assumes you have installed immuneML for development as described at :ref:`Set up immuneML for development`.
 
 To add a new ML method to immuneML, add a class that inherits :py:obj:`~immuneML.ml_methods.MLMethod.MLMethod` class to the :py:mod:`immuneML.ml_methods` package
@@ -196,9 +199,15 @@ To run this from the root directory of the project, save the specification to sp
 
   immune-ml specs.yaml output_dir/
 
-Compatible encoders
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Adding encoder compatibility to an ML method
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Each ML method is only compatible with a limited set of encoders. immuneML automatically checks if the given encoder and ML method are
 compatible when running the TrainMLModel instruction, and raises an error if they are not compatible.
-To ensure immuneML recognizes the encoder-ML method compatibility, make sure that the encoder(s) of interest is added to the list
-of encoder classes returned by the :code:`get_compatible_encoders()` method of the ML method.
+To ensure immuneML recognizes the encoder-ML method compatibility, make sure that the encoder is added to the list of encoder classes
+returned by the :code:`get_compatible_encoders()` method of the ML method(s) of interest.
+
+The :code:`SillyMLMethod` is compatible with all encoders, ...
+
+-> todo example from SillyMLMethod?
