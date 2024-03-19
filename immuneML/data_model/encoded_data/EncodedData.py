@@ -21,7 +21,7 @@ class EncodedData:
 
       example_ids: a list of example (repertoire/sequence/receptor) IDs; it must be the same length as the example_count in the examples matrix. These can be retrieved using Dataset.get_example_ids()
 
-      labels: a dict of labels where label names are keys and the values are lists of values for the label across examples: {'disease1': ['sick', 'healthy', 'sick']}.
+      labels: a dict of labels where label names are keys and the values are lists of values for the label across examples: {'disease1': ['sick', 'healthy', 'sick']}
               During encoding, the labels can be computed using EncoderHelper.encode_dataset_labels()
       """
 
