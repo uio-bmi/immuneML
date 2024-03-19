@@ -29,8 +29,3 @@ npstructures>=0.2.0
 # # export full sequence in AIRR format
 # stitchr
 # IMGTgeneDL
-#
-# # gen models
-# olga
-# sonia
-# sonnia
