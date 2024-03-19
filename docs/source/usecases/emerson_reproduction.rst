@@ -181,7 +181,7 @@ and then reproduced the analysis on those smaller datasets.
 Constructing subsampled datasets
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To construct smaller datasets of 400, 200, 100 and 50 subjects randomly from both cohorts, we used Subsampling instruction with the following YAML specification:
+To construct smaller datasets of 400, 200, 100 and 50 subjects randomly from both cohorts, we used Subsampling instruction with the following YAML specification.
 
 .. code-block:: yaml
 
@@ -190,7 +190,7 @@ To construct smaller datasets of 400, 200, 100 and 50 subjects randomly from bot
       cmv2017: # we import the full dataset with 683 subjects as it was imported previously in immuneML-optimized format
         format: ImmuneML
         params:
-          path: imported_data/cmv2017.iml_dataset
+          path: imported_data/cmv2017.yaml # Note that in older versions of immuneML (<3), immuneML datasets had .iml_dataset extension instead of .yaml
   instructions:
     subsampling_inst: # user-defined name of the instruction
       type: Subsampling # which instruction to execute
@@ -220,7 +220,7 @@ The YAML specification is mostly the same as when only TrainMLModel instruction 
   - the `dataset` parameter is now called `datasets` and accepts a list of datasets on which the TrainMLModel instruction has to be performed (format and functionality are the same as described under reproduction), and
   - it has one additional parameter called `benchmark_reports` that will be executed after all datasets have been used to compare performances.
 
-The YAML specification is given below:
+The YAML specification is given below.
 
 .. code-block:: yaml
 
@@ -229,19 +229,19 @@ The YAML specification is given below:
       cmv2017_400: # with 400 repertoires
         format: ImmuneML
         params:
-          path: subsampled_datasets/subsampling_inst/cmv2017_400_subsampled_1/exported/immuneml/cmv2017_400_subsampled_1.iml_dataset
+          path: subsampled_datasets/subsampling_inst/cmv2017_400_subsampled_1/exported/immuneml/cmv2017_400_subsampled_1.yaml # Note that in older versions of immuneML (<3), immuneML datasets had .iml_dataset extension instead of .yaml
       cmv2017_200: # with 200 repertoires
         format: ImmuneML
         params:
-          path: subsampled_datasets/subsampling_inst/cmv2017_200_subsampled_2/exported/immuneml/cmv2017_200_subsampled_2.iml_dataset
+          path: subsampled_datasets/subsampling_inst/cmv2017_200_subsampled_2/exported/immuneml/cmv2017_200_subsampled_2.yaml
       cmv2017_100: # with 100 repertoires
         format: ImmuneML
         params:
-          path: subsampled_datasets/subsampling_inst/cmv2017_100_subsampled_3/exported/immuneml/cmv2017_100_subsampled_3.iml_dataset
+          path: subsampled_datasets/subsampling_inst/cmv2017_100_subsampled_3/exported/immuneml/cmv2017_100_subsampled_3.yaml
       cmv2017_50: # with 50 repertoires
         format: ImmuneML
         params:
-          path: subsampled_datasets/subsampling_inst/cmv2017_50_subsampled_4/exported/immuneml/cmv2017_50_subsampled_4.iml_dataset
+          path: subsampled_datasets/subsampling_inst/cmv2017_50_subsampled_4/exported/immuneml/cmv2017_50_subsampled_4.yaml
     encodings: # encodings as in Emerson et al. 2017 with different p-values to discover disease-associated combination of amino acid sequence and V and J gene
       enc01:
         SequenceAbundance:

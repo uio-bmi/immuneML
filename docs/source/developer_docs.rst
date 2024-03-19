@@ -25,8 +25,8 @@ and some basic knowledge of how Git works.
 
   developer_docs/info_new_developers.rst
   developer_docs/install_for_development.rst
-  developer_docs/how_to_add_new_ML_method.rst
   developer_docs/how_to_add_new_encoding.rst
+  developer_docs/how_to_add_new_ML_method.rst
   developer_docs/how_to_add_new_report.rst
   developer_docs/how_to_add_new_preprocessing.rst
 

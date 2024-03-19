@@ -64,7 +64,8 @@ Thus, the first step of integrating your method into immuneML is to decide which
 Since preprocessing steps are usually trivial to separate and not commonly used, the
 next section will focus on the difference between encoding and ML method steps.
 
-Separating between encoding and ML method
+
+Designing an encoding
 ++++++++++++++++++++++++++++++++++++++++++
 
 An encoding (sometimes called 'design matrix' or input matrix 'X') is a numeric representation of the data.
@@ -83,27 +84,30 @@ encoding and ML method, but the encoded data format should adhere the following:
 - The first dimension represents the examples ( = individual repertoires, receptors or sequences). In other words, the encoding gives some numeric representation per example.
 - There are usually two dimensions (examples x features), but multiple additional feature dimensions may be present (examples x features1 x features2 x features3 ...)
 
+Designing an ML method
+++++++++++++++++++++++++++++++++++++++++++
+
+An ML method takes in an encoded data matrix, fits a model and is able to make predictions on new data.
+The dataset contains :code:`labels` with two or more :code:`classes`.
+For example, a sequence dataset can have label "celiac" and classes "sick" and "healthy".
+ML Models added to immuneML may be binary classifiers (2 classes) or support more classes,
+but a model is always trained for only one label at a time. If multiple labels are specified
+during training (e.g., sick/healthy for multiple different diseases), the model is trained for only one label at a time.
+It is currently not yet possible to use immuneML for regression (predicting numeric values instead of classes).
 
 
-<something about ML methods>
-    Models added to immuneML may be binary classifiers (2 classes) or support more classes.
-    But a model is always trained for only one label at a time.
-    If multiple labels are specified during training (e.g., sick/healthy for multiple different diseases), the model is trained for only one label at a time.
+Next steps
+----------------------------------------------------------
 
+#. Follow the tutorial :ref:`Set up immuneML for development`
 
-<other steps>
->**************************************************
+#. Familiarise yourself with the :ref:`immuneML data model`. Decide whether your encoding and/or ML method should be implemented for one or multiple data types.
 
-step: setting immuneML up for development
+#. If a new encoder is needed, follow the tutorial :ref:`How to add a new encoding`.
 
-step: integrating a new encoder
-step: integrating new method with existing encoder
+#. If a new ML method is needed, follow the tutorial :ref:`How to add a new machine learning method`
 
-ref to tutorials
-Debugging scripts for ML methods and encoders
-
-
-
+#. If your method or report requires some specific reports, follow the tutorial :ref:`How to add a new report`
 
 
 

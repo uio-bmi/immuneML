@@ -1,6 +1,9 @@
 How to add a new preprocessing
 ==========================================
 
+.. include:: ./coding_conventions_and_tips.rst
+
+
 In this tutorial, we will add a new preprocessing to immuneML.
 This tutorial assumes you have installed immuneML for development as described at :ref:`Set up immuneML for development`.
 

@@ -1,6 +1,28 @@
 Instructions
 ============
 
+The different workflows that can be executed by immuneML are called :code:`instructions`.
+Different intructions may require different analysis components (defined under :code:`definitions`).
+
+This page documents all instructions and their *parameters* in detail.
+Tutorials for general usage of most instructions can be found under :ref:`Tutorials`.
+
+Please use the menu on the right side of this page to navigate to the
+documentation for the instructions of interest, or jump to one of the following
+sections:
+
+- :ref:`TrainMLModel`
+- :ref:`MLApplication`
+- :ref:`ExploratoryAnalysis`
+- :ref:`LigoSim`
+- :ref:`FeasibilitySummary`
+- :ref:`TrainGenModel`
+- :ref:`ApplyGenModel`
+- :ref:`Clustering`
+- :ref:`DatasetExport`
+- :ref:`Subsampling`
+
+
 TrainMLModel
 ---------------------------
 .. include:: ../../specs/instructions/hp.rst

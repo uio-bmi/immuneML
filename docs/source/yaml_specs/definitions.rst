@@ -2,8 +2,21 @@ Definitions
 ===========
 
 The different components used inside an immuneML analysis are called :code:`definitions`.
-All possible definitions and their parameters are documented below.
+These analysis components are used inside :code:`instructions` to perform an analysis.
 
+This page documents all possible definitions and their *parameters* in detail.
+For general usage examples please check out the :ref:`Tutorials`.
+
+Please use the menu on the right side of this page to navigate to the
+documentation for the components of interest, or jump to one of the following
+sections:
+
+- :ref:`Datasets`
+- :ref:`Encodings`
+- :ref:`ML methods`
+- :ref:`Reports`
+- :ref:`Preprocessings`
+- :ref:`Simulation`
 
 
 Datasets

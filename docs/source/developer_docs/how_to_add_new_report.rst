@@ -9,6 +9,9 @@ How to add a new report
    :twitter:description: See how to add a new report to the immuneML platform.
    :twitter:image: https://docs.immuneml.uio.no/_images/extending_immuneML.png
 
+.. include:: ./coding_conventions_and_tips.rst
+
+
 In this tutorial, we will show how to add a new report to plot sequence length distribution in repertoire datasets.
 This tutorial assumes you have installed immuneML for development as described at :ref:`Set up immuneML for development`.
 

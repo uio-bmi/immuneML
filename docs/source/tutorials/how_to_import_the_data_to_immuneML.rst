@@ -189,7 +189,7 @@ Important note: ImmuneML files might not be compatible between different immuneM
       my_dataset:
         format: ImmuneML
         params:
-          path: path/to/dataset.iml_dataset
+          path: path/to/dataset.yaml
           # specifying a metadata_file is optional, it will update the dataset using this new metadata.
           metadata_file: path/to/metadata.csv
 
