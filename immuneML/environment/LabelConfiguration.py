@@ -49,7 +49,7 @@ class LabelConfiguration:
         if classes[1] == True and classes[0] == False:
             return classes[1]
 
-        for positive_str, negative_str in [("1", "0"), ("true", "false"), ("positive", "negative"), ("+", "-")]:
+        for positive_str, negative_str in [("1", "0"), ("true", "false"), ("positive", "negative"), ("+", "-"), ("yes", "no")]:
             if set(classes) == {positive_str, negative_str}:
                 return positive_str
             if set(classes) == {positive_str.upper(), negative_str.upper()}:
