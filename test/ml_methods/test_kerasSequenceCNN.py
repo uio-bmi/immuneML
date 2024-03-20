@@ -11,7 +11,7 @@ from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
-from immuneML.ml_methods.KerasSequenceCNN import KerasSequenceCNN
+from immuneML.ml_methods.classifiers.KerasSequenceCNN import KerasSequenceCNN
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
 

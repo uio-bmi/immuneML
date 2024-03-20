@@ -79,13 +79,13 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     }
 
     def __init__(self, reference: List[Receptor], max_edit_distances: dict, reads: ReadsType, sum_matches: bool, normalize: bool, name: str = None):
+        super().__init__(name=name)
         self.reference_receptors = reference
         self.max_edit_distances = max_edit_distances
         self.reads = reads
         self.sum_matches = sum_matches
         self.normalize = normalize
         self.feature_count = 2 if self.sum_matches else len(self.reference_receptors) * 2
-        self.name = name
 
     @staticmethod
     def _prepare_parameters(reference: dict, max_edit_distances: dict, reads: str, sum_matches: bool, normalize: bool, name: str = None):

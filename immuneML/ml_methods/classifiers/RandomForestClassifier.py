@@ -56,6 +56,9 @@ class RandomForestClassifier(SklearnMethod):
     def can_predict_proba(self) -> bool:
         return True
 
+    def can_fit_with_example_weights(self) -> bool:
+        return True
+
     def get_params(self):
         params = self.model.get_params(deep=True)
         params["feature_importances"] = self.model.feature_importances_.tolist()

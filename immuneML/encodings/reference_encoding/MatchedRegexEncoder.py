@@ -84,13 +84,13 @@ class MatchedRegexEncoder(DatasetEncoder):
     }
 
     def __init__(self, motif_filepath: Path, match_v_genes: bool, reads: ReadsType, chains: list, name: str = None):
+        super().__init__(name=name)
         self.motif_filepath = motif_filepath
         self.match_v_genes = match_v_genes
         self.reads = reads
         self.chains = chains
         self.regex_df = None
         self.feature_count = None
-        self.name = name
 
     @staticmethod
     def _prepare_parameters(motif_filepath: str, match_v_genes: bool, reads: str, name: str = None):

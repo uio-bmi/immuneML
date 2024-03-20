@@ -95,6 +95,7 @@ class OneHotEncoder(DatasetEncoder):
     }
 
     def __init__(self, use_positional_info: bool, distance_to_seq_middle: int, flatten: bool, name: str = None, sequence_type: SequenceType = None):
+        super().__init__(name=name)
         self.use_positional_info = use_positional_info
         self.distance_to_seq_middle = distance_to_seq_middle
         self.flatten = flatten
@@ -106,8 +107,6 @@ class OneHotEncoder(DatasetEncoder):
             self.pos_decreasing = self.pos_increasing[::-1]
         else:
             self.pos_decreasing = None
-
-        self.name = name
 
         if self.sequence_type == SequenceType.NUCLEOTIDE and self.distance_to_seq_middle is not None:  # todo check this / explain in docs
             self.distance_to_seq_middle = self.distance_to_seq_middle * 3
@@ -149,14 +148,12 @@ class OneHotEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-    def _prepare_caching_params(self, dataset, params: EncoderParams, step: str = ""):
-        return (("example_identifiers", tuple(dataset.get_example_ids())),
-                ("dataset_metadata", dataset.metadata_file if hasattr(dataset, "metadata_file") else None),
+    def _prepare_caching_params(self, dataset, params: EncoderParams):
+        return (("dataset_identifier", dataset.identifier),
+                ("example_identifiers", tuple(dataset.get_example_ids())),
                 ("dataset_type", dataset.__class__.__name__),
                 ("labels", tuple(params.label_config.get_labels_by_name())),
                 ("encoding", OneHotEncoder.__name__),
-                ("learn_model", params.learn_model),
-                ("step", step),
                 ("encoding_params", tuple(vars(self).items())))
 
     @abc.abstractmethod

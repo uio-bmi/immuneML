@@ -57,6 +57,9 @@ class PrecomputedKNN(SklearnMethod):
     def can_predict_proba(self) -> bool:
         return True
 
+    def can_fit_with_example_weights(self) -> bool:
+        return False
+
     def get_compatible_encoders(self):
         from immuneML.encodings.distance_encoding.CompAIRRDistanceEncoder import CompAIRRDistanceEncoder
         from immuneML.encodings.distance_encoding.DistanceEncoder import DistanceEncoder

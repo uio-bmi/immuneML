@@ -74,7 +74,7 @@ class KmerAbundanceEncoder(DatasetEncoder):
 
     def __init__(self, p_value_threshold: float, sequence_encoding: SequenceEncodingType, k: int,
                  k_left: int, k_right: int, min_gap: int, max_gap: int, name: str = None):
-        self.name = name
+        super().__init__(name=name)
         self.p_value_threshold = p_value_threshold
 
         self.kmer_frequency_params = {"normalization_type": NormalizationType.BINARY, "reads": ReadsType.UNIQUE,

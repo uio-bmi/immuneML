@@ -1,12 +1,6 @@
-import sys
-import os
 import argparse
-import logging
-import warnings
-import yaml
-import inspect
-from pathlib import Path
 
+from scripts.checker_util import *
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
@@ -18,48 +12,29 @@ from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.reports.encoding_reports.DesignMatrixExporter import DesignMatrixExporter
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
-from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
-def setup_logger():
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(levelname)s: %(message)s',
-                        handlers=[logging.FileHandler("check_new_encoder_log.txt", mode="w"),
-                                  logging.StreamHandler(stream=sys.stdout)])
-    warnings.showwarning = lambda message, category, filename, lineno, file=None, line=None: logging.warning(message)
 
 def parse_commandline_arguments(args):
     parser = argparse.ArgumentParser(description="Tool for testing new immuneML DatasetEncoder classes")
     parser.add_argument("-e", "--encoder_file", type=str, required=True, help="Path to the (dataset-specific) encoder file, placed in the correct immuneML subfolder. ")
     parser.add_argument("-d", "--dataset_type", type=str, choices=["repertoire", "sequence", "receptor"], required=True, help="Whether to test using 'sequence', 'receptor' or 'repertoire' dataset.")
-    parser.add_argument("-p", "--no_default_parameters",  action='store_true', help="If enabled, it is assumed that no default parameters file exists. ")
+    parser.add_argument("-p", "--no_default_parameters",  action='store_true', help="If enabled, it is assumed that no default parameters file exists, and the Encoder can be run without supplying additional parameters. ")
     parser.add_argument("-l", "--log_file", type=str, default="check_new_encoder_log.txt", help="Path to the output log file. If already present, the file will be overwritten.")
     parser.add_argument("-t", "--tmp_path", type=str, default="./tmp", help="Path to the temporary output folder. If already present, the folder will be overwritten.")
 
     return parser.parse_args(args)
 
-def set_tmp_path(tmp_path):
-    PathBuilder.remove_old_and_build(tmp_path)
-    logging.info(f"Storing temporary files at '{tmp_path}'")
-
-
 def check_methods(encoder_instance):
     logging.info("Checking methods...")
-    assert DatasetEncoder.store == encoder_instance.__class__.store, f"Error: class method 'store' should not be overwritten from DatasetEncoder. Found the following: {encoder_instance.__class__.store}"
-    assert DatasetEncoder.store_encoder == encoder_instance.__class__.store_encoder, f"Error: class method 'store_encoder' should not be overwritten from DatasetEncoder. Found the following: {encoder_instance.__class__.store_encoder}"
-    assert DatasetEncoder.load_attribute == encoder_instance.__class__.load_attribute, f"Error: class method 'load_attribute' should not be overwritten from DatasetEncoder. Found the following: {encoder_instance.__class__.load_attribute}"
+    mssg = "Error: class method '{}' should not be overwritten from DatasetEncoder. Found the following: {}"
 
-    base_class_functions = [name for name, _ in inspect.getmembers(DatasetEncoder, predicate=inspect.isfunction) if not name.startswith("_")]
-    class_methods = [name for name, _ in inspect.getmembers(encoder_instance, predicate=inspect.ismethod) if not name.startswith("_")]
-    additional_public_methods = [name for name in class_methods if name not in base_class_functions]
-    if len(additional_public_methods) > 0:
-        logging.warning(f"In immuneML, 'public' methods start without underscore while 'private' methods start with underscore. "
-                        f"Methods added to specific encoders other than those inherited from DatasetEncoder should generally be considered private, although this is not strictly enforced. "
-                        f"The following additional public methods were found: {', '.join(additional_public_methods)}. To remove this warning, rename these methods to start with _underscore.")
+    assert DatasetEncoder.store == encoder_instance.__class__.store, mssg.format("store", encoder_instance.__class__.store)
+    assert DatasetEncoder.store_encoder == encoder_instance.__class__.store_encoder, mssg.format("store_encoder", encoder_instance.__class__.store_encoder)
+    assert DatasetEncoder.load_attribute == encoder_instance.__class__.load_attribute, mssg.format("load_attribute", encoder_instance.__class__.load_attribute)
 
-    for method_name in class_methods:
-        if method_name != method_name.lower():
-            logging.warning(f"Method names must be written in snake_case, found the following method: {method_name}. Please rename this method.")
+    check_base_vs_instance_methods(DatasetEncoder, encoder_instance)
+
     logging.info("...Checking methods done.")
 
 def check_encoded_dataset(encoded_dataset_result, dummy_dataset, encoder_instance):
@@ -77,7 +52,6 @@ def check_encoded_data(encoded_data, dummy_dataset, base_class_name):
 
     if encoded_data.feature_names is None:
         logging.warning("EncodedData.feature_names is set to None. Please consider adding meaningful feature names to your encoding, as some Reports may crash without feature names.")
-
 
 def get_dummy_dataset_labels(dummy_dataset):
     if isinstance(dummy_dataset, RepertoireDataset) or isinstance(dummy_dataset, ReceptorDataset):
@@ -170,8 +144,13 @@ def check_encoder_file(encoder_file):
     assert encoder_file.stem.endswith("Encoder"), f"Error: Filename '{encoder_file}' does not end with 'Encoder'"
     assert encoder_file.stem[0].isupper(), f"Error: Filename '{encoder_file}' does not start with an upper case character. Please rename the encoder (both class and filename) to '{encoder_file.stem.title()}'"
 
-    for char in encoder_file.stem:
-        assert char.isalnum(), f"Error: Encoder name is only allowed to contain alphanumeric characters, found: {char}. Please rename the encoder (both class and filename) to an alphanumeric name."
+    check_is_alphanum_name(encoder_file.stem)
+
+    init_file_path = encoder_file.parent / "__init__.py"
+    if not init_file_path.is_file():
+        with open(init_file_path, 'w') as file:
+            pass
+        logging.info(f"Expected an empty init file to be found at {init_file_path}. This file was not present previously, but has now been created.")
 
     logging.info(f"...Checking file name and location done.")
 
@@ -182,31 +161,9 @@ def get_encoder_class(encoder_file_path):
 
     return encoder_class
 
-def check_default_args(encoder_file_path, no_default_parameters):
+def get_default_params_filepath_from_name(encoder_file_path):
     encoder_shortname = encoder_file_path.stem[:-7]
-    default_params_filepath = EnvironmentSettings.default_params_path / "encodings" / f"{DefaultParamsLoader.convert_to_snake_case(encoder_shortname)}_params.yaml"
-
-
-    if no_default_parameters:
-        if os.path.isfile(default_params_filepath):
-            logging.warning(f"Default parameters file was found at '{default_params_filepath} but 'no_default_parameters' flag was enabled. "
-                            f"Assuming no default parameters for further testing, but note that default parameters will be attempted to be loaded by immuneML when using {encoder_file_path.stem}.")
-        else:
-            logging.info("Skip default parameter testing as 'no_default_parameters' flag is enabled")
-        return {}
-
-    logging.info("Checking default parameters file...")
-
-    assert os.path.isfile(default_params_filepath), f"Error: default parameters file was expected to be found at: '{default_params_filepath}'"
-    logging.info(f"...Default parameters file was found at: '{default_params_filepath}'")
-
-    logging.info("Attempting to load default parameters file with yaml.load()...")
-    with Path(default_params_filepath).open("r") as file:
-        default_params = yaml.load(file, Loader=yaml.FullLoader)
-
-    logging.info(f"...The following default parameters were found: '{default_params}'")
-
-    return default_params
+    return EnvironmentSettings.default_params_path / "encodings" / f"{DefaultParamsLoader.convert_to_snake_case(encoder_shortname)}_params.yaml"
 
 
 def get_dummy_dataset(dataset_type, tmp_path):
@@ -232,7 +189,6 @@ def get_dummy_dataset(dataset_type, tmp_path):
                                                                 path=Path(tmp_path))
 
 
-
 def run_checks(parsed_args):
     logging.info(f"Testing new encoder file: '{parsed_args.encoder_file}'")
 
@@ -242,7 +198,8 @@ def run_checks(parsed_args):
     check_encoder_file(encoder_file_path)
     encoder_class = get_encoder_class(encoder_file_path)
 
-    default_params = check_default_args(encoder_file_path, parsed_args.no_default_parameters)
+    default_params_filepath = get_default_params_filepath_from_name(encoder_file_path)
+    default_params = check_default_args(default_params_filepath, parsed_args.no_default_parameters, class_name=encoder_file_path.stem)
     dummy_dataset = get_dummy_dataset(parsed_args.dataset_type, parsed_args.tmp_path)
     check_encoder_class(encoder_class, dummy_dataset, default_params, base_class_name=encoder_file_path.stem, tmp_path=parsed_args.tmp_path)
 
@@ -259,9 +216,9 @@ def run_checks(parsed_args):
 
 
 def main(args):
-    setup_logger()
-
     parsed_args = parse_commandline_arguments(args)
+
+    setup_logger(parsed_args.log_file)
     set_tmp_path(parsed_args.tmp_path)
 
     try:
@@ -269,6 +226,7 @@ def main(args):
     except Exception as e:
         logging.error("\n\nA critical error occurred when testing the new DatasetEncoder:\n")
         logging.exception(e)
+
         raise e
 
 

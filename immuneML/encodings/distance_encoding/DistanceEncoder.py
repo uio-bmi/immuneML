@@ -59,12 +59,12 @@ class DistanceEncoder(DatasetEncoder):
 
     def __init__(self, distance_metric: DistanceMetricType, attributes_to_match: list, sequence_batch_size: int, context: dict = None,
                  name: str = None):
+        super().__init__(name=name)
         self.distance_metric = distance_metric
         self.distance_fn = ReflectionHandler.import_function(self.distance_metric.value, DistanceMetrics)
         self.attributes_to_match = attributes_to_match
         self.sequence_batch_size = sequence_batch_size
         self.context = context
-        self.name = name
         self.comparison = None
 
     def set_context(self, context: dict):

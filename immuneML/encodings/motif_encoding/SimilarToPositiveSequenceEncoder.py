@@ -59,6 +59,7 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
     def __init__(self, hamming_distance: int = None, compairr_path: str = None,
                  ignore_genes: bool = None, threads: int = None, keep_temporary_files: bool = None,
                  name: str = None):
+        super().__init__(name=name)
         self.hamming_distance = hamming_distance
         self.compairr_path = Path(compairr_path) if compairr_path is not None else None
         self.ignore_genes = ignore_genes
@@ -66,7 +67,6 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
         self.keep_temporary_files = keep_temporary_files
 
         self.positive_sequences = None
-        self.name = name
         self.context = None
 
     @staticmethod

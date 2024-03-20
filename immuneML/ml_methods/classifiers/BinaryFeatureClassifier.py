@@ -90,27 +90,19 @@ class BinaryFeatureClassifier(MLMethod):
         self.feature_names = None
         self.rule_tree_indices = None
         self.rule_tree_features = None
-        self.label = None
-        self.optimization_metric = None
-        self.class_mapping = None
 
         self.result_path = result_path
 
-    def predict(self, encoded_data: EncodedData, label: Label):
+    def _predict(self, encoded_data: EncodedData):
         self._check_features(encoded_data.feature_names)
 
         return {self.label.name: self._get_rule_tree_predictions_class(encoded_data, self.rule_tree_indices)}
 
-    def predict_proba(self, encoded_data: EncodedData, label: Label):
+    def _predict_proba(self, encoded_data: EncodedData):
         warnings.warn(f"{BinaryFeatureClassifier.__name__}: cannot predict probabilities.")
         return None
 
-    def fit(self, encoded_data: EncodedData, label: Label, optimization_metric: str, cores_for_training: int = 2):
-        self.feature_names = encoded_data.feature_names
-        self.label = label
-        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name])
-        self.optimization_metric = optimization_metric
-
+    def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
         self.rule_tree_indices = self._build_rule_tree(encoded_data, cores_for_training)
         self.rule_tree_features = self._get_rule_tree_features_from_indices(self.rule_tree_indices, self.feature_names)
         self._export_selected_features(self.result_path, self.rule_tree_features)
@@ -266,14 +258,6 @@ class BinaryFeatureClassifier(MLMethod):
                                            y_pred=new_predictions,
                                            sample_weight=example_weights)
 
-
-    # def _apply_optimization_fn_to_new_rule_combo(self, optimization_scoring_fn, examples, y_true_train,
-    #                                              example_weights, prev_predictions, new_rule_idx):
-    #     return optimization_scoring_fn(y_true=y_true_train,
-    #                                    y_pred=np.logical_or(prev_predictions, examples[:, new_rule_idx]),
-    #                                    sample_weight=example_weights)
-    #
-
     def _get_unused_rule_indices(self, encoded_train_data, rule_indices):
         return [idx for idx in range(encoded_train_data.examples.shape[1]) if idx not in rule_indices]
 
@@ -313,11 +297,6 @@ class BinaryFeatureClassifier(MLMethod):
             with open(path / "selected_features.txt", "w") as file:
                 file.writelines([f"{feature}\n" for feature in rule_tree_features])
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric: str = None,
-                                number_of_splits: int = 5, cores_for_training: int = -1):
-        logging.warning(f"{BinaryFeatureClassifier.__name__}: cross_validation is not implemented for this method. Using standard fitting instead...")
-        self.fit(encoded_data=encoded_data, label=label)
-
     def _prepare_and_split_data(self, encoded_data: EncodedData):
         train_indices, val_indices = Util.get_train_val_indices(len(encoded_data.example_ids), self.training_percentage, random_seed=self.random_seed)
 
@@ -329,21 +308,16 @@ class BinaryFeatureClassifier(MLMethod):
 
         return train_data, val_data
 
-    def store(self, path: Path, feature_names=None, details_path: Path = None):
+    def store(self, path: Path):
         PathBuilder.build(path)
 
-        custom_vars = copy.deepcopy(vars(self))
-        del custom_vars["result_path"]
-
-        if self.label:
-            custom_vars["label"] = {key.lstrip("_"): value for key, value in vars(self.label).items()}
-
-        params_path = path / "custom_params.yaml"
+        custom_vars = self.get_params()
+        params_path = self._get_custom_params_path(path)
         with params_path.open('w') as file:
             yaml.dump(custom_vars, file)
 
     def load(self, path):
-        params_path = path / "custom_params.yaml"
+        params_path = self._get_custom_params_path(path)
         with params_path.open("r") as file:
             custom_params = yaml.load(file, Loader=yaml.SafeLoader)
 
@@ -354,27 +328,23 @@ class BinaryFeatureClassifier(MLMethod):
                 else:
                     setattr(self, param, value)
 
-    def check_if_exists(self, path):
-        return self.rule_tree_indices is not None
+    def _get_custom_params_path(self, path):
+        return path / "custom_params.yaml"
 
     def get_params(self):
         params = copy.deepcopy(vars(self))
+        del params["result_path"]
+
+        if self.label:
+            params["label"] = {key.lstrip("_"): value for key, value in vars(self.label).items()}
+
         return params
-
-    def get_label_name(self):
-        return self.label.name
-
-    def get_package_info(self) -> str:
-        return Util.get_immuneML_version()
-
-    def get_feature_names(self) -> list:
-        return self.feature_names
 
     def can_predict_proba(self) -> bool:
         return False
 
-    def get_class_mapping(self) -> dict:
-        return self.class_mapping
+    def can_fit_with_example_weights(self) -> bool:
+        return True
 
     def get_compatible_encoders(self):
         from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder

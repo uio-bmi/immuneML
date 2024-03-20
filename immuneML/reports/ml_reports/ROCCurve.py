@@ -38,10 +38,10 @@ class ROCCurve(MLReport):
             predicted_y = self.method.predict_proba(x, self.label)[self.label.name][self.label.positive_class]
         else:
             predicted_y = self.method.predict(x, self.label)[self.label.name]
-            predicted_y = Util.map_to_new_class_values(predicted_y, self.method.get_class_mapping())
+            predicted_y = Util.map_to_new_class_values(predicted_y, self.method.class_mapping)
 
         true_y = x.labels[self.label.name]
-        true_y = Util.map_to_new_class_values(true_y, self.method.get_class_mapping())
+        true_y = Util.map_to_new_class_values(true_y, self.method.class_mapping)
 
         fpr, tpr, _ = roc_curve(true_y, predicted_y)
         roc_auc = auc(fpr, tpr)

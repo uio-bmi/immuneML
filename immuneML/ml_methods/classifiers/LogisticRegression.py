@@ -58,6 +58,9 @@ class LogisticRegression(SklearnMethod):
     def can_predict_proba(self) -> bool:
         return True
 
+    def can_fit_with_example_weights(self) -> bool:
+        return True
+
     def get_params(self):
         params = self.model.get_params()
         params["coefficients"] = self.model.coef_[0].tolist()

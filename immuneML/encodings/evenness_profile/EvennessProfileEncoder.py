@@ -59,10 +59,10 @@ class EvennessProfileEncoder(DatasetEncoder):
     }
 
     def __init__(self, min_alpha: float, max_alpha: float, dimension: int, name: str = None):
+        super().__init__(name=name)
         self.min_alpha = min_alpha
         self.max_alpha = max_alpha
         self.dimension = dimension
-        self.name = name
 
     @staticmethod
     def _prepare_parameters(min_alpha: float, max_alpha: float, dimension: int, name: str = None):

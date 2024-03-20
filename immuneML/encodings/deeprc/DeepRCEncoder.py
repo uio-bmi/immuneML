@@ -38,8 +38,8 @@ class DeepRCEncoder(DatasetEncoder):
     METADATA_SEP = ","
 
     def __init__(self, context: dict = None, name: str = None):
+        super().__init__(name=name)
         self.context = context
-        self.name = name
         self.max_sequence_length = 0
 
     def set_context(self, context: dict):

@@ -75,9 +75,9 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     TOTAL_SEQUENCE_ABUNDANCE = "total_sequence_abundance"
 
     def __init__(self, comparison_attributes, p_value_threshold: float, sequence_batch_size: int, repertoire_batch_size: int, name: str = None):
+        super().__init__(name=name)
         self.comparison_attributes = comparison_attributes
         self.sequence_batch_size = sequence_batch_size
-        self.name = name
         self.relevant_sequence_indices = None
         self.context = None
         self.p_value_threshold = p_value_threshold

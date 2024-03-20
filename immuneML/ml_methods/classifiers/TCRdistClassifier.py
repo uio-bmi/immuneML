@@ -36,7 +36,6 @@ class TCRdistClassifier(SklearnMethod):
 
     def __init__(self, percentage: float, show_warnings: bool = True):
         super().__init__()
-
         ParameterValidator.assert_type_and_value(percentage, float, "TCRdistClassifier", "percentage", min_inclusive=0., max_inclusive=1.)
 
         self.percentage = percentage
@@ -63,6 +62,9 @@ class TCRdistClassifier(SklearnMethod):
 
     def can_predict_proba(self) -> bool:
         return True
+
+    def can_fit_with_example_weights(self) -> bool:
+        return False
 
     def _get_model_filename(self):
         return "tcrdist_classifier"

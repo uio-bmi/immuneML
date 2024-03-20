@@ -12,7 +12,7 @@ from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.BinaryFeatureClassifier import BinaryFeatureClassifier
+from immuneML.ml_methods.classifiers.BinaryFeatureClassifier import BinaryFeatureClassifier
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.BinaryFeaturePrecisionRecall import BinaryFeaturePrecisionRecall
 from immuneML.util.PathBuilder import PathBuilder

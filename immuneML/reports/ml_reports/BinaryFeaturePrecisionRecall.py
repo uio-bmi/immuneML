@@ -12,7 +12,7 @@ from immuneML.ml_methods.util.Util import Util
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
-from immuneML.ml_methods.BinaryFeatureClassifier import BinaryFeatureClassifier
+from immuneML.ml_methods.classifiers.BinaryFeatureClassifier import BinaryFeatureClassifier
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport

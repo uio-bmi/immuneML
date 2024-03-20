@@ -87,10 +87,7 @@ class TestDeepRC(TestCase):
             self.assertIsInstance(classifier.model, DeepRCInternal)
 
             # Test storing and loading of models
-            self.assertFalse(classifier.check_if_exists(result_path))
             classifier.store(result_path, feature_names=None)
-            self.assertTrue(classifier.check_if_exists(result_path))
-
             second_classifier = DeepRC(**params)
             second_classifier.load(result_path)
 

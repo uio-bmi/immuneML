@@ -67,13 +67,13 @@ class MatchedSequencesEncoder(DatasetEncoder):
 
     def __init__(self, max_edit_distance: int, reference: List[ReceptorSequence], reads: ReadsType, sum_matches: bool, normalize: bool,
                  name: str = None):
+        super().__init__(name=name)
         self.max_edit_distance = max_edit_distance
         self.reference_sequences = reference
         self.reads = reads
         self.sum_matches = sum_matches
         self.normalize = normalize
         self.feature_count = 1 if self.sum_matches else len(self.reference_sequences)
-        self.name = name
 
     @staticmethod
     def _prepare_parameters(max_edit_distance: int, reference: dict, reads: str, sum_matches: bool, normalize: bool,

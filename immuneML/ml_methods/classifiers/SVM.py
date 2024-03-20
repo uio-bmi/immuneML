@@ -50,6 +50,9 @@ class SVM(SklearnMethod):
     def can_predict_proba(self) -> bool:
         return False
 
+    def can_fit_with_example_weights(self) -> bool:
+        return False
+
     def get_params(self):
         params = self.model.get_params()
         params["coefficients"] = self.model.coef_[0].tolist() if self.model.kernel == 'linear' else self.model.dual_coef_.toarray().tolist() if hasattr(self.model.dual_coef_, "toarray") else self.model.dual_coef_.tolist()

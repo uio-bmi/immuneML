@@ -91,7 +91,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
     def __init__(self, p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, keep_temporary_files: bool,
                  threads: int, name: str = None):
-        self.name = name
+        super().__init__(name=name)
         self.p_value_threshold = p_value_threshold
         self.sequence_batch_size = sequence_batch_size
         self.keep_temporary_files = keep_temporary_files

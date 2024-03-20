@@ -98,6 +98,7 @@ class MotifEncoder(DatasetEncoder):
                  min_precision: float = None, min_recall: dict = None,
                  min_true_positives: int = None,
                  candidate_motif_filepath: str = None, label: str = None, name: str = None):
+        super().__init__(name=name)
         self.max_positions = max_positions
         self.min_positions = min_positions
         self.min_precision = min_precision
@@ -107,7 +108,6 @@ class MotifEncoder(DatasetEncoder):
         self.learned_motif_filepath = None
 
         self.label = label
-        self.name = name
         self.context = None
 
     @staticmethod

@@ -47,7 +47,7 @@ class TestSklearnMethod(TestCase):
         y = {"default": np.array(['a', "b", "c", "a"])}
 
         svm = SVM()
-        svm._fit(sparse.csr_matrix(x), y["default"])
+        svm._fit_model(sparse.csr_matrix(x), y["default"])
 
         path = EnvironmentSettings.root_path / "test/tmp/storesklearn/"
 
@@ -66,7 +66,7 @@ class TestSklearnMethod(TestCase):
         y = {"default": np.array(['a', "b", "c", "a"])}
 
         svm = SVM()
-        svm._fit(sparse.csr_matrix(x), y["default"])
+        svm._fit_model(sparse.csr_matrix(x), y["default"])
 
         path = EnvironmentSettings.root_path / "test/tmp/store_load_sklearn/"
         details_path = EnvironmentSettings.root_path / "test/tmp/store_load_sklearn/details.yaml"

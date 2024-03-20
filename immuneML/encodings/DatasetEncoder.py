@@ -21,6 +21,8 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
                 <encoder_class>: # encoding with parameters
                     parameter: value
     """
+    def __init__(self, name: str = None):
+        self.name = name
 
     @staticmethod
     @abc.abstractmethod

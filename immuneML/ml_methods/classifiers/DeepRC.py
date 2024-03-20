@@ -114,10 +114,7 @@ class DeepRC(MLMethod):
         self.training_function = train
 
         self.model = None
-        self.result_path = None
-
         self.max_seq_len = None
-        self.label = None
 
         self.keep_dataset_in_ram = keep_dataset_in_ram
         self.pytorch_device_name = pytorch_device_name
@@ -155,8 +152,6 @@ class DeepRC(MLMethod):
         self.sample_n_sequences = sample_n_sequences
         self.training_batch_size = training_batch_size
         self.n_workers = n_workers
-
-        self.feature_names = None
 
     def _metadata_to_hdf5(self, metadata_filepath: Path, label_name: str):
         from deeprc.dataset_converters import DatasetToHDF5
@@ -249,16 +244,11 @@ class DeepRC(MLMethod):
                 ("evaluate_at", self.evaluate_at),
                 ("pytorch_device_name", self.pytorch_device_name))
 
-    def fit(self, encoded_data: EncodedData, label: Label, optimization_metric=None, cores_for_training: int = 2):
-        if encoded_data.example_weights is not None:
-            warnings.warn(f"{self.__class__.__name__}: cannot fit this classifier with example weights, fitting without example weights instead... Example weights will still be applied when computing evaluation metrics after fitting.")
+    def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
+        self.model = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, "fit", self.label.name),
+                                                 lambda: self._fit(encoded_data, self.label, cores_for_training))
 
-        self.feature_names = encoded_data.feature_names
-        self.label = label
-        self.model = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, "fit", label.name),
-                                                 lambda: self._fit(encoded_data, label, cores_for_training))
-
-    def _fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
+    def _fit_model(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
 
         hdf5_filepath, pre_loaded_hdf5_file = self._convert_dataset_to_hdf5(encoded_data, label)
 
@@ -352,11 +342,6 @@ class DeepRC(MLMethod):
                                show_progress=False, device=self.pytorch_device, evaluate_at=self.evaluate_at,
                                task_definition=task_definition, early_stopping_target_id=label.name)
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric: str = None,
-                                number_of_splits: int = 5,  cores_for_training: int = -1):
-        warnings.warn("DeepRC: cross-validation on this classifier is not defined: fitting one model instead...")
-        self.fit(encoded_data, label)
-
     def get_params(self):
         return {name: param.data.tolist() for name, param in self.model.named_parameters()}
 
@@ -365,22 +350,21 @@ class DeepRC(MLMethod):
             raise NotFittedError("This DeepRCs instance is not fitted yet. "
                                  "Call 'fit' with appropriate arguments before using this method.")
 
-    def predict(self, encoded_data: EncodedData, label: Label):
-        probabilities = self.predict_proba(encoded_data, label)
+    def _predict(self, encoded_data: EncodedData):
+        probabilities = self._predict_proba(encoded_data)
 
-        pos_class_probs = probabilities[label.name][label.positive_class]
-        negative_class = label.get_binary_negative_class()
+        pos_class_probs = probabilities[self.label.name][self.label.positive_class]
+        negative_class = self.label.get_binary_negative_class()
 
-        # TODO: check what is returned here and how it works with multiclass
-        return {label.name: [label.positive_class if probability > 0.5 else negative_class for probability in
+        return {self.label.name: [self.label.positive_class if probability > 0.5 else negative_class for probability in
                              pos_class_probs]}
 
-    def predict_proba(self, encoded_data: EncodedData, label: Label):
+    def _predict_proba(self, encoded_data: EncodedData):
         from deeprc.dataset_readers import RepertoireDataset as DeepRCRepDataset
-        self.check_is_fitted(label.name)
+        self.check_is_fitted(self.label.name)
 
-        hdf5_filepath, _ = self._convert_dataset_to_hdf5(encoded_data, label)
-        task_definition = self._make_task_definition(label)
+        hdf5_filepath, _ = self._convert_dataset_to_hdf5(encoded_data, self.label)
+        task_definition = self._make_task_definition(self.label)
 
         test_dataset = DeepRCRepDataset(metadata_filepath=encoded_data.info['metadata_filepath'],
                                         hdf5_filepath=str(hdf5_filepath),
@@ -390,7 +374,7 @@ class DeepRC(MLMethod):
                                         inputformat='NCL',
                                         sequence_counts_scaling_fn=self.sequence_counts_scaling_fn)
 
-        test_dataloader = self.make_data_loader(test_dataset, indices=None, label_name=label.name, eval_only=True,
+        test_dataloader = self.make_data_loader(test_dataset, indices=None, label_name=self.label.name, eval_only=True,
                                                 is_train=False)
 
         probs_pos_class = self._model_predict(self.model, test_dataloader)
@@ -425,7 +409,7 @@ class DeepRC(MLMethod):
 
         return scoring_predictions
 
-    def load(self, path: Path, details_path: Path = None):
+    def load(self, path: Path):
         name = FilenameHandler.get_filename(self.__class__.__name__, "pt")
         file_path = path / name
         if file_path.is_file():
@@ -435,10 +419,7 @@ class DeepRC(MLMethod):
             raise FileNotFoundError(f"{self.__class__.__name__} model could not be loaded from {file_path}. "
                                     f"Check if the path to the {name} file is properly set.")
 
-        if details_path is None:
-            params_path = path / FilenameHandler.get_filename(self.__class__.__name__, "yaml")
-        else:
-            params_path = details_path
+        params_path = path / FilenameHandler.get_filename(self.__class__.__name__, "yaml")
 
         if params_path.is_file():
             with params_path.open("r") as file:
@@ -449,20 +430,17 @@ class DeepRC(MLMethod):
                     if param in desc:
                         setattr(self, param, desc[param])
 
-    def store(self, path, feature_names=None, details_path: Path = None):
+    def store(self, path):
         PathBuilder.build(path)
         name = FilenameHandler.get_filename(self.__class__.__name__, "pt")
         torch.save(self.model, str(path / name))
 
-        if details_path is None:
-            params_path = path / FilenameHandler.get_filename(self.__class__.__name__, "yaml")
-        else:
-            params_path = details_path
+        params_path = path / FilenameHandler.get_filename(self.__class__.__name__, "yaml")
 
         with params_path.open("w") as file:
             desc = {
                 **(self.get_params()),
-                "feature_names": feature_names,
+                "feature_names": self.get_feature_names(),
                 "classes": self.get_classes()
             }
             if self.label is not None:
@@ -470,26 +448,15 @@ class DeepRC(MLMethod):
 
             yaml.dump(desc, file)
 
-    def check_if_exists(self, path):
-        file_path = path / FilenameHandler.get_filename(self.__class__.__name__, "pt")
-
-        return file_path.is_file()
 
     def get_package_info(self) -> str:
-        return 'immuneML ' + Util.get_immuneML_version() + '; deepRC ' + pkg_resources.get_distribution(
-            'DeepRC').version
-
-    def get_feature_names(self) -> list:
-        return self.feature_names
+        return Util.get_immuneML_version() + '; deepRC ' + pkg_resources.get_distribution('DeepRC').version
 
     def can_predict_proba(self) -> bool:
         return True
 
-    def get_class_mapping(self) -> dict:
-        return {}
-
-    def get_label_name(self) -> str:
-        return self.label.name
+    def can_fit_with_example_weights(self) -> bool:
+        return False
 
     def get_compatible_encoders(self):
         return [DeepRCEncoder]

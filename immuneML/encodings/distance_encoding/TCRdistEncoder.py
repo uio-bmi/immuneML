@@ -35,8 +35,8 @@ class TCRdistEncoder(DatasetEncoder):
     """
 
     def __init__(self, cores: int, name: str = None):
+        super().__init__(name=name)
         self.cores = cores
-        self.name = name
         self.distance_matrix = None
         self.context = None
 
