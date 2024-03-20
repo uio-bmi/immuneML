@@ -28,7 +28,7 @@ class TestConfounderAnalysis(TestCase):
     def _create_dummy_lr_model(self, path, encoded_data, label):
         # dummy logistic regression with 100 observations with 3 features belonging to 2 classes
         dummy_lr = LogisticRegression()
-        dummy_lr.fit_by_cross_validation(encoded_data,
+        dummy_lr.fit_by_cross_validation(encoded_data, optimization_metric="balanced_accuracy",
                                          number_of_splits=2, label=label)
 
         return dummy_lr
@@ -58,7 +58,6 @@ class TestConfounderAnalysis(TestCase):
     def _create_report(self, path):
         report = ConfounderAnalysis.build_object(metadata_labels=["age", "HLA"], name='test')
 
-        report.ml_details_path = path / "ml_details.yaml"
         report.label = Label("disease", [True, False])
         report.result_path = path
         encoder = KmerFrequencyEncoder.build_object(RepertoireDataset(), **{

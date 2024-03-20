@@ -71,10 +71,10 @@ class TestSklearnMethod(TestCase):
         path = EnvironmentSettings.root_path / "test/tmp/store_load_sklearn/"
         details_path = EnvironmentSettings.root_path / "test/tmp/store_load_sklearn/details.yaml"
 
-        svm.store(path=path, details_path=details_path)
+        svm.store(path=path)
 
         svm2 = SVM()
-        svm2.load(path=path, details_path=details_path)
+        svm2.load(path=path)
 
         shutil.rmtree(path)
 

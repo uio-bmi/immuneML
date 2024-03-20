@@ -37,7 +37,8 @@ class TestSequenceLengthDistribution(TestCase):
 
         sld = SequenceLengthDistribution.build_object(dataset=dataset, sequence_type='amino_acid', result_path=path)
 
-        result = sld.generate_report()
+        self.assertTrue(sld.check_prerequisites())
+        result = sld._generate()
         self.assertTrue(os.path.isfile(result.output_figures[0].path))
 
         shutil.rmtree(path)
@@ -49,7 +50,8 @@ class TestSequenceLengthDistribution(TestCase):
 
         sld = SequenceLengthDistribution(dataset, 1, path, sequence_type=SequenceType.AMINO_ACID)
 
-        result = sld.generate_report()
+        self.assertTrue(sld.check_prerequisites())
+        result = sld._generate()
         self.assertTrue(os.path.isfile(result.output_figures[0].path))
 
         shutil.rmtree(path)

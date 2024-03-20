@@ -14,7 +14,7 @@ class TestGLIPH2Exporter(TestCase):
     def test_generate(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "gliph2_export")
         dataset = RandomDatasetGenerator.generate_receptor_dataset(10, {3: 1}, {2: 1}, {"epitope": {"ep1": 0.4, "ep2": 0.6}}, path)
-        report_result = GLIPH2Exporter(dataset, path / "result", "somename", "epitope").generate_report()
+        report_result = GLIPH2Exporter(dataset, path / "result", "somename", "epitope")._generate()
 
         self.assertEqual(1, len(report_result.output_tables))
         self.assertTrue(os.path.isfile(report_result.output_tables[0].path))

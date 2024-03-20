@@ -65,7 +65,7 @@ class TestFeatureDistribution(TestCase):
 
         self.assertTrue(report.check_prerequisites())
 
-        result = report.generate_report()
+        result = report._generate()
 
         self.assertIsInstance(result, ReportResult)
 

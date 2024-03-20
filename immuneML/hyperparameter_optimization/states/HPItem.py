@@ -18,7 +18,6 @@ class HPItem:
     hp_setting: HPSetting = None
     train_predictions_path: Path = None
     test_predictions_path: Path = None
-    ml_details_path: Path = None
     ml_settings_export_path: Path = None
     train_dataset: Dataset = None
     test_dataset: Dataset = None
