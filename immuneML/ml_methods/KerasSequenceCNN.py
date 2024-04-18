@@ -200,7 +200,7 @@ class KerasSequenceCNN(MLMethod):
     def store(self, path: Path, feature_names=None, details_path: Path = None):
         PathBuilder.build(path)
 
-        self.model.save(path / "model")
+        self.model.save(path / "model.keras")
 
         custom_vars = copy.deepcopy(vars(self))
         del custom_vars["model"]
@@ -228,7 +228,7 @@ class KerasSequenceCNN(MLMethod):
                 else:
                     setattr(self, param, value)
 
-        self.model = keras.models.load_model(path / "model")
+        self.model = keras.models.load_model(path / "model.keras")
 
     def check_if_exists(self, path):
         return self.model is not None

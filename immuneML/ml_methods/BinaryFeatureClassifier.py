@@ -336,7 +336,7 @@ class BinaryFeatureClassifier(MLMethod):
         del custom_vars["result_path"]
 
         if self.label:
-            custom_vars["label"] = {key.lstrip("_"): value for key, value in vars(self.label).items()}
+            custom_vars["label"] = self.label.get_desc_for_storage()
 
         params_path = path / "custom_params.yaml"
         with params_path.open('w') as file:
