@@ -74,7 +74,7 @@ Step-by-step tutorial
    :code:`get_compatible_encoders()` method of the :py:obj:`~immuneML.ml_methods.MLMethod.MLMethod` of interest.
    See also :ref:`Adding encoder compatibility to an ML method`.
 
-#. Finish the encoder by adding :ref:`class documentation <Class documentation standards>` and :ref:`unit tests<Adding a unit test for the new encoder>`.
+#. Finish the encoder by adding :ref:`class documentation <Encoding class documentation standards>` and :ref:`unit tests<Adding a unit test for the new encoder>`.
 
 #. Optional: If you want to use immuneML directly to test run your encoder, the YAML example below may be used.
    This example analysis creates a randomly generated dataset, encodes the data using the :code:`SillyEncoder`
@@ -177,7 +177,7 @@ Caching intermediate results
 
 .. include:: ./caching.rst
 
-Class documentation standards
+Encoding class documentation standards
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. include:: ./class_documentation_standards.rst

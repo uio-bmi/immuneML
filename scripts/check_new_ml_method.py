@@ -155,14 +155,14 @@ def check_model_fitting_and_prediction(ml_method_instance, tmp_path):
     logging.info(f"Attempting to call {ml_method_instance.__class__.__name__}.predict()...")
     predictions = ml_method_instance.predict(enc_data, label)
     check_predictions(ml_method_instance, predictions, label, enc_data)
-    logging.info(f"...Succeeded calling {ml_method_instance.__class__.__name__}.predict(). Predictions are: {predictions}")
+    logging.info(f"...Succeeded calling {ml_method_instance.__class__.__name__}.predict(). Predictions are:\n{predictions}")
 
     if ml_method_instance.can_predict_proba():
         logging.info("Attempting to predict ")
         logging.info(f"{ml_method_instance.__class__.__name__}.can_predict_proba() returns True, attempting to call {ml_method_instance.__class__.__name__}.predict_proba()...")
         proba_predictions = ml_method_instance.predict_proba(enc_data, label)
         check_predictions_proba(ml_method_instance, proba_predictions, label, enc_data)
-        logging.info(f"...Succeeded calling {ml_method_instance.__class__.__name__}.predict_proba(). Predictions are: {proba_predictions}")
+        logging.info(f"...Succeeded calling {ml_method_instance.__class__.__name__}.predict_proba(). Predictions are:\n{proba_predictions}")
     else:
         logging.info(f"{ml_method_instance.__class__.__name__}.can_predict_proba() returns False, {ml_method_instance.__class__.__name__}.predict_proba() will be ignored")
 

@@ -16,7 +16,7 @@ Prerequisites
 
 - System requirements: at least 4GB of RAM memory and 15GB of disk space.
 
-- A Python virtual environment using at least Python version 3.8. This can be created through `Python venv <https://docs.python.org/3/library/venv.html>`_ or `conda venv <https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html>`_.
+- A Python virtual environment using at least Python version 3.8 (newest version of Python is usually recommended). This can be created through `Python venv <https://docs.python.org/3/library/venv.html>`_ or `conda venv <https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html>`_.
 
 - Under Windows, the Microsoft Visual C++ 14.0 or greater is required to install from requirements.txt.
 
@@ -99,6 +99,11 @@ All unit tests must pass before adding new features to the main immuneML codebas
 Note that it may take some time (up to 20~30 minutes) for all tests to complete.
 
 In PyCharm, unit tests can be run by right-clicking the folder named :code:`test` at the project root, and clicking "Run 'Python tests in test...'".
+
+.. image:: ../_static/images/dev_docs/run_python_test_in_test.png
+   :alt: Pycharm run python tests
+   :width: 400
+
 
 Alternatively, unit tests can be run on the command line using the following command (see also: `the official unittest documentation <https://docs.python.org/3/library/unittest.html>`_):
 

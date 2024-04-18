@@ -13,12 +13,9 @@ YAML specification
 
 .. toctree::
   :maxdepth: 2
-  :hidden:
 
   yaml_specs/how_to_specify_an_analysis_with_yaml
-  yaml_specs/definitions
-  yaml_specs/instructions
-
+  yaml_specs/yaml_parameter_details
 
 
 

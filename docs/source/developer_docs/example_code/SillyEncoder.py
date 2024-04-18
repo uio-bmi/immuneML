@@ -16,7 +16,7 @@ class SillyEncoder(DatasetEncoder):
 
     Arguments:
 
-        random_seed (int): The random seed for generating random numbers.
+        random_seed (int): The random seed for generating random features.
 
         embedding_len (int): The number of random features to generate per example.
 

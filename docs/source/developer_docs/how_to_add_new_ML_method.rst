@@ -56,16 +56,17 @@ Step-by-step tutorial
 
 #. Use the automated script `check_new_ml_method.py <https://github.com/uio-bmi/immuneML/blob/master/scripts/check_new_ml_method.py>`_ to test
    the newly added ML method. This script will throw errors or warnings if the MLMethod class implementation is incorrect.
-   Note: this script will try running the new classifier with a random :code:`EncodedData` object, which may not be compatible with every new MLMethod.
-   You may overwrite the function :code:`get_example_encoded_data()` to supply a custom EncodedData object which meets the requirements of your MLMethod.
+
+   - Note: this script will try running the new classifier with a random :code:`EncodedData` object (a matrix of random numbers), which may not be compatible with your particular MLMethod.
+     You may overwrite the function :code:`get_example_encoded_data()` to supply a custom EncodedData object which meets the requirements of your MLMethod.
 
    Example command to test the :code:`SillyClassifier`:
 
    .. code:: bash
 
-      python3 ./scripts/check_new_ml_method.py -e ./immuneML/ml_methods/classifiers/SillyClassifier.py
+      python3 ./scripts/check_new_ml_method.py -m ./immuneML/ml_methods/classifiers/SillyClassifier.py
 
-#. Finish the ML method by adding :ref:`class documentation <Class documentation standards>` and :ref:`unit tests<Adding a unit test for the new ML method>`.
+#. Finish the ML method by adding :ref:`class documentation <MLMethod class documentation standards>` and :ref:`unit tests<Adding a unit test for the new ML method>`.
 
 #. Optional: If you want to use immuneML directly to test run your ML method, the YAML example below may be used.
    This example analysis encodes a random dataset using k-mer encoding, trains and compares the performance of two silly
@@ -225,6 +226,17 @@ To ensure immuneML recognizes the encoder-ML method compatibility, make sure tha
 returned by the :code:`get_compatible_encoders()` method of the ML method(s) of interest.
 
 
+Implementing fitting through cross-validation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+<todo>
+
+
+MLMethod class documentation standards
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. include:: ./class_documentation_standards.rst
+
 
 Adding a Unit test for the MLMethod
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -242,10 +254,6 @@ Add a unit test for the new SillyClassifier:
   .. literalinclude:: test_sillyClassifier.py
      :language: python
 
-Implementing fitting through cross-validation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-<todo>
 
 
 
