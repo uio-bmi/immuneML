@@ -336,7 +336,7 @@ class BinaryFeatureClassifier(MLMethod):
         del params["result_path"]
 
         if self.label:
-            params["label"] = {key.lstrip("_"): value for key, value in vars(self.label).items()}
+            params["label"] = self.label.get_desc_for_storage()
 
         return params
 
