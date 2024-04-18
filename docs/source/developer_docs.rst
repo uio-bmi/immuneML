@@ -34,8 +34,8 @@ and some basic knowledge of how Git works.
   :maxdepth: 1
   :caption: Platform overview
 
-  developer_docs/platform_overview.rst
   developer_docs/data_model.rst
+  developer_docs/execution_flow.rst
 
 .. toctree::
   :maxdepth: 4

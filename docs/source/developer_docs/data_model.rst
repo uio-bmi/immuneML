@@ -38,16 +38,18 @@ A Repertoire dataset contains a set of :py:obj:`~immuneML.data_model.repertoire.
 each contain a set of ReceptorSequence objects.
 
 
-<note: figure not up to date, variable names have changed>
 
-.. figure:: ../_static/images/dev_docs/data_model_architecture.png
-   :width: 70%
+..
+  <note: figure not up to date, variable names have changed>
 
-   *UML diagram showing the immuneML data model, where white classes are abstract and define the interface only, while green are concrete and used throughout the codebase.*
+  .. figure:: ../_static/images/dev_docs/data_model_architecture.png
+     :width: 70%
+
+     *UML diagram showing the immuneML data model, where white classes are abstract and define the interface only, while green are concrete and used throughout the codebase.*
 
 
-The examples in an immuneML dataset can contain one or more labels, represented by the :py:obj:`~immuneML.environment.Label.Label` class.
-The classes of such labels are what an ML method aims to learn to predict.
+  The examples in an immuneML dataset can contain one or more labels, represented by the :py:obj:`~immuneML.environment.Label.Label` class.
+  The classes of such labels are what an ML method aims to learn to predict.
 
 
 
