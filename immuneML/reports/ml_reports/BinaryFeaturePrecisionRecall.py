@@ -23,10 +23,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class BinaryFeaturePrecisionRecall(MLReport):
     """
-
-
-    Arguments:
-
+    Plots the precision and recall scores for each added feature to the collection of features selected by the BinaryFeatureClassifier.
 
 
     YAML specification:

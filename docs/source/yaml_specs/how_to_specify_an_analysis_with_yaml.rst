@@ -178,15 +178,25 @@ the only supported output format is currently HTML. The :code:`output` section m
 
 Putting all parts together
 ---------------------------------------
+Not every analysis component can be combined with every component.
+Some analysis components are specific to a particular dataset type (receptor, sequence or repertoire dataset),
+and some components need to be used in a specific combination (such as encoder-ML method compatibility).
+The diagrams below show for each dataset type how the components can be combined.
 
-A diagram of all the different dataset types, preprocessing steps, encodings, ML methods and reports, and how they can be
-combined in different analyses is shown below. The solid lines represent components that are intended to be used together, and the
-dashed lines indicate optional combinations.
+.. collapse:: Analysis component combinations for Repertoire datasets
 
-.. image:: ../_static/images/analysis_paths.png
-    :alt: Analysis paths
+    .. image:: ../_static/images/analysis_paths_repertoires.png
+        :alt: Analysis paths repertoires
 
+.. collapse:: Analysis component combinations for Receptor datasets
 
+    .. image:: ../_static/images/analysis_paths_receptors.png
+        :alt: Analysis paths receptors
+
+.. collapse:: Analysis component combinations for Sequence datasets
+
+    .. image:: ../_static/images/analysis_paths_sequences.png
+        :alt: Analysis paths sequences
 
 An example of a complete YAML specification for training an ML model through nested cross-validation is given here:
 

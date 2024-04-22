@@ -29,10 +29,20 @@ well as detailed documentation of each possible parameter.
   yaml_specs/yaml_parameter_details
 
 
+Valid combinations of analysis components (definitions) for each dataset type can be viewed below.
+These components are described by :code:`definitions`, and can be used in various different :code:`instructions` (primarily TrainMLModel and ExploratoryAnalysis).
 
 
+.. image:: _static/images/analysis_paths_repertoires.png
+    :alt: Analysis paths repertoires
 
 
+.. image:: _static/images/analysis_paths_receptors.png
+    :alt: Analysis paths receptors
+
+
+.. image:: _static/images/analysis_paths_sequences.png
+    :alt: Analysis paths sequences
 
 
 
