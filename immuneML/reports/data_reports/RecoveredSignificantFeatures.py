@@ -40,7 +40,7 @@ class RecoveredSignificantFeatures(DataReport):
     is only registered if both sequences are of equal length.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - groundtruth_sequences_path (str): Path to a file containing the true implanted (sub)sequences, e.g., full sequences or k-mers.
       The file should contain one sequence per line, without a header, and without V or J genes.
@@ -65,7 +65,7 @@ class RecoveredSignificantFeatures(DataReport):
       k-values, :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder` will be used.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

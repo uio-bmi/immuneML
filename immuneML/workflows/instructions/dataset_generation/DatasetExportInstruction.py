@@ -16,7 +16,7 @@ class DatasetExportInstruction(Instruction):
     DatasetExport instruction takes a list of datasets as input, optionally applies preprocessing steps, and outputs
     the data in specified formats.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - datasets (list): a list of datasets to export in all given formats
 
@@ -28,7 +28,7 @@ class DatasetExportInstruction(Instruction):
 
     - number_of_processes (int): how many processes to use during repertoire export (not used for sequence datasets)
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

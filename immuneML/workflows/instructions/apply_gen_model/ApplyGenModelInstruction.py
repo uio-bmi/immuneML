@@ -23,7 +23,7 @@ class ApplyGenModelInstruction(GenModelInstruction):
 
         This is an experimental feature in version 3.0.0a1.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - gen_examples_count (int): how many examples (sequences, repertoires) to generate from the applied model
 
@@ -33,7 +33,7 @@ class ApplyGenModelInstruction(GenModelInstruction):
 
     - config_path (str): path to the trained model in zip format (as provided by TrainGenModel instruction)
 
-    YAML specification:
+    **YAML specification:**
 
     .. highlight:: yaml
     .. code-block:: yaml

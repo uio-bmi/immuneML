@@ -42,23 +42,23 @@ class BinaryFeatureClassifier(MLMethod):
     are classified as positive. Parameter keep_all should be set to true, since this encoder creates only 1 feature.
 
 
-    Arguments:
+    **Specification arguments:**
 
-        training_percentage (float): What percentage of data to use for training (the rest will be used for validation); values between 0 and 1
+    - training_percentage (float): What percentage of data to use for training (the rest will be used for validation); values between 0 and 1
 
-        keep_all (bool): Whether to keep all the input features (true) or learn a reduced subset (false). By default, keep_all is false.
+    - keep_all (bool): Whether to keep all the input features (true) or learn a reduced subset (false). By default, keep_all is false.
 
-        random_seed (int): Random seed for splitting the data into training and validation sets when learning a minimal subset of features. This is only used when keep_all is false.
+    - random_seed (int): Random seed for splitting the data into training and validation sets when learning a minimal subset of features. This is only used when keep_all is false.
 
-        max_features (int): The maximum number of features to allow in the reduced subset. When this number is reached, no more features are added even if the earlystopping criterion is not reached yet.
-        This is only used when keep_all is false. By default, max_features is 100.
+    - max_features (int): The maximum number of features to allow in the reduced subset. When this number is reached, no more features are added even if the earlystopping criterion is not reached yet.
+      This is only used when keep_all is false. By default, max_features is 100.
 
-        patience (int): The patience for earlystopping. When earlystopping is reached, <patience> more features are added to the reduced set to test whether the optimization metric on the validation set improves again. By default, patience is 5.
+    - patience (int): The patience for earlystopping. When earlystopping is reached, <patience> more features are added to the reduced set to test whether the optimization metric on the validation set improves again. By default, patience is 5.
 
-        min_delta (float): The delta value used to test if there was improvement between the previous set of features and the new set of features (+1). By default, min_delta is 0, meaning the new set of features does not need to yield a higher optimization metric score on the validation set, but it needs to be at least equally high as the previous set.
+    - min_delta (float): The delta value used to test if there was improvement between the previous set of features and the new set of features (+1). By default, min_delta is 0, meaning the new set of features does not need to yield a higher optimization metric score on the validation set, but it needs to be at least equally high as the previous set.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

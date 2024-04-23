@@ -46,7 +46,7 @@ class ClusteringInstruction(Instruction):
 
         This is an experimental feature in version 3.0.0a1.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - dataset (str): name of the dataset to be clustered
 
@@ -63,7 +63,7 @@ class ClusteringInstruction(Instruction):
 
     - number_of_processes (int): how many processes to use for parallelization
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

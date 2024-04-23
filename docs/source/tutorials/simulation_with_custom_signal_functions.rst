@@ -11,7 +11,7 @@ using signals with custom function. We assume that LIgO is already installed.
 
 .. note::
 
-    This way of defining signals can only be used in combination with rejection sampling.
+    This way of defining signals can only be used in combination with the rejection sampling simulation strategy (not with implanting).
 
 Step 1: Defining the custom signal function
 ---------------------------------------------

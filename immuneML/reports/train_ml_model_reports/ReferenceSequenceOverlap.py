@@ -29,7 +29,7 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
 
     The report compares the sequences by their sequence content and the additional comparison_attributes (such as V or J gene), as specified by the user.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - reference_path (str): path to the reference file in csv format which contains one entry per row and has columns that correspond to the attributes
       listed under comparison_attributes argument
@@ -41,7 +41,7 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
       instruction; if it is none and multiple labels were specified for the instruction, the report will not be generated
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

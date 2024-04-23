@@ -29,7 +29,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
     K-mers can be defined in different ways, as determined by the sequence_encoding.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - sequence_encoding (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType`): The type
       of k-mers that are used. The simplest sequence_encoding is
@@ -81,7 +81,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
       sparsity and will increase the memory consumption. The default value for scale_to_zero_mean is false.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

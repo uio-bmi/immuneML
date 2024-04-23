@@ -38,7 +38,7 @@ class ReceptorCNN(MLMethod):
     - ReceptorCNN can only be used for binary classification, not multi-class classification.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - kernel_count (count): number of kernels that will look for motifs for one chain
 
@@ -70,7 +70,7 @@ class ReceptorCNN(MLMethod):
 
     - background_probabilities: used for rescaling the kernel values to produce information gain matrix; represents the background probability of each amino acid (without positional information); if not specified, uniform background is assumed
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

@@ -16,11 +16,11 @@ class ReceptorDatasetOverview(DataReport):
     """
     This report plots the length distribution per chain for a receptor (paired-chain) dataset.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - batch_size (int): how many receptors to load at once; 50 000 by default
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

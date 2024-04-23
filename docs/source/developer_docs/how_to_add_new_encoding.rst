@@ -62,8 +62,8 @@ Step-by-step tutorial
 
    In rare cases where classes have unconventional names that do not translate well to CamelCase (e.g., MiXCR, VDJdb), this needs to be accounted for in :py:meth:`~immuneML.dsl.DefaultParamsLoader.convert_to_snake_case`.
 
-#. Use the automated script `check_new_encoder.py <https://github.com/uio-bmi/immuneML/blob/master/scripts/check_new_encoder.py>`_ to test
-   the newly added encoder. This script will throw errors or warnings if the DatasetEncoder class implementation is incorrect.
+#. **Use the automated script** `check_new_encoder.py <https://github.com/uio-bmi/immuneML/blob/master/scripts/check_new_encoder.py>`_ **to test the newly added encoder.**
+   This script will throw errors or warnings if the DatasetEncoder class implementation is incorrect.
    Example command to test the :code:`SillyEncoder` for sequence datasets:
 
    .. code:: bash

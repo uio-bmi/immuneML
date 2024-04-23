@@ -26,7 +26,7 @@ class AtchleyKmerMILClassifier(MLMethod):
     lymphocytes and adjacent healthy tissue. Cancer Res. Published online January 1, 2019:canres.2292.2018. `doi:10.1158/0008-5472.CAN-18-2292
     <https://cancerres.aacrjournals.org/content/79/7/1671>`_ .
 
-    Specification arguments:
+    **Specification arguments:**
 
     - iteration_count (int): max number of training iterations
 
@@ -50,7 +50,7 @@ class AtchleyKmerMILClassifier(MLMethod):
 
     - pytorch_device_name (str): The name of the pytorch device to use. This name will be passed to torch.device(pytorch_device_name).
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

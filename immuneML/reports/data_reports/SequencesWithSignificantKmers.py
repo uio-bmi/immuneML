@@ -22,7 +22,7 @@ class SequencesWithSignificantKmers(DataReport):
     For each combination of p-value and k-mer size given, a file is written containing all sequences containing a significant
     k-mer of the given size at the given p-value.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - reference_sequences_path (str): Path to a file containing the reference sequences,
       The file should contain one sequence per line, without a header, and without V or J genes.
@@ -38,7 +38,7 @@ class SequencesWithSignificantKmers(DataReport):
       be defined. See the YAML specification below for an example.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

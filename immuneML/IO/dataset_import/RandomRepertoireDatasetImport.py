@@ -9,7 +9,7 @@ class RandomRepertoireDatasetImport(DataImport):
     Returns a RepertoireDataset consisting of randomly generated sequences, which can be used for benchmarking purposes.
     The sequences consist of uniformly chosen amino acids or nucleotides.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - repertoire_count (int): The number of repertoires the RepertoireDataset should contain.
 
@@ -39,7 +39,7 @@ class RandomRepertoireDatasetImport(DataImport):
                     cmv_negative: 0.3
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

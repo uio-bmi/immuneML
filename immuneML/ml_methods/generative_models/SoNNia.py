@@ -28,7 +28,7 @@ class SoNNia(GenerativeModel):
     cell receptor repertoires with soNNia. Proceedings of the National Academy of Sciences, 118(14), e2023141118.
     https://doi.org/10.1073/pnas.2023141118
 
-    Specification arguments:
+    **Specification arguments:**
 
     - chain (str)
 

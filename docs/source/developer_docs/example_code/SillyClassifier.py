@@ -14,12 +14,12 @@ class SillyClassifier(MLMethod):
     This SillyClassifier is a placeholder for a real ML method and is used as a simple example for integration of new methods.
     It generates random predictions ignoring the input features.
 
-    Arguments:
+    **Specification arguments:**
 
-        random_seed (int): The random seed for generating random predictions.
+    - random_seed (int): The random seed for generating random predictions.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

@@ -13,7 +13,7 @@ class ClonesPerRepertoireFilter(Filter):
     Since the filter removes repertoires from the dataset (examples in machine learning setting), it cannot be used with :ref:`TrainMLModel`
     instruction. If you want to use this filter, see :ref:`DatasetExport` instruction with preprocessing.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - lower_limit (int): The minimal inclusive lower limit for the number of clonotypes allowed in a repertoire.
 
@@ -22,7 +22,7 @@ class ClonesPerRepertoireFilter(Filter):
     When no lower or upper limit is specified, or the value -1 is specified, the limit is ignored.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

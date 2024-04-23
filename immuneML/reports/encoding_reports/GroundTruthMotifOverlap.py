@@ -20,26 +20,26 @@ class GroundTruthMotifOverlap(EncodingReport):
     Creates report displaying overlap between learned motifs and groundtruth motifs implanted in a given sequence dataset.
     This report must be used in combination with the MotifEncoder.
 
-    Arguments:
+    **Specification arguments:**
 
-        groundtruth_motifs_path (str): Path to a .tsv file containing groundtruth position-specific motifs.
-        The file should specify the motifs as position-specific amino acids, one column representing the positions
-        concatenated with an '&' symbol, the next column specifying the amino acids concatenated with '&' symbol,
-        and the last column specifying the implant rate.
+    - groundtruth_motifs_path (str): Path to a .tsv file containing groundtruth position-specific motifs.
+      The file should specify the motifs as position-specific amino acids, one column representing the positions
+      concatenated with an '&' symbol, the next column specifying the amino acids concatenated with '&' symbol,
+      and the last column specifying the implant rate.
 
-        Example:
+      Example:
 
-            =======  ===========  ===========
-            indices  amino_acids  n_sequences
-            =======  ===========  ===========
-            0        A            4
-            4&8&9    G&A&C        30
-            =======  ===========  ===========
+      =======  ===========  ===========
+      indices  amino_acids  n_sequences
+      =======  ===========  ===========
+      0        A            4
+      4&8&9    G&A&C        30
+      =======  ===========  ===========
 
-        This file shows a motif 'A' at position 0 implanted in 4 sequences, and motif G---AC implanted between positions 4 and 9 in 30 sequences
+      This file shows a motif 'A' at position 0 implanted in 4 sequences, and motif G---AC implanted between positions 4 and 9 in 30 sequences
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

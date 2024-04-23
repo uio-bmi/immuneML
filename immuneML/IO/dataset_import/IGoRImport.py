@@ -24,7 +24,7 @@ class IGoRImport(DataImport):
     ‘High-throughput immune repertoire analysis with IGoR’. Nature Communications, (2018)
     `doi.org/10.1038/s41467-018-02832-w <https://doi.org/10.1038/s41467-018-02832-w>`_.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - path (str): For RepertoireDatasets, this is the path to a directory with IGoR files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
@@ -57,7 +57,7 @@ class IGoRImport(DataImport):
     - separator (str): Column separator, for IGoR this is by default ",".
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

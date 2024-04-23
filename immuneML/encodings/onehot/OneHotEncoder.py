@@ -22,7 +22,7 @@ class OneHotEncoder(DatasetEncoder):
     1 represents the alphabet character.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - use_positional_info (bool): whether to include features representing the positional information.
       If True, three additional feature vectors will be added, representing the sequence start, sequence middle
@@ -68,7 +68,7 @@ class OneHotEncoder(DatasetEncoder):
     - sequence_type: whether to use nucleotide or amino acid sequence for encoding. Valid values are 'nucleotide' and 'amino_acid'.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

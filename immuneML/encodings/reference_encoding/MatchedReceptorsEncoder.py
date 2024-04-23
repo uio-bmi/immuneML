@@ -31,7 +31,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     Clinical Immunology Volume 222 (January 2021): 108621. `doi.org/10.1016/j.clim.2020.108621 <https://doi.org/10.1016/j.clim.2020.108621>`_
     with the only exception being that this encoder uses paired receptors, while the original publication used single sequences (see also: :ref:`MatchedSequences` encoder).
 
-    Specification arguments:
+    **Specification arguments:**
 
     - reference (dict): A dictionary describing the reference dataset file. Import should be specified the same way as
       regular dataset import. It is only allowed to import a receptor dataset here (i.e., is_repertoire is False and
@@ -58,7 +58,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
       (when reads = unique) or the total number of reads in the repertoire (when reads = all).
 
 
-    YAML Specification:
+    **YAML Specification:**
 
     .. indent with spaces
     .. code-block:: yaml

@@ -10,6 +10,11 @@ How to simulate immune events into an existing AIRR dataset in Galaxy
    :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
 
 
+.. note::
+
+    Galaxy simulation was implemented in an older version of immuneML (version 2).
+    In immuneML version 3, this has been replaced by simulation using LIgO.
+    For accurate tutorials on how to write a YAML specification for simulation, please check out the documentation of an old version of immuneML: https://docs.immuneml.uio.no/v2.1.2/tutorials/how_to_simulate_antigen_signals_in_airr_datasets.html
 
 The Galaxy tool `Simulate immune events into an existing repertoire dataset <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_simulation>`_
 can be used to implant short disease-associated motifs into an existing

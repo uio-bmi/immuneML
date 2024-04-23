@@ -26,7 +26,7 @@ class DistanceEncoder(DatasetEncoder):
     if they contain the same set of sequence_aas, and the distance is minimal if none of the sequence_aas are shared between
     two repertoires.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - distance_metric (:py:mod:`~immuneML.encodings.distance_encoding.DistanceMetricType`): The metric used to calculate the
       distance between two repertoires. Names of different distance metric types are allowed values in the specification.
@@ -39,7 +39,7 @@ class DistanceEncoder(DatasetEncoder):
       Only the fields defined under attributes_to_match will be considered, all other fields are ignored.
       Valid values include any repertoire attribute (sequence, amino acid sequence, V gene etc). The default value is ['sequence_aas']
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

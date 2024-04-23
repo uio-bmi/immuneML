@@ -27,7 +27,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
     Clinical Immunology Volume 222 (January 2021): 108621. `doi.org/10.1016/j.clim.2020.108621 <https://doi.org/10.1016/j.clim.2020.108621>`_
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - reference (dict): A dictionary describing the reference dataset file. Import should be specified the same way as
       regular dataset import. It is only allowed to import a sequence dataset here (i.e., is_repertoire and paired are
@@ -51,7 +51,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
       repertoire (when reads = unique) or the total number of reads in the repertoire (when reads = all).
 
 
-    YAML Specification:
+    **YAML Specification:**
 
     .. indent with spaces
     .. code-block:: yaml

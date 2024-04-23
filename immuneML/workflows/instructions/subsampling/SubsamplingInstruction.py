@@ -16,7 +16,7 @@ class SubsamplingInstruction(Instruction):
     """
     Subsampling is an instruction that subsamples a given dataset and creates multiple smaller dataset according to the parameters provided.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - dataset (str): original dataset which will be used as a basis for subsampling
 
@@ -24,7 +24,7 @@ class SubsamplingInstruction(Instruction):
 
     - dataset_export_formats (list): in which formats to export the subsampled datasets. Valid formats are class names of any non-abstract class inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

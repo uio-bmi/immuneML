@@ -25,7 +25,7 @@ class ImmunoSEQRearrangementImport(DataImport):
     The only difference between these two importers is which columns they load from the .tsv files.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - path (str): For RepertoireDatasets, this is the path to a directory with files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
@@ -78,7 +78,7 @@ class ImmunoSEQRearrangementImport(DataImport):
     - import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

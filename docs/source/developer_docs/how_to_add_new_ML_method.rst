@@ -54,8 +54,8 @@ Step-by-step tutorial
 
    In rare cases where classes have unconventional names that do not translate well to CamelCase (e.g., MiXCR, VDJdb), this needs to be accounted for in :py:meth:`~immuneML.dsl.DefaultParamsLoader.convert_to_snake_case`.
 
-#. Use the automated script `check_new_ml_method.py <https://github.com/uio-bmi/immuneML/blob/master/scripts/check_new_ml_method.py>`_ to test
-   the newly added ML method. This script will throw errors or warnings if the MLMethod class implementation is incorrect.
+#. **Use the automated script** `check_new_ml_method.py <https://github.com/uio-bmi/immuneML/blob/master/scripts/check_new_ml_method.py>`_ **to test the newly added ML method.**
+   This script will throw errors or warnings if the MLMethod class implementation is incorrect.
 
    - Note: this script will try running the new classifier with a random :code:`EncodedData` object (a matrix of random numbers), which may not be compatible with your particular MLMethod.
      You may overwrite the function :code:`get_example_encoded_data()` to supply a custom EncodedData object which meets the requirements of your MLMethod.

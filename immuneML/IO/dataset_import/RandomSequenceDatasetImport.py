@@ -10,7 +10,7 @@ class RandomSequenceDatasetImport(DataImport):
     The sequences consist of uniformly chosen amino acids or nucleotides.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - sequence_count (int): The number of sequences the SequenceDataset should contain.
 
@@ -32,7 +32,7 @@ class RandomSequenceDatasetImport(DataImport):
                     not_binding: 0.3
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

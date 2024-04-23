@@ -22,7 +22,7 @@ class PWM(GenerativeModel):
     This is a baseline implementation of a positional weight matrix. It is estimated from a set of sequences for each
     of the different lengths that appear in the dataset.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - chain (str): which chain is generated (for now, it is only assigned to the generated sequences) # TODO: fix
 
@@ -31,7 +31,7 @@ class PWM(GenerativeModel):
     - region_type (str): which region type to use (e.g., IMGT_CDR3), this is only assigned to the generated sequences; # TODO: fix
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

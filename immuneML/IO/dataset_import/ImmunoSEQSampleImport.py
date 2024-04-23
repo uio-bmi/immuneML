@@ -24,7 +24,7 @@ class ImmunoSEQSampleImport(DataImport):
     The only difference between these two importers is which columns they load from the .tsv files.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - path (str): For RepertoireDatasets, this is the path to a directory with files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
@@ -71,7 +71,7 @@ class ImmunoSEQSampleImport(DataImport):
     - separator (str): Column separator, for ImmunoSEQ files this is by default "\\t".
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

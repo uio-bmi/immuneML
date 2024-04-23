@@ -28,7 +28,7 @@ class EvennessProfileEncoder(DatasetEncoder):
     status. Genome Medicine, 7(1), 49. `doi.org/10.1186/s13073-015-0169-8 <https://doi.org/10.1186/s13073-015-0169-8>`_
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - min_alpha (float): minimum alpha value to use
 
@@ -37,7 +37,7 @@ class EvennessProfileEncoder(DatasetEncoder):
     - dimension (int): dimension of output evenness profile vector, or the number of alpha values to linearly space
       between min_alpha and max_alpha
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

@@ -11,19 +11,19 @@ class PredefinedWeighting(ExampleWeightingStrategy):
 
     Example weighting strategy where weights are supplied in a file.
 
-    Arguments:
+    **Specification arguments:**
 
-        file_path (Path): Path to the example weights, should contain the columns 'identifier' and 'example_weight':
+    - file_path (Path): Path to the example weights, should contain the columns 'identifier' and 'example_weight':
 
-        ==========  ==============
-        identifier  example_weight
-        ==========  ==============
-        1           0.5
-        2           1
-        3           1
-        ========  ==============
+      ==========  ==============
+      identifier  example_weight
+      ==========  ==============
+      1           0.5
+      2           1
+      3           1
+      ========  ==============
 
-        separator (str): Column separator in the input file.
+    - separator (str): Column separator in the input file.
 
     '''
 

@@ -26,7 +26,7 @@ class AminoAcidFrequencyDistribution(DataReport):
     """
     Generates a barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - imgt_positions (bool): Whether to use IMGT positional numbering or sequence index numbering. When imgt_positions
       is True, IMGT positions are used, meaning sequences of unequal length are aligned according to their IMGT
@@ -42,7 +42,7 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     - label (str): if split_by_label is set to True, a label can be specified here.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

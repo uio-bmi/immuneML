@@ -22,7 +22,7 @@ class ExploratoryAnalysisInstruction(Instruction):
     and a report to be executed on the [encoded] dataset. Each analysis specified under `analyses` is completely independent from all
     others.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - analyses (dict): a dictionary of analyses to perform. The keys are the names of different analyses, and the values for each
       of the analyses are:
@@ -45,7 +45,7 @@ class ExploratoryAnalysisInstruction(Instruction):
       machines, 4 or 8 is usually a good choice.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

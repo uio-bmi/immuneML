@@ -11,7 +11,7 @@ class SimConfig:
     """
     Defines all parameters of the simulation.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - sim_items (dict): a list of SimConfigItems defining individual units of simulation
 
@@ -33,7 +33,8 @@ class SimConfig:
 
     - implanting_scaling_factor (int): determines in how many receptors to implant the signal in reach iteration; this is computed as number_of_receptors_needed_for_signal * implanting_scaling_factor; useful when using Implanting simulation strategy in combination with importance sampling, since the generation probability of some receptors with implanted signals might be very rare and those receptors might end up not being kept often with importance sampling; this parameter is only used when keep_p_gen_dist is set to True
 
-    YAML specification:
+
+    **YAML specification:**
 
     .. indent-with-spaces
     .. code-block:: yaml

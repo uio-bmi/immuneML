@@ -30,12 +30,12 @@ class NonMotifSequenceSimilarity(EncodingReport):
     distribution will lean towards containing more large hamming distances.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
-        motif_color_map (dict): An optional mapping between motif sizes and colors. If no mapping is given, default colors will be chosen.
+    - motif_color_map (dict): An optional mapping between motif sizes and colors. If no mapping is given, default colors will be chosen.
 
 
-    YAML specification example:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

@@ -18,12 +18,12 @@ class MetadataRepertoireFilter(Filter):
     :ref:`TrainMLModel` instruction. To filter out repertoires, use preprocessing from the :ref:`DatasetExport` instruction that will create
     a new dataset ready to be used for training machine learning models.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - criteria (dict): a nested dictionary that specifies the criteria for keeping certain columns. See :py:obj:`~immuneML.analysis.criteria_matches.CriteriaMatcher.CriteriaMatcher` for a more detailed explanation.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

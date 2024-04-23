@@ -25,7 +25,7 @@ class GenericImport(DataImport):
     file that contains both receptor chains on one line, see :ref:`SingleLineReceptor` import
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - path (str): For RepertoireDatasets, this is the path to a directory with files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
@@ -69,7 +69,7 @@ class GenericImport(DataImport):
     - separator (str): Required parameter. Column separator, for example "\\t" or ",". The default value is "\\t"
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

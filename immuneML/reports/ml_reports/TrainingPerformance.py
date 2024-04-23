@@ -23,12 +23,12 @@ class TrainingPerformance(MLReport):
     The available metrics are accuracy, balanced_accuracy, confusion_matrix, f1_micro, f1_macro, f1_weighted, precision,
     recall, auc and log_loss (see :py:obj:`immuneML.environment.Metric.Metric`).
 
-    Specification arguments:
+    **Specification arguments:**
 
     - metrics (list): A list of metrics used to evaluate training performance. See :py:obj:`immuneML.environment.Metric.Metric` for available options.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

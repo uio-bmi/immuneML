@@ -21,7 +21,7 @@ class SplitConfig:
 
     - leave_one_out_stratification (leave-one-out CV where one refers to a specific parameter, e.g. if subject is known in a receptor dataset, it is possible to have leave-subject-out CV - currently only available for receptor and sequence datasets).
 
-    Specification arguments:
+    **Specification arguments:**
 
     - split_strategy (SplitType): one of the types of cross-validation listed above (`LOOCV`, `K_FOLD`, `STRATIFIED_K_FOLD`, `MANUAL`, ``  or `RANDOM`)
 
@@ -45,7 +45,7 @@ class SplitConfig:
       number of examples that can be present in the test dataset. This type of generating train and test datasets is only supported for receptor
       and sequence datasets so far. If split strategy is anything else, this field has no effect and can be omitted.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

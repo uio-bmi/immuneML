@@ -47,7 +47,7 @@ class LigoSimInstruction(Instruction):
     LIgO simulation instruction creates a synthetic dataset from scratch based on the generative model and a set of signals provided by
     the user.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - simulation (str): a name of a simulation object containing a list of SimConfigItem as specified under definitions key; defines how to combine signals with simulated data; specified under definitions
 
@@ -59,7 +59,8 @@ class LigoSimInstruction(Instruction):
 
     - number_of_processes (int): determines how many simulation items can be simulated in parallel
 
-    YAML specification:
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

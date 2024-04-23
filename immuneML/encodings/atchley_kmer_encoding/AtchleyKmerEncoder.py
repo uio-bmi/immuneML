@@ -32,7 +32,7 @@ class AtchleyKmerEncoder(DatasetEncoder):
 
     Note that sequences in the repertoire with length shorter than skip_first_n_aa + skip_last_n_aa + k will not be encoded.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - k (int): k-mer length
 
@@ -44,7 +44,7 @@ class AtchleyKmerEncoder(DatasetEncoder):
 
     - normalize_all_features (bool): when normalizing features to have 0 mean and unit variance, this parameter indicates if the abundance feature should be included in the normalization
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

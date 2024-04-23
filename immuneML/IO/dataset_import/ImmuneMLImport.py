@@ -39,7 +39,7 @@ class ImmuneMLImport(DataImport):
        such as repertoire identifier, disease status, subject id and other similar available information. For sequence
        and receptor datasets, sequences or receptors respectively, are stored in batches in binary numpy files.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - path (str): The path to the previously created dataset file. This file should have an '.yaml' extension. If the
       path has not been specified, immuneML attempts to load the dataset from a specified metadata file (only for
@@ -49,7 +49,7 @@ class ImmuneMLImport(DataImport):
       metadata will be updated to the newly specified metadata without otherwise changing the Repertoire objects
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

@@ -38,14 +38,14 @@ class DeepRCMotifDiscovery(MLReport):
     Neural Information Processing Systems, 33. https://proceedings.neurips.cc//paper/2020/hash/da4902cb0bc38210839714ebdcf0efc3-Abstract.html
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - n_steps (int): Number of IG steps (more steps -> better path integral -> finer contribution values). 50 is usually good enough.
 
     - threshold (float): Only applies to the plotting of kernels. Contributions are normalized to range [0, 1], and only kernels with normalized contributions above threshold are plotted.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

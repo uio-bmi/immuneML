@@ -10,7 +10,7 @@ class RandomReceptorDatasetImport(DataImport):
     The sequences consist of uniformly chosen amino acids or nucleotides.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - receptor_count (int): The number of receptors the ReceptorDataset should contain.
 
@@ -34,7 +34,7 @@ class RandomReceptorDatasetImport(DataImport):
                     not_binding: 0.3
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

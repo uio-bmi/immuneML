@@ -17,7 +17,7 @@ class SeedMotif(Motif):
     """
     Describes motifs by seed, possible gaps, allowed hamming distances, positions that can be changed and what they can be changed to.
 
-    Arguments:
+    **Specification arguments:**
 
     - seed (str): An amino acid sequence that represents the basic motif seed. All implanted motifs correspond to the seed, or a modified version thereof, as specified in its instantiation strategy. If this argument is set, seed_chain1 and seed_chain2 arguments are not used.
 
@@ -31,7 +31,7 @@ class SeedMotif(Motif):
 
     - alphabet_weights (dict): A dictionary describing the relative probabilities of choosing each amino acid for hamming distance modification. The keys of the dictionary represent the amino acids and the values are the relative probabilities for choosing this amino acid. If the values of alphabet_weights do not sum to 1, the remainder will be redistributed over all possible amino acids, including those not specified.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

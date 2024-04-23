@@ -39,7 +39,7 @@ class TrainMLModelInstruction(Instruction):
     consider running the :ref:`MLSettingsPerformance` report as hyperparameter report in the assessment loop.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - dataset (Dataset): dataset to use for training and assessing the classifier
 
@@ -75,7 +75,7 @@ class TrainMLModelInstruction(Instruction):
       If False, only the optimal model is exported. By default, export_all_models is False.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

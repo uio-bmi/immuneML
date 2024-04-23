@@ -17,7 +17,7 @@ class OLGAImport(DataImport):
     ‘High-throughput immune repertoire analysis with IGoR’. Bioinformatics, (2019)
     `doi.org/10.1093/bioinformatics/btz035 <https://doi.org/10.1093/bioinformatics/btz035>`_.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - path (str): For RepertoireDatasets, this is the path to a directory with OLGA files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
@@ -38,7 +38,7 @@ class OLGAImport(DataImport):
     - column_mapping (dict): defines which columns to import from olga format: keys are the number of the columns and values are the names of the columns to be mapped to
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

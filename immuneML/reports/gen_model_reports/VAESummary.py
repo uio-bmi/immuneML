@@ -26,13 +26,13 @@ class VAESummary(GenModelReport):
     - plots the histogram for each latent dimension
     - plots loss per epoch
 
-    Arguments:
+    **Specification arguments:**
 
-        dim_dist_cols (int): how many columns to use to plot the histograms of latent dimensions (either this or dim_dist_rows has to be set, or both)
+    - dim_dist_cols (int): how many columns to use to plot the histograms of latent dimensions (either this or dim_dist_rows has to be set, or both)
 
-        dim_dist_rows (int): how many rows to use to plot the histogram of latent dimensions (either this or dim_dist_cols has to be set, or both)
+    - dim_dist_rows (int): how many rows to use to plot the histogram of latent dimensions (either this or dim_dist_cols has to be set, or both)
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

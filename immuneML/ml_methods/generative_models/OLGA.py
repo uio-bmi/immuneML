@@ -52,7 +52,7 @@ class OLGA(GenerativeModel):
         or disease-associated signals in AIRR datasets`.
 `
 
-    Specification arguments:
+    **Specification arguments:**
 
     - model_path (str): if not default model, this parameter should point to a folder where the four OLGA/IGOR format
       files are stored (could also be inferred from some experimental data)
@@ -60,7 +60,7 @@ class OLGA(GenerativeModel):
     - default_model_name (str): if not using custom models, one of the OLGA default models could be specified here;
       the value should be the same as it would be passed to command line in OLGA: e.g., humanTRB, human IGH
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

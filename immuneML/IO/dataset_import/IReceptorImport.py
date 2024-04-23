@@ -36,7 +36,7 @@ class IReceptorImport(DataImport):
     When importing a ReceptorDataset, the AIRR field cell_id is used to determine the chain pairs.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - path (str): This is the path to a directory **with .zip files** retrieved from the iReceptor Gateway. These .zip files should include AIRR files (with .tsv extension) and corresponding metadata.json files with matching names (e.g., for my_dataset.tsv the corresponding metadata file is called my_dataset-metadata.json). The zip files must use the .zip extension.
 
@@ -80,7 +80,7 @@ class IReceptorImport(DataImport):
     - separator (str): Column separator, for AIRR this is by default "\\t".
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

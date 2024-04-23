@@ -38,7 +38,7 @@ class DeepRC(MLMethod):
     bioRxiv preprint doi: `https://doi.org/10.1101/2020.04.12.038158 <https://doi.org/10.1101/2020.04.12.038158>`_
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - validation_part (float):  the part of the data that will be used for validation, the rest will be used for training.
 
@@ -85,7 +85,7 @@ class DeepRC(MLMethod):
     - pytorch_device_name (str): The name of the pytorch device to use. This name will be passed to  torch.device(self.pytorch_device_name). The default value is cuda:0
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

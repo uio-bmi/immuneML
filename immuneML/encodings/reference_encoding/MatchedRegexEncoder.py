@@ -27,7 +27,7 @@ class MatchedRegexEncoder(DatasetEncoder):
     This encoding can be used in combination with the :ref:`Matches` report.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - match_v_genes (bool): Whether V gene matches are required. If this is True, a match is only counted if the
       V gene matches the gene specified in the motif input file. By default match_v_genes is False.
@@ -66,7 +66,7 @@ class MatchedRegexEncoder(DatasetEncoder):
         ====  ==========  =======  ==========  ========
 
 
-    YAML Specification:
+    **YAML Specification:**
 
     .. indent with spaces
     .. code-block:: yaml

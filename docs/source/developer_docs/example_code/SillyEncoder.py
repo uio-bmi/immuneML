@@ -14,14 +14,14 @@ class SillyEncoder(DatasetEncoder):
     This SillyEncoder class is a placeholder for a real encoder.
     It computes a set of random numbers as features for a given dataset.
 
-    Arguments:
+    **Specification arguments:**
 
-        random_seed (int): The random seed for generating random features.
+    - random_seed (int): The random seed for generating random features.
 
-        embedding_len (int): The number of random features to generate per example.
+    - embedding_len (int): The number of random features to generate per example.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

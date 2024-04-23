@@ -10,17 +10,17 @@ The class docstrings are used to automatically generate the documentation web pa
 
    .. code::
 
-     Arguments:
+     **Specification arguments:**
 
-         parameter_name (type): a short description
+     - parameter_name (type): a short description
 
-         other_paramer_name (type): a short description
+     - other_paramer_name (type): a short description
 
 #. A YAML snippet, to show an example of how the new component should be called. Make sure to test your YAML snippet in an immuneML run to ensure it is specified correctly. The following formatting should be used to ensure the YAML snippet is rendered correctly:
 
    .. code::
 
-      YAML specification:
+      **YAML specification:**
 
       .. indent with spaces
       .. code-block:: yaml

@@ -25,7 +25,7 @@ class TrainGenModelInstruction(GenModelInstruction):
 
         This is an experimental feature in version 3.0.0a1.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - dataset: dataset to use for fitting the generative model; it has to be defined under definitions/datasets
 
@@ -39,7 +39,7 @@ class TrainGenModelInstruction(GenModelInstruction):
       and generating gen_examples_count examples; these can be data reports (to be run on generated examples), ML
       reports (to be run on the fitted model)
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

@@ -38,7 +38,7 @@ class DuplicateSequenceFilter(Filter):
     Note that this means the count value of a sequence with a given sequence identifier might not be the same as before
     removing duplicates, unless count_agg = FIRST is used.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - filter_sequence_type (:py:obj:`~immuneML.environment.SequenceType.SequenceType`): Whether the sequences should be collapsed on the nucleotide or amino acid level. Valid options are defined by the SequenceType enum.
 
@@ -47,7 +47,7 @@ class DuplicateSequenceFilter(Filter):
     - count_agg (:py:obj:`~immuneML.preprocessing.filters.CountAggregationFunction.CountAggregationFunction`): determines how the sequence counts of duplicate sequences are aggregated. Valid options are defined by the CountAggregationFunction enum.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

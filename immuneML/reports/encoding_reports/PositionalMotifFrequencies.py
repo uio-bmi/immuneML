@@ -27,15 +27,24 @@ class PositionalMotifFrequencies(EncodingReport):
     investigating motif continuity which displays a bar plot of the gap sizes between the amino acids in the motifs in
     the given dataset. Note that a distance of 1 means that the amino acids are continuous (next to each other).
 
-    Arguments:
+    **Specification arguments:**
+
+    - motif_color_map (dict): Optional mapping between motif lengths and specific colors to be used. Example:
+
+        motif_color_map:
+            1: #66C5CC
+            2: #F6CF71
+            3: #F89C74
 
 
-    YAML specification example:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_pos_motif_report: PositionalMotifFrequencies
+        my_pos_motif_report:
+            PositionalMotifFrequencies:
+                motif_color_map:
 
     """
 

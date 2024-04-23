@@ -26,7 +26,7 @@ class TenxGenomicsImport(DataImport):
     Furthermore, the 10xGenomics field clonotype_id is used for the immuneML field cell_id.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - path (str): For RepertoireDatasets, this is the path to a directory with 10xGenomics files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
@@ -72,7 +72,7 @@ class TenxGenomicsImport(DataImport):
     - separator (str): Column separator, for 10xGenomics this is by default ",".
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

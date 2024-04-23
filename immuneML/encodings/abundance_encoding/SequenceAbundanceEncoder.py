@@ -38,7 +38,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
     For full example of using this encoder, see :ref:`Reproduction of the CMV status predictions study`.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - comparison_attributes (list): The attributes to be considered to group receptors into clonotypes. Only the fields specified in
       comparison_attributes will be considered, all other fields are ignored. Valid comparison value can be any repertoire field name.
@@ -52,7 +52,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
       This value is a trade-off between the number of repertoires that can fit the RAM at the time and loading time from disk.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

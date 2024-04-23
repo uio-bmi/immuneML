@@ -31,7 +31,7 @@ class SklearnMethod(MLMethod):
     Other methods can also be overwritten if needed.
     The arguments and specification described bellow applied for all classes inheriting SklearnMethod.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - parameters: a dictionary of parameters that will be directly passed to scikit-learn's class upon calling __init__()
       method; for detailed list see scikit-learn's documentation of the specific class inheriting SklearnMethod
@@ -42,7 +42,7 @@ class SklearnMethod(MLMethod):
       these parameters and the optimal model will be kept
 
 
-    YAML specification:
+    **YAML specification:**
 
         ml_methods:
             log_reg:
@@ -270,7 +270,7 @@ class SklearnMethod(MLMethod):
     By default, mode 1 is used. In order to use mode 2, model_selection_cv and model_selection_n_folds must be set. 
     
     
-    Specification arguments:
+    **Specification arguments:**
 
     - {model_name} (dict): Under this key, hyperparameters can be specified that will be passed to the scikit-learn class.
       Any scikit-learn hyperparameters can be specified here. In mode 1, a single value must be specified for each of the scikit-learn

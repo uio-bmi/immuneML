@@ -26,7 +26,7 @@ class MLSettingsPerformance(TrainMLModelReport):
     This report can be used only with TrainMLModel instruction under 'reports'.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - single_axis_labels (bool): whether to use single axis labels. Note that using single axis labels makes the figure unsuited for rescaling, as the label position is given in a fixed distance from the axis. By default, single_axis_labels is False, resulting in standard plotly axis labels.
 
@@ -35,7 +35,7 @@ class MLSettingsPerformance(TrainMLModelReport):
     - y_label_position (float): same as x_label_position, but for the y-axis.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

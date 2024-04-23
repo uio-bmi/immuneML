@@ -31,7 +31,7 @@ class SignificantFeatures(DataReport):
     :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder`
     to calculate significant full sequences (depending on whether the argument compairr_path was set).
 
-    Specification arguments:
+    **Specification arguments:**
 
     - p_values (list): The p value thresholds to be used by Fisher's exact test. Each p-value specified here will become
       one panel in the output figure.
@@ -52,7 +52,7 @@ class SignificantFeatures(DataReport):
     - log_scale (bool): Whether to plot the y axis in log10 scale (log_scale = True) or continuous scale (log_scale = False). By default, log_scale is False.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
