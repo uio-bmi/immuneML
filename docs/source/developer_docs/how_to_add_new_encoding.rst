@@ -74,7 +74,7 @@ Step-by-step tutorial
    :code:`get_compatible_encoders()` method of the :py:obj:`~immuneML.ml_methods.MLMethod.MLMethod` of interest.
    See also :ref:`Adding encoder compatibility to an ML method`.
 
-#. Finish the encoder by adding :ref:`class documentation <Encoding class documentation standards>` and :ref:`unit tests<Adding a unit test for the new encoder>`.
+#. Finish the encoder by adding :ref:`class documentation <Class documentation standards for encodings>` and :ref:`unit tests<Adding a unit test for the new encoder>`.
 
 #. Optional: If you want to use immuneML directly to test run your encoder, the YAML example below may be used.
    This example analysis creates a randomly generated dataset, encodes the data using the :code:`SillyEncoder`
@@ -177,16 +177,56 @@ Caching intermediate results
 
 .. include:: ./caching.rst
 
-Encoding class documentation standards
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Class documentation standards for encodings
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. include:: ./class_documentation_standards.rst
 
-Adding a unit test for the new encoder
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. collapse:: Click to view a full example of DatasetEncoder class documentation.
 
-to be added
+       .. code::
 
+        This SillyEncoder class is a placeholder for a real encoder.
+        It computes a set of random numbers as features for a given dataset.
+
+        **Specification arguments:**
+
+        - random_seed (int): The random seed for generating random features.
+
+        - embedding_len (int): The number of random features to generate per example.
+
+
+         **YAML specification:**
+
+        .. indent with spaces
+        .. code-block:: yaml
+
+            my_silly_encoder:
+                Silly:
+                    random_seed: 1
+                    embedding_len: 5
+
+
+Adding a Unit test for the DatasetEncoder
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Add a unit test for the new SillyEncoder:
+
+#. Add a new package to the :code:`test.encodings` package which matches the package name of your encoder code. In this case, the new package would be :code:`test.encodings.silly`.
+#. To the new :code:`test.encodings.silly` package, add a new file named test_sillyEncoder.py  (:download:`download <./example_code/test_sillyEncoder.py>` the example testfile or view below).
+#. Add a class :code:`TestSillyEncoder` that inherits :code:`unittest.TestCase` to the new file.
+#. Add a function :code:`setUp()` to set up cache used for testing. This should ensure that the cache location will be set to :code:`EnvironmentSettings.tmp_test_path / "cache/"`
+#. Define one or more tests for the class and functions you implemented.
+
+   - It is recommended to at least test the output of the 'encode' method (ensure a valid EncodedData object with correct examples matrix is returned).
+   - Make sure to add tests for *every* relevant dataset type. Tests for different dataset types may be split into several different classes/files if desired (e.g., test_oneHotReceptorEncoder.py, test_oneHotSequenceEncoder.py, ...). For the SillyEncoder, all tests are in the same file.
+   - Mock data is typically used to test new classes. Tip: the :code:`RandomDatasetGenerator` class can be used to generate Repertoire, Sequence or Receptor datasets with random sequences.
+   - If you need to write data to a path (for example test datasets or results), use the following location: :code:`EnvironmentSettings.tmp_test_path / "some_unique_foldername"`
+
+.. collapse:: View test_sillyEncoder.py
+
+  .. literalinclude:: ./example_code/test_sillyEncoder.py
+     :language: python
 
 
 

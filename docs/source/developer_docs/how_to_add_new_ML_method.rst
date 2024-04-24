@@ -66,7 +66,7 @@ Step-by-step tutorial
 
       python3 ./scripts/check_new_ml_method.py -m ./immuneML/ml_methods/classifiers/SillyClassifier.py
 
-#. Finish the ML method by adding :ref:`class documentation <MLMethod class documentation standards>` and :ref:`unit tests<Adding a unit test for the new ML method>`.
+#. Finish the ML method by adding :ref:`class documentation <Class documentation standards for ML methods>` and :ref:`unit tests<Adding a unit test for the new ML method>`.
 
 #. Optional: If you want to use immuneML directly to test run your ML method, the YAML example below may be used.
    This example analysis encodes a random dataset using k-mer encoding, trains and compares the performance of two silly
@@ -232,26 +232,50 @@ Implementing fitting through cross-validation
 <todo>
 
 
-MLMethod class documentation standards
+Class documentation standards for ML methods
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. include:: ./class_documentation_standards.rst
 
+.. collapse:: Click to view a full example of MLMethod class documentation.
+
+       .. code::
+
+        This SillyClassifier is a placeholder for a real ML method.
+        It generates random predictions ignoring the input features.
+
+
+        **Specification arguments:**
+
+        - random_seed (int): The random seed for generating random predictions.
+
+
+        **YAML specification:**
+
+        .. indent with spaces
+        .. code-block:: yaml
+
+            my_silly_method:
+                SillyClassifier:
+                    random_seed: 100
 
 Adding a Unit test for the MLMethod
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Add a unit test for the new SillyClassifier:
 
-#. Add a new file to :py:mod:`~test.ml_methods` package named test_sillyClassifier.py.
+#. Add a new file to the :code:`test.ml_methods` package named test_sillyClassifier.py (:download:`download <./example_code/test_sillyClassifier.py>` the example testfile or view below).
 #. Add a class :code:`TestSillyClassifier` that inherits :code:`unittest.TestCase` to the new file.
 #. Add a function :code:`setUp()` to set up cache used for testing. This should ensure that the cache location will be set to :code:`EnvironmentSettings.tmp_test_path / "cache/"`
-#. Define one or more tests for the class and functions you implemented. Mock data is typically used to test new classes.
-#. If you need to write data to a path (for example test datasets or results), use the following location: :code:`EnvironmentSettings.tmp_test_path / "some_unique_foldername"`
+#. Define one or more tests for the class and functions you implemented.
+
+   - It is recommended to at least test fitting, prediction and storing/loading of the model.
+   - Mock data is typically used to test new classes.
+   - If you need to write data to a path (for example test datasets or results), use the following location: :code:`EnvironmentSettings.tmp_test_path / "some_unique_foldername"`
 
 .. collapse:: View test_sillyClassifier.py
 
-  .. literalinclude:: test_sillyClassifier.py
+  .. literalinclude:: ./example_code/test_sillyClassifier.py
      :language: python
 
 

@@ -363,30 +363,29 @@ and `Train ML model reports <https://docs.immuneml.uio.no/specification.html#tra
       labels:
         - disease
 
-Adding documentation for the new report
-****************************************************
+Class documentation standards for reports
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-After implementing the desired functionality, the documentation for the report should be added, so that the users of immuneML have sufficient information when deciding to use the report. It should be added to the docstring and consist of the following components:
+.. include:: ./class_documentation_standards.rst
 
-  #. A short description of what the report is meant for.
+.. collapse:: Click to view a full example of Report class documentation.
 
-  #. Optional extended description, including any references or specific cases that should bee considered.
+       .. code::
 
-  #. List of arguments the report takes as input. If the report does not take any arguments other than the ones provided by the immuneML in runtime depending on the report type (such as training and test dataset or trained method), there should be only a short statement that the report does not take input arguments.
+           Generates a histogram of the lengths of the sequences in a repertoire or sequence dataset.
 
-  #. An example of how the report can be specified in YAML.
 
-Documentation should be written in Sphinx `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_ formatting.
-Here is an example of a documentation for the :ref:`DesignMatrixExporter` report that has no input arguments which can be provided by the user in the YAML
-specification (the encoded dataset to be exported will be provided by immuneML at runtime):
+           **Specification arguments:**
 
-.. code-block:: text
+           - sequence_type (str): whether to check the length of amino acid or nucleotide sequences; default value is 'amino_acid'
 
-    Generates a histogram of the lengths of the sequences in a RepertoireDataset.
 
-    YAML specification:
+           **YAML specification:**
 
-    .. indent with spaces
-    .. code-block:: yaml
+           .. indent with spaces
+           .. code-block:: yaml
 
-        my_sld_report: NewSequenceLengthDistribution
+               my_sld_report:
+                   SequenceLengthDistribution:
+                       sequence_type: amino_acid
+

@@ -289,9 +289,9 @@ class VJGeneDistribution(DataReport):
         vj_dfs = []
 
         for repertoire in self.dataset.repertoires:
-            repertoire_attributes = {"v_call": repertoire.get_v_genes().tolist(),
-                                     "j_call": repertoire.get_j_genes().tolist(),
-                                     "chain": repertoire.get_attribute("chain").tolist()}
+            repertoire_attributes = {"v_call": repertoire.get_v_genes(),
+                                     "j_call": repertoire.get_j_genes(),
+                                     "chain": repertoire.get_attribute("chain", as_list=True)}
 
             v_rep_df = self._get_gene_count_df(repertoire_attributes, "v_call", include_label=False)
             j_rep_df = self._get_gene_count_df(repertoire_attributes, "j_call", include_label=False)

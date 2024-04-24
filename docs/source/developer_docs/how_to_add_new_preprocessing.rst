@@ -240,44 +240,36 @@ An example YAML specification for this is given below:
 
 
 
-Adding class documentation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Class documentation standards for preprocessors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To complete the preprocessing, class documentation should be added to inform other users how the preprocessing should be used.
-The documentation should contain:
 
-  #. A short, general description of the preprocessor, including which dataset types (repertoire dataset, sequence dataset, receptor dataset) it can be applied to.
+.. include:: ./class_documentation_standards.rst
 
-  #. If applicable, a listing of the types and descriptions of the arguments that should be providedto the preprocessor.
+.. collapse:: Click to view a full example of MLMethod class documentation.
 
-  #. An example of how the preprocessor definition should be specified in the YAML.
+       .. code::
 
-The class docstrings are used to automatically generate the documentation for the preprocessor, and should be written
-in Sphinx `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_ formatting.
+           Removes all repertoires from the RepertoireDataset, which contain fewer clonotypes than specified by the
+           lower_limit, or more clonotypes than specified by the upper_limit.
+           Note that this filter filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
+           When no lower or upper limit is specified, or the value -1 is specified, the limit is ignored.
 
-This is the example of documentation for :py:obj:`~immuneML.preprocessing.filters.ClonesPerRepertoireFilter.ClonesPerRepertoireFilter`:
+           Specification arguments:
 
-.. code-block:: RST
+           - lower_limit (int): The minimal inclusive lower limit for the number of clonotypes allowed in a repertoire.
 
-    Removes all repertoires from the RepertoireDataset, which contain fewer clonotypes than specified by the
-    lower_limit, or more clonotypes than specified by the upper_limit.
-    Note that this filter filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
+           - upper_limit (int): The maximal inclusive upper limit for the number of clonotypes allowed in a repertoire.
 
-    Specification arguments:
 
-        lower_limit (int): The minimal inclusive lower limit for the number of clonotypes allowed in a repertoire.
+           YAML specification:
 
-        upper_limit (int): The maximal inclusive upper limit for the number of clonotypes allowed in a repertoire.
-        When no lower or upper limit is specified, or the value -1 is specified, the limit is ignored.
+           .. indent with spaces
+           .. code-block:: yaml
 
-    YAML specification:
-
-    .. indent with spaces
-    .. code-block:: yaml
-
-        preprocessing_sequences:
-            my_preprocessing:
-                - my_filter:
-                    NewClonesPerRepertoireFilter:
-                        lower_limit: 100
-                        upper_limit: 100000
+               preprocessing_sequences:
+                   my_preprocessing:
+                       - my_filter:
+                           NewClonesPerRepertoireFilter:
+                               lower_limit: 100
+                               upper_limit: 100000
