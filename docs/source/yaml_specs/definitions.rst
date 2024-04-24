@@ -49,8 +49,16 @@ Under the :code:`definitions/ml_methods` component, the user can specify differe
 From version 3, immuneML includes different types of ML methods:
 
 - :ref:`**Classifiers**` which make predictions about data. See also :ref:`How to train and assess a receptor or repertoire-level ML classifier`.
-- :ref:`**Generative models**` to generate new AIR sequences
-- :ref:`**Dimensionality reduction methods**`
+- :ref:`**Generative models**` to generate new AIR sequences. **IN DEVELOPMENT**
+- :ref:`**Dimensionality reduction methods**` **IN DEVELOPMENT**
+
+When choosing which ML method(s) are most suitable for your use-case, please consider the following table:
+
+.. csv-table:: ML methods properties
+   :file: ../_static/files/ml_methods_properties.csv
+   :header-rows: 1
+
+
 
 .. include:: ../../specs/definitions/ml_methods.rst
 

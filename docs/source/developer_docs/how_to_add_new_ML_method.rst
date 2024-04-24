@@ -251,7 +251,8 @@ Implementing fitting through cross-validation
 By default, models in immuneML are fitted through nested-cross validation.
 This allows for both hyperparameter selection and model comparison.
 immuneML also allows for the implementation of a third level of k-fold cross-validation for hyperparameter selection within
-the ML model. This can be useful when a large number or range of hyperparameters is typically considered
+the ML model (:code:`model_selection_cv` in the YAML specification).
+This can be useful when a large number or range of hyperparameters is typically considered
 (e.g., regularisation parameters in logistic regression).
 Such additional cross-validation should be implemented inside the method :code:`_fit_by_cross_validation`.
 The result should be that a single model (with optimal hyperparameters) is saved in the MLMethod object.
