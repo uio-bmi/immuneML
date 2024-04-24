@@ -69,7 +69,6 @@ class KerasSequenceCNN(MLMethod):
         self.training_percentage = training_percentage
 
         self.background_probabilities = None
-        self.CNN = None
         self.label = None
         self.class_mapping = None
         self.result_path = None
@@ -202,7 +201,7 @@ class KerasSequenceCNN(MLMethod):
 
         self.model.save(path / "model.keras")
 
-        custom_vars = copy.deepcopy(vars(self))
+        custom_vars = self.get_params()
         del custom_vars["model"]
         del custom_vars["result_path"]
 
@@ -234,8 +233,15 @@ class KerasSequenceCNN(MLMethod):
         return self.model is not None
 
     def get_params(self):
-        params = copy.deepcopy(vars(self))
-        params["model"] = copy.deepcopy(self.model).state_dict()
+        params = dict()
+
+        # using 'deepcopy' on the model directly results in an error, therefore loop over all other items
+        for key, value in vars(self).items():
+            if key != "model":
+                params[key] = copy.deepcopy(value)
+
+        params["model"] = copy.deepcopy(self.model.get_config())
+
         return params
 
     def get_label_name(self):

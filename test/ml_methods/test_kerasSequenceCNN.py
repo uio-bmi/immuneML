@@ -75,20 +75,16 @@ class TestKerasSequenceCNN(TestCase):
         cnn2 = KerasSequenceCNN()
         cnn2.load(path / "model_storage")
 
-        cnn2_vars = vars(cnn2)
-        del cnn2_vars["CNN"]
-        cnn_vars = vars(cnn)
-        del cnn_vars["CNN"]
+        cnn2_params = cnn2.get_params()
+        cnn_params = cnn.get_params()
 
-        for item, value in cnn_vars.items():
+        for item, value in cnn_params.items():
             if isinstance(value, Label):
-                self.assertDictEqual(vars(value), (vars(cnn2_vars[item])))
-            elif not isinstance(value, keras.Sequential):
-                self.assertEqual(value, cnn2_vars[item])
+                self.assertDictEqual(vars(value), (vars(cnn2_params[item])))
+            else:
+                self.assertEqual(value, cnn2_params[item])
 
         predictions_proba2 = cnn2.predict_proba(enc_dataset.encoded_data, label)
-
-        print(predictions_proba2)
 
         self.assertTrue(all(predictions_proba["CMV"]["yes"] == predictions_proba2["CMV"]["yes"]))
         self.assertTrue(all(predictions_proba["CMV"]["no"] == predictions_proba2["CMV"]["no"]))
