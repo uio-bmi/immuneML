@@ -109,11 +109,11 @@ and exports the encoded data as a csv file.
 Adding a Unit test for a DatasetEncoder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Add a unit test for the new SillyEncoder (:download:`download <./example_code/test_sillyEncoder.py>` the example testfile or view below):
+Add a unit test for the new SillyEncoder (:download:`download <./example_code/_test_sillyEncoder.py>` the example testfile or view below):
 
         .. collapse:: test_sillyEncoder.py
 
-          .. literalinclude:: ./example_code/test_sillyEncoder.py
+          .. literalinclude:: ./example_code/_test_sillyEncoder.py
              :language: python
 
 

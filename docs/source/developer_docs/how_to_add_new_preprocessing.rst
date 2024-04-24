@@ -88,11 +88,11 @@ runs the :ref:`SimpleDatasetOverview` report on the preprocessed dataset to insp
 Adding a Unit test for a Preprocessing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Add a unit test for the new :code:`SillyFilter` (:download:`download <./example_code/test_sillyFilter.py>` the example testfile or view below)
+Add a unit test for the new :code:`SillyFilter` (:download:`download <./example_code/_test_sillyFilter.py>` the example testfile or view below)
 
     .. collapse:: test_sillyFilter.py
 
-      .. literalinclude:: ./example_code/test_sillyFilter.py
+      .. literalinclude:: ./example_code/_test_sillyFilter.py
          :language: python
 
 

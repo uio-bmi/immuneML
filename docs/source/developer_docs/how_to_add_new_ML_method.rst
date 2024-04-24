@@ -129,11 +129,11 @@ Note that when you test your own classifier, a compatible encoding must be used.
 Adding a Unit test for an MLMethod
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Add a unit test for the new :code:`SillyClassifier` (:download:`download <./example_code/test_sillyClassifier.py>` the example testfile or view below)
+Add a unit test for the new :code:`SillyClassifier` (:download:`download <./example_code/_test_sillyClassifier.py>` the example testfile or view below)
 
         .. collapse:: test_sillyClassifier.py
 
-          .. literalinclude:: ./example_code/test_sillyClassifier.py
+          .. literalinclude:: ./example_code/_test_sillyClassifier.py
              :language: python
 
 

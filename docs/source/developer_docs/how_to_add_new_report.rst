@@ -77,11 +77,11 @@ This example analysis creates a randomly generated dataset, and runs the :code:`
 Adding a unit test for a Report
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Add a unit test for the new :code:`RandomDataPlot` (:download:`download <./example_code/test_randomDataPlot.py>` the example testfile or view below)
+Add a unit test for the new :code:`RandomDataPlot` (:download:`download <./example_code/_test_randomDataPlot.py>` the example testfile or view below)
 
     .. collapse:: test_randomDataPlot.py
 
-      .. literalinclude:: ./example_code/test_randomDataPlot.py
+      .. literalinclude:: ./example_code/_test_randomDataPlot.py
          :language: python
 
 
