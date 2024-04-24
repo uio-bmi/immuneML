@@ -45,11 +45,11 @@ Step 2: Define frequency of each individual signal and the pair of signals in a 
             receptors_in_repertoire_count: 1000 # we simulate 1000 BCRs in each repertoire
             signals:
               signal1__signal2: 0.1 # 10% of BCRs contain both signal 1 and signal 2
-              signal1: 0.2 # 20% of BCRs contain signal 1 
+              signal1: 0.2 # 20% of BCRs contain signal 1
               signal2: 0.2 # 20% of BCRs contain signal 2
 
 
-Step 3: Run the simulation with the following yaml file 
+Step 3: Run the simulation with the following yaml file
 ```````````````````````````````````````````````````````````````````````````````
 
 .. code-block:: yaml
@@ -83,7 +83,7 @@ Step 3: Run the simulation with the following yaml file
             receptors_in_repertoire_count: 1000 # we simulate 1000 BCRs in each repertoire
             signals:
               signal1__signal2: 0.1 # 10% of BCRs contain both signal 1 and signal 2
-              signal1: 0.2 # 20% of BCRs contain signal 1 
+              signal1: 0.2 # 20% of BCRs contain signal 1
               signal2: 0.2 # 20% of BCRs contain signal 2
   instructions:
     inst1:

@@ -10,10 +10,9 @@ class GenModelReport(Report, ABC):
 
     def __init__(self, dataset: Dataset = None, model: GenerativeModel = None, result_path: Path = None,
                  name: str = None):
-        super().__init__(name)
+        super().__init__(name=name, result_path=result_path)
         self.dataset = dataset
         self.model = model
-        self.result_path = result_path
 
     @staticmethod
     def get_title():

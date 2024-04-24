@@ -5,6 +5,7 @@ immuneML provides several different options for recovering motifs associated wit
 Depending on the context, immuneML provides several different reports which can be used for this purpose.
 
 .. toctree::
+  :caption: Motif recovery tutorials
   :maxdepth: 1
 
   discover_motifs_precision_recall

@@ -35,59 +35,62 @@ See also the tutorial about :ref:`recovering simulated immune signals <Recoverin
 
 An example of a simulation with disease-associated signals is given below.
 
-.. highlight:: yaml
-.. code-block:: yaml
 
-  definitions:
-    motifs:
-      motif1:
-        seed: AA
-      motif2:
-        seed: GG
-    signals:
-      signal1:
-        motifs: [motif1]
-      signal2:
-        motifs: [motif2]
-    simulations:
-      sim1:
-        is_repertoire: true # if the simulation is on repertoire or receptor here -> here it's repertoire level
-        paired: false # whether to simulate paired chain data or not
-        sequence_type: amino_acid
-        simulation_strategy: Implanting # how to simulate the signals
-        remove_seqs_with_signals: true # remove signal-specific AIRs from the background
-        sim_items:
-          sim_item: # group of AIRs with the same parameters
-            AIRR1:
-              immune_events: # all repertoires in this set will have these values for immune events
-                ievent1: True
-                ievent1: False
-              signals:
-                signal1: 0.3 # in each repertoire 30% of sequences will have signal1
-                signal2: 0.3 # in each repertoire other 30% of sequences will have signal2
-              number_of_examples: 10 # simulate 10 repertoires
-              receptors_in_repertoire_count: 6 # how many receptor sequences should be in each repertoire
-              generative_model: # how to generate background AIRs
-                chain: heavy
-                default_model_name: humanIGH # use default model
-                type: OLGA # use OLGA for background simulation
-            AIRR2: # another set of repertoires, but with different parameters
-              immune_events:
-                ievent1: False
-                ievent1: True
-              signals: {signal1: 0.5, signal2: 0.5}
-              number_of_examples: 10
-              receptors_in_repertoire_count: 6
-              generative_model:
-                chain: heavy
-                default_model_name: humanIGH
-                model_path: null # if there was a custom model to use, path to the folder should be given here
-                type: OLGA
-  instructions:
-    my_sim_inst:
-      export_p_gens: false
-      max_iterations: 100
-      number_of_processes: 4
-      sequence_batch_size: 1000
-      simulation: sim1
-      type: LigoSim
+    .. collapse:: ligo_complete_specification.yaml
+
+        .. highlight:: yaml
+        .. code-block:: yaml
+
+          definitions:
+            motifs:
+              motif1:
+                seed: AA
+              motif2:
+                seed: GG
+            signals:
+              signal1:
+                motifs: [motif1]
+              signal2:
+                motifs: [motif2]
+            simulations:
+              sim1:
+                is_repertoire: true # if the simulation is on repertoire or receptor here -> here it's repertoire level
+                paired: false # whether to simulate paired chain data or not
+                sequence_type: amino_acid
+                simulation_strategy: Implanting # how to simulate the signals
+                remove_seqs_with_signals: true # remove signal-specific AIRs from the background
+                sim_items:
+                  sim_item: # group of AIRs with the same parameters
+                    AIRR1:
+                      immune_events: # all repertoires in this set will have these values for immune events
+                        ievent1: True
+                        ievent1: False
+                      signals:
+                        signal1: 0.3 # in each repertoire 30% of sequences will have signal1
+                        signal2: 0.3 # in each repertoire other 30% of sequences will have signal2
+                      number_of_examples: 10 # simulate 10 repertoires
+                      receptors_in_repertoire_count: 6 # how many receptor sequences should be in each repertoire
+                      generative_model: # how to generate background AIRs
+                        chain: heavy
+                        default_model_name: humanIGH # use default model
+                        type: OLGA # use OLGA for background simulation
+                    AIRR2: # another set of repertoires, but with different parameters
+                      immune_events:
+                        ievent1: False
+                        ievent1: True
+                      signals: {signal1: 0.5, signal2: 0.5}
+                      number_of_examples: 10
+                      receptors_in_repertoire_count: 6
+                      generative_model:
+                        chain: heavy
+                        default_model_name: humanIGH
+                        model_path: null # if there was a custom model to use, path to the folder should be given here
+                        type: OLGA
+          instructions:
+            my_sim_inst:
+              export_p_gens: false
+              max_iterations: 100
+              number_of_processes: 4
+              sequence_batch_size: 1000
+              simulation: sim1
+              type: LigoSim

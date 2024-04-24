@@ -71,33 +71,38 @@ These keys are unique names that identify the settings for a component, and they
 later referenced in the :ref:`instructions <Specifying Instructions>`.
 
 An example of a full :code:`definitions` section which may be used for a machine learning task is given below.
-See also :ref:`How to train and assess a receptor or repertoire-level ML classifier` for more details.
+Note that in order to run this yaml file, instructions still need to be added
 
-.. highlight:: yaml
-.. code-block:: yaml
 
-  definitions:
-    datasets: # every instruction uses a dataset
-      my_dataset:
-        format: AIRR
-        params:
-          path: path/to/data/
-          metadata_file: path/to/metadata.csv
-    preprocessing_sequences:
-      my_preprocessing:
-        - my_beta_chain_filter:
-            ChainRepertoireFilter:
-              keep_chain: TRB
-    ml_methods:
-      my_log_reg: LogisticRegression
-      my_svm: SVM
-    encodings:
-      my_kmer_freq_encoding_1: KmerFrequency # KmerFrequency with default parameters
-      my_kmer_freq_encoding_2: # KmerFrequency with user-defined parameters
-        KmerFrequency:
-          k: 5
-    reports:
-      my_seq_length_distribution: SequenceLengthDistribution
+    .. collapse:: definitions.yaml
+
+        .. highlight:: yaml
+        .. code-block:: yaml
+
+          definitions:
+            datasets: # every instruction uses a dataset
+              my_dataset:
+                format: AIRR
+                params:
+                  path: path/to/data/
+                  metadata_file: path/to/metadata.csv
+            preprocessing_sequences:
+              my_preprocessing:
+                - my_beta_chain_filter:
+                    ChainRepertoireFilter:
+                      keep_chain: TRB
+            ml_methods:
+              my_log_reg: LogisticRegression
+              my_svm: SVM
+            encodings:
+              my_kmer_freq_encoding_1: KmerFrequency # KmerFrequency with default parameters
+              my_kmer_freq_encoding_2: # KmerFrequency with user-defined parameters
+                KmerFrequency:
+                  k: 5
+            reports:
+              my_seq_length_distribution: SequenceLengthDistribution
+          instructions:
+            # to be added...
 
 The :code:`definitions` section used for Simulation contains different components (:code:`motifs`, :code:`signals`, :code:`simulations`).
 These are discussed in more detail in the following tutorial: :ref:`How to simulate antigen or disease-associated signals in AIRR datasets`.
@@ -133,35 +138,39 @@ run to train a ML model).
 An example of the YAML specification for the TrainMLModel instruction is shown below.
 See the tutorial :ref:`How to train and assess a receptor or repertoire-level ML classifier` for more explanation behind all settings.
 
-.. highlight:: yaml
-.. code-block:: yaml
+    .. collapse:: instructions.yaml
 
-  instructions:
-    my_instruction: # user-defined instruction key
-      type: TrainMLModel
-      dataset: my_dataset # reference dataset from definitions
-      labels: [disease]
-      settings: # settings are made up of preprocessing (optional), ml_method and encoding
-      - encoding: my_kmer_freq_encoding_1
-        ml_method: my_log_reg
-      - preprocessing: my_preprocessing
-        encoding: my_kmer_freq_encoding_2
-        ml_method: my_svm
-      assessment:
-        split_strategy: random
-        split_count: 1
-        training_percentage: 70
-        reports:
-          data_splits: [my_seq_length_distribution]
-      selection:
-        split_strategy: k_fold
-        split_count: 5
-      strategy: GridSearch
-      metrics: [accuracy]
-      optimization_metric: accuracy
-      reports: null # no reports
-      refit_optimal_model: False
-      number_of_processes: 4
+        .. highlight:: yaml
+        .. code-block:: yaml
+
+          definitions:
+            # to be added...
+          instructions:
+            my_instruction: # user-defined instruction key
+              type: TrainMLModel
+              dataset: my_dataset # reference dataset from definitions
+              labels: [disease]
+              settings: # settings are made up of preprocessing (optional), ml_method and encoding
+              - encoding: my_kmer_freq_encoding_1
+                ml_method: my_log_reg
+              - preprocessing: my_preprocessing
+                encoding: my_kmer_freq_encoding_2
+                ml_method: my_svm
+              assessment:
+                split_strategy: random
+                split_count: 1
+                training_percentage: 70
+                reports:
+                  data_splits: [my_seq_length_distribution]
+              selection:
+                split_strategy: k_fold
+                split_count: 5
+              strategy: GridSearch
+              metrics: [accuracy]
+              optimization_metric: accuracy
+              reports: null # no reports
+              refit_optimal_model: False
+              number_of_processes: 4
 
 Specifying output
 ^^^^^^^^^^^^^^^^^
@@ -200,59 +209,61 @@ The diagrams below show for each dataset type how the components can be combined
 
 An example of a complete YAML specification for training an ML model through nested cross-validation is given here:
 
-.. highlight:: yaml
-.. code-block:: yaml
+    .. collapse:: complete_definitions_instructions.yaml
 
-  definitions:
-    datasets:
-      d1:
-        format: AIRR
-        params:
-          metadata_file: path/to/metadata.csv
-          path: path/to/data/
-    preprocessing_sequences:
-      my_preprocessing:
-        - my_beta_chain_filter:
-            ChainRepertoireFilter:
-              keep_chain: TRB
-    ml_methods:
-      my_log_reg: LogisticRegression
-      my_svm: SVM
-    encodings:
-      my_kmer_freq_encoding_1: KmerFrequency # KmerFrequency with default parameters
-      my_kmer_freq_encoding_2: # KmerFrequency with user-defined parameters
-        KmerFrequency:
-          k: 5
-    reports:
-      my_seq_length_distribution: SequenceLengthDistribution
-  instructions:
-    my_instruction: # user-defined instruction key
-      type: TrainMLModel
-      dataset: my_dataset # reference dataset from definitions
-      labels: [disease]
-      settings: # settings are made up of preprocessing (optional), ml_method and encoding
-      - encoding: my_kmer_freq_encoding_1
-        ml_method: my_log_reg
-      - preprocessing: my_preprocessing
-        encoding: my_kmer_freq_encoding_2
-        ml_method: my_svm
-      assessment:
-        split_strategy: random
-        split_count: 1
-        training_percentage: 70
-        reports:
-          data_splits: [my_seq_length_distribution]
-      selection:
-        split_strategy: k_fold
-        split_count: 5
-      strategy: GridSearch
-      metrics: [accuracy]
-      optimization_metric: accuracy
-      reports: null # no reports
-      refit_optimal_model: False
-      number_of_processes: 4
-  output:
-    format: HTML
+        .. highlight:: yaml
+        .. code-block:: yaml
+
+          definitions:
+            datasets:
+              d1:
+                format: AIRR
+                params:
+                  metadata_file: path/to/metadata.csv
+                  path: path/to/data/
+            preprocessing_sequences:
+              my_preprocessing:
+                - my_beta_chain_filter:
+                    ChainRepertoireFilter:
+                      keep_chain: TRB
+            ml_methods:
+              my_log_reg: LogisticRegression
+              my_svm: SVM
+            encodings:
+              my_kmer_freq_encoding_1: KmerFrequency # KmerFrequency with default parameters
+              my_kmer_freq_encoding_2: # KmerFrequency with user-defined parameters
+                KmerFrequency:
+                  k: 5
+            reports:
+              my_seq_length_distribution: SequenceLengthDistribution
+          instructions:
+            my_instruction: # user-defined instruction key
+              type: TrainMLModel
+              dataset: my_dataset # reference dataset from definitions
+              labels: [disease]
+              settings: # settings are made up of preprocessing (optional), ml_method and encoding
+              - encoding: my_kmer_freq_encoding_1
+                ml_method: my_log_reg
+              - preprocessing: my_preprocessing
+                encoding: my_kmer_freq_encoding_2
+                ml_method: my_svm
+              assessment:
+                split_strategy: random
+                split_count: 1
+                training_percentage: 70
+                reports:
+                  data_splits: [my_seq_length_distribution]
+              selection:
+                split_strategy: k_fold
+                split_count: 5
+              strategy: GridSearch
+              metrics: [accuracy]
+              optimization_metric: accuracy
+              reports: null # no reports
+              refit_optimal_model: False
+              number_of_processes: 4
+          output:
+            format: HTML
 
 
 

@@ -11,7 +11,7 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 
 class SillyClassifier(MLMethod):
     """
-    This SillyClassifier is a placeholder for a real ML method and is used as a simple example for integration of new methods.
+    This SillyClassifier is a placeholder for a real ML method.
     It generates random predictions ignoring the input features.
 
     **Specification arguments:**

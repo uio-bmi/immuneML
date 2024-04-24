@@ -25,38 +25,40 @@ In the example below, two analyses are done:
 
 - :code:`my_analysis_2` first encodes :code:`my_dataset` using :code:`my_regex_matches` before running report :code:`my_matches`.
 
-.. highlight:: yaml
-.. code-block:: yaml
+    .. collapse:: exploratory_analysis.yaml
 
-  definitions:
-    datasets:
-      # imported datasets
-      my_dataset: # user-defined dataset name
-        format: AIRR
-        params:
-          metadata_file: path/to/metadata.csv
-          path: path/to/data/
+        .. highlight:: yaml
+        .. code-block:: yaml
 
-    encodings:
-      my_regex_matches:
-        MatchedRegex:
-          motif_filepath: path/to/regex_file.tsv
+          definitions:
+            datasets:
+              # imported datasets
+              my_dataset: # user-defined dataset name
+                format: AIRR
+                params:
+                  metadata_file: path/to/metadata.csv
+                  path: path/to/data/
 
-    reports:
-      my_seq_lengths: SequenceLengthDistribution # reports without parameters
-      my_matches: Matches
+            encodings:
+              my_regex_matches:
+                MatchedRegex:
+                  motif_filepath: path/to/regex_file.tsv
 
-  instructions:
-    my_instruction: # user-defined instruction name
-      type: ExploratoryAnalysis
-      analyses:
-        my_analysis_1: # user-defined analysis name
-          dataset: my_dataset
-          report: my_seq_lengths
-        my_analysis_2:
-          dataset: my_dataset
-          encoding: my_regex_matches
-          report: my_matches
+            reports:
+              my_seq_lengths: SequenceLengthDistribution # reports without parameters
+              my_matches: Matches
+
+          instructions:
+            my_instruction: # user-defined instruction name
+              type: ExploratoryAnalysis
+              analyses:
+                my_analysis_1: # user-defined analysis name
+                  dataset: my_dataset
+                  report: my_seq_lengths
+                my_analysis_2:
+                  dataset: my_dataset
+                  encoding: my_regex_matches
+                  report: my_matches
 
 Where the file :download:`regex_file.tsv <../_static/files/regex_file.tsv>` must be a tab-separated file, which may contain the following contents:
 

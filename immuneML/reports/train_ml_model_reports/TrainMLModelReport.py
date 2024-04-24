@@ -31,9 +31,8 @@ class TrainMLModelReport(Report):
         result_path (Path): location where the report results will be stored
         number_of_processes (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
         '''
-        super().__init__(name, number_of_processes)
+        super().__init__(name=name, result_path=result_path, number_of_processes=number_of_processes)
         self.state = state
-        self.result_path = result_path
         self.label = label
 
     @staticmethod
