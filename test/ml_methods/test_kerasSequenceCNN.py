@@ -16,8 +16,6 @@ from immuneML.simulation.dataset_generation.RandomDatasetGenerator import Random
 from immuneML.util.PathBuilder import PathBuilder
 
 
-
-
 class TestKerasSequenceCNN(TestCase):
     maxDiff = None
 
@@ -32,6 +30,14 @@ class TestKerasSequenceCNN(TestCase):
         except ImportError as e:
             print("Test ignored since keras is not installed.")
 
+    def _recursive_convert_lists_to_tuples(self, model_description):
+        if isinstance(model_description, dict):
+            return {key: self._recursive_convert_lists_to_tuples(value) for key, value in
+                    model_description.items()}
+        elif isinstance(model_description, (list, tuple, set)):
+            return tuple([self._recursive_convert_lists_to_tuples(item) for item in model_description])
+        else:
+            return model_description
 
     def _test_fit(self):
         import keras
@@ -82,6 +88,11 @@ class TestKerasSequenceCNN(TestCase):
         for item, value in cnn_params.items():
             if isinstance(value, Label):
                 self.assertDictEqual(vars(value), (vars(cnn2_params[item])))
+            elif item == "model":
+                model1_params = self._recursive_convert_lists_to_tuples(cnn_params["model"])
+                model2_params = self._recursive_convert_lists_to_tuples(cnn2_params["model"])
+
+                self.assertDictEqual(model1_params, model2_params)
             else:
                 self.assertEqual(value, cnn2_params[item])
 
