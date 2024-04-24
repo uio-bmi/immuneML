@@ -19,6 +19,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestKerasSequenceCNN(TestCase):
+    maxDiff = None
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -77,14 +78,6 @@ class TestKerasSequenceCNN(TestCase):
 
         cnn2_params = cnn2.get_params()
         cnn_params = cnn.get_params()
-
-        print("*" * 40)
-        print("first CNN params")
-        print(cnn_params)
-        print("*" * 40)
-        print("second CNN params")
-        print(cnn2_params)
-
 
         for item, value in cnn_params.items():
             if isinstance(value, Label):
