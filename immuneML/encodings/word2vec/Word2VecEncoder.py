@@ -57,7 +57,7 @@ class Word2VecEncoder(DatasetEncoder):
     - window (int): max distance between two k-mers in a sequence (same as window parameter in gensim's word2vec)
 
 
-    **YAML specification:**
+    **YAML pecification:**
 
     .. highlight:: yaml
     .. code-block:: yaml

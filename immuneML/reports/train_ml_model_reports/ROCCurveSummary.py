@@ -23,7 +23,7 @@ class ROCCurveSummary(TrainMLModelReport):
     in this report.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

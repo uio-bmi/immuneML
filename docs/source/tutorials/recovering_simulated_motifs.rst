@@ -1,6 +1,6 @@
 Recovering simulated immune signals
 -----------------------------------
-The :ref:`Simulation instruction<How to simulate antigen or disease-associated signals in AIRR datasets>` can be used to implant
+The :ref:`LigoSim instruction<Dataset simulation with LIgO>` can be used to implant
 synthetic immune signals into AIRR datasets. Such immune signals can range from simple k-mers to collections of different
 k-mers with possible gap positions or stochastic hamming distance modifications.
 

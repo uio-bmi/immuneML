@@ -10,11 +10,6 @@ How to simulate immune events into an existing AIRR dataset in Galaxy
    :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
 
 
-.. note::
-
-    Galaxy simulation was implemented in an older version of immuneML (version 2).
-    In immuneML version 3, this has been replaced by simulation using LIgO.
-    For accurate tutorials on how to write a YAML specification for simulation, please check out the documentation of an old version of immuneML: https://docs.immuneml.uio.no/v2.1.2/tutorials/how_to_simulate_antigen_signals_in_airr_datasets.html
 
 The Galaxy tool `Simulate immune events into an existing repertoire dataset <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_simulation>`_
 can be used to implant short disease-associated motifs into an existing
@@ -27,16 +22,20 @@ An example Galaxy history showing how to use this tool `can be found here <https
 
 Creating the YAML specification
 ---------------------------------------------
+.. note::
+
+    Galaxy simulation was implemented in an older version of immuneML (version 2).
+    In immuneML version 3, this has been replaced by simulation using LIgO.
+    For accurate tutorials on how to write a YAML specification for simulation, please check out the documentation of an old version of immuneML: https://docs.immuneml.uio.no/v2.1.2/tutorials/how_to_simulate_antigen_signals_in_airr_datasets.html
 
 The Galaxy tool takes in an immuneML dataset from the history and a YAML specification.
 
-In the YAML specification, the :ref:`Simulation` instruction must be used. Additionally, the elements
+In the YAML specification, the :code:`Simulation` instruction must be used. Additionally, the elements
 :code:`motifs`, :code:`signals` and :code:`simulations` must be defined in the :code:`definitions` section of the YAML specification.
 A :ref:`motif <Motif>` describes a short amino acid sequence (motif seed) which may be implanted into an immune receptor sequence with small modifications.
 A :ref:`signal <Signal>` is a group of motifs, and may for example represent a disease. A simulation consists of :ref:`implantings <Implanting>`, which each represent
 one or more signals. This can be used to simulate confounding factors (signals occurring together), or ensure signals do not overlap between repertoires.
 
-These elements are described in more detail in :ref:`YAML specification of the Simulation instruction for introducing immune signals`.
 
 This figure shows how the different concepts in a Simulation relate to each other:
 

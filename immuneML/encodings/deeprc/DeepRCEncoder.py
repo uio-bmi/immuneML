@@ -21,7 +21,7 @@ class DeepRCEncoder(DatasetEncoder):
 
     Note: sequences where count is None, the count value will be set to 1
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

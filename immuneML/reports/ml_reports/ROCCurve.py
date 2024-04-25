@@ -16,7 +16,7 @@ class ROCCurve(MLReport):
     A report that plots the ROC curve for a binary classifier.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

@@ -17,7 +17,7 @@ class ExperimentalImport(GenerativeModel):
     """
     Allows to import existing experimental data and do annotations and simulations on top of them.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

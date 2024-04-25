@@ -64,7 +64,7 @@ class RandomReceptorDatasetImport(DataImport):
         """
         Returns randomly generated receptor dataset according to the parameters;
 
-        YAML specification:
+        **YAML specification:**
 
             result_path: path/where/to/store/results/
             receptor_count: 100 # number of random receptors to generate

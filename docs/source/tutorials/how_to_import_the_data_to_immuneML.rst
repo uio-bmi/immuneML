@@ -174,7 +174,7 @@ which speeds up the analysis. The main resulting file has an `.yaml` extension, 
 by several other `.yaml` and `.npy` files. When running immuneML locally, you can by default find these immuneML
 dataset files in the folder 'datasets', which is located in the main output folder of your analysis.
 
-Some instructions (:ref:`Simulation`, :ref:`DatasetExport`, :ref:`SubSampling`) also explicitly export binarized immuneML
+Some instructions (:ref:`DatasetExport`, :ref:`SubSampling`) also explicitly export binarized immuneML
 datasets when selecting 'ImmuneML' as the export format.
 
 These `.yaml` files can later be imported easily and with few parameters, and importing from `.yaml` is

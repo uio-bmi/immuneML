@@ -26,7 +26,7 @@ class BinaryFeaturePrecisionRecall(MLReport):
     Plots the precision and recall scores for each added feature to the collection of features selected by the BinaryFeatureClassifier.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

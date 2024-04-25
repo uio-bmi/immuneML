@@ -58,7 +58,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
       (when reads = unique) or the total number of reads in the repertoire (when reads = all).
 
 
-    **YAML Specification:**
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

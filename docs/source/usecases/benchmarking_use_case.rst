@@ -50,7 +50,7 @@ Simulating immune signals into the immune repertoires
 
 .. note::
 
-   In immuneML version 3, the old Simulation instruction has been replaced by LIgO.
+   In immuneML version 3, the old Simulation instruction has been replaced by LIgO (LigoSim instruction).
    To run the YAML specification below and exactly reproduce the original simulation results,
    an older immuneML version (2.x or lower) should be used.
 

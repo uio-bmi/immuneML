@@ -58,7 +58,7 @@ class RandomSequenceDatasetImport(DataImport):
         """
         Returns randomly generated receptor dataset according to the parameters;
 
-        YAML specification:
+        **YAML specification:**
 
             result_path: path/where/to/store/results/
             sequence_count: 100 # number of random sequences to generate

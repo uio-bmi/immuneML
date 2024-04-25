@@ -56,7 +56,7 @@ Under :code:`definitions`, the following analysis components may be defined:
 
 - :code:`reports`: specific plots or statistics to apply to the raw or encoded data, ML methods or results.
 
-Simulation-specific components (only relevant when running a :ref:`Simulation instruction<How to simulate antigen or disease-associated signals in AIRR datasets>`) are:
+Simulation-specific components (only relevant when running the :ref:`LigoSim instruction<Dataset simulation with LIgO`) are:
 
 - :code:`motifs`: parts of the simulation definition defined by a seed and a way to create specific motif instances from the seed,
 

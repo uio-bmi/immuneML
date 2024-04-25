@@ -10,7 +10,7 @@ class PCA(DimRedMethod):
     same as supported by scikit-learn (see `PCA scikit-learn documentation
     <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html#sklearn.decomposition.PCA>`_ for details).
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

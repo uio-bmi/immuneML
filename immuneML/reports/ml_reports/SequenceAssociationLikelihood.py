@@ -20,9 +20,8 @@ class SequenceAssociationLikelihood(MLReport):
     Plots the beta distribution used as a prior for class assignment in ProbabilisticBinaryClassifier. The distribution plotted shows
     the probability that a sequence is associated with a given class for a label.
 
-    Attributes: the report does not take in any arguments.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

@@ -66,7 +66,7 @@ class MatchedRegexEncoder(DatasetEncoder):
         ====  ==========  =======  ==========  ========
 
 
-    **YAML Specification:**
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
