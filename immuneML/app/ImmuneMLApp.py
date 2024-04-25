@@ -88,6 +88,5 @@ def main():
 
     run_immuneML(namespace)
 
-
 if __name__ == "__main__":
     main()

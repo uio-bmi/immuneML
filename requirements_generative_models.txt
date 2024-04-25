@@ -1,3 +1,3 @@
 olga
-sonia
-sonnia
+sonia<=0.1.3
+sonnia<=0.1.5
