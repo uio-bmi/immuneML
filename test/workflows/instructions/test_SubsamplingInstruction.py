@@ -1,4 +1,5 @@
 import os
+import random
 import shutil
 from unittest import TestCase
 
@@ -11,6 +12,7 @@ from immuneML.workflows.instructions.subsampling.SubsamplingInstruction import S
 
 class TestSubsamplingInstruction(TestCase):
     def test_run(self):
+        random.seed(1)
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "subsampling/")
         dataset = RandomDatasetGenerator.generate_receptor_dataset(200, labels={"epitope": {"A": 0.5, "B": 0.5}}, path=path,
                                                                    chain_1_length_probabilities={3: 1}, chain_2_length_probabilities={4: 1})
