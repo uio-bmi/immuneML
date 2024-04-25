@@ -26,7 +26,9 @@ class DeepRCEncoder(DatasetEncoder):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_deeprc_encoder: DeepRC
+        definitions:
+            encodings:
+                my_deeprc_encoder: DeepRC
 
     """
     ID_COLUMN = "ID"

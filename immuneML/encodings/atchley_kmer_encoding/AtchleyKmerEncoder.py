@@ -49,13 +49,15 @@ class AtchleyKmerEncoder(DatasetEncoder):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_encoder:
-            AtchleyKmer:
-                k: 4
-                skip_first_n_aa: 3
-                skip_last_n_aa: 3
-                abundance: RELATIVE_ABUNDANCE
-                normalize_all_features: False
+        definitions:
+            encodings:
+                my_encoder:
+                    AtchleyKmer:
+                        k: 4
+                        skip_first_n_aa: 3
+                        skip_last_n_aa: 3
+                        abundance: RELATIVE_ABUNDANCE
+                        normalize_all_features: False
 
     """
 

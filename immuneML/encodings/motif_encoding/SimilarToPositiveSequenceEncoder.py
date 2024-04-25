@@ -50,9 +50,11 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
     .. indent with spaces
     .. code-block:: yaml
 
-            my_sequence_encoder:
-                SimilarToPositiveSequenceEncoder:
-                    hamming_distance: 2
+        definitions:
+            encodings:
+                my_sequence_encoder:
+                    SimilarToPositiveSequenceEncoder:
+                        hamming_distance: 2
     """
 
     def __init__(self, hamming_distance: int = None, compairr_path: str = None,

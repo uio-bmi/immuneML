@@ -86,27 +86,29 @@ class KmerFrequencyEncoder(DatasetEncoder):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_continuous_kmer:
-            KmerFrequency:
-                normalization_type: RELATIVE_FREQUENCY
-                reads: UNIQUE
-                sequence_encoding: CONTINUOUS_KMER
-                sequence_type: NUCLEOTIDE
-                k: 3
-                scale_to_unit_variance: True
-                scale_to_zero_mean: True
-        my_gapped_kmer:
-            KmerFrequency:
-                normalization_type: RELATIVE_FREQUENCY
-                reads: UNIQUE
-                sequence_encoding: GAPPED_KMER
-                sequence_type: AMINO_ACID
-                k_left: 2
-                k_right: 2
-                min_gap: 1
-                max_gap: 3
-                scale_to_unit_variance: True
-                scale_to_zero_mean: False
+        definitions:
+            encodings:
+                my_continuous_kmer:
+                    KmerFrequency:
+                        normalization_type: RELATIVE_FREQUENCY
+                        reads: UNIQUE
+                        sequence_encoding: CONTINUOUS_KMER
+                        sequence_type: NUCLEOTIDE
+                        k: 3
+                        scale_to_unit_variance: True
+                        scale_to_zero_mean: True
+                my_gapped_kmer:
+                    KmerFrequency:
+                        normalization_type: RELATIVE_FREQUENCY
+                        reads: UNIQUE
+                        sequence_encoding: GAPPED_KMER
+                        sequence_type: AMINO_ACID
+                        k_left: 2
+                        k_right: 2
+                        min_gap: 1
+                        max_gap: 3
+                        scale_to_unit_variance: True
+                        scale_to_zero_mean: False
 
     """
 

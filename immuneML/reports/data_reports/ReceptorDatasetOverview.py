@@ -25,8 +25,9 @@ class ReceptorDatasetOverview(DataReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        reports:
-            my_receptor_overview_report: ReceptorDatasetOverview
+        definitions:
+            reports:
+                my_receptor_overview_report: ReceptorDatasetOverview
 
     """
 

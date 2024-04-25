@@ -37,8 +37,9 @@ class PerformanceOverview(MultiDatasetReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        reports:
-            my_performance_report: PerformanceOverview
+        definitions:
+            reports:
+                my_performance_report: PerformanceOverview
 
     """
 

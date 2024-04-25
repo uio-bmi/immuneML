@@ -33,11 +33,13 @@ class ConfounderAnalysis(MLReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_confounder_report:
-            ConfounderAnalysis:
-                metadata_labels:
-                  - age
-                  - sex
+        definitions:
+            reports:
+                my_confounder_report:
+                    ConfounderAnalysis:
+                        metadata_labels:
+                          - age
+                          - sex
 
     """
 

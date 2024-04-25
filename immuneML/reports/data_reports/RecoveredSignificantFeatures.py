@@ -70,24 +70,26 @@ class RecoveredSignificantFeatures(DataReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_recovered_significant_features_report:
-            RecoveredSignificantFeatures:
-                groundtruth_sequences_path: path/to/groundtruth/sequences.txt
-                trim_leading_trailing: False
-                p_values:
-                    - 0.1
-                    - 0.01
-                    - 0.001
-                    - 0.0001
-                k_values:
-                    - 3
-                    - 4
-                    - 5
-                    - full_sequence
-                compairr_path: path/to/compairr # can be specified if 'full_sequence' is listed under k_values
-                label: # Define a label, and the positive class for that given label
-                    CMV:
-                        positive_class: +
+        definitions:
+            reports:
+                my_recovered_significant_features_report:
+                    RecoveredSignificantFeatures:
+                        groundtruth_sequences_path: path/to/groundtruth/sequences.txt
+                        trim_leading_trailing: False
+                        p_values:
+                            - 0.1
+                            - 0.01
+                            - 0.001
+                            - 0.0001
+                        k_values:
+                            - 3
+                            - 4
+                            - 5
+                            - full_sequence
+                        compairr_path: path/to/compairr # can be specified if 'full_sequence' is listed under k_values
+                        label: # Define a label, and the positive class for that given label
+                            CMV:
+                                positive_class: +
     """
 
     @classmethod

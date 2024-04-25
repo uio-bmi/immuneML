@@ -24,9 +24,11 @@ class SillyClassifier(MLMethod):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_silly_method:
-            SillyClassifier:
-                random_seed: 100
+        definitions:
+            ml_methods:
+                my_silly_method:
+                    SillyClassifier:
+                        random_seed: 100
 
     """
     def __init__(self, random_seed: int = None):

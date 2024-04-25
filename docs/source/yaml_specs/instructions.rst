@@ -11,13 +11,21 @@ Please use the menu on the right side of this page to navigate to the
 documentation for the instructions of interest, or jump to one of the following
 sections:
 
+**Machine learning:**
+
 - :ref:`TrainMLModel`
 - :ref:`MLApplication`
-- :ref:`ExploratoryAnalysis`
+
+**Data simulation:**
+
 - :ref:`LigoSim`
 - :ref:`FeasibilitySummary`
 - :ref:`TrainGenModel`
 - :ref:`ApplyGenModel`
+
+**Data analysis, exploration and manipulation:**
+
+- :ref:`ExploratoryAnalysis`
 - :ref:`Clustering`
 - :ref:`DatasetExport`
 - :ref:`Subsampling`

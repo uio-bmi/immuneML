@@ -75,20 +75,22 @@ class ReceptorCNN(MLMethod):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_receptor_cnn:
-            ReceptorCNN:
-                kernel_count: 5
-                kernel_size: [3]
-                positional_channels: 3
-                sequence_type: amino_acid
-                device: cpu
-                number_of_threads: 16
-                random_seed: 100
-                learning_rate: 0.01
-                iteration_count: 10000
-                l1_weight_decay: 0
-                l2_weight_decay: 0
-                batch_size: 5000
+        definitions:
+            ml_methods:
+                my_receptor_cnn:
+                    ReceptorCNN:
+                        kernel_count: 5
+                        kernel_size: [3]
+                        positional_channels: 3
+                        sequence_type: amino_acid
+                        device: cpu
+                        number_of_threads: 16
+                        random_seed: 100
+                        learning_rate: 0.01
+                        iteration_count: 10000
+                        l1_weight_decay: 0
+                        l2_weight_decay: 0
+                        batch_size: 5000
 
     """
 

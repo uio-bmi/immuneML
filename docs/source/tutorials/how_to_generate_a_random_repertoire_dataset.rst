@@ -17,7 +17,7 @@ chosen from a uniform distribution. The dataset size, sequence lengths and optio
 
 The generated dataset can then be used to train a classifier (see :ref:`How to train and assess a receptor or repertoire-level ML classifier`),
 apply a classifier (see :ref:`How to apply previously trained ML models to a new dataset`), or simulate immune events (see
-:ref:`How to simulate antigen or disease-associated signals in AIRR datasets`).
+:ref:`Dataset simulation with LIgO`).
 
 YAML specification of a random repertoire dataset
 -------------------------------------------------

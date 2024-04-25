@@ -37,8 +37,9 @@ class DiseaseAssociatedSequenceOverlap(MultiDatasetReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        reports: # the report is defined with all other reports under definitions/reports
-            my_overlap_report: DiseaseAssociatedSequenceOverlap # report has no parameters
+        definitions:
+            reports:
+                my_overlap_report: DiseaseAssociatedSequenceOverlap # report has no parameters
 
     """
 

@@ -44,6 +44,7 @@ class EncodingReport(Report):
             # other parameters...
 
     """
+    DOCS_TITLE = "Encoding reports"
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, name: str = None, number_of_processes: int = 1):
         """
@@ -57,7 +58,3 @@ class EncodingReport(Report):
         """
         super().__init__(name=name, result_path=result_path, number_of_processes=number_of_processes)
         self.dataset = dataset
-
-    @staticmethod
-    def get_title():
-        return "Encoding reports"

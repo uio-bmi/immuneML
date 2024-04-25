@@ -20,6 +20,7 @@ class TrainMLModelReport(Report):
                 - my_train_ml_model_report
             # other parameters...
     """
+    DOCS_TITLE = "Train ML model reports"
 
     def __init__(self, name: str = None, state: TrainMLModelState = None, label: Label = None, result_path: Path = None, number_of_processes: int = 1):
         '''
@@ -35,6 +36,3 @@ class TrainMLModelReport(Report):
         self.state = state
         self.label = label
 
-    @staticmethod
-    def get_title():
-        return "Train ML model reports"

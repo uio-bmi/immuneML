@@ -71,11 +71,13 @@ class MatchedRegexEncoder(DatasetEncoder):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_mr_encoding:
-            MatchedRegex:
-                motif_filepath: path/to/file.txt
-                match_v_genes: True
-                reads: unique
+        definitions:
+            encodings:
+                my_mr_encoding:
+                    MatchedRegex:
+                        motif_filepath: path/to/file.txt
+                        match_v_genes: True
+                        reads: unique
 
     """
 

@@ -29,9 +29,11 @@ class RepertoireClonotypeSummary(DataReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_clonotype_summary_rep:
-          RepertoireClonotypeSummary:
-            color_by_label: celiac
+        definitions:
+            reports:
+                my_clonotype_summary_rep:
+                    RepertoireClonotypeSummary:
+                        color_by_label: celiac
 
     """
 

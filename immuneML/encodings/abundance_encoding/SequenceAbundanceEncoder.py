@@ -57,17 +57,19 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_sa_encoding:
-            SequenceAbundance:
-                comparison_attributes:
-                    - sequence_aa
-                    - v_call
-                    - j_call
-                    - chain
-                    - region_type
-                p_value_threshold: 0.05
-                sequence_batch_size: 100000
-                repertoire_batch_size: 32
+        definitions:
+            encodings:
+                my_sa_encoding:
+                    SequenceAbundance:
+                        comparison_attributes:
+                            - sequence_aa
+                            - v_call
+                            - j_call
+                            - chain
+                            - region_type
+                        p_value_threshold: 0.05
+                        sequence_batch_size: 100000
+                        repertoire_batch_size: 32
 
     """
 

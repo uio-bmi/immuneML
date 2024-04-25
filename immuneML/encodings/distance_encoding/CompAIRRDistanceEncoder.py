@@ -58,13 +58,15 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_distance_encoder:
-            CompAIRRDistance:
-                compairr_path: optional/path/to/compairr
-                differences: 0
-                indels: False
-                ignore_counts: False
-                ignore_genes: False
+        definitions:
+            encodings:
+                my_distance_encoder:
+                    CompAIRRDistance:
+                        compairr_path: optional/path/to/compairr
+                        differences: 0
+                        indels: False
+                        ignore_counts: False
+                        ignore_genes: False
 
     """
 

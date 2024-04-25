@@ -47,11 +47,13 @@ class AminoAcidFrequencyDistribution(DataReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_aa_freq_report:
-          AminoAcidFrequencyDistribution:
-            relative_frequency: False
-            split_by_label: True
-            label: CMV
+        definitions:
+            reports:
+                my_aa_freq_report:
+                    AminoAcidFrequencyDistribution:
+                        relative_frequency: False
+                        split_by_label: True
+                        label: CMV
 
     """
 

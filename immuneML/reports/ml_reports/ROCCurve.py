@@ -21,8 +21,9 @@ class ROCCurve(MLReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        reports:
-          my_roc_report: ROCCurve
+        definitions:
+            reports:
+                my_roc_report: ROCCurve
 
     """
 

@@ -26,7 +26,9 @@ class SequenceAssociationLikelihood(MLReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_sequence_assoc_report: SequenceAssociationLikelihood
+        definitions:
+            reports:
+                my_sequence_assoc_report: SequenceAssociationLikelihood
 
     """
 

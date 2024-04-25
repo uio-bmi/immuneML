@@ -44,16 +44,18 @@ class DistanceEncoder(DatasetEncoder):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_distance_encoder:
-            Distance:
-                distance_metric: JACCARD
-                sequence_batch_size: 1000
-                attributes_to_match:
-                    - sequence_aa
-                    - v_call
-                    - j_call
-                    - chain
-                    - region_type
+        definitions:
+            encodings:
+                my_distance_encoder:
+                    Distance:
+                        distance_metric: JACCARD
+                        sequence_batch_size: 1000
+                        attributes_to_match:
+                            - sequence_aa
+                            - v_call
+                            - j_call
+                            - chain
+                            - region_type
 
     """
 

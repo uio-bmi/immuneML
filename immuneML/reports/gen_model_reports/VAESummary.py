@@ -37,10 +37,12 @@ class VAESummary(GenModelReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_vae_summary:
-          VAESummary:
-            dim_dist_cols: 4
-            dim_dist_rows: None
+        definitions:
+            reports:
+                my_vae_summary:
+                    VAESummary:
+                        dim_dist_cols: 4
+                        dim_dist_rows: None
 
     """
     @classmethod

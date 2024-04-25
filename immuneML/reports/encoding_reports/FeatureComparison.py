@@ -26,6 +26,7 @@ class FeatureComparison(FeatureReport):
     Alternatively, when the feature values are of interest without comparing them between labelled subgroups of the data, please
     use :ref:`FeatureValueBarplot` or :ref:`FeatureDistribution` instead.
 
+
     **Specification arguments:**
 
     - comparison_label (str): Mandatory label. This label is used to split the encoded data matrix and define the x and y axes of the plot.
@@ -54,9 +55,11 @@ class FeatureComparison(FeatureReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_comparison_report:
-            FeatureComparison: # compare the different classes defined in the label disease
-                comparison_label: disease
+        definitions:
+            reports:
+                my_comparison_report:
+                    FeatureComparison: # compare the different classes defined in the label disease
+                        comparison_label: disease
 
     """
 

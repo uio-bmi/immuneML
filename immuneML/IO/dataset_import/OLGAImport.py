@@ -43,24 +43,26 @@ class OLGAImport(DataImport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_olga_dataset:
-            format: OLGA
-            params:
-                path: path/to/files/
-                is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
-                metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
-                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
-                # Optional fields with OLGA-specific defaults, only change when different behavior is required:
-                separator: "\\t" # column separator
-                region_type: IMGT_CDR3 # what part of the sequence to import
-                columns_to_load: [0, 1, 2, 3]
-                column_mapping:
-                    0: sequence
-                    1: sequence_aa
-                    2: v_call
-                    3: j_call
+        definitions:
+            datasets:
+                my_olga_dataset:
+                    format: OLGA
+                    params:
+                        path: path/to/files/
+                        is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
+                        metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                        import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
+                        import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                        import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+                        # Optional fields with OLGA-specific defaults, only change when different behavior is required:
+                        separator: "\\t" # column separator
+                        region_type: IMGT_CDR3 # what part of the sequence to import
+                        columns_to_load: [0, 1, 2, 3]
+                        column_mapping:
+                            0: sequence
+                            1: sequence_aa
+                            2: v_call
+                            3: j_call
 
     """
 

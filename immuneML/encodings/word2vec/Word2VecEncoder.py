@@ -62,14 +62,16 @@ class Word2VecEncoder(DatasetEncoder):
     .. highlight:: yaml
     .. code-block:: yaml
 
-        encodings:
-            my_w2v:
-                Word2Vec:
-                    vector_size: 16
-                    k: 3
-                    model_type: SEQUENCE
-                    epochs: 100
-                    window: 8
+        definitions:
+            encodings:
+                encodings:
+                    my_w2v:
+                        Word2Vec:
+                            vector_size: 16
+                            k: 3
+                            model_type: SEQUENCE
+                            epochs: 100
+                            window: 8
 
     """
 

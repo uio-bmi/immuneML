@@ -43,21 +43,23 @@ class SequencesWithSignificantKmers(DataReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_sequences_with_significant_kmers:
-            SequencesWithSignificantKmers:
-                reference_sequences_path: path/to/reference/sequences.txt
-                p_values:
-                    - 0.1
-                    - 0.01
-                    - 0.001
-                    - 0.0001
-                k_values:
-                    - 3
-                    - 4
-                    - 5
-                label: # Define a label, and the positive class for that given label
-                    CMV:
-                        positive_class: +
+        definitions:
+            reports:
+                my_sequences_with_significant_kmers:
+                    SequencesWithSignificantKmers:
+                        reference_sequences_path: path/to/reference/sequences.txt
+                        p_values:
+                            - 0.1
+                            - 0.01
+                            - 0.001
+                            - 0.0001
+                        k_values:
+                            - 3
+                            - 4
+                            - 5
+                        label: # Define a label, and the positive class for that given label
+                            CMV:
+                                positive_class: +
 
     """
 

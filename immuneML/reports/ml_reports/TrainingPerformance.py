@@ -33,19 +33,21 @@ class TrainingPerformance(MLReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_performance_report:
-            TrainingPerformance: 
-                metrics:
-                    - accuracy
-                    - balanced_accuracy
-                    - confusion_matrix
-                    - f1_micro
-                    - f1_macro
-                    - f1_weighted
-                    - precision
-                    - recall
-                    - auc
-                    - log_loss
+        definitions:
+            reports:
+                my_performance_report:
+                    TrainingPerformance:
+                        metrics:
+                            - accuracy
+                            - balanced_accuracy
+                            - confusion_matrix
+                            - f1_micro
+                            - f1_macro
+                            - f1_weighted
+                            - precision
+                            - recall
+                            - auc
+                            - log_loss
 
     """
 

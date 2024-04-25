@@ -11,17 +11,16 @@ class ApplyGenModelState(GenModelState):
 
 class ApplyGenModelInstruction(GenModelInstruction):
     """
-    ApplyGenModel instruction implements applying generative AIRR models on the sequence level.
-
-    This instruction takes as input a trained model which will be used for generating data and the number of
-    sequences to be generated. It can also produce reports of the applied model and reports of generated
-    sequences.
-
-    To train generative model with immuneML, see TrainGenModel instruction.
-
     .. note::
 
-        This is an experimental feature in version 3.0.0a1.
+        This is an experimental feature
+
+    ApplyGenModel instruction implements applying generative AIRR models on the sequence level.
+
+    This instruction takes as input a trained model (trained in the :ref:`TrainGenModel` instruction)
+    which will be used for generating data and the number of sequences to be generated.
+    It can also produce reports of the applied model and reports of generated sequences.
+
 
     **Specification arguments:**
 
@@ -38,11 +37,12 @@ class ApplyGenModelInstruction(GenModelInstruction):
     .. highlight:: yaml
     .. code-block:: yaml
 
-        my_apply_gen_model_inst: # user-defined instruction name
-            type: ApplyGenModel
-            gen_examples_count: 100
-            ml_config_path: ./config.zip
-            reports: [data_rep1, ml_rep2]
+        instructions:
+            my_apply_gen_model_inst: # user-defined instruction name
+                type: ApplyGenModel
+                gen_examples_count: 100
+                ml_config_path: ./config.zip
+                reports: [data_rep1, ml_rep2]
 
     """
     def __init__(self, method: GenerativeModel = None, reports: list = None, result_path: Path = None,

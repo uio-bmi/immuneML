@@ -50,14 +50,16 @@ class FeatureValueBarplot(FeatureReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_fvb_report:
-            FeatureValueBarplot: # timepoint, disease_status and age_group are metadata labels
-                column_grouping_label: timepoint
-                row_grouping_label: disease_status
-                color_grouping_label: age_group
-                plot_all_features: true
-                plot_top_n: 10
-                plot_bottom_n: 5
+        definitions:
+            reports:
+                my_fvb_report:
+                    FeatureValueBarplot: # timepoint, disease_status and age_group are metadata labels
+                        column_grouping_label: timepoint
+                        row_grouping_label: disease_status
+                        color_grouping_label: age_group
+                        plot_all_features: true
+                        plot_top_n: 10
+                        plot_bottom_n: 5
 
     """
 

@@ -57,31 +57,33 @@ class MiXCRImport(DataImport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_mixcr_dataset:
-            format: MiXCR
-            params:
-                path: path/to/files/
-                is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
-                metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                metadata_column_mapping: # metadata column mapping MiXCR: immuneML for SequenceDataset
-                    mixcrColumnName1: metadata_label1
-                    mixcrColumnName2: metadata_label2
-                region_type: IMGT_CDR3 # what part of the sequence to import
-                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
-                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
-                # Optional fields with MiXCR-specific defaults, only change when different behavior is required:
-                separator: "\\t" # column separator
-                columns_to_load: # subset of columns to load, sequence columns are handled by region_type parameter
-                - cloneCount
-                - allVHitsWithScore
-                - allJHitsWithScore
-                - aaSeqCDR3
-                - nSeqCDR3
-                column_mapping: # column mapping MiXCR: immuneML
-                    cloneCount: duplicate_count
-                    allVHitsWithScore: v_call
-                    allJHitsWithScore: j_call
+        definitions:
+            datasets:
+                my_mixcr_dataset:
+                    format: MiXCR
+                    params:
+                        path: path/to/files/
+                        is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
+                        metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                        metadata_column_mapping: # metadata column mapping MiXCR: immuneML for SequenceDataset
+                            mixcrColumnName1: metadata_label1
+                            mixcrColumnName2: metadata_label2
+                        region_type: IMGT_CDR3 # what part of the sequence to import
+                        import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
+                        import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                        import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+                        # Optional fields with MiXCR-specific defaults, only change when different behavior is required:
+                        separator: "\\t" # column separator
+                        columns_to_load: # subset of columns to load, sequence columns are handled by region_type parameter
+                        - cloneCount
+                        - allVHitsWithScore
+                        - allJHitsWithScore
+                        - aaSeqCDR3
+                        - nSeqCDR3
+                        column_mapping: # column mapping MiXCR: immuneML
+                            cloneCount: duplicate_count
+                            allVHitsWithScore: v_call
+                            allJHitsWithScore: j_call
 
     """
 

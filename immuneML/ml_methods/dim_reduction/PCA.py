@@ -15,10 +15,12 @@ class PCA(DimRedMethod):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_pca: # user-defined name of the dimensionality reduction method
-            PCA: # name of the class
-                # arguments as defined by scikit-learn
-                n_components: 2
+        definitions:
+            ml_methods:
+                my_pca:
+                    PCA:
+                        # arguments as defined by scikit-learn
+                        n_components: 2
 
     """
 

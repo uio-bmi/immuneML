@@ -25,7 +25,9 @@ class RelevantSequenceExporter(EncodingReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_relevant_sequences: RelevantSequenceExporter
+        definitions:
+            reports:
+                my_relevant_sequences: RelevantSequenceExporter
 
     """
 

@@ -35,9 +35,11 @@ class DesignMatrixExporter(EncodingReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_dme_report:
-            DesignMatrixExporter:
-                file_format: csv
+        definitions:
+            reports:
+                my_dme_report:
+                    DesignMatrixExporter:
+                        file_format: csv
 
     """
     def __init__(self, dataset: Dataset = None, result_path: Path = None, file_format: str = None, number_of_processes: int = 1, name: str = None):

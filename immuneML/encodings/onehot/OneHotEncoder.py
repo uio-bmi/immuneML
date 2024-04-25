@@ -73,18 +73,20 @@ class OneHotEncoder(DatasetEncoder):
     .. indent with spaces
     .. code-block:: yaml
 
-        one_hot_vanilla:
-            OneHot:
-                use_positional_info: False
-                flatten: False
-                sequence_type: amino_acid
+        definitions:
+            encodings:
+                one_hot_vanilla:
+                    OneHot:
+                        use_positional_info: False
+                        flatten: False
+                        sequence_type: amino_acid
 
-        one_hot_positional:
-            OneHot:
-                use_positional_info: True
-                distance_to_seq_middle: 3
-                flatten: False
-                sequence_type: nucleotide
+                one_hot_positional:
+                    OneHot:
+                        use_positional_info: True
+                        distance_to_seq_middle: 3
+                        flatten: False
+                        sequence_type: nucleotide
 
     """
 

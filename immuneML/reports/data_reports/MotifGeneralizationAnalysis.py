@@ -81,13 +81,15 @@ class MotifGeneralizationAnalysis(DataReport):
     .. indent with spaces
     .. code-block:: yaml
 
-
-        my_report:
-            MotifGeneralizationAnalysis:
-                ...
-                label: # Define a label, and the positive class for that given label
-                    CMV:
-                        positive_class: +
+        definitions:
+            reports:
+                my_motif_generalization:
+                    MotifGeneralizationAnalysis:
+                        min_precision: 0.9
+                        min_recall: 0.1
+                        label: # Define a label, and the positive class for that given label
+                            CMV:
+                                positive_class: +
     """
 
     def __init__(self, training_set_identifier_path: str = None, training_percentage: float = None,

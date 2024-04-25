@@ -75,12 +75,14 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
     .. code-block:: yaml
 
-        my_sa_encoding:
-            CompAIRRSequenceAbundance:
-                compairr_path: optional/path/to/compairr
-                p_value_threshold: 0.05
-                ignore_genes: False
-                threads: 8
+        definitions:
+            encodings:
+                my_sa_encoding:
+                    CompAIRRSequenceAbundance:
+                        compairr_path: optional/path/to/compairr
+                        p_value_threshold: 0.05
+                        ignore_genes: False
+                        threads: 8
 
     """
 

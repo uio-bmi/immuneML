@@ -9,16 +9,20 @@ from immuneML.ml_methods.util.Util import Util
 
 class MLMethod(metaclass=abc.ABCMeta):
     """
-    Base class for different machine learning methods, defining which functions should be implemented. These public functions are the only ones that
-    will be used outside the method, during training, assessment or while making predictions. MLMethods are classifiers (binary or
-    multi-class) that should learn some label on either immune repertoires (sets of receptor sequences), receptors (paired sequences) or receptor
-    sequences (lists of amino acids).
+    ML method classifiers are algorithms which can be trained to predict some label on immune
+    repertoires, receptors or sequences.
 
-    Throughout the documentation we use the term 'ML method' to describe a general algorithm which can be trained,
-    and use the term 'model' to refer to an already-trained version of an algorithm.
-    For instance, logistic regression is an ML method, whereas a logistic regression model is a fitted model
-    which has learnt specific coefficients.
+    These methods can be trained using the :ref:`TrainMLModel` instruction, and previously trained
+    models can be applied to new data using the :ref:`MLApplication` instruction.
+
+    When choosing which ML method(s) are most suitable for your use-case, please consider the following table:
+
+    .. csv-table:: ML methods properties
+       :file: ../../source/_static/files/ml_methods_properties.csv
+       :header-rows: 1
     """
+    DOCS_TITLE = "Classifiers"
+
     def __init__(self):
         self.name = None
         self.label = None

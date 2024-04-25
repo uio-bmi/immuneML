@@ -44,28 +44,25 @@ An encoding is a numerical data representation, which may be used as input for a
 ML methods
 -----------
 
-Under the :code:`definitions/ml_methods` component, the user can specify different ML methods to use on a given encoded dataset.
+Under the :code:`definitions/ml_methods` component, the user can specify different ML methods to use on a given (encoded) dataset.
 
 From version 3, immuneML includes different types of ML methods:
 
-- :ref:`**Classifiers**` which make predictions about data. See also :ref:`How to train and assess a receptor or repertoire-level ML classifier`.
-- :ref:`**Generative models**` to generate new AIR sequences. **IN DEVELOPMENT**
-- :ref:`**Dimensionality reduction methods**` **IN DEVELOPMENT**
+- :ref:`**Classifiers**` which make predictions about labelled data.
+- :ref:`**Clustering methods**` which can cluster unlabelled data.
+- :ref:`**Generative models**` to generate new AIR sequences.
+- :ref:`**Dimensionality reduction methods**` to reduce the dimensionality of the data before analysing it.
 
-When choosing which ML method(s) are most suitable for your use-case, please consider the following table:
+.. note::
 
-.. csv-table:: ML methods properties
-   :file: ../_static/files/ml_methods_properties.csv
-   :header-rows: 1
-
-
+    Clustering methods, Generative models and Dimensionality reduction methods are experimental features.
 
 .. include:: ../../specs/definitions/ml_methods.rst
 
 Reports
 ---------
 
-Under the :code:`definitions/ml_methods` component, the user can specify reports which visualise or summarise different properties
+Under the :code:`definitions/reports` component, the user can specify reports which visualise or summarise different properties
 of the dataset or analysis.
 
 Reports have been divided into different types. Different types of reports can be specified depending on which instruction is run. Click on the name of the report type to see more details.

@@ -63,13 +63,15 @@ class BinaryFeatureClassifier(MLMethod):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_motif_classifier:
-            MotifClassifier:
-                training_percentage: 0.7
-                max_features: 100
-                patience: 5
-                min_delta: 0
-                keep_all: false
+        definitions:
+            ml_methods:
+                my_motif_classifier:
+                    MotifClassifier:
+                        training_percentage: 0.7
+                        max_features: 100
+                        patience: 5
+                        min_delta: 0
+                        keep_all: false
 
     """
 

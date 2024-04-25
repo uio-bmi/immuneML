@@ -25,7 +25,9 @@ The class docstrings are used to automatically generate the documentation web pa
       .. indent with spaces
       .. code-block:: yaml
 
-          my_new_class:
-              MyNewClass:
-                  parameter_name: 0
-                  other_paramer_name: 1
+          definitions:
+              yaml_keyword: # could be encodings/ml_methods/reports/etc...
+                  my_new_class:
+                      MyNewClass:
+                          parameter_name: 0
+                          other_paramer_name: 1

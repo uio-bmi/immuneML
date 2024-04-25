@@ -29,10 +29,12 @@ class SillyEncoder(DatasetEncoder):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_silly_encoder:
-            Silly: # name of the class (without 'Encoder' suffix)
-                random_seed: 1
-                embedding_len: 5
+        definitions:
+            encodings:
+                my_silly_encoder:
+                    Silly: # name of the class (without 'Encoder' suffix)
+                        random_seed: 1
+                        embedding_len: 5
     """
 
     def __init__(self, random_seed: int, embedding_len: int, name: str = None):

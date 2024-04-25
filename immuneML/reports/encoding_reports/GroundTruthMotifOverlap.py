@@ -44,10 +44,12 @@ class GroundTruthMotifOverlap(EncodingReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_ground_truth_motif_report:
-            GroundTruthMotifOverlap:
-                groundtruth_motifs_path: path/to/file.tsv
-    """
+        definitions:
+            reports:
+                my_ground_truth_motif_report:
+                    GroundTruthMotifOverlap:
+                        groundtruth_motifs_path: path/to/file.tsv
+            """
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, name: str = None,
                  number_of_processes: int = 1, groundtruth_motifs_path: str = None):

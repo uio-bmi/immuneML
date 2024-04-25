@@ -37,7 +37,7 @@ class ExploratoryAnalysisInstruction(Instruction):
 
       - labels: if encoding is specified, the relevant labels should be specified here.
 
-      - dim_reduction: which dimensionality reduction to apply; this is an experimental feature in version 3.0.0a1
+      - dim_reduction: which dimensionality reduction to apply; this is an experimental feature
 
       - report: which report to run on the dataset. Reports specified here may be of the category :ref:`Data reports` or :ref:`Encoding reports`, depending on whether 'encoding' was specified.
 
@@ -50,26 +50,27 @@ class ExploratoryAnalysisInstruction(Instruction):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_expl_analysis_instruction: # user-defined instruction name
-            type: ExploratoryAnalysis # which instruction to execute
-            analyses: # analyses to perform
-                my_first_analysis: # user-defined name of the analysis
-                    dataset: d1 # dataset to use in the first analysis
-                    preprocessing_sequence: p1 # preprocessing sequence to use in the first analysis
-                    report: r1 # which report to generate using the dataset d1
-                my_second_analysis: # user-defined name of another analysis
-                    dataset: d1 # dataset to use in the second analysis - can be the same or different from other analyses
-                    encoding: e1 # encoding to apply on the specified dataset (d1)
-                    report: r2 # which report to generate in the second analysis
-                    labels: # labels present in the dataset d1 which will be included in the encoded data on which report r2 will be run
-                        - celiac # name of the first label as present in the column of dataset's metadata file
-                        - CMV # name of the second label as present in the column of dataset's metadata file
-                my_third_analysis: # user-defined name of another analysis
-                    dataset: d1 # dataset to use in the second analysis - can be the same or different from other analyses
-                    encoding: e1 # encoding to apply on the specified dataset (d1)
-                    dim_reduction: umap # or None; which dimensionality reduction method to apply to encoded d1
-                    report: r3 # which report to generate in the third analysis
-            number_of_processes: 4 # number of parallel processes to create (could speed up the computation)
+        instructions:
+            my_expl_analysis_instruction: # user-defined instruction name
+                type: ExploratoryAnalysis # which instruction to execute
+                analyses: # analyses to perform
+                    my_first_analysis: # user-defined name of the analysis
+                        dataset: d1 # dataset to use in the first analysis
+                        preprocessing_sequence: p1 # preprocessing sequence to use in the first analysis
+                        report: r1 # which report to generate using the dataset d1
+                    my_second_analysis: # user-defined name of another analysis
+                        dataset: d1 # dataset to use in the second analysis - can be the same or different from other analyses
+                        encoding: e1 # encoding to apply on the specified dataset (d1)
+                        report: r2 # which report to generate in the second analysis
+                        labels: # labels present in the dataset d1 which will be included in the encoded data on which report r2 will be run
+                            - celiac # name of the first label as present in the column of dataset's metadata file
+                            - CMV # name of the second label as present in the column of dataset's metadata file
+                    my_third_analysis: # user-defined name of another analysis
+                        dataset: d1 # dataset to use in the second analysis - can be the same or different from other analyses
+                        encoding: e1 # encoding to apply on the specified dataset (d1)
+                        dim_reduction: umap # or None; which dimensionality reduction method to apply to encoded d1
+                        report: r3 # which report to generate in the third analysis
+                number_of_processes: 4 # number of parallel processes to create (could speed up the computation)
     """
 
     def __init__(self, exploratory_analysis_units: dict, name: str = None):

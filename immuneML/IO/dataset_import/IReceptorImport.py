@@ -85,31 +85,33 @@ class IReceptorImport(DataImport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_airr_dataset:
-            format: IReceptor
-            params:
-                path: path/to/zipfiles/
-                is_repertoire: True # whether to import a RepertoireDataset
-                metadata_column_mapping: # metadata column mapping AIRR: immuneML for Sequence- or ReceptorDatasetDataset
-                    airr_column_name1: metadata_label1
-                    airr_column_name2: metadata_label2
-                import_productive: True # whether to include productive sequences in the dataset
-                import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
-                import_out_of_frame: False # whether to include out of frame sequences in the dataset
-                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
-                import_empty_nt_sequences: True # keep sequences even if the `sequences` column is empty (provided that other fields are as specified here)
-                import_empty_aa_sequences: False # remove all sequences with empty `sequence_aas` column
-                # Optional fields with AIRR-specific defaults, only change when different behavior is required:
-                separator: "\\t" # column separator
-                region_type: IMGT_CDR3 # what part of the sequence to import
-                column_mapping: # column mapping AIRR: immuneML
-                    junction: sequences
-                    junction_aa: sequence_aas
-                    v_call: v_alleles
-                    j_call: j_alleles
-                    locus: chains
-                    duplicate_count: counts
-                    sequence_id: sequence_identifiers
+        definitions:
+            datasets:
+                my_airr_dataset:
+                    format: IReceptor
+                    params:
+                        path: path/to/zipfiles/
+                        is_repertoire: True # whether to import a RepertoireDataset
+                        metadata_column_mapping: # metadata column mapping AIRR: immuneML for Sequence- or ReceptorDatasetDataset
+                            airr_column_name1: metadata_label1
+                            airr_column_name2: metadata_label2
+                        import_productive: True # whether to include productive sequences in the dataset
+                        import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
+                        import_out_of_frame: False # whether to include out of frame sequences in the dataset
+                        import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
+                        import_empty_nt_sequences: True # keep sequences even if the `sequences` column is empty (provided that other fields are as specified here)
+                        import_empty_aa_sequences: False # remove all sequences with empty `sequence_aas` column
+                        # Optional fields with AIRR-specific defaults, only change when different behavior is required:
+                        separator: "\\t" # column separator
+                        region_type: IMGT_CDR3 # what part of the sequence to import
+                        column_mapping: # column mapping AIRR: immuneML
+                            junction: sequences
+                            junction_aa: sequence_aas
+                            v_call: v_alleles
+                            j_call: j_alleles
+                            locus: chains
+                            duplicate_count: counts
+                            sequence_id: sequence_identifiers
 
     """
     REPERTOIRES_FOLDER = "repertoires/"

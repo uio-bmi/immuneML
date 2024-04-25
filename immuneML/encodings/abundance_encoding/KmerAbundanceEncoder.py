@@ -62,10 +62,12 @@ class KmerAbundanceEncoder(DatasetEncoder):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_sa_encoding:
-            KmerAbundance:
-                p_value_threshold: 0.05
-                threads: 8
+        definitions:
+            encodings:
+                my_ka_encoding:
+                    KmerAbundance:
+                        p_value_threshold: 0.05
+                        threads: 8
 
     """
 

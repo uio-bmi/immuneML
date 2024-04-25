@@ -46,6 +46,17 @@ class SoNNia(GenerativeModel):
 
     - default_model_name (str)
 
+        **YAML specification:**
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        definitions:
+            ml_methods:
+                my_sonnia_model:
+                    SoNNia:
+                        ...
+
     """
 
     @classmethod

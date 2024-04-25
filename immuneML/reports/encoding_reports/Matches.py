@@ -42,7 +42,9 @@ class Matches(EncodingReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_match_report: Matches
+        definitions:
+            reports:
+                my_match_report: Matches
     """
 
     @classmethod

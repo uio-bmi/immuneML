@@ -13,16 +13,19 @@ class TSNE(DimRedMethod):
     same as supported by scikit-learn (see `TSNE scikit-learn documentation
     <https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html#sklearn.manifold.TSNE>`_ for details).
 
+
     **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_tsne: # user-defined name of the dimensionality reduction method
-            TSNE: # name of the class
-                # arguments as defined by scikit-learn
-                n_components: 2
-                init: pca
+        definitions:
+            ml_methods:
+                my_tsne:
+                    TSNE:
+                        # arguments as defined by scikit-learn
+                        n_components: 2
+                        init: pca
 
     """
     def __init__(self, name: str = None, **kwargs):

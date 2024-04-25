@@ -28,8 +28,9 @@ class ROCCurveSummary(TrainMLModelReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        reports:
-            my_roc_summary_report: ROCCurveSummary
+        definitions:
+            reports:
+                my_roc_summary_report: ROCCurveSummary
 
     """
 

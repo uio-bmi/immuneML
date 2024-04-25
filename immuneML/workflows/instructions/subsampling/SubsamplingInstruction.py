@@ -29,15 +29,16 @@ class SubsamplingInstruction(Instruction):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_subsampling_instruction: # user-defined name of the instruction
-            type: Subsampling # which instruction to execute
-            dataset: my_dataset # original dataset to be subsampled, with e.g., 300 examples
-            subsampled_dataset_sizes: # how large the subsampled datasets should be, one dataset will be created for each list item
-                - 200 # one subsampled dataset with 200 examples (200 repertoires if my_dataset was repertoire dataset)
-                - 100 # the other subsampled dataset will have 100 examples
-            dataset_export_formats: # in which formats to export the subsampled datasets
-                - ImmuneML
-                - AIRR
+        instructions:
+            my_subsampling_instruction: # user-defined name of the instruction
+                type: Subsampling # which instruction to execute
+                dataset: my_dataset # original dataset to be subsampled, with e.g., 300 examples
+                subsampled_dataset_sizes: # how large the subsampled datasets should be, one dataset will be created for each list item
+                    - 200 # one subsampled dataset with 200 examples (200 repertoires if my_dataset was repertoire dataset)
+                    - 100 # the other subsampled dataset will have 100 examples
+                dataset_export_formats: # in which formats to export the subsampled datasets
+                    - ImmuneML
+                    - AIRR
 
     """
 

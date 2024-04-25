@@ -31,7 +31,9 @@ class KernelSequenceLogo(MLReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_kernel_seq_logo: KernelSequenceLogo
+        definitions:
+            reports:
+                my_kernel_seq_logo: KernelSequenceLogo
 
     """
 

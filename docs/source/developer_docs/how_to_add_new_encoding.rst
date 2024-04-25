@@ -222,10 +222,12 @@ Class documentation standards for encodings
         .. indent with spaces
         .. code-block:: yaml
 
-            my_silly_encoder:
-                Silly:
-                    random_seed: 1
-                    embedding_len: 5
+            definitions:
+                encodings:
+                    my_silly_encoder:
+                        Silly:
+                            random_seed: 1
+                            embedding_len: 5
 
 
 

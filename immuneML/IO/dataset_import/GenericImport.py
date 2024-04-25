@@ -74,32 +74,34 @@ class GenericImport(DataImport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_generic_dataset:
-            format: Generic
-            params:
-                path: path/to/files/
-                is_repertoire: True # whether to import a RepertoireDataset
-                metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                paired: False # whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False
-                receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
-                separator: "\\t" # column separator
-                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
-                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
-                region_type: IMGT_CDR3 # what part of the sequence to import
-                column_mapping: # column mapping file: immuneML
-                    file_column_amino_acids: sequence_aas
-                    file_column_v_genes: v_call
-                    file_column_j_genes: j_call
-                    file_column_frequencies: duplicate_count
-                metadata_column_mapping: # metadata column mapping file: immuneML
-                    file_column_antigen_specificity: antigen_specificity
-                columns_to_load:  # which subset of columns to load from the file
-                    - file_column_amino_acids
-                    - file_column_v_genes
-                    - file_column_j_genes
-                    - file_column_frequencies
-                    - file_column_antigen_specificity
+        definitions:
+            datasets:
+                my_generic_dataset:
+                    format: Generic
+                    params:
+                        path: path/to/files/
+                        is_repertoire: True # whether to import a RepertoireDataset
+                        metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                        paired: False # whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False
+                        receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
+                        separator: "\\t" # column separator
+                        import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
+                        import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                        import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+                        region_type: IMGT_CDR3 # what part of the sequence to import
+                        column_mapping: # column mapping file: immuneML
+                            file_column_amino_acids: sequence_aas
+                            file_column_v_genes: v_call
+                            file_column_j_genes: j_call
+                            file_column_frequencies: duplicate_count
+                        metadata_column_mapping: # metadata column mapping file: immuneML
+                            file_column_antigen_specificity: antigen_specificity
+                        columns_to_load:  # which subset of columns to load from the file
+                            - file_column_amino_acids
+                            - file_column_v_genes
+                            - file_column_j_genes
+                            - file_column_frequencies
+                            - file_column_antigen_specificity
 
     """
 

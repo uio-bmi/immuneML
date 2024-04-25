@@ -105,7 +105,7 @@ Note that in order to run this yaml file, instructions still need to be added
             # to be added...
 
 The :code:`definitions` section used for Simulation contains different components (:code:`motifs`, :code:`signals`, :code:`simulations`).
-These are discussed in more detail in the following tutorial: :ref:`How to simulate antigen or disease-associated signals in AIRR datasets`.
+These are discussed in more detail in the following tutorial: :ref:`Dataset simulation with LIgO`.
 
 
 

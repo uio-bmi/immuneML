@@ -34,10 +34,12 @@ class CVFeaturePerformance(TrainMLModelReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        report1:
-            CVFeaturePerformance:
-                feature: p_value_threshold # parameter value of SequenceAbundance encoder
-                is_feature_axis_categorical: True # show x-axis as categorical
+        definitions:
+            reports:
+                report1:
+                    CVFeaturePerformance:
+                        feature: p_value_threshold # parameter value of SequenceAbundance encoder
+                        is_feature_axis_categorical: True # show x-axis as categorical
 
     """
 

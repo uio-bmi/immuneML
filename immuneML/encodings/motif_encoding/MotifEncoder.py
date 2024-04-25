@@ -78,16 +78,18 @@ class MotifEncoder(DatasetEncoder):
     .. indent with spaces
     .. code-block:: yaml
 
-            my_motif_encoder:
-                MotifEncoder:
-                    max_positions: 4
-                    min_precision: 0.8
-                    min_recall:  # different recall thresholds for each motif size
-                        1: 0.5   # For shorter motifs, a stricter recall threshold is used
-                        2: 0.1
-                        3: 0.01
-                        4: 0.001
-                    min_true_positives: 10
+        definitions:
+            encodings:
+                my_motif_encoder:
+                    MotifEncoder:
+                        max_positions: 4
+                        min_precision: 0.8
+                        min_recall:  # different recall thresholds for each motif size
+                            1: 0.5   # For shorter motifs, a stricter recall threshold is used
+                            2: 0.1
+                            3: 0.01
+                            4: 0.001
+                        min_true_positives: 10
 
 
 

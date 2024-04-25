@@ -42,15 +42,17 @@ class MotifTestSetPerformance(EncodingReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_motif_report:
-            MotifTestSetPerformance:
-                test_dataset:
-                    format: AIRR # choose any valid import format
-                    params:
-                        path: path/to/files/
-                        is_repertoire: False  # is_repertoire must be False to import a SequenceDataset
-                        paired: False         # paired must be False to import a SequenceDataset
-                        # optional other parameters...
+        definitions:
+            reports:
+                my_motif_report:
+                    MotifTestSetPerformance:
+                        test_dataset:
+                            format: AIRR # choose any valid import format
+                            params:
+                                path: path/to/files/
+                                is_repertoire: False  # is_repertoire must be False to import a SequenceDataset
+                                paired: False         # paired must be False to import a SequenceDataset
+                                # optional other parameters...
 
     """
 

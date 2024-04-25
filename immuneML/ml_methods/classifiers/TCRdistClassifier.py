@@ -27,10 +27,12 @@ class TCRdistClassifier(SklearnMethod):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_tcr_method:
-            TCRdistClassifier:
-                percentage: 0.1
-                show_warnings: True
+        definitions:
+            ml_methods:
+                my_tcr_method:
+                    TCRdistClassifier:
+                        percentage: 0.1
+                        show_warnings: True
 
     """
 

@@ -56,13 +56,15 @@ class MatchedSequencesEncoder(DatasetEncoder):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_ms_encoding:
-            MatchedSequences:
-                reference:
-                    format: VDJDB
-                    params:
-                        path: path/to/file.txt
-                max_edit_distance: 1
+        definitions:
+            encodings:
+                my_ms_encoding:
+                    MatchedSequences:
+                        reference:
+                            format: VDJDB
+                            params:
+                                path: path/to/file.txt
+                        max_edit_distance: 1
     """
 
     def __init__(self, max_edit_distance: int, reference: List[ReceptorSequence], reads: ReadsType, sum_matches: bool, normalize: bool,

@@ -57,23 +57,25 @@ class SignificantFeatures(DataReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_significant_features_report:
-            SignificantFeatures:
-                p_values:
-                    - 0.1
-                    - 0.01
-                    - 0.001
-                    - 0.0001
-                k_values:
-                    - 3
-                    - 4
-                    - 5
-                    - full_sequence
-                compairr_path: path/to/compairr # can be specified if 'full_sequence' is listed under k_values
-                label: # Define a label, and the positive class for that given label
-                    CMV:
-                        positive_class: +
-                log_scale: False
+        definitions:
+            reports:
+                my_significant_features_report:
+                    SignificantFeatures:
+                        p_values:
+                            - 0.1
+                            - 0.01
+                            - 0.001
+                            - 0.0001
+                        k_values:
+                            - 3
+                            - 4
+                            - 5
+                            - full_sequence
+                        compairr_path: path/to/compairr # can be specified if 'full_sequence' is listed under k_values
+                        label: # Define a label, and the positive class for that given label
+                            CMV:
+                                positive_class: +
+                        log_scale: False
 
     """
 

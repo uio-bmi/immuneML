@@ -30,9 +30,11 @@ class SequenceLengthDistribution(DataReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_sld_report:
-            SequenceLengthDistribution:
-                sequence_type: amino_acid
+        definitions:
+            reports:
+                my_sld_report:
+                    SequenceLengthDistribution:
+                        sequence_type: amino_acid
 
     """
 

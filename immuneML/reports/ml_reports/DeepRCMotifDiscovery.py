@@ -50,10 +50,12 @@ class DeepRCMotifDiscovery(MLReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_deeprc_report:
-            DeepRCMotifDiscovery:
-                threshold: 0.5
-                n_steps: 50
+        definitions:
+            reports:
+                my_deeprc_report:
+                    DeepRCMotifDiscovery:
+                        threshold: 0.5
+                        n_steps: 50
 
     """
 

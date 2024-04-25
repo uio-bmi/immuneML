@@ -42,11 +42,13 @@ class EvennessProfileEncoder(DatasetEncoder):
     .. indent with spaces
     .. code-block:: yaml
 
-            my_evenness_profile:
-                EvennessProfile:
-                    min_alpha: 0
-                    max_alpha: 10
-                    dimension: 51
+        definitions:
+            encodings:
+                my_evenness_profile:
+                    EvennessProfile:
+                        min_alpha: 0
+                        max_alpha: 10
+                        dimension: 51
 
 
     """

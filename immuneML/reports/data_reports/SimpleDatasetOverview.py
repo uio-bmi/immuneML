@@ -19,8 +19,9 @@ class SimpleDatasetOverview(DataReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        reports:
-            my_overview: SimpleDatasetOverview
+        definitions:
+            reports:
+                my_overview: SimpleDatasetOverview
 
     """
     UNKNOWN_CHAIN = "unknown"

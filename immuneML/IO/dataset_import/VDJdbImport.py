@@ -72,30 +72,32 @@ class VDJdbImport(DataImport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_vdjdb_dataset:
-            format: VDJdb
-            params:
-                path: path/to/files/
-                is_repertoire: True # whether to import a RepertoireDataset
-                metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                paired: False # whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False
-                receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
-                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
-                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
-                # Optional fields with VDJdb-specific defaults, only change when different behavior is required:
-                separator: "\\t" # column separator
-                region_type: IMGT_CDR3 # what part of the sequence to import
-                column_mapping: # column mapping VDJdb: immuneML
-                    V: v_call
-                    J: j_call
-                    CDR3: sequence_aa
-                    complex.id: sequence_id
-                    Gene: chain
-                metadata_column_mapping: # metadata column mapping VDJdb: immuneML
-                    Epitope: epitope
-                    Epitope gene: epitope_gene
-                    Epitope species: epitope_species
+        definitions:
+            datasets:
+                my_vdjdb_dataset:
+                    format: VDJdb
+                    params:
+                        path: path/to/files/
+                        is_repertoire: True # whether to import a RepertoireDataset
+                        metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                        paired: False # whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False
+                        receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
+                        import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
+                        import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                        import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+                        # Optional fields with VDJdb-specific defaults, only change when different behavior is required:
+                        separator: "\\t" # column separator
+                        region_type: IMGT_CDR3 # what part of the sequence to import
+                        column_mapping: # column mapping VDJdb: immuneML
+                            V: v_call
+                            J: j_call
+                            CDR3: sequence_aa
+                            complex.id: sequence_id
+                            Gene: chain
+                        metadata_column_mapping: # metadata column mapping VDJdb: immuneML
+                            Epitope: epitope
+                            Epitope gene: epitope_gene
+                            Epitope species: epitope_species
 
     """
 

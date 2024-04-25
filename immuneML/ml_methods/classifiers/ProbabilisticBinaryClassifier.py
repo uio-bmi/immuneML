@@ -43,10 +43,12 @@ class ProbabilisticBinaryClassifier(MLMethod):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_probabilistic_classifier: # user-defined name of the ML method
-            ProbabilisticBinaryClassifier: # method name
-                max_iterations: 1000
-                update_rate: 0.01
+        definitions:
+            ml_methods:
+                my_probabilistic_classifier: # user-defined name of the ML method
+                    ProbabilisticBinaryClassifier: # method name
+                        max_iterations: 1000
+                        update_rate: 0.01
 
     """
 

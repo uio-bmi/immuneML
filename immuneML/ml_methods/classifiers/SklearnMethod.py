@@ -44,27 +44,29 @@ class SklearnMethod(MLMethod):
 
     **YAML specification:**
 
-        ml_methods:
-            log_reg:
-                LogisticRegression: # name of the class inheriting SklearnMethod
-                    # sklearn parameters (same names as in original sklearn class)
-                    max_iter: 1000 # specific parameter value
-                    penalty: l1
-                    # Additional parameter that determines whether to print convergence warnings
-                    show_warnings: True
-                # if any of the parameters under LogisticRegression is a list and model_selection_cv is True,
-                # a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,
-                # and the optimal model will be selected
-                model_selection_cv: True
-                model_selection_n_folds: 5
-            svm_with_cv:
-                SVM: # name of another class inheriting SklearnMethod
-                    # sklearn parameters (same names as in original sklearn class)
-                    alpha: 10
-                    # Additional parameter that determines whether to print convergence warnings
-                    show_warnings: True
-                # no grid search will be done
-                model_selection_cv: False
+        definitions:
+            ml_methods:
+                ml_methods:
+                    log_reg:
+                        LogisticRegression: # name of the class inheriting SklearnMethod
+                            # sklearn parameters (same names as in original sklearn class)
+                            max_iter: 1000 # specific parameter value
+                            penalty: l1
+                            # Additional parameter that determines whether to print convergence warnings
+                            show_warnings: True
+                        # if any of the parameters under LogisticRegression is a list and model_selection_cv is True,
+                        # a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,
+                        # and the optimal model will be selected
+                        model_selection_cv: True
+                        model_selection_n_folds: 5
+                    svm_with_cv:
+                        SVM: # name of another class inheriting SklearnMethod
+                            # sklearn parameters (same names as in original sklearn class)
+                            alpha: 10
+                            # Additional parameter that determines whether to print convergence warnings
+                            show_warnings: True
+                        # no grid search will be done
+                        model_selection_cv: False
 
     """
 

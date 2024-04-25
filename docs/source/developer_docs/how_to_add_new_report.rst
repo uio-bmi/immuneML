@@ -321,7 +321,9 @@ Class documentation standards for reports
            .. indent with spaces
            .. code-block:: yaml
 
-               my_report:
-                   RandomDataPlot:
-                       n_points_to_plot: 10
+               definitions:
+                   reports:
+                       my_report:
+                           RandomDataPlot:
+                               n_points_to_plot: 10
 

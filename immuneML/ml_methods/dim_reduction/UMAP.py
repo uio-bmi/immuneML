@@ -14,16 +14,19 @@ class UMAP(DimRedMethod):
     functions as input values (e.g., for the metric parameter, it has to be one of the predefined metrics available
     in umap-learn).
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_umap: # user-defined name of the dimensionality reduction method
-            UMAP: # name of the class
-                n_components: 2
-                n_neighbors: 15
-                metric: euclidean
+        definitions:
+            ml_methods:
+                my_umap:
+                    UMAP:
+                        # arguments as defined by scikit-learn
+                        n_components: 2
+                        n_neighbors: 15
+                        metric: euclidean
 
     """
 

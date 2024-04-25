@@ -46,9 +46,11 @@ class VJGeneDistribution(DataReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_vj_gene_report:
-          VJGeneDistribution:
-            label: ag_binding
+        definitions:
+            reports:
+                my_vj_gene_report:
+                    VJGeneDistribution:
+                        label: ag_binding
 
     """
 

@@ -50,21 +50,24 @@ class SimpleLSTM(GenerativeModel):
 
     - embed_size (int): the dimension of the sequence embedding
 
-    - temperature (float)
+    - temperature (float): a higher temperature leads to faster yet more unstable learning
+
 
     **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_simple_lstm:
-            sequence_type: amino_acid
-            hidden_size: 50
-            num_layers: 1
-            num_epochs: 5000
-            learning_rate: 0.001
-            batch_size: 100
-            embed_size: 100
+        definitions:
+            ml_methods:
+                my_simple_lstm:
+                    sequence_type: amino_acid
+                    hidden_size: 50
+                    num_layers: 1
+                    num_epochs: 5000
+                    learning_rate: 0.001
+                    batch_size: 100
+                    embed_size: 100
 
 
     """

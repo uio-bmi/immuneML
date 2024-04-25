@@ -46,19 +46,20 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        reports: # the report is defined with all other reports under definitions/reports
-            my_reference_overlap_report:
-                ReferenceSequenceOverlap:
-                    reference_path: reference_sequences.csv  # example usage with SequenceAbundanceEncoder or CompAIRRSequenceAbundanceEncoder
-                    comparison_attributes:
-                        - sequence_aa
-                        - v_call
-                        - j_call
-            my_reference_overlap_report_with_kmers:
-                ReferenceSequenceOverlap:
-                    reference_path: reference_kmers.csv  # example usage with KmerAbundanceEncoder
-                    comparison_attributes:
-                        - k-mer
+        definitions:
+            reports:
+                my_reference_overlap_report:
+                    ReferenceSequenceOverlap:
+                        reference_path: reference_sequences.csv  # example usage with SequenceAbundanceEncoder or CompAIRRSequenceAbundanceEncoder
+                        comparison_attributes:
+                            - sequence_aa
+                            - v_call
+                            - j_call
+                my_reference_overlap_report_with_kmers:
+                    ReferenceSequenceOverlap:
+                        reference_path: reference_kmers.csv  # example usage with KmerAbundanceEncoder
+                        comparison_attributes:
+                            - k-mer
 
     """
 

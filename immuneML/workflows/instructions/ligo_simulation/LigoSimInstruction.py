@@ -65,13 +65,14 @@ class LigoSimInstruction(Instruction):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_simulation_instruction: # user-defined name of the instruction
-            type: LIgOSim # which instruction to execute
-            simulation: sim1
-            sequence_batch_size: 1000
-            max_iterations: 1000
-            export_p_gens: False
-            number_of_processes: 4
+        instructions:
+            my_simulation_instruction: # user-defined name of the instruction
+                type: LIgOSim # which instruction to execute
+                simulation: sim1
+                sequence_batch_size: 1000
+                max_iterations: 1000
+                export_p_gens: False
+                number_of_processes: 4
 
     """
 

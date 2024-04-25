@@ -28,9 +28,11 @@ class GLIPH2Exporter(DataReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_gliph2_exporter: # user-defined name
-            GLIPH2Exporter:
-                condition: epitope # for instance, epitope parameter is present in receptors' metadata with values such as "MtbLys" for Mycobacterium tuberculosis (as shown in the original paper).
+        definitions:
+            reports:
+                my_gliph2_exporter:
+                    GLIPH2Exporter:
+                        condition: epitope # for instance, epitope parameter is present in receptors' metadata with values such as "MtbLys" for Mycobacterium tuberculosis (as shown in the original paper).
 
     """
 

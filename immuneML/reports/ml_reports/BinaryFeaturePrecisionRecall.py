@@ -31,7 +31,9 @@ class BinaryFeaturePrecisionRecall(MLReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_report: BinaryFeaturePrecisionRecall
+        definitions:
+            reports:
+                my_report: BinaryFeaturePrecisionRecall
     """
 
     @classmethod

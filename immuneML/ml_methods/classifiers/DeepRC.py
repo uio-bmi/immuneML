@@ -90,11 +90,13 @@ class DeepRC(MLMethod):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_deeprc_method:
-            DeepRC:
-                validation_part: 0.2
-                add_positional_information: True
-                kernel_size: 9
+        definitions:
+            ml_methods:
+                my_deeprc_method:
+                    DeepRC:
+                        validation_part: 0.2
+                        add_positional_information: True
+                        kernel_size: 9
 
     """
 

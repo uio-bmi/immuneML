@@ -49,9 +49,11 @@ class FeatureDistribution(FeatureReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_fdistr_report:
-            FeatureDistribution:
-                mode: sparse
+        definitions:
+            reports:
+                my_fdistr_report:
+                    FeatureDistribution:
+                        mode: sparse
 
     """
 

@@ -55,17 +55,19 @@ class AtchleyKmerMILClassifier(MLMethod):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_kmer_mil_classifier:
-            AtchleyKmerMILClassifier:
-                iteration_count: 100
-                evaluate_at: 15
-                use_early_stopping: False
-                learning_rate: 0.01
-                random_seed: 100
-                zero_abundance_weight_init: True
-                number_of_threads: 8
-                threshold: 0.00001
-                initialization_count: 4
+        definitions:
+            ml_methods:
+                my_kmer_mil_classifier:
+                    AtchleyKmerMILClassifier:
+                        iteration_count: 100
+                        evaluate_at: 15
+                        use_early_stopping: False
+                        learning_rate: 0.01
+                        random_seed: 100
+                        zero_abundance_weight_init: True
+                        number_of_threads: 8
+                        threshold: 0.00001
+                        initialization_count: 4
 
     """
 

@@ -88,25 +88,27 @@ class MotifSeedRecovery(MLReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_motif_report:
-            MotifSeedRecovery:
-                implanted_motifs_per_label:
-                    CD:
-                        seeds:
-                        - AA/A
-                        - AAA
-                        hamming_distance: False
-                        gap_sizes:
-                        - 0
-                        - 1
-                        - 2
-                    T1D:
-                        seeds:
-                        - CC/C
-                        - CCC
-                        hamming_distance: True
-                        gap_sizes:
-                        - 2
+        definitions:
+            reports:
+                my_motif_report:
+                    MotifSeedRecovery:
+                        implanted_motifs_per_label:
+                            CD:
+                                seeds:
+                                - AA/A
+                                - AAA
+                                hamming_distance: False
+                                gap_sizes:
+                                - 0
+                                - 1
+                                - 2
+                            T1D:
+                                seeds:
+                                - CC/C
+                                - CCC
+                                hamming_distance: True
+                                gap_sizes:
+                                - 2
 
     """
 

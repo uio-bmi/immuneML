@@ -53,12 +53,14 @@ class TCRdistMotifDiscovery(MLReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_tcr_dist_report: # user-defined name
-            TCRdistMotifDiscovery:
-                positive_class_name: True # class name, could also be epitope name, depending on how it's defined in the dataset
-                cores: 4
-                min_cluster_size: 30
-                use_reference_sequences: False
+        definitions:
+            reports:
+                my_tcr_dist_report: # user-defined name
+                    TCRdistMotifDiscovery:
+                        positive_class_name: True # class name, could also be epitope name, depending on how it's defined in the dataset
+                        cores: 4
+                        min_cluster_size: 30
+                        use_reference_sequences: False
 
     """
 

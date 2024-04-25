@@ -180,8 +180,9 @@ Class documentation standards for preprocessors
            .. indent with spaces
            .. code-block:: yaml
 
-               preprocessing_sequences:
-                   my_preprocessing:
-                       - step1:
-                           SillyFilter:
-                               fraction_to_remove: 0.8
+               definitions:
+                   preprocessing_sequences:
+                       my_preprocessing:
+                           - step1:
+                               SillyFilter:
+                                   fraction_to_remove: 0.8

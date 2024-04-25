@@ -21,14 +21,17 @@ class DimensionalityReduction(EncodingReport):
 
     - label (str): name of the label to use for highlighting data points
 
+
     **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        rep1:
-            DimensionalityReduction:
-                label: epitope
+        definitions:
+            reports:
+                rep1:
+                    DimensionalityReduction:
+                        label: epitope
 
     """
 

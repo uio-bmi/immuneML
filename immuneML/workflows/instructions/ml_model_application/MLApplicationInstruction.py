@@ -93,15 +93,16 @@ class MLApplicationInstruction(Instruction):
     .. highlight:: yaml
     .. code-block:: yaml
 
-        instruction_name:
-            type: MLApplication
-            dataset: d1
-            config_path: ./config.zip
-            metrics:
-            - accuracy
-            - precision
-            - recall
-            number_of_processes: 4
+        instructions:
+            instruction_name:
+                type: MLApplication
+                dataset: d1
+                config_path: ./config.zip
+                metrics:
+                - accuracy
+                - precision
+                - recall
+                number_of_processes: 4
 
     """
 

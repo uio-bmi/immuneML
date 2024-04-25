@@ -50,11 +50,13 @@ class KerasSequenceCNN(MLMethod):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_cnn:
-            KerasSequenceCNN:
-                training_percentage: 0.7
-                units_per_layer: [[CONV, 400, 3, 1], [DROP, 0.5], [POOL, 2, 1], [FLAT], [DENSE, 50]]
-                activation: relu
+        definitions:
+            ml_methods:
+                my_cnn:
+                    KerasSequenceCNN:
+                        training_percentage: 0.7
+                        units_per_layer: [[CONV, 400, 3, 1], [DROP, 0.5], [POOL, 2, 1], [FLAT], [DENSE, 50]]
+                        activation: relu
 
 
 

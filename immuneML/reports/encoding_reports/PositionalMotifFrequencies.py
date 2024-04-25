@@ -42,9 +42,11 @@ class PositionalMotifFrequencies(EncodingReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_pos_motif_report:
-            PositionalMotifFrequencies:
-                motif_color_map:
+        definitions:
+            reports:
+                my_pos_motif_report:
+                    PositionalMotifFrequencies:
+                        motif_color_map:
 
     """
 

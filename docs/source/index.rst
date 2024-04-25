@@ -20,17 +20,13 @@ repertoires (AIRR). To **get started using immuneML right away**, check out our 
 immuneML can be used for:
 
 - **Training ML models** for repertoire classification (e.g., disease prediction) or receptor sequence
-  classification (e.g., antigen binding prediction). In immuneML, the performance of different machine learning (ML)
-  settings can be compared by nested cross-validation. These ML settings consist of data preprocessing steps, encodings
-  and ML models and their hyperparameters.
+  classification (e.g., antigen binding prediction), and applying them to new datasets with unknown class labels.
 
-- **Exploratory analysis of datasets** by applying preprocessing and encoding, and plotting descriptive statistics without training ML models.
+- **Simulating datasets** for ML model benchmarking. Data can be simulated by implanting ground truth
+  immune signals using LIgO, or by training generative models to learn the underlying patterns in a natural dataset.
 
-- **Simulating** immune events, such as disease states, into experimental or synthetic repertoire datasets.
-  By implanting known immune signals into a given dataset, a ground truth benchmarking dataset is created. Such a dataset
-  can be used to test the performance of ML settings under known conditions.
-
-- **Applying trained ML models** to new datasets with unknown class labels.
+- **Exploratory analysis of datasets** such as statistical analyses, dimensionality reduction or clustering
+  in order to gain deeper insight into the data.
 
 - **And more!**
 

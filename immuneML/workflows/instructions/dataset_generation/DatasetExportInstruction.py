@@ -33,16 +33,17 @@ class DatasetExportInstruction(Instruction):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_dataset_export_instruction: # user-defined instruction name
-            type: DatasetExport # which instruction to execute
-            datasets: # list of datasets to export
-                - my_generated_dataset
-                - my_dataset_from_adaptive
-            preprocessing_sequence: my_preprocessing_sequence
-            number_of_processes: 4
-            export_formats: # list of formats to export the datasets to
-                - AIRR
-                - ImmuneML
+        instructions:
+            my_dataset_export_instruction: # user-defined instruction name
+                type: DatasetExport # which instruction to execute
+                datasets: # list of datasets to export
+                    - my_generated_dataset
+                    - my_dataset_from_adaptive
+                preprocessing_sequence: my_preprocessing_sequence
+                number_of_processes: 4
+                export_formats: # list of formats to export the datasets to
+                    - AIRR
+                    - ImmuneML
 
     """
 

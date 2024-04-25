@@ -283,9 +283,11 @@ Class documentation standards for ML methods
         .. indent with spaces
         .. code-block:: yaml
 
-            my_silly_method:
-                SillyClassifier:
-                    random_seed: 100
+            definitions:
+                ml_methods:
+                    my_silly_method:
+                        SillyClassifier:
+                            random_seed: 100
 
 
 

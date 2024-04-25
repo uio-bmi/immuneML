@@ -64,10 +64,11 @@ class FeasibilitySummaryInstruction(Instruction):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_feasibility_summary: # user-defined name of the instruction
-            type: FeasibilitySummary # which instruction to execute
-            simulation: sim1
-            sequence_count: 10000
+        instructions:
+            my_feasibility_summary: # user-defined name of the instruction
+                type: FeasibilitySummary # which instruction to execute
+                simulation: sim1
+                sequence_count: 10000
 
     """
 

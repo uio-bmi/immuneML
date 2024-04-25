@@ -54,11 +54,13 @@ class ImmuneMLImport(DataImport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_dataset:
-            format: ImmuneML
-            params:
-                path: path/to/dataset.yaml
-                metadata_file: path/to/metadata.csv
+        definitions:
+            datasets:
+                my_dataset:
+                    format: ImmuneML
+                    params:
+                        path: path/to/dataset.yaml
+                        metadata_file: path/to/metadata.csv
 
     """
 

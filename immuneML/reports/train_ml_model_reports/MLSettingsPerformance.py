@@ -40,7 +40,9 @@ class MLSettingsPerformance(TrainMLModelReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_hp_report: MLSettingsPerformance
+        definitions:
+            reports:
+                my_hp_report: MLSettingsPerformance
 
     """
 

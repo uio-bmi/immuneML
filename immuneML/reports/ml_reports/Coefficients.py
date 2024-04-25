@@ -50,19 +50,21 @@ class Coefficients(MLReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_coef_report:
-            Coefficients:
-                coefs_to_plot:
-                    - all
-                    - nonzero
-                    - cutoff
-                    - n_largest
-                cutoff:
-                    - 0.1
-                    - 0.01
-                n_largest:
-                    - 5
-                    - 10
+        definitions:
+            reports:
+                my_coef_report:
+                    Coefficients:
+                        coefs_to_plot:
+                            - all
+                            - nonzero
+                            - cutoff
+                            - n_largest
+                        cutoff:
+                            - 0.1
+                            - 0.01
+                        n_largest:
+                            - 5
+                            - 10
 
     """
 

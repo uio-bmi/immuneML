@@ -31,6 +31,7 @@ class MLReport(Report):
                 # other parameters...
             # other parameters...
     """
+    DOCS_TITLE = "ML model reports"
 
     def __init__(self, train_dataset: Dataset = None, test_dataset: Dataset = None, method: MLMethod = None,
                  result_path: Path = None, name: str = None, hp_setting: HPSetting = None, label: Label =None, number_of_processes: int = 1):
@@ -55,6 +56,3 @@ class MLReport(Report):
         self.hp_setting = hp_setting
         self.label = label
 
-    @staticmethod
-    def get_title():
-        return "ML model reports"

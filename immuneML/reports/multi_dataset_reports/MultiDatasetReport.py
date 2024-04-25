@@ -22,6 +22,7 @@ class MultiDatasetReport(Report):
                 - my_benchmark_report
             # other parameters...
     '''
+    DOCS_TITLE = "Multi dataset reports"
 
     def __init__(self, instruction_states: List[TrainMLModelState] = None, name: str = None, result_path: Path = None, number_of_processes: int = 1):
         '''
@@ -35,7 +36,3 @@ class MultiDatasetReport(Report):
         '''
         super().__init__(name=name, result_path=result_path, number_of_processes=number_of_processes)
         self.instruction_states = instruction_states
-
-    @staticmethod
-    def get_title():
-        return "Multi dataset reports"

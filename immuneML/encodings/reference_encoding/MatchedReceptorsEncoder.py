@@ -63,15 +63,17 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_mr_encoding:
-            MatchedReceptors:
-                reference:
-                    format: VDJDB
-                    params:
-                        path: path/to/file.txt
-                max_edit_distances:
-                    alpha: 1
-                    beta: 0
+        definitions:
+            encodings:
+                my_mr_encoding:
+                    MatchedReceptors:
+                        reference:
+                            format: VDJDB
+                            params:
+                                path: path/to/file.txt
+                        max_edit_distances:
+                            alpha: 1
+                            beta: 0
     """
 
     dataset_mapping = {

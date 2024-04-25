@@ -28,9 +28,11 @@ class TCRdistEncoder(DatasetEncoder):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_tcr_dist_enc: # user-defined name
-            TCRdist:
-                cores: 4
+        definitions:
+            encodings:
+                my_tcr_dist_enc:
+                    TCRdist:
+                        cores: 4
 
     """
 
