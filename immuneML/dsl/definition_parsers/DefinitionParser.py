@@ -76,12 +76,13 @@ class DefinitionParser:
 
     @staticmethod
     def make_simulation_docs(path: Path):
-        classes_to_document = [DocumentationFormat(SeedMotif, SeedMotif.__name__, DocumentationFormat.LEVELS[1]),
-                               DocumentationFormat(LigoPWM, "PWM", DocumentationFormat.LEVELS[1]),
-                               DocumentationFormat(Signal, Signal.__name__, DocumentationFormat.LEVELS[1]),
+        classes_to_document = [DocumentationFormat(Motif, "Motifs", DocumentationFormat.LEVELS[1]),
+                               DocumentationFormat(SeedMotif, SeedMotif.__name__, DocumentationFormat.LEVELS[2]),
+                               DocumentationFormat(LigoPWM, "PWM", DocumentationFormat.LEVELS[2]),
+                               DocumentationFormat(Signal, "Signals", DocumentationFormat.LEVELS[1]),
                                DocumentationFormat(SimConfig, "Simulation config", DocumentationFormat.LEVELS[1]),
                                DocumentationFormat(SimConfigItem, "Simulation config item",
-                                                   DocumentationFormat.LEVELS[1])]
+                                                   DocumentationFormat.LEVELS[2])]
 
         file_path = path / "simulation.rst"
         with file_path.open("w") as file:

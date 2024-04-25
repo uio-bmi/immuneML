@@ -30,10 +30,11 @@ class LigoPWM(Motif):
     .. indent with spaces
     .. code-block:: yaml
 
-        motifs:
-            my_custom_pwm: # this will be the identifier of the motif
-                file_path: my_pwm_1.csv
-                threshold: 2
+        definitions:
+            motifs:
+                my_custom_pwm: # this will be the identifier of the motif
+                    file_path: my_pwm_1.csv
+                    threshold: 2
 
     """
     file_path: Path

@@ -9,7 +9,10 @@ from immuneML.simulation.simulation_strategy.SimulationStrategy import Simulatio
 @dataclass
 class SimConfig:
     """
-    Defines all parameters of the simulation.
+    The simulation config defines all parameters of the simulation.
+    It can contain one or more simulation config items, which define groups of repertoires or receptors
+    that have the same simulation parameters, such as signals, generative model, clonal frequencies, and noise parameters.
+
 
     **Specification arguments:**
 
@@ -39,23 +42,24 @@ class SimConfig:
     .. indent-with-spaces
     .. code-block:: yaml
 
-      simulations:
-        sim1:
-          is_repertoire: false
-          paired: false
-          sequence_type: amino_acid
-          simulation_strategy: RejectionSampling
-          sim_items:
-            sim_item1: # group of sequences with same simulation params
-              generative_model:
-                chain: beta
-                default_model_name: humanTRB
-                model_path: null
-                type: OLGA
-              number_of_examples: 100
-              seed: 1002
-              signals:
-               signal1: 1
+        definitions:
+            simulations:
+                sim1:
+                    is_repertoire: false
+                    paired: false
+                    sequence_type: amino_acid
+                    simulation_strategy: RejectionSampling
+                    sim_items:
+                        sim_item1: # group of sequences with same simulation params
+                            generative_model:
+                                chain: beta
+                                default_model_name: humanTRB
+                                model_path: null
+                                type: OLGA
+                            number_of_examples: 100
+                            seed: 1002
+                            signals:
+                                signal1: 1
 
     """
     sim_items: List[SimConfigItem] = None

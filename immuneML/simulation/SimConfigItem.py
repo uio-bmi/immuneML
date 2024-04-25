@@ -8,9 +8,9 @@ from immuneML.simulation.implants.Signal import Signal, SignalPair
 @dataclass
 class SimConfigItem:
     """
-    When performing a simulation, one or more simulation config items can be specified. Config items define groups of
-    repertoires or receptors that have the same simulation parameters, such as signals, generative model, clonal
-    frequencies, noise parameters.
+    When performing a simulation, one or more simulation config items can be specified.
+    Config items define groups of repertoires or receptors that have the same simulation parameters,
+    such as signals, generative model, clonal frequencies, noise parameters.
 
 
     **Specification arguments:**
@@ -52,37 +52,38 @@ class SimConfigItem:
     .. indent with spaces
     .. code-block:: yaml
 
-        simulations: # definitions of simulations should be under key simulations in the definitions part of the specification
-            # one simulation with multiple implanting objects, a part of definition section
-            my_simulation:
-                sim_item1:
-                    number_of_examples: 10
-                    seed: null # don't use seed
-                    receptors_in_repertoire_count: 100
-                    generative_model:
-                        chain: beta
-                        default_model_name: humanTRB
-                        model_path: null
-                        type: OLGA
-                    signals:
-                        my_signal: 0.25
-                        my_signal2: 0.01
-                        my_signal__my_signal2: 0.02 # my_signal and my_signal2 will co-occur in 2% of the receptors in all 10 repertoires
-                sim_item2:
-                    number_of_examples: 5
-                    receptors_in_repertoire_count: 150
-                    seed: 10 #
-                    generative_model:
-                        chain: beta
-                        default_model_name: humanTRB
-                        model_path: null
-                        type: OLGA
-                    signals:
-                        my_signal: 0.75
-                    default_clonal_frequency:
-                        a: 2
-                    sequence_len_limits:
-                        min: 3
+        definitions:
+            simulations: # definitions of simulations should be under key simulations in the definitions part of the specification
+                # one simulation with multiple implanting objects, a part of definition section
+                my_simulation:
+                    sim_item1:
+                        number_of_examples: 10
+                        seed: null # don't use seed
+                        receptors_in_repertoire_count: 100
+                        generative_model:
+                            chain: beta
+                            default_model_name: humanTRB
+                            model_path: null
+                            type: OLGA
+                        signals:
+                            my_signal: 0.25
+                            my_signal2: 0.01
+                            my_signal__my_signal2: 0.02 # my_signal and my_signal2 will co-occur in 2% of the receptors in all 10 repertoires
+                    sim_item2:
+                        number_of_examples: 5
+                        receptors_in_repertoire_count: 150
+                        seed: 10 #
+                        generative_model:
+                            chain: beta
+                            default_model_name: humanTRB
+                            model_path: null
+                            type: OLGA
+                        signals:
+                            my_signal: 0.75
+                        default_clonal_frequency:
+                            a: 2
+                        sequence_len_limits:
+                            min: 3
 
 
     """
