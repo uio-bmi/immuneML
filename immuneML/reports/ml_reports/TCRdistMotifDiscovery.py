@@ -33,7 +33,7 @@ class TCRdistMotifDiscovery(MLReport):
     `doi:10.1101/2020.12.24.424260 <https://www.biorxiv.org/content/10.1101/2020.12.24.424260v1>`_
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - positive_class_name (str): the class value (e.g., epitope) used to select only the receptors that are specific to the given epitope so that
       only those sequences are used to infer motifs; the reference receptors as required by TCRdist will be the ones from the dataset that have
@@ -48,17 +48,19 @@ class TCRdistMotifDiscovery(MLReport):
     - use_reference_sequences (bool): when showing motifs, this parameter defines if reference sequences should be provided as well as a background
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_tcr_dist_report: # user-defined name
-            TCRdistMotifDiscovery:
-                positive_class_name: True # class name, could also be epitope name, depending on how it's defined in the dataset
-                cores: 4
-                min_cluster_size: 30
-                use_reference_sequences: False
+        definitions:
+            reports:
+                my_tcr_dist_report: # user-defined name
+                    TCRdistMotifDiscovery:
+                        positive_class_name: True # class name, could also be epitope name, depending on how it's defined in the dataset
+                        cores: 4
+                        min_cluster_size: 30
+                        use_reference_sequences: False
 
     """
 

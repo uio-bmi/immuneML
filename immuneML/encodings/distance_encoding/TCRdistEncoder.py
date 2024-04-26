@@ -19,24 +19,26 @@ class TCRdistEncoder(DatasetEncoder):
     For the implementation, `TCRdist3 <https://tcrdist3.readthedocs.io/en/latest/>`_ library was used (source code available
     `here <https://github.com/kmayerb/tcrdist3>`_).
 
-    Specification arguments:
+    **Specification arguments:**
 
     - cores (int): number of processes to use for the computation
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_tcr_dist_enc: # user-defined name
-            TCRdist:
-                cores: 4
+        definitions:
+            encodings:
+                my_tcr_dist_enc:
+                    TCRdist:
+                        cores: 4
 
     """
 
     def __init__(self, cores: int, name: str = None):
+        super().__init__(name=name)
         self.cores = cores
-        self.name = name
         self.distance_matrix = None
         self.context = None
 

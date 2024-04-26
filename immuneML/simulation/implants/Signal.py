@@ -12,9 +12,9 @@ from immuneML.simulation.implants.MotifInstance import MotifInstanceGroup
 @dataclass
 class Signal:
     """
-    This class represents the simulated signal.
-    A signal is represented by a list of motifs, and optionally, position weights showing where one of the motifs of the signal can
-    occur in a sequence.
+    A signal represents a collection of motifs, and optionally, position weights showing where one
+    of the motifs of the signal can occur in a sequence.
+    The signals are defined under :code:`definitions/signals`.
 
     A signal is associated with a metadata label, which is assigned to a receptor or repertoire.
     For example antigen-specific/disease-associated (receptor) or diseased (repertoire).
@@ -23,7 +23,7 @@ class Signal:
 
         To use sequence position weights, IMGT positions should be explicitly specified as strings, under quotation marks, to allow for all positions to be properly distinguished.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - motifs (list): A list of the motifs associated with this signal, either defined by seed or by position weight matrix. Alternatively, it can be a list of a list of motifs, in which case the motifs in the same sublist (max 2 motifs) have to co-occur in the same sequence
 
@@ -51,29 +51,30 @@ class Signal:
         loc: 0 # 0 by default but can be used to shift the distribution
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. code-block:: yaml
 
-        signals:
-            my_signal:
-                motifs:
-                    - my_simple_motif
-                    - my_gapped_motif
-                sequence_position_weights:
-                    '109': 0.5
-                    '110': 0.5
-                v_call: TRBV1
-                j_call: TRBJ1
-                clonal_frequency:
-                    a: 2
-                    loc: 0
-            signal_with_custom_func:
-                source_file: signal_func.py
-                is_present_func: is_signal_present
-                clonal_frequency:
-                    a: 2
-                    loc: 0
+        definitions:
+            signals:
+                my_signal:
+                    motifs:
+                        - my_simple_motif
+                        - my_gapped_motif
+                    sequence_position_weights:
+                        '109': 0.5
+                        '110': 0.5
+                    v_call: TRBV1
+                    j_call: TRBJ1
+                    clonal_frequency:
+                        a: 2
+                        loc: 0
+                signal_with_custom_func:
+                    source_file: signal_func.py
+                    is_present_func: is_signal_present
+                    clonal_frequency:
+                        a: 2
+                        loc: 0
 
     """
     id: str

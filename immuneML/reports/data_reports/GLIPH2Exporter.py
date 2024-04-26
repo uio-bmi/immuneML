@@ -18,19 +18,21 @@ class GLIPH2Exporter(DataReport):
     clustering with GLIPH2 and genome-wide antigen screening. Nature Biotechnology. Published online April 27,
     2020:1-9. `doi:10.1038/s41587-020-0505-4 <https://www.nature.com/articles/s41587-020-0505-4>`_
 
-    Specification arguments:
+    **Specification arguments:**
 
     - condition (str): name of the parameter present in the receptor metadata in the dataset; condition can be anything which can be processed in
       GLIPH2, such as tissue type or treatment.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_gliph2_exporter: # user-defined name
-            GLIPH2Exporter:
-                condition: epitope # for instance, epitope parameter is present in receptors' metadata with values such as "MtbLys" for Mycobacterium tuberculosis (as shown in the original paper).
+        definitions:
+            reports:
+                my_gliph2_exporter:
+                    GLIPH2Exporter:
+                        condition: epitope # for instance, epitope parameter is present in receptors' metadata with values such as "MtbLys" for Mycobacterium tuberculosis (as shown in the original paper).
 
     """
 

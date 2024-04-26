@@ -19,21 +19,22 @@ class LigoPWM(Motif):
     For more details on bionumpy's implementation of PWM, as well as for supported formats,
     see the documentation at https://bionumpy.github.io/bionumpy/tutorials/position_weight_matrix.html.
 
-    Arguments:
+    **Specification arguments:**
 
     - file_path: path to the file where the PWM is stored
 
     - threshold (float): when matching PWM to a sequence, this is the threshold to consider the sequence as containing the motif
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        motifs:
-            my_custom_pwm: # this will be the identifier of the motif
-                file_path: my_pwm_1.csv
-                threshold: 2
+        definitions:
+            motifs:
+                my_custom_pwm: # this will be the identifier of the motif
+                    file_path: my_pwm_1.csv
+                    threshold: 2
 
     """
     file_path: Path

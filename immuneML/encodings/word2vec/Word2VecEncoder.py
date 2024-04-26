@@ -36,7 +36,7 @@ class Word2VecEncoder(DatasetEncoder):
     This encoder relies on gensim's implementation of Word2Vec and KmerHelper for k-mer extraction. Currently it works on amino acid level.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - vector_size (int): The size of the vector to be learnt.
 
@@ -57,19 +57,21 @@ class Word2VecEncoder(DatasetEncoder):
     - window (int): max distance between two k-mers in a sequence (same as window parameter in gensim's word2vec)
 
 
-    YAML specification:
+    **YAML pecification:**
 
     .. highlight:: yaml
     .. code-block:: yaml
 
-        encodings:
-            my_w2v:
-                Word2Vec:
-                    vector_size: 16
-                    k: 3
-                    model_type: SEQUENCE
-                    epochs: 100
-                    window: 8
+        definitions:
+            encodings:
+                encodings:
+                    my_w2v:
+                        Word2Vec:
+                            vector_size: 16
+                            k: 3
+                            model_type: SEQUENCE
+                            epochs: 100
+                            window: 8
 
     """
 

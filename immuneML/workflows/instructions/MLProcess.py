@@ -39,7 +39,6 @@ class MLProcess:
         self.label_config = label_config
         self.method = copy.deepcopy(hp_setting.ml_method)
         self.path = PathBuilder.build(path) if path is not None else None
-        self.ml_details_path = path / "ml_details.yaml" if path is not None else None
         self.ml_settings_export_path = path / "ml_settings_config" if path is not None else None
         self.ml_score_path = path / "ml_score.csv" if path is not None else None
         self.train_predictions_path = path / "train_predictions.csv" if path is not None else None
@@ -60,7 +59,6 @@ class MLProcess:
     def _set_paths(self):
         if self.path is None:
             raise RuntimeError("MLProcess: path is not set, stopping execution...")
-        self.ml_details_path = self.path / "ml_details.yaml"
         self.ml_settings_export_path = self.path / "ml_settings_config"
         self.ml_score_path = self.path / "ml_score.csv"
         self.train_predictions_path = self.path / "train_predictions.csv"
@@ -101,7 +99,6 @@ class MLProcess:
             dataset=dataset,
             label=self.label,
             train_predictions_path=self.train_predictions_path,
-            ml_details_path=self.ml_details_path,
             model_selection_cv=self.hp_setting.ml_params["model_selection_cv"],
             model_selection_n_folds=self.hp_setting.ml_params["model_selection_n_folds"],
             cores_for_training=self.number_of_processes,
@@ -131,13 +128,13 @@ class MLProcess:
                                                              self.report_path / "ml_method", self.hp_setting, self.label, self.number_of_processes, self.report_context)
 
             hp_item = HPItem(method=method, hp_setting=self.hp_setting, train_predictions_path=self.train_predictions_path,
-                             test_predictions_path=self.test_predictions_path, ml_details_path=self.ml_details_path, train_dataset=self.train_dataset,
+                             test_predictions_path=self.test_predictions_path, train_dataset=self.train_dataset,
                              test_dataset=self.test_dataset, split_index=split_index, model_report_results=model_report_results,
                              encoding_train_results=encoding_train_results, encoding_test_results=encoding_test_results, performance=performance,
                              encoder=self.hp_setting.encoder, ml_settings_export_path=self.ml_settings_export_path)
         else:
             hp_item = HPItem(method=method, hp_setting=self.hp_setting, train_predictions_path=self.train_predictions_path,
-                             test_predictions_path=None, ml_details_path=self.ml_details_path, train_dataset=self.train_dataset,
+                             test_predictions_path=None, train_dataset=self.train_dataset,
                              split_index=split_index, encoding_train_results=encoding_train_results, encoder=self.hp_setting.encoder,
                              ml_settings_export_path=self.ml_settings_export_path)
 

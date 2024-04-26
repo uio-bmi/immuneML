@@ -50,7 +50,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
     See :ref:`Reproduction of the CMV status predictions study` for an example using :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - p_value_threshold (float): The p value threshold to be used by the statistical test.
 
@@ -71,16 +71,18 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
       presence matrix. This may take a lot of storage space if the input dataset is large. By default, temporary files are not kept.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. code-block:: yaml
 
-        my_sa_encoding:
-            CompAIRRSequenceAbundance:
-                compairr_path: optional/path/to/compairr
-                p_value_threshold: 0.05
-                ignore_genes: False
-                threads: 8
+        definitions:
+            encodings:
+                my_sa_encoding:
+                    CompAIRRSequenceAbundance:
+                        compairr_path: optional/path/to/compairr
+                        p_value_threshold: 0.05
+                        ignore_genes: False
+                        threads: 8
 
     """
 
@@ -91,7 +93,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
     def __init__(self, p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, keep_temporary_files: bool,
                  threads: int, name: str = None):
-        self.name = name
+        super().__init__(name=name)
         self.p_value_threshold = p_value_threshold
         self.sequence_batch_size = sequence_batch_size
         self.keep_temporary_files = keep_temporary_files

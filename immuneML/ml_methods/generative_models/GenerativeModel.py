@@ -7,6 +7,19 @@ from immuneML.environment.SequenceType import SequenceType
 
 
 class GenerativeModel:
+    '''
+    .. note::
+
+        This is an experimental feature
+
+    Generative models are algorithms which can be trained to learn patterns in existing datasets,
+    and then be used to generate new synthetic datasets.
+
+    These methods can be used in the :ref:`TrainGenModel` instruction, and previously trained
+    models can be used to generate data using the :ref:`ApplyGenModel` instruction.
+    '''
+
+    DOCS_TITLE = "Generative models"
     OUTPUT_COLUMNS = []
 
     def __init__(self, chain):

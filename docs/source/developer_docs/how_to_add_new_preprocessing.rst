@@ -1,160 +1,122 @@
 How to add a new preprocessing
 ==========================================
 
-In this tutorial, we will add a new preprocessing to immuneML.
-This tutorial assumes you have installed immuneML for development as described at :ref:`Set up immuneML for development`.
 
 Preprocessings are applied to modify a dataset before encoding the data, for example, removing certain sequences from a repertoire.
 In immuneML, the sequence of preprocessing steps applied to a given dataset before training an ML model is
 considered a hyperparameter that can be optimized using nested cross validation.
 
 
-Adding a new Preprocessor class
--------------------------------
-
-All preprocessing classes should be placed in the :py:mod:`~immuneML.preprocessing` package, and inherit the immuneML
-class :py:mod:`~immuneML.preprocessing.Preprocessor.Preprocessor`.
-A filter is a special category of preprocessors which removes sequences or repertoires from the dataset.
-If your preprocessing is a filter, it should be placed in the :py:mod:`~immuneML.preprocessing.filters` package and
-inherit the :py:mod:`~immuneML.preprocessing.filters.Filter.Filter` class.
-
-A new preprocessor should implement:
-
-- an :code:`__init__()` method if the preprocessor uses any parameters.
-- The static abstract method :code:`process(dataset, params)`, which takes a dataset and returns a new (modified) dataset.
-- The abstract method :code:`process_dataset(dataset, result_path)`, which typically prepares parameters and calls :code:`process(dataset, params)` internally.
-
-An example implementation of a new filter named NewClonesPerRepertoireFilter is shown below.
-It includes implementations of the abstract methods and class documentation at the beginning. This class documentation will be shown to the user.
-
-.. code-block:: python
-
-    class NewClonesPerRepertoireFilter(Filter):
-        """
-        Removes all repertoires from the RepertoireDataset, which contain fewer clonotypes than specified by the
-        lower_limit, or more clonotypes than specified by the upper_limit.
-        Note that this filter filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
-
-        Specification arguments:
-
-            lower_limit (int): The minimal inclusive lower limit for the number of clonotypes allowed in a repertoire.
-
-            upper_limit (int): The maximal inclusive upper limit for the number of clonotypes allowed in a repertoire.
-
-        When no lower or upper limit is specified, or the value -1 is specified, the limit is ignored.
+Adding an example preprocessor to the immuneML codebase
+-------------------------------------------------------------
+This tutorial describes how to add a new  :py:obj:`~immuneML.preprocessing.Preprocessor.Preprocessor` class to immuneML,
+using a simple example preprocessor. We highly recommend completing this tutorial to get a better understanding of the immuneML
+interfaces before continuing to :ref:`implement your own preprocessor <Implementing a new preprocessor>`.
 
 
-        YAML specification:
+Step-by-step tutorial
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-        .. indent with spaces
-        .. code-block:: yaml
+For this tutorial, we provide a :code:`SillyFilter` (:download:`download here <./example_code/SillyFilter.py>` or view below),
+in order to test adding a new Preprocessor file to immuneML. This preprocessor acts like a filter which randomly selects
+a subset of repertoires to keep.
 
-            preprocessing_sequences:
-                my_preprocessing:
-                    - my_filter:
-                        NewClonesPerRepertoireFilter:
-                            lower_limit: 100
-                            upper_limit: 100000
+    .. collapse:: SillyFilter.py
 
-        """
+      .. literalinclude:: ./example_code/SillyFilter.py
+         :language: python
 
-        def __init__(self, lower_limit: int = -1, upper_limit: int = -1):
-            self.lower_limit = lower_limit
-            self.upper_limit = upper_limit
 
-        def process_dataset(self, dataset: RepertoireDataset, result_path: Path = None):
-            # Prepare the parameter dictionary for the process method
-            params = {"result_path": result_path}
-            if self.lower_limit > -1:
-                params["lower_limit"] = self.lower_limit
-            if self.upper_limit > -1:
-                params["upper_limit"] = self.upper_limit
+#. Add a new class to the :py:mod:`~immuneML.preprocessing.filters` package inside the :py:mod:`~immuneML.preprocessing` package.
+   The new class should inherit from the base class :py:obj:`~immuneML.preprocessing.filters.Filter.Filter`.
+   A filter is a special category of preprocessors which removes examples (repertoires) from the dataset.
+   Other preprocessors, which for example just annotate the dataset, should be placed directly inside the :py:mod:`~immuneML.preprocessing` package
+   and inherit the :py:mod:`~immuneML.preprocessing.Preprocessor.Preprocessor` class instead.
 
-            return NewClonesPerRepertoireFilter.process(dataset, params)
+#. If the preprocessor has any default parameters, they should be added in a default parameters YAML file. This file should be added to the folder :code:`config/default_params/preprocessing`.
+   The default parameters file is automatically discovered based on the name of the class using the base name converted to snake case, and with an added '_params.yaml' suffix.
+   For the :code:`SillyFilter`, this is :code:`silly_filter_params.yaml`, which could for example contain the following:
 
-        @staticmethod
-        def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
-            # Check if the dataset is the correct type for this preprocessor (here, only RepertoireDataset is allowed)
-            NewClonesPerRepertoireFilter.check_dataset_type(dataset, [RepertoireDataset], "NewClonesPerRepertoireFilter")
+   .. code:: yaml
 
-            processed_dataset = dataset.clone()
+      fraction_to_keep: 0.8
 
-            # Here, any code can be placed to create a modified set of repertoires
-            repertoires = []
-            indices = []
-            for index, repertoire in enumerate(dataset.get_data()):
-                if "lower_limit" in params.keys() and len(repertoire.sequences) >= params["lower_limit"] or \
-                    "upper_limit" in params.keys() and len(repertoire.sequences) <= params["upper_limit"]:
-                    repertoires.append(dataset.repertoires[index])
-                    indices.append(index)
+   In rare cases where classes have unconventional names that do not translate well to CamelCase (e.g., MiXCR, VDJdb), this needs to be accounted for in :py:meth:`~immuneML.dsl.DefaultParamsLoader.convert_to_snake_case`.
 
-            processed_dataset.repertoires = repertoires
 
-            # Rebuild the metadata file, which only contains the repertoires that were kept
-            processed_dataset.metadata_file = NewClonesPerRepertoireFilter.build_new_metadata(dataset, indices, params["result_path"])
+Test running the new preprocessing with a YAML specification
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-            # Ensure the dataset did not end up empty after filtering
-            NewClonesPerRepertoireFilter.check_dataset_not_empty(processed_dataset, "NewClonesPerRepertoireFilter")
+If you want to use immuneML directly to test run your preprocessor, the YAML example below may be used.
+This example analysis creates a randomly generated dataset, runs the :code:`SillyFilter`, and
+runs the :ref:`SimpleDatasetOverview` report on the preprocessed dataset to inspect the results.
 
-            return processed_dataset
+   .. collapse:: test_run_silly_filter.yaml
 
-Unit testing the new Preprocessor
----------------------------------
+      .. code:: yaml
 
-To add a unit test:
+         definitions:
+           datasets:
+             my_dataset:
+               format: RandomSequenceDataset
+               params:
+                 sequence_count: 100
 
-#. Create a new python file named test_newClonesPerRepertoireFilter.py and add it to the :py:mod:`~test.preprocessing.filters` test package.
-#. Add a class TestNewClonesPerRepertoireFilter that inherits :code:`unittest.TestCase` to the new file.
-#. Add a function :code:`setUp()` to set up cache used for testing (see example below). This will ensure that the cache location will be set to :code:`EnvironmentSettings.tmp_test_path / "cache/"`
+           preprocessing_sequences:
+             my_preprocessing:
+             - step1:
+                 SillyFilter:
+                   fraction_to_remove: 0.8
+
+           reports:
+             simple_overview: SimpleDatasetOverview
+
+
+         instructions:
+           exploratory_instr:
+             type: ExploratoryAnalysis
+             analyses:
+               analysis_1:
+                 dataset: d1
+                 preprocessing_sequence: my_preprocessing_seq
+                 report: simple_overview
+
+
+
+
+
+Adding a Unit test for a Preprocessing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Add a unit test for the new :code:`SillyFilter` (:download:`download <./example_code/_test_sillyFilter.py>` the example testfile or view below)
+
+    .. collapse:: test_sillyFilter.py
+
+      .. literalinclude:: ./example_code/_test_sillyFilter.py
+         :language: python
+
+
+#. Add a new file to the :code:`test.preprocessing.filters` package named test_sillyFilter.py.
+#. Add a class :code:`TestSillyFilter` that inherits :code:`unittest.TestCase` to the new file.
+#. Add a function :code:`setUp()` to set up cache used for testing. This should ensure that the cache location will be set to :code:`EnvironmentSettings.tmp_test_path / "cache/"`
 #. Define one or more tests for the class and functions you implemented.
-#. If you need to write data to a path (for example test datasets or results), use the following location: :code:`EnvironmentSettings.tmp_test_path / "some_unique_foldername"`
 
-When building unit tests, a useful class is :py:obj:`~immuneML.simulation.dataset_generation.RandomDatasetGenerator.RandomDatasetGenerator`, which can create a dataset with random sequences.
-
-An example of the unit test TestNewClonesPerRepertoireFilter is given below.
-
-.. code-block:: python
-
-    import os
-    import shutil
-    from unittest import TestCase
-
-    from immuneML.caching.CacheType import CacheType
-    from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-    from immuneML.environment.Constants import Constants
-    from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-    from immuneML.preprocessing.filters.ClonesPerRepertoireFilter import ClonesPerRepertoireFilter
-    from immuneML.util.PathBuilder import PathBuilder
-    from immuneML.util.RepertoireBuilder import RepertoireBuilder
-
-
-    class TestClonesPerRepertoireFilter(TestCase):
-
-        def setUp(self) -> None:
-            os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
-
-        def test_process(self):
-            path = EnvironmentSettings.tmp_test_path / "clones_per_repertoire_filter"
-            PathBuilder.build(path)
-            dataset = RepertoireDataset(repertoires=RepertoireBuilder.build_from_objects([["ACF", "ACF", "ACF"],
-                                                                           ["ACF", "ACF"],
-                                                                           ["ACF", "ACF", "ACF", "ACF"]], path)[0])
-
-            dataset1 = ClonesPerRepertoireFilter.process(dataset, {"lower_limit": 3, "result_path": path})
-            self.assertEqual(2, dataset1.get_example_count())
-
-            dataset2 = ClonesPerRepertoireFilter.process(dataset, {"upper_limit": 2, "result_path": path})
-            self.assertEqual(1, dataset2.get_example_count())
-
-            self.assertRaises(AssertionError, ClonesPerRepertoireFilter.process, dataset, {"lower_limit": 10, "result_path": path})
-
-            shutil.rmtree(path)
+   - It is recommended to at least test building the Preprocessor and running the preprocessing
+   - Mock data is typically used to test new classes. Tip: the :code:`RandomDatasetGenerator` class can be used to generate Repertoire, Sequence or Receptor datasets with random sequences.
+   - If you need to write data to a path (for example test datasets or results), use the following location: :code:`EnvironmentSettings.tmp_test_path / "some_unique_foldername"`
 
 
 
-
-Adding a Preprocessor: additional information
+Implementing a new Preprocessor
 ------------------------------------------
+
+This section describes tips and tricks for implementing your own new :code:`Preprocessor` from scratch.
+Detailed instructions of how to implement each method, as well as some special cases, can be found in the
+:py:obj:`~immuneML.preprocessing.Preprocessor.Preprocessor` base class.
+
+
+.. include:: ./coding_conventions_and_tips.rst
+
 
 
 Implementing the process() method in a new encoder class
@@ -192,89 +154,35 @@ When implementing the :code:`process(dataset, params)` method, take the followin
 
 
 
-Test run of the preprocessing: specifying the preprocessing in YAML
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Custom preprocessings can be specified in the YAML specification just like any other existing preprocessing. The preprocessing
-needs to be defined under ‘definitions’ and referenced in the ‘instructions’ section.
-The easiest way to test a new preprocessing is to apply it when running the :ref:`ExploratoryAnalysis` instruction,
-and running the :ref:`SimpleDatasetOverview` report on the preprocessed dataset to inspect the results.
-An example YAML specification for this is given below:
-
-.. code-block:: yaml
-
-  definitions:
-    preprocessing_sequences:
-      my_preprocessing_seq:           # User-defined name of the preprocessing sequence (may contain one or more preprocessings)
-      - my_new_filter:                # User-defined name of one preprocessing
-        NewClonesPerRepertoireFilter: # The name of the new preprocessor class
-          lower_limit: 10             # Any parameters to provide to the preprocessor.
-          upper_limit: 20             # In this test example, only repertoires with 10-20 clones are kept
-
-    datasets:
-      d1:
-        # if you do not have real data to test your report with, consider
-        # using a randomly generated dataset, see the documentation:
-        # “How to generate a random receptor or repertoire dataset”
-        format: RandomRepertoireDataset
-        params:
-            repertoire_count: 100 # number of random repertoires to generate
-            sequence_count_probabilities:
-              15: 0.5  # Generate a dataset where half the repertoires contain 15 sequences, and the other half 25 sequences
-              25: 0.5  # When the filter is applied, only the 50 repertoires with 15 sequences should remain
-
-    reports:
-      simple_overview: SimpleDatasetOverview
-
-  instructions:
-    exploratory_instr: # Example of specifying reports in ExploratoryAnalysis
-      type: ExploratoryAnalysis
-      analyses:
-        analysis_1: # Example analysis with data report
-          dataset: d1
-          preprocessing_sequence: my_preprocessing_seq # apply the preprocessing
-          report: simple_overview
+Class documentation standards for preprocessors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+.. include:: ./class_documentation_standards.rst
 
-Adding class documentation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To complete the preprocessing, class documentation should be added to inform other users how the preprocessing should be used.
-The documentation should contain:
+.. collapse:: Click to view a full example of Preprocessor class documentation.
 
-  #. A short, general description of the preprocessor, including which dataset types (repertoire dataset, sequence dataset, receptor dataset) it can be applied to.
+       .. code::
 
-  #. If applicable, a listing of the types and descriptions of the arguments that should be providedto the preprocessor.
+           This SillyFilter class is a placeholder for a real Preprocessor.
+           It randomly selects a fraction of the repertoires to be removed from the dataset.
 
-  #. An example of how the preprocessor definition should be specified in the YAML.
 
-The class docstrings are used to automatically generate the documentation for the preprocessor, and should be written
-in Sphinx `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_ formatting.
+           **Specification arguments:**
 
-This is the example of documentation for :py:obj:`~immuneML.preprocessing.filters.ClonesPerRepertoireFilter.ClonesPerRepertoireFilter`:
+           - fraction_to_keep (float): The fraction of repertoires to keep
 
-.. code-block:: RST
 
-    Removes all repertoires from the RepertoireDataset, which contain fewer clonotypes than specified by the
-    lower_limit, or more clonotypes than specified by the upper_limit.
-    Note that this filter filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
+           **YAML specification:**
 
-    Specification arguments:
+           .. indent with spaces
+           .. code-block:: yaml
 
-        lower_limit (int): The minimal inclusive lower limit for the number of clonotypes allowed in a repertoire.
-
-        upper_limit (int): The maximal inclusive upper limit for the number of clonotypes allowed in a repertoire.
-        When no lower or upper limit is specified, or the value -1 is specified, the limit is ignored.
-
-    YAML specification:
-
-    .. indent with spaces
-    .. code-block:: yaml
-
-        preprocessing_sequences:
-            my_preprocessing:
-                - my_filter:
-                    NewClonesPerRepertoireFilter:
-                        lower_limit: 100
-                        upper_limit: 100000
+               definitions:
+                   preprocessing_sequences:
+                       my_preprocessing:
+                           - step1:
+                               SillyFilter:
+                                   fraction_to_remove: 0.8

@@ -24,7 +24,7 @@ class AIRRImport(DataImport):
 
     When importing a ReceptorDataset, the AIRR field cell_id is used to determine the chain pairs.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - path (str): For RepertoireDatasets, this is the path to a directory with AIRR files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
@@ -68,33 +68,35 @@ class AIRRImport(DataImport):
     - separator (str): Column separator, for AIRR this is by default "\\t".
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_airr_dataset:
-            format: AIRR
-            params:
-                path: path/to/files/
-                is_repertoire: True # whether to import a RepertoireDataset
-                metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                metadata_column_mapping: # metadata column mapping AIRR: immuneML for Sequence- or ReceptorDatasetDataset
-                    airr_column_name1: metadata_label1
-                    airr_column_name2: metadata_label2
-                import_productive: True # whether to include productive sequences in the dataset
-                import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
-                import_out_of_frame: False # whether to include out of frame sequences in the dataset
-                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
-                import_empty_nt_sequences: True # keep sequences even if the `sequences` column is empty (provided that other fields are as specified here)
-                import_empty_aa_sequences: False # remove all sequences with empty `sequence_aa` column
-                # Optional fields with AIRR-specific defaults, only change when different behavior is required:
-                separator: "\\t" # column separator
-                region_type: IMGT_CDR3 # what part of the sequence to import
-                column_mapping: # column mapping AIRR: immuneML
-                    junction: sequence
-                    junction_aa: sequence_aa
-                    locus: chain
+        definitions:
+            datasets:
+                my_airr_dataset:
+                    format: AIRR
+                    params:
+                        path: path/to/files/
+                        is_repertoire: True # whether to import a RepertoireDataset
+                        metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                        metadata_column_mapping: # metadata column mapping AIRR: immuneML for Sequence- or ReceptorDatasetDataset
+                            airr_column_name1: metadata_label1
+                            airr_column_name2: metadata_label2
+                        import_productive: True # whether to include productive sequences in the dataset
+                        import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
+                        import_out_of_frame: False # whether to include out of frame sequences in the dataset
+                        import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
+                        import_empty_nt_sequences: True # keep sequences even if the `sequences` column is empty (provided that other fields are as specified here)
+                        import_empty_aa_sequences: False # remove all sequences with empty `sequence_aa` column
+                        # Optional fields with AIRR-specific defaults, only change when different behavior is required:
+                        separator: "\\t" # column separator
+                        region_type: IMGT_CDR3 # what part of the sequence to import
+                        column_mapping: # column mapping AIRR: immuneML
+                            junction: sequence
+                            junction_aa: sequence_aa
+                            locus: chain
 
     """
 

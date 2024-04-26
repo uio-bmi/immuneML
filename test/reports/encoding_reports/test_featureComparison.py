@@ -63,7 +63,8 @@ class TestFeatureComparison(TestCase):
 
         self.assertTrue(report.check_prerequisites())
 
-        result = report.generate_report()
+        self.assertTrue(report.check_prerequisites())
+        result = report._generate()
 
         self.assertIsInstance(result, ReportResult)
 

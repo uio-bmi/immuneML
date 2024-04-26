@@ -27,15 +27,11 @@ class TestMotifSeedRecovery(TestCase):
         # dummy logistic regression with 100 observations with 20 features belonging to 2 classes
         dummy_lr = LogisticRegression()
         dummy_lr.fit_by_cross_validation(EncodedData(np.random.rand(100, 5), {"l1": [i % 2 for i in range(0, 100)]}),
-                                         number_of_splits=2,
+                                         optimization_metric="balanced_accuracy", number_of_splits=2,
                                          label=Label("l1", [0, 1]))
 
         # Change coefficients to values 1-20
         dummy_lr.model.coef_ = np.array(list(range(0, 5))).reshape(1, -1)
-
-        with open(path / "ml_details.yaml", "w") as file:
-            yaml.dump({"l1": {"feature_names": ["AAA", "AAC", "CKJ", "KSA", "AKJ"]}},
-                      file)
 
         return dummy_lr
 

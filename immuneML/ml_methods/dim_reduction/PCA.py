@@ -10,15 +10,17 @@ class PCA(DimRedMethod):
     same as supported by scikit-learn (see `PCA scikit-learn documentation
     <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html#sklearn.decomposition.PCA>`_ for details).
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_pca: # user-defined name of the dimensionality reduction method
-            PCA: # name of the class
-                # arguments as defined by scikit-learn
-                n_components: 2
+        definitions:
+            ml_methods:
+                my_pca:
+                    PCA:
+                        # arguments as defined by scikit-learn
+                        n_components: 2
 
     """
 

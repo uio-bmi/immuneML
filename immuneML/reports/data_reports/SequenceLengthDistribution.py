@@ -21,18 +21,20 @@ class SequenceLengthDistribution(DataReport):
     """
     Generates a histogram of the lengths of the sequences in a repertoire or sequence dataset.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - sequence_type (str): whether to check the length of amino acid or nucleotide sequences; default value is 'amino_acid'
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_sld_report:
-            SequenceLengthDistribution:
-                sequence_type: amino_acid
+        definitions:
+            reports:
+                my_sld_report:
+                    SequenceLengthDistribution:
+                        sequence_type: amino_acid
 
     """
 

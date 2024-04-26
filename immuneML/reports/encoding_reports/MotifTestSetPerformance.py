@@ -31,26 +31,28 @@ class MotifTestSetPerformance(EncodingReport):
     It is recommended to first run the report :py:obj:`~immuneML.reports.data_reports.MotifGeneralizationAnalysis.MotifGeneralizationAnalysis`
     in order to calibrate the optimal recall thresholds and plot the performance of motifs on training- and validation sets.
 
-    Arguments:
+    **Specification arguments:**
 
-        test_dataset (dict): parameters for importing a SequenceDataset to use as an independent test set. By default,
-        the import parameters 'is_repertoire' and 'paired' will be set to False to ensure a SequenceDataset is imported.
+    - test_dataset (dict): parameters for importing a SequenceDataset to use as an independent test set. By default,
+      the import parameters 'is_repertoire' and 'paired' will be set to False to ensure a SequenceDataset is imported.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_motif_report:
-            MotifTestSetPerformance:
-                test_dataset:
-                    format: AIRR # choose any valid import format
-                    params:
-                        path: path/to/files/
-                        is_repertoire: False  # is_repertoire must be False to import a SequenceDataset
-                        paired: False         # paired must be False to import a SequenceDataset
-                        # optional other parameters...
+        definitions:
+            reports:
+                my_motif_report:
+                    MotifTestSetPerformance:
+                        test_dataset:
+                            format: AIRR # choose any valid import format
+                            params:
+                                path: path/to/files/
+                                is_repertoire: False  # is_repertoire must be False to import a SequenceDataset
+                                paired: False         # paired must be False to import a SequenceDataset
+                                # optional other parameters...
 
     """
 

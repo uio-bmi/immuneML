@@ -14,7 +14,7 @@ class CountPerSequenceFilter(Filter):
     Removes all sequences from a Repertoire when they have a count below low_count_limit, or sequences with no count
     value if remove_without_counts is True. This filter can be applied to Repertoires and RepertoireDatasets.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - low_count_limit (int): The inclusive minimal count value in order to retain a given sequence.
 
@@ -27,7 +27,7 @@ class CountPerSequenceFilter(Filter):
     - batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed when applying this filter on a RepertoireDataset)
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

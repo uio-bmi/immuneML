@@ -10,7 +10,7 @@ class RandomSequenceDatasetImport(DataImport):
     The sequences consist of uniformly chosen amino acids or nucleotides.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - sequence_count (int): The number of sequences the SequenceDataset should contain.
 
@@ -32,25 +32,27 @@ class RandomSequenceDatasetImport(DataImport):
                     not_binding: 0.3
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_random_dataset:
-            format: RandomSequenceDataset
-            params:
-                sequence_count: 100 # number of random sequences to generate
-                length_probabilities:
-                    14: 0.8 # 80% of all generated sequences for all sequences will have length 14
-                    15: 0.2 # 20% of all generated sequences across all sequences will have length 15
-                labels:
-                    epitope1: # label name
-                        True: 0.5 # 50% of the sequences will have class True
-                        False: 0.5 # 50% of the sequences will have class False
-                    epitope2: # next label with classes that will be assigned to sequences independently of the previous label or other parameters
-                        1: 0.3 # 30% of the generated sequences will have class 1
-                        0: 0.7 # 70% of the generated sequences will have class 0
+        definitions:
+            datasets:
+                my_random_dataset:
+                    format: RandomSequenceDataset
+                    params:
+                        sequence_count: 100 # number of random sequences to generate
+                        length_probabilities:
+                            14: 0.8 # 80% of all generated sequences for all sequences will have length 14
+                            15: 0.2 # 20% of all generated sequences across all sequences will have length 15
+                        labels:
+                            epitope1: # label name
+                                True: 0.5 # 50% of the sequences will have class True
+                                False: 0.5 # 50% of the sequences will have class False
+                            epitope2: # next label with classes that will be assigned to sequences independently of the previous label or other parameters
+                                1: 0.3 # 30% of the generated sequences will have class 1
+                                0: 0.7 # 70% of the generated sequences will have class 0
     """
 
     @staticmethod
@@ -58,7 +60,7 @@ class RandomSequenceDatasetImport(DataImport):
         """
         Returns randomly generated receptor dataset according to the parameters;
 
-        YAML specification:
+        **YAML specification:**
 
             result_path: path/where/to/store/results/
             sequence_count: 100 # number of random sequences to generate

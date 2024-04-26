@@ -26,39 +26,41 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
     Any sequence within a given hamming distance from a positive training sequence will be classified positive,
     all other sequences will be classified negative.
 
-    Arguments:
+    **Specification arguments:**
 
-        hamming_distance (int): Maximum number of differences allowed between any positive sequence of the training set and a
-        new observed sequence in order for the observed sequence to be classified as 'positive'.
+    - hamming_distance (int): Maximum number of differences allowed between any positive sequence of the training set and a
+      new observed sequence in order for the observed sequence to be classified as 'positive'.
 
-        compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
-        has been installed such that it can be called directly on the command line with the command 'compairr',
-        or that it is located at /usr/local/bin/compairr.
+    - compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
+      has been installed such that it can be called directly on the command line with the command 'compairr',
+      or that it is located at /usr/local/bin/compairr.
 
-        ignore_genes (bool): Only used when compairr is used. Whether to ignore V and J gene information. If False, the V and J genes between two sequences
-        have to match for the sequence to be considered 'similar'. If True, gene information is ignored. By default, ignore_genes is False.
+    - ignore_genes (bool): Only used when compairr is used. Whether to ignore V and J gene information. If False, the V and J genes between two sequences
+      have to match for the sequence to be considered 'similar'. If True, gene information is ignored. By default, ignore_genes is False.
 
-        threads (int): The number of threads to use for parallelization. This does not affect the results of the encoding, only the speed.
-        The default number of threads is 8.
+    - threads (int): The number of threads to use for parallelization. This does not affect the results of the encoding, only the speed.
+      The default number of threads is 8.
 
-        keep_temporary_files (bool): whether to keep temporary files, including CompAIRR input, output and log files, and the sequence
-        presence matrix. This may take a lot of storage space if the input dataset is large. By default temporary files are not kept.
+    - keep_temporary_files (bool): whether to keep temporary files, including CompAIRR input, output and log files, and the sequence
+      presence matrix. This may take a lot of storage space if the input dataset is large. By default temporary files are not kept.
 
 
-
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-            my_sequence_encoder:
-                SimilarToPositiveSequenceEncoder:
-                    hamming_distance: 2
+        definitions:
+            encodings:
+                my_sequence_encoder:
+                    SimilarToPositiveSequenceEncoder:
+                        hamming_distance: 2
     """
 
     def __init__(self, hamming_distance: int = None, compairr_path: str = None,
                  ignore_genes: bool = None, threads: int = None, keep_temporary_files: bool = None,
                  name: str = None):
+        super().__init__(name=name)
         self.hamming_distance = hamming_distance
         self.compairr_path = Path(compairr_path) if compairr_path is not None else None
         self.ignore_genes = ignore_genes
@@ -66,7 +68,6 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
         self.keep_temporary_files = keep_temporary_files
 
         self.positive_sequences = None
-        self.name = name
         self.context = None
 
     @staticmethod

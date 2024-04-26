@@ -61,7 +61,8 @@ IVKNQEJ01AJ44V	1	IVKNQEJ01AJ44V	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCT
             if index == 0:
                 self.assertEqual(3, len(rep.sequences))
                 self.assertListEqual(["IVKNQEJ01BVGQ6", "IVKNQEJ01AQVWS", "IVKNQEJ01EI5S4"], rep.get_sequence_identifiers().tolist())
-                self.assertListEqual(['IGHV4-31*03', 'IGHV4-31*03', 'IGHV4-31*03'], rep.get_v_genes().tolist())
+                self.assertListEqual(['IGHV4-31*03', 'IGHV4-31*03', 'IGHV4-31*03'], rep.get_attribute("v_call", as_list=True))
+                self.assertListEqual(['IGHV4-31', 'IGHV4-31', 'IGHV4-31'], rep.get_v_genes())
                 self.assertListEqual([36, 36, 36], rep.get_attribute("junction_length").tolist())
                 self.assertListEqual(["ASGVAGTFDY", "ASGVAGTFDY", "ASGVAGTFDY"], rep.get_sequence_aas().tolist())
                 self.assertListEqual([1247, 4, 2913], rep.get_counts().tolist())

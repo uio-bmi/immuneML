@@ -30,7 +30,7 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
     Morisita-Horn distance (= similarity - 1) is set to 0 to avoid negative distance scores.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR has been
       installed such that it can be called directly on the command line with the command 'compairr', or that it is
@@ -53,18 +53,20 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
 
     - threads (int): The number of threads to use for parallelization. Default is 8.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_distance_encoder:
-            CompAIRRDistance:
-                compairr_path: optional/path/to/compairr
-                differences: 0
-                indels: False
-                ignore_counts: False
-                ignore_genes: False
+        definitions:
+            encodings:
+                my_distance_encoder:
+                    CompAIRRDistance:
+                        compairr_path: optional/path/to/compairr
+                        differences: 0
+                        indels: False
+                        ignore_counts: False
+                        ignore_genes: False
 
     """
 

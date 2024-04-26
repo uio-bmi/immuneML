@@ -42,7 +42,7 @@ class TestGroundTruthMotifOverlap(TestCase):
     def _write_groundtruth_motifs_file(self, path):
         file_path = path / "gt_motifs.tsv"
         with open(file_path, "w") as file:
-            file.writelines(["indices\tamino_acids\tn_sequences\n", "1\tI\t6\n", "5\tN\t10\n", "0\tA\t4\n", "4&7\t0&1\t30\n"])
+            file.writelines(["indices\tamino_acids\tn_sequences\n", "1\tI\t6\n", "5\tN\t10\n", "0\tA\t4\n", "4&8\tG&A\t30\n"])
 
         return file_path
 
@@ -65,6 +65,6 @@ class TestGroundTruthMotifOverlap(TestCase):
         if len(df) > 0:
             self.assertTrue(os.path.isfile(path / "result_path/motif_overlap.html"))
 
-        shutil.rmtree(path)
+        # shutil.rmtree(path)
 
 

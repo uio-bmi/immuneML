@@ -38,7 +38,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
     For full example of using this encoder, see :ref:`Reproduction of the CMV status predictions study`.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - comparison_attributes (list): The attributes to be considered to group receptors into clonotypes. Only the fields specified in
       comparison_attributes will be considered, all other fields are ignored. Valid comparison value can be any repertoire field name.
@@ -52,22 +52,24 @@ class SequenceAbundanceEncoder(DatasetEncoder):
       This value is a trade-off between the number of repertoires that can fit the RAM at the time and loading time from disk.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_sa_encoding:
-            SequenceAbundance:
-                comparison_attributes:
-                    - sequence_aa
-                    - v_call
-                    - j_call
-                    - chain
-                    - region_type
-                p_value_threshold: 0.05
-                sequence_batch_size: 100000
-                repertoire_batch_size: 32
+        definitions:
+            encodings:
+                my_sa_encoding:
+                    SequenceAbundance:
+                        comparison_attributes:
+                            - sequence_aa
+                            - v_call
+                            - j_call
+                            - chain
+                            - region_type
+                        p_value_threshold: 0.05
+                        sequence_batch_size: 100000
+                        repertoire_batch_size: 32
 
     """
 
@@ -75,9 +77,9 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     TOTAL_SEQUENCE_ABUNDANCE = "total_sequence_abundance"
 
     def __init__(self, comparison_attributes, p_value_threshold: float, sequence_batch_size: int, repertoire_batch_size: int, name: str = None):
+        super().__init__(name=name)
         self.comparison_attributes = comparison_attributes
         self.sequence_batch_size = sequence_batch_size
-        self.name = name
         self.relevant_sequence_indices = None
         self.context = None
         self.p_value_threshold = p_value_threshold

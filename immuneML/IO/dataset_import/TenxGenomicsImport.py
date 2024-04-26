@@ -26,7 +26,7 @@ class TenxGenomicsImport(DataImport):
     Furthermore, the 10xGenomics field clonotype_id is used for the immuneML field cell_id.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - path (str): For RepertoireDatasets, this is the path to a directory with 10xGenomics files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
@@ -72,36 +72,38 @@ class TenxGenomicsImport(DataImport):
     - separator (str): Column separator, for 10xGenomics this is by default ",".
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_10x_dataset:
-            format: 10xGenomics
-            params:
-                path: path/to/files/
-                is_repertoire: True # whether to import a RepertoireDataset
-                metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                paired: False # whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False
-                receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
-                metadata_column_mapping: # metadata column mapping 10xGenomics: immuneML for SequenceDataset
-                    tenx_column_name1: metadata_label1
-                    tenx_column_name2: metadata_label2
-                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
-                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
-                # Optional fields with 10xGenomics-specific defaults, only change when different behavior is required:
-                separator: "," # column separator
-                region_type: IMGT_CDR3 # what part of the sequence to import
-                column_mapping: # column mapping 10xGenomics: immuneML
-                    cdr3: sequence_aa
-                    cdr3_nt: sequence
-                    v_gene: v_call
-                    j_gene: j_call
-                    umis: duplicate_count
-                    clonotype_id: cell_id
-                    consensus_id: sequence_id
+        definitions:
+            datasets:
+                my_10x_dataset:
+                    format: 10xGenomics
+                    params:
+                        path: path/to/files/
+                        is_repertoire: True # whether to import a RepertoireDataset
+                        metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                        paired: False # whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False
+                        receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
+                        metadata_column_mapping: # metadata column mapping 10xGenomics: immuneML for SequenceDataset
+                            tenx_column_name1: metadata_label1
+                            tenx_column_name2: metadata_label2
+                        import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
+                        import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                        import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+                        # Optional fields with 10xGenomics-specific defaults, only change when different behavior is required:
+                        separator: "," # column separator
+                        region_type: IMGT_CDR3 # what part of the sequence to import
+                        column_mapping: # column mapping 10xGenomics: immuneML
+                            cdr3: sequence_aa
+                            cdr3_nt: sequence
+                            v_gene: v_call
+                            j_gene: j_call
+                            umis: duplicate_count
+                            clonotype_id: cell_id
+                            consensus_id: sequence_id
 
     """
 

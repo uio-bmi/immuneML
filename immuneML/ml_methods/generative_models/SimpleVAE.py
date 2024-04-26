@@ -39,7 +39,7 @@ class SimpleVAE(GenerativeModel):
     Deep generative models for T cell receptor protein sequences. eLife, 8, e46935. https://doi.org/10.7554/eLife.46935
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - chain (str): which chain the sequence come from, e.g., TRB
 
@@ -78,26 +78,28 @@ class SimpleVAE(GenerativeModel):
     - device (str): name of the device where to train the model (e.g., cpu)
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_vae:
-            SimpleVAE:
-                chain: beta
-                beta: 0.75
-                latent_dim: 20
-                linear_nodes_count: 75
-                num_epochs: 5000
-                batch_size: 10000
-                j_gene_embed_dim: 13
-                v_gene_embed_dim: 30
-                cdr3_embed_dim: 21
-                pretrains: 10
-                warmup_epochs: 20
-                patience: 20
-                device: cpu
+        definitions:
+            ml_methods:
+                my_vae:
+                    SimpleVAE:
+                        chain: beta
+                        beta: 0.75
+                        latent_dim: 20
+                        linear_nodes_count: 75
+                        num_epochs: 5000
+                        batch_size: 10000
+                        j_gene_embed_dim: 13
+                        v_gene_embed_dim: 30
+                        cdr3_embed_dim: 21
+                        pretrains: 10
+                        warmup_epochs: 20
+                        patience: 20
+                        device: cpu
 
     """
 

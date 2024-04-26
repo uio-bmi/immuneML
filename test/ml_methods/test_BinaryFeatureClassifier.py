@@ -12,7 +12,7 @@ from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.BinaryFeatureClassifier import BinaryFeatureClassifier
+from immuneML.ml_methods.classifiers.BinaryFeatureClassifier import BinaryFeatureClassifier
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -35,7 +35,7 @@ class TestBinaryFeatureClassifier(TestCase):
                                                   [True, False, False, False]]),
                                labels={"l1": ["True", "True", "True", "True", "False", "False", "False", "False"]})
 
-        label = Label("l1", values=[True, False], positive_class=True)
+        label = Label("l1", values=["True", "False"], positive_class="True")
         return enc_data, label
 
     def get_fitted_classifier(self, path, enc_data, label, max_features=None):

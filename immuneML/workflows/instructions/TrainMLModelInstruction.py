@@ -35,11 +35,13 @@ class TrainMLModelInstruction(Instruction):
 
     Optimal model chosen by the inner loop is then retrained on the whole training dataset in the outer loop.
 
-    Note: If you are interested in plotting the performance of all combinations of encodings and ML methods on the test set,
-    consider running the :ref:`MLSettingsPerformance` report as hyperparameter report in the assessment loop.
+    .. note::
+
+        If you are interested in plotting the performance of all combinations of encodings and ML methods on the test set,
+        consider running the :ref:`MLSettingsPerformance` report as hyperparameter report in the assessment loop.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - dataset (Dataset): dataset to use for training and assessing the classifier
 
@@ -75,56 +77,57 @@ class TrainMLModelInstruction(Instruction):
       If False, only the optimal model is exported. By default, export_all_models is False.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_nested_cv_instruction: # user-defined name of the instruction
-            type: TrainMLModel # which instruction should be executed
-            settings: # a list of combinations of preprocessing, encoding and ml_method to optimize over
-                - preprocessing: seq1 # preprocessing is optional
-                  encoding: e1 # mandatory field
-                  ml_method: simpleLR # mandatory field
-                - preprocessing: seq1 # the second combination
-                  encoding: e2
-                  ml_method: simpleLR
-            assessment: # outer loop of nested CV
-                split_strategy: random # perform Monte Carlo CV (randomly split the data into train and test)
-                split_count: 1 # how many train/test datasets to generate
-                training_percentage: 0.7 # what percentage of the original data should be used for the training set
-                reports: # reports to execute on training/test datasets, encoded datasets and trained ML methods
-                    data_splits: # list of reports to execute on training/test datasets (before they are encoded)
-                        - rep1
-                    encoding: # list of reports to execute on encoded training/test datasets
-                        - rep2
-                    models: # list of reports to execute on trained ML methods for each assessment CV split
-                        - rep3
-            selection: # inner loop of nested CV
-                split_strategy: k_fold # perform k-fold CV
-                split_count: 5 # how many fold to create: here these two parameters mean: do 5-fold CV
-                reports:
-                    data_splits: # list of reports to execute on training/test datasets (in the inner loop, so these are actually training and validation datasets)
-                        - rep1
-                    models: # list of reports to execute on trained ML methods for each selection CV split
-                        - rep2
-                    encoding: # list of reports to execute on encoded training/test datasets (again, it is training/validation here)
-                        - rep3
-            labels: # list of labels to optimize the classifier for, as given in the metadata for the dataset
-                - celiac:
-                    positive_class: + # if it's binary classification, positive class parameter should be set
-                - T1D # this is not binary label, so no need to specify positive class
-            dataset: d1 # which dataset to use for the nested CV
-            strategy: GridSearch # how to choose the combinations which to test from settings (GridSearch means test all)
-            metrics: # list of metrics to compute for all settings, but these do not influence the choice of optimal model
-                - accuracy
-                - auc
-            reports: # list of reports to execute when nested CV is finished to show overall performance
-                - rep4
-            number_of_processes: 4 # number of parallel processes to create (could speed up the computation)
-            optimization_metric: balanced_accuracy # the metric to use for choosing the optimal model and during training
-            refit_optimal_model: False # use trained model, do not refit on the full dataset
-            export_all_ml_settings: False # only export the optimal setting
+        instructions:
+            my_nested_cv_instruction: # user-defined name of the instruction
+                type: TrainMLModel # which instruction should be executed
+                settings: # a list of combinations of preprocessing, encoding and ml_method to optimize over
+                    - preprocessing: seq1 # preprocessing is optional
+                      encoding: e1 # mandatory field
+                      ml_method: simpleLR # mandatory field
+                    - preprocessing: seq1 # the second combination
+                      encoding: e2
+                      ml_method: simpleLR
+                assessment: # outer loop of nested CV
+                    split_strategy: random # perform Monte Carlo CV (randomly split the data into train and test)
+                    split_count: 1 # how many train/test datasets to generate
+                    training_percentage: 0.7 # what percentage of the original data should be used for the training set
+                    reports: # reports to execute on training/test datasets, encoded datasets and trained ML methods
+                        data_splits: # list of reports to execute on training/test datasets (before they are encoded)
+                            - rep1
+                        encoding: # list of reports to execute on encoded training/test datasets
+                            - rep2
+                        models: # list of reports to execute on trained ML methods for each assessment CV split
+                            - rep3
+                selection: # inner loop of nested CV
+                    split_strategy: k_fold # perform k-fold CV
+                    split_count: 5 # how many fold to create: here these two parameters mean: do 5-fold CV
+                    reports:
+                        data_splits: # list of reports to execute on training/test datasets (in the inner loop, so these are actually training and validation datasets)
+                            - rep1
+                        models: # list of reports to execute on trained ML methods for each selection CV split
+                            - rep2
+                        encoding: # list of reports to execute on encoded training/test datasets (again, it is training/validation here)
+                            - rep3
+                labels: # list of labels to optimize the classifier for, as given in the metadata for the dataset
+                    - celiac:
+                        positive_class: + # if it's binary classification, positive class parameter should be set
+                    - T1D # this is not binary label, so no need to specify positive class
+                dataset: d1 # which dataset to use for the nested CV
+                strategy: GridSearch # how to choose the combinations which to test from settings (GridSearch means test all)
+                metrics: # list of metrics to compute for all settings, but these do not influence the choice of optimal model
+                    - accuracy
+                    - auc
+                reports: # list of reports to execute when nested CV is finished to show overall performance
+                    - rep4
+                number_of_processes: 4 # number of parallel processes to create (could speed up the computation)
+                optimization_metric: balanced_accuracy # the metric to use for choosing the optimal model and during training
+                refit_optimal_model: False # use trained model, do not refit on the full dataset
+                export_all_ml_settings: False # only export the optimal setting
 
     """
 
@@ -253,7 +256,7 @@ class TrainMLModelInstruction(Instruction):
             "a metric to use for optimization": f"a metric to use for optimization (one of {valid_values})",
             "Valid values are objects of any class inheriting :py:obj:`~immuneML.hyperparameter_optimization.strategy."
             "HPOptimizationStrategy.HPOptimizationStrategy`.": f"Valid values are: {valid_strategies}.",
-            "the reports to be specified here have to be :py:obj:`~immuneML.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport` reports.": f"the reports that can be provided here are :ref:`{TrainMLModelReport.get_title()}`."
+            "the reports to be specified here have to be :py:obj:`~immuneML.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport` reports.": f"the reports that can be provided here are :ref:`{TrainMLModelReport.DOCS_TITLE}`."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

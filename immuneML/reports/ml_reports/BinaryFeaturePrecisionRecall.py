@@ -12,7 +12,7 @@ from immuneML.ml_methods.util.Util import Util
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
-from immuneML.ml_methods.BinaryFeatureClassifier import BinaryFeatureClassifier
+from immuneML.ml_methods.classifiers.BinaryFeatureClassifier import BinaryFeatureClassifier
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
@@ -23,18 +23,17 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class BinaryFeaturePrecisionRecall(MLReport):
     """
+    Plots the precision and recall scores for each added feature to the collection of features selected by the BinaryFeatureClassifier.
 
 
-    Arguments:
-
-
-
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_report: BinaryFeaturePrecisionRecall
+        definitions:
+            reports:
+                my_report: BinaryFeaturePrecisionRecall
     """
 
     @classmethod

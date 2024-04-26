@@ -30,7 +30,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
     ‘Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire’.
     Nature Genetics 49, no. 5 (May 2017): 659–65. `doi.org/10.1038/ng.3822 <https://doi.org/10.1038/ng.3822>`_.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - max_iterations (int): maximum number of iterations while optimizing the parameters of the beta distribution (same for both classes)
 
@@ -38,15 +38,17 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
     - likelihood_threshold (float): at which threshold to stop the optimization (default -1e-10)
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_probabilistic_classifier: # user-defined name of the ML method
-            ProbabilisticBinaryClassifier: # method name
-                max_iterations: 1000
-                update_rate: 0.01
+        definitions:
+            ml_methods:
+                my_probabilistic_classifier: # user-defined name of the ML method
+                    ProbabilisticBinaryClassifier: # method name
+                        max_iterations: 1000
+                        update_rate: 0.01
 
     """
 
@@ -63,36 +65,22 @@ class ProbabilisticBinaryClassifier(MLMethod):
         self.beta_0 = None
         self.beta_1 = None
         self.likelihood_threshold = likelihood_threshold if likelihood_threshold is not None else -1e-10
-        self.class_mapping = None
-        self.label = None
-        self.feature_names = None
 
-    def fit(self, encoded_data: EncodedData, label: Label, optimization_metric=None, cores_for_training: int = 2):
-        if encoded_data.example_weights is not None:
-            warnings.warn(f"{self.__class__.__name__}: cannot fit this classifier with example weights, fitting without example weights instead... Example weights will still be applied when computing evaluation metrics after fitting.")
-
-        self.feature_names = encoded_data.feature_names
+    def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
         X = encoded_data.examples
         assert X.shape[1] == 2, "ProbabilisticBinaryClassifier: the shape of the input is not compatible with the classifier. " \
                                 "The classifier is defined when examples are encoded by two counts: the number of successful trials " \
                                 "and the total number of trials. If this is not targeted use-case and the encoding, please consider using " \
                                 "another classifier."
 
-        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[label.name], label.positive_class)
-        self.label = label
-        self.N_0 = int(np.sum(np.array(encoded_data.labels[label.name]) == self.class_mapping[0]))
-        self.N_1 = int(np.sum(np.array(encoded_data.labels[label.name]) == self.class_mapping[1]))
+        self.N_0 = int(np.sum(np.array(encoded_data.labels[self.label.name]) == self.class_mapping[0]))
+        self.N_1 = int(np.sum(np.array(encoded_data.labels[self.label.name]) == self.class_mapping[1]))
         self.alpha_0, self.beta_0 = self._find_beta_distribution_parameters(
             X[np.nonzero(np.array(encoded_data.labels[self.label.name]) == self.class_mapping[0])], self.N_0)
         self.alpha_1, self.beta_1 = self._find_beta_distribution_parameters(
             X[np.nonzero(np.array(encoded_data.labels[self.label.name]) == self.class_mapping[1])], self.N_1)
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric: str = None,
-                                number_of_splits: int = 5, cores_for_training: int = -1):
-        warnings.warn("ProbabilisticBinaryClassifier: cross-validation on this classifier is not defined: fitting one model instead...")
-        self.fit(encoded_data=encoded_data, label=label)
-
-    def predict(self, encoded_data: EncodedData, label: Label):
+    def _predict(self, encoded_data: EncodedData):
         """
         Predict the class assignment for examples in X (where X is validation or test set - examples not seen during training).
 
@@ -114,7 +102,6 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
         """
         X = encoded_data.examples
-        self._check_labels(label.name)
         predictions_list = []
         for example in X:
             k, n = example[0], example[1]
@@ -124,7 +111,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
         return {self.label.name: predictions_list}
 
-    def predict_proba(self, encoded_data: EncodedData, label: Label):
+    def _predict_proba(self, encoded_data: EncodedData):
         """
         Predict the probability of the class for examples in X.
 
@@ -144,7 +131,6 @@ class ProbabilisticBinaryClassifier(MLMethod):
             class probabilities for all examples in X
 
         """
-        self._check_labels(label.name)
         X = encoded_data.examples
         class_probabilities = np.zeros((X.shape[0], len(list(self.class_mapping.keys()))), dtype=float)
 
@@ -153,7 +139,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
             posterior_class_probabilities = self._compute_posterior_class_probability(k, n)
             class_probabilities[index] = posterior_class_probabilities
 
-        return {label.name: {self.class_mapping[i]: class_probabilities[:, i] for i in range(class_probabilities.shape[1])}}
+        return {self.label.name: {self.class_mapping[i]: class_probabilities[:, i] for i in range(class_probabilities.shape[1])}}
 
     def _find_beta_distribution_parameters(self, X, N_l: int) -> Tuple[float, float]:
         """
@@ -377,7 +363,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
         return result
 
-    def store(self, path: Path, feature_names=None, details_path=None):
+    def store(self, path: Path):
         content = self._convert_object_to_dict()
         PathBuilder.build(path)
         file_path = path / FilenameHandler.get_filename(self.__class__.__name__, "pickle")
@@ -385,15 +371,12 @@ class ProbabilisticBinaryClassifier(MLMethod):
         with file_path.open("wb") as file:
             pickle.dump(content, file)
 
-        if details_path is None:
-            params_path = path / FilenameHandler.get_filename(self.__class__.__name__, "yaml")
-        else:
-            params_path = details_path
+        params_path = path / FilenameHandler.get_filename(self.__class__.__name__, "yaml")
 
         with params_path.open("w") as file:
             desc = {self.label.name: {
                 **content,
-                "feature_names": feature_names,
+                "feature_names": self.get_feature_names(),
                 "classes": list(self.class_mapping.values())
             }}
             if self.label is not None:
@@ -424,34 +407,11 @@ class ProbabilisticBinaryClassifier(MLMethod):
     def get_params(self):
         return vars(self)
 
-    def check_if_exists(self, path):
-        vals = vars(self).values()
-        if any(val is None for val in vals):
-            return False
-        else:
-            return True
-
-    def _check_labels(self, label_name):
-        assert label_name == self.label.name, f"ProbabilisticBinaryClassifier: classifier cannot predict the labels " \
-                                              f"on which it was not trained: got: {label_name}, expected: {self.label.name}."
-
-    def get_label_name(self):
-        return self.label.name
-
-    def get_package_info(self) -> str:
-        return Util.get_immuneML_version()
-
-    def get_feature_names(self) -> list:
-        return self.feature_names
-
     def can_predict_proba(self) -> bool:
         return True
 
-    def get_classes(self) -> list:
-        return list(self.class_mapping.values())
-
-    def get_class_mapping(self) -> dict:
-        return self.class_mapping
+    def can_fit_with_example_weights(self) -> bool:
+        return False
 
     def get_compatible_encoders(self):
         from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder

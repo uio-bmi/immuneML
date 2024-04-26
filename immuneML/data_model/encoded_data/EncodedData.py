@@ -29,7 +29,7 @@ class EncodedData:
                  feature_annotations: pd.DataFrame = None, encoding: str = None, example_weights: list = None, info: dict = None,
                  dimensionality_reduced_data: np.ndarray = None):
 
-        assert feature_names is None or examples.shape[1] == len(feature_names)
+        assert feature_names is None or examples.shape[1] == len(feature_names), f"EncodedData: the length of feature_names ({len(feature_names)}) must match the feature dimension of the example matrix ({examples.shape[1]})"
         if feature_names is not None:
             assert feature_annotations is None or feature_annotations.shape[0] == len(feature_names) == examples.shape[1]
         if example_ids is not None and labels is not None:

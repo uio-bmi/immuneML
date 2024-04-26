@@ -9,9 +9,12 @@ from immuneML.simulation.simulation_strategy.SimulationStrategy import Simulatio
 @dataclass
 class SimConfig:
     """
-    Defines all parameters of the simulation.
+    The simulation config defines all parameters of the simulation.
+    It can contain one or more simulation config items, which define groups of repertoires or receptors
+    that have the same simulation parameters, such as signals, generative model, clonal frequencies, and noise parameters.
 
-    Specification arguments:
+
+    **Specification arguments:**
 
     - sim_items (dict): a list of SimConfigItems defining individual units of simulation
 
@@ -33,28 +36,30 @@ class SimConfig:
 
     - implanting_scaling_factor (int): determines in how many receptors to implant the signal in reach iteration; this is computed as number_of_receptors_needed_for_signal * implanting_scaling_factor; useful when using Implanting simulation strategy in combination with importance sampling, since the generation probability of some receptors with implanted signals might be very rare and those receptors might end up not being kept often with importance sampling; this parameter is only used when keep_p_gen_dist is set to True
 
-    YAML specification:
+
+    **YAML specification:**
 
     .. indent-with-spaces
     .. code-block:: yaml
 
-      simulations:
-        sim1:
-          is_repertoire: false
-          paired: false
-          sequence_type: amino_acid
-          simulation_strategy: RejectionSampling
-          sim_items:
-            sim_item1: # group of sequences with same simulation params
-              generative_model:
-                chain: beta
-                default_model_name: humanTRB
-                model_path: null
-                type: OLGA
-              number_of_examples: 100
-              seed: 1002
-              signals:
-               signal1: 1
+        definitions:
+            simulations:
+                sim1:
+                    is_repertoire: false
+                    paired: false
+                    sequence_type: amino_acid
+                    simulation_strategy: RejectionSampling
+                    sim_items:
+                        sim_item1: # group of sequences with same simulation params
+                            generative_model:
+                                chain: beta
+                                default_model_name: humanTRB
+                                model_path: null
+                                type: OLGA
+                            number_of_examples: 100
+                            seed: 1002
+                            signals:
+                                signal1: 1
 
     """
     sim_items: List[SimConfigItem] = None

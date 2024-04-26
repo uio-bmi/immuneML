@@ -29,7 +29,7 @@ class FeatureDistribution(FeatureReport):
     When comparing the feature values between two subsets of the data, please use :ref:`FeatureComparison`.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - color_grouping_label (str): The label that is used to color each bar, at each level of the grouping_label.
 
@@ -44,14 +44,16 @@ class FeatureDistribution(FeatureReport):
     - y_title (str): y-axis label
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_fdistr_report:
-            FeatureDistribution:
-                mode: sparse
+        definitions:
+            reports:
+                my_fdistr_report:
+                    FeatureDistribution:
+                        mode: sparse
 
     """
 

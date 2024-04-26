@@ -21,12 +21,14 @@ class DeepRCEncoder(DatasetEncoder):
 
     Note: sequences where count is None, the count value will be set to 1
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_deeprc_encoder: DeepRC
+        definitions:
+            encodings:
+                my_deeprc_encoder: DeepRC
 
     """
     ID_COLUMN = "ID"
@@ -38,8 +40,8 @@ class DeepRCEncoder(DatasetEncoder):
     METADATA_SEP = ","
 
     def __init__(self, context: dict = None, name: str = None):
+        super().__init__(name=name)
         self.context = context
-        self.name = name
         self.max_sequence_length = 0
 
     def set_context(self, context: dict):

@@ -38,15 +38,16 @@ class ClusteringState:
 
 class ClusteringInstruction(Instruction):
     """
+    .. note::
+
+        This is an experimental feature
+
     Clustering instruction fits clustering methods to the provided encoded dataset and compares the combinations of
     clustering method with its hyperparameters, and encodings across a pre-defined set of metrics. Finally, it
     provides options to include a set of reports to visualize the results.
 
-    .. note::
 
-        This is an experimental feature in version 3.0.0a1.
-
-    Specification arguments:
+    **Specification arguments:**
 
     - dataset (str): name of the dataset to be clustered
 
@@ -63,23 +64,24 @@ class ClusteringInstruction(Instruction):
 
     - number_of_processes (int): how many processes to use for parallelization
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_clustering_instruction:
-            type: Clustering
-            dataset: d1
-            metrics: [adjusted_rand_score, adjusted_mutual_info_score]
-            labels: [epitope, v_call]
-            clustering_settings:
-                - encoding: e1
-                  dim_reduction: pca
-                  method: k_means1
-                - encoding: e2
-                  method: dbscan
-            reports: [rep1, rep2]
+        instructions:
+            my_clustering_instruction:
+                type: Clustering
+                dataset: d1
+                metrics: [adjusted_rand_score, adjusted_mutual_info_score]
+                labels: [epitope, v_call]
+                clustering_settings:
+                    - encoding: e1
+                      dim_reduction: pca
+                      method: k_means1
+                    - encoding: e2
+                      method: dbscan
+                reports: [rep1, rep2]
 
     """
 

@@ -43,12 +43,10 @@ class TestMLMethodTrainer(TestCase):
             model_selection_cv=True,
             cores_for_training=1,
             train_predictions_path=path / "predictions.csv",
-            ml_details_path=path / "details.yaml",
             optimization_metric="balanced_accuracy"
         ))
 
         method.predict(EncodedData(np.array([1, 2, 3]).reshape(1, -1)), Label("l1", [0, 1]))
         self.assertTrue(os.path.isfile(path / "predictions.csv"))
-        self.assertTrue(os.path.isfile(path / "details.yaml"))
 
         shutil.rmtree(path)

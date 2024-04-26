@@ -27,7 +27,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
     Clinical Immunology Volume 222 (January 2021): 108621. `doi.org/10.1016/j.clim.2020.108621 <https://doi.org/10.1016/j.clim.2020.108621>`_
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - reference (dict): A dictionary describing the reference dataset file. Import should be specified the same way as
       regular dataset import. It is only allowed to import a sequence dataset here (i.e., is_repertoire and paired are
@@ -51,29 +51,31 @@ class MatchedSequencesEncoder(DatasetEncoder):
       repertoire (when reads = unique) or the total number of reads in the repertoire (when reads = all).
 
 
-    YAML Specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_ms_encoding:
-            MatchedSequences:
-                reference:
-                    format: VDJDB
-                    params:
-                        path: path/to/file.txt
-                max_edit_distance: 1
+        definitions:
+            encodings:
+                my_ms_encoding:
+                    MatchedSequences:
+                        reference:
+                            format: VDJDB
+                            params:
+                                path: path/to/file.txt
+                        max_edit_distance: 1
     """
 
     def __init__(self, max_edit_distance: int, reference: List[ReceptorSequence], reads: ReadsType, sum_matches: bool, normalize: bool,
                  name: str = None):
+        super().__init__(name=name)
         self.max_edit_distance = max_edit_distance
         self.reference_sequences = reference
         self.reads = reads
         self.sum_matches = sum_matches
         self.normalize = normalize
         self.feature_count = 1 if self.sum_matches else len(self.reference_sequences)
-        self.name = name
 
     @staticmethod
     def _prepare_parameters(max_edit_distance: int, reference: dict, reads: str, sum_matches: bool, normalize: bool,

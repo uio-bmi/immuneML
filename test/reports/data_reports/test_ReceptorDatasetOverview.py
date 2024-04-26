@@ -17,7 +17,9 @@ class TestReceptorDatasetOverview(TestCase):
                                                                    {}, path / "dataset")
 
         report = ReceptorDatasetOverview(200, dataset, path / "result", "receptor_overview")
-        result = report.generate_report()
+
+        self.assertTrue(report.check_prerequisites())
+        result = report._generate()
 
         self.assertTrue(os.path.isfile(path / "result/sequence_length_distribution.html"))
         self.assertTrue(os.path.isfile(path / "result/sequence_length_distribution_chain_alpha.csv"))

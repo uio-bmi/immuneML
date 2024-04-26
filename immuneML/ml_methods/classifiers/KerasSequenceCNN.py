@@ -24,11 +24,11 @@ class KerasSequenceCNN(MLMethod):
     ‘Optimization of therapeutic antibodies by predicting antigen specificity from antibody sequence via deep learning’.
     Nat Biomed Eng 5, 600–612 (2021). https://doi.org/10.1038/s41551-021-00699-9
 
-    Arguments:
+    **Specification arguments:**
 
-        units_per_layer (list): A nested list specifying the layers of the CNN. The first element in each nested list defines the layer type, other elements define the layer parameters.
-        Valid layer types are: CONV (keras.layers.Conv1D), DROP (keras.layers.Dropout), POOL (keras.layers.MaxPool1D), FLAT (keras.layers.Flatten), DENSE (keras.layers.Dense).
-        The parameters per layer type are as follows:
+    - units_per_layer (list): A nested list specifying the layers of the CNN. The first element in each nested list defines the layer type, other elements define the layer parameters.
+      Valid layer types are: CONV (keras.layers.Conv1D), DROP (keras.layers.Dropout), POOL (keras.layers.MaxPool1D), FLAT (keras.layers.Flatten), DENSE (keras.layers.Dense).
+      The parameters per layer type are as follows:
 
         - [CONV, <filters>, <kernel_size>, <strides>]
 
@@ -40,21 +40,23 @@ class KerasSequenceCNN(MLMethod):
 
         - [DENSE, <units>]
 
-        activation (str): The Activation function to use in the convolutional or dense layers. Activation functions can be chosen from keras.activations. For example, rely or softmax. By default, relu is used.
+    - activation (str): The Activation function to use in the convolutional or dense layers. Activation functions can be chosen from keras.activations. For example, rely or softmax. By default, relu is used.
 
-        training_percentage (float): The fraction of sequences that will be randomly assigned to form the training set (the rest will be the validation set). Should be a value between 0 and 1. By default, training_percentage is 0.7.
+    - training_percentage (float): The fraction of sequences that will be randomly assigned to form the training set (the rest will be the validation set). Should be a value between 0 and 1. By default, training_percentage is 0.7.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_cnn:
-            KerasSequenceCNN:
-                training_percentage: 0.7
-                units_per_layer: [[CONV, 400, 3, 1], [DROP, 0.5], [POOL, 2, 1], [FLAT], [DENSE, 50]]
-                activation: relu
+        definitions:
+            ml_methods:
+                my_cnn:
+                    KerasSequenceCNN:
+                        training_percentage: 0.7
+                        units_per_layer: [[CONV, 400, 3, 1], [DROP, 0.5], [POOL, 2, 1], [FLAT], [DENSE, 50]]
+                        activation: relu
 
 
 
@@ -74,16 +76,16 @@ class KerasSequenceCNN(MLMethod):
         self.result_path = None
         self.feature_names = None
 
-    def predict(self, encoded_data: EncodedData, label: Label):
-        predictions_proba = self.predict_proba(encoded_data, label)[label.name][label.positive_class]
+    def _predict(self, encoded_data: EncodedData):
+        predictions_proba = self._predict_proba(encoded_data)[self.label.name][self.label.positive_class]
 
-        return {label.name: [self.class_mapping[val] for val in (predictions_proba > 0.5).tolist()]}
+        return {self.label.name: [self.class_mapping[val] for val in (predictions_proba > 0.5).tolist()]}
 
-    def predict_proba(self, encoded_data: EncodedData, label: Label):
+    def _predict_proba(self, encoded_data: EncodedData):
         predictions = self.model.predict(x=encoded_data.examples).flatten()
 
-        return {label.name: {label.positive_class: predictions,
-                             label.get_binary_negative_class(): 1 - predictions}}
+        return {self.label.name: {self.label.positive_class: predictions,
+                                  self.label.get_binary_negative_class(): 1 - predictions}}
 
     def _create_cnn(self, units_per_layer, input_shape,
                activation):
@@ -146,18 +148,14 @@ class KerasSequenceCNN(MLMethod):
 
         return model
 
-    def fit(self, encoded_data: EncodedData, label: Label, optimization_metric=None, cores_for_training: int = 2):
-        self.feature_names = encoded_data.feature_names
-        self.label = label
-        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name])
-
+    def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
         encoded_train_data, encoded_val_data = self._prepare_and_split_data(encoded_data)
 
-        self.model = self._create_cnn(units_per_layer=self.units_per_layer, # todo better input format...
+        self.model = self._create_cnn(units_per_layer=self.units_per_layer,
                                       input_shape=encoded_data.examples.shape[1:],
                                       activation=self.activation)
 
-        self._fit(encoded_train_data=encoded_train_data, encoded_val_data=encoded_val_data)
+        self._fit_model(encoded_train_data=encoded_train_data, encoded_val_data=encoded_val_data)
 
 
     def _prepare_and_split_data(self, encoded_data: EncodedData):
@@ -168,7 +166,7 @@ class KerasSequenceCNN(MLMethod):
 
         return train_data, val_data
 
-    def _fit(self, encoded_train_data, encoded_val_data):
+    def _fit_model(self, encoded_train_data, encoded_val_data):
         """reference to original code, maybe the input should just be the encoded data instead? #todo"""
         from keras.optimizers import Adam
 
@@ -190,13 +188,7 @@ class KerasSequenceCNN(MLMethod):
             epochs=20, batch_size=16, verbose=0
         )
 
-
-    def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric: str = None,
-                                number_of_splits: int = 5, cores_for_training: int = -1):
-        logging.warning(f"{KerasSequenceCNN.__name__}: cross_validation is not implemented for this method. Using standard fitting instead...")
-        self.fit(encoded_data=encoded_data, label=label)
-
-    def store(self, path: Path, feature_names=None, details_path: Path = None):
+    def store(self, path: Path):
         PathBuilder.build(path)
 
         self.model.save(path / "model.keras")
@@ -229,9 +221,6 @@ class KerasSequenceCNN(MLMethod):
 
         self.model = keras.models.load_model(path / "model.keras")
 
-    def check_if_exists(self, path):
-        return self.model is not None
-
     def get_params(self):
         params = dict()
 
@@ -244,20 +233,11 @@ class KerasSequenceCNN(MLMethod):
 
         return params
 
-    def get_label_name(self):
-        return self.label.name
-
-    def get_package_info(self) -> str:
-        return Util.get_immuneML_version()
-
-    def get_feature_names(self) -> list:
-        return self.feature_names
-
     def can_predict_proba(self) -> bool:
         return True
 
-    def get_class_mapping(self) -> dict:
-        return self.class_mapping
+    def can_fit_with_example_weights(self) -> bool:
+        return True
 
     def get_compatible_encoders(self):
         from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder

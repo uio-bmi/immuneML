@@ -40,7 +40,7 @@ class KmerAbundanceEncoder(DatasetEncoder):
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
     See :ref:`Reproduction of the CMV status predictions study` for an example using :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - p_value_threshold (float): The p value threshold to be used by the statistical test.
 
@@ -57,15 +57,17 @@ class KmerAbundanceEncoder(DatasetEncoder):
     - max_gap: (int): Maximum gap size when gapped k-mers are used. The default value for max_gap is 0.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_sa_encoding:
-            KmerAbundance:
-                p_value_threshold: 0.05
-                threads: 8
+        definitions:
+            encodings:
+                my_ka_encoding:
+                    KmerAbundance:
+                        p_value_threshold: 0.05
+                        threads: 8
 
     """
 
@@ -74,7 +76,7 @@ class KmerAbundanceEncoder(DatasetEncoder):
 
     def __init__(self, p_value_threshold: float, sequence_encoding: SequenceEncodingType, k: int,
                  k_left: int, k_right: int, min_gap: int, max_gap: int, name: str = None):
-        self.name = name
+        super().__init__(name=name)
         self.p_value_threshold = p_value_threshold
 
         self.kmer_frequency_params = {"normalization_type": NormalizationType.BINARY, "reads": ReadsType.UNIQUE,

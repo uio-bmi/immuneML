@@ -26,7 +26,8 @@ class FeatureComparison(FeatureReport):
     Alternatively, when the feature values are of interest without comparing them between labelled subgroups of the data, please
     use :ref:`FeatureValueBarplot` or :ref:`FeatureDistribution` instead.
 
-    Specification arguments:
+
+    **Specification arguments:**
 
     - comparison_label (str): Mandatory label. This label is used to split the encoded data matrix and define the x and y axes of the plot.
       This label is only allowed to have 2 classes (for example: sick and healthy, binding and non-binding).
@@ -49,14 +50,16 @@ class FeatureComparison(FeatureReport):
     - opacity (float): a value between 0 and 1 setting the opacity for data points making it easier to see if there are overlapping points
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_comparison_report:
-            FeatureComparison: # compare the different classes defined in the label disease
-                comparison_label: disease
+        definitions:
+            reports:
+                my_comparison_report:
+                    FeatureComparison: # compare the different classes defined in the label disease
+                        comparison_label: disease
 
     """
 

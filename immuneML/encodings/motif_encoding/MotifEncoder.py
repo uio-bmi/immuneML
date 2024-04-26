@@ -41,53 +41,55 @@ class MotifEncoder(DatasetEncoder):
     to learn a weight per motif.
 
 
-    Arguments:
+    **Specification arguments:**
 
-        max_positions (int): The maximum motif size. This is number of positional amino acids the motif consists of (excluding gaps). The default value for max_positions is 4.
+    - max_positions (int): The maximum motif size. This is number of positional amino acids the motif consists of (excluding gaps). The default value for max_positions is 4.
 
-        min_positions (int): The minimum motif size (see also: max_positions). The default value for max_positions is 1.
+    - min_positions (int): The minimum motif size (see also: max_positions). The default value for max_positions is 1.
 
-        min_precision (float): The minimum precision threshold for keeping a motif. The default value for min_precision is 0.8.
+    - min_precision (float): The minimum precision threshold for keeping a motif. The default value for min_precision is 0.8.
 
-        min_recall (float): The minimum recall threshold for keeping a motif. The default value for min_precision is 0.
-        It is also possible to specify a recall threshold for each motif size. In this case, a dictionary must be specified where
-        the motif sizes are keys and the recall values are values. Use the :py:obj:`~immuneML.reports.data_reports.MotifGeneralizationAnalysis` report
-        to calibrate the optimal recall threshold given a user-defined precision threshold to ensure generalisability to unseen data.
+    - min_recall (float): The minimum recall threshold for keeping a motif. The default value for min_precision is 0.
+      It is also possible to specify a recall threshold for each motif size. In this case, a dictionary must be specified where
+      the motif sizes are keys and the recall values are values. Use the :py:obj:`~immuneML.reports.data_reports.MotifGeneralizationAnalysis` report
+      to calibrate the optimal recall threshold given a user-defined precision threshold to ensure generalisability to unseen data.
 
-        min_true_positives (int): The minimum number of true positive sequences that a motif needs to occur in. The default value for min_true_positives is 10.
+    - min_true_positives (int): The minimum number of true positive sequences that a motif needs to occur in. The default value for min_true_positives is 10.
 
-        candidate_motif_filepath (str): Optional filepath for pre-filterd candidate motifs. This may be used to save time. Only the given candidate motifs are considered.
-        When this encoder has been run previously, a candidate motifs file named 'all_candidate_motifs.tsv' will have been exported. This file contains all
-        possible motifs with high enough min_true_positives without applying precision and recall thresholds.
-        The file must be a tab-separated file, structured as follows:
+    - candidate_motif_filepath (str): Optional filepath for pre-filterd candidate motifs. This may be used to save time. Only the given candidate motifs are considered.
+      When this encoder has been run previously, a candidate motifs file named 'all_candidate_motifs.tsv' will have been exported. This file contains all
+      possible motifs with high enough min_true_positives without applying precision and recall thresholds.
+      The file must be a tab-separated file, structured as follows:
 
-        ========  ==============
-        indices    amino_acids
-        ========  ==============
-        1&2&3      A&G&C
-        5&7        E&D
-        ========  ==============
+      ========  ==============
+      indices    amino_acids
+      ========  ==============
+      1&2&3      A&G&C
+      5&7        E&D
+      ========  ==============
 
-        The example above contains two motifs: AGC in positions 123, and E-D in positions 5-7 (with a gap at position 6).
+      The example above contains two motifs: AGC in positions 123, and E-D in positions 5-7 (with a gap at position 6).
 
-        label (str): The name of the binary label to train the encoder for. This is only necessary when the dataset contains multiple labels.
+    - label (str): The name of the binary label to train the encoder for. This is only necessary when the dataset contains multiple labels.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-            my_motif_encoder:
-                MotifEncoder:
-                    max_positions: 4
-                    min_precision: 0.8
-                    min_recall:  # different recall thresholds for each motif size
-                        1: 0.5   # For shorter motifs, a stricter recall threshold is used
-                        2: 0.1
-                        3: 0.01
-                        4: 0.001
-                    min_true_positives: 10
+        definitions:
+            encodings:
+                my_motif_encoder:
+                    MotifEncoder:
+                        max_positions: 4
+                        min_precision: 0.8
+                        min_recall:  # different recall thresholds for each motif size
+                            1: 0.5   # For shorter motifs, a stricter recall threshold is used
+                            2: 0.1
+                            3: 0.01
+                            4: 0.001
+                        min_true_positives: 10
 
 
 
@@ -98,6 +100,7 @@ class MotifEncoder(DatasetEncoder):
                  min_precision: float = None, min_recall: dict = None,
                  min_true_positives: int = None,
                  candidate_motif_filepath: str = None, label: str = None, name: str = None):
+        super().__init__(name=name)
         self.max_positions = max_positions
         self.min_positions = min_positions
         self.min_precision = min_precision
@@ -107,7 +110,6 @@ class MotifEncoder(DatasetEncoder):
         self.learned_motif_filepath = None
 
         self.label = label
-        self.name = name
         self.context = None
 
     @staticmethod

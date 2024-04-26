@@ -17,7 +17,7 @@ class OLGAImport(DataImport):
     ‘High-throughput immune repertoire analysis with IGoR’. Bioinformatics, (2019)
     `doi.org/10.1093/bioinformatics/btz035 <https://doi.org/10.1093/bioinformatics/btz035>`_.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - path (str): For RepertoireDatasets, this is the path to a directory with OLGA files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
@@ -38,29 +38,31 @@ class OLGAImport(DataImport):
     - column_mapping (dict): defines which columns to import from olga format: keys are the number of the columns and values are the names of the columns to be mapped to
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_olga_dataset:
-            format: OLGA
-            params:
-                path: path/to/files/
-                is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
-                metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
-                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
-                # Optional fields with OLGA-specific defaults, only change when different behavior is required:
-                separator: "\\t" # column separator
-                region_type: IMGT_CDR3 # what part of the sequence to import
-                columns_to_load: [0, 1, 2, 3]
-                column_mapping:
-                    0: sequence
-                    1: sequence_aa
-                    2: v_call
-                    3: j_call
+        definitions:
+            datasets:
+                my_olga_dataset:
+                    format: OLGA
+                    params:
+                        path: path/to/files/
+                        is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
+                        metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                        import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
+                        import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                        import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+                        # Optional fields with OLGA-specific defaults, only change when different behavior is required:
+                        separator: "\\t" # column separator
+                        region_type: IMGT_CDR3 # what part of the sequence to import
+                        columns_to_load: [0, 1, 2, 3]
+                        column_mapping:
+                            0: sequence
+                            1: sequence_aa
+                            2: v_call
+                            3: j_call
 
     """
 

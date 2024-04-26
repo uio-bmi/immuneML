@@ -12,6 +12,10 @@ class TrainGenModelState(GenModelState):
 
 class TrainGenModelInstruction(GenModelInstruction):
     """
+    .. note::
+
+        This is an experimental feature
+
     TrainGenModel instruction implements training generative AIRR models on receptor level. Models that can be trained
     for sequence generation are listed under Generative Models section.
 
@@ -19,13 +23,10 @@ class TrainGenModelInstruction(GenModelInstruction):
     sequences to generate to illustrate the applicability of the model. It can also produce reports of the fitted model
     and reports of original and generated sequences.
 
-    To use the generative model previously trained with immuneML, see ApplyGenModel instruction.
+    To use the generative model previously trained with immuneML, see :ref:`ApplyGenModel` instruction.
 
-    .. note::
 
-        This is an experimental feature in version 3.0.0a1.
-
-    Specification arguments:
+    **Specification arguments:**
 
     - dataset: dataset to use for fitting the generative model; it has to be defined under definitions/datasets
 
@@ -39,18 +40,19 @@ class TrainGenModelInstruction(GenModelInstruction):
       and generating gen_examples_count examples; these can be data reports (to be run on generated examples), ML
       reports (to be run on the fitted model)
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_train_gen_model_inst: # user-defined instruction name
-            type: TrainGenModel
-            dataset: d1 # defined previously under definitions/datasets
-            model: model1 # defined previously under definitions/ml_methods
-            gen_examples_count: 100
-            number_of_processes: 4
-            reports: [data_rep1, ml_rep2]
+        instructions:
+            my_train_gen_model_inst: # user-defined instruction name
+                type: TrainGenModel
+                dataset: d1 # defined previously under definitions/datasets
+                model: model1 # defined previously under definitions/ml_methods
+                gen_examples_count: 100
+                number_of_processes: 4
+                reports: [data_rep1, ml_rep2]
 
     """
 

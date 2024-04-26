@@ -16,6 +16,7 @@ from immuneML.dsl.import_parsers.ImportParser import ImportParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
+from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.preprocessing.Preprocessor import Preprocessor
@@ -75,12 +76,13 @@ class DefinitionParser:
 
     @staticmethod
     def make_simulation_docs(path: Path):
-        classes_to_document = [DocumentationFormat(SeedMotif, SeedMotif.__name__, DocumentationFormat.LEVELS[1]),
-                               DocumentationFormat(LigoPWM, "PWM", DocumentationFormat.LEVELS[1]),
-                               DocumentationFormat(Signal, Signal.__name__, DocumentationFormat.LEVELS[1]),
+        classes_to_document = [DocumentationFormat(Motif, "Motifs", DocumentationFormat.LEVELS[1]),
+                               DocumentationFormat(SeedMotif, SeedMotif.__name__, DocumentationFormat.LEVELS[2]),
+                               DocumentationFormat(LigoPWM, "PWM", DocumentationFormat.LEVELS[2]),
+                               DocumentationFormat(Signal, "Signals", DocumentationFormat.LEVELS[1]),
                                DocumentationFormat(SimConfig, "Simulation config", DocumentationFormat.LEVELS[1]),
                                DocumentationFormat(SimConfigItem, "Simulation config item",
-                                                   DocumentationFormat.LEVELS[1])]
+                                                   DocumentationFormat.LEVELS[2])]
 
         file_path = path / "simulation.rst"
         with file_path.open("w") as file:
@@ -105,7 +107,7 @@ class DefinitionParser:
         for report_type_class in [DataReport, EncodingReport, MLReport, TrainMLModelReport, MultiDatasetReport]:
             with file_path.open("a") as file:
                 doc_format = DocumentationFormat(cls=report_type_class,
-                                                 cls_name=f"**{report_type_class.get_title()}**",
+                                                 cls_name=f"**{report_type_class.DOCS_TITLE}**",
                                                  level_heading=DocumentationFormat.LEVELS[1])
                 write_class_docs(doc_format, file)
 
@@ -119,10 +121,10 @@ class DefinitionParser:
         filename = 'ml_methods.rst'
         file_path = path / filename
 
-        method_mapping = [{'method_type': MLMethod, 'subdir': 'classifiers', 'title': 'Classifiers'},
-                          {'method_type': GenerativeModel, 'subdir': 'generative_models', 'title': 'Generative models'},
-                          {'method_type': DimRedMethod, 'subdir': 'dim_reduction',
-                           'title': 'Dimensionality reduction methods'}]
+        method_mapping = [{'method_type': MLMethod, 'subdir': 'classifiers', 'title': MLMethod.DOCS_TITLE},
+                          {'method_type': ClusteringMethod, 'subdir': 'clustering', 'title': ClusteringMethod.DOCS_TITLE},
+                          {'method_type': GenerativeModel, 'subdir': 'generative_models', 'title': GenerativeModel.DOCS_TITLE},
+                          {'method_type': DimRedMethod, 'subdir': 'dim_reduction', 'title': DimRedMethod.DOCS_TITLE}]
 
         for method in method_mapping:
             with file_path.open('a') as file:

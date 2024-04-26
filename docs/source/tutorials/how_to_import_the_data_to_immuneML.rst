@@ -12,12 +12,12 @@ How to import data into immuneML
 
 The first step of any immuneML analysis is to import the dataset that will be used. There exist three types of datasets in immuneML:
 
-- **repertoire datasets** should be used when making predictions per repertoire, such as predicting a disease state.
+- **Repertoire datasets** should be used when making predictions per repertoire, such as predicting a disease state.
   When importing a repertoire dataset, you should create a :ref:`metadata file <What should the metadata file look like?>`.
 
-- **sequence datasets** should be used when predicting values for single immune receptor chains, such as antigen specificity.
+- **Sequence datasets** should be used when predicting values for single immune receptor chains, such as antigen specificity.
 
-- **receptor datasets** are the paired variant of sequence datasets, and should be used to make a prediction for each receptor chain pair.
+- **Receptor datasets** are the paired variant of sequence datasets, and should be used to make a prediction for each receptor chain pair.
 
 A broad range of different import formats can be specified, including AIRR, MiXCR, VDJdb, ImmunoSEQ (Adaptive Biotechnologies),
 10xGenomics, OLGA and IGoR. For the complete list of supported data formats, and extensive documentation see :ref:`Datasets`.
@@ -26,7 +26,7 @@ using :ref:`Generic` import. When possible, using format-specific importers is p
 less options to be set and might take care of automatic reformatting of certain fields.
 
 Alternatively to importing data from files, it is also possible to generate datasets containing random immune receptor sequences on the fly,
-see :ref:`How to generate a random sequence, receptor or repertoire dataset`.
+see :ref:`How to generate a dataset with random sequences`.
 
 
 What should the metadata file look like?
@@ -174,7 +174,7 @@ which speeds up the analysis. The main resulting file has an `.yaml` extension, 
 by several other `.yaml` and `.npy` files. When running immuneML locally, you can by default find these immuneML
 dataset files in the folder 'datasets', which is located in the main output folder of your analysis.
 
-Some instructions (:ref:`Simulation`, :ref:`DatasetExport`, :ref:`SubSampling`) also explicitly export binarized immuneML
+Some instructions (:ref:`DatasetExport`, :ref:`SubSampling`) also explicitly export binarized immuneML
 datasets when selecting 'ImmuneML' as the export format.
 
 These `.yaml` files can later be imported easily and with few parameters, and importing from `.yaml` is
@@ -189,7 +189,7 @@ Important note: ImmuneML files might not be compatible between different immuneM
       my_dataset:
         format: ImmuneML
         params:
-          path: path/to/dataset.iml_dataset
+          path: path/to/dataset.yaml
           # specifying a metadata_file is optional, it will update the dataset using this new metadata.
           metadata_file: path/to/metadata.csv
 

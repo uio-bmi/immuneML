@@ -50,7 +50,7 @@ class FeasibilitySummaryInstruction(Instruction):
 
     The feasibility analysis is performed for each generative model separately as these could differ in the analyses that will be reported.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - simulation (str): a name of a simulation object containing a list of SimConfigItem as specified under definitions key; defines how to combine signals with simulated data; specified under definitions
 
@@ -58,15 +58,17 @@ class FeasibilitySummaryInstruction(Instruction):
 
     - number_of_processes (int): for the parts of the analysis that are possible to parallelize, how many processes to use
 
-    YAML specification:
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_feasibility_summary: # user-defined name of the instruction
-            type: FeasibilitySummary # which instruction to execute
-            simulation: sim1
-            sequence_count: 10000
+        instructions:
+            my_feasibility_summary: # user-defined name of the instruction
+                type: FeasibilitySummary # which instruction to execute
+                simulation: sim1
+                sequence_count: 10000
 
     """
 

@@ -14,13 +14,14 @@ class SimpleDatasetOverview(DataReport):
     """
     Generates a simple text-based overview of the properties of any dataset, including the dataset name, size, and metadata labels.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        reports:
-            my_overview: SimpleDatasetOverview
+        definitions:
+            reports:
+                my_overview: SimpleDatasetOverview
 
     """
     UNKNOWN_CHAIN = "unknown"

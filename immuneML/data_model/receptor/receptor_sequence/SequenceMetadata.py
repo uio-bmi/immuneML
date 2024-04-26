@@ -40,11 +40,11 @@ class SequenceMetadata:
 
     @property
     def v_gene(self):
-        return self.v_call.split("\*")[0]
+        return self.v_call.split("*")[0]
 
     @property
     def j_gene(self):
-        return self.j_call.split("\*")[0]
+        return self.j_call.split("*")[0]
 
     def get_attribute(self, name: str):
         """Returns the attribute value if attribute is present either directly or in custom_params, otherwise returns

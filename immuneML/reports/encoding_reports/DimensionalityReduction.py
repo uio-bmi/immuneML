@@ -17,18 +17,21 @@ class DimensionalityReduction(EncodingReport):
     """
     This report visualizes the data obtained by dimensionality reduction.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - label (str): name of the label to use for highlighting data points
 
-    YAML specification:
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        rep1:
-            DimensionalityReduction:
-                label: epitope
+        definitions:
+            reports:
+                rep1:
+                    DimensionalityReduction:
+                        label: epitope
 
     """
 

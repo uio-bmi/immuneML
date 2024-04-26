@@ -12,7 +12,7 @@ from immuneML.encodings.EncoderParams import EncoderParams
 class DatasetEncoder(metaclass=abc.ABCMeta):
     """
 
-    YAML specification:
+    **YAML specification:**
 
         encodings:
             e1: <encoder_class> # encoding without parameters
@@ -21,6 +21,8 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
                 <encoder_class>: # encoding with parameters
                     parameter: value
     """
+    def __init__(self, name: str = None):
+        self.name = name
 
     @staticmethod
     @abc.abstractmethod

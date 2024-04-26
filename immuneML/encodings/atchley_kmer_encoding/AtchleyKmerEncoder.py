@@ -32,7 +32,7 @@ class AtchleyKmerEncoder(DatasetEncoder):
 
     Note that sequences in the repertoire with length shorter than skip_first_n_aa + skip_last_n_aa + k will not be encoded.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - k (int): k-mer length
 
@@ -44,18 +44,20 @@ class AtchleyKmerEncoder(DatasetEncoder):
 
     - normalize_all_features (bool): when normalizing features to have 0 mean and unit variance, this parameter indicates if the abundance feature should be included in the normalization
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_encoder:
-            AtchleyKmer:
-                k: 4
-                skip_first_n_aa: 3
-                skip_last_n_aa: 3
-                abundance: RELATIVE_ABUNDANCE
-                normalize_all_features: False
+        definitions:
+            encodings:
+                my_encoder:
+                    AtchleyKmer:
+                        k: 4
+                        skip_first_n_aa: 3
+                        skip_last_n_aa: 3
+                        abundance: RELATIVE_ABUNDANCE
+                        normalize_all_features: False
 
     """
 
@@ -74,12 +76,12 @@ class AtchleyKmerEncoder(DatasetEncoder):
             raise ValueError(f"AtchleyKmerEncoder can only be applied to repertoire dataset, got {type(dataset).__name__} instead.")
 
     def __init__(self, k: int, skip_first_n_aa: int, skip_last_n_aa: int, abundance: str, normalize_all_features: bool, name: str = None):
+        super().__init__(name=name)
         self.k = k
         self.skip_first_n_aa = skip_first_n_aa
         self.skip_last_n_aa = skip_last_n_aa
         self.abundance = RelativeAbundanceType[abundance.upper()]
         self.normalize_all_features = normalize_all_features
-        self.name = name
         self.scaler = None
         self.kmer_keys = None
 

@@ -36,7 +36,7 @@ class Coefficients(MLReport):
     The full set of coefficients will also be exported as a csv file.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - coefs_to_plot (list): A list specifying which coefficients should be plotted. For options see :py:obj:`~immuneML.reports.ml_reports.CoefficientPlottingSetting.CoefficientPlottingSetting`.
 
@@ -45,24 +45,26 @@ class Coefficients(MLReport):
     - n_largest (list): If 'n_largest' is specified under 'coefs_to_plot', the values for n can be specified here. These should be integer values. The n largest coefficients are determined based on their absolute values.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_coef_report:
-            Coefficients:
-                coefs_to_plot:
-                    - all
-                    - nonzero
-                    - cutoff
-                    - n_largest
-                cutoff:
-                    - 0.1
-                    - 0.01
-                n_largest:
-                    - 5
-                    - 10
+        definitions:
+            reports:
+                my_coef_report:
+                    Coefficients:
+                        coefs_to_plot:
+                            - all
+                            - nonzero
+                            - cutoff
+                            - n_largest
+                        cutoff:
+                            - 0.1
+                            - 0.01
+                        n_largest:
+                            - 5
+                            - 10
 
     """
 

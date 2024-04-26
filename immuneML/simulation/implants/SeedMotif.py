@@ -17,7 +17,7 @@ class SeedMotif(Motif):
     """
     Describes motifs by seed, possible gaps, allowed hamming distances, positions that can be changed and what they can be changed to.
 
-    Arguments:
+    **Specification arguments:**
 
     - seed (str): An amino acid sequence that represents the basic motif seed. All implanted motifs correspond to the seed, or a modified version thereof, as specified in its instantiation strategy. If this argument is set, seed_chain1 and seed_chain2 arguments are not used.
 
@@ -31,30 +31,31 @@ class SeedMotif(Motif):
 
     - alphabet_weights (dict): A dictionary describing the relative probabilities of choosing each amino acid for hamming distance modification. The keys of the dictionary represent the amino acids and the values are the relative probabilities for choosing this amino acid. If the values of alphabet_weights do not sum to 1, the remainder will be redistributed over all possible amino acids, including those not specified.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        motifs:
-            # examples for single chain receptor data
-            my_simple_motif: # this will be the identifier of the motif
-                seed: AAA # motif is always AAA
-            my_gapped_motif:
-                seed: AA/A # this motif can be AAA, AA_A, CAA, CA_A, DAA, DA_A, EAA, EA_A
-                min_gap: 0
-                max_gap: 1
-                hamming_distance_probabilities: # it can have a max of 1 substitution
-                    0: 0.7
-                    1: 0.3
-                position_weights: # note that index 2, the position of the gap, is excluded from position_weights
-                    0: 1 # only first position can be changed
-                    1: 0
-                    3: 0
-                alphabet_weights: # the first A can be replaced by C, D or E
-                    C: 0.4
-                    D: 0.4
-                    E: 0.2
+        definitions:
+            motifs:
+                # examples for single chain receptor data
+                my_simple_motif: # this will be the identifier of the motif
+                    seed: AAA # motif is always AAA
+                my_gapped_motif:
+                    seed: AA/A # this motif can be AAA, AA_A, CAA, CA_A, DAA, DA_A, EAA, EA_A
+                    min_gap: 0
+                    max_gap: 1
+                    hamming_distance_probabilities: # it can have a max of 1 substitution
+                        0: 0.7
+                        1: 0.3
+                    position_weights: # note that index 2, the position of the gap, is excluded from position_weights
+                        0: 1 # only first position can be changed
+                        1: 0
+                        3: 0
+                    alphabet_weights: # the first A can be replaced by C, D or E
+                        C: 0.4
+                        D: 0.4
+                        E: 0.2
 
     """
 

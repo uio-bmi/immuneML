@@ -1,5 +1,6 @@
 import abc
 import logging
+from pathlib import Path
 
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -14,8 +15,9 @@ class Report(metaclass=abc.ABCMeta):
 
     """
 
-    def __init__(self, name: str = None, number_of_processes: int = 1):
+    def __init__(self, name: str = None, result_path: Path = None, number_of_processes: int = 1):
         self.name = name
+        self.result_path = result_path
         self.number_of_processes = number_of_processes
 
     @classmethod

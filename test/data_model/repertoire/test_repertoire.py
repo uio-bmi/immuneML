@@ -20,10 +20,10 @@ class TestRepertoire(TestCase):
         PathBuilder.build(path)
 
         sequences = [ReceptorSequence(sequence_aa="AAA", sequence_id="1",
-                                      metadata=SequenceMetadata(v_call="V1", cell_id="1", chain=Chain.ALPHA,
+                                      metadata=SequenceMetadata(v_call="V1*01", cell_id="1", chain=Chain.ALPHA,
                                                                 custom_params={"cmv": "no", "coeliac": False})),
                      ReceptorSequence(sequence_aa="CCC", sequence_id="2",
-                                      metadata=SequenceMetadata(j_call="J1", cell_id="1", chain=Chain.BETA,
+                                      metadata=SequenceMetadata(j_call="J1*01", cell_id="1", chain=Chain.BETA,
                                                                 custom_params={"cmv": "yes", "coeliac": True}))]
 
         obj = Repertoire.build_from_sequence_objects(sequences, path, {"cmv": "yes", 'subject_id': "1"})
@@ -32,8 +32,8 @@ class TestRepertoire(TestCase):
         self.assertTrue(isinstance(obj, Repertoire))
         self.assertTrue(np.array_equal(np.array(["1", "2"]), obj.get_sequence_identifiers().tolist()))
         self.assertTrue(np.array_equal(np.array(["AAA", "CCC"]), obj.get_sequence_aas().tolist()))
-        self.assertTrue(np.array_equal(np.array(["V1", '']), obj.get_v_genes().tolist()))
-        self.assertTrue(np.array_equal(np.array(['', "J1"]), obj.get_j_genes().tolist()))
+        self.assertTrue(np.array_equal(np.array(["V1", '']), obj.get_v_genes()))
+        self.assertTrue(np.array_equal(np.array(['', "J1"]), obj.get_j_genes()))
         self.assertTrue(np.array_equal(np.array(["no", "yes"]), obj.get_attribute("cmv").tolist()))
         self.assertTrue(np.array_equal(np.array([False, True]), obj.get_attribute("coeliac").tolist()))
         self.assertEqual("yes", obj.metadata["cmv"])

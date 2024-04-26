@@ -31,7 +31,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     Clinical Immunology Volume 222 (January 2021): 108621. `doi.org/10.1016/j.clim.2020.108621 <https://doi.org/10.1016/j.clim.2020.108621>`_
     with the only exception being that this encoder uses paired receptors, while the original publication used single sequences (see also: :ref:`MatchedSequences` encoder).
 
-    Specification arguments:
+    **Specification arguments:**
 
     - reference (dict): A dictionary describing the reference dataset file. Import should be specified the same way as
       regular dataset import. It is only allowed to import a receptor dataset here (i.e., is_repertoire is False and
@@ -58,20 +58,22 @@ class MatchedReceptorsEncoder(DatasetEncoder):
       (when reads = unique) or the total number of reads in the repertoire (when reads = all).
 
 
-    YAML Specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_mr_encoding:
-            MatchedReceptors:
-                reference:
-                    format: VDJDB
-                    params:
-                        path: path/to/file.txt
-                max_edit_distances:
-                    alpha: 1
-                    beta: 0
+        definitions:
+            encodings:
+                my_mr_encoding:
+                    MatchedReceptors:
+                        reference:
+                            format: VDJDB
+                            params:
+                                path: path/to/file.txt
+                        max_edit_distances:
+                            alpha: 1
+                            beta: 0
     """
 
     dataset_mapping = {
@@ -79,13 +81,13 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     }
 
     def __init__(self, reference: List[Receptor], max_edit_distances: dict, reads: ReadsType, sum_matches: bool, normalize: bool, name: str = None):
+        super().__init__(name=name)
         self.reference_receptors = reference
         self.max_edit_distances = max_edit_distances
         self.reads = reads
         self.sum_matches = sum_matches
         self.normalize = normalize
         self.feature_count = 2 if self.sum_matches else len(self.reference_receptors) * 2
-        self.name = name
 
     @staticmethod
     def _prepare_parameters(reference: dict, max_edit_distances: dict, reads: str, sum_matches: bool, normalize: bool, name: str = None):

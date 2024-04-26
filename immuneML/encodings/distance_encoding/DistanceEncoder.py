@@ -26,7 +26,7 @@ class DistanceEncoder(DatasetEncoder):
     if they contain the same set of sequence_aas, and the distance is minimal if none of the sequence_aas are shared between
     two repertoires.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - distance_metric (:py:mod:`~immuneML.encodings.distance_encoding.DistanceMetricType`): The metric used to calculate the
       distance between two repertoires. Names of different distance metric types are allowed values in the specification.
@@ -39,32 +39,34 @@ class DistanceEncoder(DatasetEncoder):
       Only the fields defined under attributes_to_match will be considered, all other fields are ignored.
       Valid values include any repertoire attribute (sequence, amino acid sequence, V gene etc). The default value is ['sequence_aas']
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_distance_encoder:
-            Distance:
-                distance_metric: JACCARD
-                sequence_batch_size: 1000
-                attributes_to_match:
-                    - sequence_aa
-                    - v_call
-                    - j_call
-                    - chain
-                    - region_type
+        definitions:
+            encodings:
+                my_distance_encoder:
+                    Distance:
+                        distance_metric: JACCARD
+                        sequence_batch_size: 1000
+                        attributes_to_match:
+                            - sequence_aa
+                            - v_call
+                            - j_call
+                            - chain
+                            - region_type
 
     """
 
     def __init__(self, distance_metric: DistanceMetricType, attributes_to_match: list, sequence_batch_size: int, context: dict = None,
                  name: str = None):
+        super().__init__(name=name)
         self.distance_metric = distance_metric
         self.distance_fn = ReflectionHandler.import_function(self.distance_metric.value, DistanceMetrics)
         self.attributes_to_match = attributes_to_match
         self.sequence_batch_size = sequence_batch_size
         self.context = context
-        self.name = name
         self.comparison = None
 
     def set_context(self, context: dict):

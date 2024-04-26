@@ -68,7 +68,7 @@ class MotifSeedRecovery(MLReport):
     See :ref:`Recovering simulated immune signals` for more details and an example plot.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - implanted_motifs_per_label (dict): a nested dictionary that specifies the motif seeds that were implanted in the given dataset. The first
       level of keys in this dictionary represents the different labels. In the inner dictionary there should be two keys: "seeds" and
@@ -83,30 +83,32 @@ class MotifSeedRecovery(MLReport):
         gapped seeds are used, this value has no effect.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_motif_report:
-            MotifSeedRecovery:
-                implanted_motifs_per_label:
-                    CD:
-                        seeds:
-                        - AA/A
-                        - AAA
-                        hamming_distance: False
-                        gap_sizes:
-                        - 0
-                        - 1
-                        - 2
-                    T1D:
-                        seeds:
-                        - CC/C
-                        - CCC
-                        hamming_distance: True
-                        gap_sizes:
-                        - 2
+        definitions:
+            reports:
+                my_motif_report:
+                    MotifSeedRecovery:
+                        implanted_motifs_per_label:
+                            CD:
+                                seeds:
+                                - AA/A
+                                - AAA
+                                hamming_distance: False
+                                gap_sizes:
+                                - 0
+                                - 1
+                                - 2
+                            T1D:
+                                seeds:
+                                - CC/C
+                                - CCC
+                                hamming_distance: True
+                                gap_sizes:
+                                - 2
 
     """
 

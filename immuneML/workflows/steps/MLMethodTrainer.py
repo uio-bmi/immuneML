@@ -43,7 +43,7 @@ class MLMethodTrainer(Step):
 
     @staticmethod
     def store(method: MLMethod, input_params: MLMethodTrainerParams):
-        method.store(input_params.result_path, input_params.dataset.encoded_data.feature_names, input_params.ml_details_path)
+        method.store(input_params.result_path)
         train_predictions = method.predict(input_params.dataset.encoded_data, input_params.label)
         train_proba_predictions = method.predict_proba(input_params.dataset.encoded_data, input_params.label)
 
