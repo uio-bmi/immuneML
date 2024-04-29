@@ -26,7 +26,7 @@ class OneHotSequenceEncoder(OneHotEncoder):
         return encoded_dataset
 
     def _encode_data(self, dataset: SequenceDataset, params: EncoderParams):
-        sequence_objs = [obj for obj in dataset.get_data(params.pool_size)]
+        sequence_objs = [obj for obj in dataset.get_data()]
 
         sequences = [obj.get_sequence(self.sequence_type) for obj in sequence_objs]
 

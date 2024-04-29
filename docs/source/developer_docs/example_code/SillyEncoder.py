@@ -68,7 +68,7 @@ class SillyEncoder(DatasetEncoder):
         np.random.seed(self.random_seed)
 
         # Generate the design matrix from the sequence dataset
-        encoded_examples = self._get_encoded_examples(dataset, params)
+        encoded_examples = self._get_encoded_examples(dataset)
 
         # EncoderHelper contains some utility functions, including this function for encoding the labels
         labels = EncoderHelper.encode_dataset_labels(dataset, params.label_config, params.encode_labels)
@@ -87,18 +87,18 @@ class SillyEncoder(DatasetEncoder):
         return self._construct_encoded_dataset(dataset, encoded_data)
 
 
-    def _get_encoded_examples(self, dataset: Dataset, params: EncoderParams) -> np.array:
+    def _get_encoded_examples(self, dataset: Dataset) -> np.array:
         if isinstance(dataset, SequenceDataset):
-            return self._get_encoded_sequences(dataset, params)
+            return self._get_encoded_sequences(dataset)
         elif isinstance(dataset, ReceptorDataset):
-            return self._get_encoded_receptors(dataset, params)
+            return self._get_encoded_receptors(dataset)
         elif isinstance(dataset, RepertoireDataset):
-            return self._get_encoded_repertoires(dataset, params)
+            return self._get_encoded_repertoires(dataset)
 
-    def _get_encoded_sequences(self, dataset: SequenceDataset, params: EncoderParams) -> np.array:
+    def _get_encoded_sequences(self, dataset: SequenceDataset) -> np.array:
         encoded_sequences = []
 
-        for sequence in dataset.get_data(params.pool_size):
+        for sequence in dataset.get_data():
             # Each sequence is a ReceptorSequence object.
             # Different properties of the sequence can be retrieved here, examples:
             identifier = sequence.get_id()
@@ -112,10 +112,10 @@ class SillyEncoder(DatasetEncoder):
 
         return np.array(encoded_sequences)
 
-    def _get_encoded_receptors(self, dataset: ReceptorDataset, params: EncoderParams) -> np.array:
+    def _get_encoded_receptors(self, dataset: ReceptorDataset) -> np.array:
         encoded_receptors = []
 
-        for receptor in dataset.get_data(params.pool_size):
+        for receptor in dataset.get_data():
             # Each receptor is a Receptor subclass object (e.g., TCABReceptor, BCReceptor)
             # A Receptor contains two paired ReceptorSequence objects
             identifier = receptor.get_id()
@@ -138,10 +138,10 @@ class SillyEncoder(DatasetEncoder):
 
         return np.array(encoded_receptors)
 
-    def _get_encoded_repertoires(self, dataset: RepertoireDataset, params: EncoderParams) -> np.array:
+    def _get_encoded_repertoires(self, dataset: RepertoireDataset) -> np.array:
         encoded_repertoires = []
 
-        for repertoire in dataset.get_data(params.pool_size):
+        for repertoire in dataset.get_data():
             # Each repertoire is a Repertoire object.
             # Different properties of the repertoire can be retrieved here, examples:
             identifiers = repertoire.get_sequence_identifiers(as_list=True)
