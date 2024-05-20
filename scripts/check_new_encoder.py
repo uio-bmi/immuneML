@@ -1,4 +1,10 @@
 import argparse
+import sys
+
+# Ensure the immuneML/ project 'root dir' is added to sys.path
+# Adding "." and "../" allows the script to be run from immuneML/ and immuneML/scripts/
+# When encountering ModuleNotFoundError, try adding the absolute path to the project 'root dir' here
+sys.path.extend([".", "../"])
 
 from scripts.checker_util import *
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
@@ -17,11 +23,15 @@ from immuneML.util.ReflectionHandler import ReflectionHandler
 
 def parse_commandline_arguments(args):
     parser = argparse.ArgumentParser(description="Tool for testing new immuneML DatasetEncoder classes")
-    parser.add_argument("-e", "--encoder_file", type=str, required=True, help="Path to the (dataset-specific) encoder file, placed in the correct immuneML subfolder. ")
-    parser.add_argument("-d", "--dataset_type", type=str, choices=["repertoire", "sequence", "receptor"], required=True, help="Whether to test using 'sequence', 'receptor' or 'repertoire' dataset.")
-    parser.add_argument("-p", "--no_default_parameters",  action='store_true', help="If enabled, it is assumed that no default parameters file exists, and the Encoder can be run without supplying additional parameters. ")
-    parser.add_argument("-l", "--log_file", type=str, default="check_new_encoder_log.txt", help="Path to the output log file. If already present, the file will be overwritten.")
-    parser.add_argument("-t", "--tmp_path", type=str, default="./tmp", help="Path to the temporary output folder. If already present, the folder will be overwritten.")
+
+    usage_args = parser.add_argument_group('usage arguments')
+    usage_args.add_argument("-e", "--encoder_file", type=str, required=True, help="Path to the (dataset-specific) encoder file, placed in the correct immuneML subfolder. ")
+    usage_args.add_argument("-d", "--dataset_type", type=str, choices=["repertoire", "sequence", "receptor"], required=True, help="Whether to test using 'sequence', 'receptor' or 'repertoire' dataset.")
+    usage_args.add_argument("-p", "--no_default_parameters",  action='store_true', help="If enabled, it is assumed that no default parameters file exists, and the Encoder can be run without supplying additional parameters. ")
+
+    logging_args = parser.add_argument_group('logging arguments')
+    logging_args.add_argument("-l", "--log_file", type=str, default="check_new_encoder_log.txt", help="Path to the output log file. If already present, the file will be overwritten (default='./check_new_encoder_log.txt').")
+    logging_args.add_argument("-t", "--tmp_path", type=str, default="./tmp", help="Path to the temporary output folder. If already present, the folder will be overwritten (default='./tmp').")
 
     return parser.parse_args(args)
 
@@ -45,7 +55,7 @@ def check_encoded_data(encoded_data, dummy_dataset, base_class_name):
     assert isinstance(encoded_data, EncodedData), f"Error: expected the .encoded_data field of the output dataset to be an EncodedData object, found {encoded_data.__class__.__name__}"
 
     assert encoded_data.examples is not None, f"Error: EncodedData.examples is None, but should be a numeric matrix with a number of rows equal to the number of examples in the dataset ({dummy_dataset.get_example_count()})"
-    assert encoded_data.examples.shape[0] == dummy_dataset.get_example_count(), f"Error: the number of rows in EncodedData.examples must be equal to the number of examples in the dataset ({dummy_dataset.get_example_count()})"
+    assert encoded_data.examples.shape[0] == dummy_dataset.get_example_count(), f"Error: the number of rows in EncodedData.examples ({encoded_data.examples.shape[0]}) must be equal to the number of examples in the dataset ({dummy_dataset.get_example_count()})"
 
     assert encoded_data.example_ids == dummy_dataset.get_example_ids(), f"Error: EncodedData.example_ids must match the original dataset: {dummy_dataset.get_example_ids()}, found {encoded_data.example_ids}"
     assert encoded_data.encoding == base_class_name, f"Error: EncodedData.encoding must be set to the base class name ('{base_class_name}'), found {encoded_data.encoding}"
