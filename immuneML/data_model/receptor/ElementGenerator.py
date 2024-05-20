@@ -48,7 +48,7 @@ class ElementGenerator:
                 elements = bnp_data
         except ValueError as error:
             raise ValueError(f'{ElementGenerator.__name__}: an error occurred while creating an object from tsv file. '
-                             f'Details: {error}')
+                             f'Details: {error}').with_traceback(error.__traceback__)
 
         return elements
 

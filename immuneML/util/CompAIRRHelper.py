@@ -46,7 +46,7 @@ class CompAIRRHelper:
         except Exception as e:
             raise Exception(f"CompAIRRHelper: failed to call CompAIRR: {e}\n"
                             f"Please ensure the correct version of CompAIRR has been installed (version {required_major}.{required_minor}.{required_patch} or later), "
-                            f"or provide the path to the CompAIRR executable.")
+                            f"or provide the path to the CompAIRR executable.").with_traceback(e.__traceback__)
 
         return compairr_path
 

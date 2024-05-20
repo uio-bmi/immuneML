@@ -1,23 +1,32 @@
+import sys
 import argparse
 import random
-
 import numpy as np
 
+# Ensure the immuneML/ project 'root dir' is added to sys.path
+# Adding "." and "../" allows the script to be run from immuneML/ and immuneML/scripts/
+# When encountering ModuleNotFoundError, try adding the absolute path to the project 'root dir' here
+sys.path.extend([".", "../"])
+
+from scripts.checker_util import *
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.util.ReflectionHandler import ReflectionHandler
-from scripts.checker_util import *
 
 
 def parse_commandline_arguments(args):
     parser = argparse.ArgumentParser(description="Tool for testing new immuneML MLMethod classes")
-    parser.add_argument("-m", "--ml_method_file", type=str, required=True, help="Path to the MLMethod file, placed in the correct immuneML subfolder. ")
-    parser.add_argument("-p", "--no_default_parameters",  action='store_true', help="If enabled, it is assumed that no default parameters file exists, and the MLMethod can be run without supplying additional parameters. ")
-    parser.add_argument("-l", "--log_file", type=str, default="check_new_ml_method_log.txt", help="Path to the output log file. If already present, the file will be overwritten.")
-    parser.add_argument("-t", "--tmp_path", type=str, default="./tmp", help="Path to the temporary output folder. If already present, the folder will be overwritten.")
+
+    usage_args = parser.add_argument_group('usage arguments')
+    usage_args.add_argument("-m", "--ml_method_file", type=str, required=True, help="Path to the MLMethod file, placed in the correct immuneML subfolder. ")
+    usage_args.add_argument("-p", "--no_default_parameters",  action='store_true', help="If enabled, it is assumed that no default parameters file exists, and the MLMethod can be run without supplying additional parameters. ")
+
+    logging_args = parser.add_argument_group('logging arguments')
+    logging_args.add_argument("-l", "--log_file", type=str, default="check_new_ml_method_log.txt", help="Path to the output log file. If already present, the file will be overwritten (default='./check_new_ml_method_log.txt').")
+    logging_args.add_argument("-t", "--tmp_path", type=str, default="./tmp", help="Path to the temporary output folder. If already present, the folder will be overwritten (default='./tmp').")
 
     return parser.parse_args(args)
 
@@ -55,11 +64,16 @@ def check_methods(ml_method_instance):
     assert MLMethod._assert_matching_label == ml_method_instance.__class__._assert_matching_label, mssg.format("_assert_matching_label", ml_method_instance.__class__._assert_matching_label)
     assert MLMethod.predict == ml_method_instance.__class__.predict, mssg.format("predict", ml_method_instance.__class__.predict)
     assert MLMethod.predict_proba == ml_method_instance.__class__.predict_proba, mssg.format("predict_proba", ml_method_instance.__class__.predict_proba)
-    assert MLMethod.check_encoder_compatibility == ml_method_instance.__class__.check_encoder_compatibility, mssg.format("check_encoder_compatibility", ml_method_instance.__class__.check_encoder_compatibility)
     assert MLMethod.get_feature_names == ml_method_instance.__class__.get_feature_names, mssg.format("get_feature_names", ml_method_instance.__class__.get_feature_names)
     assert MLMethod.get_label_name == ml_method_instance.__class__.get_label_name, mssg.format("get_label_name", ml_method_instance.__class__.get_label_name)
     assert MLMethod.get_classes == ml_method_instance.__class__.get_classes, mssg.format("get_classes", ml_method_instance.__class__.get_classes)
     assert MLMethod.get_positive_class == ml_method_instance.__class__.get_positive_class, mssg.format("get_positive_class", ml_method_instance.__class__.get_positive_class)
+
+    if MLMethod.check_encoder_compatibility != ml_method_instance.__class__.check_encoder_compatibility:
+        logging.warning(f"class method 'check_encoder_compatibility' was overwritten from MLMethod. Please ensure this was intentional (for example: if more than just the Encoder type needs to be checked). ")
+
+        # , mssg.format("check_encoder_compatibility", ml_method_instance.__class__.check_encoder_compatibility)
+
 
     check_base_vs_instance_methods(MLMethod, ml_method_instance)
 
