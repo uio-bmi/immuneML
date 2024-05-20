@@ -14,7 +14,7 @@ def log(func):
                     raise Exception(f"{e}\n\n"
                                     f"ImmuneMLParser: an error occurred during parsing in function {func.__name__} "
                                     f" with parameters: {args}.\n\nFor more details on how to write the specification, "
-                                    f"see the documentation. For technical description of the error, see the log above.")
+                                    f"see the documentation. For technical description of the error, see the log above.").with_traceback(e.__traceback__)
                 else:
                     raise e
         finally:

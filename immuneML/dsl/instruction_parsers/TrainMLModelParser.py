@@ -139,7 +139,7 @@ class TrainMLModelParser:
                 settings.append(s)
             return settings
         except KeyError as key_error:
-            raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under settings in TrainMLModel instruction.")
+            raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under settings in TrainMLModel instruction.") from key_error
 
     def _prepare_path(self, instruction: dict) -> Path:
         if "path" in instruction:
@@ -192,7 +192,7 @@ class TrainMLModelParser:
                                if "leave_one_out_config" in instruction[split_key] else None)
 
         except KeyError as key_error:
-            raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under {split_key}.")
+            raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under {split_key}.") from key_error
 
     def _prepare_report_config(self, instruction_key, instruction, split_key, symbol_table):
         if "reports" in instruction[split_key] and len(instruction[split_key]["reports"]) > 0:
