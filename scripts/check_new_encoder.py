@@ -37,11 +37,11 @@ def parse_commandline_arguments(args):
 
 def check_methods(encoder_instance):
     logging.info("Checking methods...")
-    mssg = "Error: class method '{}' should not be overwritten from DatasetEncoder. Found the following: {}"
+    mssg = "Error: class method '{}' should not be overwritten from DatasetEncoder. Please remove this method."
 
-    assert DatasetEncoder.store == encoder_instance.__class__.store, mssg.format("store", encoder_instance.__class__.store)
-    assert DatasetEncoder.store_encoder == encoder_instance.__class__.store_encoder, mssg.format("store_encoder", encoder_instance.__class__.store_encoder)
-    assert DatasetEncoder.load_attribute == encoder_instance.__class__.load_attribute, mssg.format("load_attribute", encoder_instance.__class__.load_attribute)
+    assert DatasetEncoder.store == encoder_instance.__class__.store, mssg.format("store")
+    assert DatasetEncoder.store_encoder == encoder_instance.__class__.store_encoder, mssg.format("store_encoder")
+    assert DatasetEncoder.load_attribute == encoder_instance.__class__.load_attribute, mssg.format("load_attribute")
 
     check_base_vs_instance_methods(DatasetEncoder, encoder_instance)
 
@@ -139,6 +139,8 @@ def check_encoder_class(encoder_class, dummy_dataset, default_params, base_class
 
     logging.info(f"Attempting to run {encoder_class.__name__}.build_object() for datasets of type {dummy_dataset.__class__.__name__} (with default parameters if given)...")
     encoder_instance = encoder_class.build_object(dummy_dataset, **default_params)
+    assert isinstance(encoder_instance, DatasetEncoder), f"Expected method 'build_object()' to return an instance of DatasetEncoder, found {type(encoder_instance)}. " + \
+                                                         "It looks like the return statement may be missing." if encoder_instance is None else ""
     logging.info(f"...Successfully loaded an instance of {encoder_instance.__class__.__name__}")
 
     check_methods(encoder_instance)
@@ -166,7 +168,12 @@ def check_encoder_file(encoder_file):
 
 def get_encoder_class(encoder_file_path):
     logging.info(f"Attempting to load Encoder class named '{encoder_file_path.stem}'...")
-    encoder_class = ReflectionHandler.get_class_from_path(encoder_file_path, class_name=encoder_file_path.stem)
+    try:
+        encoder_class = ReflectionHandler.get_class_from_path(encoder_file_path, class_name=encoder_file_path.stem)
+    except AttributeError as e:
+        raise AttributeError(f"Encountered an AttributeError while trying to load the class named {encoder_file_path.stem} from file {encoder_file_path}. "
+                             f"Please double check if the class and filename match. ").with_traceback(e.__traceback__)
+
     logging.info(f"...Loading Encoder class done.")
 
     return encoder_class

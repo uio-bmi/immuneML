@@ -56,18 +56,18 @@ def get_default_params_filepath_from_name(ml_method_file_path):
 
 def check_methods(ml_method_instance):
     logging.info("Checking methods...")
-    mssg = "Error: class method '{}' should not be overwritten from MLMethod. Found the following: {}"
+    mssg = "Error: class method '{}' should not be overwritten from MLMethod. Please remove this method."
 
     assert MLMethod.fit == ml_method_instance.__class__.fit, mssg.format("fit", ml_method_instance.__class__.fit)
-    assert MLMethod._initialize_fit == ml_method_instance.__class__._initialize_fit, mssg.format("_initialize_fit", ml_method_instance.__class__._initialize_fit)
-    assert MLMethod.fit_by_cross_validation == ml_method_instance.__class__.fit_by_cross_validation, mssg.format("fit_by_cross_validation", ml_method_instance.__class__.fit_by_cross_validation)
-    assert MLMethod._assert_matching_label == ml_method_instance.__class__._assert_matching_label, mssg.format("_assert_matching_label", ml_method_instance.__class__._assert_matching_label)
-    assert MLMethod.predict == ml_method_instance.__class__.predict, mssg.format("predict", ml_method_instance.__class__.predict)
-    assert MLMethod.predict_proba == ml_method_instance.__class__.predict_proba, mssg.format("predict_proba", ml_method_instance.__class__.predict_proba)
-    assert MLMethod.get_feature_names == ml_method_instance.__class__.get_feature_names, mssg.format("get_feature_names", ml_method_instance.__class__.get_feature_names)
-    assert MLMethod.get_label_name == ml_method_instance.__class__.get_label_name, mssg.format("get_label_name", ml_method_instance.__class__.get_label_name)
-    assert MLMethod.get_classes == ml_method_instance.__class__.get_classes, mssg.format("get_classes", ml_method_instance.__class__.get_classes)
-    assert MLMethod.get_positive_class == ml_method_instance.__class__.get_positive_class, mssg.format("get_positive_class", ml_method_instance.__class__.get_positive_class)
+    assert MLMethod._initialize_fit == ml_method_instance.__class__._initialize_fit, mssg.format("_initialize_fit")
+    assert MLMethod.fit_by_cross_validation == ml_method_instance.__class__.fit_by_cross_validation, mssg.format("fit_by_cross_validation")
+    assert MLMethod._assert_matching_label == ml_method_instance.__class__._assert_matching_label, mssg.format("_assert_matching_label")
+    assert MLMethod.predict == ml_method_instance.__class__.predict, mssg.format("predict")
+    assert MLMethod.predict_proba == ml_method_instance.__class__.predict_proba, mssg.format("predict_proba")
+    assert MLMethod.get_feature_names == ml_method_instance.__class__.get_feature_names, mssg.format("get_feature_names")
+    assert MLMethod.get_label_name == ml_method_instance.__class__.get_label_name, mssg.format("get_label_name")
+    assert MLMethod.get_classes == ml_method_instance.__class__.get_classes, mssg.format("get_classes")
+    assert MLMethod.get_positive_class == ml_method_instance.__class__.get_positive_class, mssg.format("get_positive_class")
 
     if MLMethod.check_encoder_compatibility != ml_method_instance.__class__.check_encoder_compatibility:
         logging.warning(f"class method 'check_encoder_compatibility' was overwritten from MLMethod. Please ensure this was intentional (for example: if more than just the Encoder type needs to be checked). ")
@@ -130,13 +130,15 @@ def check_predictions(ml_method_instance, predictions, label, enc_data):
         assert pred in label.values, error_mssg + f"\n\nFound the wrong predicted class: {pred}"
 
 def check_predictions_proba(ml_method_instance, proba_predictions, label, enc_data):
-    class1_proba = [round(random.uniform(0, 1), 2) for p in range(enc_data.examples.shape[0])]
+    class1_proba = [round(random.uniform(0, 1), 1) for p in range(enc_data.examples.shape[0])]
     class2_proba = [round(1 - p, 2) for p in class1_proba]
 
-    error_mssg = f"The output of {ml_method_instance.__class__.__name__}.predict_proba() is assumed to be a dictionary where the label name is the key," \
+    correct_example = {label.name: {label.values[0]: np.array(class1_proba),label.values[1]: np.array(class2_proba)}}
+
+    error_mssg = f"The output of {ml_method_instance.__class__.__name__}.predict_proba() is assumed to be a dictionary where the label name is the key, " \
                  f"and its value is a dictionary containing the probabilities for each class." \
-                 "\nFor example (numbers are random examples): {" + f"'{label.name}': " + "{" + f"'{label.values[1]}': {class1_proba}, '{label.values[0]}': {class2_proba}" + "}}" \
-                f"\nFound the follwing instead: {proba_predictions}"
+                 f"\n\nFor example (numbers are random examples):\n\t{correct_example}" \
+                 f"\n\nFound the follwing instead: \n\t{proba_predictions}"
 
     assert isinstance(proba_predictions, dict), error_mssg + f"\n\nFound the wrong type: {type(proba_predictions)}"
     assert list(proba_predictions.keys()) == [label.name], error_mssg + f"\n\nFound the wrong keys: {list(proba_predictions.keys())}"
@@ -182,6 +184,7 @@ def check_model_fitting_and_prediction(ml_method_instance, tmp_path):
 
     logging.info(f"Checking {ml_method_instance.__class__.__name__}.get_params()...")
     params = ml_method_instance.get_params()
+    assert isinstance(params, dict), f"Expected get_params() to return a dictionary, found the following: {params}"
     logging.info(f"Checking formatting of the following params: {params}")
     check_params_recursively(params)
 
