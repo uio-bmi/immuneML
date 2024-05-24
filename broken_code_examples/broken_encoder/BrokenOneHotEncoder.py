@@ -4,7 +4,6 @@ import numpy as np
 from sklearn.preprocessing import OneHotEncoder as SklearnOneHotEncoder
 
 from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
-from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.EncoderHelper import EncoderHelper
@@ -54,10 +53,14 @@ class BrokenOneHotSequenceEncoder():
         encoder = BrokenOneHotEncoder(**params)
 
     def encode(self, dataset, params: EncoderParams):
-        encoded_dataset = CacheHandler.memo_by_params(self._prepare_caching_params(dataset, params),
-                                                      lambda: self._encode_new_dataset(dataset, params))
+        encoded_data = self._encode_data(dataset, params)
 
-        return encoded_dataset
+        encoded_dataset = SequenceDataset(filenames=dataset.get_filenames(),
+                                          encoded_data=encoded_data,
+                                          labels=dataset.labels,
+                                          file_size=dataset.file_size, dataset_file=dataset.dataset_file)
+
+        return encoded_data
 
     def _prepare_caching_params(self, dataset, params: EncoderParams):
         return (("dataset_identifier", dataset.identifier),
@@ -66,10 +69,6 @@ class BrokenOneHotSequenceEncoder():
                 ("labels", tuple(params.label_config.get_labels_by_name())),
                 ("encoding", BrokenOneHotEncoder.__name__),
                 ("encoding_params", tuple(vars(self).items())))
-
-    @abc.abstractmethod
-    def _encode_new_dataset(self, dataset, params: EncoderParams):
-        pass
 
     def encode_sequence_list(self, sequences, pad_n_sequences, pad_sequence_len):
         char_array = np.array(sequences, dtype=str)
@@ -83,16 +82,6 @@ class BrokenOneHotSequenceEncoder():
         encoded_data = np.pad(encoded_data, pad_width=((0, pad_n_sequences - n_sequences), (0, 0)))
         encoded_data = encoded_data.reshape((pad_n_sequences, sequence_len, len(self.alphabet)))
         encoded_data = np.pad(encoded_data, pad_width=((0, 0), (0, pad_sequence_len - sequence_len), (0, 0)))
-
-        return encoded_data
-
-    def _encode_new_dataset(self, dataset: SequenceDataset, params: EncoderParams):
-        encoded_data = self._encode_data(dataset, params)
-
-        encoded_dataset = SequenceDataset(filenames=dataset.get_filenames(),
-                                          encoded_data=encoded_data,
-                                          labels=dataset.labels,
-                                          file_size=dataset.file_size, dataset_file=dataset.dataset_file)
 
         return encoded_data
 

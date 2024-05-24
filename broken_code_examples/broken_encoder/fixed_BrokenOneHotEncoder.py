@@ -3,7 +3,6 @@ import abc
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder as SklearnOneHotEncoder
 
-from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.EncoderHelper import EncoderHelper
@@ -56,10 +55,14 @@ class BrokenOneHotEncoder(DatasetEncoder):
         return BrokenOneHotEncoder(**params)
 
     def encode(self, dataset, params: EncoderParams):
-        encoded_dataset = CacheHandler.memo_by_params(self._prepare_caching_params(dataset, params),
-                                                      lambda: self._encode_new_dataset(dataset, params))
+        encoded_data = self._encode_data(dataset, params)
 
-        return encoded_dataset
+        encoded_dataset = SequenceDataset(filenames=dataset.get_filenames(),
+                                          encoded_data=encoded_data,
+                                          labels=dataset.labels,
+                                          file_size=dataset.file_size, dataset_file=dataset.dataset_file)
+
+        return encoded_dataset  # fix: encoded_data -> encoded_dataset
 
     def _prepare_caching_params(self, dataset, params: EncoderParams):
         return (("dataset_identifier", dataset.identifier),
@@ -69,9 +72,6 @@ class BrokenOneHotEncoder(DatasetEncoder):
                 ("encoding", BrokenOneHotEncoder.__name__),
                 ("encoding_params", tuple(vars(self).items())))
 
-    @abc.abstractmethod
-    def _encode_new_dataset(self, dataset, params: EncoderParams):
-        pass
 
     # fix warning: encode_sequence_list -> _encode_sequence_list
     def _encode_sequence_list(self, sequences, pad_n_sequences, pad_sequence_len):
@@ -89,15 +89,6 @@ class BrokenOneHotEncoder(DatasetEncoder):
 
         return encoded_data
 
-    def _encode_new_dataset(self, dataset: SequenceDataset, params: EncoderParams):
-        encoded_data = self._encode_data(dataset, params)
-
-        encoded_dataset = SequenceDataset(filenames=dataset.get_filenames(),
-                                          encoded_data=encoded_data,
-                                          labels=dataset.labels,
-                                          file_size=dataset.file_size, dataset_file=dataset.dataset_file)
-
-        return encoded_dataset # fix: encoded_data -> encoded_dataset
 
     def _encode_data(self, dataset: SequenceDataset, params: EncoderParams):
         sequence_objs = [obj for obj in dataset.get_data()]
