@@ -37,10 +37,10 @@ class SillyEncoder(DatasetEncoder):
 
     @staticmethod
     def build_object(dataset=None, **params):
-        # check parameters & dataset type
-        assert isinstance(params['embedding_len'], int), "SillyEncoder: embedding_len " \
-                                                         "must be an integer"
-        assert params['embedding_len'] >= 1, "SillyEncoder: embedding_len must be at least 1"
+        if 'embedding_len' in params:
+            assert isinstance(params['embedding_len'], int), "SillyEncoder: embedding_len " \
+                                                             "must be an integer"
+            assert params['embedding_len'] >= 1, "SillyEncoder: embedding_len must be at least 1"
 
         if isinstance(dataset, SequenceDataset):
             return SillyEncoder(**params)
