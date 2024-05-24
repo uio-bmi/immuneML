@@ -212,7 +212,7 @@ def check_store_load(ml_method_instance, tmp_path):
     assert (orig_preds["my_label"] == loaded_preds["my_label"]).all(), f"When using the same example data to call .predict() on both the original model " \
                                                                        f"and the model loaded after storing, different results were found: " \
                                                                        f"\nOriginal model predictions: {orig_preds}" \
-                                                                       f"\nLoaded model predictions: {orig_preds}." \
+                                                                       f"\nLoaded model predictions: {loaded_preds}." \
                                                                        f"\nThis indicates an issue with storing and loading the model."
 
     logging.info(f"...The original and re-loaded model make the same predictions.")
