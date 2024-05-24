@@ -14,7 +14,6 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.encodings.EncoderParams import EncoderParams
 
 
-#class BrokenOneHotSequenceEncoder():
 class BrokenOneHotSequenceEncoder():
     """
     One-hot encoding for sequence datasets. In one-hot encoding, each alphabet character

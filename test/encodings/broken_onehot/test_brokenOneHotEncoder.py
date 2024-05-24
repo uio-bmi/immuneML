@@ -5,7 +5,7 @@ from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.broken_encoder.fixed_BrokenOneHotEncoder import BrokenOneHotEncoder
+from broken_code_examples.broken_encoder.fixed_BrokenOneHotEncoder import BrokenOneHotEncoder
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
