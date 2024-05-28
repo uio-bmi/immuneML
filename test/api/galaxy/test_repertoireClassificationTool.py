@@ -27,18 +27,21 @@ class TestRepertoireClassificationTool(TestCase):
         PathBuilder.build(result_path)
 
         old_working_dir = os.getcwd()
-        os.chdir(path)
 
-        self.make_random_dataset(path)
+        try:
+            os.chdir(path)
 
-        args = ['-o', str(path), '-l', 'subject_id', '-m', 'RandomForestClassifier', 'LogisticRegression',
-                '-t', '70', '-c', '2', '-s', 'subsequence', '-p', 'invariant', '-g', 'gapped',
-                '-kl', '1', '-kr', '1', '-gi', '0', '-ga', '1', '-r', 'unique']
+            self.make_random_dataset(path)
 
-        tool = RepertoireClassificationTool(args=args, result_path=result_path)
-        tool.run()
+            args = ['-o', str(path), '-l', 'subject_id', '-m', 'RandomForestClassifier', 'LogisticRegression',
+                    '-t', '70', '-c', '2', '-s', 'subsequence', '-p', 'invariant', '-g', 'gapped',
+                    '-kl', '1', '-kr', '1', '-gi', '0', '-ga', '1', '-r', 'unique']
 
-        os.chdir(old_working_dir)
+            tool = RepertoireClassificationTool(args=args, result_path=result_path)
+            tool.run()
+
+        finally:
+            os.chdir(old_working_dir)
 
         self.assertTrue(os.path.exists(result_path / "inst1/split_1/"))
         self.assertTrue(os.path.exists(result_path / "inst1/split_2/"))

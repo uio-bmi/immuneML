@@ -40,23 +40,25 @@ class MyTestCase(unittest.TestCase):
 
         old_wd = os.getcwd()
 
-        os.chdir(data_path)
+        try:
+            os.chdir(data_path)
 
-        yamlbuilder_main(["-o", str(output_dir), "-f", output_filename,
-                          "-l", "label1,label2",
-                          "-m", "LogisticRegression", "-t", "70",
-                          "-c", "5", "-s", "subsequence", "subsequence",
-                          "-r", "unique", "all",
-                          "-g", "gapped", "ungapped",
-                          "-p", "invariant", "positional",
-                          "-kl", "2", "0", "-kr", "3", "0",
-                          "-gi", "0", "0", "-ga", "4", "0",
-                          "-k", "0", "3"])
+            yamlbuilder_main(["-o", str(output_dir), "-f", output_filename,
+                              "-l", "label1,label2",
+                              "-m", "LogisticRegression", "-t", "70",
+                              "-c", "5", "-s", "subsequence", "subsequence",
+                              "-r", "unique", "all",
+                              "-g", "gapped", "ungapped",
+                              "-p", "invariant", "positional",
+                              "-kl", "2", "0", "-kr", "3", "0",
+                              "-gi", "0", "0", "-ga", "4", "0",
+                              "-k", "0", "3"])
 
-        # Use ImmuneML parser to test whether the yaml file created here is still valid
-        ImmuneMLParser.parse_yaml_file(output_dir / output_filename, path / "result_path")
+            # Use ImmuneML parser to test whether the yaml file created here is still valid
+            ImmuneMLParser.parse_yaml_file(output_dir / output_filename, path / "result_path")
 
-        os.chdir(old_wd)
+        finally:
+            os.chdir(old_wd)
 
         shutil.rmtree(path)
 

@@ -97,17 +97,19 @@ rep2.tsv,2""")
         old_wd = os.getcwd()
         os.chdir(path)
 
-        for dataset_type in ("files", "already_imported"):
-            result_path = path / f"tool_results_path_{dataset_type}/"
+        try:
+            for dataset_type in ("files", "already_imported"):
+                result_path = path / f"tool_results_path_{dataset_type}/"
 
-            yaml_path = self.prepare_specs(path, dataset_type=dataset_type)
+                yaml_path = self.prepare_specs(path, dataset_type=dataset_type)
 
-            run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path, 'tool': "DatasetGenerationOverviewTool"}))
+                run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path, 'tool': "DatasetGenerationOverviewTool"}))
 
-            self.assertTrue(os.path.isfile(result_path / "galaxy_dataset/dataset_metadata.csv"))
-            self.assertTrue(os.path.isfile(result_path / "galaxy_dataset/dataset.yaml"))
-            self.assertEqual(4, len([name for name in os.listdir(result_path / "galaxy_dataset/repertoires/")
-                                     if os.path.isfile(os.path.join(result_path / "galaxy_dataset/repertoires/", name))]))
+                self.assertTrue(os.path.isfile(result_path / "galaxy_dataset/dataset_metadata.csv"))
+                self.assertTrue(os.path.isfile(result_path / "galaxy_dataset/dataset.yaml"))
+                self.assertEqual(4, len([name for name in os.listdir(result_path / "galaxy_dataset/repertoires/")
+                                         if os.path.isfile(os.path.join(result_path / "galaxy_dataset/repertoires/", name))]))
+        finally:
+            os.chdir(old_wd)
 
-        os.chdir(old_wd)
         shutil.rmtree(path)

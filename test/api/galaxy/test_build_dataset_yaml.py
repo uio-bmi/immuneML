@@ -47,20 +47,22 @@ class MyTestCase(unittest.TestCase):
 
         old_wd = os.getcwd()
 
-        os.chdir(path)
+        try:
+            os.chdir(path)
 
-        yamlbuilder_main(["-r", "VDJdb", "-o", str(path), "-f", "sequence.yaml", "-p", "False", "-a", "a,b", "-i", "False"])
+            yamlbuilder_main(["-r", "VDJdb", "-o", str(path), "-f", "sequence.yaml", "-p", "False", "-a", "a,b", "-i", "False"])
 
-        with open(path / "sequence.yaml", "r") as file:
-            loaded_receptor = yaml.load(file, Loader=yaml.FullLoader)
+            with open(path / "sequence.yaml", "r") as file:
+                loaded_receptor = yaml.load(file, Loader=yaml.FullLoader)
 
-            self.assertDictEqual(loaded_receptor["definitions"]["datasets"], {"dataset": {"format": "VDJdb", "params":
-                {"path": "./", "is_repertoire": False, "paired": False, "metadata_column_mapping": {"a": "a", "b": "b"},
-                 "region_type": RegionType.IMGT_CDR3.name, "result_path": "./"}}})
+                self.assertDictEqual(loaded_receptor["definitions"]["datasets"], {"dataset": {"format": "VDJdb", "params":
+                    {"path": "./", "is_repertoire": False, "paired": False, "metadata_column_mapping": {"a": "a", "b": "b"},
+                     "region_type": RegionType.IMGT_CDR3.name, "result_path": "./"}}})
 
-        ImmuneMLParser.parse_yaml_file(path / "sequence.yaml")
+            ImmuneMLParser.parse_yaml_file(path / "sequence.yaml")
 
-        os.chdir(old_wd)
+        finally:
+            os.chdir(old_wd)
 
         shutil.rmtree(path)
 
@@ -72,20 +74,22 @@ class MyTestCase(unittest.TestCase):
 
         old_wd = os.getcwd()
 
-        os.chdir(path)
+        try:
+            os.chdir(path)
 
-        yamlbuilder_main(["-r", "VDJdb", "-o", str(path), "-f", "receptor.yaml", "-p", "True", "-c", "TRA_TRB", "-a", "'c'", "-i", "False"])
+            yamlbuilder_main(["-r", "VDJdb", "-o", str(path), "-f", "receptor.yaml", "-p", "True", "-c", "TRA_TRB", "-a", "'c'", "-i", "False"])
 
-        with open(path / "receptor.yaml", "r") as file:
-            loaded_receptor = yaml.load(file, Loader=yaml.FullLoader)
+            with open(path / "receptor.yaml", "r") as file:
+                loaded_receptor = yaml.load(file, Loader=yaml.FullLoader)
 
-            self.assertDictEqual(loaded_receptor["definitions"]["datasets"], {"dataset": {"format": "VDJdb", "params":
-                {"path": "./", "is_repertoire": False, "paired": True, "receptor_chains": "TRA_TRB", "metadata_column_mapping": {"c": "c"},
-                 "region_type": RegionType.IMGT_CDR3.name, "result_path": "./"}}})
+                self.assertDictEqual(loaded_receptor["definitions"]["datasets"], {"dataset": {"format": "VDJdb", "params":
+                    {"path": "./", "is_repertoire": False, "paired": True, "receptor_chains": "TRA_TRB", "metadata_column_mapping": {"c": "c"},
+                     "region_type": RegionType.IMGT_CDR3.name, "result_path": "./"}}})
 
-        ImmuneMLParser.parse_yaml_file(path / "receptor.yaml")
+            ImmuneMLParser.parse_yaml_file(path / "receptor.yaml")
 
-        os.chdir(old_wd)
+        finally:
+            os.chdir(old_wd)
 
         shutil.rmtree(path)
 
@@ -97,20 +101,22 @@ class MyTestCase(unittest.TestCase):
 
         old_wd = os.getcwd()
 
-        os.chdir(path)
+        try:
+            os.chdir(path)
 
-        yamlbuilder_main(["-r", "VDJdb", "-o", str(path), "-f", "repertoire.yaml", "-m", "metadata.csv", "-i", "True"])
+            yamlbuilder_main(["-r", "VDJdb", "-o", str(path), "-f", "repertoire.yaml", "-m", "metadata.csv", "-i", "True"])
 
-        with open(path / "repertoire.yaml", "r") as file:
-            loaded_receptor = yaml.load(file, Loader=yaml.FullLoader)
+            with open(path / "repertoire.yaml", "r") as file:
+                loaded_receptor = yaml.load(file, Loader=yaml.FullLoader)
 
-            self.assertDictEqual(loaded_receptor["definitions"]["datasets"], {"dataset": {"format": "VDJdb", "params":
-                {"path": "./", "metadata_file": "metadata.csv", "is_repertoire": True, "region_type": RegionType.IMGT_CDR3.name,
-                 "result_path": "./"}}})
+                self.assertDictEqual(loaded_receptor["definitions"]["datasets"], {"dataset": {"format": "VDJdb", "params":
+                    {"path": "./", "metadata_file": "metadata.csv", "is_repertoire": True, "region_type": RegionType.IMGT_CDR3.name,
+                     "result_path": "./"}}})
 
-        ImmuneMLParser.parse_yaml_file(path / "repertoire.yaml")
+            ImmuneMLParser.parse_yaml_file(path / "repertoire.yaml")
 
-        os.chdir(old_wd)
+        finally:
+            os.chdir(old_wd)
 
         shutil.rmtree(path)
 
