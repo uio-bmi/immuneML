@@ -84,8 +84,10 @@ class SillyEncoder(DatasetEncoder):
                                                                    # make sure to use the general encoder name here
                                                                    # (e.g., OneHotEncoder.__name__, not OneHotSequenceEncoder.__name__)
 
-        return self._construct_encoded_dataset(dataset, encoded_data)
+        encoded_dataset = dataset.clone()
+        encoded_dataset.encoded_data = encoded_data
 
+        return encoded_dataset
 
     def _get_encoded_examples(self, dataset: Dataset) -> np.array:
         if isinstance(dataset, SequenceDataset):
@@ -156,24 +158,3 @@ class SillyEncoder(DatasetEncoder):
             encoded_repertoires.append(random_encoding)
 
         return np.array(encoded_repertoires)
-
-    def _construct_encoded_dataset(self, dataset, encoded_data) -> Dataset:
-        if isinstance(dataset, SequenceDataset):
-            return SequenceDataset(filenames=dataset.get_filenames(),
-                                   encoded_data=encoded_data,
-                                   labels=dataset.labels,
-                                   file_size=dataset.file_size,
-                                   dataset_file=dataset.dataset_file)
-        elif isinstance(dataset, ReceptorDataset):
-            return ReceptorDataset(filenames=dataset.get_filenames(),
-                                   encoded_data=encoded_data,
-                                   labels=dataset.labels,
-                                   file_size=dataset.file_size,
-                                   dataset_file=dataset.dataset_file)
-        elif isinstance(dataset, RepertoireDataset):
-            return RepertoireDataset(repertoires=dataset.repertoires,
-                                     encoded_data=encoded_data,
-                                     labels=dataset.labels,
-                                     metadata_file=dataset.metadata_file)
-
-

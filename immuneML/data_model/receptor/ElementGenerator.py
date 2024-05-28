@@ -101,27 +101,26 @@ class ElementGenerator:
 
         example_indices.sort()
 
-        batch_filenames = self._prepare_batch_filenames(len(example_indices), path, dataset_type, dataset_identifier)
+        batch_filenames = self._prepare_batch_filenames(len(example_indices), dataset_type, dataset_identifier)
 
         for index, batch in enumerate(self.build_batch_generator(return_objects=False)):
             extracted_elements = self._extract_elements_from_batch(index, batch, example_indices, paired=paired)
             elements = merge_dataclass_objects([elements, extracted_elements]) if elements else extracted_elements
 
             if len(elements) >= tmp_file_size or len(set(getattr(elements, id_attr_name).tolist())) == len(example_indices):
-                bnp_write_to_file(batch_filenames[file_count - 1], elements[:tmp_file_size])
+                bnp_write_to_file(path / batch_filenames[file_count - 1], elements[:tmp_file_size])
                 file_count += 1
                 elements = elements[tmp_file_size:]
 
         if len(elements) > 0:
-            bnp_write_to_file(batch_filenames[file_count - 1], elements)
+            bnp_write_to_file(path / batch_filenames[file_count - 1], elements)
 
         return batch_filenames
 
-    def _prepare_batch_filenames(self, example_count: int, path: Path, dataset_type: str, dataset_identifier: str):
+    def _prepare_batch_filenames(self, example_count: int, dataset_type: str, dataset_identifier: str):
         batch_count = math.ceil(example_count / self.file_size)
         digits_count = len(str(batch_count)) + 1
-        filenames = [
-            path / f"{dataset_identifier}_{dataset_type}_batch{''.join(['0' for _ in range(digits_count - len(str(index)))])}{index}.tsv"
+        filenames = [f"{dataset_identifier}_{dataset_type}_batch{''.join(['0' for _ in range(digits_count - len(str(index)))])}{index}.tsv"
             for index in range(batch_count)]
         return filenames
 

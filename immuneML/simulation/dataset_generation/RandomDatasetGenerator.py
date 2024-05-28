@@ -99,7 +99,9 @@ class RandomDatasetGenerator:
         repertoires, metadata = RepertoireBuilder.build(sequences=sequences, path=path, labels=processed_labels)
         dataset = RepertoireDataset(labels=dataset_params, repertoires=repertoires, metadata_file=metadata, name=name)
 
-        return ImmuneMLExporter.export(dataset, path)
+        ImmuneMLExporter.export(dataset, path)
+
+        return dataset
 
     @staticmethod
     def _make_labels(labels: dict, element_count: int):
@@ -179,7 +181,9 @@ class RandomDatasetGenerator:
         dataset = ReceptorDataset.build_from_objects(receptors, 100, path, name="receptor_dataset",
                                                      labels=dataset_params)
 
-        return ImmuneMLExporter.export(dataset, path)
+        ImmuneMLExporter.export(dataset, path)
+
+        return dataset
 
     @staticmethod
     def _check_sequence_dataset_generation_params(receptor_count: int, length_probabilities: dict, labels: dict,
@@ -240,4 +244,6 @@ class RandomDatasetGenerator:
         dataset = SequenceDataset.build_from_objects(sequences, sequence_count, path, name="sequence_dataset",
                                                      labels=dataset_params)
 
-        return ImmuneMLExporter.export(dataset, path)
+        ImmuneMLExporter.export(dataset, path)
+
+        return dataset

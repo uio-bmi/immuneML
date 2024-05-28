@@ -155,11 +155,6 @@ class MatchedReceptorsEncoder(DatasetEncoder):
                 ("encoding_params", encoding_params_desc), )
 
     def _encode_new_dataset(self, dataset, params: EncoderParams):
-        pass
-
-        encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires, labels=dataset.labels,
-                                            metadata_file=dataset.metadata_file)
-
         feature_annotations = None if self.sum_matches else self._get_feature_info()
 
         if self.sum_matches:
@@ -171,18 +166,15 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         encoded_repertoires, labels, example_ids = self._encode_repertoires(dataset, params)
         encoded_repertoires = self._normalize(dataset, encoded_repertoires) if self.normalize else encoded_repertoires
 
-        encoded_dataset.add_encoded_data(EncodedData(
-            # examples contains a np.ndarray with counts
+        encoded_dataset = dataset.clone()
+        encoded_dataset.encoded_data = EncodedData(
             examples=encoded_repertoires,
-            # example_ids contains a list of repertoire identifiers
             example_ids=example_ids,
-            # feature_names contains a list of reference receptor identifiers
             feature_names=feature_names,
-            # feature_annotations contains a PD dataframe with sequence and VDJ gene usage per reference receptor
             feature_annotations=feature_annotations,
             labels=labels,
             encoding=MatchedReceptorsEncoder.__name__
-        ))
+        )
 
         return encoded_dataset
 
