@@ -26,7 +26,7 @@ class KmerFreqSequenceEncoder(KmerFrequencyEncoder):
 
         sequence_encoder = self._prepare_sequence_encoder()
         feature_names = sequence_encoder.get_feature_names(params)
-        for sequence in dataset.get_data(params.pool_size):
+        for sequence in dataset.get_data():
             counts = self._encode_sequence(sequence, params, sequence_encoder, Counter())
             encoded_sequences.append(counts)
             sequence_ids.append(sequence.sequence_id)

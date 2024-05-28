@@ -145,17 +145,17 @@ class Repertoire(DatasetItem):
     def _buffer_type(self):
         return self._create_buffer_type_from_field_dict(self._type_dict)
 
-    def get_sequence_aas(self):
-        return self.get_attribute("sequence_aa")
+    def get_sequence_aas(self, as_list: bool = False):
+        return self.get_attribute("sequence_aa", as_list)
 
-    def get_sequence_identifiers(self):
-        return self.get_attribute("sequence_id")
+    def get_sequence_identifiers(self, as_list: bool = False):
+        return self.get_attribute("sequence_id", as_list)
 
     def get_v_genes(self):
-        return self.get_attribute("v_call")
+        return [v_call.split("*")[0] for v_call in self.get_attribute("v_call", as_list=True)]
 
     def get_j_genes(self):
-        return self.get_attribute("j_call")
+        return [j_call.split("*")[0] for j_call in self.get_attribute("j_call", as_list=True)]
 
     def get_counts(self):
         counts = self.get_attribute("duplicate_count")

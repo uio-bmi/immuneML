@@ -16,6 +16,7 @@ Troubleshooting
 Installation issues
 -------------------
 
+
 During installation of the dependency pystache, I get an error: use_2to3 is invalid.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -59,6 +60,13 @@ Please note that when using DeepRC from immuneML, a PyTorch distribution that su
 
 Runtime issues
 --------------
+
+When running immuneML, I get the error "cannot import name 'triu' from 'scipy.linalg'"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This issue occurs due to the function 'triu' being removed from scipy in version 1.13, which
+is called by the dependency gensim. The workaround is to use a lower scipy version, such as 1.12.
+In the next release of gensim this issue will be fixed. See also: https://github.com/piskvorky/gensim/issues/3525
+
 
 When running immuneML, I get "ModuleNotFoundError: No module named 'init'"
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

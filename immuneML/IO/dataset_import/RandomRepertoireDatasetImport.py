@@ -9,7 +9,7 @@ class RandomRepertoireDatasetImport(DataImport):
     Returns a RepertoireDataset consisting of randomly generated sequences, which can be used for benchmarking purposes.
     The sequences consist of uniformly chosen amino acids or nucleotides.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - repertoire_count (int): The number of repertoires the RepertoireDataset should contain.
 
@@ -39,25 +39,27 @@ class RandomRepertoireDatasetImport(DataImport):
                     cmv_negative: 0.3
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_random_dataset:
-            format: RandomRepertoireDataset
-            params:
-                repertoire_count: 100 # number of random repertoires to generate
-                sequence_count_probabilities:
-                    10: 0.5 # probability that any of the repertoires would have 10 receptor sequences
-                    20: 0.5
-                sequence_length_probabilities:
-                    10: 0.5 # probability that any of the receptor sequences would be 10 amino acids in length
-                    12: 0.5
-                labels: # randomly assigned labels (only useful for simple benchmarking)
-                    cmv:
-                        True: 0.5 # probability of value True for label cmv to be assigned to any repertoire
-                        False: 0.5
+        definitions:
+            datasets:
+                my_random_dataset:
+                    format: RandomRepertoireDataset
+                    params:
+                        repertoire_count: 100 # number of random repertoires to generate
+                        sequence_count_probabilities:
+                            10: 0.5 # probability that any of the repertoires would have 10 receptor sequences
+                            20: 0.5
+                        sequence_length_probabilities:
+                            10: 0.5 # probability that any of the receptor sequences would be 10 amino acids in length
+                            12: 0.5
+                        labels: # randomly assigned labels (only useful for simple benchmarking)
+                            cmv:
+                                True: 0.5 # probability of value True for label cmv to be assigned to any repertoire
+                                False: 0.5
 
     """
 

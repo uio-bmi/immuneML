@@ -24,7 +24,7 @@ class IGoRImport(DataImport):
     ‘High-throughput immune repertoire analysis with IGoR’. Nature Communications, (2018)
     `doi.org/10.1038/s41467-018-02832-w <https://doi.org/10.1038/s41467-018-02832-w>`_.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - path (str): For RepertoireDatasets, this is the path to a directory with IGoR files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
@@ -57,30 +57,32 @@ class IGoRImport(DataImport):
     - separator (str): Column separator, for IGoR this is by default ",".
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_igor_dataset:
-            format: IGoR
-            params:
-                path: path/to/files/
-                is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
-                metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                metadata_column_mapping: # metadata column mapping IGoR: immuneML for SequenceDataset
-                    igor_column_name1: metadata_label1
-                    igor_column_name2: metadata_label2
-                import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
-                import_out_of_frame: False # whether to include out of frame sequences in the dataset
-                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
-                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                # Optional fields with IGoR-specific defaults, only change when different behavior is required:
-                separator: "," # column separator
-                region_type: IMGT_CDR3 # what part of the sequence to import
-                column_mapping: # column mapping IGoR: immuneML
-                    nt_CDR3: sequences
-                    seq_index: sequence_identifiers
+        definitions:
+            datasets:
+                my_igor_dataset:
+                    format: IGoR
+                    params:
+                        path: path/to/files/
+                        is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
+                        metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                        metadata_column_mapping: # metadata column mapping IGoR: immuneML for SequenceDataset
+                            igor_column_name1: metadata_label1
+                            igor_column_name2: metadata_label2
+                        import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
+                        import_out_of_frame: False # whether to include out of frame sequences in the dataset
+                        import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
+                        import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                        # Optional fields with IGoR-specific defaults, only change when different behavior is required:
+                        separator: "," # column separator
+                        region_type: IMGT_CDR3 # what part of the sequence to import
+                        column_mapping: # column mapping IGoR: immuneML
+                            nt_CDR3: sequences
+                            seq_index: sequence_identifiers
 
     """
     CODON_TABLE = {

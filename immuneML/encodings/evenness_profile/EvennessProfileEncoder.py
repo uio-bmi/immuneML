@@ -28,7 +28,7 @@ class EvennessProfileEncoder(DatasetEncoder):
     status. Genome Medicine, 7(1), 49. `doi.org/10.1186/s13073-015-0169-8 <https://doi.org/10.1186/s13073-015-0169-8>`_
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - min_alpha (float): minimum alpha value to use
 
@@ -37,16 +37,18 @@ class EvennessProfileEncoder(DatasetEncoder):
     - dimension (int): dimension of output evenness profile vector, or the number of alpha values to linearly space
       between min_alpha and max_alpha
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-            my_evenness_profile:
-                EvennessProfile:
-                    min_alpha: 0
-                    max_alpha: 10
-                    dimension: 51
+        definitions:
+            encodings:
+                my_evenness_profile:
+                    EvennessProfile:
+                        min_alpha: 0
+                        max_alpha: 10
+                        dimension: 51
 
 
     """
@@ -59,10 +61,10 @@ class EvennessProfileEncoder(DatasetEncoder):
     }
 
     def __init__(self, min_alpha: float, max_alpha: float, dimension: int, name: str = None):
+        super().__init__(name=name)
         self.min_alpha = min_alpha
         self.max_alpha = max_alpha
         self.dimension = dimension
-        self.name = name
 
     @staticmethod
     def _prepare_parameters(min_alpha: float, max_alpha: float, dimension: int, name: str = None):
@@ -120,6 +122,7 @@ class EvennessProfileEncoder(DatasetEncoder):
                                    feature_names=feature_names,
                                    example_ids=example_ids,
                                    feature_annotations=feature_annotations,
+                                   example_weights=EncoderHelper.get_example_weights_by_identifiers(dataset, example_ids),
                                    encoding=EvennessProfileEncoder.__name__)
 
         return encoded_data

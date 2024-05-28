@@ -61,7 +61,8 @@ class TestCVFeaturePerformance(TestCase):
 
         report.state = state
 
-        report_result = report.generate_report()
+        self.assertTrue(report.check_prerequisites())
+        report_result = report._generate()
 
         self.assertTrue(isinstance(report_result, ReportResult))
         self.assertEqual(2, len(report_result.output_tables))

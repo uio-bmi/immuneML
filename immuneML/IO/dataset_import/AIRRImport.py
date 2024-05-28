@@ -24,7 +24,7 @@ class AIRRImport(DataImport):
 
     When importing a ReceptorDataset, the AIRR field cell_id is used to determine the chain pairs.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - path (str): For RepertoireDatasets, this is the path to a directory with AIRR files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
@@ -37,6 +37,8 @@ class AIRRImport(DataImport):
     - receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor. Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum. If receptor_chains is not provided, the chain pair is automatically detected (only one chain pair type allowed per repertoire).
 
     - import_productive (bool): Whether productive sequences (with value 'T' in column productive) should be included in the imported sequences. By default, import_productive is True.
+
+    - import_unknown_productivity (bool): Whether sequences with unknown productivity (missing value in column productive) should be included in the imported sequences. By default, import_unknown_productivity is True.
 
     - import_with_stop_codon (bool): Whether sequences with stop codons (with value 'T' in column stop_codon) should be included in the imported sequences. This only applies if column stop_codon is present. By default, import_with_stop_codon is False.
 
@@ -66,33 +68,35 @@ class AIRRImport(DataImport):
     - separator (str): Column separator, for AIRR this is by default "\\t".
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_airr_dataset:
-            format: AIRR
-            params:
-                path: path/to/files/
-                is_repertoire: True # whether to import a RepertoireDataset
-                metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                metadata_column_mapping: # metadata column mapping AIRR: immuneML for Sequence- or ReceptorDatasetDataset
-                    airr_column_name1: metadata_label1
-                    airr_column_name2: metadata_label2
-                import_productive: True # whether to include productive sequences in the dataset
-                import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
-                import_out_of_frame: False # whether to include out of frame sequences in the dataset
-                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
-                import_empty_nt_sequences: True # keep sequences even if the `sequences` column is empty (provided that other fields are as specified here)
-                import_empty_aa_sequences: False # remove all sequences with empty `sequence_aa` column
-                # Optional fields with AIRR-specific defaults, only change when different behavior is required:
-                separator: "\\t" # column separator
-                region_type: IMGT_CDR3 # what part of the sequence to import
-                column_mapping: # column mapping AIRR: immuneML
-                    junction: sequence
-                    junction_aa: sequence_aa
-                    locus: chain
+        definitions:
+            datasets:
+                my_airr_dataset:
+                    format: AIRR
+                    params:
+                        path: path/to/files/
+                        is_repertoire: True # whether to import a RepertoireDataset
+                        metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                        metadata_column_mapping: # metadata column mapping AIRR: immuneML for Sequence- or ReceptorDatasetDataset
+                            airr_column_name1: metadata_label1
+                            airr_column_name2: metadata_label2
+                        import_productive: True # whether to include productive sequences in the dataset
+                        import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
+                        import_out_of_frame: False # whether to include out of frame sequences in the dataset
+                        import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
+                        import_empty_nt_sequences: True # keep sequences even if the `sequences` column is empty (provided that other fields are as specified here)
+                        import_empty_aa_sequences: False # remove all sequences with empty `sequence_aa` column
+                        # Optional fields with AIRR-specific defaults, only change when different behavior is required:
+                        separator: "\\t" # column separator
+                        region_type: IMGT_CDR3 # what part of the sequence to import
+                        column_mapping: # column mapping AIRR: immuneML
+                            junction: sequence
+                            junction_aa: sequence_aa
+                            locus: chain
 
     """
 
@@ -110,15 +114,16 @@ class AIRRImport(DataImport):
             - the allele information is removed from the V and J genes
         """
         if "productive" in df.columns:
-            df["frame_type"] = SequenceFrameType.OUT.name
-            df.loc[df["productive"], "frame_type"] = SequenceFrameType.IN.name
+            df["frame_type"] = SequenceFrameType.UNDEFINED.value
+            df.loc[df["productive"]==True, "frame_type"] = SequenceFrameType.IN.value
+            df.loc[df["productive"]==False, "frame_type"] = SequenceFrameType.OUT.value
         else:
             df["frame_type"] = None
 
         if "vj_in_frame" in df.columns:
-            df.loc[df["vj_in_frame"], "frame_type"] = SequenceFrameType.IN.name
+            df.loc[df["vj_in_frame"]==True, "frame_type"] = SequenceFrameType.IN.value
         if "stop_codon" in df.columns:
-            df.loc[df["stop_codon"], "frame_type"] = SequenceFrameType.STOP.name
+            df.loc[df["stop_codon"]==True, "frame_type"] = SequenceFrameType.STOP.value
 
         if "productive" in df.columns:
             frame_type_list = ImportHelper.prepare_frame_type_list(params)

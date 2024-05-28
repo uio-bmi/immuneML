@@ -16,7 +16,7 @@ class SubsamplingInstruction(Instruction):
     """
     Subsampling is an instruction that subsamples a given dataset and creates multiple smaller dataset according to the parameters provided.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - dataset (str): original dataset which will be used as a basis for subsampling
 
@@ -24,20 +24,21 @@ class SubsamplingInstruction(Instruction):
 
     - dataset_export_formats (list): in which formats to export the subsampled datasets. Valid formats are class names of any non-abstract class inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_subsampling_instruction: # user-defined name of the instruction
-            type: Subsampling # which instruction to execute
-            dataset: my_dataset # original dataset to be subsampled, with e.g., 300 examples
-            subsampled_dataset_sizes: # how large the subsampled datasets should be, one dataset will be created for each list item
-                - 200 # one subsampled dataset with 200 examples (200 repertoires if my_dataset was repertoire dataset)
-                - 100 # the other subsampled dataset will have 100 examples
-            dataset_export_formats: # in which formats to export the subsampled datasets
-                - ImmuneML
-                - AIRR
+        instructions:
+            my_subsampling_instruction: # user-defined name of the instruction
+                type: Subsampling # which instruction to execute
+                dataset: my_dataset # original dataset to be subsampled, with e.g., 300 examples
+                subsampled_dataset_sizes: # how large the subsampled datasets should be, one dataset will be created for each list item
+                    - 200 # one subsampled dataset with 200 examples (200 repertoires if my_dataset was repertoire dataset)
+                    - 100 # the other subsampled dataset will have 100 examples
+                dataset_export_formats: # in which formats to export the subsampled datasets
+                    - ImmuneML
+                    - AIRR
 
     """
 

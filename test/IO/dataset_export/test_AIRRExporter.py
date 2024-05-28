@@ -39,7 +39,7 @@ class TestAIRRExporter(TestCase):
                                                                        j_call="TRAJ2",
                                                                        chain=Chain.ALPHA,
                                                                        duplicate_count=15,
-                                                                       frame_type=SequenceFrameType.UNDEFINED,
+                                                                       frame_type=SequenceFrameType.OUT,
                                                                        region_type="IMGT_CDR3",
                                                                        custom_params={"d_call": "TRAD2",
                                                                                       "custom_test": "cust2",

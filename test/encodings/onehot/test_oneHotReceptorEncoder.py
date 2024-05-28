@@ -45,7 +45,6 @@ class TestOneHotSequenceEncoder(TestCase):
             label_config=lc,
             learn_model=True,
             model={},
-            filename="dataset.pkl"
         ))
 
         self.assertTrue(isinstance(encoded_data, ReceptorDataset))
@@ -97,7 +96,6 @@ class TestOneHotSequenceEncoder(TestCase):
             pool_size=1,
             learn_model=True,
             model={},
-            filename="dataset.pkl"
         ))
 
         self.assertTrue(isinstance(encoded_data, ReceptorDataset))

@@ -50,7 +50,8 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
-    'sphinx_rtd_theme',
+    'sphinx_toolbox.collapse',
+#    'sphinx_rtd_theme',
     'sphinx.ext.napoleon',
     'sphinx.ext.autosectionlabel',
     'sphinx_sitemap'

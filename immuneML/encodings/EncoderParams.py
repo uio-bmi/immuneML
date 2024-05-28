@@ -8,7 +8,6 @@ from immuneML.environment.LabelConfiguration import LabelConfiguration
 class EncoderParams:
     result_path: Path
     label_config: LabelConfiguration
-    filename: str = ""
     pool_size: int = 4
     model: dict = None
     learn_model: bool = True

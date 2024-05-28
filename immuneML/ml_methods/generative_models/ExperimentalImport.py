@@ -17,23 +17,24 @@ class ExperimentalImport(GenerativeModel):
     """
     Allows to import existing experimental data and do annotations and simulations on top of them.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        generative_model:
-            import_format: AIRR
-            tmp_import_path: ./tmp/
-            import_params:
-                path: path/to/files/
-                region_type: IMGT_CDR3 # what part of the sequence to import
-                column_mapping: # column mapping AIRR: immuneML
-                    junction: sequence
-                    junction_aa: sequence_aa
-                    locus: chain
-            type: ExperimentalImport
-
+        definitions:
+            ml_methods:
+                generative_model:
+                    type: ExperimentalImport
+                    import_format: AIRR
+                    tmp_import_path: ./tmp/
+                    import_params:
+                        path: path/to/files/
+                        region_type: IMGT_CDR3 # what part of the sequence to import
+                        column_mapping: # column mapping AIRR: immuneML
+                            junction: sequence
+                            junction_aa: sequence_aa
+                            locus: chain
     """
 
     def __init__(self, dataset: SequenceDataset, original_input_file: Path = None):

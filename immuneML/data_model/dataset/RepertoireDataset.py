@@ -63,8 +63,9 @@ class RepertoireDataset(Dataset):
         return RepertoireDataset(**{**kwargs, **{"repertoires": repertoires}})
 
     def __init__(self, labels: dict = None, encoded_data: EncodedData = None, repertoires: list = None, identifier: str = None,
-                 metadata_file: Path = None, name: str = None, metadata_fields: list = None, repertoire_ids: list = None):
-        super().__init__(encoded_data, name, identifier if identifier is not None else uuid.uuid4().hex, labels)
+                 metadata_file: Path = None, name: str = None, metadata_fields: list = None, repertoire_ids: list = None,
+                 example_weights: list = None):
+        super().__init__(encoded_data, name, identifier if identifier is not None else uuid.uuid4().hex, labels, example_weights)
         self.metadata_file = Path(metadata_file) if metadata_file is not None else None
         self.metadata_fields = metadata_fields
         self.repertoire_ids = repertoire_ids
@@ -106,7 +107,7 @@ class RepertoireDataset(Dataset):
         """Returns the list of metadata fields which can be used as labels; if refresh=True, it reloads the fields
         from disk"""
         all_metadata_fields = set(self.get_metadata_fields(refresh))
-        for non_label in ["subject_id", "filename", "repertoire_id", "identifier"]:
+        for non_label in ["subject_id", "filename", "repertoire_id", "identifier", "type_dict"]:
             if non_label in all_metadata_fields:
                 all_metadata_fields.remove(non_label)
 
@@ -167,6 +168,10 @@ class RepertoireDataset(Dataset):
         metadata_file = self._build_new_metadata(example_indices, path / f"{dataset_type}_metadata.csv")
         new_dataset = RepertoireDataset(repertoires=[self.repertoires[i] for i in example_indices], labels=copy.deepcopy(self.labels),
                                         metadata_file=metadata_file, identifier=str(uuid.uuid1()))
+
+        original_example_weights = self.get_example_weights()
+        if original_example_weights is not None:
+            new_dataset.set_example_weights([original_example_weights[i] for i in example_indices])
 
         return new_dataset
 

@@ -6,7 +6,7 @@ class ReportConfig:
     A class encapsulating different report lists which can be executed while performing nested cross-validation (CV) using TrainMLModel
     instruction. All arguments are optional.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - data (dict): :ref:`Data reports` to be executed on the whole dataset before it is split to training/test or training/validation
 
@@ -16,7 +16,7 @@ class ReportConfig:
 
     - encoding (dict): :ref:`Encoding reports` to be executed on each of the encoded training/test datasets or training/validation datasets
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

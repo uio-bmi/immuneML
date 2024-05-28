@@ -10,6 +10,7 @@ from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
+from immuneML.util.EncoderHelper import EncoderHelper
 
 
 class OneHotRepertoireEncoder(OneHotEncoder):
@@ -77,6 +78,7 @@ class OneHotRepertoireEncoder(OneHotEncoder):
                                    example_ids=repertoire_names,
                                    labels=labels,
                                    feature_names=feature_names,
+                                   example_weights=EncoderHelper.get_example_weights_by_identifiers(dataset, repertoire_names),
                                    encoding=OneHotEncoder.__name__)
 
         return encoded_data

@@ -13,7 +13,7 @@ class SequenceLengthFilter(Filter):
     """
     Removes sequences with length out of the predefined range.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - sequence_type (:py:obj:`~immuneML.environment.SequenceType.SequenceType`): Whether the sequences should be filtered on the nucleotide or amino acid level. Valid options are defined by the SequenceType enum.
 
@@ -21,7 +21,7 @@ class SequenceLengthFilter(Filter):
 
     - max_len (int): maximum length of the sequence (sequences longer than max_len will be removed); to not use max_len, set it to -1
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

@@ -36,7 +36,7 @@ class Word2VecEncoder(DatasetEncoder):
     This encoder relies on gensim's implementation of Word2Vec and KmerHelper for k-mer extraction. Currently it works on amino acid level.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - vector_size (int): The size of the vector to be learnt.
 
@@ -57,19 +57,21 @@ class Word2VecEncoder(DatasetEncoder):
     - window (int): max distance between two k-mers in a sequence (same as window parameter in gensim's word2vec)
 
 
-    YAML specification:
+    **YAML pecification:**
 
     .. highlight:: yaml
     .. code-block:: yaml
 
-        encodings:
-            my_w2v:
-                Word2Vec:
-                    vector_size: 16
-                    k: 3
-                    model_type: SEQUENCE
-                    epochs: 100
-                    window: 8
+        definitions:
+            encodings:
+                encodings:
+                    my_w2v:
+                        Word2Vec:
+                            vector_size: 16
+                            k: 3
+                            model_type: SEQUENCE
+                            epochs: 100
+                            window: 8
 
     """
 
@@ -178,10 +180,12 @@ class Word2VecEncoder(DatasetEncoder):
         feature_annotations = pd.DataFrame({"feature": feature_names})
 
         encoded_dataset.encoded_data = EncodedData(examples=scaled_examples,
-                                                   labels={label: labels[i] for i, label in enumerate(label_names)} if labels is not None else None,
-                                                   example_ids=[example.identifier for example in encoded_dataset.get_data()],
+                                                   labels={label: labels[i] for i, label in
+                                                           enumerate(label_names)} if labels is not None else None,
+                                                   example_ids=dataset.get_example_ids(),
                                                    feature_names=feature_names,
                                                    feature_annotations=feature_annotations,
+                                                   example_weights=dataset.get_example_weights(),
                                                    encoding=Word2VecEncoder.__name__)
         return encoded_dataset
 
@@ -231,11 +235,6 @@ class Word2VecEncoder(DatasetEncoder):
 
     def get_additional_files(self) -> List[str]:
         return [self.model_path]
-
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> str:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file
 
     @staticmethod
     def load_encoder(encoder_file: Path):

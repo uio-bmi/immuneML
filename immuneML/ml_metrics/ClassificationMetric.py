@@ -18,8 +18,8 @@ class ClassificationMetric(Enum):
     def get_metric(metric_name: str):
         try:
             return ClassificationMetric[metric_name.upper()]
-        except KeyError:
-            raise KeyError(f"'{metric_name}' is not a valid performance metric. Valid metrics are: {', '.join([m.name for m in ClassificationMetric])}")
+        except KeyError as e:
+            raise KeyError(f"'{metric_name}' is not a valid performance metric. Valid metrics are: {', '.join([m.name for m in ClassificationMetric])}").with_traceback(e.__traceback__)
 
     @staticmethod
     def get_search_criterion(metric):

@@ -1,0 +1,8 @@
+highlight_motifs_name: Highlighted motif
+min_points_in_window: 50
+smoothing_constant1: 5
+smoothing_constant2: 10
+training_set_name: training set
+test_set_name: test set
+split_by_motif_size: true
+keep_test_dataset: true

@@ -24,7 +24,7 @@ class ImmunoSEQSampleImport(DataImport):
     The only difference between these two importers is which columns they load from the .tsv files.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - path (str): For RepertoireDatasets, this is the path to a directory with files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
@@ -71,51 +71,53 @@ class ImmunoSEQSampleImport(DataImport):
     - separator (str): Column separator, for ImmunoSEQ files this is by default "\\t".
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_immunoseq_dataset:
-            format: ImmunoSEQSample
-            params:
-                path: path/to/files/
-                is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
-                metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                metadata_column_mapping: # metadata column mapping ImmunoSEQ: immuneML for SequenceDataset
-                    immunoseq_column_name1: metadata_label1
-                    immunoseq_column_name2: metadata_label2
-                import_productive: True # whether to include productive sequences in the dataset
-                import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
-                import_out_of_frame: False # whether to include out of frame sequences in the dataset
-                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
-                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
-                # Optional fields with ImmunoSEQ sample-specific defaults, only change when different behavior is required:
-                separator: "\\t" # column separator
-                columns_to_load: # subset of columns to load
-                - nucleotide
-                - aminoAcid
-                - count (templates/reads)
-                - vFamilyName
-                - vGeneName
-                - vGeneAllele
-                - jFamilyName
-                - jGeneName
-                - jGeneAllele
-                - sequenceStatus
-                region_type: IMGT_CDR3 # what part of the sequence to import
-                column_mapping: # column mapping immunoSEQ: immuneML
-                    nucleotide: sequence
-                    aminoAcid: sequence_aa
-                    vGeneName: v_call
-                    jGeneName: j_call
-                    sequenceStatus: frame_type
-                    vFamilyName: v_family
-                    jFamilyName: j_family
-                    vGeneAllele: v_allele
-                    jGeneAllele: j_allele
-                    count (templates/reads): duplicate_count
+        definitions:
+            datasets:
+                my_immunoseq_dataset:
+                    format: ImmunoSEQSample
+                    params:
+                        path: path/to/files/
+                        is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
+                        metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                        metadata_column_mapping: # metadata column mapping ImmunoSEQ: immuneML for SequenceDataset
+                            immunoseq_column_name1: metadata_label1
+                            immunoseq_column_name2: metadata_label2
+                        import_productive: True # whether to include productive sequences in the dataset
+                        import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
+                        import_out_of_frame: False # whether to include out of frame sequences in the dataset
+                        import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
+                        import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                        import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+                        # Optional fields with ImmunoSEQ sample-specific defaults, only change when different behavior is required:
+                        separator: "\\t" # column separator
+                        columns_to_load: # subset of columns to load
+                        - nucleotide
+                        - aminoAcid
+                        - count (templates/reads)
+                        - vFamilyName
+                        - vGeneName
+                        - vGeneAllele
+                        - jFamilyName
+                        - jGeneName
+                        - jGeneAllele
+                        - sequenceStatus
+                        region_type: IMGT_CDR3 # what part of the sequence to import
+                        column_mapping: # column mapping immunoSEQ: immuneML
+                            nucleotide: sequence
+                            aminoAcid: sequence_aa
+                            vGeneName: v_call
+                            jGeneName: j_call
+                            sequenceStatus: frame_type
+                            vFamilyName: v_family
+                            jFamilyName: j_family
+                            vGeneAllele: v_allele
+                            jGeneAllele: j_allele
+                            count (templates/reads): duplicate_count
 
     """
 

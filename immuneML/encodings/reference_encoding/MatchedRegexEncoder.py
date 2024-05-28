@@ -27,7 +27,7 @@ class MatchedRegexEncoder(DatasetEncoder):
     This encoding can be used in combination with the :ref:`Matches` report.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - match_v_genes (bool): Whether V gene matches are required. If this is True, a match is only counted if the
       V gene matches the gene specified in the motif input file. By default match_v_genes is False.
@@ -66,16 +66,18 @@ class MatchedRegexEncoder(DatasetEncoder):
         ====  ==========  =======  ==========  ========
 
 
-    YAML Specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_mr_encoding:
-            MatchedRegex:
-                motif_filepath: path/to/file.txt
-                match_v_genes: True
-                reads: unique
+        definitions:
+            encodings:
+                my_mr_encoding:
+                    MatchedRegex:
+                        motif_filepath: path/to/file.txt
+                        match_v_genes: True
+                        reads: unique
 
     """
 
@@ -84,13 +86,13 @@ class MatchedRegexEncoder(DatasetEncoder):
     }
 
     def __init__(self, motif_filepath: Path, match_v_genes: bool, reads: ReadsType, chains: list, name: str = None):
+        super().__init__(name=name)
         self.motif_filepath = motif_filepath
         self.match_v_genes = match_v_genes
         self.reads = reads
         self.chains = chains
         self.regex_df = None
         self.feature_count = None
-        self.name = name
 
     @staticmethod
     def _prepare_parameters(motif_filepath: str, match_v_genes: bool, reads: str, name: str = None):

@@ -86,7 +86,7 @@ class ImportHelper:
         except Exception as e:
             raise Exception(f"{e}\nAn error occurred while reading in the metadata file {params.metadata_file}. Please "
                             f"see the error log above for more details on this error and the documentation for the "
-                            f"expected format of the metadata.")
+                            f"expected format of the metadata.").with_traceback(e.__traceback__)
 
         ParameterValidator.assert_keys_present(metadata.columns.tolist(), ["filename"], ImportHelper.__name__,
                                                f'{dataset_name}: params: metadata_file')
@@ -142,7 +142,7 @@ class ImportHelper:
             return repertoire
         except Exception as exception:
             raise RuntimeError(
-                f"{ImportHelper.__name__}: error when importing file {metadata_row['filename']}.") from exception
+                f"{ImportHelper.__name__}: error when importing file {metadata_row['filename']}: {exception}").with_traceback(exception.__traceback__)
 
     @staticmethod
     def load_sequence_dataframe(filepath, params, alternative_load_func=None):
@@ -156,7 +156,7 @@ class ImportHelper:
                 f"{ex}\n\nImportHelper: an error occurred during dataset import while parsing the input file: {filepath}.\n"
                 f"Please make sure this is a correct immune receptor data file (not metadata).\n"
                 f"The parameters used for import are {params}.\nFor technical description of the error, see the log above. "
-                f"For details on how to specify the dataset import, see the documentation.")
+                f"For details on how to specify the dataset import, see the documentation.").with_traceback(ex.__traceback__)
 
         ImportHelper.rename_dataframe_columns(df, params)
         ImportHelper.standardize_none_values(df)
@@ -293,11 +293,13 @@ class ImportHelper:
     def prepare_frame_type_list(params: DatasetImportParams) -> list:
         frame_type_list = []
         if params.import_productive:
-            frame_type_list.append(SequenceFrameType.IN.name)
+            frame_type_list.append(SequenceFrameType.IN.value)
+        if params.import_unknown_productivity:
+            frame_type_list.append(SequenceFrameType.UNDEFINED.value)
         if params.import_out_of_frame:
-            frame_type_list.append(SequenceFrameType.OUT.name)
+            frame_type_list.append(SequenceFrameType.OUT.value)
         if params.import_with_stop_codon:
-            frame_type_list.append(SequenceFrameType.STOP.name)
+            frame_type_list.append(SequenceFrameType.STOP.value)
         return frame_type_list
 
     @staticmethod

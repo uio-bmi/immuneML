@@ -19,6 +19,7 @@ class DatasetImportParams:
     column_mapping_synonyms: dict = None
     region_type: RegionType = None
     import_productive: bool = None
+    import_unknown_productivity: bool = None
     import_unproductive: bool = None
     import_with_stop_codon: bool = None
     import_out_of_frame: bool = None

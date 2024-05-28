@@ -1,10 +1,14 @@
 ML method,binary classification,multi-class classification,sequence dataset,receptor dataset,repertoire dataset,model selection CV
 AtchleyKmerMILClassifier,✓,✗,✗,✗,✓,✗
+BinaryFeatureClassifier,✓,✗,✓,✗,✗,✗
 DeepRC,✓,✗,✗,✗,✓,✗
 KNN,✓,✓,✓,✓,✓,✓
+KerasSequenceCnn,✓,✗,✓,✗,✗,✗
 LogisticRegression,✓,✓,✓,✓,✓,✓
+PrecomputedKNN,✓,✓,✓,✓,✓,✓
 ProbabalisticBinaryClassifier,✓,✗,✗,✗,✓,✗
 RandomForestClassifier,✓,✓,✓,✓,✓,✓
 ReceptorCNN,✓,✗,✗,✓,✗,✗
+SVC,✓,✓,✓,✓,✓,✓
 SVM,✓,✓,✓,✓,✓,✓
 TCRdistClassifier,✓,✓,✓,✓,✓,✗

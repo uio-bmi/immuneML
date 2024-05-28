@@ -1,7 +1,7 @@
 import copy
 import logging
 import math
-import random
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -38,7 +38,7 @@ class ReceptorCNN(MLMethod):
     - ReceptorCNN can only be used for binary classification, not multi-class classification.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - kernel_count (count): number of kernels that will look for motifs for one chain
 
@@ -70,33 +70,34 @@ class ReceptorCNN(MLMethod):
 
     - background_probabilities: used for rescaling the kernel values to produce information gain matrix; represents the background probability of each amino acid (without positional information); if not specified, uniform background is assumed
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_receptor_cnn:
-            ReceptorCNN:
-                kernel_count: 5
-                kernel_size: [3]
-                positional_channels: 3
-                sequence_type: amino_acid
-                device: cpu
-                number_of_threads: 16
-                random_seed: 100
-                learning_rate: 0.01
-                iteration_count: 10000
-                l1_weight_decay: 0
-                l2_weight_decay: 0
-                batch_size: 5000
+        definitions:
+            ml_methods:
+                my_receptor_cnn:
+                    ReceptorCNN:
+                        kernel_count: 5
+                        kernel_size: [3]
+                        positional_channels: 3
+                        sequence_type: amino_acid
+                        device: cpu
+                        number_of_threads: 16
+                        random_seed: 100
+                        learning_rate: 0.01
+                        iteration_count: 10000
+                        l1_weight_decay: 0
+                        l2_weight_decay: 0
+                        batch_size: 5000
 
     """
 
     def __init__(self, kernel_count: int = None, kernel_size=None, positional_channels: int = None, sequence_type: str = None, device=None,
                  number_of_threads: int = None, random_seed: int = None, learning_rate: float = None, iteration_count: int = None,
                  l1_weight_decay: float = None, l2_weight_decay: float = None, batch_size: int = None, training_percentage: float = None,
-                 evaluate_at: int = None, background_probabilities=None, result_path: Path = None):
-
+                 evaluate_at: int = None, background_probabilities=None):
         super().__init__()
         self.kernel_count = kernel_count
         self.kernel_size = kernel_size
@@ -115,21 +116,17 @@ class ReceptorCNN(MLMethod):
 
         self.background_probabilities = None
         self.CNN = None
-        self.label = None
-        self.class_mapping = None
-        self.result_path = result_path
         self.chain_names = None
-        self.feature_names = None
 
-    def predict(self, encoded_data: EncodedData, label: Label):
-        predictions_proba = self.predict_proba(encoded_data, label)[label.name][self.label.positive_class]
-        return {label.name: [self.class_mapping[val] for val in (predictions_proba > 0.5).tolist()]}
+    def _predict(self, encoded_data: EncodedData):
+        predictions_proba = self._predict_proba(encoded_data)[self.label.name][self.label.positive_class]
+        return {self.label.name: [self.class_mapping[val] for val in (predictions_proba > 0.5).tolist()]}
 
     def set_background_probabilities(self):
         self.background_probabilities = np.array([1. / len(EnvironmentSettings.get_sequence_alphabet(self.sequence_type))
                            for i in range(len(EnvironmentSettings.get_sequence_alphabet(self.sequence_type)))])
 
-    def predict_proba(self, encoded_data: EncodedData, label: Label):
+    def _predict_proba(self, encoded_data: EncodedData):
         # set the model to evaluation mode for inference
         self.CNN.eval()
 
@@ -139,7 +136,7 @@ class ReceptorCNN(MLMethod):
         # make predictions
         with torch.no_grad():
             predictions = []
-            for examples, labels, example_ids in self._get_data_batch(encoded_data_pt, label.name):
+            for examples, labels, example_ids in self._get_data_batch(encoded_data_pt, self.label.name):
                 logit_outputs = self.CNN(examples)
                 prediction = torch.sigmoid(logit_outputs)
                 predictions.extend(prediction.numpy())
@@ -147,10 +144,7 @@ class ReceptorCNN(MLMethod):
         return {self.label.name: {self.label.positive_class: np.array(predictions),
                                   self.label.get_binary_negative_class(): 1 - np.array(predictions)}}
 
-    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
-
-        self.feature_names = encoded_data.feature_names
-
+    def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
         Util.setup_pytorch(self.number_of_threads, self.random_seed)
         if "chain_names" in encoded_data.info and encoded_data.info["chain_names"] is not None and len(encoded_data.info["chain_names"]) == 2:
             self.chain_names = encoded_data.info["chain_names"]
@@ -159,10 +153,6 @@ class ReceptorCNN(MLMethod):
 
         self._make_CNN()
         self.CNN.to(device=self.device)
-
-        self.label = label
-        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name], self.label.positive_class)
-
         self.CNN.train()
 
         iteration = 0
@@ -203,11 +193,6 @@ class ReceptorCNN(MLMethod):
 
         logging.info("ReceptorCNN: finished training.")
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None, cores_for_training: int = -1,
-                                optimization_metric=None):
-        logging.warning(f"{ReceptorCNN.__name__}: cross_validation is not implemented for this method. Using standard fitting instead...")
-        self.fit(encoded_data=encoded_data, label=label)
-
     def _get_data_batch(self, encoded_data: EncodedData, label_name: str):
         batch_count = int(math.ceil(len(encoded_data.example_ids) / self.batch_size))
         for i in range(batch_count):
@@ -216,12 +201,7 @@ class ReceptorCNN(MLMethod):
                   encoded_data.example_ids[start_index: end_index]
 
     def _prepare_and_split_data(self, encoded_data: EncodedData):
-        indices = list(range(len(encoded_data.example_ids)))
-        random.shuffle(indices)
-
-        limit = int(len(encoded_data.example_ids) * self.training_percentage)
-        train_indices = indices[:limit]
-        val_indices = indices[limit:]
+        train_indices, val_indices = Util.get_train_val_indices(len(encoded_data.example_ids), self.training_percentage)
 
         train_data = self._make_encoded_data(encoded_data, train_indices)
         val_data = self._make_encoded_data(encoded_data, val_indices)
@@ -269,7 +249,7 @@ class ReceptorCNN(MLMethod):
 
         return loss
 
-    def store(self, path: Path, feature_names=None, details_path: Path = None):
+    def store(self, path: Path):
         PathBuilder.build(path)
 
         torch.save(copy.deepcopy(self.CNN).state_dict(), str(path / "CNN.pt"))
@@ -314,28 +294,16 @@ class ReceptorCNN(MLMethod):
         self.CNN = RCNN(kernel_count=self.kernel_count, kernel_size=self.kernel_size, positional_channels=self.positional_channels,
                         sequence_type=self.sequence_type, background_probabilities=self.background_probabilities, chain_names=self.chain_names)
 
-    def check_if_exists(self, path):
-        return self.CNN is not None
-
     def get_params(self):
         params = copy.deepcopy(vars(self))
         params["CNN"] = copy.deepcopy(self.CNN).state_dict()
         return params
 
-    def get_label_name(self):
-        return self.label.name
-
-    def get_package_info(self) -> str:
-        return Util.get_immuneML_version()
-
-    def get_feature_names(self) -> list:
-        return self.feature_names
-
     def can_predict_proba(self) -> bool:
         return True
 
-    def get_class_mapping(self) -> dict:
-        return self.class_mapping
+    def can_fit_with_example_weights(self) -> bool:
+        return False
 
     def get_compatible_encoders(self):
         from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder

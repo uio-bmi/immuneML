@@ -19,7 +19,7 @@ class MultiDatasetBenchmarkTool:
     TrainMLModel instruction for each of the listed datasets and performs nested CV on each, accumulates the results of these runs and then
     generates reports on the cumulative results.
 
-    YAML specification:
+    **YAML specification:**
 
     .. highlight:: yaml
     .. code-block:: yaml

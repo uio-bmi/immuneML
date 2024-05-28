@@ -47,7 +47,7 @@ class TestSklearnMethod(TestCase):
         y = {"default": np.array(['a', "b", "c", "a"])}
 
         svm = SVM()
-        svm._fit(sparse.csr_matrix(x), y["default"])
+        svm._fit_model(sparse.csr_matrix(x), y["default"])
 
         path = EnvironmentSettings.root_path / "test/tmp/storesklearn/"
 
@@ -66,15 +66,15 @@ class TestSklearnMethod(TestCase):
         y = {"default": np.array(['a', "b", "c", "a"])}
 
         svm = SVM()
-        svm._fit(sparse.csr_matrix(x), y["default"])
+        svm._fit_model(sparse.csr_matrix(x), y["default"])
 
         path = EnvironmentSettings.root_path / "test/tmp/store_load_sklearn/"
         details_path = EnvironmentSettings.root_path / "test/tmp/store_load_sklearn/details.yaml"
 
-        svm.store(path=path, details_path=details_path)
+        svm.store(path=path)
 
         svm2 = SVM()
-        svm2.load(path=path, details_path=details_path)
+        svm2.load(path=path)
 
         shutil.rmtree(path)
 

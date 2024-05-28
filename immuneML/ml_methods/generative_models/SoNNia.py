@@ -29,7 +29,7 @@ class SoNNia(GenerativeModel):
     cell receptor repertoires with soNNia. Proceedings of the National Academy of Sciences, 118(14), e2023141118.
     https://doi.org/10.1073/pnas.2023141118
 
-    Specification arguments:
+    **Specification arguments:**
 
     - chain (str)
 
@@ -46,6 +46,17 @@ class SoNNia(GenerativeModel):
     - custom_model_path (str)
 
     - default_model_name (str)
+
+        **YAML specification:**
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        definitions:
+            ml_methods:
+                my_sonnia_model:
+                    SoNNia:
+                        ...
 
     """
 

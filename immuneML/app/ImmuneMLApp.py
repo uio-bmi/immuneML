@@ -36,14 +36,15 @@ class ImmuneMLApp:
         del os.environ[Constants.CACHE_TYPE]
 
     def run(self):
+        print_log(f"Running immuneML version {Constants.VERSION}\n", include_datetime=True)
 
         self.set_cache()
 
-        print_log(f"ImmuneML: parsing the specification...\n", include_datetime=True)
+        print_log(f"immuneML: parsing the specification...\n", include_datetime=True)
 
         symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path, self._result_path)
 
-        print_log(f"ImmuneML: starting the analysis...\n", include_datetime=True)
+        print_log(f"immuneML: starting the analysis...\n", include_datetime=True)
 
         instructions = symbol_table.get_by_type(SymbolType.INSTRUCTION)
         output = symbol_table.get("output")
@@ -91,7 +92,6 @@ def main():
     namespace.result_path = Path(namespace.result_path)
 
     run_immuneML(namespace)
-
 
 if __name__ == "__main__":
     main()

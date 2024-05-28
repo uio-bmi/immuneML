@@ -50,22 +50,24 @@ class DeepRCMotifDiscovery(MLReport):
        :height: 150px
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - n_steps (int): Number of IG steps (more steps -> better path integral -> finer contribution values). 50 is usually good enough.
 
     - threshold (float): Only applies to the plotting of kernels. Contributions are normalized to range [0, 1], and only kernels with normalized contributions above threshold are plotted.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_deeprc_report:
-            DeepRCMotifDiscovery:
-                threshold: 0.5
-                n_steps: 50
+        definitions:
+            reports:
+                my_deeprc_report:
+                    DeepRCMotifDiscovery:
+                        threshold: 0.5
+                        n_steps: 50
 
     """
 

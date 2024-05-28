@@ -99,12 +99,3 @@ class InstructionParser:
         with file_path.open("w") as file:
             write_class_docs(DocumentationFormat(instruction, "", DocumentationFormat.LEVELS[1]), file)
         return file_path
-
-    @staticmethod
-    def make_trainmlmodel_docs(path):
-        file_path = path / "hp.rst"
-        with file_path.open("w") as file:
-            write_class_docs(DocumentationFormat(TrainMLModelInstruction, "", DocumentationFormat.LEVELS[1]), file)
-            write_class_docs(DocumentationFormat(SplitConfig, "SplitConfig", DocumentationFormat.LEVELS[1]), file)
-            write_class_docs(DocumentationFormat(ReportConfig, "ReportConfig", DocumentationFormat.LEVELS[1]), file)
-        return file_path

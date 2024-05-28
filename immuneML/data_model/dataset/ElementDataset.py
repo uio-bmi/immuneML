@@ -28,12 +28,10 @@ class ElementDataset(Dataset):
 
     def __init__(self, labels: dict = None, encoded_data: EncodedData = None, filenames: list = None,
                  identifier: str = None, dataset_file: Path = None,
-                 file_size: int = 100000, name: str = None, element_class_name: str = None, element_ids: list = None,
+                 file_size: int = 100000, name: str = None, element_class_name: str = None,
+                 element_ids: list = None, example_weights: list = None,
                  buffer_type=None):
-        super().__init__()
-        self.labels = labels
-        self.encoded_data = encoded_data
-        self.identifier = identifier if identifier is not None else uuid4().hex
+        super().__init__(encoded_data, name, identifier if identifier is not None else uuid4().hex, labels, example_weights)
         self.filenames = filenames if filenames is not None else []
         self.filenames = [Path(filename) for filename in self.filenames]
         if buffer_type is None:
@@ -41,7 +39,6 @@ class ElementDataset(Dataset):
         self.element_generator = ElementGenerator(self.filenames, file_size, element_class_name, buffer_type)
         self.file_size = file_size
         self.element_ids = element_ids
-        self.name = name
         self.element_class_name = element_class_name
         self.dataset_file = Path(dataset_file)
 
@@ -110,12 +107,17 @@ class ElementDataset(Dataset):
                                            dataset_file=path / f"{dataset_name}.yaml", types=types,
                                            identifier=new_dataset_id, name=dataset_name)
 
+        # todo check if this is necessary
+        original_example_weights = self.get_example_weights()
+        if original_example_weights is not None:
+            new_dataset.set_example_weights([original_example_weights[i] for i in example_indices])
+
         return new_dataset
 
     def get_label_names(self):
         """Returns the list of metadata fields which can be used as labels"""
         return [label for label in list(self.labels.keys()) if
-                label not in ['region_type', 'receptor_chains', 'organism']] if self.labels else []
+                label not in ['region_type', 'receptor_chains', 'organism', 'type_dict']] if self.labels else []
 
     def clone(self, keep_identifier: bool = False):
         raise NotImplementedError

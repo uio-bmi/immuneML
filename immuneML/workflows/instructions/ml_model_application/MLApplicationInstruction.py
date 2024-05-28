@@ -77,7 +77,7 @@ class MLApplicationInstruction(Instruction):
           - 0.22
           - 0
 
-    Specification arguments:
+    **Specification arguments:**
 
     - dataset: dataset for which examples need to be classified
 
@@ -88,20 +88,21 @@ class MLApplicationInstruction(Instruction):
     - metrics (list): a list of metrics to compute between the true and predicted classes. These metrics will only be computed when the same label with the same classes is provided for the dataset as the original label the ML setting was trained for.
 
 
-    Specification example for the MLApplication instruction:
+    **YAML specification:**
 
     .. highlight:: yaml
     .. code-block:: yaml
 
-        instruction_name:
-            type: MLApplication
-            dataset: d1
-            config_path: ./config.zip
-            metrics:
-            - accuracy
-            - precision
-            - recall
-            number_of_processes: 4
+        instructions:
+            instruction_name:
+                type: MLApplication
+                dataset: d1
+                config_path: ./config.zip
+                metrics:
+                - accuracy
+                - precision
+                - recall
+                number_of_processes: 4
 
     """
 

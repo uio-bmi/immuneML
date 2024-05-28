@@ -33,21 +33,23 @@ class VJGeneDistribution(DataReport):
     case only the average value for the normalised gene usage frequencies are shown (original count values are additionaly exported in tsv files).
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a single label, or alternatively the label of interest can be specified under 'label'. By default, split_by_label is False.
 
     - label (str): Optional label for separating the results by color/creating separate plots. Note that this should the name of a valid dataset label.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_vj_gene_report:
-          VJGeneDistribution:
-            label: ag_binding
+        definitions:
+            reports:
+                my_vj_gene_report:
+                    VJGeneDistribution:
+                        label: ag_binding
 
     """
 
@@ -283,9 +285,9 @@ class VJGeneDistribution(DataReport):
         vj_dfs = []
 
         for repertoire in self.dataset.repertoires:
-            repertoire_attributes = {"v_call": repertoire.get_v_genes().tolist(),
-                                     "j_call": repertoire.get_j_genes().tolist(),
-                                     "chain": repertoire.get_attribute("chain").tolist()}
+            repertoire_attributes = {"v_call": repertoire.get_v_genes(),
+                                     "j_call": repertoire.get_j_genes(),
+                                     "chain": repertoire.get_attribute("chain", as_list=True)}
 
             v_rep_df = self._get_gene_count_df(repertoire_attributes, "v_call", include_label=False)
             j_rep_df = self._get_gene_count_df(repertoire_attributes, "j_call", include_label=False)

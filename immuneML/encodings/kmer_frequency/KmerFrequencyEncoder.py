@@ -29,7 +29,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
     K-mers can be defined in different ways, as determined by the sequence_encoding.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - sequence_encoding (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType`): The type
       of k-mers that are used. The simplest sequence_encoding is
@@ -81,32 +81,34 @@ class KmerFrequencyEncoder(DatasetEncoder):
       sparsity and will increase the memory consumption. The default value for scale_to_zero_mean is false.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_continuous_kmer:
-            KmerFrequency:
-                normalization_type: RELATIVE_FREQUENCY
-                reads: UNIQUE
-                sequence_encoding: CONTINUOUS_KMER
-                sequence_type: NUCLEOTIDE
-                k: 3
-                scale_to_unit_variance: True
-                scale_to_zero_mean: True
-        my_gapped_kmer:
-            KmerFrequency:
-                normalization_type: RELATIVE_FREQUENCY
-                reads: UNIQUE
-                sequence_encoding: GAPPED_KMER
-                sequence_type: AMINO_ACID
-                k_left: 2
-                k_right: 2
-                min_gap: 1
-                max_gap: 3
-                scale_to_unit_variance: True
-                scale_to_zero_mean: False
+        definitions:
+            encodings:
+                my_continuous_kmer:
+                    KmerFrequency:
+                        normalization_type: RELATIVE_FREQUENCY
+                        reads: UNIQUE
+                        sequence_encoding: CONTINUOUS_KMER
+                        sequence_type: NUCLEOTIDE
+                        k: 3
+                        scale_to_unit_variance: True
+                        scale_to_zero_mean: True
+                my_gapped_kmer:
+                    KmerFrequency:
+                        normalization_type: RELATIVE_FREQUENCY
+                        reads: UNIQUE
+                        sequence_encoding: GAPPED_KMER
+                        sequence_type: AMINO_ACID
+                        k_left: 2
+                        k_right: 2
+                        min_gap: 1
+                        max_gap: 3
+                        scale_to_unit_variance: True
+                        scale_to_zero_mean: False
 
     """
 
@@ -124,6 +126,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
     def __init__(self, normalization_type: NormalizationType, reads: ReadsType, sequence_encoding: SequenceEncodingType, k: int = 0,
                  k_left: int = 0, k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None,
                  name: str = None, scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False, sequence_type: SequenceType = None):
+        super().__init__(name=name)
         self.normalization_type = normalization_type
         self.reads = reads
         self.sequence_encoding = sequence_encoding
@@ -134,7 +137,6 @@ class KmerFrequencyEncoder(DatasetEncoder):
         self.min_gap = min_gap
         self.max_gap = max_gap
         self.metadata_fields_to_include = metadata_fields_to_include if metadata_fields_to_include is not None else []
-        self.name = name
         self.scale_to_unit_variance = scale_to_unit_variance
         self.scale_to_zero_mean = scale_to_zero_mean
         self.scaler = None
@@ -229,6 +231,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
                                    feature_names=feature_names,
                                    example_ids=example_ids,
                                    feature_annotations=feature_annotations,
+                                   example_weights=EncoderHelper.get_example_weights_by_identifiers(dataset, example_ids),
                                    encoding=KmerFrequencyEncoder.__name__)
 
         return encoded_data
@@ -286,18 +289,9 @@ class KmerFrequencyEncoder(DatasetEncoder):
                 if self.reads == ReadsType.UNIQUE:
                     counts[i] += 1
                 elif self.reads == ReadsType.ALL:
-                    counts[i] += sequence.metadata.count
+                    counts[i] += sequence.metadata.duplicate_count
         return counts
 
     def get_additional_files(self) -> List[str]:
         return []
 
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> Path:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file
-
-    @staticmethod
-    def load_encoder(encoder_file: Path):
-        encoder = DatasetEncoder.load_encoder(encoder_file)
-        return encoder

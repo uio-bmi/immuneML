@@ -22,7 +22,7 @@ class OneHotEncoder(DatasetEncoder):
     1 represents the alphabet character.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - use_positional_info (bool): whether to include features representing the positional information.
       If True, three additional feature vectors will be added, representing the sequence start, sequence middle
@@ -68,23 +68,25 @@ class OneHotEncoder(DatasetEncoder):
     - sequence_type: whether to use nucleotide or amino acid sequence for encoding. Valid values are 'nucleotide' and 'amino_acid'.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        one_hot_vanilla:
-            OneHot:
-                use_positional_info: False
-                flatten: False
-                sequence_type: amino_acid
+        definitions:
+            encodings:
+                one_hot_vanilla:
+                    OneHot:
+                        use_positional_info: False
+                        flatten: False
+                        sequence_type: amino_acid
 
-        one_hot_positional:
-            OneHot:
-                use_positional_info: True
-                distance_to_seq_middle: 3
-                flatten: False
-                sequence_type: nucleotide
+                one_hot_positional:
+                    OneHot:
+                        use_positional_info: True
+                        distance_to_seq_middle: 3
+                        flatten: False
+                        sequence_type: nucleotide
 
     """
 
@@ -95,6 +97,7 @@ class OneHotEncoder(DatasetEncoder):
     }
 
     def __init__(self, use_positional_info: bool, distance_to_seq_middle: int, flatten: bool, name: str = None, sequence_type: SequenceType = None):
+        super().__init__(name=name)
         self.use_positional_info = use_positional_info
         self.distance_to_seq_middle = distance_to_seq_middle
         self.flatten = flatten
@@ -106,8 +109,6 @@ class OneHotEncoder(DatasetEncoder):
             self.pos_decreasing = self.pos_increasing[::-1]
         else:
             self.pos_decreasing = None
-
-        self.name = name
 
         if self.sequence_type == SequenceType.NUCLEOTIDE and self.distance_to_seq_middle is not None:  # todo check this / explain in docs
             self.distance_to_seq_middle = self.distance_to_seq_middle * 3
@@ -149,22 +150,17 @@ class OneHotEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-    def _prepare_caching_params(self, dataset, params: EncoderParams, step: str = ""):
-        return (("example_identifiers", tuple(dataset.get_example_ids())),
-                ("dataset_metadata", dataset.metadata_file if hasattr(dataset, "metadata_file") else None),
+    def _prepare_caching_params(self, dataset, params: EncoderParams):
+        return (("dataset_identifier", dataset.identifier),
+                ("example_identifiers", tuple(dataset.get_example_ids())),
                 ("dataset_type", dataset.__class__.__name__),
                 ("labels", tuple(params.label_config.get_labels_by_name())),
                 ("encoding", OneHotEncoder.__name__),
-                ("learn_model", params.learn_model),
-                ("step", step),
                 ("encoding_params", tuple(vars(self).items())))
 
     @abc.abstractmethod
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         pass
-
-    def store(self, encoded_dataset, params: EncoderParams):
-        ImmuneMLExporter.export(encoded_dataset, params.result_path)
 
     def _encode_sequence_list(self, sequences, pad_n_sequences, pad_sequence_len):
         char_array = np.array(sequences, dtype=str)

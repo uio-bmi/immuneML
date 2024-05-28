@@ -50,7 +50,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
     See :ref:`Reproduction of the CMV status predictions study` for an example using :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - p_value_threshold (float): The p value threshold to be used by the statistical test.
 
@@ -71,16 +71,18 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
       presence matrix. This may take a lot of storage space if the input dataset is large. By default, temporary files are not kept.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. code-block:: yaml
 
-        my_sa_encoding:
-            CompAIRRSequenceAbundance:
-                compairr_path: optional/path/to/compairr
-                p_value_threshold: 0.05
-                ignore_genes: False
-                threads: 8
+        definitions:
+            encodings:
+                my_sa_encoding:
+                    CompAIRRSequenceAbundance:
+                        compairr_path: optional/path/to/compairr
+                        p_value_threshold: 0.05
+                        ignore_genes: False
+                        threads: 8
 
     """
 
@@ -91,7 +93,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
     def __init__(self, p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, keep_temporary_files: bool,
                  threads: int, name: str = None):
-        self.name = name
+        super().__init__(name=name)
         self.p_value_threshold = p_value_threshold
         self.sequence_batch_size = sequence_batch_size
         self.keep_temporary_files = keep_temporary_files
@@ -105,11 +107,17 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         self.context = None
         self.compairr_sequence_presence = None
 
-        self.compairr_params = CompAIRRParams(compairr_path=Path(compairr_path), keep_compairr_input=True,
-                                              differences=0, indels=False,
-                                              ignore_counts=True, ignore_genes=ignore_genes,
-                                              threads=threads, output_filename=None,
-                                              log_filename=None, output_pairs=False, pairs_filename=None)
+        self.compairr_params = CompAIRRParams(compairr_path=Path(compairr_path),
+                                              keep_compairr_input=True,
+                                              differences=0,
+                                              indels=False,
+                                              ignore_counts=True,
+                                              ignore_genes=ignore_genes,
+                                              threads=threads,
+                                              output_filename=None,
+                                              log_filename=None,
+                                              output_pairs=False,
+                                              pairs_filename=None)
 
     @staticmethod
     def _prepare_parameters(p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, keep_temporary_files: bool,
@@ -141,7 +149,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         return CompAIRRSequenceAbundanceEncoder(**prepared_params)
 
     def encode(self, dataset, params: EncoderParams):
-        AbundanceEncoderHelper.check_labels(params.label_config, CompAIRRSequenceAbundanceEncoder.__name__)
+        EncoderHelper.check_positive_class_labels(params.label_config, CompAIRRSequenceAbundanceEncoder.__name__)
         self.compairr_params.is_cdr3 = dataset.repertoires[0].get_region_type() == RegionType.IMGT_CDR3
 
         self.compairr_sequence_presence = self._prepare_sequence_presence_data(dataset, params)
@@ -278,6 +286,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         encoded_data = EncodedData(examples, dataset.get_metadata([label.name]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [CompAIRRSequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE,
                                     CompAIRRSequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
+                                   example_weights=dataset.get_example_weights(),
                                    encoding=CompAIRRSequenceAbundanceEncoder.__name__,
                                    info={"relevant_sequence_path": self.relevant_sequence_path,
                                          "contingency_table_path": self.contingency_table_path,
@@ -352,14 +361,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     def set_context(self, context: dict):
         self.context = context
         return self
-
-    def store(self, encoded_dataset, params: EncoderParams):
-        EncoderHelper.store(encoded_dataset, params)
-
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> Path:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file
 
     def get_additional_files(self) -> List[Path]:
         return [file for file in [self.relevant_indices_path, self.relevant_sequence_path, self.contingency_table_path, self.p_values_path] if file]

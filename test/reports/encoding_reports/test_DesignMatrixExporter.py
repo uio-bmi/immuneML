@@ -25,7 +25,8 @@ class TestDesignMatrixExporter(TestCase):
         path = EnvironmentSettings.tmp_test_path / "designmatrrixexporterreport/"
 
         report = DesignMatrixExporter(dataset, path, name='report', file_format='csv')
-        report.generate_report()
+        self.assertTrue(report.check_prerequisites())
+        report._generate()
         self.assertTrue(os.path.isfile(path / "design_matrix.csv"))
 
         self.assertTrue(os.path.isfile(path / "labels.csv"))
@@ -61,7 +62,7 @@ class TestDesignMatrixExporter(TestCase):
 
         report = DesignMatrixExporter(dataset=dataset, result_path=path,
                                       name="design_matrix", file_format='csv')
-        report.generate_report()
+        report._generate()
         self.assertTrue(os.path.isfile(path / "design_matrix.csv"))
         report.file_format = 'csv.zip'
         report._export_matrix()

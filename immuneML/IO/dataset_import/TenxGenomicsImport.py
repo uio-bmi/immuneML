@@ -26,7 +26,7 @@ class TenxGenomicsImport(DataImport):
     Furthermore, the 10xGenomics field clonotype_id is used for the immuneML field cell_id.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - path (str): For RepertoireDatasets, this is the path to a directory with 10xGenomics files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
@@ -37,6 +37,12 @@ class TenxGenomicsImport(DataImport):
     - paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a SequenceDataset (paired = False) or a ReceptorDataset (paired = True). In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together based on the identifier given in the 10xGenomics column named 'clonotype_id'.
 
     - receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor.  Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum. If receptor_chains is not provided, the chain pair is automatically detected (only one chain pair type allowed per repertoire).
+
+    - import_productive (bool): Whether productive sequences (with value 'True' in column productive) should be included in the imported sequences. By default, import_productive is True.
+
+    - import_unproductive (bool): Whether productive sequences (with value 'Fale' in column productive) should be included in the imported sequences. By default, import_unproductive is False.
+
+    - import_unknown_productivity (bool): Whether sequences with unknown productivity (missing or 'NA' value in column productive) should be included in the imported sequences. By default, import_unknown_productivity is True.
 
     - import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.
 
@@ -66,36 +72,38 @@ class TenxGenomicsImport(DataImport):
     - separator (str): Column separator, for 10xGenomics this is by default ",".
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_10x_dataset:
-            format: 10xGenomics
-            params:
-                path: path/to/files/
-                is_repertoire: True # whether to import a RepertoireDataset
-                metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                paired: False # whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False
-                receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
-                metadata_column_mapping: # metadata column mapping 10xGenomics: immuneML for SequenceDataset
-                    tenx_column_name1: metadata_label1
-                    tenx_column_name2: metadata_label2
-                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
-                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
-                # Optional fields with 10xGenomics-specific defaults, only change when different behavior is required:
-                separator: "," # column separator
-                region_type: IMGT_CDR3 # what part of the sequence to import
-                column_mapping: # column mapping 10xGenomics: immuneML
-                    cdr3: sequence_aa
-                    cdr3_nt: sequence
-                    v_gene: v_call
-                    j_gene: j_call
-                    umis: duplicate_count
-                    clonotype_id: cell_id
-                    consensus_id: sequence_id
+        definitions:
+            datasets:
+                my_10x_dataset:
+                    format: 10xGenomics
+                    params:
+                        path: path/to/files/
+                        is_repertoire: True # whether to import a RepertoireDataset
+                        metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                        paired: False # whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False
+                        receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
+                        metadata_column_mapping: # metadata column mapping 10xGenomics: immuneML for SequenceDataset
+                            tenx_column_name1: metadata_label1
+                            tenx_column_name2: metadata_label2
+                        import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
+                        import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                        import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+                        # Optional fields with 10xGenomics-specific defaults, only change when different behavior is required:
+                        separator: "," # column separator
+                        region_type: IMGT_CDR3 # what part of the sequence to import
+                        column_mapping: # column mapping 10xGenomics: immuneML
+                            cdr3: sequence_aa
+                            cdr3_nt: sequence
+                            v_gene: v_call
+                            j_gene: j_call
+                            umis: duplicate_count
+                            clonotype_id: cell_id
+                            consensus_id: sequence_id
 
     """
 
@@ -105,17 +113,21 @@ class TenxGenomicsImport(DataImport):
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        df["frame_type"] = None
-        df['productive'] = df['productive'] == 'True'
-        df.loc[df['productive'], "frame_type"] = SequenceFrameType.IN.name
+        df["frame_type"] = SequenceFrameType.UNDEFINED.value
+        df.loc[df['productive']=="True", "frame_type"] = SequenceFrameType.IN.value
+        df.loc[df['productive']=="False", "frame_type"] = SequenceFrameType.OUT.value
 
         allowed_productive_values = []
         if params.import_productive:
-            allowed_productive_values.append(True)
+            allowed_productive_values.append('True')
         if params.import_unproductive:
-            allowed_productive_values.append(False)
+            allowed_productive_values.append('False')
+        if params.import_unknown_productivity:
+            allowed_productive_values.append('')
+            allowed_productive_values.append('NA')
 
         df = df[df.productive.isin(allowed_productive_values)]
+        df.drop(columns=["productive"], inplace=True)
 
         ImportHelper.junction_to_cdr3(df, params.region_type)
         df.loc[:, "region_type"] = params.region_type.name
