@@ -35,7 +35,7 @@ Lastly, this quickstart tutorial can be used when you have immuneML :ref:`instal
 
 For simulation purposes, you can try LIgO quickstart:
 
-- :ref:`Simulation quickstart`
+- :ref:`LIgO simulation quickstart`
 
 
 
