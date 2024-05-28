@@ -3,8 +3,8 @@ from datetime import datetime
 
 import random
 import numpy as np
-import pkg_resources
 import torch
+import importlib
 from sklearn.preprocessing import label_binarize
 
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
@@ -100,8 +100,8 @@ class Util:
     @staticmethod
     def get_immuneML_version():
         try:
-            return 'immuneML ' + pkg_resources.get_distribution('immuneML').version
-        except pkg_resources.DistributionNotFound as err:
+            return 'immuneML ' + importlib.metadata.version('immuneML')
+        except importlib.metadata.PackageNotFoundError as err:
             try:
                 return 'immuneML ' + Constants.VERSION
             except Exception as e:

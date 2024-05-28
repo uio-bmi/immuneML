@@ -1,9 +1,8 @@
 import hashlib
-import warnings
 from pathlib import Path
 
 import numpy as np
-import pkg_resources
+import importlib
 import torch
 import yaml
 from sklearn.exceptions import NotFittedError
@@ -452,7 +451,7 @@ class DeepRC(MLMethod):
 
 
     def get_package_info(self) -> str:
-        return Util.get_immuneML_version() + '; deepRC ' + pkg_resources.get_distribution('DeepRC').version
+        return Util.get_immuneML_version() + '; deepRC ' + importlib.metadata.version('DeepRC')
 
     def can_predict_proba(self) -> bool:
         return True

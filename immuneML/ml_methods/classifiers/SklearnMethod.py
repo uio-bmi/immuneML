@@ -6,7 +6,7 @@ from pathlib import Path
 
 import dill
 import numpy as np
-import pkg_resources
+import importlib
 import yaml
 from sklearn.metrics import get_scorer_names
 from sklearn.model_selection import RandomizedSearchCV
@@ -241,7 +241,7 @@ class SklearnMethod(MLMethod):
         pass
 
     def get_package_info(self) -> str:
-        return Util.get_immuneML_version() + '; scikit-learn ' + pkg_resources.get_distribution('scikit-learn').version
+        return Util.get_immuneML_version() + '; scikit-learn ' + importlib.metadata.version('scikit-learn')
 
     def get_compatible_encoders(self):
         from immuneML.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
