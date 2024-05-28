@@ -19,13 +19,11 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         self._load_regex_df()
 
-        encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires, labels=dataset.labels,
-                                            metadata_file=dataset.metadata_file)
-
         feature_annotations = self._get_feature_info()
         encoded_repertoires, labels = self._encode_repertoires(dataset, params)
 
-        encoded_dataset.add_encoded_data(EncodedData(
+        encoded_dataset = dataset.clone()
+        encoded_dataset.encoded_data = EncodedData(
             examples=encoded_repertoires,
             example_ids=dataset.get_example_ids(), #list(dataset.get_metadata(["subject_id"]).values())[0],
             example_weights=dataset.get_example_weights(),
@@ -33,7 +31,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
             feature_annotations=feature_annotations,
             labels=labels,
             encoding=MatchedRegexEncoder.__name__
-        ))
+        )
 
         return encoded_dataset
 

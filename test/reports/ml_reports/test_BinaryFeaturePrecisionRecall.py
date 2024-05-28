@@ -65,8 +65,8 @@ class TestBinaryFeaturePrecisionRecall(TestCase):
         report.method = motif_classifier
         report.label = label
         report.result_path = path
-        report.train_dataset = SequenceDataset(buffer_type="NA", dataset_file="")
-        report.test_dataset = SequenceDataset(buffer_type="NA", dataset_file="")
+        report.train_dataset = SequenceDataset(buffer_type="NA", dataset_file="", batchfiles_path="")
+        report.test_dataset = SequenceDataset(buffer_type="NA", dataset_file="", batchfiles_path="")
         report.train_dataset.encoded_data = enc_data_train
         report.test_dataset.encoded_data = enc_data_test
 

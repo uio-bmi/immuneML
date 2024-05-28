@@ -179,7 +179,8 @@ class KmerAbundanceEncoder(DatasetEncoder):
                                          "contingency_table_path": self.contingency_table_path,
                                          "p_values_path": self.p_values_path})
 
-        encoded_dataset = RepertoireDataset(labels=dataset.labels, encoded_data=encoded_data, repertoires=dataset.repertoires)
+        encoded_dataset = dataset.clone()
+        encoded_dataset.encoded_data = encoded_data
 
         return encoded_dataset
 

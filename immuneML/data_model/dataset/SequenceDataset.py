@@ -28,8 +28,7 @@ class SequenceDataset(ElementDataset):
         file_count = math.ceil(len(sequences) / file_size)
         PathBuilder.build(path)
 
-        file_names = [
-            path / f"batch{''.join(['0' for i in range(1, len(str(file_count)) - len(str(index)) + 1)])}{index}.tsv"
+        filenames = [f"batch{''.join(['0' for i in range(1, len(str(file_count)) - len(str(index)) + 1)])}{index}.tsv"
             for index in range(1, file_count + 1)]
 
         seq_set_dc, types = make_dynamic_seq_set_from_objs(sequences)
@@ -39,17 +38,18 @@ class SequenceDataset(ElementDataset):
                     for field_name in types.keys()}
             vals = prepare_values_for_bnp(vals, types)
             sequence_matrix = seq_set_dc(**vals)
-            bnp_write_to_file(file_names[index], sequence_matrix)
+            bnp_write_to_file(path / filenames[index], sequence_matrix)
 
         metadata = {
             'type_dict': {key: SequenceSet.TYPE_TO_STR[val] for key, val in types.items()},
             'dataset_class': 'SequenceDataset', 'element_class_name': ReceptorSequence.__name__,
-            'filenames': [str(file) for file in file_names]
+            'filenames': filenames
         }
         dataset_file = path / f'dataset_{name}.yaml'
         write_yaml(dataset_file, metadata)
 
-        return SequenceDataset(filenames=file_names, file_size=file_size, name=name, labels=labels,
+        return SequenceDataset(filenames=filenames, batchfiles_path=path, file_size=file_size,
+                               name=name, labels=labels,
                                element_class_name=ReceptorSequence.__name__, dataset_file=dataset_file,
                                buffer_type=bnp.io.delimited_buffers.get_bufferclass_for_datatype(seq_set_dc,
                                                                                                  delimiter='\t',
@@ -78,8 +78,8 @@ class SequenceDataset(ElementDataset):
 
     def clone(self, keep_identifier: bool = False):
         dataset = SequenceDataset(labels=self.labels, encoded_data=copy.deepcopy(self.encoded_data),
-                                  filenames=copy.deepcopy(self.filenames), dataset_file=self.dataset_file,
-                                  file_size=self.file_size, name=self.name)
+                                  filenames=copy.deepcopy(self.filenames), batchfiles_path=copy.deepcopy(self.batchfiles_path),
+                                  dataset_file=self.dataset_file, file_size=self.file_size, name=self.name)
         if keep_identifier:
             dataset.identifier = self.identifier
         dataset.element_ids = self.element_ids

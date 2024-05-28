@@ -14,33 +14,52 @@ from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestImmuneMLImport(TestCase):
-    def test_import(self):
-        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "iml_import/")
 
-        repertoires, metadata = RepertoireBuilder.build([["AA"], ["CC"]], path)
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
+    def test_import_repertoires(self):
+        base_path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "iml_import_repertoires/")
+        orig_dataset_folder = base_path / "orig_dataset"
+        orig_dataset = RandomDatasetGenerator.generate_repertoire_dataset(2, {10: 1}, {3: 1}, {}, orig_dataset_folder)
+        dataset_path = ImmuneMLExporter.export(orig_dataset, orig_dataset_folder)
 
-        with open(path / "dataset.yaml", "w") as file:
-            dataset_dict = {key: item if not isinstance(item, Path) else str(item) for key, item in vars(dataset).items()
-                            if key not in ['repertoires', 'encoded_data']}
-            yaml.dump({**dataset_dict, **{"dataset_class": "RepertoireDataset"}}, file)
+        imported_dataset = ImmuneMLImport.import_dataset({"path": dataset_path}, "dataset_name")
 
-        dataset2 = ImmuneMLImport.import_dataset({"path": path / "dataset.yaml"}, "dataset_name")
+        self.assertEqual(2, len(imported_dataset.get_data()))
+        self.assertListEqual(orig_dataset.get_example_ids(), imported_dataset.get_example_ids())
 
-        shutil.rmtree(path)
+        # testing if dataset can be imported from different folder location
+        moved_dataset_folder = base_path / "newpath" / "subfolder"
+        shutil.move(orig_dataset_folder, moved_dataset_folder)
 
-        self.assertEqual(2, len(dataset2.get_data()))
-        self.assertEqual("rep_1", dataset2.get_data()[1].metadata["subject_id"])
+        moved_imported_dataset = ImmuneMLImport.import_dataset({"path": moved_dataset_folder / dataset_path.name},
+                                                               "dataset_name")
+        self.assertEqual(2, len(moved_imported_dataset.get_data()))
+        self.assertListEqual(orig_dataset.get_example_ids(), moved_imported_dataset.get_example_ids())
+
+        shutil.rmtree(base_path)
 
     def test_import_receptors(self):
-        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "iml_import_receptors/")
+        base_path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "iml_import_receptors/")
+        orig_dataset_folder = base_path / "orig_dataset"
 
-        dataset = RandomDatasetGenerator.generate_receptor_dataset(10, {2: 1}, {3: 1}, {}, path)
-        dataset.name = "d1"
-        ImmuneMLExporter.export(dataset, path)
+        orig_dataset = RandomDatasetGenerator.generate_receptor_dataset(10, {2: 1}, {3: 1}, {}, orig_dataset_folder)
+        dataset_path = ImmuneMLExporter.export(orig_dataset, orig_dataset_folder)
 
-        receptor_dataset = ImmuneMLImport.import_dataset({"path": path / "d1.yaml"}, "d2")
+        imported_dataset = ImmuneMLImport.import_dataset({"path": dataset_path}, "d2")
 
-        self.assertEqual(10, len(list(receptor_dataset.get_data())))
+        self.assertEqual(orig_dataset.get_example_count(), imported_dataset.get_example_count())
+        self.assertEqual(len(list(imported_dataset.get_data())), len(list(imported_dataset.get_data())))
+        self.assertListEqual(orig_dataset.get_example_ids(), imported_dataset.get_example_ids())
 
-        shutil.rmtree(path)
+        # testing if dataset can be imported from different folder location
+        moved_dataset_folder = base_path / "newpath" / "subfolder"
+        shutil.move(orig_dataset_folder, moved_dataset_folder)
+
+        moved_imported_dataset = ImmuneMLImport.import_dataset({"path": moved_dataset_folder / dataset_path.name},
+                                                               "dataset_name")
+        self.assertEqual(orig_dataset.get_example_count(), moved_imported_dataset.get_example_count())
+        self.assertListEqual(orig_dataset.get_example_ids(), moved_imported_dataset.get_example_ids())
+
+        # original data has been deleted so get_data doesnt work, testing this way instead
+        self.assertEqual(orig_dataset.get_example_count(), len(list(moved_imported_dataset.get_data())))
+
+        shutil.rmtree(base_path)
