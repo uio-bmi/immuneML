@@ -144,8 +144,8 @@ class TrainGenModelInstruction(GenModelInstruction):
         bnp_write_to_file(path / 'batch1.tsv', combined_data)
 
         self.state.combined_dataset = SequenceDataset.build(
-            dataset_file=path / f'combined_{self.state.name}_dataset.yaml', filenames=[path / 'batch1.tsv'],
-            types=get_type_dict_from_bnp_object(combined_data), element_class_name='ReceptorSequence')
+            dataset_file=path / f'combined_{self.state.name}_dataset.yaml', filenames=['batch1.tsv'],
+            batchfiles_path=path, types=get_type_dict_from_bnp_object(combined_data), element_class_name='ReceptorSequence')
 
     def _get_dataclass_object_from_dataset(self, dataset: Dataset, from_gen_model_vals: np.ndarray,
                                            used_for_training_vals: np.ndarray):
