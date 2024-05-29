@@ -59,9 +59,9 @@ class SillyEncoder(DatasetEncoder):
                                                                               params.encode_labels),
                                    encoding=SillyEncoder.__name__)
 
-        return SequenceDataset(filenames=dataset.get_filenames(), encoded_data=encoded_data,
-                               labels=dataset.labels, file_size=dataset.file_size,
-                               dataset_file=dataset.dataset_file)
+        encoded_dataset = dataset.clone()
+        encoded_dataset.encoded_data = encoded_data
+        return encoded_dataset
 
     def _get_encoded_sequences(self, dataset: SequenceDataset) -> np.array:
         encoded_sequences = []
