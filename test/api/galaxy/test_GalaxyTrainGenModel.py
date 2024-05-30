@@ -23,6 +23,10 @@ def test_train_gen_model_run():
                     }
                 }
             },
+            "reports": {
+              "seq_len": "SequenceLengthDistribution",
+              "kl_gen_model_report": "KLKmerComparison"
+            },
             "ml_methods": {
                 "sonnia": {
                     "SoNNia": {
@@ -42,8 +46,11 @@ def test_train_gen_model_run():
                 "gen_examples_count": 100,
                 "dataset": "d1",
                 "method": "sonnia",
+                "reports": ["seq_len", "kl_gen_model_report"],
                 "number_of_processes": 2,
-                'training_percentage': 1.
+                'training_percentage': 1.,
+                "export_generated_dataset": False,
+                "export_combined_dataset": True
             }
         }
     }

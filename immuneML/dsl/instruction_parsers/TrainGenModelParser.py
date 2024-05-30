@@ -24,6 +24,10 @@ class TrainGenModelParser:
                                                  'number_of_processes', 1)
         ParameterValidator.assert_type_and_value(float(instruction['training_percentage']), float, TrainGenModelParser.__name__,
                                                  'training_percentage', 0, 1)
+        ParameterValidator.assert_type_and_value(instruction['export_generated_dataset'], bool, TrainGenModelParser.__name__, 'export_generated_dataset')
+        ParameterValidator.assert_type_and_value(instruction['export_combined_dataset'], bool, TrainGenModelParser.__name__, 'export_combined_dataset')
+
+        assert instruction['export_generated_dataset'] or instruction['export_combined_dataset'], f"{TrainGenModelParser.__name__}: 'export_generated_dataset' and 'export_combined_dataset' are both set to False. At least one of these must be True. "
 
         valid_report_ids = symbol_table.get_keys_by_type(SymbolType.REPORT)
         ParameterValidator.assert_all_in_valid_list(instruction['reports'], valid_report_ids, TrainGenModelParser.__name__, 'reports')

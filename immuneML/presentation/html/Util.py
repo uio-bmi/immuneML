@@ -78,6 +78,26 @@ class Util:
         return path_str
 
     @staticmethod
+    def get_logfile_path(base_path) -> str:
+        path_str = ""
+
+        logfile_path = list(base_path.glob("../*log.txt"))
+
+        if len(logfile_path) == 1:
+            path_str = os.path.relpath(logfile_path[0], base_path)
+        else:
+            try:
+                logger = logging.getLogger()
+                if len(logger.handlers) == 1:
+                    handler = logger.handlers[0]
+                    if isinstance(handler, logging.handlers.FileHandler):
+                        path_str = os.path.relpath(str(handler.baseFilename), base_path)
+            except Exception:
+                pass
+
+        return path_str
+
+    @staticmethod
     def get_table_string_from_csv_string(csv_string: str, separator: str = ",", has_header: bool = True) -> str:
         table_string = "<table>\n"
         for index, line in enumerate(csv_string.splitlines()):
@@ -118,11 +138,11 @@ class Util:
         return report_result
 
     @staticmethod
-    def make_dataset_html_map(dataset):
-        return {"dataset_name": dataset.name,
-                "dataset_type": StringHelper.camel_case_to_word_string(type(dataset).__name__),
-                "dataset_size": f"{dataset.get_example_count()} {type(dataset).__name__.replace('Dataset', 's').lower()}",
-                "dataset_labels": [{"dataset_label_name": label_name,
-                                    "dataset_label_classes": ", ".join(str(class_name) for class_name in dataset.labels[label_name])}
-                                   for label_name in dataset.get_label_names()]
-                }
+    def make_dataset_html_map(dataset, dataset_key="dataset"):
+        return {f"{dataset_key}_name": dataset.name,
+                f"{dataset_key}_type": StringHelper.camel_case_to_word_string(type(dataset).__name__),
+                f"{dataset_key}_size": f"{dataset.get_example_count()} {type(dataset).__name__.replace('Dataset', 's').lower()}",
+                f"{dataset_key}_labels": [{f"{dataset_key}_label_name": label_name,
+                                           f"{dataset_key}_label_classes": ", ".join(str(class_name) for class_name in dataset.labels[label_name])}
+                                                for label_name in dataset.get_label_names()],
+                f"show_{dataset_key}_labels": len(dataset.get_label_names()) > 0}

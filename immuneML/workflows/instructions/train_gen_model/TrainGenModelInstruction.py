@@ -69,6 +69,8 @@ class TrainGenModelInstruction(GenModelInstruction):
                 gen_examples_count: 100
                 number_of_processes: 4
                 training_percentage: 0.7
+                export_generated_dataset: True
+                export_combined_dataset: False
                 reports: [data_rep1, ml_rep2]
 
     """
@@ -77,10 +79,11 @@ class TrainGenModelInstruction(GenModelInstruction):
 
     def __init__(self, dataset: Dataset = None, method: GenerativeModel = None, number_of_processes: int = 1,
                  gen_examples_count: int = 100, result_path: Path = None, name: str = None, reports: list = None,
-                 export_combined_dataset: bool = False, training_percentage: float = None):
+                 export_generated_dataset: bool = True, export_combined_dataset: bool = False, training_percentage: float = None):
         super().__init__(TrainGenModelState(result_path, name, gen_examples_count), method, reports)
         self.dataset = dataset
         self.number_of_processes = number_of_processes
+        self.export_generated_dataset = export_generated_dataset
         self.export_combined_dataset = export_combined_dataset
         self.state.training_percentage = training_percentage
 
@@ -116,7 +119,7 @@ class TrainGenModelInstruction(GenModelInstruction):
         print_log(f"{self.state.name}: fitted the model", True)
 
     def _gen_data(self):
-        super()._gen_data()
+        super()._gen_data(export_airr=self.export_generated_dataset)
         self._make_and_export_combined_dataset()
 
     def _make_combined_dataset(self):

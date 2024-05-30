@@ -81,16 +81,14 @@ def build_specs(parsed_args):
                 "number_of_processes": 8,
                 "gen_examples_count": int(parsed_args.gen_example_count),
                 "training_percentage": float(parsed_args.training_percentage) / 100,
+                "export_generated_dataset": True if parsed_args.export_dataset_type == "generated_dataset" else False,
                 "export_combined_dataset": True if parsed_args.export_dataset_type == "combined_dataset" else False,
                 "reports": list(reports.keys()),
             }
         }
     }
 
-
-
     return specs
-
 
 def main(args):
     parsed_args = parse_command_line_arguments(args)

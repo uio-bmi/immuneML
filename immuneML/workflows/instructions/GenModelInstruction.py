@@ -36,7 +36,7 @@ class GenModelInstruction(Instruction, ABC):
         self.state = state
         self.reports = reports
 
-    def _gen_data(self):
+    def _gen_data(self, export_airr: bool):
         dataset = self.method.generate_sequences(self.state.gen_examples_count, 1,
                                                  self.state.result_path / 'generated_sequences',
                                                  SequenceType.AMINO_ACID, False)
@@ -45,8 +45,9 @@ class GenModelInstruction(Instruction, ABC):
         self.generated_dataset = dataset
         self.state.generated_dataset = self.generated_dataset
 
-        AIRRExporter.export(dataset, self.state.result_path / 'exported_gen_dataset')
-        self.state.exported_datasets['generated_dataset'] = self.state.result_path / 'exported_gen_dataset'
+        if export_airr:
+            AIRRExporter.export(dataset, self.state.result_path / 'exported_gen_dataset')
+            self.state.exported_datasets['generated_dataset'] = self.state.result_path / 'exported_gen_dataset'
 
     def _run_reports(self):
         report_path = self._get_reports_path()
