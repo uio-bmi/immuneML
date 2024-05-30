@@ -38,6 +38,7 @@ class ClusteringHTMLBuilder:
             "name": state.name,
             'immuneML_version': MLUtil.get_immuneML_version(),
             "full_specs": Util.get_full_specs_path(base_path),
+            "logfile": Util.get_logfile_path(base_path),
             "predictions_path": Path(os.path.relpath(path=str(state.predictions_path), start=str(base_path))),
             "performance_table_internal_val": ClusteringHTMLBuilder.make_internal_performance_table(state),
             "label_eval_tables": ClusteringHTMLBuilder.make_external_performance_tables(state),

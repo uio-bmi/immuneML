@@ -12,8 +12,11 @@
     <div class="container">
         <div>
             <h1>Clustering workflow: {{name}}</h1>
-            <div>Full specification is available <a href="{{full_specs}}">here</a>.</div>
-            <div class="padded-bottom padded-top">immuneML version: {{immuneML_version}}</div>
+            <p>immuneML version: {{immuneML_version}}</p>
+            <p>Full specification is available <a href="{{{full_specs}}}">here</a>.</p>
+            <p>Log file is available <a href="{{{logfile}}}">here</a>.</p>
+            <p></p>
+
             <details>
             <summary>Dataset details</summary>
             <div class="grid-container">
@@ -36,6 +39,7 @@
                     </div>
                 </div>
             </div>
+
         </details>
             <div class="padded-top padded-bottom"><a href="{{predictions_path}}">Download all cluster predictions here.</a></div>
             <h2>Performances</h2>

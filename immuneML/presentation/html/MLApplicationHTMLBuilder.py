@@ -24,15 +24,13 @@ class MLApplicationHTMLBuilder:
 
     @staticmethod
     def make_html_map(state: MLApplicationState, base_path: Path) -> dict:
-        return {
+        return {**Util.make_dataset_html_map(state.dataset), **{
             "css_style": Util.get_css_content(MLApplicationHTMLBuilder.CSS_PATH),
             "hp_setting": state.hp_setting.get_key(),
             'immuneML_version': MLUtil.get_immuneML_version(),
+            "full_specs": Util.get_full_specs_path(base_path),
+            "logfile": Util.get_logfile_path(base_path),
             "label": state.label_config.get_labels_by_name()[0],
-            "dataset_name": state.dataset.name,
-            "dataset_type": StringHelper.camel_case_to_word_string(type(state.dataset).__name__),
-            "example_count": state.dataset.get_example_count(),
-            "dataset_size": f"{state.dataset.get_example_count()} {type(state.dataset).__name__.replace('Dataset', 's').lower()}",
             "labels": [{"name": label_name, "values": str(state.label_config.get_label_values(label_name))[1:-1]}
                        for label_name in state.label_config.get_labels_by_name()],
             "predictions": Util.get_table_string_from_csv(state.predictions_path),
@@ -40,4 +38,4 @@ class MLApplicationHTMLBuilder:
             "show_metrics": state.metrics_path is not None,
             "metrics": Util.get_table_string_from_csv(state.metrics_path) if state.metrics_path is not None else None,
             "metrics_download_link": os.path.relpath(state.metrics_path, base_path) if state.metrics_path is not None else None
-        }
+        }}

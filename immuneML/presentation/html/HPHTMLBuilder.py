@@ -275,13 +275,10 @@ class HPHTMLBuilder:
 
     @staticmethod
     def _make_main_html_map(state: TrainMLModelState, base_path: Path) -> dict:
-        html_map = {
+        html_map = {**Util.make_dataset_html_map(state.dataset), **{
             "css_style": Util.get_css_content(HPHTMLBuilder.CSS_PATH),
             "full_specs": Util.get_full_specs_path(base_path),
-            "dataset_name": state.dataset.name if state.dataset.name is not None else state.dataset.identifier,
-            "dataset_type": StringHelper.camel_case_to_word_string(type(state.dataset).__name__),
-            "example_count": state.dataset.get_example_count(),
-            "dataset_size": f"{state.dataset.get_example_count()} {type(state.dataset).__name__.replace('Dataset', 's').lower()}",
+            "logfile": Util.get_logfile_path(base_path),
             "labels": [{"name": label.name, "values": str(label.values)[1:-1]} for label in state.label_configuration.get_label_objects()],
             "optimization_metric": state.optimization_metric.name.lower(),
             "other_metrics": str([metric.name.lower() for metric in state.metrics])[1:-1].replace("'", ""),
@@ -293,7 +290,7 @@ class HPHTMLBuilder:
             "hp_per_label": HPHTMLBuilder._make_hp_per_label(state),
             'models_per_label': HPHTMLBuilder._make_model_per_label(state, base_path),
             'immuneML_version': MLUtil.get_immuneML_version()
-        }
+        }}
 
         return html_map
 
