@@ -57,13 +57,13 @@ class SillyClassifier(MLMethod):
         return {self.label.name: np.array(predictions)}
 
     def get_compatible_encoders(self):
-        # Every encoder that is compatible with the ML method should be listed here.
-        # The SillyClassifier can in principle be used with any encoder, few examples are listed
+        # The SillyClassifier can be used with any encoder, few examples are listed here:
         from immuneML.encodings.distance_encoding.DistanceEncoder import DistanceEncoder
         from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
         from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
+        from immuneML.encodings.silly.SillyEncoder import SillyEncoder
 
-        return [DistanceEncoder, KmerFrequencyEncoder, OneHotEncoder]
+        return [DistanceEncoder, KmerFrequencyEncoder, OneHotEncoder, SillyEncoder]
 
     def can_predict_proba(self) -> bool:
         return True
