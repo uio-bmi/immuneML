@@ -15,7 +15,7 @@ from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisIns
 
 class DatasetGenerationOverviewTool(GalaxyTool):
     """
-    DatasetGenerationTool is an alternative to running ImmuneMLApp directly.
+    DatasetGenerationOverviewTool is an alternative to running ImmuneMLApp directly.
     This tool is meant to be used as an endpoint for Galaxy tool that will create a Galaxy collection out of a dataset in immuneML format.
 
     This tool accepts a path to a YAML specification which uses a single dataset, and runs the ExploratoryAnalysisInstruction with optional reports.
