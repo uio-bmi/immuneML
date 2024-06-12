@@ -74,7 +74,7 @@ def build_specs(parsed_args):
             }
         },
         "instructions": {
-            "inst1": {
+            f"train_{parsed_args.generative_method}": {
                 "type": "TrainGenModel",
                 "dataset": "dataset",
                 "method": "generative_model",
