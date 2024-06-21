@@ -1,4 +1,5 @@
 import dataclasses
+import logging
 from dataclasses import fields as get_fields
 from enum import Enum
 from itertools import chain
@@ -25,8 +26,7 @@ def bnp_write_to_file(filename: Path, bnp_object):
 
 def bnp_read_from_file(filename: Path, buffer_type: bnp.io.delimited_buffers.DelimitedBuffer = None, dataclass=None):
     if buffer_type is None:
-        buffer_type = bnp.io.delimited_buffers.get_bufferclass_for_datatype(dataclass, delimiter='\t',
-                                                                            has_header=True)
+        buffer_type = bnp.io.delimited_buffers.get_bufferclass_for_datatype(dataclass, delimiter='\t', has_header=True)
     with bnp.open(str(filename), buffer_type=buffer_type) as file:
         return file.read()  # TODO: fix - throws error when empty file (no lines after header)
 
@@ -98,29 +98,30 @@ def convert_enums_to_str(field_values: dict) -> dict:
 
 
 def make_dynamic_seq_set_dataclass(type_dict: Dict[str, Any]):
-    dc = dataclasses.make_dataclass('DynamicSequenceSet', fields=type_dict.items(),
-                                    namespace={
-                                        'get_row_by_index': lambda self, index: get_row_by_index(self, index),
-                                        'get_single_row_value': lambda self,
-                                                                       attr_name: get_single_row_value(self, attr_name),
+    bnp_dc = bnpdataclass(dataclasses.make_dataclass('DynamicSequenceSet', fields=type_dict.items()))
 
-                                        'to_dict': lambda self: {field: getattr(self, field).tolist()
-                                                                 for field in type_dict.keys()},
-                                        'get_rows_by_indices': lambda self, index1, index2: get_rows_by_indices(self,
-                                                                                                                index1,
-                                                                                                                index2)
-                                    })
+    methods = {'get_row_by_index': lambda self, index: get_row_by_index(self, index),
+               'get_single_row_value': lambda self, attr_name: get_single_row_value(self, attr_name),
+               'to_dict': lambda self: {field: getattr(self, field).tolist() for field in type_dict.keys()},
+               'get_rows_by_indices': lambda self, index1, index2: get_rows_by_indices(self, index1, index2)
+               }
 
-    return bnpdataclass(dc)
+    for method_name, method in methods.items():
+        setattr(bnp_dc, method_name, method)
+
+    return bnp_dc
 
 
 def get_receptor_attributes_for_bnp(receptors, receptor_dc, types) -> dict:
     field_vals = {}
     for field_obj in dataclasses.fields(receptor_dc):
         if receptors[0].metadata and field_obj.name in receptors[0].metadata:
-            field_vals[field_obj.name] = list(chain.from_iterable((receptor.get_attribute(field_obj.name), receptor.get_attribute(field_obj.name)) for receptor in receptors))
+            field_vals[field_obj.name] = list(chain.from_iterable(
+                (receptor.get_attribute(field_obj.name), receptor.get_attribute(field_obj.name)) for receptor in
+                receptors))
         elif field_obj.name == 'identifier':
-            field_vals[field_obj.name] = list(chain.from_iterable((receptor.identifier, receptor.identifier) for receptor in receptors))
+            field_vals[field_obj.name] = list(
+                chain.from_iterable((receptor.identifier, receptor.identifier) for receptor in receptors))
         else:
             field_vals[field_obj.name] = list(chain.from_iterable([receptor.get_chain(ch).get_attribute(field_obj.name)
                                                                    for ch in receptor.get_chains()]
@@ -145,26 +146,39 @@ def make_dynamic_seq_set_from_objs(objs: list):
 
 def get_field_type_from_values(values):
     if isinstance(values, np.ndarray):
-        return values.dtype
-    if len(values) == 0:
-        return str
-    if values[0] is not None:
+        t = type(values[0].item())
+    elif len(values) == 0:
+        t = str
+    elif values[0] is not None:
         if issubclass(type(values[0]), Enum):
-            return str
+            t = str
         else:
-            return type(values[0])
-    proper_values = [v for v in values if v is not None]
-    if len(proper_values) > 0:
-        return type(proper_values[0])
+            t = type(values[0])
     else:
-        return str
+        proper_values = [v for v in values if v is not None]
+        if len(proper_values) > 0:
+            t = type(proper_values[0])
+        else:
+            t = str
+
+    return t
 
 
 def get_row_by_index(self, index) -> dict:
     field_names = [f.name for f in dataclasses.fields(self)]
-    return {
-        field_name: getattr(self, field_name).tolist()[index] for field_name in field_names
-    }
+    d = dict()
+
+    for field_name in field_names:
+        field_value = getattr(self, field_name)[index]
+
+        if isinstance(field_value, EncodedArray):
+            field_value = field_value.to_string()
+        else:
+            field_value = field_value.item()
+
+        d[field_name] = field_value
+
+    return d
 
 
 def get_rows_by_indices(self, index1, index2) -> dict:
@@ -212,14 +226,29 @@ def make_buffer_type_from_dataset_file(dataset_file: Path):
         raise RuntimeError(f"Dataset file {dataset_file} doesn't exist, cannot load the dataset.")
 
 
-def merge_dataclass_objects(objects: list):
-    field_names = sorted(
-        list(set(chain.from_iterable([field.name for field in get_fields(obj)] for obj in objects))))
+def merge_dataclass_objects(objects: list, fill_unmatched: bool = False):
+    fields = {k: v for d in [{field.name: field.type for field in get_fields(obj)} for obj in objects] for k, v in
+              d.items()}
+    fields = {k: fields[k] for k in sorted(list(fields.keys()))}
+
+    tmp_objs = []
 
     for obj in objects:
-        assert all(hasattr(obj, field) for field in field_names), (obj, field_names)
+        missing_fields = [field for field in fields.keys() if not hasattr(obj, field)]
 
-    cls = type(objects[0])
+        if not fill_unmatched or len(missing_fields) == 0:
+            assert all(hasattr(obj, field) for field in fields.keys()), (obj, list(fields.keys()))
+            tmp_objs.append(obj)
+        else:
+            logging.info(f"Filling in missing fields when merging dataclass objects: {missing_fields}\nObject:\n{obj}")
+            tmp_objs.append(obj.add_fields({field_name: [SequenceSet.get_neutral_value(fields[field_name])] * len(obj)
+                                            for field_name in missing_fields}))
+
+    cls = make_dynamic_seq_set_dataclass(fields)
     return cls(
-        **{field_name: list(chain.from_iterable([getattr(obj, field_name) for obj in objects])) for field_name in
-           field_names})
+        **{field_name: list(chain.from_iterable([getattr(obj, field_name) for obj in tmp_objs])) for field_name in
+           fields.keys()})
+
+
+def get_type_dict_from_bnp_object(bnp_object) -> dict:
+    return {field.name: field.type for field in get_fields(bnp_object)}

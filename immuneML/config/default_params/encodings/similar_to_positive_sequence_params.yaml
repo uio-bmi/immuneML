@@ -1,0 +1,5 @@
+hamming_distance: 1
+ignore_genes: false
+threads: 8
+keep_temporary_files: false
+compairr_path: null

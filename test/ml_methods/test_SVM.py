@@ -46,7 +46,7 @@ class TestSVM(TestCase):
                         {"t1": [1, 0, 2, 0, 1, 0, 2, 0], "t2": [1, 0, 2, 0, 1, 0, 2, 0]})
 
         svm = SVM()
-        svm.fit_by_cross_validation(x, number_of_splits=2, label=Label("t1", [0, 1, 2]))
+        svm.fit_by_cross_validation(x, number_of_splits=2, label=Label("t1", [0, 1, 2]), optimization_metric="balanced_accuracy")
 
     def test_store(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])

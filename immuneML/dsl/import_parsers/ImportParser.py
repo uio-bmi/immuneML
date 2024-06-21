@@ -63,9 +63,9 @@ class ImportParser:
             raise KeyError(f"{key_error}\n\nAn error occurred during parsing of dataset {key}. "
                            f"The keyword {key_error.args[0]} was missing. This either means this argument was "
                            f"not defined under definitions/datasets/{key}/params, or this column was missing from "
-                           f"an input data file. ")
+                           f"an input data file. ").with_traceback(key_error.__traceback__)
         except Exception as ex:
-            raise Exception(f"{ex}\n\nAn error occurred while parsing the dataset {key}. See the log above for more details.")
+            raise Exception(f"{ex}\n\nAn error occurred while parsing the dataset {key}. See the log above for more details.").with_traceback(ex.__traceback__)
 
         return dataset
 
@@ -88,5 +88,6 @@ class ImportParser:
 
     @staticmethod
     def log_dataset_info(dataset: Dataset):
-        print_log(f"Imported {dataset.__class__.__name__.split('Dataset')[0].lower()} dataset {dataset.name} with "
-                  f"{dataset.get_example_count()} examples.", True)
+        print_log(f"Imported {dataset.__class__.__name__.split('Dataset')[0].lower()} dataset {dataset.name}:\n"
+                  f"- Example count: {dataset.get_example_count()}\n"
+                  f"- Labels: {dataset.get_label_names()}", True)

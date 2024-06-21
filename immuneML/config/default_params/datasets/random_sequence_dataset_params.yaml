@@ -5,3 +5,4 @@ length_probabilities:
   14: 0.3
   17: 0.1
 labels: {}
+region_type: IMGT_CDR3

@@ -1,11 +1,11 @@
+import json
 import shutil
 from pathlib import Path
 
 import numpy as np
 from olga import load_model
-from sonia.sequence_generation import SequenceGeneration
-from sonnia.sonnia import SoNNia as InternalSoNNia
 
+from immuneML.data_model.bnp_util import write_yaml, read_yaml
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.RegionType import RegionType
@@ -29,31 +29,63 @@ class SoNNia(GenerativeModel):
     cell receptor repertoires with soNNia. Proceedings of the National Academy of Sciences, 118(14), e2023141118.
     https://doi.org/10.1073/pnas.2023141118
 
-    Arguments:
+    **Specification arguments:**
 
-        chain (str)
+    - chain (str)
 
-        batch_size (int)
+    - batch_size (int)
 
-        epochs (int)
+    - epochs (int)
 
-        deep (bool)
+    - deep (bool)
 
-        include_joint_genes (bool)
+    - include_joint_genes (bool)
 
-        n_gen_seqs (int)
+    - n_gen_seqs (int)
 
-        custom_model_path (str)
+    - custom_model_path (str)
 
-        default_model_name (str)
+    - default_model_name (str)
+
+        **YAML specification:**
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        definitions:
+            ml_methods:
+                my_sonnia_model:
+                    SoNNia:
+                        ...
 
     """
 
     @classmethod
     def load_model(cls, path: Path):
-        raise NotImplementedError
+        from sonnia.sonnia import SoNNia as InternalSoNNia
 
-    def __init__(self, chain=None, batch_size: int = None, epochs: int = None, deep: bool = False,
+        assert path.exists(), f"{cls.__name__}: {path} does not exist."
+
+        model_overview_file = path / 'model_overview.yaml'
+
+        for file in [model_overview_file]:
+            assert file.exists(), f"{cls.__name__}: {file} is not a file."
+
+        model_overview = read_yaml(model_overview_file)
+        sonnia = SoNNia(**{k: v for k, v in model_overview.items() if k != 'type'})
+        with open(path / 'model.json', 'r') as json_file:
+            model_data = json.load(json_file)
+
+        sonnia._model = InternalSoNNia(custom_pgen_model=sonnia._model_path,
+                                       vj=sonnia.chain in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
+                                       include_joint_genes=sonnia.include_joint_genes,
+                                       include_indep_genes=not sonnia.include_joint_genes)
+
+        sonnia._model.model.set_weights([np.array(w) for w in model_data['model_weights']])
+
+        return sonnia
+
+    def __init__(self, chain=None, batch_size: int = None, epochs: int = None, deep: bool = False, name: str = None,
                  default_model_name: str = None, n_gen_seqs: int = None, include_joint_genes: bool = True,
                  custom_model_path: str = None):
         if chain is not None:
@@ -66,6 +98,7 @@ class SoNNia(GenerativeModel):
         self.include_joint_genes = include_joint_genes
         self.n_gen_seqs = n_gen_seqs
         self._model = None
+        self.name = name
         self.default_model_name = default_model_name
         if custom_model_path is None or custom_model_path == '':
             self._model_path = Path(
@@ -74,6 +107,11 @@ class SoNNia(GenerativeModel):
             self._model_path = custom_model_path
 
     def fit(self, dataset: Dataset, path: Path = None):
+        from sonnia.sonnia import SoNNia as InternalSoNNia
+
+        region_types = list(set(dataset.get_attribute('region_type', as_list=True)))
+        assert len(region_types) == 1 and RegionType[region_types[0].upper()] == RegionType.IMGT_JUNCTION, \
+            f"SoNNia supports only IMGT_JUNCTION for the input sequences, got {region_types}"
         print_log(f"{SoNNia.__name__}: fitting a selection model...", True)
 
         data = dataset.get_attributes(['sequence_aa', 'v_call', 'j_call'], as_list=True)
@@ -97,6 +135,8 @@ class SoNNia(GenerativeModel):
         raise NotImplementedError
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
+        from sonia.sequence_generation import SequenceGeneration
+
         gen_model = SequenceGeneration(self._model)
         sequences = gen_model.generate_sequences_post(count)
         return SequenceDataset.build_from_objects(sequences=[ReceptorSequence(sequence_aa=seq[0], sequence=seq[3],
@@ -126,5 +166,17 @@ class SoNNia(GenerativeModel):
 
     def save_model(self, path: Path) -> Path:
         PathBuilder.build(path / 'model')
-        self._model.save_model(path / 'model')
+
+        write_yaml(path / 'model/model_overview.yaml', {'type': 'SoNNia', 'chain': self.chain.name,
+                                                        **{k: v for k, v in vars(self).items()
+                                                           if k not in ['_model', 'chain', '_model_path']}})
+        attributes_to_save = ['data_seqs', 'gen_seqs', 'log']
+        self._model.save_model(path / 'model', attributes_to_save)
+
+        model_json = self._model.model.to_json()
+        model_weights = [w.tolist() for w in self._model.model.get_weights()]
+        model_data = {'model_config': model_json, 'model_weights': model_weights}
+        with open(path / 'model' / 'model.json', 'w') as json_file:
+            json.dump(model_data, json_file)
+
         return Path(shutil.make_archive(str(path / 'trained_model'), "zip", str(path / 'model'))).absolute()

@@ -56,7 +56,7 @@ class Quickstart:
                     },
                     "hprep": "MLSettingsPerformance",
                     "coef": "Coefficients"
-                }
+                },
             },
             "instructions": {
                 "machine_learning_instruction": {
@@ -125,26 +125,46 @@ class Quickstart:
 
         specs = {
             "definitions": {
-                "datasets": {
-                    "my_synthetic_dataset": {"format": "RandomRepertoireDataset", "params": {"labels": {}}}
-                },
-                "motifs": {"my_motif": {"seed": "AA", "instantiation": "GappedKmer"}},
-                "signals": {"my_signal": {"motifs": ["my_motif"], "implanting": "HealthySequence"}},
-                "simulations": {"my_simulation": {
-                    "type": "Implanting",
-                    "sim_items": {
-                        "my_implantng": {
-                            "type": "Implanting",
-                            "signals": ["my_signal"],
-                            "dataset_implanting_rate": 0.5,
-                            "repertoire_implanting_rate": 0.1
+                "motifs": {"my_motif": {"seed": "AAA"}},
+                "signals": {"my_signal": {"motifs": ["my_motif"]}},
+                "simulations": {
+                    "quickstart_simulation": {
+                        'is_repertoire': True,
+                        'paired': False,
+                        'sequence_type': 'amino_acid',
+                        'simulation_strategy': 'Implanting',
+                        'remove_seqs_with_signals': False,
+                        'sim_items': {
+                            "pos_reps": {
+                                "signals": {"my_signal": 0.1},
+                                "number_of_examples": 50,
+                                "receptors_in_repertoire_count": 100,
+                                "generative_model": {
+                                    "default_model_name": "humanTRB",
+                                    "type": "OLGA"
+                                }
+                            },
+                            "neg_reps": {
+                                "signals": {},
+                                "number_of_examples": 50,
+                                "receptors_in_repertoire_count": 100,
+                                "generative_model": {
+                                    "default_model_name": "humanTRB",
+                                    "type": "OLGA"
+                                }
+                            }
                         }
                     }
                 }
-                }
             },
-            "instructions": {"simulation_instruction": {"type": "Simulation", "dataset": "my_synthetic_dataset", "simulation": "my_simulation",
-                                                        "export_formats": ["AIRR"]}}
+            "instructions": {
+                "simulation_instruction": {
+                    "type": "LigoSim",
+                    "export_p_gens": False,
+                    "max_iterations": 100,
+                    "sequence_batch_size": 2000,
+                    "simulation": "quickstart_simulation"
+                }}
         }
 
         specs_file = path / "simulation_specs.yaml"

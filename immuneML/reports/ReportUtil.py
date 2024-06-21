@@ -1,4 +1,5 @@
 import copy
+import warnings
 from pathlib import Path
 from typing import List
 
@@ -11,6 +12,7 @@ from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.reports.ml_reports.MLReport import MLReport
+from immuneML.util.ParameterValidator import ParameterValidator
 
 
 class ReportUtil:
@@ -56,3 +58,12 @@ class ReportUtil:
     @staticmethod
     def run_data_reports(dataset: Dataset, reports: List[DataReport], path: Path, number_of_processes: int = 1, context: dict = None):
         return ReportUtil._run_reports_on_dataset(dataset, reports, path, number_of_processes, context)
+
+    @staticmethod
+    def update_split_by_label_kwargs(kwargs, location):
+        if kwargs["label"] is not None:
+            ParameterValidator.assert_type_and_value(kwargs["label"], str, location, "label")
+
+            if kwargs["split_by_label"] is False:
+                warnings.warn(f"{location}: label is set but split_by_label was False, setting split_by_label to True")
+                kwargs["split_by_label"] = True

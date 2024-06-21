@@ -31,34 +31,49 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     Clinical Immunology Volume 222 (January 2021): 108621. `doi.org/10.1016/j.clim.2020.108621 <https://doi.org/10.1016/j.clim.2020.108621>`_
     with the only exception being that this encoder uses paired receptors, while the original publication used single sequences (see also: :ref:`MatchedSequences` encoder).
 
-    Arguments:
+    **Specification arguments:**
 
-        reference (dict): A dictionary describing the reference dataset file. Import should be specified the same way as regular dataset import. It is only allowed to import a receptor dataset here (i.e., is_repertoire is False and paired is True by default, and these are not allowed to be changed).
+    - reference (dict): A dictionary describing the reference dataset file. Import should be specified the same way as
+      regular dataset import. It is only allowed to import a receptor dataset here (i.e., is_repertoire is False and
+      paired is True by default, and these are not allowed to be changed).
 
-        max_edit_distances (dict): A dictionary specifying the maximum edit distance between a target sequence (from the repertoire) and the reference sequence. A maximum distance can be specified per chain, for example to allow for less strict matching of TCR alpha and BCR light chains. When only an integer is specified, this distance is applied to all possible chains.
+    - max_edit_distances (dict): A dictionary specifying the maximum edit distance between a target sequence (from the
+      repertoire) and the reference sequence. A maximum distance can be specified per chain, for example to allow for
+      less strict matching of TCR alpha and BCR light chains. When only an integer is specified, this distance is
+      applied to all possible chains.
 
-        reads (:py:mod:`~immuneML.util.ReadsType`): Reads type signify whether the counts of the sequences in the repertoire will be taken into account. If :py:mod:`~immuneML.util.ReadsType.UNIQUE`, only unique sequences (clonotypes) are counted, and if :py:mod:`~immuneML.util.ReadsType.ALL`, the sequence 'count' value is summed when determining the number of matches. The default value for reads is all.
+    - reads (:py:mod:`~immuneML.util.ReadsType`): Reads type signify whether the counts of the sequences in the
+      repertoire will be taken into account. If :py:mod:`~immuneML.util.ReadsType.UNIQUE`, only unique sequences
+      (clonotypes) are counted, and if :py:mod:`~immuneML.util.ReadsType.ALL`, the sequence 'count' value is summed when
+      determining the number of matches. The default value for reads is all.
 
-        sum_matches (bool): When sum_matches is False, the resulting encoded data matrix contains multiple columns with the number of matches per reference receptor chain. When sum_matches is true, the columns representing each of the two chains are summed together, meaning that there are only two aggregated sums of matches (one per chain) per repertoire in the encoded data.
-        To use this encoder in combination with the :ref:`Matches` report, sum_matches must be set to False. When sum_matches is set to True, this encoder behaves similarly to the encoder described by Yao, Y. et al. By default, sum_matches is False.
+    - sum_matches (bool): When sum_matches is False, the resulting encoded data matrix contains multiple columns with
+      the number of matches per reference receptor chain. When sum_matches is true, the columns representing each of the
+      two chains are summed together, meaning that there are only two aggregated sums of matches (one per chain) per
+      repertoire in the encoded data. To use this encoder in combination with the :ref:`Matches` report, sum_matches
+      must be set to False. When sum_matches is set to True, this encoder behaves similarly to the encoder described by
+      Yao, Y. et al. By default, sum_matches is False.
 
-        normalize (bool): If True, the chain matches are divided by the total number of unique receptors in the repertoire (when reads = unique) or the total number of reads in the repertoire (when reads = all).
+    - normalize (bool): If True, the chain matches are divided by the total number of unique receptors in the repertoire
+      (when reads = unique) or the total number of reads in the repertoire (when reads = all).
 
 
-    YAML Specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_mr_encoding:
-            MatchedReceptors:
-                reference:
-                    format: VDJDB
-                    params:
-                        path: path/to/file.txt
-                max_edit_distances:
-                    alpha: 1
-                    beta: 0
+        definitions:
+            encodings:
+                my_mr_encoding:
+                    MatchedReceptors:
+                        reference:
+                            format: VDJDB
+                            params:
+                                path: path/to/file.txt
+                        max_edit_distances:
+                            alpha: 1
+                            beta: 0
     """
 
     dataset_mapping = {
@@ -66,13 +81,13 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     }
 
     def __init__(self, reference: List[Receptor], max_edit_distances: dict, reads: ReadsType, sum_matches: bool, normalize: bool, name: str = None):
+        super().__init__(name=name)
         self.reference_receptors = reference
         self.max_edit_distances = max_edit_distances
         self.reads = reads
         self.sum_matches = sum_matches
         self.normalize = normalize
         self.feature_count = 2 if self.sum_matches else len(self.reference_receptors) * 2
-        self.name = name
 
     @staticmethod
     def _prepare_parameters(reference: dict, max_edit_distances: dict, reads: str, sum_matches: bool, normalize: bool, name: str = None):
@@ -140,11 +155,6 @@ class MatchedReceptorsEncoder(DatasetEncoder):
                 ("encoding_params", encoding_params_desc), )
 
     def _encode_new_dataset(self, dataset, params: EncoderParams):
-        pass
-
-        encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires, labels=dataset.labels,
-                                            metadata_file=dataset.metadata_file)
-
         feature_annotations = None if self.sum_matches else self._get_feature_info()
 
         if self.sum_matches:
@@ -156,18 +166,15 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         encoded_repertoires, labels, example_ids = self._encode_repertoires(dataset, params)
         encoded_repertoires = self._normalize(dataset, encoded_repertoires) if self.normalize else encoded_repertoires
 
-        encoded_dataset.add_encoded_data(EncodedData(
-            # examples contains a np.ndarray with counts
+        encoded_dataset = dataset.clone()
+        encoded_dataset.encoded_data = EncodedData(
             examples=encoded_repertoires,
-            # example_ids contains a list of repertoire identifiers
             example_ids=example_ids,
-            # feature_names contains a list of reference receptor identifiers
             feature_names=feature_names,
-            # feature_annotations contains a PD dataframe with sequence and VDJ gene usage per reference receptor
             feature_annotations=feature_annotations,
             labels=labels,
             encoding=MatchedReceptorsEncoder.__name__
-        ))
+        )
 
         return encoded_dataset
 

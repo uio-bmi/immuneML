@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 
 import pandas as pd
@@ -18,24 +19,26 @@ class TCRdistEncoder(DatasetEncoder):
     For the implementation, `TCRdist3 <https://tcrdist3.readthedocs.io/en/latest/>`_ library was used (source code available
     `here <https://github.com/kmayerb/tcrdist3>`_).
 
-    Arguments:
+    **Specification arguments:**
 
-        cores (int): number of processes to use for the computation
+    - cores (int): number of processes to use for the computation
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_tcr_dist_enc: # user-defined name
-            TCRdist:
-                cores: 4
+        definitions:
+            encodings:
+                my_tcr_dist_enc:
+                    TCRdist:
+                        cores: 4
 
     """
 
     def __init__(self, cores: int, name: str = None):
+        super().__init__(name=name)
         self.cores = cores
-        self.name = name
         self.distance_matrix = None
         self.context = None
 
@@ -60,6 +63,7 @@ class TCRdistEncoder(DatasetEncoder):
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=distance_matrix, labels=labels, example_ids=distance_matrix.index.values,
+                                                   example_weights=EncoderHelper.get_example_weights_by_identifiers(dataset, distance_matrix.index.values),
                                                    encoding=TCRdistEncoder.__name__)
 
         return encoded_dataset
@@ -79,7 +83,3 @@ class TCRdistEncoder(DatasetEncoder):
                 labels[label_name].append(receptor.metadata[label_name])
         return labels
 
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> str:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file

@@ -30,29 +30,44 @@ class DeepRCMotifDiscovery(MLReport):
     For kernels only: contributions to positional encoding are indicated by < (beginning of sequence),
     ∧ (center of sequence), and > (end of sequence).
 
-    See :ref:`DeepRCMotifDiscovery for repertoire classification` for a usage example.
+    See :ref:`DeepRCMotifDiscovery for repertoire classification` for a more detailed example.
 
     Reference:
-    Michael Widrich, Bernhard Schäfl, Milena Pavlović, Geir Kjetil Sandve, Sepp Hochreiter, Victor Greiff, Günter Klambauer
-    ‘DeepRC: Immune repertoire classification with attention-based deep massive multiple instance learning’.
-    bioRxiv preprint doi: `https://doi.org/10.1101/2020.04.12.03815 <https://doi.org/10.1101/2020.04.12.038158>`_
+
+    Widrich, M., et al. (2020). Modern Hopfield Networks and Attention for Immune Repertoire Classification. Advances in
+    Neural Information Processing Systems, 33. https://proceedings.neurips.cc//paper/2020/hash/da4902cb0bc38210839714ebdcf0efc3-Abstract.html
 
 
-    Arguments:
+    Example output:
 
-        n_steps (int): Number of IG steps (more steps -> better path integral -> finer contribution values). 50 is usually good enough.
+    .. image:: _static/images/reports/deeprc_ig_inputs.png
+       :alt: DeepRC IG over inputs
+       :height: 150px
 
-        threshold (float): Only applies to the plotting of kernels. Contributions are normalized to range [0, 1], and only kernels with normalized contributions above threshold are plotted.
 
-    YAML specification:
+    .. image:: _static/images/reports/deeprc_ig_kernels.png
+       :alt: DeepRC IG over kernels
+       :height: 150px
+
+
+    **Specification arguments:**
+
+    - n_steps (int): Number of IG steps (more steps -> better path integral -> finer contribution values). 50 is usually good enough.
+
+    - threshold (float): Only applies to the plotting of kernels. Contributions are normalized to range [0, 1], and only kernels with normalized contributions above threshold are plotted.
+
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_deeprc_report:
-            DeepRCMotifDiscovery:
-                threshold: 0.5
-                n_steps: 50
+        definitions:
+            reports:
+                my_deeprc_report:
+                    DeepRCMotifDiscovery:
+                        threshold: 0.5
+                        n_steps: 50
 
     """
 

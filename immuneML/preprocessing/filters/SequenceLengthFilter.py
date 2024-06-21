@@ -11,28 +11,28 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class SequenceLengthFilter(Filter):
     """
-        Removes sequences with length out of the predefined range.
+    Removes sequences with length out of the predefined range.
 
-        Arguments:
+    **Specification arguments:**
 
-            sequence_type (:py:obj:`~immuneML.environment.SequenceType.SequenceType`): Whether the sequences should be filtered on the nucleotide or amino acid level. Valid options are defined by the SequenceType enum.
+    - sequence_type (:py:obj:`~immuneML.environment.SequenceType.SequenceType`): Whether the sequences should be filtered on the nucleotide or amino acid level. Valid options are defined by the SequenceType enum.
 
-            min_len (int): minimum length of the sequence (sequences shorter than min_len will be removed); to not use min_len, set it to -1
+    - min_len (int): minimum length of the sequence (sequences shorter than min_len will be removed); to not use min_len, set it to -1
 
-            max_len (int): maximum length of the sequence (sequences longer than max_len will be removed); to not use max_len, set it to -1
+    - max_len (int): maximum length of the sequence (sequences longer than max_len will be removed); to not use max_len, set it to -1
 
-        YAML specification:
+    **YAML specification:**
 
-        .. indent with spaces
-        .. code-block:: yaml
+    .. indent with spaces
+    .. code-block:: yaml
 
-            preprocessing_sequences:
-                my_preprocessing:
-                    - my_filter:
-                        SequenceLengthFilter:
-                            sequence_type: AMINO_ACID
-                            min_len: 3 # -> remove all sequences shorter than 3
-                            max_len: -1 # -> no upper bound on the sequence length
+        preprocessing_sequences:
+            my_preprocessing:
+                - my_filter:
+                    SequenceLengthFilter:
+                        sequence_type: AMINO_ACID
+                        min_len: 3 # -> remove all sequences shorter than 3
+                        max_len: -1 # -> no upper bound on the sequence length
 
         """
 

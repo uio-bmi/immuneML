@@ -16,48 +16,61 @@ class ElementDataset(Dataset):
     """
 
     @classmethod
-    def build(cls, dataset_file: Path, types: dict = None, filenames: list = None, **kwargs):
+    def build(cls, dataset_file: Path, types: dict = None, filenames: list = None, batchfiles_path: Path = None, **kwargs):
         if not Path(dataset_file).exists():
             metadata = {
                 'type_dict': {key: SequenceSet.TYPE_TO_STR[val] for key, val in types.items()},
                 'dataset_class': cls.__name__, 'element_class_name': kwargs['element_class_name'],
-                'filenames': [str(file) for file in filenames]
+                'filenames': [str(file) for file in filenames],
+                'batchfiles_path': str(batchfiles_path)
             }
             write_yaml(dataset_file, metadata)
-        return cls(**{**kwargs, 'dataset_file': dataset_file, 'filenames': filenames})
+        return cls(**{**kwargs, 'dataset_file': dataset_file, 'filenames': filenames, 'batchfiles_path': batchfiles_path})
+
+    @staticmethod
+    def parse_filenames(filenames):
+        filenames = [Path(filename) for filename in filenames] if filenames is not None else []
+        for filename in filenames:
+            assert str(filename) == str(filename.name), "ElementDataset: filenames must only contain the names of files, not the full path. " \
+                                                        "To supply the name of the folder where the files are stored, use parameter batchfiles_path. " \
+                                                        f"This error was caused by the following filename: {filename} (should be {filename.name})"
+
+        return filenames
 
     def __init__(self, labels: dict = None, encoded_data: EncodedData = None, filenames: list = None,
-                 identifier: str = None, dataset_file: Path = None,
-                 file_size: int = 100000, name: str = None, element_class_name: str = None, element_ids: list = None,
+                 batchfiles_path: Path = None, identifier: str = None, dataset_file: Path = None,
+                 file_size: int = 100000, name: str = None, element_class_name: str = None,
+                 element_ids: list = None, example_weights: list = None,
                  buffer_type=None):
-        super().__init__()
-        self.labels = labels
-        self.encoded_data = encoded_data
-        self.identifier = identifier if identifier is not None else uuid4().hex
-        self.filenames = filenames if filenames is not None else []
-        self.filenames = [Path(filename) for filename in self.filenames]
+        super().__init__(encoded_data, name, identifier if identifier is not None else uuid4().hex, labels, example_weights)
+        self.batchfiles_path = Path(batchfiles_path)
+        self.filenames = ElementDataset.parse_filenames(filenames)
         if buffer_type is None:
             buffer_type = make_buffer_type_from_dataset_file(Path(dataset_file))
-        self.element_generator = ElementGenerator(self.filenames, file_size, element_class_name, buffer_type)
+
+        self.element_generator = ElementGenerator([self.batchfiles_path / filename for filename in self.filenames],
+                                                  file_size, element_class_name, buffer_type)
         self.file_size = file_size
         self.element_ids = element_ids
-        self.name = name
         self.element_class_name = element_class_name
         self.dataset_file = Path(dataset_file)
 
     def get_data(self, batch_size: int = 10000, return_objects: bool = True):
-        self.element_generator.file_list = self.filenames
+        self.element_generator.file_list = self.get_filenames_full_path()
         return self.element_generator.build_element_generator(return_objects=return_objects)
 
     def get_batch(self, batch_size: int = 10000):
-        self.element_generator.file_list = self.filenames
+        self.element_generator.file_list = self.get_filenames_full_path()
         return self.element_generator.build_batch_generator()
+
+    def get_filenames_full_path(self):
+        return [self.batchfiles_path / filename for filename in self.filenames]
 
     def get_filenames(self):
         return self.filenames
 
     def set_filenames(self, filenames):
-        self.filenames = filenames
+        self.filenames = ElementDataset.parse_filenames(filenames)
 
     def get_example_count(self):
         return len(self.get_example_ids())
@@ -105,17 +118,22 @@ class ElementDataset(Dataset):
 
         types = read_yaml(self.dataset_file)['type_dict']
 
-        new_dataset = self.__class__.build(labels=self.labels, file_size=self.file_size, filenames=batch_filenames,
+        new_dataset = self.__class__.build(labels=self.labels, file_size=self.file_size,
+                                           filenames=batch_filenames, batchfiles_path=path,
                                            element_class_name=self.element_generator.element_class_name,
                                            dataset_file=path / f"{dataset_name}.yaml", types=types,
                                            identifier=new_dataset_id, name=dataset_name)
+
+        original_example_weights = self.get_example_weights()
+        if original_example_weights is not None:
+            new_dataset.set_example_weights([original_example_weights[i] for i in example_indices])
 
         return new_dataset
 
     def get_label_names(self):
         """Returns the list of metadata fields which can be used as labels"""
         return [label for label in list(self.labels.keys()) if
-                label not in ['region_type', 'receptor_chains', 'organism']] if self.labels else []
+                label not in ['region_type', 'receptor_chains', 'organism', 'type_dict']] if self.labels else []
 
     def clone(self, keep_identifier: bool = False):
         raise NotImplementedError

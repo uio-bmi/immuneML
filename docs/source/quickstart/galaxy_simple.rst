@@ -163,7 +163,7 @@ If you want to try running immuneML on your own dataset, be sure to check out :r
 While in this tutorial we trained an ML model for making a prediction per repertoire, immuneML also provides
 a button-based interface for training ML models to make predictions per sequence, such as antigen binding: `Train immune receptor classifiers (simplified interface) <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_train_classifiers>`_.
 
-immuneML provides many more options for customizing your machine learning analysis when using the YAML-based specification.
+immuneML provides many more options for customizing your machine learning analysis when using the YAML specification.
 To get started with this, you can try out :ref:`Quickstart: Galaxy with YAML-based tools`, for example using
 the YAML specification that was produced in the Galaxy history ('repertoire_classification.yaml') with some minor modifications.
 See also the tutorial :ref:`How to specify an analysis with YAML` to understand how the YAML specification can be altered.

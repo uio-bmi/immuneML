@@ -1,6 +1,7 @@
 from typing import Any, Dict
 
 import bionumpy as bnp
+import numpy as np
 from bionumpy import AminoAcidEncoding, DNAEncoding
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.encodings import AlphabetEncoding
@@ -16,6 +17,7 @@ class SequenceSet:
     frame_type: str = None
     duplicate_count: int = None
     sequence_id: str = None
+    chain: str = None
 
     STR_TO_TYPE = {'str': str, 'int': int, 'float': float, 'bool': bool,
                    'AminoAcidEncoding': bnp.encodings.AminoAcidEncoding,
@@ -32,5 +34,5 @@ class SequenceSet:
 
     @classmethod
     def get_neutral_value(cls, field_type):
-        neutral_values = {str: '', int: -1, DNAEncoding: '', AminoAcidEncoding: ''}
+        neutral_values = {str: '', int: -1, DNAEncoding: '', AminoAcidEncoding: '', float: np.nan}
         return neutral_values.get(field_type, None)

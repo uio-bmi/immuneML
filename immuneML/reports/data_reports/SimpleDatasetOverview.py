@@ -14,13 +14,14 @@ class SimpleDatasetOverview(DataReport):
     """
     Generates a simple text-based overview of the properties of any dataset, including the dataset name, size, and metadata labels.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        reports:
-            my_overview: SimpleDatasetOverview
+        definitions:
+            reports:
+                my_overview: SimpleDatasetOverview
 
     """
     UNKNOWN_CHAIN = "unknown"
@@ -51,7 +52,7 @@ class SimpleDatasetOverview(DataReport):
         text_path.write_text(output_text)
 
         return ReportResult(name=self.name,
-                            info="A simple text-based overview of the properties of any dataset, including the dataset name, size, and metadata labels.",
+                            info=f"A simple overview of the properties of dataset {self.dataset.name}",
                             output_text=[ReportOutput(text_path, f"Description of dataset {dataset_name}")])
 
     def _get_generic_dataset_text(self):

@@ -6,7 +6,6 @@ from immuneML.ml_methods.util.Util import Util as MLUtil
 from immuneML.presentation.TemplateParser import TemplateParser
 from immuneML.presentation.html.Util import Util
 from immuneML.util.PathBuilder import PathBuilder
-from immuneML.util.StringHelper import StringHelper
 from immuneML.workflows.instructions.dataset_generation.DatasetExportState import DatasetExportState
 
 
@@ -39,26 +38,26 @@ class DatasetExportHTMLBuilder:
             "name": state.name,
             'immuneML_version': MLUtil.get_immuneML_version(),
             "full_specs": Util.get_full_specs_path(base_path),
+            "logfile": Util.get_logfile_path(base_path),
             "datasets": [
                 {
-                    "dataset_name": dataset.name,
-                    "dataset_type": StringHelper.camel_case_to_word_string(type(dataset).__name__),
-                    "dataset_size": f"{dataset.get_example_count()} {type(dataset).__name__.replace('Dataset', 's').lower()}",
-                    "labels": [{"label_name": label} for label in dataset.get_label_names()],
-                    "preprocessing_sequence": [
-                        {
-                            "preprocessing_name": preprocessing.__class__.__name__,
-                            "preprocessing_params": ", ".join([f"{key}: {value}" for key, value in vars(preprocessing).items()])
-                        } for preprocessing in state.preprocessing_sequence
-                    ] if state.preprocessing_sequence is not None else [],
-                    "show_preprocessing": state.preprocessing_sequence is not None and len(state.preprocessing_sequence) > 0,
-                    "formats": [
-                        {
-                            "format_name": format_name,
-                            "dataset_download_link": os.path.relpath(path=Util.make_downloadable_zip(state.result_path, state.paths[dataset.name][format_name]),
+                    **Util.make_dataset_html_map(dataset),
+                    **{
+                        "preprocessing_sequence": [
+                            {
+                                "preprocessing_name": preprocessing.__class__.__name__,
+                                "preprocessing_params": ", ".join([f"{key}: {value}" for key, value in vars(preprocessing).items()])
+                            } for preprocessing in state.preprocessing_sequence
+                        ] if state.preprocessing_sequence is not None else [],
+                        "show_preprocessing": state.preprocessing_sequence is not None and len(state.preprocessing_sequence) > 0,
+                        "formats": [
+                            {
+                                "format_name": format_name,
+                                "dataset_download_link": os.path.relpath(path=Util.make_downloadable_zip(state.result_path, state.paths[dataset.name][format_name]),
                                                                      start=base_path)
-                        } for format_name in state.formats
-                    ]
+                            } for format_name in state.formats
+                        ]
+                    }
                 } for dataset in state.datasets
             ]
         }

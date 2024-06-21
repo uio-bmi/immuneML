@@ -18,7 +18,7 @@ class SubjectRepertoireCollector(Preprocessor):
     with :ref:`DatasetExport` instruction.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

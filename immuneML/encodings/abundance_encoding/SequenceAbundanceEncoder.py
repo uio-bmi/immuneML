@@ -38,36 +38,38 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
     For full example of using this encoder, see :ref:`Reproduction of the CMV status predictions study`.
 
-    Arguments:
+    **Specification arguments:**
 
-        comparison_attributes (list): The attributes to be considered to group receptors into clonotypes. Only the fields specified in
-        comparison_attributes will be considered, all other fields are ignored. Valid comparison value can be any repertoire field name.
+    - comparison_attributes (list): The attributes to be considered to group receptors into clonotypes. Only the fields specified in
+      comparison_attributes will be considered, all other fields are ignored. Valid comparison value can be any repertoire field name.
 
-        p_value_threshold (float): The p value threshold to be used by the statistical test.
+    - p_value_threshold (float): The p value threshold to be used by the statistical test.
 
-        sequence_batch_size (int): The number of sequences in a batch when comparing sequences across repertoires, typically 100s of thousands.
-        This does not affect the results of the encoding, only the speed. The default value is 1.000.000
+    - sequence_batch_size (int): The number of sequences in a batch when comparing sequences across repertoires, typically 100s of thousands.
+      This does not affect the results of the encoding, only the speed. The default value is 1.000.000
 
-        repertoire_batch_size (int): How many repertoires will be loaded at once. This does not affect the result of the encoding, only the speed.
-        This value is a trade-off between the number of repertoires that can fit the RAM at the time and loading time from disk.
+    - repertoire_batch_size (int): How many repertoires will be loaded at once. This does not affect the result of the encoding, only the speed.
+      This value is a trade-off between the number of repertoires that can fit the RAM at the time and loading time from disk.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_sa_encoding:
-            SequenceAbundance:
-                comparison_attributes:
-                    - sequence_aas
-                    - v_genes
-                    - j_genes
-                    - chains
-                    - region_types
-                p_value_threshold: 0.05
-                sequence_batch_size: 100000
-                repertoire_batch_size: 32
+        definitions:
+            encodings:
+                my_sa_encoding:
+                    SequenceAbundance:
+                        comparison_attributes:
+                            - sequence_aa
+                            - v_call
+                            - j_call
+                            - chain
+                            - region_type
+                        p_value_threshold: 0.05
+                        sequence_batch_size: 100000
+                        repertoire_batch_size: 32
 
     """
 
@@ -75,9 +77,9 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     TOTAL_SEQUENCE_ABUNDANCE = "total_sequence_abundance"
 
     def __init__(self, comparison_attributes, p_value_threshold: float, sequence_batch_size: int, repertoire_batch_size: int, name: str = None):
+        super().__init__(name=name)
         self.comparison_attributes = comparison_attributes
         self.sequence_batch_size = sequence_batch_size
-        self.name = name
         self.relevant_sequence_indices = None
         self.context = None
         self.p_value_threshold = p_value_threshold
@@ -94,7 +96,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         return SequenceAbundanceEncoder(**params)
 
     def encode(self, dataset, params: EncoderParams):
-        AbundanceEncoderHelper.check_labels(params.label_config, SequenceAbundanceEncoder.__name__)
+        EncoderHelper.check_positive_class_labels(params.label_config, SequenceAbundanceEncoder.__name__)
 
         self.comparison_data = self._build_comparison_data(dataset, params)
         return self._encode_data(dataset, params)
@@ -118,11 +120,13 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
         encoded_data = EncodedData(examples, dataset.get_metadata([label_name]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [SequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE, SequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
+                                   example_weights=dataset.get_example_weights(),
                                    encoding=SequenceAbundanceEncoder.__name__, info={'relevant_sequence_path': self.relevant_sequence_path,
                                                                                      "contingency_table_path": self.contingency_table_path,
                                                                                      "p_values_path": self.p_values_path})
 
-        encoded_dataset = RepertoireDataset(labels=dataset.labels, encoded_data=encoded_data, repertoires=dataset.repertoires)
+        encoded_dataset = dataset.clone()
+        encoded_dataset.encoded_data = encoded_data
 
         return encoded_dataset
 
@@ -177,15 +181,6 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     def set_context(self, context: dict):
         self.context = context
         return self
-
-    def store(self, encoded_dataset, params: EncoderParams):
-        EncoderHelper.store(encoded_dataset, params)
-
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> Path:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        UtilIO.export_comparison_data(encoder.comparison_data, path)
-        return encoder_file
 
     def get_additional_files(self) -> List[Path]:
         return [self.relevant_indices_path]

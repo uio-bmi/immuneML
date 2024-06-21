@@ -30,42 +30,43 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
     Morisita-Horn distance (= similarity - 1) is set to 0 to avoid negative distance scores.
 
 
-    Arguments:
+    **Specification arguments:**
 
-        compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
-        has been installed such that it can be called directly on the command line with the command 'compairr',
-        or that it is located at /usr/local/bin/compairr.
+    - compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR has been
+      installed such that it can be called directly on the command line with the command 'compairr', or that it is
+      located at /usr/local/bin/compairr.
 
-        keep_compairr_input (bool): whether to keep the input file that was passed to CompAIRR. This may take a lot of
-        storage space if the input dataset is large. By default the input file is not kept.
+    - keep_compairr_input (bool): whether to keep the input file that was passed to CompAIRR. This may take a lot of
+      storage space if the input dataset is large. By default, the input file is not kept.
 
-        differences (int): Number of differences allowed between the sequences of two immune receptor chains, this
-        may be between 0 and 2. By default, differences is 0.
+    - differences (int): Number of differences allowed between the sequences of two immune receptor chains, this may be
+      between 0 and 2. By default, differences is 0.
 
-        indels (bool): Whether to allow an indel. This is only possible if differences is 1. By default, indels is False.
+    - indels (bool): Whether to allow an indel. This is only possible if differences is 1. By default, indels is False.
 
-        ignore_counts (bool): Whether to ignore the frequencies of the immune receptor chains. If False, frequencies
-        will be included, meaning the 'counts' values for the receptors available in two repertoires are multiplied.
-        If False, only the number of unique overlapping immune receptors ('clones') are considered.
-        By default, ignore_counts is False.
+    - ignore_counts (bool): Whether to ignore the frequencies of the immune receptor chains. If False, frequencies will
+      be included, meaning the 'counts' values for the receptors available in two repertoires are multiplied. If False,
+      only the number of unique overlapping immune receptors ('clones') are considered. By default, ignore_counts is False.
 
-        ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor chains
-        have to match. If True, gene information is ignored. By default, ignore_genes is False.
+    - ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor
+      chains have to match. If True, gene information is ignored. By default, ignore_genes is False.
 
-        threads (int): The number of threads to use for parallelization. Default is 8.
+    - threads (int): The number of threads to use for parallelization. Default is 8.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_distance_encoder:
-            CompAIRRDistance:
-                compairr_path: optional/path/to/compairr
-                differences: 0
-                indels: False
-                ignore_counts: False
-                ignore_genes: False
+        definitions:
+            encodings:
+                my_distance_encoder:
+                    CompAIRRDistance:
+                        compairr_path: optional/path/to/compairr
+                        differences: 0
+                        indels: False
+                        ignore_counts: False
+                        ignore_genes: False
 
     """
 
@@ -142,6 +143,7 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
                                                    labels=labels,
                                                    feature_names=distance_matrix.columns.values,
                                                    example_ids=distance_matrix.index.values,
+                                                   example_weights=EncoderHelper.get_example_weights_by_identifiers(dataset, distance_matrix.index.values),
                                                    encoding=CompAIRRDistanceEncoder.__name__)
         return encoded_dataset
 
@@ -230,12 +232,3 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
 
         return repertoire_sizes, repertoire_indices
 
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> Path:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file
-
-    @staticmethod
-    def load_encoder(encoder_file: Path):
-        encoder = DatasetEncoder.load_encoder(encoder_file)
-        return encoder

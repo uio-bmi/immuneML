@@ -16,25 +16,27 @@ class RandomForestClassifier(SklearnMethod):
     For usage instructions, check :py:obj:`~immuneML.ml_methods.classifiers.SklearnMethod.SklearnMethod`.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_random_forest_classifier: # user-defined method name
-            RandomForestClassifier: # name of the ML method
-                # sklearn parameters (same names as in original sklearn class)
-                random_state: 100 # always use this value for random state
-                n_estimators: [10, 50, 100] # find the optimal number of trees in the forest
-                # Additional parameter that determines whether to print convergence warnings
-                show_warnings: True
-            # if any of the parameters under RandomForestClassifier is a list and model_selection_cv is True,
-            # a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,
-            # and the optimal model will be selected
-            model_selection_cv: True
-            model_selection_n_folds: 5
-        # alternative way to define ML method with default values:
-        my_default_random_forest: RandomForestClassifier
+        definitions:
+            ml_methods:
+                my_random_forest_classifier: # user-defined method name
+                    RandomForestClassifier: # name of the ML method
+                        # sklearn parameters (same names as in original sklearn class)
+                        random_state: 100 # always use this value for random state
+                        n_estimators: [10, 50, 100] # find the optimal number of trees in the forest
+                        # Additional parameter that determines whether to print convergence warnings
+                        show_warnings: True
+                    # if any of the parameters under RandomForestClassifier is a list and model_selection_cv is True,
+                    # a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,
+                    # and the optimal model will be selected
+                    model_selection_cv: True
+                    model_selection_n_folds: 5
+                # alternative way to define ML method with default values:
+                my_default_random_forest: RandomForestClassifier
 
     """
 
@@ -54,6 +56,9 @@ class RandomForestClassifier(SklearnMethod):
         return RFC(**params)
 
     def can_predict_proba(self) -> bool:
+        return True
+
+    def can_fit_with_example_weights(self) -> bool:
         return True
 
     def get_params(self):

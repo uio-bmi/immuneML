@@ -8,11 +8,12 @@ class Dataset:
     SUBSAMPLED = "subsampled"
     PREPROCESSED = "preprocessed"
 
-    def __init__(self, encoded_data=None, name: str = None, identifier: str = None, labels: dict = None):
+    def __init__(self, encoded_data=None, name: str = None, identifier: str = None, labels: dict = None, example_weights: list = None):
         self.encoded_data = encoded_data
         self.identifier = identifier
         self.name = name if name is not None else self.identifier
         self.labels = labels
+        self.example_weights = example_weights
 
     @classmethod
     @abc.abstractmethod
@@ -62,3 +63,13 @@ class Dataset:
     @abc.abstractmethod
     def get_data_from_index_range(self, start_index: int, end_index: int):
         pass
+
+    def set_example_weights(self, example_weights: list):
+        if example_weights is not None:
+            assert len(example_weights) == self.get_example_count(), f"{self.__class__.__name__}: trying to set example weights " \
+                                                                 f"for dataset {self.identifier} but number of weights ({len(example_weights)}) " \
+                                                                 f"does not match example count ({self.get_example_count()}). "
+        self.example_weights = example_weights
+
+    def get_example_weights(self):
+        return self.example_weights

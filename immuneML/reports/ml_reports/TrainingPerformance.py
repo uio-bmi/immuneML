@@ -8,7 +8,7 @@ import plotly.graph_objs as go
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.hyperparameter_optimization import HPSetting
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.ml_metrics.MetricUtil import MetricUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -23,35 +23,38 @@ class TrainingPerformance(MLReport):
     The available metrics are accuracy, balanced_accuracy, confusion_matrix, f1_micro, f1_macro, f1_weighted, precision,
     recall, auc and log_loss (see :py:obj:`immuneML.environment.Metric.Metric`).
 
-    Arguments:
+    **Specification arguments:**
 
-        metrics (list): A list of metrics used to evaluate training performance. See :py:obj:`immuneML.environment.Metric.Metric` for available options.
+    - metrics (list): A list of metrics used to evaluate training performance. See :py:obj:`immuneML.environment.Metric.Metric` for available options.
 
-    YAML specification:
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_performance_report:
-            TrainingPerformance: 
-                metrics:
-                    - accuracy
-                    - balanced_accuracy
-                    - confusion_matrix
-                    - f1_micro
-                    - f1_macro
-                    - f1_weighted
-                    - precision
-                    - recall
-                    - auc
-                    - log_loss
+        definitions:
+            reports:
+                my_performance_report:
+                    TrainingPerformance:
+                        metrics:
+                            - accuracy
+                            - balanced_accuracy
+                            - confusion_matrix
+                            - f1_micro
+                            - f1_macro
+                            - f1_weighted
+                            - precision
+                            - recall
+                            - auc
+                            - log_loss
 
     """
 
     @classmethod
     def build_object(cls, **kwargs):
         location = "TrainingPerformance"        
-        valid_metrics = [m.name for m in Metric]
+        valid_metrics = [m.name for m in ClassificationMetric]
 
         name = kwargs["name"] if "name" in kwargs else None
         metrics = kwargs["metrics"] if "metrics" in kwargs else valid_metrics
@@ -74,6 +77,7 @@ class TrainingPerformance(MLReport):
         predicted_proba_y = self.method.predict_proba(X, self.label)[self.label.name][self.label.positive_class]
         true_y = self.train_dataset.encoded_data.labels[self.label.name]
         classes = self.method.get_classes()
+        example_weights = self.train_dataset.get_example_weights()
 
         PathBuilder.build(self.result_path)
 
@@ -84,9 +88,9 @@ class TrainingPerformance(MLReport):
         }
 
         for metric in self.metrics_set:
-            _score = MetricUtil.score_for_metric(metric=Metric.get_metric(metric),
+            _score = MetricUtil.score_for_metric(metric=ClassificationMetric.get_metric(metric),
                                                  predicted_y=predicted_y, predicted_proba_y=predicted_proba_y,
-                                                 true_y=true_y, classes=classes)
+                                                 true_y=true_y, example_weights=example_weights, classes=classes)
 
             if metric == 'CONFUSION_MATRIX':
                 self._generate_heatmap(classes, classes, _score, metric, output)

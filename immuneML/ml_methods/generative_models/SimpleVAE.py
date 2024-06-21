@@ -39,64 +39,67 @@ class SimpleVAE(GenerativeModel):
     Deep generative models for T cell receptor protein sequences. eLife, 8, e46935. https://doi.org/10.7554/eLife.46935
 
 
-    Arguments:
+    **Specification arguments:**
 
-        chain (str): which chain the sequence come from, e.g., TRB
+    - chain (str): which chain the sequence come from, e.g., TRB
 
-        beta (float): VAE hyperparameter that balanced the reconstruction loss and latent dimension regularization
+    - beta (float): VAE hyperparameter that balanced the reconstruction loss and latent dimension regularization
 
-        latent_dim (int): latent dimension of the VAE
+    - latent_dim (int): latent dimension of the VAE
 
-        linear_nodes_count (int): in linear layers, how many nodes to use
+    - linear_nodes_count (int): in linear layers, how many nodes to use
 
-        num_epochs (int): how many epochs to use for training
+    - num_epochs (int): how many epochs to use for training
 
-        batch_size (int): how many examples to consider at the same time
+    - batch_size (int): how many examples to consider at the same time
 
-        j_gene_embed_dim (int): dimension of J gene embedding
+    - j_gene_embed_dim (int): dimension of J gene embedding
 
-        v_gene_embed_dim (int): dimension of V gene embedding
+    - v_gene_embed_dim (int): dimension of V gene embedding
 
-        cdr3_embed_dim (int): dimension of the cdr3 embedding
+    - cdr3_embed_dim (int): dimension of the cdr3 embedding
 
-        pretrains (int): how many times to attempt pretraining to initialize the weights and use warm-up for the beta hyperparameter before the main training process
+    - pretrains (int): how many times to attempt pretraining to initialize the weights and use warm-up for the beta hyperparameter before the main training process
 
-        warmup_epochs (int): how many epochs to use for training where beta hyperparameter is linearly increased from 0 up to its max value; this is in addition to num_epochs set above
+    - warmup_epochs (int): how many epochs to use for training where beta hyperparameter is linearly increased from 0 up to its max value; this is in addition to num_epochs set above
 
-        patience (int): number of epochs to wait before the training is stopped when the loss is not improving
+    - patience (int): number of epochs to wait before the training is stopped when the loss is not improving
 
-        iter_count_prob_estimation (int): how many iterations to use to estimate the log probability of the generated sequence (the more iterations, the better the estimated log probability)
+    - iter_count_prob_estimation (int): how many iterations to use to estimate the log probability of the generated sequence (the more iterations, the better the estimated log probability)
 
-        vocab (list): which letters (amino acids) are allowed - this is automatically filled for new models (no need to set)
+    - vocab (list): which letters (amino acids) are allowed - this is automatically filled for new models (no need to set)
 
-        max_cdr3_len (int): what is the maximum cdr3 length - this is automatically filled for new models (no need to set)
+    - max_cdr3_len (int): what is the maximum cdr3 length - this is automatically filled for new models (no need to set)
 
-        unique_v_genes (list): list of allowed V genes (this will be automatically filled from the dataset if not provided here manually)
+    - unique_v_genes (list): list of allowed V genes (this will be automatically filled from the dataset if not provided here manually)
 
-        unique_j_genes (list): list of allowed J genes (this will be automatically filled from the dataset if not provided here manually)
+    - unique_j_genes (list): list of allowed J genes (this will be automatically filled from the dataset if not provided here manually)
 
-        device (str): name of the device where to train the model (e.g., cpu)
+    - device (str): name of the device where to train the model (e.g., cpu)
 
-    YAML specification:
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_vae:
-            SimpleVAE:
-                chain: beta
-                beta: 0.75
-                latent_dim: 20
-                linear_nodes_count: 75
-                num_epochs: 5000
-                batch_size: 10000
-                j_gene_embed_dim: 13
-                v_gene_embed_dim: 30
-                cdr3_embed_dim: 21
-                pretrains: 10
-                warmup_epochs: 20
-                patience: 20
-                device: cpu
+        definitions:
+            ml_methods:
+                my_vae:
+                    SimpleVAE:
+                        chain: beta
+                        beta: 0.75
+                        latent_dim: 20
+                        linear_nodes_count: 75
+                        num_epochs: 5000
+                        batch_size: 10000
+                        j_gene_embed_dim: 13
+                        v_gene_embed_dim: 30
+                        cdr3_embed_dim: 21
+                        pretrains: 10
+                        warmup_epochs: 20
+                        patience: 20
+                        device: cpu
 
     """
 
@@ -111,14 +114,14 @@ class SimpleVAE(GenerativeModel):
             assert file.exists(), f"{cls.__name__}: {file} is not a file."
 
         model_overview = read_yaml(model_overview_file)
-        vae = SimpleVAE(**model_overview)
+        vae = SimpleVAE(**{k: v for k, v in model_overview.items() if k != 'type'})
         vae.model = vae.make_new_model(state_dict_file)
 
         return vae
 
     def __init__(self, chain, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim, pretrains,
                  v_gene_embed_dim, cdr3_embed_dim, warmup_epochs, patience, iter_count_prob_estimation, device,
-                 vocab=None, max_cdr3_len=None, unique_v_genes=None, unique_j_genes=None):
+                 vocab=None, max_cdr3_len=None, unique_v_genes=None, unique_j_genes=None, name: str = None):
         super().__init__(chain)
         self.sequence_type = SequenceType.AMINO_ACID
         self.iter_count_prob_estimation = iter_count_prob_estimation
@@ -138,6 +141,7 @@ class SimpleVAE(GenerativeModel):
         self.batch_size = batch_size
         self.device = device
         self.max_cdr3_len, self.unique_v_genes, self.unique_j_genes = max_cdr3_len, unique_v_genes, unique_j_genes
+        self.name = name
         self.model = None
 
         # hard-coded in the original implementation
@@ -192,7 +196,8 @@ class SimpleVAE(GenerativeModel):
             if min(losses) == loss.item():
                 store_weights(model, path / 'state_dict.yaml')
 
-            if epoch > self.patience and all(x <= y for x, y in zip(losses[-self.patience:], losses[-self.patience:][1:])):
+            if epoch > self.patience and all(
+                    x <= y for x, y in zip(losses[-self.patience:], losses[-self.patience:][1:])):
                 loss_decreasing = False
 
             epoch += 1
@@ -291,11 +296,11 @@ class SimpleVAE(GenerativeModel):
                                          region_type=self.region_type.name)
         }) for i in range(count)]
 
-        for obj in seq_objs:
-            log_prob = self.compute_p_gen({self.sequence_type.value: obj.get_attribute(self.sequence_type.value),
-                                           'v_call': obj.metadata.v_call, 'j_call': obj.metadata.j_call},
-                                          self.sequence_type)
-            obj.metadata.custom_params = {'log_prob': log_prob}
+        # for obj in seq_objs:
+        #     log_prob = self.compute_p_gen({self.sequence_type.value: obj.get_attribute(self.sequence_type.value),
+        #                                    'v_call': obj.metadata.v_call, 'j_call': obj.metadata.j_call},
+        #                                   self.sequence_type)
+        #     obj.metadata.custom_params = {'log_prob': log_prob}
 
         dataset = SequenceDataset.build_from_objects(seq_objs, count, path, 'synthetic_vae')
 
@@ -351,10 +356,11 @@ class SimpleVAE(GenerativeModel):
     def save_model(self, path: Path) -> Path:
         model_path = PathBuilder.build(path / 'model')
 
+        skip_export_keys = ['model', 'loss_path', 'j_gene_loss_weight', 'v_gene_loss_weight', 'region_type',
+                            'sequence_type', 'vocab_size']
         write_yaml(filename=model_path / 'model_overview.yaml',
-                   yaml_dict={**{k: v for k, v in vars(self).items() if k != 'model'},
-                              **{'type': self.__class__.__name__, 'region_type': self.region_type.name,
-                                 'sequence_type': self.sequence_type.name}})
+                   yaml_dict={**{k: v for k, v in vars(self).items() if k not in skip_export_keys},
+                              **{'type': self.__class__.__name__}})
 
         store_weights(self.model, model_path / 'state_dict.yaml')
 

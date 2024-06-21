@@ -25,7 +25,7 @@ from immuneML.environment import Constants
 # -- Project information -----------------------------------------------------
 
 project = 'immuneML'
-copyright = '2021, Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve'
+copyright = '2021-2023, Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve'
 author = 'Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve'
 
 # The short X.Y version
@@ -50,7 +50,8 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
-    'sphinx_rtd_theme',
+    'sphinx_toolbox.collapse',
+#    'sphinx_rtd_theme',
     'sphinx.ext.napoleon',
     'sphinx.ext.autosectionlabel',
     'sphinx_sitemap'
@@ -107,7 +108,7 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'furo'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

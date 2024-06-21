@@ -12,7 +12,6 @@ from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
-@pytest.mark.skip(reason='bionumpy fails if no seqs in rep files')
 def test_count_per_seq_filter():
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "count_per_seq_filter/")
 
@@ -24,7 +23,7 @@ def test_count_per_seq_filter():
                      {"duplicate_count": 1}]]
     dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
                                                                      ["ACF", "ACF"],
-                                                                     ["ACF", "ACF", "ACF", "ACF"]], path,
+                                                                     ["ACF", "ACF", "ACF", "ACF"]], path / "dataset1",
                                                                     seq_metadata=seq_metadata)[0])
 
     dataset1 = CountPerSequenceFilter(**{"low_count_limit": 2, "remove_without_count": True, "remove_empty_repertoires": False,
@@ -46,7 +45,7 @@ def test_count_per_seq_filter():
 
     dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
                                                                      ["ACF", "ACF"],
-                                                                     ["ACF", "ACF", "ACF", "ACF"]], path,
+                                                                     ["ACF", "ACF", "ACF", "ACF"]], path / "dataset2",
                                                                     seq_metadata=[[{"duplicate_count": None}, {"duplicate_count": None}, {"duplicate_count": None}],
                                                                                   [{"duplicate_count": None}, {"duplicate_count": None}],
                                                                                   [{"duplicate_count": None}, {"duplicate_count": None}, {"duplicate_count": None},

@@ -1,14 +1,25 @@
 import os
+import shutil
 
 import pytest
 
 from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
+from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
+from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.reports.ml_reports.TCRdistMotifDiscovery import TCRdistMotifDiscovery
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
 
 
-def _create_dataset(self, path):
+def _create_dataset(path):
     data = """subject,epitope,count,v_a_gene,j_a_gene,cdr3_a_aa,cdr3_a_nucseq,v_b_gene,j_b_gene,cdr3_b_aa,cdr3_b_nucseq,clone_id
 mouse_subject0050,PA,2,TRAV7-3*01,TRAJ33*01,CAVSLDSNYQLIW,tgtgcagtgagcctcgatagcaactatcagttgatctgg,TRBV13-1*01,TRBJ2-3*01,CASSDFDWGGDAETLYF,tgtgccagcagtgatttcgactggggaggggatgcagaaacgctgtatttt,mouse_tcr0072.clone
 mouse_subject0050,PA,6,TRAV6D-6*01,TRAJ56*01,CALGDRATGGNNKLTF,tgtgctctgggtgacagggctactggaggcaataataagctgactttt,TRBV29*01,TRBJ1-1*01,CASSPDRGEVFF,tgtgctagcagtccggacaggggtgaagtcttcttt,mouse_tcr0096.clone
@@ -29,52 +40,35 @@ mouse_subject0007,PA,3,TRAV4D-3*03,TRAJ33*01,CAAEAGSNYQLIW,tgtgctgctgaggcgggtagc
 mouse_subject0007,PA,1,TRAV12N-3*01,TRAJ34*02,CALSKTNTNKVVF,tgtgctctgagtaagaccaataccaacaaagtcgtcttt,TRBV29*01,TRBJ2-7*01,CASSWGGEQYF,tgtgctagcagttgggggggcgaacagtacttc,mouse_tcr0423.clone
 mouse_subject0007,PA,3,TRAV21/DV12*01,TRAJ56*01,CILRVGATGGNNKLTF,tgtatcctgagagtaggggctactggaggcaataataagctgactttt,TRBV29*01,TRBJ1-1*01,CASSLDRGEVFF,tgtgctagcagcctggacaggggagaagtcttcttt,mouse_tcr0411.clone
 mouse_subject0007,PA,1,TRAV6D-6*01,TRAJ33*01,CALGAGSNYQLIW,tgtgctctgggggccggtagcaactatcagttgatctgg,TRBV29*01,TRBJ1-1*01,CASSSGQEVFF,tgtgctagcagttcgggacaggaagtcttcttt,mouse_tcr0449.clone
-mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagcaattacaaactgacattt,TRBV29*01,TRBJ2-7*01,CASSGGGEQYF,tgtgctagcagtggggggggcgaacagtacttc,mouse_tcr0110.clone
-"""
-    filename = path / 'data.csv'
+mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagcaattacaaactgacattt,TRBV29*01,TRBJ2-7*01,CASSGGGEQYF,tgtgctagcagtggggggggcgaacagtacttc,mouse_tcr0110.clone"""
 
-    with open(filename, "w") as file:
-        file.writelines(data)
+    receptors = []
+    for line in data.split("\n"):
+        if not line.startswith('subject,epitope'):
+            receptor_info = line.split(",")
+            receptor = TCABReceptor(alpha=ReceptorSequence(sequence_aa=receptor_info[5], sequence=receptor_info[6],
+                                                           metadata=SequenceMetadata(v_call=receptor_info[3], chain='TRA',
+                                                                                     j_call=receptor_info[4])),
+                                    beta=ReceptorSequence(sequence_aa=receptor_info[9], sequence=receptor_info[10],
+                                                          metadata=SequenceMetadata(v_call=receptor_info[7], chain='TRB',
+                                                                                    j_call=receptor_info[9])),
+                                    metadata={'epitope': receptor_info[1]})
+            receptors.append(receptor)
 
-    return filename
+    return ReceptorDataset.build_from_objects(receptors, 100, path, labels={'epitope': ['PA'], 'organism': 'mouse'})
 
 
-@pytest.mark.skip(reason='change import method - single line receptor not supported any longer')
-def test_generate(self):
+def test_generate():
     os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "tcrdist_motif_discovery/")
-    dataset_path = self._create_dataset(path)
-    self.fail("change import method")
+    dataset = _create_dataset(PathBuilder.build(path / 'dataset'))
 
-    # dataset = SingleLineReceptorImport.import_dataset({"path": dataset_path,
-    #                                                    "result_path": path / "dataset/",
-    #                                                    "separator": ",",
-    #                                                    "columns_to_load": ["subject", "epitope", "count", "v_a_gene", "j_a_gene", "cdr3_a_aa",
-    #                                                                        "v_b_gene", "j_b_gene", "cdr3_b_aa", "clone_id", "cdr3_a_nucseq",
-    #                                                                        "cdr3_b_nucseq"],
-    #                                                    "column_mapping": {
-    #                                                        "cdr3_a_aa": "alpha_amino_acid_sequence",
-    #                                                        "cdr3_b_aa": "beta_amino_acid_sequence",
-    #                                                        "cdr3_a_nucseq": "alpha_nucleotide_sequence",
-    #                                                        "cdr3_b_nucseq": "beta_nucleotide_sequence",
-    #                                                        "v_a_gene": "alpha_v_call",
-    #                                                        "v_b_gene": "beta_v_call",
-    #                                                        "j_a_gene": "alpha_j_call",
-    #                                                        "j_b_gene": "beta_j_call",
-    #                                                        "clone_id": "identifier",
-    #                                                        "count": "duplicate_count"
-    #                                                    },
-    #                                                    "receptor_chains": "TRA_TRB",
-    #                                                    "region_type": "IMGT_CDR3",
-    #                                                    "sequence_file_size": 50000,
-    #                                                    "organism": "mouse"}, 'd1')
-    #
-    # dataset = TCRdistEncoder(8).encode(dataset, EncoderParams(path / "result", LabelConfiguration([Label("epitope", None)])))
-    #
-    # report = TCRdistMotifDiscovery(train_dataset=dataset, test_dataset=dataset, result_path=path / "report", name="report name", cores=8,
-    #                                positive_class_name="PA", min_cluster_size=3)
-    # report.label = Label("epitope", None)
-    # report._generate()
-    #
-    # shutil.rmtree(path)
+    dataset = TCRdistEncoder(8).encode(dataset, EncoderParams(path / "result", LabelConfiguration([Label("epitope", None)])))
+
+    report = TCRdistMotifDiscovery(train_dataset=dataset, test_dataset=dataset, result_path=path / "report",
+                                   name="report name", cores=8, positive_class_name="PA", min_cluster_size=3)
+    report.label = Label("epitope", None)
+    report._generate()
+
+    shutil.rmtree(path)

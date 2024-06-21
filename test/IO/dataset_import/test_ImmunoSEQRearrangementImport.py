@@ -62,7 +62,7 @@ rep2.tsv,TRB,1234a,no"""
                 )
 
     def test_repertoire_import(self):
-        path = EnvironmentSettings.tmp_test_path / "adaptive/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "adaptive/")
         self.build_dummy_dataset(path, True)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "ImmunoSEQRearrangement")

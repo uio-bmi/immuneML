@@ -1,5 +1,6 @@
-# quality: gold
+import logging
 import math
+from dataclasses import fields
 from enum import Enum
 from multiprocessing import Pool
 from pathlib import Path
@@ -36,7 +37,7 @@ class AIRRExporter(DataExporter):
     """
 
     @staticmethod
-    def export(dataset: Dataset, path: Path, number_of_processes: int = 1):
+    def export(dataset: Dataset, path: Path, number_of_processes: int = 1, omit_columns: list = None):
         PathBuilder.build(path)
 
         if isinstance(dataset, RepertoireDataset):
@@ -44,7 +45,9 @@ class AIRRExporter(DataExporter):
             repertoire_path = PathBuilder.build(path / repertoire_folder)
 
             with Pool(processes=number_of_processes) as pool:
-                pool.starmap(AIRRExporter.export_repertoire, [(repertoire, repertoire_path) for repertoire in dataset.repertoires])
+                arguments = [(repertoire, repertoire_path, dataset.labels, omit_columns)
+                             for repertoire in dataset.repertoires]
+                pool.starmap(AIRRExporter.export_repertoire, arguments)
 
             AIRRExporter.export_updated_metadata(dataset, path, repertoire_folder)
         else:
@@ -60,15 +63,15 @@ class AIRRExporter(DataExporter):
                 else:
                     df = AIRRExporter._sequences_to_dataframe(batch)
 
-                df = AIRRExporter._postprocess_dataframe(df)
+                df = AIRRExporter._postprocess_dataframe(df, dataset.labels, omit_columns)
                 airr.dump_rearrangement(df, str(filename))
 
                 index += 1
 
     @staticmethod
-    def export_repertoire(repertoire: Repertoire, repertoire_path: Path):
+    def export_repertoire(repertoire: Repertoire, repertoire_path: Path, dataset_labels: dict, omit_columns: list = None):
         df = AIRRExporter._repertoire_to_dataframe(repertoire)
-        df = AIRRExporter._postprocess_dataframe(df)
+        df = AIRRExporter._postprocess_dataframe(df, dataset_labels, omit_columns)
         output_file = repertoire_path / f"{repertoire.data_filename.stem if 'subject_id' not in repertoire.metadata else repertoire.metadata['subject_id']}.tsv"
         airr.dump_rearrangement(df, str(output_file))
 
@@ -96,7 +99,8 @@ class AIRRExporter(DataExporter):
 
     @staticmethod
     def _repertoire_to_dataframe(repertoire: Repertoire):
-        df = pd.DataFrame(repertoire.load_bnp_data().to_dict())
+        rep_data = repertoire.load_bnp_data()
+        df = pd.DataFrame({field.name: getattr(rep_data, field.name).tolist() for field in fields(rep_data)})
 
         region_type = repertoire.get_region_type()
 
@@ -108,6 +112,29 @@ class AIRRExporter(DataExporter):
         df.drop(columns=['region_type'], inplace=True)
 
         return df
+
+    @staticmethod
+    def add_full_length_seq(df, species, unique_chains):
+        if unique_chains is not None and len(unique_chains) <= 2 and all(chain in [Chain.ALPHA.value, Chain.BETA.value] for chain in unique_chains):
+            try:
+                from Stitchr import stitchr as st
+                from Stitchr import stitchrfunctions as fxn
+                from olga.utils import nt2aa
+
+                tcr_dat, functionality, partial = {}, {}, {}
+
+                for chain in unique_chains:
+                    tcr_dat[chain], functionality[chain], partial[chain] = fxn.get_imgt_data(chain, st.gene_types, species.upper())
+
+                codons = fxn.get_optimal_codons('', species)
+
+                df['full_sequence'] = df.apply(lambda row: stitch_wrapper(row, st, fxn, species, tcr_dat, functionality, partial, codons), axis=1)
+
+                df['full_sequence_aa'] = df.apply(lambda row: nt2aa(row['full_sequence']), axis=1)
+
+            except Exception as e:
+                logging.warning(f"An error occurred while exporting full length sequence. Only CDR3/JUNCTION region "
+                                f"is exported instead.\nFull error: {e}")
 
     @staticmethod
     def _receptors_to_dataframe(receptors: List[Receptor]):
@@ -124,7 +151,7 @@ class AIRRExporter(DataExporter):
     def _get_sequence_list_region_type(sequences: List[ReceptorSequence]):
         region_types = set([sequence.get_attribute("region_type") for sequence in sequences])
 
-        assert len(region_types) == 1, f"AIRRExporter: expected one region_type, found: {region_types}"
+        assert len(region_types) == 1, f"AIRRExporter: expected one region_type in the dataset, found: {region_types}."
 
         return RegionType(region_types.pop())
 
@@ -171,19 +198,23 @@ class AIRRExporter(DataExporter):
                     df.at[index, f"{gene}_{allele_name}"] = row[f"{gene}_{gene_name}"]
 
     @staticmethod
-    def _postprocess_dataframe(df):
+    def _postprocess_dataframe(df, dataset_labels: dict, omit_columns: list = None):
         if "locus" in df.columns:
             df["locus"] = [Chain.get_chain(chain).value if chain and Chain.get_chain(chain) else '' for chain in df["locus"]]
+        else:
+            df['locus'] = df.apply(lambda row: Chain.get_chain(row['v_call'][:3]).value, axis=1)
 
         if "frame_type" in df.columns:
             AIRRExporter._enums_to_strings(df, "frame_type")
 
-            df["productive"] = df["frame_type"] == SequenceFrameType.IN.name
-            df.loc[df["frame_type"].isnull(), "productive"] = ''
+            df["productive"] = df["frame_type"] == SequenceFrameType.IN.value
+            df.loc[df["frame_type"].isnull(), "productive"] = ""
+            df.loc[df["frame_type"] == "", "productive"] = ""
+            df.loc[df["frame_type"] == SequenceFrameType.UNDEFINED.value, "productive"] = ""
 
             df["vj_in_frame"] = df["productive"]
 
-            df["stop_codon"] = df["frame_type"] == SequenceFrameType.STOP.name
+            df["stop_codon"] = df["frame_type"] == SequenceFrameType.STOP.value
             df.loc[df["frame_type"].isnull(), "stop_codon"] = ''
 
             df.drop(columns=["frame_type"], inplace=True)
@@ -191,8 +222,30 @@ class AIRRExporter(DataExporter):
         if "region_type" in df.columns:
             df.drop(columns=["region_type"], inplace=True)
 
+        if omit_columns is not None:
+            df.drop(columns=omit_columns, inplace=True)
+
+        AIRRExporter.add_full_length_seq(df, dataset_labels.get('species', None) if dataset_labels else None, list(set(df['locus'].values.tolist())))
+
         return df
 
     @staticmethod
     def _enums_to_strings(df, field):
         df.loc[:, field] = [field_value.value if isinstance(field_value, Enum) else field_value for field_value in df.loc[:, field]]
+
+
+def stitch_wrapper(row, st, fxn, species, tcr_dat, functionality, partial, codons):
+    full_sequence = ""
+
+    try:
+        full_sequence = st.stitch({'v': row['v_call'], 'j': row['j_call'], 'cdr3': row['junction_aa'],
+                   'skip_c_checks': False, '5_prime_seq': '', '3_prime_seq': '', 'name': '',
+                   'c': fxn.autofill_input({'c': None, 'species': species.upper(), 'j': row['j_call'],
+                                            'l': row['v_call']}, row['locus'])['c'],
+                   'species': species.upper(), 'l': row['v_call']},
+                  tcr_dat[row['locus']], functionality[row['locus']], partial[row['locus']], codons, 3, '')[1]
+
+    except Exception as e:
+        logging.warning(f"An error occurred while constructing full sequence from row: \n{row}. Error log: \n{e}")
+
+    return full_sequence

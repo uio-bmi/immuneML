@@ -5,11 +5,12 @@ from typing import List
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeightingStrategy
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.reports.ml_reports.MLReport import MLReport
 from immuneML.util.Logger import print_log
@@ -29,22 +30,22 @@ class MLProcess:
     It performs the task for a given label configuration, and given list of metrics (used only in the assessment step).
     """
 
-    def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label: Label, metrics: set, optimization_metric: Metric,
+    def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label: Label, metrics: set, optimization_metric: ClassificationMetric,
                  path: Path, ml_reports: List[MLReport] = None, encoding_reports: list = None, data_reports: list = None, number_of_processes: int = 2,
-                 label_config: LabelConfiguration = None, report_context: dict = None, hp_setting: HPSetting = None):
+                 label_config: LabelConfiguration = None, report_context: dict = None, hp_setting: HPSetting = None, example_weighting: ExampleWeightingStrategy = None):
         self.train_dataset = train_dataset
         self.test_dataset = test_dataset
         self.label = label
         self.label_config = label_config
         self.method = copy.deepcopy(hp_setting.ml_method)
         self.path = PathBuilder.build(path) if path is not None else None
-        self.ml_details_path = path / "ml_details.yaml" if path is not None else None
+        self.ml_settings_export_path = path / "ml_settings_config" if path is not None else None
         self.ml_score_path = path / "ml_score.csv" if path is not None else None
         self.train_predictions_path = path / "train_predictions.csv" if path is not None else None
         self.test_predictions_path = path / "test_predictions.csv" if path is not None else None
         self.report_path = PathBuilder.build(path / "reports") if path is not None else None
         self.number_of_processes = number_of_processes
-        assert all([isinstance(metric, Metric) for metric in metrics]), \
+        assert all([isinstance(metric, ClassificationMetric) for metric in metrics]), \
             "MLProcess: metrics are not set to be an instance of Metric."
         self.metrics = metrics
         self.optimization_metric = optimization_metric
@@ -53,11 +54,12 @@ class MLProcess:
         self.data_reports = data_reports if data_reports is not None else []
         self.report_context = report_context
         self.hp_setting = copy.deepcopy(hp_setting)
+        self.example_weighting = example_weighting
 
     def _set_paths(self):
         if self.path is None:
             raise RuntimeError("MLProcess: path is not set, stopping execution...")
-        self.ml_details_path = self.path / "ml_details.yaml"
+        self.ml_settings_export_path = self.path / "ml_settings_config"
         self.ml_score_path = self.path / "ml_score.csv"
         self.train_predictions_path = self.path / "train_predictions.csv"
         self.test_predictions_path = self.path / "test_predictions.csv"
@@ -73,7 +75,10 @@ class MLProcess:
         processed_dataset = HPUtil.preprocess_dataset(self.train_dataset, self.hp_setting.preproc_sequence, self.path / "preprocessed_train_dataset",
                                                       self.report_context)
 
-        encoded_train_dataset = HPUtil.encode_dataset(processed_dataset, self.hp_setting, self.path / "encoded_datasets", learn_model=True,
+        weighted_dataset = HPUtil.weight_examples(dataset=processed_dataset, weighting_strategy=self.example_weighting, path=self.path / "weighted_train_datasets",
+                                                  learn_model=True, number_of_processes=self.number_of_processes)
+
+        encoded_train_dataset = HPUtil.encode_dataset(weighted_dataset, self.hp_setting, self.path / "encoded_datasets", learn_model=True,
                                                       context=self.report_context, number_of_processes=self.number_of_processes,
                                                       label_configuration=self.label_config)
 
@@ -94,7 +99,6 @@ class MLProcess:
             dataset=dataset,
             label=self.label,
             train_predictions_path=self.train_predictions_path,
-            ml_details_path=self.ml_details_path,
             model_selection_cv=self.hp_setting.ml_params["model_selection_cv"],
             model_selection_n_folds=self.hp_setting.ml_params["model_selection_n_folds"],
             cores_for_training=self.number_of_processes,
@@ -106,7 +110,12 @@ class MLProcess:
         if self.test_dataset is not None and self.test_dataset.get_example_count() > 0:
             processed_test_dataset = HPUtil.preprocess_dataset(self.test_dataset, self.hp_setting.preproc_sequence,
                                                                self.path / "preprocessed_test_dataset")
-            encoded_test_dataset = HPUtil.encode_dataset(processed_test_dataset, self.hp_setting, self.path / "encoded_datasets",
+
+            weighted_test_dataset = HPUtil.weight_examples(dataset=processed_test_dataset, weighting_strategy=self.example_weighting,
+                                                           path=self.path / "weighted_test_datasets", learn_model=False,
+                                                           number_of_processes=self.number_of_processes)
+
+            encoded_test_dataset = HPUtil.encode_dataset(weighted_test_dataset, self.hp_setting, self.path / "encoded_datasets",
                                                          learn_model=False, context=self.report_context, number_of_processes=self.number_of_processes,
                                                          label_configuration=self.label_config)
 
@@ -119,13 +128,14 @@ class MLProcess:
                                                              self.report_path / "ml_method", self.hp_setting, self.label, self.number_of_processes, self.report_context)
 
             hp_item = HPItem(method=method, hp_setting=self.hp_setting, train_predictions_path=self.train_predictions_path,
-                             test_predictions_path=self.test_predictions_path, ml_details_path=self.ml_details_path, train_dataset=self.train_dataset,
+                             test_predictions_path=self.test_predictions_path, train_dataset=self.train_dataset,
                              test_dataset=self.test_dataset, split_index=split_index, model_report_results=model_report_results,
                              encoding_train_results=encoding_train_results, encoding_test_results=encoding_test_results, performance=performance,
-                             encoder=self.hp_setting.encoder)
+                             encoder=self.hp_setting.encoder, ml_settings_export_path=self.ml_settings_export_path)
         else:
             hp_item = HPItem(method=method, hp_setting=self.hp_setting, train_predictions_path=self.train_predictions_path,
-                             test_predictions_path=None, ml_details_path=self.ml_details_path, train_dataset=self.train_dataset,
-                             split_index=split_index, encoding_train_results=encoding_train_results, encoder=self.hp_setting.encoder)
+                             test_predictions_path=None, train_dataset=self.train_dataset,
+                             split_index=split_index, encoding_train_results=encoding_train_results, encoder=self.hp_setting.encoder,
+                             ml_settings_export_path=self.ml_settings_export_path)
 
         return hp_item

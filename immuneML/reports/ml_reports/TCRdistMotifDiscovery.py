@@ -33,31 +33,46 @@ class TCRdistMotifDiscovery(MLReport):
     `doi:10.1101/2020.12.24.424260 <https://www.biorxiv.org/content/10.1101/2020.12.24.424260v1>`_
 
 
-    Arguments:
+    Example output:
 
-        positive_class_name (str): the class value (e.g., epitope) used to select only the receptors that are specific to the given epitope so that
-        only those sequences are used to infer motifs; the reference receptors as required by TCRdist will be the ones from the dataset that have
-        different or no epitope specified in their metadata; if the labels are available only on the epitope level (e.g., label is "AVFDRKSDAK" and
-        classes are True and False), then here it should be specified that only the receptors with value "True" for label "AVFDRKSDAK" should be used;
-        there is no default value for this argument
+    .. image:: _static/images/reports/tcrdist_motif_a.svg
+       :alt: TCRdist alpha chain logo plot
+       :width: 300px
 
-        cores (int): number of processes to use for the computation of the distance and motifs
 
-        min_cluster_size (int): the minimum size of the cluster to discover the motifs for
+    .. image:: _static/images/reports/tcrdist_motif_b.svg
+       :alt: TCRdist beta chain logo plot
+       :width: 300px
 
-        use_reference_sequences (bool): when showing motifs, this parameter defines if reference sequences should be provided as well as a background
 
-    YAML specification:
+    **Specification arguments:**
+
+    - positive_class_name (str): the class value (e.g., epitope) used to select only the receptors that are specific to the given epitope so that
+      only those sequences are used to infer motifs; the reference receptors as required by TCRdist will be the ones from the dataset that have
+      different or no epitope specified in their metadata; if the labels are available only on the epitope level (e.g., label is "AVFDRKSDAK" and
+      classes are True and False), then here it should be specified that only the receptors with value "True" for label "AVFDRKSDAK" should be used;
+      there is no default value for this argument
+
+    - cores (int): number of processes to use for the computation of the distance and motifs
+
+    - min_cluster_size (int): the minimum size of the cluster to discover the motifs for
+
+    - use_reference_sequences (bool): when showing motifs, this parameter defines if reference sequences should be provided as well as a background
+
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_tcr_dist_report: # user-defined name
-            TCRdistMotifDiscovery:
-                positive_class_name: True # class name, could also be epitope name, depending on how it's defined in the dataset
-                cores: 4
-                min_cluster_size: 30
-                use_reference_sequences: False
+        definitions:
+            reports:
+                my_tcr_dist_report: # user-defined name
+                    TCRdistMotifDiscovery:
+                        positive_class_name: True # class name, could also be epitope name, depending on how it's defined in the dataset
+                        cores: 4
+                        min_cluster_size: 30
+                        use_reference_sequences: False
 
     """
 

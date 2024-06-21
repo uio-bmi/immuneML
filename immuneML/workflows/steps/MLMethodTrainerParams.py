@@ -9,7 +9,7 @@ from immuneML.workflows.steps.StepParams import StepParams
 class MLMethodTrainerParams(StepParams):
 
     def __init__(self, method: MLMethod, dataset: Dataset, result_path: Path, label: Label, model_selection_cv: bool,
-                 model_selection_n_folds: int, cores_for_training: int, train_predictions_path: Path, ml_details_path: Path,
+                 model_selection_n_folds: int, cores_for_training: int, train_predictions_path: Path,
                  optimization_metric: str):
         self.method = method
         self.result_path = result_path
@@ -19,5 +19,4 @@ class MLMethodTrainerParams(StepParams):
         self.model_selection_n_folds = model_selection_n_folds
         self.cores_for_training = cores_for_training
         self.train_predictions_path = train_predictions_path
-        self.ml_details_path = ml_details_path
         self.optimization_metric = optimization_metric

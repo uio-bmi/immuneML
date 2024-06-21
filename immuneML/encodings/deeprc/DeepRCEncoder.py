@@ -7,6 +7,7 @@ from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -20,12 +21,14 @@ class DeepRCEncoder(DatasetEncoder):
 
     Note: sequences where count is None, the count value will be set to 1
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_deeprc_encoder: DeepRC
+        definitions:
+            encodings:
+                my_deeprc_encoder: DeepRC
 
     """
     ID_COLUMN = "ID"
@@ -37,8 +40,8 @@ class DeepRCEncoder(DatasetEncoder):
     METADATA_SEP = ","
 
     def __init__(self, context: dict = None, name: str = None):
+        super().__init__(name=name)
         self.context = context
-        self.name = name
         self.max_sequence_length = 0
 
     def set_context(self, context: dict):
@@ -88,19 +91,17 @@ class DeepRCEncoder(DatasetEncoder):
 
         self.export_repertoire_tsv_files(result_path)
 
-        labels = params.label_config.get_labels_by_name()
-        metadata_filepath = self.export_metadata_file(dataset, labels, result_path)
+
+        metadata_filepath = self.export_metadata_file(dataset, params.label_config.get_labels_by_name(), result_path)
 
         encoded_dataset = dataset.clone()
-        encoded_dataset.encoded_data = EncodedData(examples=None, labels=dataset.get_metadata(labels) if params.encode_labels else None,
-                                                   example_ids=dataset.repertoire_ids,
+        encoded_dataset.encoded_data = EncodedData(examples=None,
+                                                   labels=EncoderHelper.encode_dataset_labels(dataset, params.label_config, params.encode_labels),
+                                                   example_ids=dataset.get_repertoire_ids(),
+                                                   example_weights=dataset.get_example_weights(),
                                                    encoding=DeepRCEncoder.__name__,
                                                    info={"metadata_filepath": metadata_filepath,
                                                          "max_sequence_length": self.max_sequence_length})
 
         return encoded_dataset
 
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> Path:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file

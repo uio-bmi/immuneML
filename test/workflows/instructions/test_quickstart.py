@@ -9,7 +9,6 @@ from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.quickstart import Quickstart
 
 
-@pytest.mark.skip(reason='simulation will come from ligo')
 def test_quickstart():
     path = EnvironmentSettings.tmp_test_path / "quickstart_test/"
     PathBuilder.remove_old_and_build(path)

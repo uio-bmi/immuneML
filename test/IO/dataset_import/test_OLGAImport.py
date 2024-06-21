@@ -60,8 +60,8 @@ rep2.tsv,2""")
                 self.assertListEqual(["ASSLSPGLAYEQY",
                                       "ASKVRIAATNEKLF",
                                       "SADSKNRGAGGEASSYEQY"], rep.get_sequence_aas().tolist())
-                self.assertListEqual(["TRBV27", "TRBV5-6", "TRBV20-1"], rep.get_v_genes().tolist())
-                self.assertListEqual(["TRBJ2-7", "TRBJ1-4", "TRBJ2-7"], rep.get_j_genes().tolist())
+                self.assertListEqual(["TRBV27", "TRBV5-6", "TRBV20-1"], rep.get_v_genes())
+                self.assertListEqual(["TRBJ2-7", "TRBJ1-4", "TRBJ2-7"], rep.get_j_genes())
                 self.assertListEqual([1, 1, 1], rep.get_counts().tolist())
                 self.assertListEqual([Chain.BETA, Chain.BETA, Chain.BETA], rep.get_chains().tolist())
 

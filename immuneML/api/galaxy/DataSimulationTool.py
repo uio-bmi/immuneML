@@ -25,7 +25,7 @@ class DataSimulationTool(GalaxyTool):
         Util.run_tool(self.yaml_path, self.result_path)
 
         dataset_location = self.result_path / f"{self.instruction_name}/{self.dataset_name}/{self.export_format}/"
-        shutil.copytree(dataset_location, self.result_path / 'result/')
+        shutil.copytree(dataset_location, self.result_path / 'galaxy_dataset/')
 
         logging.info(f"{DataSimulationTool.__name__}: immuneML has finished and the dataset was created.")
 

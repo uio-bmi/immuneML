@@ -37,12 +37,14 @@ class Matches(EncodingReport):
       the paired matches (where a match was found in both chains) per repertoire.
 
 
-    YAML Specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_match_report: Matches
+        definitions:
+            reports:
+                my_match_report: Matches
     """
 
     @classmethod

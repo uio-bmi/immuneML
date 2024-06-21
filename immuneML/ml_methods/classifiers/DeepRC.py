@@ -38,62 +38,65 @@ class DeepRC(MLMethod):
     bioRxiv preprint doi: `https://doi.org/10.1101/2020.04.12.038158 <https://doi.org/10.1101/2020.04.12.038158>`_
 
 
-    Arguments:
+    **Specification arguments:**
 
-        validation_part (float):  the part of the data that will be used for validation, the rest will be used for training.
+    - validation_part (float):  the part of the data that will be used for validation, the rest will be used for training.
 
-        add_positional_information (bool): whether positional information should be included in the input features.
+    - add_positional_information (bool): whether positional information should be included in the input features.
 
-        kernel_size (int): the size of the 1D-CNN kernels.
+    - kernel_size (int): the size of the 1D-CNN kernels.
 
-        n_kernels (int): the number of 1D-CNN kernels in each layer.
+    - n_kernels (int): the number of 1D-CNN kernels in each layer.
 
-        n_additional_convs (int): Number of additional 1D-CNN layers after first layer
+    - n_additional_convs (int): Number of additional 1D-CNN layers after first layer
 
-        n_attention_network_layers (int): Number of attention layers to compute keys
+    - n_attention_network_layers (int): Number of attention layers to compute keys
 
-        n_attention_network_units (int): Number of units in each attention layer
+    - n_attention_network_units (int): Number of units in each attention layer
 
-        n_output_network_units (int): Number of units in the output layer
+    - n_output_network_units (int): Number of units in the output layer
 
-        consider_seq_counts (bool): whether the input data should be scaled by the receptor sequence counts.
+    - consider_seq_counts (bool): whether the input data should be scaled by the receptor sequence counts.
 
-        sequence_reduction_fraction (float): Fraction of number of sequences to which to reduce the number of sequences per bag based on attention weights. Has to be in range [0,1].
+    - sequence_reduction_fraction (float): Fraction of number of sequences to which to reduce the number of sequences per bag based on attention weights. Has to be in range [0,1].
 
-        reduction_mb_size (int): Reduction of sequences per bag is performed using minibatches of reduction_mb_size` sequences to compute the attention weights.
+    - reduction_mb_size (int): Reduction of sequences per bag is performed using minibatches of reduction_mb_size` sequences to compute the attention weights.
 
-        n_updates (int): Number of updates to train for
+    - n_updates (int): Number of updates to train for
 
-        n_torch_threads (int):  Number of parallel threads to allow PyTorch
+    - n_torch_threads (int):  Number of parallel threads to allow PyTorch
 
-        learning_rate (float): Learning rate for adam optimizer
+    - learning_rate (float): Learning rate for adam optimizer
 
-        l1_weight_decay (float): l1 weight decay factor. l1 weight penalty will be added to loss, scaled by `l1_weight_decay`
+    - l1_weight_decay (float): l1 weight decay factor. l1 weight penalty will be added to loss, scaled by `l1_weight_decay`
 
-        l2_weight_decay (float): l2 weight decay factor. l2 weight penalty will be added to loss, scaled by `l2_weight_decay`
+    - l2_weight_decay (float): l2 weight decay factor. l2 weight penalty will be added to loss, scaled by `l2_weight_decay`
 
-        sequence_counts_scaling_fn: it can either be `log` (logarithmic scaling of sequence counts) or None
+    - sequence_counts_scaling_fn: it can either be `log` (logarithmic scaling of sequence counts) or None
 
-        evaluate_at (int): Evaluate model on training and validation set every `evaluate_at` updates. This will also check for a new best model for early stopping.
+    - evaluate_at (int): Evaluate model on training and validation set every `evaluate_at` updates. This will also check for a new best model for early stopping.
 
-        sample_n_sequences (int): Optional random sub-sampling of `sample_n_sequences` sequences per repertoire. Number of sequences per repertoire might be smaller than `sample_n_sequences` if repertoire is smaller or random indices have been drawn multiple times. If None, all sequences will be loaded for each repertoire.
+    - sample_n_sequences (int): Optional random sub-sampling of `sample_n_sequences` sequences per repertoire. Number of sequences per repertoire might be smaller than `sample_n_sequences` if repertoire is smaller or random indices have been drawn multiple times. If None, all sequences will be loaded for each repertoire.
 
-        training_batch_size (int): Number of repertoires per minibatch during training.
+    - training_batch_size (int): Number of repertoires per minibatch during training.
 
-        n_workers (int): Number of background processes to use for converting dataset to hdf5 container and training set data loader.
+    - n_workers (int): Number of background processes to use for converting dataset to hdf5 container and training set data loader.
 
-        pytorch_device_name (str): The name of the pytorch device to use. This name will be passed to  torch.device(self.pytorch_device_name). The default value is cuda:0
+    - pytorch_device_name (str): The name of the pytorch device to use. This name will be passed to  torch.device(self.pytorch_device_name). The default value is cuda:0
 
-    YAML specification:
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_deeprc_method:
-            DeepRC:
-                validation_part: 0.2
-                add_positional_information: True
-                kernel_size: 9
+        definitions:
+            ml_methods:
+                my_deeprc_method:
+                    DeepRC:
+                        validation_part: 0.2
+                        add_positional_information: True
+                        kernel_size: 9
 
     """
 
@@ -113,10 +116,7 @@ class DeepRC(MLMethod):
         self.training_function = train
 
         self.model = None
-        self.result_path = None
-
         self.max_seq_len = None
-        self.label = None
 
         self.keep_dataset_in_ram = keep_dataset_in_ram
         self.pytorch_device_name = pytorch_device_name
@@ -154,8 +154,6 @@ class DeepRC(MLMethod):
         self.sample_n_sequences = sample_n_sequences
         self.training_batch_size = training_batch_size
         self.n_workers = n_workers
-
-        self.feature_names = None
 
     def _metadata_to_hdf5(self, metadata_filepath: Path, label_name: str):
         from deeprc.dataset_converters import DatasetToHDF5
@@ -248,13 +246,11 @@ class DeepRC(MLMethod):
                 ("evaluate_at", self.evaluate_at),
                 ("pytorch_device_name", self.pytorch_device_name))
 
-    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
-        self.feature_names = encoded_data.feature_names
-        self.label = label
-        self.model = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, "fit", label.name),
-                                                 lambda: self._fit(encoded_data, label, cores_for_training))
+    def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
+        self.model = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, "fit", self.label.name),
+                                                 lambda: self._fit(encoded_data, self.label, cores_for_training))
 
-    def _fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
+    def _fit_model(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
 
         hdf5_filepath, pre_loaded_hdf5_file = self._convert_dataset_to_hdf5(encoded_data, label)
 
@@ -348,12 +344,6 @@ class DeepRC(MLMethod):
                                show_progress=False, device=self.pytorch_device, evaluate_at=self.evaluate_at,
                                task_definition=task_definition, early_stopping_target_id=label.name)
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None,
-                                cores_for_training: int = -1,
-                                optimization_metric=None):
-        warnings.warn("DeepRC: cross-validation on this classifier is not defined: fitting one model instead...")
-        self.fit(encoded_data, label)
-
     def get_params(self):
         return {name: param.data.tolist() for name, param in self.model.named_parameters()}
 
@@ -362,22 +352,21 @@ class DeepRC(MLMethod):
             raise NotFittedError("This DeepRCs instance is not fitted yet. "
                                  "Call 'fit' with appropriate arguments before using this method.")
 
-    def predict(self, encoded_data: EncodedData, label: Label):
-        probabilities = self.predict_proba(encoded_data, label)
+    def _predict(self, encoded_data: EncodedData):
+        probabilities = self._predict_proba(encoded_data)
 
-        pos_class_probs = probabilities[label.name][label.positive_class]
-        negative_class = label.get_binary_negative_class()
+        pos_class_probs = probabilities[self.label.name][self.label.positive_class]
+        negative_class = self.label.get_binary_negative_class()
 
-        # TODO: check what is returned here and how it works with multiclass
-        return {label.name: [label.positive_class if probability > 0.5 else negative_class for probability in
+        return {self.label.name: [self.label.positive_class if probability > 0.5 else negative_class for probability in
                              pos_class_probs]}
 
-    def predict_proba(self, encoded_data: EncodedData, label: Label):
+    def _predict_proba(self, encoded_data: EncodedData):
         from deeprc.dataset_readers import RepertoireDataset as DeepRCRepDataset
-        self.check_is_fitted(label.name)
+        self.check_is_fitted(self.label.name)
 
-        hdf5_filepath, _ = self._convert_dataset_to_hdf5(encoded_data, label)
-        task_definition = self._make_task_definition(label)
+        hdf5_filepath, _ = self._convert_dataset_to_hdf5(encoded_data, self.label)
+        task_definition = self._make_task_definition(self.label)
 
         test_dataset = DeepRCRepDataset(metadata_filepath=encoded_data.info['metadata_filepath'],
                                         hdf5_filepath=str(hdf5_filepath),
@@ -387,7 +376,7 @@ class DeepRC(MLMethod):
                                         inputformat='NCL',
                                         sequence_counts_scaling_fn=self.sequence_counts_scaling_fn)
 
-        test_dataloader = self.make_data_loader(test_dataset, indices=None, label_name=label.name, eval_only=True,
+        test_dataloader = self.make_data_loader(test_dataset, indices=None, label_name=self.label.name, eval_only=True,
                                                 is_train=False)
 
         probs_pos_class = self._model_predict(self.model, test_dataloader)
@@ -422,7 +411,7 @@ class DeepRC(MLMethod):
 
         return scoring_predictions
 
-    def load(self, path: Path, details_path: Path = None):
+    def load(self, path: Path):
         name = FilenameHandler.get_filename(self.__class__.__name__, "pt")
         file_path = path / name
         if file_path.is_file():
@@ -432,10 +421,7 @@ class DeepRC(MLMethod):
             raise FileNotFoundError(f"{self.__class__.__name__} model could not be loaded from {file_path}. "
                                     f"Check if the path to the {name} file is properly set.")
 
-        if details_path is None:
-            params_path = path / FilenameHandler.get_filename(self.__class__.__name__, "yaml")
-        else:
-            params_path = details_path
+        params_path = path / FilenameHandler.get_filename(self.__class__.__name__, "yaml")
 
         if params_path.is_file():
             with params_path.open("r") as file:
@@ -446,20 +432,17 @@ class DeepRC(MLMethod):
                     if param in desc:
                         setattr(self, param, desc[param])
 
-    def store(self, path, feature_names=None, details_path: Path = None):
+    def store(self, path):
         PathBuilder.build(path)
         name = FilenameHandler.get_filename(self.__class__.__name__, "pt")
         torch.save(self.model, str(path / name))
 
-        if details_path is None:
-            params_path = path / FilenameHandler.get_filename(self.__class__.__name__, "yaml")
-        else:
-            params_path = details_path
+        params_path = path / FilenameHandler.get_filename(self.__class__.__name__, "yaml")
 
         with params_path.open("w") as file:
             desc = {
                 **(self.get_params()),
-                "feature_names": feature_names,
+                "feature_names": self.get_feature_names(),
                 "classes": self.get_classes()
             }
             if self.label is not None:
@@ -467,26 +450,15 @@ class DeepRC(MLMethod):
 
             yaml.dump(desc, file)
 
-    def check_if_exists(self, path):
-        file_path = path / FilenameHandler.get_filename(self.__class__.__name__, "pt")
-
-        return file_path.is_file()
 
     def get_package_info(self) -> str:
-        return 'immuneML ' + Util.get_immuneML_version() + '; deepRC ' + pkg_resources.get_distribution(
-            'DeepRC').version
-
-    def get_feature_names(self) -> list:
-        return self.feature_names
+        return Util.get_immuneML_version() + '; deepRC ' + pkg_resources.get_distribution('DeepRC').version
 
     def can_predict_proba(self) -> bool:
         return True
 
-    def get_class_mapping(self) -> dict:
-        return {}
-
-    def get_label_name(self) -> str:
-        return self.label.name
+    def can_fit_with_example_weights(self) -> bool:
+        return False
 
     def get_compatible_encoders(self):
         return [DeepRCEncoder]

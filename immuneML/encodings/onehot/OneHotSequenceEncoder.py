@@ -18,15 +18,13 @@ class OneHotSequenceEncoder(OneHotEncoder):
     def _encode_new_dataset(self, dataset: SequenceDataset, params: EncoderParams):
         encoded_data = self._encode_data(dataset, params)
 
-        encoded_dataset = SequenceDataset(filenames=dataset.get_filenames(),
-                                          encoded_data=encoded_data,
-                                          labels=dataset.labels,
-                                          file_size=dataset.file_size, dataset_file=dataset.dataset_file)
+        encoded_dataset = dataset.clone()
+        encoded_dataset.encoded_data = encoded_data
 
         return encoded_dataset
 
     def _encode_data(self, dataset: SequenceDataset, params: EncoderParams):
-        sequence_objs = [obj for obj in dataset.get_data(params.pool_size)]
+        sequence_objs = [obj for obj in dataset.get_data()]
 
         sequences = [obj.get_sequence(self.sequence_type) for obj in sequence_objs]
 
@@ -35,7 +33,6 @@ class OneHotSequenceEncoder(OneHotEncoder):
                 f"{OneHotEncoder.__name__}: sequence dataset {dataset.name} (id: {dataset.identifier}) contains empty sequences for the specified "
                 f"sequence type {self.sequence_type.name.lower()}. Please check that the dataset is imported correctly.")
 
-        example_ids = dataset.get_example_ids()
         max_seq_len = max([len(seq) for seq in sequences])
         labels = self._get_labels(sequence_objs, params) if params.encode_labels else None
 
@@ -49,8 +46,9 @@ class OneHotSequenceEncoder(OneHotEncoder):
 
         encoded_data = EncodedData(examples=examples,
                                    labels=labels,
-                                   example_ids=example_ids,
+                                   example_ids=dataset.get_example_ids(),
                                    feature_names=feature_names,
+                                   example_weights=dataset.get_example_weights(),
                                    encoding=OneHotEncoder.__name__)
 
         return encoded_data

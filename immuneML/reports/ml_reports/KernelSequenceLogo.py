@@ -26,14 +26,14 @@ class KernelSequenceLogo(MLReport):
     Bioinformatics. 2020; 36(7):2272-2274. `doi:10.1093/bioinformatics/btz921 <https://academic.oup.com/bioinformatics/article/36/7/2272/5671693>`_.
 
 
-    Arguments: this report does not take any arguments as input.
-
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_kernel_seq_logo: KernelSequenceLogo
+        definitions:
+            reports:
+                my_kernel_seq_logo: KernelSequenceLogo
 
     """
 

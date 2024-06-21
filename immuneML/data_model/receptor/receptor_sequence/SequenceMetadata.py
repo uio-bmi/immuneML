@@ -9,12 +9,11 @@ from immuneML.data_model.receptor.receptor_sequence.SequenceFrameType import Seq
 class SequenceMetadata:
     """
     class modeling the existing knowledge about a receptor_sequence, should be stored according to
-    IMGT gene nomenclature (human can be found `here
-    <http://www.imgt.org/IMGTrepertoire/index.php?section=LocusGenes&repertoire=genetable&species=human&group=TRBV>`_):
+    AIRR nomenclature
         - v call
         - j call
         - chain
-        - count
+        - duplicate_count
         - region_type (e.g. IMGT_CDR3, IMGT_CDR1, FULL_SEQUENCE)
         - frame_type (e.g. IN, OUT, STOP)
         - sample
@@ -41,11 +40,11 @@ class SequenceMetadata:
 
     @property
     def v_gene(self):
-        return self.v_call.split("\*")[0]
+        return self.v_call.split("*")[0]
 
     @property
     def j_gene(self):
-        return self.j_call.split("\*")[0]
+        return self.j_call.split("*")[0]
 
     def get_attribute(self, name: str):
         """Returns the attribute value if attribute is present either directly or in custom_params, otherwise returns

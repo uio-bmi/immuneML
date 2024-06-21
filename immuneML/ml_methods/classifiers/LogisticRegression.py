@@ -16,25 +16,27 @@ class LogisticRegression(SklearnMethod):
     For usage instructions, check :py:obj:`~immuneML.ml_methods.classifiers.SklearnMethod.SklearnMethod`.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_logistic_regression: # user-defined method name
-            LogisticRegression: # name of the ML method
-                # sklearn parameters (same names as in original sklearn class)
-                penalty: l1 # always use penalty l1
-                C: [0.01, 0.1, 1, 10, 100] # find the optimal value for C
-                # Additional parameter that determines whether to print convergence warnings
-                show_warnings: True
-            # if any of the parameters under LogisticRegression is a list and model_selection_cv is True,
-            # a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,
-            # and the optimal model will be selected
-            model_selection_cv: True
-            model_selection_n_folds: 5
-        # alternative way to define ML method with default values:
-        my_default_logistic_regression: LogisticRegression
+        definitions:
+            ml_methods:
+                my_logistic_regression: # user-defined method name
+                    LogisticRegression: # name of the ML method
+                        # sklearn parameters (same names as in original sklearn class)
+                        penalty: l1 # always use penalty l1
+                        C: [0.01, 0.1, 1, 10, 100] # find the optimal value for C
+                        # Additional parameter that determines whether to print convergence warnings
+                        show_warnings: True
+                    # if any of the parameters under LogisticRegression is a list and model_selection_cv is True,
+                    # a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,
+                    # and the optimal model will be selected
+                    model_selection_cv: True
+                    model_selection_n_folds: 5
+                # alternative way to define ML method with default values:
+                my_default_logistic_regression: LogisticRegression
 
     """
 
@@ -56,6 +58,9 @@ class LogisticRegression(SklearnMethod):
         return SklearnLogisticRegression(**params)
 
     def can_predict_proba(self) -> bool:
+        return True
+
+    def can_fit_with_example_weights(self) -> bool:
         return True
 
     def get_params(self):

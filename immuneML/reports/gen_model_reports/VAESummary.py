@@ -26,27 +26,29 @@ class VAESummary(GenModelReport):
     - plots the histogram for each latent dimension
     - plots loss per epoch
 
-    Arguments:
+    **Specification arguments:**
 
-        dim_dist_cols (int): how many columns to use to plot the histograms of latent dimensions (either this or dim_dist_rows has to be set, or both)
+    - dim_dist_cols (int): how many columns to use to plot the histograms of latent dimensions (either this or
+      dim_dist_rows has to be set, or both)
 
-        dim_dist_rows (int): how many rows to use to plot the histogram of latent dimensions (either this or dim_dist_cols has to be set, or both)
+    - dim_dist_rows (int): how many rows to use to plot the histogram of latent dimensions (either this or
+      dim_dist_cols has to be set, or both)
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_vae_summary:
-          VAESummary:
-            dim_dist_cols: 4
-            dim_dist_rows: None
+        definitions:
+            reports:
+                my_vae_summary:
+                    VAESummary:
+                        dim_dist_cols: 4
+                        dim_dist_rows: None
 
     """
     @classmethod
     def build_object(cls, **kwargs):
-        print("Entering vae summary build obj!")
-
         name = kwargs["name"] if "name" in kwargs else "VAESummary"
 
         ParameterValidator.assert_keys_present(list(kwargs.keys()), ['dim_dist_cols', 'dim_dist_rows'],

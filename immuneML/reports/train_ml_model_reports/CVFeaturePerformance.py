@@ -20,23 +20,26 @@ class CVFeaturePerformance(TrainMLModelReport):
     in the feature attribute. It can be used only in combination with TrainMLModel instruction and can be only specified under 'reports'
 
 
-    Arguments:
-        feature: name of the encoder parameter w.r.t. which the performance across training and test will be shown. Possible values depend
-        on the encoder on which it is used.
+    **Specification arguments:**
 
-        is_feature_axis_categorical (bool): if the x-axis of the plot where features are shown should be categorical; alternatively it is
-        automatically determined based on the feature values
+    - feature: name of the encoder parameter w.r.t. which the performance across training and test will be shown. Possible values depend
+      on the encoder on which it is used.
+
+    - is_feature_axis_categorical (bool): if the x-axis of the plot where features are shown should be categorical; alternatively it is
+      automatically determined based on the feature values
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        report1:
-            CVFeaturePerformance:
-                feature: p_value_threshold # parameter value of SequenceAbundance encoder
-                is_feature_axis_categorical: True # show x-axis as categorical
+        definitions:
+            reports:
+                report1:
+                    CVFeaturePerformance:
+                        feature: p_value_threshold # parameter value of SequenceAbundance encoder
+                        is_feature_axis_categorical: True # show x-axis as categorical
 
     """
 

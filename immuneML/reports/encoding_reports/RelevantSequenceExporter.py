@@ -19,14 +19,15 @@ class RelevantSequenceExporter(EncodingReport):
     Exports the sequences that are extracted as label-associated when using the :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder` or
     :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder` in AIRR-compliant format.
 
-    Arguments: there are no arguments for this report.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_relevant_sequences: RelevantSequenceExporter
+        definitions:
+            reports:
+                my_relevant_sequences: RelevantSequenceExporter
 
     """
 

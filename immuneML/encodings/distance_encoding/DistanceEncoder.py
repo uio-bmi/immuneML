@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 
 import pandas as pd
@@ -25,45 +26,47 @@ class DistanceEncoder(DatasetEncoder):
     if they contain the same set of sequence_aas, and the distance is minimal if none of the sequence_aas are shared between
     two repertoires.
 
-    Arguments:
+    **Specification arguments:**
 
-        distance_metric (:py:mod:`~immuneML.encodings.distance_encoding.DistanceMetricType`): The metric used to calculate the
-        distance between two repertoires. Names of different distance metric types are allowed values in the specification.
-        The default distance metric is JACCARD (inverse Jaccard).
+    - distance_metric (:py:mod:`~immuneML.encodings.distance_encoding.DistanceMetricType`): The metric used to calculate the
+      distance between two repertoires. Names of different distance metric types are allowed values in the specification.
+      The default distance metric is JACCARD (inverse Jaccard).
 
-        sequence_batch_size (int): The number of sequences to be processed at once. Increasing this number increases the memory use.
-        The default value is 1000.
+    - sequence_batch_size (int): The number of sequences to be processed at once. Increasing this number increases the memory use.
+      The default value is 1000.
 
-        attributes_to_match (list): The attributes to consider when determining whether a sequence is present in both repertoires.
-        Only the fields defined under attributes_to_match will be considered, all other fields are ignored.
-        Valid values include any repertoire attribute (sequence, amino acid sequence, V gene etc). The default value is ['sequence_aas']
+    - attributes_to_match (list): The attributes to consider when determining whether a sequence is present in both repertoires.
+      Only the fields defined under attributes_to_match will be considered, all other fields are ignored.
+      Valid values include any repertoire attribute (sequence, amino acid sequence, V gene etc). The default value is ['sequence_aas']
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_distance_encoder:
-            Distance:
-                distance_metric: JACCARD
-                sequence_batch_size: 1000
-                attributes_to_match:
-                    - sequence_aas
-                    - v_genes
-                    - j_genes
-                    - chains
-                    - region_types
+        definitions:
+            encodings:
+                my_distance_encoder:
+                    Distance:
+                        distance_metric: JACCARD
+                        sequence_batch_size: 1000
+                        attributes_to_match:
+                            - sequence_aa
+                            - v_call
+                            - j_call
+                            - chain
+                            - region_type
 
     """
 
     def __init__(self, distance_metric: DistanceMetricType, attributes_to_match: list, sequence_batch_size: int, context: dict = None,
                  name: str = None):
+        super().__init__(name=name)
         self.distance_metric = distance_metric
         self.distance_fn = ReflectionHandler.import_function(self.distance_metric.value, DistanceMetrics)
         self.attributes_to_match = attributes_to_match
         self.sequence_batch_size = sequence_batch_size
         self.context = context
-        self.name = name
         self.comparison = None
 
     def set_context(self, context: dict):
@@ -118,21 +121,17 @@ class DistanceEncoder(DatasetEncoder):
         return tmp_labels
 
     def encode(self, dataset, params: EncoderParams) -> RepertoireDataset:
-
         train_repertoire_ids = EncoderHelper.prepare_training_ids(dataset, params)
         distance_matrix = self.build_distance_matrix(dataset, params, train_repertoire_ids)
         labels = self.build_labels(dataset, params) if params.encode_labels else None
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=distance_matrix, labels=labels, example_ids=distance_matrix.index.values,
+                                                   example_weights=EncoderHelper.get_example_weights_by_identifiers(dataset, distance_matrix.index.values),
                                                    encoding=DistanceEncoder.__name__)
 
         return encoded_dataset
 
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> Path:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file
 
     @staticmethod
     def load_encoder(encoder_file: Path):

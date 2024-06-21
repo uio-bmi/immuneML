@@ -21,10 +21,8 @@ class EvennessProfileRepertoireEncoder(EvennessProfileEncoder):
 
         encoded_data = self._encode_data(dataset, params)
 
-        encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires,
-                                            encoded_data=encoded_data,
-                                            labels=dataset.labels,
-                                            metadata_file=dataset.metadata_file)
+        encoded_dataset = dataset.clone()
+        encoded_dataset.encoded_data = encoded_data
 
         return encoded_dataset
 
@@ -57,9 +55,10 @@ class EvennessProfileRepertoireEncoder(EvennessProfileEncoder):
 
         alphas = np.linspace(start=params.model["min_alpha"], stop=params.model["max_alpha"], num=params.model["dimension"])
 
-        counts = [sequence.metadata.duplicate_count for sequence in repertoire.sequences if sequence.metadata.frame_type == SequenceFrameType.IN]
-        freqs = np.array(counts)
-        freqs = freqs[np.nonzero(freqs)]
+        data = repertoire.get_attributes(['duplicate_count', 'frame_type'])
+        counts = data['duplicate_count'][[el == 'IN' for el in data['frame_type'].tolist()]]
+
+        freqs = counts[np.nonzero(counts)]
 
         evenness_profile = np.array([np.exp(EntropyCalculator.renyi_entropy(freqs, alpha))/len(freqs) for alpha in alphas])
 

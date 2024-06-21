@@ -30,64 +30,66 @@ class RecoveredSignificantFeatures(DataReport):
 
     This report creates two plots:
 
-        - the first plot is a bar chart showing what percentage of the groundtruth implanted signals were found to be significant.
+    - the first plot is a bar chart showing what percentage of the ground truth implanted signals were found to be significant.
 
-        - the second plot is a bar chart showing what percentage of the k-mers/sequences found to be significant match the
-        groundtruth implanted signals.
+    - the second plot is a bar chart showing what percentage of the k-mers/sequences found to be significant match the
+      ground truth implanted signals.
 
-    To compare k-mers or sequences of differing lengths, the groundtruth sequences or long k-mers are split into k-mers
-    of the given size through a sliding window approach. When comparing 'full_sequences' to groundtruth sequences, a match
+    To compare k-mers or sequences of differing lengths, the ground truth sequences or long k-mers are split into k-mers
+    of the given size through a sliding window approach. When comparing 'full_sequences' to ground truth sequences, a match
     is only registered if both sequences are of equal length.
 
 
-    Arguments:
+    **Specification arguments:**
 
-        groundtruth_sequences_path (str): Path to a file containing the true implanted (sub)sequences, e.g., full sequences or k-mers.
-        The file should contain one sequence per line, without a header, and without V or J genes.
+    - groundtruth_sequences_path (str): Path to a file containing the true implanted (sub)sequences, e.g., full sequences or k-mers.
+      The file should contain one sequence per line, without a header, and without V or J genes.
 
-        trim_leading_trailing (bool): Whether to trim the leading and trailing first positions from the provided groundtruth sequences,
-        e.g., the leading C and trailing Y/F amino acids.
-        This is necessary for comparing full sequences when the main dataset is imported using settings that also trim
-        the leading and trailing positions (specified by the region_type parameter). By default, trim_leading_trailing is False.
+    - trim_leading_trailing (bool): Whether to trim the leading and trailing first positions from the provided groundtruth sequences,
+      e.g., the leading C and trailing Y/F amino acids.
+      This is necessary for comparing full sequences when the main dataset is imported using settings that also trim
+      the leading and trailing positions (specified by the region_type parameter). By default, trim_leading_trailing is False.
 
-        p_values (list): The p value thresholds to be used by Fisher's exact test. Each p-value specified here will become one panel in the output figure.
+    - p_values (list): The p value thresholds to be used by Fisher's exact test. Each p-value specified here will become one panel in the output figure.
 
-        k_values (list): Length of the k-mers (number of amino acids) created by the :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder`.
-        When using a full sequence encoding (:py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder` or
-        :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder`), specify 'full_sequence' here.
-        Each value specified under k_values will represent one bar in the output figure.
+    - k_values (list): Length of the k-mers (number of amino acids) created by the :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder`.
+      When using a full sequence encoding (:py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder` or
+      :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder`), specify 'full_sequence' here.
+      Each value specified under k_values will represent one bar in the output figure.
 
-        label (dict): A label configuration. One label should be specified, and the positive_class for this label should be defined. See the YAML specification below for an example.
+    - label (dict): A label configuration. One label should be specified, and the positive_class for this label should be defined. See the YAML specification below for an example.
 
-        compairr_path (str): If 'full_sequence' is listed under k_values, the path to the CompAIRR executable may be provided.
-        If the compairr_path is specified, the :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder`
-        will be used to compute the significant sequences. If the path is not specified and 'full_sequence' is listed under
-        k-values, :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder` will be used.
+    - compairr_path (str): If 'full_sequence' is listed under k_values, the path to the CompAIRR executable may be provided.
+      If the compairr_path is specified, the :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder`
+      will be used to compute the significant sequences. If the path is not specified and 'full_sequence' is listed under
+      k-values, :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder` will be used.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_recovered_significant_features_report:
-            RecoveredSignificantFeatures:
-                groundtruth_sequences_path: path/to/groundtruth/sequences.txt
-                trim_leading_trailing: False
-                p_values:
-                    - 0.1
-                    - 0.01
-                    - 0.001
-                    - 0.0001
-                k_values:
-                    - 3
-                    - 4
-                    - 5
-                    - full_sequence
-                compairr_path: path/to/compairr # can be specified if 'full_sequence' is listed under k_values
-                label: # Define a label, and the positive class for that given label
-                    CMV:
-                        positive_class: +
+        definitions:
+            reports:
+                my_recovered_significant_features_report:
+                    RecoveredSignificantFeatures:
+                        groundtruth_sequences_path: path/to/groundtruth/sequences.txt
+                        trim_leading_trailing: False
+                        p_values:
+                            - 0.1
+                            - 0.01
+                            - 0.001
+                            - 0.0001
+                        k_values:
+                            - 3
+                            - 4
+                            - 5
+                            - full_sequence
+                        compairr_path: path/to/compairr # can be specified if 'full_sequence' is listed under k_values
+                        label: # Define a label, and the positive class for that given label
+                            CMV:
+                                positive_class: +
     """
 
     @classmethod

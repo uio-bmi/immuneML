@@ -34,6 +34,7 @@ class FeasibilitySummaryHTMLBuilder:
         html_map = {
             "css_style": Util.get_css_content(FeasibilitySummaryHTMLBuilder.CSS_PATH),
             "full_specs": Util.get_full_specs_path(base_path),
+            "logfile": Util.get_logfile_path(base_path),
             "sequence_count": state.sequence_count,
             "signal_names": ", ".join(s.id for s in state.signals),
             "gen_models": [{

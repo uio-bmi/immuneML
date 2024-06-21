@@ -14,9 +14,9 @@ def test_generate():
                                                                  {"celiac": {True: 0.5, False: 0.5}}, path / 'dataset')
 
     report = RepertoireClonotypeSummary.build_object(result_path=PathBuilder.build(path / 'report'), dataset=dataset, name='test_clonotype_report',
-                                                     color_by_label=None)
+                                                     split_by_label=True, label=None)
 
-    result = report._plot()
+    result = report._generate()
 
     assert all(output.path.is_file() for output in result.output_figures)
     assert all(output.path.is_file() for output in result.output_tables)

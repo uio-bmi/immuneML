@@ -49,7 +49,7 @@ class TestProbabilisticBinaryClassifier(TestCase):
         path = EnvironmentSettings.tmp_test_path / "probabilistic_binary_classifier/"
         PathBuilder.build(path)
 
-        classifier.store(path=path, feature_names=["k_i", "n_i"])
+        classifier.store(path=path)
 
         self.assertTrue(os.path.isfile(path / "probabilistic_binary_classifier.pickle"))
         self.assertTrue(os.path.isfile(path / "probabilistic_binary_classifier.yaml"))

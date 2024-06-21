@@ -12,8 +12,18 @@ class Label:
     def __str__(self):
         return f"label {self.name} ({', '.join([str(val) for val in self.values])})"
 
+    def __eq__(self, other):
+        if not isinstance(other, Label):
+            return False
+
+        return self.name == other.name and self.values == other.values and \
+            self.positive_class == other.positive_class and self.auxiliary_label_names == other.auxiliary_label_names
+
     @property
     def positive_class(self):
+        """
+        Ensures the same class is always returned as the 'positive class', even when it was not explicitly set.
+        """
         if self._positive_class is not None:
             return self._positive_class
         else:

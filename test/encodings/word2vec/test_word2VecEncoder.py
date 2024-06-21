@@ -44,7 +44,6 @@ class TestWord2VecEncoder(TestCase):
             learn_model=True,
             result_path=test_path,
             label_config=label_configuration,
-            filename="dataset.pkl"
         )
 
         encoder = Word2VecEncoder.build_object(dataset, **{
@@ -80,7 +79,6 @@ class TestWord2VecEncoder(TestCase):
             learn_model=True,
             result_path=test_path / 'encoded',
             label_config=label_configuration,
-            filename="dataset.pkl"
         )
 
         encoder = Word2VecEncoder.build_object(dataset, **{

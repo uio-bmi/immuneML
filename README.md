@@ -4,12 +4,6 @@
 ![Docker](https://github.com/uio-bmi/immuneML/workflows/Docker/badge.svg?branch=master)
 [![](https://img.shields.io/static/v1?label=AIRR-C%20sw-tools%20v1&message=compliant&color=008AFF&labelColor=000000&style=plastic)](https://docs.airr-community.org/en/stable/swtools/airr_swtools_standard.html)
 
----
-
- **NOTE**: This is a development version of immuneML that includes integration with Galaxy tools. To use the main immuneML (recommended), see the package immuneML at https://pypi.org/project/immuneML/.
-
----
-
 immuneML is a platform for machine learning-based analysis and 
 classification of adaptive immune receptors and repertoires (AIRR).
 
@@ -34,34 +28,31 @@ Useful links:
 
 ## Installation
 
-immuneML can be installed directly [using pip](<https://pypi.org/project/immuneML/>).
-immuneML uses Python 3.7 or later. We recommend installing immuneML inside a virtual environment.
 
-For more detailed instructions (virtual environment, troubleshooting, Docker, developer installation), please see the [installation documentation](https://docs.immuneml.uio.no/installation/install_with_package_manager.html).
+We recommend installing immuneML inside a virtual environment.
+immuneML uses Python 3.8 or later. If using immuneML simulation, Python 3.11 is recommended.
 
-### Installation using pip
+immuneML can be [installed directly using a package manager](<https://docs.immuneml.uio.no/latest/installation/install_with_package_manager.html#>) such as pip or conda,
+or [set up via docker](<https://docs.immuneml.uio.no/latest/installation/installation_docker.html>).
 
-
-To install the immuneML core package, run:
-
-```bash
-pip install immuneML
-```
-
-Alternatively, to use the TCRdistClassifier ML method and corresponding TCRdistMotifDiscovery report, install immuneML with the optional TCRdist extra:
+Quick installation:
 
 ```bash
-pip install immuneML[TCRdist]
+python3 -m venv ./immuneml_venv/
+source ./immuneml_venv/bin/activate
+pip install wheel
+pip install immune-ml
 ```
 
-Optionally, if you want to use the DeepRC ML method and and corresponding DeepRCMotifDiscovery report, you also
-have to install DeepRC dependencies using the [requirements_DeepRC.txt](https://raw.githubusercontent.com/uio-bmi/immuneML/master/requirements_DeepRC.txt) file.
-Important note: DeepRC uses PyTorch functionalities that depend on GPU. Therefore, DeepRC does not work on a CPU.
-To install the DeepRC dependencies, run:
+or
 
 ```bash
-pip install -r requirements_DeepRC.txt --no-dependencies
+conda create --prefix immuneml_env/ python=3.8
+conda activate immuneml_env/
+conda install -c bioconda immuneml
 ```
+
+Please check the documentation for more detailed instructions or [how to install optional dependencies](<https://docs.immuneml.uio.no/latest/installation/install_with_package_manager.html#installing-optional-dependencies>).
 
 ### Validating the installation
 
@@ -97,34 +88,24 @@ simple machine learning analysis on an adaptive immune receptor repertoire (AIRR
 using either the command line tool or the [Galaxy web interface](https://galaxy.immuneml.uiocloud.no). 
 
 
-### Overview of input, analyses and results
+### Overview of immuneML analyses
 
 The figure below shows an overview of immuneML usage. 
-All parameters for an immuneML analysis are defined in the a YAML specification file. 
+All parameters for an immuneML analysis are defined in the YAML specification file.
 In this file, the settings of the analysis components are defined (also known as `definitions`, 
-shown in six different colors in the figure). 
+shown in different colors in the figure). 
 Additionally, the YAML file describes one or more `instructions`, which are workflows that are
 applied to the defined analysis components. 
-Each instruction uses at least a dataset component, and optionally additional components.
-AIRR datasets may either be [imported from files](https://docs.immuneml.uio.no/tutorials/how_to_import_the_data_to_immuneML.html), 
-or [generated synthetically](https://docs.immuneml.uio.no/tutorials/how_to_generate_a_random_repertoire_dataset.html) during runtime.
+See also: [documentation of the YAML specification](https://docs.immuneml.uio.no/latest/yaml_specs/how_to_specify_an_analysis_with_yaml.html).
 
 Each instruction produces different types of results, including trained ML models, 
 ML model predictions on a given dataset, plots or other reports describing the 
-dataset or trained models, and modified datasets. 
-To navigate over the results, immuneML generates a summary HTML file. 
+dataset or trained models, or synthetic/simulated datasets. 
+These results can be navigated through the summary HTML file. 
+See also: [tutorials for specific immuneML use cases](https://docs.immuneml.uio.no/latest/tutorials.html#).
 
 
 ![image info](https://docs.immuneml.uio.no/latest/_images/definitions_instructions_overview.png)
-
-For a detailed explanation of the YAML specification file, see the tutorial [How to specify an analysis with YAML](https://docs.immuneml.uio.no/tutorials/how_to_specify_an_analysis_with_yaml.html).
-
-See also the following tutorials for specific instructions:
-- [Training ML models](https://docs.immuneml.uio.no/tutorials/how_to_train_and_assess_a_receptor_or_repertoire_classifier.html) for repertoire classification (e.g., disease prediction) or receptor sequence classification (e.g., antigen binding prediction). In immuneML, the performance of different machine learning (ML) settings can be compared by nested cross-validation. These ML settings consist of data preprocessing steps, encodings and ML models and their hyperparameters.
-- [Exploratory analysis](https://docs.immuneml.uio.no/tutorials/how_to_perform_exploratory_analysis.html) of datasets by applying preprocessing and encoding, and plotting descriptive statistics without training ML models.
-- [Simulating](https://docs.immuneml.uio.no/tutorials/how_to_simulate_antigen_signals_in_airr_datasets.html) immune events, such as disease states, into experimental or synthetic repertoire datasets. By implanting known immune signals into a given dataset, a ground truth benchmarking dataset is created. Such a dataset can be used to test the performance of ML settings under known conditions.
-- [Applying trained ML models](https://docs.immuneml.uio.no/tutorials/how_to_apply_to_new_data.html) to new datasets with unknown class labels.
-- And [other tutorials](https://docs.immuneml.uio.no/tutorials.html)
 
 
 ### Command line usage 
@@ -136,60 +117,40 @@ An example is given here:
 immune-ml path/to/specification.yaml result/folder/path/
 ```
 
+### Results of an immuneML run
+
 For each instruction specified in the YAML specification file, a subfolder is created in the 
 `result/folder/path`. Each subfolder will contain:
 - An `index.html` file which shows an overview of the results produced by that instruction. Inspecting the results of an immuneML analysis typically starts here. 
 - A copy of the used YAML specification (`full_specification.yaml`) with all default parameters explicitly set.
+- A log file (`log.txt`).
+- A folder containing the imported dataset(s) in immuneML format.
 - A folder containing all raw results produced by the instruction.
-- A folder containing the imported dataset(s) in optimized binary (Pickle) format.
 
 ## Support
 
-We will prioritize fixing important bugs, and try to answer any questions as soon as possible. We may implement suggested features and enhancements as time permits. 
+We will prioritize fixing important bugs, and try to answer any questions as soon as possible.
+Please note we are only 2 people maintaining the platform with occasional absences.
 
-If you run into problems when using immuneML, please see [the documentation](https://docs.immuneml.uio.no/latest/). In particular, we recommend you check out:
-- The [Quickstart tutorial](https://docs.immuneml.uio.no/latest/quickstart.html) for new users
-- The [Troubleshooting](https://docs.immuneml.uio.no/latest/troubleshooting.html) page
+When experiencing an issue, please take the following steps:
 
+1. **Make sure the latest version of immuneML is installed.** immuneML is under constant development, and the issue you experience may already be resolved in the latest version of the platform.
+
+2. Check the ['troubleshooting' page](<https://docs.immuneml.uio.no/latest/troubleshooting.html>) in the immuneML documentation. Any known issues and their solutions are already described there.
+
+3. If you are still experience a problem and suspect a bug in immuneMl, you can [report an issue on GitHub](https://github.com/uio-bmi/immuneML/issues). Please make sure to include the following information:
+    - The YAML specification you tried to run.
+    - The full output log file (log.txt).
+    - A list of dependency versions (can be retrieved with pip list or conda list).
+    - We primarily test immuneML using Unix-based operating systems, please make sure to mention it if you're using Windows.
+    - We will be able to help you fastest if you can also provide a small reproducible example, such as a very small dataset for which your run fails. 
+
+  
 If this does not answer your question, you can contact us via:
 - Twitter [`@immuneml`](https://twitter.com/immuneml)
 - Email [`contact@immuneml.uio.no`](mailto:contact@immuneml.uio.no)
 
-To report a potential bug or suggest new features, please [submit an issue on GitHub](https://github.com/uio-bmi/immuneML/issues).
 
-If you would like to make contributions, for example by adding a new ML method, encoding, report or preprocessing, please [see our developer documentation](https://docs.immuneml.uio.no/latest/developer_docs.html) and [submit a pull request](https://github.com/uio-bmi/compairr/pulls).
-
-## Requirements
-
-- [Python 3.7 or later](https://www.python.org/)
-- Python packages:
-   - [airr](https://pypi.org/project/airr/) (1 or higher)
-   - [dill](https://pypi.org/project/dill/) (0.3 or higher)
-   - [editdistance](https://pypi.org/project/editdistance/) (0.5.3 or higher)
-   - [fishersapi](https://pypi.org/project/fishersapi/)
-   - [gensim](https://pypi.org/project/gensim/) (3.8 or higher)
-   - [logomaker](https://pypi.org/project/logomaker/) (0.8 or higher)
-   - [matplotlib](https://matplotlib.org) (3.1 or higher)
-   - [matplotlib-venn](https://pypi.org/project/matplotlib-venn/) (0.11 or higher)
-   - [numpy](https://www.numpy.org/) (1.18 or higher)
-   - [pandas](https://pandas.pydata.org/) (1 or higher)
-   - [plotly](https://plotly.com/python/) (4 or higher)
-   - [pystache](https://pypi.org/project/pystache/) (0.5.4)
-   - [Pytorch](https://pytorch.org/) (1.5.1 or higher)
-   - [PyYAML](https://pyyaml.org) (5.3 or higher)
-   - [regex](https://pypi.org/project/regex/) 
-   - [scikit-learn](https://scikit-learn.org/) (0.23 or higher)
-   - [scipy](https://www.scipy.org)
-   - [tzlocal](https://pypi.org/project/tzlocal/) 
-- Optional dependencies when using DeepRC:
-   - [DeepRC](https://github.com/ml-jku/DeepRC) (0.0.1)
-   - [widis-lstm-tools](https://github.com/widmi/widis-lstm-tools) (0.4)
-   - [tqdm](https://tqdm.github.io/) (0.24 or higher)
-   - [h5py](https://www.h5py.org/) 
-   - [tensorboard](https://www.tensorflow.org/tensorboard) (1.14.0 or higher)
-- Optional dependencies when using TCRdist:
-   - [parasail](https://pypi.org/project/parasail/) (1.2)
-   - [tcrdist3](https://github.com/kmayerb/tcrdist3) (0.1.6 or higher)
 
 # Citing immuneML
 

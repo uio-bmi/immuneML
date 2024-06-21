@@ -22,39 +22,45 @@ class SequencesWithSignificantKmers(DataReport):
     For each combination of p-value and k-mer size given, a file is written containing all sequences containing a significant
     k-mer of the given size at the given p-value.
 
-    Arguments:
+    **Specification arguments:**
 
-        reference_sequences_path (str): Path to a file containing the reference sequences,
-        The file should contain one sequence per line, without a header, and without V or J genes.
+    - reference_sequences_path (str): Path to a file containing the reference sequences,
+      The file should contain one sequence per line, without a header, and without V or J genes.
 
-        p_values (list): The p value thresholds to be used by Fisher's exact test. Each p-value specified here will become one panel in the output figure.
+    - p_values (list): The p value thresholds to be used by Fisher's exact test. Each p-value specified here will become
+      one panel in the output figure.
 
-        k_values (list): Length of the k-mers (number of amino acids) created by the :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder`.
-        Each k-mer length will become one panel in the output figure.
+    - k_values (list): Length of the k-mers (number of amino acids) created by the
+      :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder`.
+      Each k-mer length will become one panel in the output figure.
 
-        label (dict): A label configuration. One label should be specified, and the positive_class for this label should be defined. See the YAML specification below for an example.
+    - label (dict): A label configuration. One label should be specified, and the positive_class for this label should
+      be defined. See the YAML specification below for an example.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_sequences_with_significant_kmers:
-            SequencesWithSignificantKmers:
-                reference_sequences_path: path/to/reference/sequences.txt
-                p_values:
-                    - 0.1
-                    - 0.01
-                    - 0.001
-                    - 0.0001
-                k_values:
-                    - 3
-                    - 4
-                    - 5
-                label: # Define a label, and the positive class for that given label
-                    CMV:
-                        positive_class: +
+        definitions:
+            reports:
+                my_sequences_with_significant_kmers:
+                    SequencesWithSignificantKmers:
+                        reference_sequences_path: path/to/reference/sequences.txt
+                        p_values:
+                            - 0.1
+                            - 0.01
+                            - 0.001
+                            - 0.0001
+                        k_values:
+                            - 3
+                            - 4
+                            - 5
+                        label: # Define a label, and the positive class for that given label
+                            CMV:
+                                positive_class: +
+
     """
 
     @classmethod

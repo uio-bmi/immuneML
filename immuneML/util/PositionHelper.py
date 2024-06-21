@@ -1,5 +1,7 @@
 import logging
 
+import numpy as np
+
 from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.environment.SequenceType import SequenceType
@@ -11,7 +13,62 @@ class PositionHelper:
     MIDPOINT_CDR3_LEN = 13
 
     @staticmethod
-    def gen_imgt_positions_from_cdr3_length(input_length: int):
+    def get_imgt_position_weights_for_annotation(input_length: int, region_type: RegionType,
+                                                 sequence_position_weights: dict):
+        imgt_positions = PositionHelper.gen_imgt_positions_from_length(input_length, region_type)
+
+        position_weights = {}
+        if sequence_position_weights:
+            for index, position in enumerate(imgt_positions):
+                if position in sequence_position_weights:
+                    position_weights[position] = sequence_position_weights[position]
+
+        if len(imgt_positions) > len(position_weights):
+            weights_sum = sum(list(position_weights.values()))
+            remaining_weight_for_position = (1 - weights_sum) / (len(imgt_positions) - len(position_weights))
+            for position in imgt_positions:
+                if position not in position_weights:
+                    position_weights[position] = remaining_weight_for_position
+
+        if not np.isclose(sum(list(position_weights.values())), 1):
+            weights_sum = sum(list(position_weights.values()))
+            position_weights = {position: weight / weights_sum for position, weight in position_weights.items()}
+
+        return {position: position_weights[position] for position in imgt_positions}
+
+    @staticmethod
+    def get_allowed_positions_for_annotation(input_length: int, region_type: RegionType,
+                                             sequence_position_weights: dict):
+        position_weights = PositionHelper.get_imgt_position_weights_for_annotation(input_length, region_type,
+                                                                                   sequence_position_weights)
+        return [int(bool(weight)) for weight in position_weights.values()]
+
+    @staticmethod
+    def get_imgt_position_weights_for_implanting(input_length: int, region_type: RegionType,
+                                                 sequence_position_weights: dict, limit: int):
+        position_weights = PositionHelper.get_imgt_position_weights_for_annotation(input_length, region_type,
+                                                                                   sequence_position_weights)
+
+        for index, position in enumerate(position_weights.keys()):
+            if index > input_length - limit:
+                position_weights[position] = 0.
+
+        weights_sum = sum(list(position_weights.values()))
+        if weights_sum == 0:
+            logging.warning(f"Sequence of length {input_length} has no allowed positions for signal with sequence "
+                            f"position weights {sequence_position_weights} and motif length {limit}, it will be discarded.")
+            return position_weights
+
+        position_weights = {position: np.array([weight]).astype(np.float64)[0] / weights_sum
+                            for position, weight in position_weights.items()}
+
+        assert np.isclose(sum(list(position_weights.values())), 1.), \
+            (input_length, region_type.name, position_weights, sum(list(position_weights.values())), limit)
+
+        return position_weights
+
+    @staticmethod
+    def gen_imgt_positions_from_cdr3_length(input_length: int) -> list:
         if PositionHelper.MIN_CDR3_LEN <= input_length <= PositionHelper.MIDPOINT_CDR3_LEN:
             positions = [105, 106, 107, 116, 117]
             pos_left_count = (input_length - PositionHelper.MIN_CDR3_LEN) // 2
@@ -47,7 +104,8 @@ class PositionHelper:
             return []
 
     @staticmethod
-    def gen_imgt_positions_from_sequence(sequence: ReceptorSequence, sequence_type: SequenceType = SequenceType.AMINO_ACID):
+    def gen_imgt_positions_from_sequence(sequence: ReceptorSequence,
+                                         sequence_type: SequenceType = SequenceType.AMINO_ACID):
         if sequence_type != SequenceType.AMINO_ACID:
             raise NotImplementedError(f"{sequence_type.name} is currently not supported for obtaining IMGT positions")
         region_type = sequence.get_attribute("region_type")
@@ -62,40 +120,5 @@ class PositionHelper:
         if region_type == RegionType.IMGT_JUNCTION:
             return PositionHelper.gen_imgt_positions_from_junction_length(input_length)
         else:
-            raise NotImplementedError(f"PositionHelper: IMGT positions are not implemented for region type {region_type}")
-
-    @staticmethod
-    def adjust_position_weights(sequence_position_weights: dict, imgt_positions, limit: int) -> dict:
-        """
-        :param sequence_position_weights: weights supplied by the user as to where in the receptor_sequence to implant
-        :param imgt_positions: IMGT positions present in the specific receptor_sequence
-        :param limit: how far from the end of the receptor_sequence the motif at latest must start
-                        in order not to elongate the receptor_sequence
-        :return: position_weights for implanting a motif instance into a receptor_sequence
-        """
-        # filter only position weights where there are imgt positions in the receptor_sequence and 0 if this imgt position is
-        # not in the sequence_position_weights
-        index_limit = len(imgt_positions) - limit
-
-        position_weights = {imgt_positions[k]: sequence_position_weights[imgt_positions[k]]
-                            if imgt_positions[k] in sequence_position_weights.keys() and k < index_limit else 0.0 for k
-                            in range(len(imgt_positions))}
-        weights_sum = sum([position_weights[k] for k in sequence_position_weights.keys() if k in position_weights])
-        # normalize weights
-        if weights_sum != 0:
-            position_weights = {k: float(position_weights[k]) / float(weights_sum) for k in position_weights.keys()}
-        else:
-            position_weights = {k: 1 / len(position_weights.keys()) for k in position_weights}
-        return position_weights
-
-    @staticmethod
-    def build_position_weights(sequence_position_weights: dict, imgt_positions, limit: int) -> dict:
-        if sequence_position_weights is not None:
-            position_weights = PositionHelper.adjust_position_weights(sequence_position_weights, imgt_positions, limit)
-        else:
-            valid_position_count = len(imgt_positions) - limit
-            position_weights = {imgt_positions[i]: 1.0 / valid_position_count if i < valid_position_count else 0
-                                for i in range(len(imgt_positions))}
-            logging.warning('Position weights are not defined. Randomly choosing position to implant motif_instance instead.')
-
-        return position_weights
+            raise NotImplementedError(
+                f"PositionHelper: IMGT positions are not implemented for region type {region_type}")

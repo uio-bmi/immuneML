@@ -92,114 +92,117 @@ The input data, YAML specifications and results of these comparisons are availab
 YAML specification for training machine learning models and recovering motifs in the GILGFVFTL dataset (note that the ROCCurveSummary was not present in the original
 specification and the plots were obtained outside immuneML; it has since been added to immuneML and can be used directly from YAML specification):
 
-.. code-block:: yaml
 
-  definitions: # definition of the components: datasets, encodings, ML models, reports
-    datasets:
-      dataset_GILGFVFTL: # the dataset specific for the epitope GILGFVFTL of EBV virus combined with naive receptors
-        format: AIRR
-        params:
-          is_repertoire: False
-          path: data/GILGFVFTL.tsv
-          paired: True
-          import_illegal_characters: False
-          import_empty_nt_sequences: True
-          import_empty_aa_sequences: False
-          receptor_chains: TRA_TRB
-          metadata_column_mapping:
-            GILGFVFTL: GILGFVFTL
-          organism: human
-    encodings: # how to represent the data
-      one_hot: # encoding for the neural network includes one-hot encoding of receptors and additional three positional channels
-        OneHot:
-          use_positional_info: True
-          distance_to_seq_middle: 3
-          flatten: False
-      tcrdist_enc: # represents the the receptors by tcrdist distances between them
-        TCRdist:
-          cores: 32
-      kmer_frequency: # represents receptors by the frequency of k-mers per chain
-        KmerFrequency:
-          k: 3
-          sequence_encoding: continuous_kmer  # split sequence into overlapping k-mers
-          scale_to_unit_variance: True # scale the normalized examples to have unit variance
-          scale_to_zero_mean: False # scale the normalized examples to have zero mean -> setting this to True might destroy sparsity
-    ml_methods: # which machine learning methods to use
-      cnn: # a convolutiional network
-        ReceptorCNN:
-          number_of_threads: 32
-          batch_size: 20000
-          evaluate_at: 1000
-          iteration_count: 20000
-          kernel_count: 50
-          kernel_size: [3, 4, 5, 6]
-          positional_channels: 3
-          learning_rate: 0.01
-          l1_weight_decay: 0.01
-          l2_weight_decay: 0.01
-      tcrdist_cls: # kNN classifier based on tcrdist distances [computed in the encoding phase]
-        TCRdistClassifier:
-          percentage: 0.1 # the percentage of receptors relevant for determining the class assignment (binding vs. not binding), based on the paper by Dash $
-      logistic_regression:
-        LogisticRegression:
-          penalty: [l1, l2] # try lasso and ridge
-          C: [1000, 100, 10, 1, 0.1, 0.01, 0.001] # regularization constants
-        model_selection_cv: True # do a third level of cross-validation where only the logistic regression hyperparameters listed here will be optimized by $
-        model_selection_n_folds: 5 # for this third level of CV, use 5-fold CV
-    reports: # additional output: analysis reports
-      cnn_kernel_logo: KernelSequenceLogo # this report will visualize kernels from the CNN as sequences logos since the kernels are conditioned to represen$
-      tcrdist_logo: # uses tcrdist3 library to discover the motifs in the hierarchically clustered receptors based on tcrdist distance
-        TCRdistMotifDiscovery:
-          positive_class_name: True # will only cluster the positive class (receptors binding to GILGFVFTL)
-          min_cluster_size: 100 # minimum cluster size to extract the motif from
-      coefficients:
-        Coefficients: # plot top 100 largest coefficients for logistic regression
-          coefs_to_plot: [n_largest]
-          n_largest: [100]
-      gliph_exporter: # will export the receptor data in format compatible with GLIPH2 (Huang et al. 2020) so that it can be directly used on the data as sp$
-        GLIPH2Exporter:
-          condition: GILGFVFTL # what is the condition, as defined by GLIPH2
-      roc_summary: ROCCurveSummary # plot the ROC curves on the performance for each split in the outer cross-validation loop to compare different methods defined here
-  instructions:
-    tcrdist_cnn_comparison: # definition of the analysis
-      type: TrainMLModel # analysis for training ML models
-      settings: # which combinations of previously defined encodings and ML models to consider
-        - encoding: one_hot
-          ml_method: cnn
-        - encoding: tcrdist_enc
-          ml_method: tcrdist_cls
-        - encoding: kmer_frequency
-          ml_method: logistic_regression
-      assessment: # how to perform the outer loop of nested cross-validation to obtain performance estimate
-        split_strategy: random # randomly split to train and test
-        split_count: 1 # make only one such split
-        training_percentage: 0.7 # use 70% of data for testing
-        reports: # which reports to generate of the data and the models obtained in this way
-          models: # reports to generate from the models, here: motif discovery
-            - cnn_kernel_logo
-            - tcrdist_logo
-            - coefficients
-          data_splits: # reports to generate from the data, here: output the data in GLIPH2-compatible format
-            - gliph_exporter
-      selection: # how to perform the inner loop of nested cross-validation to choose the optimal model
-        split_strategy: k_fold # do 5-fold cross-validation
-        split_count: 5
-        reports: # again, which reports to generate, same as under assessment
-          models:
-            - cnn_kernel_logo
-            - tcrdist_logo
-            - coefficients
-          data_splits:
-            - gliph_exporter
-      labels: # which labels to use to train the ML models
-        - GILGFVFTL
-      dataset: dataset_GILGFVFTL # which dataset to use
-      metrics: [balanced_accuracy, precision, recall] # metrics to be computed for all settings
-      strategy: GridSearch # how to evaluate different combinations of encodings and ML models listed under settings, here: just compare them all with each other
-      number_of_processes: 32 # in the parallelized parts of the code, how many processes to use
-      optimization_metric: auc # the metric used for optimization
-      reports: [roc_summary] # additional reports made on the full results -> here produce the ROC curves for each method as shown in the results
-      refit_optimal_model: False # whether to refit the optimal model before exporting it (not in this use-case as the models will be used for comparison, not for classifying some new data)
+    .. collapse:: model_comparison.yaml
+
+        .. code-block:: yaml
+
+          definitions: # definition of the components: datasets, encodings, ML models, reports
+            datasets:
+              dataset_GILGFVFTL: # the dataset specific for the epitope GILGFVFTL of EBV virus combined with naive receptors
+                format: AIRR
+                params:
+                  is_repertoire: False
+                  path: data/GILGFVFTL.tsv
+                  paired: True
+                  import_illegal_characters: False
+                  import_empty_nt_sequences: True
+                  import_empty_aa_sequences: False
+                  receptor_chains: TRA_TRB
+                  metadata_column_mapping:
+                    GILGFVFTL: GILGFVFTL
+                  organism: human
+            encodings: # how to represent the data
+              one_hot: # encoding for the neural network includes one-hot encoding of receptors and additional three positional channels
+                OneHot:
+                  use_positional_info: True
+                  distance_to_seq_middle: 3
+                  flatten: False
+              tcrdist_enc: # represents the the receptors by tcrdist distances between them
+                TCRdist:
+                  cores: 32
+              kmer_frequency: # represents receptors by the frequency of k-mers per chain
+                KmerFrequency:
+                  k: 3
+                  sequence_encoding: continuous_kmer  # split sequence into overlapping k-mers
+                  scale_to_unit_variance: True # scale the normalized examples to have unit variance
+                  scale_to_zero_mean: False # scale the normalized examples to have zero mean -> setting this to True might destroy sparsity
+            ml_methods: # which machine learning methods to use
+              cnn: # a convolutiional network
+                ReceptorCNN:
+                  number_of_threads: 32
+                  batch_size: 20000
+                  evaluate_at: 1000
+                  iteration_count: 20000
+                  kernel_count: 50
+                  kernel_size: [3, 4, 5, 6]
+                  positional_channels: 3
+                  learning_rate: 0.01
+                  l1_weight_decay: 0.01
+                  l2_weight_decay: 0.01
+              tcrdist_cls: # kNN classifier based on tcrdist distances [computed in the encoding phase]
+                TCRdistClassifier:
+                  percentage: 0.1 # the percentage of receptors relevant for determining the class assignment (binding vs. not binding), based on the paper by Dash $
+              logistic_regression:
+                LogisticRegression:
+                  penalty: [l1, l2] # try lasso and ridge
+                  C: [1000, 100, 10, 1, 0.1, 0.01, 0.001] # regularization constants
+                model_selection_cv: True # do a third level of cross-validation where only the logistic regression hyperparameters listed here will be optimized by $
+                model_selection_n_folds: 5 # for this third level of CV, use 5-fold CV
+            reports: # additional output: analysis reports
+              cnn_kernel_logo: KernelSequenceLogo # this report will visualize kernels from the CNN as sequences logos since the kernels are conditioned to represen$
+              tcrdist_logo: # uses tcrdist3 library to discover the motifs in the hierarchically clustered receptors based on tcrdist distance
+                TCRdistMotifDiscovery:
+                  positive_class_name: True # will only cluster the positive class (receptors binding to GILGFVFTL)
+                  min_cluster_size: 100 # minimum cluster size to extract the motif from
+              coefficients:
+                Coefficients: # plot top 100 largest coefficients for logistic regression
+                  coefs_to_plot: [n_largest]
+                  n_largest: [100]
+              gliph_exporter: # will export the receptor data in format compatible with GLIPH2 (Huang et al. 2020) so that it can be directly used on the data as sp$
+                GLIPH2Exporter:
+                  condition: GILGFVFTL # what is the condition, as defined by GLIPH2
+              roc_summary: ROCCurveSummary # plot the ROC curves on the performance for each split in the outer cross-validation loop to compare different methods defined here
+          instructions:
+            tcrdist_cnn_comparison: # definition of the analysis
+              type: TrainMLModel # analysis for training ML models
+              settings: # which combinations of previously defined encodings and ML models to consider
+                - encoding: one_hot
+                  ml_method: cnn
+                - encoding: tcrdist_enc
+                  ml_method: tcrdist_cls
+                - encoding: kmer_frequency
+                  ml_method: logistic_regression
+              assessment: # how to perform the outer loop of nested cross-validation to obtain performance estimate
+                split_strategy: random # randomly split to train and test
+                split_count: 1 # make only one such split
+                training_percentage: 0.7 # use 70% of data for testing
+                reports: # which reports to generate of the data and the models obtained in this way
+                  models: # reports to generate from the models, here: motif discovery
+                    - cnn_kernel_logo
+                    - tcrdist_logo
+                    - coefficients
+                  data_splits: # reports to generate from the data, here: output the data in GLIPH2-compatible format
+                    - gliph_exporter
+              selection: # how to perform the inner loop of nested cross-validation to choose the optimal model
+                split_strategy: k_fold # do 5-fold cross-validation
+                split_count: 5
+                reports: # again, which reports to generate, same as under assessment
+                  models:
+                    - cnn_kernel_logo
+                    - tcrdist_logo
+                    - coefficients
+                  data_splits:
+                    - gliph_exporter
+              labels: # which labels to use to train the ML models
+                - GILGFVFTL
+              dataset: dataset_GILGFVFTL # which dataset to use
+              metrics: [balanced_accuracy, precision, recall] # metrics to be computed for all settings
+              strategy: GridSearch # how to evaluate different combinations of encodings and ML models listed under settings, here: just compare them all with each other
+              number_of_processes: 32 # in the parallelized parts of the code, how many processes to use
+              optimization_metric: auc # the metric used for optimization
+              reports: [roc_summary] # additional reports made on the full results -> here produce the ROC curves for each method as shown in the results
+              refit_optimal_model: False # whether to refit the optimal model before exporting it (not in this use-case as the models will be used for comparison, not for classifying some new data)
 
 GLIPH2 motifs
 ***************

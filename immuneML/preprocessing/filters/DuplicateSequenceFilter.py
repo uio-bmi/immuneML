@@ -2,7 +2,11 @@ import copy
 from dataclasses import fields as get_fields
 from multiprocessing.pool import Pool
 from pathlib import Path
+from uuid import uuid4
 
+import pandas as pd
+
+from immuneML.data_model.bnp_util import write_yaml
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.repertoire.Repertoire import Repertoire
@@ -20,10 +24,13 @@ class DuplicateSequenceFilter(Filter):
 
     Sequences are considered duplicates if the following fields are identical:
 
-      - amino acid or nucleotide sequence (whichever is specified)
-      - v and j genes (note that the full field including subgroup + gene is used for matching, i.e. V1 and V1-1 are not considered duplicates)
-      - chain
-      - region type
+    - amino acid or nucleotide sequence (whichever is specified)
+
+    - v and j genes (note that the full field including subgroup + gene is used for matching, i.e. V1 and V1-1 are not considered duplicates)
+
+    - chain
+
+    - region type
 
     For all other fields (the non-specified sequence type, custom lists, sequence identifier) only the first occurring
     value is kept.
@@ -31,15 +38,16 @@ class DuplicateSequenceFilter(Filter):
     Note that this means the count value of a sequence with a given sequence identifier might not be the same as before
     removing duplicates, unless count_agg = FIRST is used.
 
-    Arguments:
+    **Specification arguments:**
 
-        filter_sequence_type (:py:obj:`~immuneML.environment.SequenceType.SequenceType`): Whether the sequences should be collapsed on the nucleotide or amino acid level. Valid options are defined by the SequenceType enum.
+    - filter_sequence_type (:py:obj:`~immuneML.environment.SequenceType.SequenceType`): Whether the sequences should be collapsed on the nucleotide or amino acid level. Valid options are defined by the SequenceType enum.
 
-        batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed)
+    - batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed)
 
-        count_agg (:py:obj:`~immuneML.preprocessing.filters.CountAggregationFunction.CountAggregationFunction`): determines how the sequence counts of duplicate sequences are aggregated. Valid options are defined by the CountAggregationFunction enum.
+    - count_agg (:py:obj:`~immuneML.preprocessing.filters.CountAggregationFunction.CountAggregationFunction`): determines how the sequence counts of duplicate sequences are aggregated. Valid options are defined by the CountAggregationFunction enum.
 
-    YAML specification:
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
@@ -128,8 +136,9 @@ class DuplicateSequenceFilter(Filter):
         return agg_dict
 
     def _process_repertoire(self, repertoire: Repertoire) -> Repertoire:
-        data = repertoire.load_bnp_data()
-        columns = [field.name for field in get_fields(data)]
+        data = repertoire.load_bnp_data().topandas()
+        data['duplicate_count'] = [el if el != -1 else pd.NA for el in data['duplicate_count']]
+        columns = data.columns
 
         groupby_fields = self._prepare_group_by_field(columns)
         custom_lists = list(set(columns) - set(Repertoire.FIELDS))
@@ -141,31 +150,22 @@ class DuplicateSequenceFilter(Filter):
         else:
             data["chain"] = None
 
-        no_duplicates = data.groupby(groupby_fields).agg(agg_dict).reset_index()
+        no_duplicates = data.groupby(groupby_fields, sort=False).agg(agg_dict).reset_index()
 
-        processed_repertoire = Repertoire.build(sequence_aa=list(no_duplicates["sequence_aa"]) if "sequence_aa" in no_duplicates.columns else None,
-                                                sequence=list(no_duplicates["sequence"]) if "sequence" in no_duplicates.columns else None,
-                                                v_call=list(no_duplicates["v_call"]) if "v_call" in no_duplicates.columns else None,
-                                                j_call=list(no_duplicates["j_call"]) if 'j_call' in no_duplicates.columns else None,
-                                                chain=[Chain.get_chain(key) for key in
-                                                        list(no_duplicates["chain"])] if "chain" in no_duplicates.columns else None,
-                                                duplicate_count=list(no_duplicates["duplicate_count"]) if "duplicate_count" in no_duplicates else None,
-                                                region_type=list(no_duplicates["region_type"]) if "region_type" in no_duplicates else None,
-                                                custom_lists={key: list(no_duplicates[key]) for key in custom_lists},
-                                                sequence_id=list(no_duplicates["sequence_id"]),
-                                                metadata=copy.deepcopy(repertoire.metadata),
-                                                path=self.result_path,
-                                                filename_base=f"{repertoire.data_filename.stem}_filtered")
+        no_duplicates.to_csv(f"{self.result_path}/{repertoire.data_filename.stem}_filtered.tsv", sep='\t', index=False)
+        write_yaml(Path(f"{self.result_path}/{repertoire.metadata_filename.stem}_filtered.yaml"), repertoire.metadata)
 
-        return processed_repertoire
+        return Repertoire(Path(f"{self.result_path}/{repertoire.data_filename.stem}_filtered.tsv"),
+                          Path(f"{self.result_path}/{repertoire.metadata_filename.stem}_filtered.yaml"),
+                          str(uuid4().hex))
 
     @staticmethod
     def get_documentation():
         doc = str(DuplicateSequenceFilter.__doc__)
 
         mapping = {
-            "Valid options are defined by the CountAggregationFunction enum.": f"Valid values are: {[e.name for e in CountAggregationFunction]}.",
-            "Valid options are defined by the SequenceType enum.": f"Valid values are: {[e.name for e in SequenceType]}."
+            "Valid options are defined by the CountAggregationFunction enum.": f"Valid values are: {[e.name.lower() for e in CountAggregationFunction]}.",
+            "Valid options are defined by the SequenceType enum.": f"Valid values are: {[e.name.lower() for e in SequenceType]}."
         }
 
         doc = update_docs_per_mapping(doc, mapping)

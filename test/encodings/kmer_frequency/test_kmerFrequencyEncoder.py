@@ -59,7 +59,6 @@ class TestKmerFrequencyEncoder(TestCase):
             label_config=lc,
             learn_model=True,
             model={},
-            filename="dataset.pkl"
         ))
 
         encoder = KmerFrequencyEncoder.build_object(dataset, **{
@@ -76,7 +75,6 @@ class TestKmerFrequencyEncoder(TestCase):
             pool_size=2,
             learn_model=True,
             model={},
-            filename="dataset.csv"
         ))
 
         encoder3 = KmerFrequencyEncoder.build_object(dataset, **{
@@ -92,7 +90,6 @@ class TestKmerFrequencyEncoder(TestCase):
             label_config=lc,
             learn_model=True,
             model={},
-            filename="dataset.pkl"
         ))
 
         shutil.rmtree(path)

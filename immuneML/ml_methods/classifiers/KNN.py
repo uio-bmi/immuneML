@@ -15,25 +15,27 @@ class KNN(SklearnMethod):
 
     For usage instructions, check :py:obj:`~immuneML.ml_methods.classifiers.SklearnMethod.SklearnMethod`.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_knn_method:
-            KNN:
-                # sklearn parameters (same names as in original sklearn class)
-                weights: uniform # always use this setting for weights
-                n_neighbors: [5, 10, 15] # find the optimal number of neighbors
-                # Additional parameter that determines whether to print convergence warnings
-                show_warnings: True
-            # if any of the parameters under KNN is a list and model_selection_cv is True,
-            # a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,
-            # and the optimal model will be selected
-            model_selection_cv: True
-            model_selection_n_folds: 5
-        # alternative way to define ML method with default values:
-        my_default_knn: KNN
+        definitions:
+            ml_methods:
+                my_knn_method:
+                    KNN:
+                        # sklearn parameters (same names as in original sklearn class)
+                        weights: uniform # always use this setting for weights
+                        n_neighbors: [5, 10, 15] # find the optimal number of neighbors
+                        # Additional parameter that determines whether to print convergence warnings
+                        show_warnings: True
+                    # if any of the parameters under KNN is a list and model_selection_cv is True,
+                    # a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,
+                    # and the optimal model will be selected
+                    model_selection_cv: True
+                    model_selection_n_folds: 5
+                # alternative way to define ML method with default values:
+                my_default_knn: KNN
 
     """
 
@@ -53,6 +55,9 @@ class KNN(SklearnMethod):
 
     def can_predict_proba(self) -> bool:
         return True
+
+    def can_fit_with_example_weights(self) -> bool:
+        return False
 
     def get_compatible_encoders(self):
         from immuneML.encodings.distance_encoding.DistanceEncoder import DistanceEncoder

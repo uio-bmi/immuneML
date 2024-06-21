@@ -103,7 +103,6 @@ class TestOneHotEncoder(unittest.TestCase):
             pool_size=1,
             learn_model=True,
             model={},
-            filename="dataset.pkl"
         ))
 
         self.assertTrue(isinstance(encoded_data, RepertoireDataset))
@@ -182,8 +181,7 @@ class TestOneHotEncoder(unittest.TestCase):
         encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False, "distance_to_seq_middle": None,
                                                          "flatten": False, 'sequence_type': 'nucleotide'})
 
-        encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=lc, pool_size=1, learn_model=True, model={},
-                                                                filename="dataset.pkl"))
+        encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=lc, pool_size=1, learn_model=True, model={}))
 
         self.assertTrue(isinstance(encoded_dataset, RepertoireDataset))
         self.assertEqual((2, 3, 4, 4), encoded_dataset.encoded_data.examples.shape)
@@ -213,7 +211,6 @@ class TestOneHotEncoder(unittest.TestCase):
             pool_size=1,
             learn_model=True,
             model={},
-            filename="dataset.pkl"
         ))
 
         self.assertTrue(isinstance(encoded_dataset, RepertoireDataset))

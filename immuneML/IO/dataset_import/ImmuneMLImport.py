@@ -22,37 +22,46 @@ class ImmuneMLImport(DataImport):
 
     This format includes:
 
-     1. a dataset file in yaml format with iml_dataset extension with parameters:
+    1. a dataset file in yaml format with iml_dataset extension with parameters:
 
-        - name,
-        - identifier,
-        - metadata_file (for repertoire datasets),
-        - metadata_fields (for repertoire datasets),
-        - repertoire_ids (for repertoire datasets)
-        - element_ids (for receptor and sequence datasets),
-        - labels,
+       - name,
+       - identifier,
+       - metadata_file (for repertoire datasets),
+       - metadata_fields (for repertoire datasets),
+       - repertoire_ids (for repertoire datasets)
+       - element_ids (for receptor and sequence datasets),
+       - labels
 
-     2. a csv metadata file (only for repertoire datasets, should be in the same folder as the iml_dataset file),
+    2. a csv metadata file (only for repertoire datasets, should be in the same folder as the iml_dataset file),
 
-     3. data files for different types of data. For repertoire datasets, data files include one binary numpy file per repertoire with sequences and associated information and one metadata yaml file per repertoire with details such as repertoire identifier, disease status, subject id and other similar available information. For sequence and receptor datasets, sequences or receptors respectively, are stored in batches in binary numpy files.
+    3. data files for different types of data. For repertoire datasets, data files include one binary numpy file per
+       repertoire with sequences and associated information and one metadata yaml file per repertoire with details
+       such as repertoire identifier, disease status, subject id and other similar available information. For sequence
+       and receptor datasets, sequences or receptors respectively, are stored in batches in binary numpy files.
 
-    Arguments:
+    **Specification arguments:**
 
-        path (str): The path to the previously created dataset file. This file should have an '.yaml' extension. If the path has not been specified, immuneML attempts to load the dataset from a specified metadata file (only for RepertoireDatasets).
+    - path (str): The path to the previously created dataset file. This file should have an '.yaml' extension. If the
+      path has not been specified, immuneML attempts to load the dataset from a specified metadata file (only for
+      RepertoireDatasets). For Sequence- and ReceptorDatasets, all additional files are expected to be located in
+      the same folder as the dataset '.yaml' file.
 
-        metadata_file (str): An optional metadata file for a RepertoireDataset. If specified, the RepertoireDataset metadata will be updated to the newly specified metadata without otherwise changing the Repertoire objects
+    - metadata_file (str): An optional metadata file for a RepertoireDataset. If specified, the RepertoireDataset
+      metadata will be updated to the newly specified metadata without otherwise changing the Repertoire objects
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_dataset:
-            format: ImmuneML
-            params:
-                path: path/to/dataset.yaml
-                metadata_file: path/to/metadata.csv
+        definitions:
+            datasets:
+                my_dataset:
+                    format: ImmuneML
+                    params:
+                        path: path/to/dataset.yaml
+                        metadata_file: path/to/metadata.csv
 
     """
 
@@ -70,8 +79,6 @@ class ImmuneMLImport(DataImport):
 
         if isinstance(dataset, RepertoireDataset):
             dataset = ImmuneMLImport._update_repertoire_paths(iml_params, dataset)
-        else:
-            dataset = ImmuneMLImport._update_receptor_paths(iml_params, dataset)
 
         return dataset
 
@@ -92,7 +99,7 @@ class ImmuneMLImport(DataImport):
             dataset_dict['metadata_file'] = iml_params.path.parent / Path(dataset_dict['metadata_file']).name
 
         if dataset_class.__name__ in ['ReceptorDataset', 'SequenceDataset']:
-            dataset_dict['filenames'] = [iml_params.path.parent / filename for filename in dataset_dict['filenames']]
+            dataset_dict['batchfiles_path'] = iml_params.path.parent
             del dataset_dict['type_dict']
 
             dataset = dataset_class.build(**{**dataset_dict, 'dataset_file': iml_params.path})
@@ -126,19 +133,6 @@ class ImmuneMLImport(DataImport):
     @staticmethod
     def _discover_dataset_dir(pickle_params):
         return pickle_params.path.parent
-
-    @staticmethod
-    def _update_receptor_paths(pickle_params, dataset: ElementDataset):
-        dataset_dir = ImmuneMLImport._discover_dataset_dir(pickle_params)
-
-        if len(list(dataset_dir.glob("*.npy"))) == len(dataset.get_filenames()):
-            path = dataset_dir
-            new_filenames = []
-            for file in dataset.get_filenames():
-                new_filenames.append(path / file.name)
-            dataset.set_filenames(new_filenames)
-
-        return dataset
 
     @staticmethod
     def _discover_repertoire_path(params, dataset):

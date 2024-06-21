@@ -79,7 +79,7 @@ class TestMatches(unittest.TestCase):
         report = Matches(dataset=encoded_data, result_path=path / "report_results/")
 
         self.assertTrue(report.check_prerequisites())
-        report.generate_report()
+        report._generate()
 
         self.assertTrue(os.path.isfile(path / "report_results/complete_match_count_table.csv"))
         self.assertTrue(os.path.isfile(path / "report_results/repertoire_sizes.csv"))
@@ -166,7 +166,7 @@ class TestMatches(unittest.TestCase):
         report = Matches(dataset=encoded_data, result_path=path / "report_results/")
 
         self.assertTrue(report.check_prerequisites())
-        report.generate_report()
+        report._generate()
 
         self.assertTrue(os.path.isfile(path / "report_results/complete_match_count_table.csv"))
         self.assertTrue(os.path.isfile(path / "report_results/repertoire_sizes.csv"))
@@ -248,18 +248,18 @@ class TestMatches(unittest.TestCase):
         report = Matches(dataset=encoded_data, result_path=path / "report_results/")
 
         self.assertTrue(report.check_prerequisites())
-        report.generate_report()
+        report._generate()
 
         self.assertTrue(os.path.isfile(path / "report_results/complete_match_count_table.csv"))
         self.assertTrue(os.path.isfile(path / "report_results/repertoire_sizes.csv"))
 
         self.assertTrue(os.path.isdir(path / "report_results/paired_matches"))
-        self.assertTrue(os.path.isfile(path / "report_results/paired_matches/example_subject_1_label_yes_subject_id_subject_1.csv"))
-        self.assertTrue(os.path.isfile(path / "report_results/paired_matches/example_subject_2_label_no_subject_id_subject_2.csv"))
-        self.assertTrue(os.path.isfile(path / "report_results/paired_matches/example_subject_3_label_no_subject_id_subject_3.csv"))
+        self.assertTrue(os.path.isfile(path / f"report_results/paired_matches/example_{encoded_data.get_example_ids()[0]}_label_yes_subject_id_subject_1.csv"))
+        self.assertTrue(os.path.isfile(path / f"report_results/paired_matches/example_{encoded_data.get_example_ids()[1]}_label_no_subject_id_subject_2.csv"))
+        self.assertTrue(os.path.isfile(path / f"report_results/paired_matches/example_{encoded_data.get_example_ids()[2]}_label_no_subject_id_subject_3.csv"))
 
         matches = pd.read_csv(path / "report_results/complete_match_count_table.csv")
-        subj1_results = pd.read_csv(path / "report_results/paired_matches/example_subject_1_label_yes_subject_id_subject_1.csv")
+        subj1_results = pd.read_csv(path / f"report_results/paired_matches/example_{encoded_data.get_example_ids()[0]}_label_yes_subject_id_subject_1.csv")
 
         self.assertListEqual(list(matches["1_TRA"]), [20, 0, 0])
         self.assertListEqual(list(matches["1_TRB"]), [10, 0, 0])

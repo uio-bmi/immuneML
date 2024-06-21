@@ -17,50 +17,52 @@ class OLGAImport(DataImport):
     ‘High-throughput immune repertoire analysis with IGoR’. Bioinformatics, (2019)
     `doi.org/10.1093/bioinformatics/btz035 <https://doi.org/10.1093/bioinformatics/btz035>`_.
 
-    Arguments:
+    **Specification arguments:**
 
-        path (str): For RepertoireDatasets, this is the path to a directory with OLGA files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
+    - path (str): For RepertoireDatasets, this is the path to a directory with OLGA files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
-        is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset. By default, is_repertoire is set to True.
+    - is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset. By default, is_repertoire is set to True.
 
-        metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. Only the OLGA files included under the column 'filename' are imported into the RepertoireDataset. SequenceDataset metadata is currently not supported.
+    - metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. Only the OLGA files included under the column 'filename' are imported into the RepertoireDataset. SequenceDataset metadata is currently not supported.
 
-        import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.
+    - import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.
 
-        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.
+    - import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.
 
-        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
+    - import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
 
-        region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as OLGA uses the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
+    - region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as OLGA uses the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
-        separator (str): Column separator, for OLGA this is by default "\\t".
+    - separator (str): Column separator, for OLGA this is by default "\\t".
 
-        column_mapping (dict): defines which columns to import from olga format: keys are the number of the columns and values are the names of the columns to be mapped to
+    - column_mapping (dict): defines which columns to import from olga format: keys are the number of the columns and values are the names of the columns to be mapped to
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_olga_dataset:
-            format: OLGA
-            params:
-                path: path/to/files/
-                is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
-                metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
-                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
-                # Optional fields with OLGA-specific defaults, only change when different behavior is required:
-                separator: "\\t" # column separator
-                region_type: IMGT_CDR3 # what part of the sequence to import
-                columns_to_load: [0, 1, 2, 3]
-                column_mapping:
-                    0: sequences
-                    1: sequence_aas
-                    2: v_genes
-                    3: j_genes
+        definitions:
+            datasets:
+                my_olga_dataset:
+                    format: OLGA
+                    params:
+                        path: path/to/files/
+                        is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
+                        metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                        import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
+                        import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                        import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+                        # Optional fields with OLGA-specific defaults, only change when different behavior is required:
+                        separator: "\\t" # column separator
+                        region_type: IMGT_CDR3 # what part of the sequence to import
+                        columns_to_load: [0, 1, 2, 3]
+                        column_mapping:
+                            0: sequence
+                            1: sequence_aa
+                            2: v_call
+                            3: j_call
 
     """
 

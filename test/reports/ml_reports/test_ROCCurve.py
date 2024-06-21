@@ -25,7 +25,7 @@ class TestROCCurve(unittest.TestCase):
         encoded_tr = EncodedData(np.random.rand(100, 20),
                                  {"l1": [i % 2 for i in range(0, 100)]})
 
-        dummy_lr.fit_by_cross_validation(encoded_tr, number_of_splits=2,
+        dummy_lr.fit_by_cross_validation(encoded_tr, number_of_splits=2, optimization_metric="balanced_accuracy",
                                          label=Label("l1", [0, 1], positive_class=1))
         return dummy_lr
 

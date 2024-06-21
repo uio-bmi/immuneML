@@ -34,7 +34,7 @@ This process is shown in the figure below:
   optimization is done on training and validation data and the model performance is
   assessed on test data
 
-See also :ref:`How to discover disease- or antigen specificity-associated motifs` to read more about ML interpretability.
+See also :ref:`Discovering motifs learned by classifiers` to read more about ML interpretability.
 
 YAML specification of TrainMLModel
 ------------------------------------------------------------------
@@ -102,7 +102,7 @@ The table describes which of the ML methods can be used for binary classificatio
 can be used for multi-class classification. Note that all classifiers can automatically be used for multi-label classification
 in immuneML.
 Furthermore, it describes what type of dataset the classifier can be applied to, and whether a third level of nested cross-validation
-can be used for the selection of model parameters (scikit-learn classifiers).
+(:code:`model_selection_cv` in the YAML specification) can be used for the selection of model parameters (scikit-learn classifiers).
 
 .. csv-table:: ML methods properties
    :file: ../_static/files/ml_methods_properties.csv
@@ -236,98 +236,100 @@ Complete YAML
 
 An example of the complete YAML specification is shown here:
 
-.. highlight:: yaml
-.. code-block:: yaml
+    .. collapse:: instructions.yaml
 
-  definitions:
-    datasets: # every instruction uses a dataset
-      my_dataset:
-        format: AIRR
-        params:
-          path: path/to/repertoires/
-          metadata_file: path/to/metadata.csv
+        .. highlight:: yaml
+        .. code-block:: yaml
 
-    preprocessing_sequences:
-      my_preprocessing: # user-defined preprocessing name
-        - my_beta_chain_filter:
-            ChainRepertoireFilter:
-              keep_chain: TRB
+          definitions:
+            datasets: # every instruction uses a dataset
+              my_dataset:
+                format: AIRR
+                params:
+                  path: path/to/repertoires/
+                  metadata_file: path/to/metadata.csv
 
-    ml_methods:
-      my_svm:       # example ML method with user-defined settings
-        SVM:        # Here, a third level of 3-fold cross-validation is used
-          penalty:  # to determine the optimal hyperparameters for 'C' and 'penalty'
-            - l1    # This functionality is only available for scikit-learn classifiers
-            - l2
-          C:
-           - 0.01
-           - 0.1
-           - 1
-           - 10
-           - 100
-        model_selection_cv: True
-        model_selection_n_folds: 3
-      my_log_reg: LogisticRegression # example ML method with default settings
+            preprocessing_sequences:
+              my_preprocessing: # user-defined preprocessing name
+                - my_beta_chain_filter:
+                    ChainRepertoireFilter:
+                      keep_chain: TRB
 
-    encodings:
-      my_kmer_freq_encoding:
-        KmerFrequency:
-          k: 3
+            ml_methods:
+              my_svm:       # example ML method with user-defined settings
+                SVM:        # Here, a third level of 3-fold cross-validation is used
+                  penalty:  # to determine the optimal hyperparameters for 'C' and 'penalty'
+                    - l1    # This functionality is only available for scikit-learn classifiers
+                    - l2
+                  C:
+                   - 0.01
+                   - 0.1
+                   - 1
+                   - 10
+                   - 100
+                model_selection_cv: True
+                model_selection_n_folds: 3
+              my_log_reg: LogisticRegression # example ML method with default settings
 
-    reports:
-      my_coefficients: Coefficients
-      my_sequence_lengths: SequenceLengthDistribution
-      my_performance: MLSettingsPerformance
+            encodings:
+              my_kmer_freq_encoding:
+                KmerFrequency:
+                  k: 3
 
-  instructions:
-    my_instr:
-      type: TrainMLModel
+            reports:
+              my_coefficients: Coefficients
+              my_sequence_lengths: SequenceLengthDistribution
+              my_performance: MLSettingsPerformance
 
-      dataset: my_dataset
-      labels:
-      - disease_1
-      - disease_2
+          instructions:
+            my_instr:
+              type: TrainMLModel
 
-      settings:
-        - encoding: my_kmer_freq_encoding # Testing my_kmer_freq_encoding in combination with
-          ml_method: my_log_reg           # my_log_reg and my_svm, with and without my_preprocessing
-        - encoding: my_kmer_freq_encoding
-          ml_method: my_svm
-        - preprocessing: my_preprocessing # preprocessing can only be defined for repertoire datasets
-          encoding: my_kmer_freq_encoding
-          ml_method: my_log_reg
-        - preprocessing: my_preprocessing
-          encoding: my_kmer_freq_encoding
-          ml_method: my_svm
+              dataset: my_dataset
+              labels:
+              - disease_1
+              - disease_2
 
-      assessment:                # example defining 5-fold cross-validation
-        split_strategy: k_fold
-        split_count: 5
-        reports:
-          models:                # plot the coefficients of the trained models
-          - my_coefficients
-          data:                  # run this report on all data
-          - my_sequence_lengths
-      selection:                 # example defining 3-fold monte carlo cross-validation with
-        split_strategy: random   # 70% randomly chosen training data per split
-        split_count: 3
-        training_percentage: 0.7
-        reports:                 # run this report on training/validation splits
-          data_splits:
-          - my_sequence_lengths
+              settings:
+                - encoding: my_kmer_freq_encoding # Testing my_kmer_freq_encoding in combination with
+                  ml_method: my_log_reg           # my_log_reg and my_svm, with and without my_preprocessing
+                - encoding: my_kmer_freq_encoding
+                  ml_method: my_svm
+                - preprocessing: my_preprocessing # preprocessing can only be defined for repertoire datasets
+                  encoding: my_kmer_freq_encoding
+                  ml_method: my_log_reg
+                - preprocessing: my_preprocessing
+                  encoding: my_kmer_freq_encoding
+                  ml_method: my_svm
 
-      optimization_metric: balanced_accuracy # the metric used for optimization
-      metrics: # other metrics to compute
-      - accuracy
-      - auc
-      strategy: GridSearch
-      refit_optimal_model: False
-      reports:
-      - my_performance
-      number_of_processes: 4
+              assessment:                # example defining 5-fold cross-validation
+                split_strategy: k_fold
+                split_count: 5
+                reports:
+                  models:                # plot the coefficients of the trained models
+                  - my_coefficients
+                  data:                  # run this report on all data
+                  - my_sequence_lengths
+              selection:                 # example defining 3-fold monte carlo cross-validation with
+                split_strategy: random   # 70% randomly chosen training data per split
+                split_count: 3
+                training_percentage: 0.7
+                reports:                 # run this report on training/validation splits
+                  data_splits:
+                  - my_sequence_lengths
+
+              optimization_metric: balanced_accuracy # the metric used for optimization
+              metrics: # other metrics to compute
+              - accuracy
+              - auc
+              strategy: GridSearch
+              refit_optimal_model: False
+              reports:
+              - my_performance
+              number_of_processes: 4
 
 
-Example datasets
+Example datasets to test training ML models
 ------------------------------------------------------------------
 Below you will find example datasets that can be used to test out the :ref:`TrainMLModel` instruction.
 

@@ -7,14 +7,18 @@ from immuneML.reports.Report import Report
 
 
 class GenModelReport(Report, ABC):
+    '''
+    .. note::
+
+        This is an experimental feature
+
+    Generative model reports show some type of features or statistics about a generative model.
+    '''
+
+    DOCS_TITLE = "Generative model reports"
 
     def __init__(self, dataset: Dataset = None, model: GenerativeModel = None, result_path: Path = None,
                  name: str = None):
-        super().__init__(name)
+        super().__init__(name=name, result_path=result_path)
         self.dataset = dataset
         self.model = model
-        self.result_path = result_path
-
-    @staticmethod
-    def get_title():
-        return "Generative model reports"

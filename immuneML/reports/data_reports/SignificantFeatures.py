@@ -31,47 +31,52 @@ class SignificantFeatures(DataReport):
     :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder`
     to calculate significant full sequences (depending on whether the argument compairr_path was set).
 
-    Arguments:
+    **Specification arguments:**
 
-        p_values (list): The p value thresholds to be used by Fisher's exact test. Each p-value specified here will become one panel in the output figure.
+    - p_values (list): The p value thresholds to be used by Fisher's exact test. Each p-value specified here will become
+      one panel in the output figure.
 
-        k_values (list): Length of the k-mers (number of amino acids) created by the :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder`.
-        When using a full sequence encoding (:py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder` or
-        :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder`), specify 'full_sequence' here.
-        Each value specified under k_values will represent one boxplot in the output figure.
+    - k_values (list): Length of the k-mers (number of amino acids) created by the
+      :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder`.
+      When using a full sequence encoding (:py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder` or
+      :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder`), specify 'full_sequence' here.
+      Each value specified under k_values will represent one boxplot in the output figure.
 
-        label (dict): A label configuration. One label should be specified, and the positive_class for this label should be defined. See the YAML specification below for an example.
+    - label (dict): A label configuration. One label should be specified, and the positive_class for this label should be defined. See the YAML specification below for an example.
 
-        compairr_path (str): If 'full_sequence' is listed under k_values, the path to the CompAIRR executable may be provided.
-        If the compairr_path is specified, the :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder`
-        will be used to compute the significant sequences. If the path is not specified and 'full_sequence' is listed under
-        k-values, :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder` will be used.
+    - compairr_path (str): If 'full_sequence' is listed under k_values, the path to the CompAIRR executable may be provided.
+      If the compairr_path is specified, the :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder`
+      will be used to compute the significant sequences. If the path is not specified and 'full_sequence' is listed under
+      k-values, :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder` will be used.
 
-        log_scale (bool): Whether to plot the y axis in log10 scale (log_scale = True) or continuous scale (log_scale = False). By default, log_scale is False.
+    - log_scale (bool): Whether to plot the y axis in log10 scale (log_scale = True) or continuous scale (log_scale = False). By default, log_scale is False.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_significant_features_report:
-            SignificantFeatures:
-                p_values:
-                    - 0.1
-                    - 0.01
-                    - 0.001
-                    - 0.0001
-                k_values:
-                    - 3
-                    - 4
-                    - 5
-                    - full_sequence
-                compairr_path: path/to/compairr # can be specified if 'full_sequence' is listed under k_values
-                label: # Define a label, and the positive class for that given label
-                    CMV:
-                        positive_class: +
-                log_scale: False
+        definitions:
+            reports:
+                my_significant_features_report:
+                    SignificantFeatures:
+                        p_values:
+                            - 0.1
+                            - 0.01
+                            - 0.001
+                            - 0.0001
+                        k_values:
+                            - 3
+                            - 4
+                            - 5
+                            - full_sequence
+                        compairr_path: path/to/compairr # can be specified if 'full_sequence' is listed under k_values
+                        label: # Define a label, and the positive class for that given label
+                            CMV:
+                                positive_class: +
+                        log_scale: False
+
     """
 
     @classmethod

@@ -65,43 +65,57 @@ class MotifSeedRecovery(MLReport):
         Feature: xAxAAx
                   ^/^^
 
-    See :ref:`Recovering simulated immune signals` for more details and an example plot.
+    See :ref:`Recovering simulated immune signals` for more details.
 
 
-    Arguments:
+    Example output:
 
-        implanted_motifs_per_label (dict): a nested dictionary that specifies the motif seeds that were implanted in the given dataset. The first
-        level of keys in this dictionary represents the different labels. In the inner dictionary there should be two keys: "seeds" and
-        "hamming_distance":
-                - seeds: a list of motif seeds. The seeds may contain gaps, specified by a '/' symbol.
-                - hamming_distance: A boolean value that specifies whether hamming distance was allowed when implanting the motif seeds for a given label. Note that this applies to all seeds for this label.
-                - gap_sizes: a list of all the possible gap sizes that were used when implanting a gapped motif seed. When no gapped seeds are used, this value has no effect.
+    .. image:: _static/images/reports/motif_seed_recovery.png
+       :alt: Motif seed recovery report
+       :width: 650
 
 
-    YAML specification:
+    **Specification arguments:**
+
+    - implanted_motifs_per_label (dict): a nested dictionary that specifies the motif seeds that were implanted in the given dataset. The first
+      level of keys in this dictionary represents the different labels. In the inner dictionary there should be two keys: "seeds" and
+      "hamming_distance":
+
+      - seeds: a list of motif seeds. The seeds may contain gaps, specified by a '/' symbol.
+
+      - hamming_distance: A boolean value that specifies whether hamming distance was allowed when implanting the motif
+        seeds for a given label. Note that this applies to all seeds for this label.
+
+      - gap_sizes: a list of all the possible gap sizes that were used when implanting a gapped motif seed. When no
+        gapped seeds are used, this value has no effect.
+
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_motif_report:
-            MotifSeedRecovery:
-                implanted_motifs_per_label:
-                    CD:
-                        seeds:
-                        - AA/A
-                        - AAA
-                        hamming_distance: False
-                        gap_sizes:
-                        - 0
-                        - 1
-                        - 2
-                    T1D:
-                        seeds:
-                        - CC/C
-                        - CCC
-                        hamming_distance: True
-                        gap_sizes:
-                        - 2
+        definitions:
+            reports:
+                my_motif_report:
+                    MotifSeedRecovery:
+                        implanted_motifs_per_label:
+                            CD:
+                                seeds:
+                                - AA/A
+                                - AAA
+                                hamming_distance: False
+                                gap_sizes:
+                                - 0
+                                - 1
+                                - 2
+                            T1D:
+                                seeds:
+                                - CC/C
+                                - CCC
+                                hamming_distance: True
+                                gap_sizes:
+                                - 2
 
     """
 
