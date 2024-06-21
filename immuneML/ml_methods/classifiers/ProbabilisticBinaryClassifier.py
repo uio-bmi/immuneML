@@ -368,7 +368,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
             elif value is None or isinstance(value, str) or isinstance(value, dict) or isinstance(value, list) or isinstance(value, Path):
                 result[key] = value
             elif isinstance(value, Label):
-                result[key] = value.name
+                result[key] = value.get_desc_for_storage()
             else:
                 result[key] = float(value)
 
