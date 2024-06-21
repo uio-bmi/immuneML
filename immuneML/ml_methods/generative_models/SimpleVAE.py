@@ -293,7 +293,7 @@ class SimpleVAE(GenerativeModel):
                                      .replace(Constants.GAP_LETTER, ''),
             'metadata': SequenceMetadata(v_call=self.unique_v_genes[Categorical(v_genes[i]).sample()],
                                          j_call=self.unique_j_genes[Categorical(j_genes[i]).sample()], chain=self.chain,
-                                         region_type=self.region_type.name)
+                                         region_type=self.region_type.name, custom_params={'gen_model_name': self.name})
         }) for i in range(count)]
 
         # for obj in seq_objs:

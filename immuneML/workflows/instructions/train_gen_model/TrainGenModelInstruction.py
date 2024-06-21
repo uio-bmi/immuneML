@@ -93,6 +93,9 @@ class TrainGenModelInstruction(GenModelInstruction):
         self._fit_model()
         self._save_model()
         self._gen_data()
+        if self.export_generated_dataset:
+            self._export_generated_dataset()
+        self._make_and_export_combined_dataset()
         self._run_reports()
 
         return self.state
@@ -117,10 +120,6 @@ class TrainGenModelInstruction(GenModelInstruction):
         print_log(f"{self.state.name}: starting to fit the model", True)
         self.method.fit(self.state.train_dataset, self.state.result_path)
         print_log(f"{self.state.name}: fitted the model", True)
-
-    def _gen_data(self):
-        super()._gen_data(export_airr=self.export_generated_dataset)
-        self._make_and_export_combined_dataset()
 
     def _make_combined_dataset(self):
         path = PathBuilder.build(self.state.result_path / 'combined_dataset')

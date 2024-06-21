@@ -89,8 +89,8 @@ class PWM(GenerativeModel):
         pwm.pwm_matrix = pwm_matrix
         return pwm
 
-    def __init__(self, chain, sequence_type: str, region_type: str):
-        super().__init__(Chain.get_chain(chain))
+    def __init__(self, chain, sequence_type: str, region_type: str, name: str = None):
+        super().__init__(Chain.get_chain(chain), name=name)
         self.sequence_type = SequenceType[sequence_type.upper()]
         self.region_type = RegionType[region_type.upper()]
         self.pwm_matrix = None
@@ -136,7 +136,8 @@ class PWM(GenerativeModel):
 
         dataset = SequenceDataset.build_from_objects(
             [ReceptorSequence(sequence_aa=seq,
-                              metadata=SequenceMetadata(chain=self.chain, region_type=self.region_type.name))
+                              metadata=SequenceMetadata(chain=self.chain, region_type=self.region_type.name,
+                                                        custom_params={'gen_model_name': self.name}))
              for seq in sequences],
             count, path, 'synthetic_dataset')
 

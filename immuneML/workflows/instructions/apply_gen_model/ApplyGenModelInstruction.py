@@ -51,7 +51,8 @@ class ApplyGenModelInstruction(GenModelInstruction):
 
     def run(self, result_path: Path) -> GenModelState:
         self._set_path(result_path)
-        self._gen_data(export_airr=True)
+        self._gen_data()
+        self._export_generated_dataset()
         self._run_reports()
 
         return self.state

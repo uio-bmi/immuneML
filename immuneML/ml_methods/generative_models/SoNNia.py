@@ -143,7 +143,8 @@ class SoNNia(GenerativeModel):
                                                                               metadata=SequenceMetadata(
                                                                                   v_call=seq[1],
                                                                                   j_call=seq[2],
-                                                                                  region_type=RegionType.IMGT_JUNCTION.name))
+                                                                                  region_type=RegionType.IMGT_JUNCTION.name,
+                                                                              custom_params={'gen_model_name': self.name}))
                                                              for seq in sequences],
                                                   file_size=len(sequences), path=PathBuilder.build(path),
                                                   name='SoNNiaDataset')

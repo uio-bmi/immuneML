@@ -229,7 +229,8 @@ class SimpleLSTM(GenerativeModel):
     def _export_dataset(self, sequences, count, path):
         sequence_objs = [ReceptorSequence(**{
             self.sequence_type.value: sequence,
-            'metadata': SequenceMetadata(region_type=self.region_type.name, chain=self.chain.name)
+            'metadata': SequenceMetadata(region_type=self.region_type.name, chain=self.chain.name,
+                                         custom_params={'gen_model_name': self.name})
         }) for i, sequence in enumerate(sequences)]
 
         dataset = SequenceDataset.build_from_objects(sequence_objs, count, path, 'synthetic_lstm')
