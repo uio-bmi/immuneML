@@ -43,7 +43,7 @@ class TestSequenceCountDistribution(TestCase):
         shutil.rmtree(path)
 
     def test_sequence_lengths_repertoire_dataset(self):
-        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "receptor_counts")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "repertoire_counts")
 
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=10,
                                                                      sequence_count_probabilities={10:0.5, 20: 0.5},
