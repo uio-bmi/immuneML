@@ -8,13 +8,10 @@ from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.repertoire.Repertoire import Repertoire
-from immuneML.environment.SequenceType import SequenceType
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.reports.data_reports.DataReport import DataReport
-from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -61,9 +58,9 @@ class SequenceCountDistribution(DataReport):
                 self.label_name = list(self.dataset.get_label_names())[0]
         else:
             self.label_name = None
+
     def check_prerequisites(self):
         return True
-
 
     def _generate(self) -> ReportResult:
         self._set_label_name()
@@ -85,6 +82,7 @@ class SequenceCountDistribution(DataReport):
             return self._get_repertoire_df()
         elif isinstance(self.dataset, ReceptorDataset) or isinstance(self.dataset, SequenceDataset):
             return self._get_sequence_receptor_df()
+
     def _get_repertoire_df(self):
         sequence_counts = Counter()
 
@@ -104,9 +102,6 @@ class SequenceCountDistribution(DataReport):
             df[self.label_name] = [key[1] for key in sequence_counts.keys()]
 
         return df
-
-
-
 
     def _get_sequence_receptor_df(self):
         try:
