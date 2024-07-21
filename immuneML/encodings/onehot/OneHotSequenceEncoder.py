@@ -18,10 +18,8 @@ class OneHotSequenceEncoder(OneHotEncoder):
     def _encode_new_dataset(self, dataset: SequenceDataset, params: EncoderParams):
         encoded_data = self._encode_data(dataset, params)
 
-        encoded_dataset = SequenceDataset(filenames=dataset.get_filenames(),
-                                          encoded_data=encoded_data,
-                                          labels=dataset.labels,
-                                          file_size=dataset.file_size, dataset_file=dataset.dataset_file)
+        encoded_dataset = dataset.clone()
+        encoded_dataset.encoded_data = encoded_data
 
         return encoded_dataset
 

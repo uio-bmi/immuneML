@@ -78,9 +78,6 @@ class RepertoireDataset(Dataset):
             dataset.identifier = self.identifier
         return dataset
 
-    def add_encoded_data(self, encoded_data: EncodedData):
-        self.encoded_data = encoded_data
-
     def get_data(self, batch_size: int = 1):
         return self.repertoires
 

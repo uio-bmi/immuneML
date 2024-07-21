@@ -45,15 +45,18 @@ class ImmuneMLExporter(DataExporter):
                 yaml.dump(yaml_dict, file)
 
         elif isinstance(dataset, SequenceDataset) or isinstance(dataset, ReceptorDataset):
-            exported_dataset.set_filenames(ImmuneMLExporter._export_receptors(exported_dataset.get_filenames(), path))
+            ImmuneMLExporter._export_receptors(exported_dataset.get_filenames_full_path(), path_new=path)
+            exported_dataset.batchfiles_path = path
+
             exported_dataset.dataset_file = ImmuneMLExporter._export_element_metadata(dataset, path)
+            file_path = exported_dataset.dataset_file
 
         version_path = path / "info.txt"
         with version_path.open("w") as file:
             file.writelines(f"immuneML_version: {Constants.VERSION}\n"
                             f"Python_version: {platform.python_version()}\n")
 
-        return exported_dataset
+        return file_path
 
     @staticmethod
     def _parse_val_for_export(val):
@@ -82,19 +85,22 @@ class ImmuneMLExporter(DataExporter):
         if dataset.metadata_file is None or not dataset.metadata_file.is_file():
             return None
 
-        metadata_file = metadata_folder_path / f"{dataset.name}_metadata.csv"
+        new_metadata_file = metadata_folder_path / f"{dataset.name}_metadata.csv"
 
-        if not metadata_file.is_file():
-            shutil.copyfile(dataset.metadata_file, metadata_file)
+        if not new_metadata_file.is_file():
+            shutil.copyfile(dataset.metadata_file, new_metadata_file)
 
-        ImmuneMLExporter._update_repertoire_paths_in_metadata(metadata_file, repertoires_path)
-        ImmuneMLExporter._add_dataset_to_metadata(metadata_file, dataset_filename)
+        ImmuneMLExporter._update_repertoire_paths_in_metadata(new_metadata_file, repertoires_path)
+        ImmuneMLExporter._add_dataset_to_metadata(new_metadata_file, dataset_filename)
 
         old_metadata_file = metadata_folder_path / "metadata.csv"
         if old_metadata_file.is_file():
+            # if true, it means the metadata file is exported to the same location
+            # overwrite the original dataset.metadata file with the new file to prevent 'missing metadata' bug
             os.remove(str(old_metadata_file))
+            dataset.metadata_file = new_metadata_file
 
-        return metadata_file
+        return new_metadata_file
 
     @staticmethod
     def _update_repertoire_paths_in_metadata(metadata_file: Path, repertoires_path: Path):
@@ -111,12 +117,9 @@ class ImmuneMLExporter(DataExporter):
         metadata.to_csv(metadata_file, mode="a", index=False)
 
     @staticmethod
-    def _export_receptors(filenames_old: List[Path], path: Path) -> List[Path]:
-        filenames_new = []
-        for filename_old in filenames_old:
-            filename_new = ImmuneMLExporter._copy_if_exists(filename_old, path)
-            filenames_new.append(filename_new)
-        return filenames_new
+    def _export_receptors(filepaths: List[Path], path_new: Path) -> List[Path]:
+        for filepath_old in filepaths:
+            ImmuneMLExporter._copy_if_exists(filepath_old, path_new)
 
     @staticmethod
     def _export_repertoires(repertoires: List[Repertoire], repertoires_path: Path) -> List[Repertoire]:
@@ -131,11 +134,11 @@ class ImmuneMLExporter(DataExporter):
         return new_repertoires
 
     @staticmethod
-    def _copy_if_exists(old_file: Path, path: Path):
+    def _copy_if_exists(old_file: Path, new_folder: Path):
         if old_file is not None and old_file.is_file():
-            new_file = path / old_file.name
+            new_file = new_folder / old_file.name
             if not new_file.is_file():
                 shutil.copyfile(old_file, new_file)
             return new_file
         else:
-            raise RuntimeError(f"{ImmuneMLExporter.__name__}: tried exporting file {old_file}, but it does not exist.")
+            raise RuntimeError(f"{ImmuneMLExporter.__name__}: tried exporting file {old_file} to new folder {new_folder}, but it does not exist.")
