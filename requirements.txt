@@ -17,10 +17,8 @@ dill>=0.3
 plotly>=4
 logomaker>=0.8
 matplotlib-venn>=0.11
-scipy<1.13 # in 1.13, function 'triu' gets removed causing 'gensim' to fail
+scipy
 umap-learn
-
-# simulation and ligo
 bionumpy>=0.2.31
 fisher>=0.1.9
 olga>=1.2.4

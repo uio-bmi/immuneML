@@ -23,11 +23,11 @@ setup(
     install_requires=["numpy", "pandas>=1,<2.0", "PyYAML>=5.3", "scikit-learn>=0.23",
                       "gensim>=4", "matplotlib>=3.1", "editdistance", "regex", "tzlocal", "airr>=1,<1.4",
                       "fishersapi", "pystache", "torch>=1.5.1", "dill>=0.3", "plotly>=4", "logomaker>=0.8",
-                      "matplotlib-venn>=0.11", "scipy", "bionumpy>=0.2.31", "umap-learn"],
+                      "matplotlib-venn>=0.11", "scipy", "bionumpy>=0.2.31", "umap-learn", "fisher", "olga"],
     extras_require={
         "TCRdist": ["tcrdist3>=0.1.6"],
-        "gen_models": ['olga', 'sonnia', 'torch'],
-        "ligo": ['olga', 'stitchr', 'IMGTgeneDL'],
+        "gen_models": ['sonnia', 'torch'],
+        "ligo": ['stitchr', 'IMGTgeneDL'],
         "KerasSequenceCNN": ["keras==2.11.0", "tensorflow==2.11.0"]
     },
     classifiers=[
