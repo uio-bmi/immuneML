@@ -67,7 +67,7 @@ class Matches(EncodingReport):
         if self.dataset.encoded_data.encoding == "MatchedSequencesEncoder":
             output_tables += self._write_sequence_info(self.result_path / "sequence_info")
         else:
-            if len(self.dataset.encoded_data.feature_annotations["chain"].unique()) == 2:
+            if len(self.dataset.encoded_data.feature_annotations["locus"].unique()) == 2:
                 output_tables += self._write_paired_matches(self.result_path / "paired_matches")
 
             if self.dataset.encoded_data.encoding == "MatchedReceptorsEncoder":
@@ -153,10 +153,10 @@ class Matches(EncodingReport):
         Writes the repertoire sizes (# clones & # reads) per subject, per chain.
         """
         all_subjects = sorted(set(self.dataset.get_subject_ids()))
-        all_chains = sorted(set(self.dataset.encoded_data.feature_annotations["chain"]))
+        all_chains = sorted(set(self.dataset.encoded_data.feature_annotations["locus"]))
 
         results_df = pd.DataFrame(list(itertools.product(all_subjects, all_chains)),
-                                  columns=["subject_id", "chain"])
+                                  columns=["subject_id", "locus"])
         results_df["n_reads"] = 0
         results_df["n_clones"] = 0
 
@@ -166,9 +166,9 @@ class Matches(EncodingReport):
 
             for chain in all_chains:
                 indices = rep_chains == Chain.get_chain(chain.upper())
-                results_df.loc[(results_df.subject_id == repertoire.metadata["subject_id"]) & (results_df.chain == chain),
+                results_df.loc[(results_df.subject_id == repertoire.metadata["subject_id"]) & (results_df.locus == chain),
                                'n_reads'] += np.sum(rep_counts[indices])
-                results_df.loc[(results_df.subject_id == repertoire.metadata["subject_id"]) & (results_df.chain == chain),
+                results_df.loc[(results_df.subject_id == repertoire.metadata["subject_id"]) & (results_df.locus == chain),
                                'n_clones'] += len(rep_counts[indices])
 
         results_path = self.result_path / "repertoire_sizes.csv"
@@ -180,13 +180,13 @@ class Matches(EncodingReport):
         PathBuilder.build(receptor_info_path)
 
         receptor_chains = self.dataset.encoded_data.feature_annotations
-        chain_types = receptor_chains["chain"].unique()
+        chain_types = receptor_chains["locus"].unique()
 
-        first_chains = receptor_chains.loc[receptor_chains.chain == chain_types[0]]
-        second_chains = receptor_chains.loc[receptor_chains.chain == chain_types[1]]
+        first_chains = receptor_chains.loc[receptor_chains.locus == chain_types[0]]
+        second_chains = receptor_chains.loc[receptor_chains.locus == chain_types[1]]
 
-        first_chains.drop(columns=["chain"], inplace=True)
-        second_chains.drop(columns=["chain"], inplace=True)
+        first_chains.drop(columns=["locus"], inplace=True)
+        second_chains.drop(columns=["locus"], inplace=True)
 
         on_cols = ["receptor_id"]
         if "clonotype_id" in second_chains.columns and first_chains.columns:

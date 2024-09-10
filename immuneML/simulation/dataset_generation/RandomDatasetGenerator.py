@@ -166,7 +166,7 @@ class RandomDatasetGenerator:
             metadata=SequenceMetadata(duplicate_count=1, region_type='IMGT_CDR3',
                                       v_call=chain + "V1-1*01",
                                       j_call=chain + "J1-1*01",
-                                      chain=chain,
+                                      locus=chain,
                                       cell_id=str(id)))
 
         receptors = [TCABReceptor(alpha=get_random_sequence(chain_1_length_probabilities, "TRA", i),
@@ -230,7 +230,7 @@ class RandomDatasetGenerator:
                              metadata=SequenceMetadata(duplicate_count=1,
                                                        v_call=chain + "V1-1*01",
                                                        j_call=chain + "J1-1*01",
-                                                       chain=chain,
+                                                       locus=chain,
                                                        region_type=RegionType[region_type].name,
                                                        custom_params={**{label: random.choices(list(label_dict.keys()),
                                                                                                label_dict.values(),

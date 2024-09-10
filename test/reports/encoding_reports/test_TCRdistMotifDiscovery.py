@@ -47,10 +47,10 @@ mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagc
         if not line.startswith('subject,epitope'):
             receptor_info = line.split(",")
             receptor = TCABReceptor(alpha=ReceptorSequence(sequence_aa=receptor_info[5], sequence=receptor_info[6],
-                                                           metadata=SequenceMetadata(v_call=receptor_info[3], chain='TRA',
+                                                           metadata=SequenceMetadata(v_call=receptor_info[3], locus='TRA',
                                                                                      j_call=receptor_info[4])),
                                     beta=ReceptorSequence(sequence_aa=receptor_info[9], sequence=receptor_info[10],
-                                                          metadata=SequenceMetadata(v_call=receptor_info[7], chain='TRB',
+                                                          metadata=SequenceMetadata(v_call=receptor_info[7], locus='TRB',
                                                                                     j_call=receptor_info[9])),
                                     metadata={'epitope': receptor_info[1]})
             receptors.append(receptor)

@@ -50,7 +50,7 @@ class TestSimpleDatasetOverview(TestCase):
         shutil.rmtree(path)
 
     def test_generate_repertoire_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "overview_repertoire_dataset/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "overview_repertoire_dataset/")
 
 
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=5, sequence_count_probabilities={20:1},

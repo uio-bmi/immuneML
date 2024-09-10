@@ -304,14 +304,14 @@ class ImportHelper:
 
     @staticmethod
     def load_chains(df: pd.DataFrame):
-        if "chain" in df.columns:
-            df["chain"] = ImportHelper.load_chains_from_chains(df)
+        if "locus" in df.columns:
+            df["locus"] = ImportHelper.load_chains_from_chains(df)
         else:
-            df["chain"] = ImportHelper.load_chains_from_genes(df)
+            df["locus"] = ImportHelper.load_chains_from_genes(df)
 
     @staticmethod
     def load_chains_from_chains(df: pd.DataFrame) -> list:
-        return [Chain.get_chain(chain_str).value if chain_str is not None else None for chain_str in df["chain"]]
+        return [Chain.get_chain(chain_str).value if chain_str is not None else None for chain_str in df["locus"]]
 
     @staticmethod
     def load_chains_from_genes(df: pd.DataFrame) -> list:
@@ -440,7 +440,7 @@ class ImportHelper:
             v_call=str(row["v_call"]) if "v_call" in row and row["v_call"] is not None else None,
             j_call=str(row["j_call"]) if "j_call" in row and row["j_call"] is not None else None,
             cell_id=str(row['cell_id']) if 'cell_id' in row and row['cell_id'] is not None else None,
-            chain=row["chain"] if "chain" in row and row["chain"] is not None else None,
+            locus=row["locus"] if "locus" in row and row["locus"] is not None else None,
             region_type=row["region_type"] if "region_type" in row and row["region_type"] is not None else None,
             duplicate_count=int(row["duplicate_count"]) if "duplicate_count" in row and row[
                 "duplicate_count"] is not None else None,
@@ -462,7 +462,7 @@ class ImportHelper:
 
         chain_pair = params.receptor_chains
         if chain_pair is None:
-            chains = [Chain.get_chain(chain) for chain in df["chain"].unique()]
+            chains = [Chain.get_chain(chain) for chain in df["locus"].unique()]
             chain_pair = ChainPair.get_chain_pair(chains)
 
         metadata_columns = list(params.metadata_column_mapping.values()) if params.metadata_column_mapping else None
@@ -477,8 +477,8 @@ class ImportHelper:
 
     @staticmethod
     def import_receptors_by_id(df, identifier, chain_pair, metadata_columns) -> List[Receptor]:
-        first_row = df.loc[(df["receptor_id"] == identifier) & (df["chain"] == chain_pair.value[0])]
-        second_row = df.loc[(df["receptor_id"] == identifier) & (df["chain"] == chain_pair.value[1])]
+        first_row = df.loc[(df["receptor_id"] == identifier) & (df["locus"] == chain_pair.value[0])]
+        second_row = df.loc[(df["receptor_id"] == identifier) & (df["locus"] == chain_pair.value[1])]
 
         for i, row in enumerate([first_row, second_row]):
             if row.shape[0] > 1:
@@ -486,7 +486,7 @@ class ImportHelper:
                     f"Multiple {chain_pair.value[i]} chains found for receptor with identifier {identifier}, only the first entry will be loaded")
             elif row.shape[0] == 0:
                 warnings.warn(
-                    f"Missing {chain_pair.value[i]} chain for receptor with identifier {identifier}, this receptor will be omitted.")
+                    f"Missing {chain_pair.value[i]} locus for receptor with identifier {identifier}, this receptor will be omitted.")
                 return []
 
         # todo add possibility to import multiple chain combo's? (BCR heavy-light & heavy-kappa, as seen in 10xGenomics?)

@@ -28,17 +28,19 @@ class TestKmerFreqReceptorEncoder(TestCase):
 
     def test(self):
 
-        receptors = [TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAACCC", metadata=SequenceMetadata(chain='alpha')),
-                                  beta=ReceptorSequence(sequence_aa="AAACCC", metadata=SequenceMetadata(chain='beta')),
+        receptors = [TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAACCC", metadata=SequenceMetadata(
+            locus='alpha')),
+                                  beta=ReceptorSequence(sequence_aa="AAACCC", metadata=SequenceMetadata(locus='beta')),
                                   identifier="1"),
-                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAA", metadata=SequenceMetadata(chain='alpha')),
-                                  beta=ReceptorSequence(sequence_aa="CCC", metadata=SequenceMetadata(chain='beta')),
+                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAA", metadata=SequenceMetadata(locus='alpha')),
+                                  beta=ReceptorSequence(sequence_aa="CCC", metadata=SequenceMetadata(locus='beta')),
                                   identifier="2"),
-                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAACCC", metadata=SequenceMetadata(chain='alpha')),
-                                  beta=ReceptorSequence(sequence_aa="AAACCC", metadata=SequenceMetadata(chain='beta')),
+                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAACCC", metadata=SequenceMetadata(
+                         locus='alpha')),
+                                  beta=ReceptorSequence(sequence_aa="AAACCC", metadata=SequenceMetadata(locus='beta')),
                                   identifier="3"),
-                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAA", metadata=SequenceMetadata(chain='alpha')),
-                                  beta=ReceptorSequence(sequence_aa="CCC", metadata=SequenceMetadata(chain='beta')),
+                     TCABReceptor(alpha=ReceptorSequence(sequence_aa="AAA", metadata=SequenceMetadata(locus='alpha')),
+                                  beta=ReceptorSequence(sequence_aa="CCC", metadata=SequenceMetadata(locus='beta')),
                                   identifier="4")]
 
         path = EnvironmentSettings.tmp_test_path / "kmer_receptor_frequency/"

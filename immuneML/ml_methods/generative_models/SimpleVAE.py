@@ -41,7 +41,7 @@ class SimpleVAE(GenerativeModel):
 
     **Specification arguments:**
 
-    - chain (str): which chain the sequence come from, e.g., TRB
+    - locus (str): which locus the sequence come from, e.g., TRB
 
     - beta (float): VAE hyperparameter that balanced the reconstruction loss and latent dimension regularization
 
@@ -87,7 +87,7 @@ class SimpleVAE(GenerativeModel):
             ml_methods:
                 my_vae:
                     SimpleVAE:
-                        chain: beta
+                        locus: beta
                         beta: 0.75
                         latent_dim: 20
                         linear_nodes_count: 75
@@ -119,10 +119,10 @@ class SimpleVAE(GenerativeModel):
 
         return vae
 
-    def __init__(self, chain, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim, pretrains,
+    def __init__(self, locus, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim, pretrains,
                  v_gene_embed_dim, cdr3_embed_dim, warmup_epochs, patience, iter_count_prob_estimation, device,
                  vocab=None, max_cdr3_len=None, unique_v_genes=None, unique_j_genes=None, name: str = None):
-        super().__init__(chain)
+        super().__init__(locus)
         self.sequence_type = SequenceType.AMINO_ACID
         self.iter_count_prob_estimation = iter_count_prob_estimation
         self.num_epochs = num_epochs
@@ -292,7 +292,7 @@ class SimpleVAE(GenerativeModel):
             self.sequence_type.value: ''.join([self.vocab[Categorical(letter).sample()] for letter in sequences[i]])
                                      .replace(Constants.GAP_LETTER, ''),
             'metadata': SequenceMetadata(v_call=self.unique_v_genes[Categorical(v_genes[i]).sample()],
-                                         j_call=self.unique_j_genes[Categorical(j_genes[i]).sample()], chain=self.chain,
+                                         j_call=self.unique_j_genes[Categorical(j_genes[i]).sample()], locus=self.locus,
                                          region_type=self.region_type.name, custom_params={'gen_model_name': self.name})
         }) for i in range(count)]
 

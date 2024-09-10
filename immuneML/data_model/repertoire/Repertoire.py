@@ -32,7 +32,7 @@ class Repertoire(DatasetItem):
     loaded separately. Internally, this class relies on numpy to store/import_dataset the data.
     """
 
-    FIELDS = ("sequence_aa", "sequence", "v_call", "j_call", "chain", "duplicate_count", "region_type", "frame_type",
+    FIELDS = ("sequence_aa", "sequence", "v_call", "j_call", "locus", "duplicate_count", "region_type", "frame_type",
               "sequence_id", "cell_id")
 
     @classmethod
@@ -79,7 +79,7 @@ class Repertoire(DatasetItem):
         assert all(isinstance(sequence, ReceptorSequence) for sequence in sequence_objects), \
             "Repertoire: all sequences have to be instances of ReceptorSequence class."
 
-        sequence_aa, sequence, v_call, j_call, chain, duplicate_count, region_type, frame_type, sequence_id, cell_id = [], [], [], [], [], [], [], [], [], []
+        sequence_aa, sequence, v_call, j_call, locus, duplicate_count, region_type, frame_type, sequence_id, cell_id = [], [], [], [], [], [], [], [], [], []
         custom_lists = {key: [] for key in sequence_objects[0].metadata.custom_params} if sequence_objects[
             0].metadata else {}
         signals = {}
@@ -91,7 +91,7 @@ class Repertoire(DatasetItem):
             if seq.metadata:
                 v_call.append(seq.metadata.v_call)
                 j_call.append(seq.metadata.j_call)
-                chain.append(seq.metadata.chain.value if seq.metadata.chain else None)
+                locus.append(seq.metadata.locus.value if seq.metadata.locus else None)
                 duplicate_count.append(seq.metadata.duplicate_count)
                 region_type.append(seq.metadata.region_type.value if seq.metadata.region_type else None)
                 frame_type.append(seq.metadata.frame_type.value if seq.metadata.frame_type else None)
@@ -111,7 +111,7 @@ class Repertoire(DatasetItem):
             if signal_info_count < sequence_count:
                 signals[signal].extend([None for _ in range(sequence_count - signal_info_count)])
 
-        return cls.build(sequence_aa=sequence_aa, sequence=sequence, v_call=v_call, j_call=j_call, chain=chain,
+        return cls.build(sequence_aa=sequence_aa, sequence=sequence, v_call=v_call, j_call=j_call, locus=locus,
                          duplicate_count=duplicate_count, region_type=region_type, frame_type=frame_type,
                          sequence_id=sequence_id, path=path, metadata=metadata, cell_id=cell_id,
                          filename_base=filename_base, identifier=repertoire_id, **custom_lists, **signals)
@@ -164,7 +164,7 @@ class Repertoire(DatasetItem):
         return counts
 
     def get_chains(self):
-        chains = self.get_attribute("chain")
+        chains = self.get_attribute("locus")
         if chains is not None:
             chains = np.array(
                 [Chain.get_chain(chain_str) if chain_str is not None else None for chain_str in chains.tolist()])
@@ -223,7 +223,7 @@ class Repertoire(DatasetItem):
                                sequence_id=row.get('sequence_id', None),
                                metadata=SequenceMetadata(v_call=row.get('v_call', None),
                                                          j_call=row.get('j_call', None),
-                                                         chain=row.get('chain', None),
+                                                         locus=row.get('locus', None),
                                                          duplicate_count=row.get('duplicate_count', None),
                                                          region_type=row.get('region_type', None),
                                                          frame_type=row.get('frame_type', None),
@@ -298,10 +298,10 @@ class Repertoire(DatasetItem):
         """
         data = self.load_bnp_data()
         receptors = []
-        chains = data.chain.tolist()
+        locus = data.locus.tolist()
         for i in range(0, len(data), 2):
             rows = data.get_rows_by_indices(i, i + 1)
-            cls = ChainPair.get_chain_pair([Chain.get_chain(el) for el in chains[i:i+2]]).get_appropriate_receptor_class()
+            cls = ChainPair.get_chain_pair([Chain.get_chain(el) for el in locus[i:i+2]]).get_appropriate_receptor_class()
             receptors.append(cls.create_from_record(**rows))
 
         return receptors

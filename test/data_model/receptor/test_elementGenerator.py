@@ -18,8 +18,8 @@ class TestElementGenerator(TestCase):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "element_batch_generator/")
 
         receptors = [BCReceptor(identifier=str(i),
-                                heavy=ReceptorSequence('A', metadata=SequenceMetadata(chain='HEAVY', cell_id=str(i))),
-                                light=ReceptorSequence('C', metadata=SequenceMetadata(chain='LIGHT', cell_id=str(i))))
+                                heavy=ReceptorSequence('A', metadata=SequenceMetadata(locus='HEAVY', cell_id=str(i))),
+                                light=ReceptorSequence('C', metadata=SequenceMetadata(locus='LIGHT', cell_id=str(i))))
                      for i in range(307)]
         file_list = [path / f"batch{i+1}.tsv" for i in range(4)]
 
@@ -63,8 +63,8 @@ class TestElementGenerator(TestCase):
     def make_rec_dataset(self, path, count: int, file_size: int) -> ReceptorDataset:
         receptors = []
         for i in range(count):
-            receptors.append(TCABReceptor(ReceptorSequence("AA", metadata=SequenceMetadata(chain='alpha', cell_id=str(i))),
-                                          ReceptorSequence('CCC', metadata=SequenceMetadata(chain='beta', cell_id=str(i))),
+            receptors.append(TCABReceptor(ReceptorSequence("AA", metadata=SequenceMetadata(locus='alpha', cell_id=str(i))),
+                                          ReceptorSequence('CCC', metadata=SequenceMetadata(locus='beta', cell_id=str(i))),
                                           identifier=str(i)))
 
         return ReceptorDataset.build_from_objects(receptors, file_size, path, 'dataset_rec1')

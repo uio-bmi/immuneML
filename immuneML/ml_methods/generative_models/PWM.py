@@ -29,7 +29,7 @@ class PWM(GenerativeModel):
 
     **Specification arguments:**
 
-    - chain (str): which chain is generated (for now, it is only assigned to the generated sequences)
+    - locus (str): which chain is generated (for now, it is only assigned to the generated sequences)
 
     - sequence_type (str): amino_acid or nucleotide
 
@@ -45,7 +45,7 @@ class PWM(GenerativeModel):
             ml_methods:
                 my_pwm:
                     PWM:
-                        chain: beta
+                        locus: beta
                         sequence_type: amino_acid
                         region_type: IMGT_CDR3
 
@@ -66,7 +66,7 @@ class PWM(GenerativeModel):
         model_overview = read_yaml(model_overview_file)
         pwm_matrix = {}
 
-        pwm = PWM(chain=model_overview['chain'], sequence_type=model_overview['sequence_type'],
+        pwm = PWM(locus=model_overview['locus'], sequence_type=model_overview['sequence_type'],
                   region_type=model_overview['region_type'])
 
         for file, length in [(path / f'pwm_len_{length}.csv', length) for length in length_probs.keys()]:
@@ -89,8 +89,8 @@ class PWM(GenerativeModel):
         pwm.pwm_matrix = pwm_matrix
         return pwm
 
-    def __init__(self, chain, sequence_type: str, region_type: str, name: str = None):
-        super().__init__(Chain.get_chain(chain), name=name)
+    def __init__(self, locus, sequence_type: str, region_type: str, name: str = None):
+        super().__init__(Chain.get_chain(locus), name=name)
         self.sequence_type = SequenceType[sequence_type.upper()]
         self.region_type = RegionType[region_type.upper()]
         self.pwm_matrix = None
@@ -136,7 +136,7 @@ class PWM(GenerativeModel):
 
         dataset = SequenceDataset.build_from_objects(
             [ReceptorSequence(sequence_aa=seq,
-                              metadata=SequenceMetadata(chain=self.chain, region_type=self.region_type.name,
+                              metadata=SequenceMetadata(locus=self.locus, region_type=self.region_type.name,
                                                         custom_params={'gen_model_name': self.name}))
              for seq in sequences],
             count, path, 'synthetic_dataset')
@@ -168,7 +168,7 @@ class PWM(GenerativeModel):
              .to_csv(model_path / f'pwm_len_{length}.csv'))
 
         write_yaml(filename=model_path / 'model_overview.yaml',
-                   yaml_dict={'type': 'PWM', 'chain': self.chain.name, 'sequence_type': self.sequence_type.name,
+                   yaml_dict={'type': 'PWM', 'locus': self.locus.name, 'sequence_type': self.sequence_type.name,
                               'region_type': self.region_type.name})
 
         return Path(shutil.make_archive(str(path / 'trained_model'), "zip", str(path / 'model'))).absolute()

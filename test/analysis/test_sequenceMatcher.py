@@ -24,25 +24,25 @@ class TestSequenceMatcher(TestCase):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "seqmatch/")
 
         repertoire = Repertoire.build_from_sequence_objects(sequence_objects=[
-            ReceptorSequence(sequence_aa="AAAAAA", metadata=SequenceMetadata(chain="A", v_call="V1", j_call="J2",
+            ReceptorSequence(sequence_aa="AAAAAA", metadata=SequenceMetadata(locus="A", v_call="V1", j_call="J2",
                                                                              region_type=RegionType.IMGT_CDR3.name),
                              sequence_id="3"),
-            ReceptorSequence(sequence_aa="CCCCCC", metadata=SequenceMetadata(chain="A", v_call="V1", j_call="J2",
+            ReceptorSequence(sequence_aa="CCCCCC", metadata=SequenceMetadata(locus="A", v_call="V1", j_call="J2",
                                                                              region_type=RegionType.IMGT_CDR3.name),
                              sequence_id="4"),
-            ReceptorSequence(sequence_aa="AAAACC", metadata=SequenceMetadata(chain="A", v_call="V1", j_call="J2",
+            ReceptorSequence(sequence_aa="AAAACC", metadata=SequenceMetadata(locus="A", v_call="V1", j_call="J2",
                                                                              region_type=RegionType.IMGT_CDR3.name),
                              sequence_id="5"),
-            ReceptorSequence(sequence_aa="TADQVF", metadata=SequenceMetadata(chain="A", v_call="V1", j_call="J3",
+            ReceptorSequence(sequence_aa="TADQVF", metadata=SequenceMetadata(locus="A", v_call="V1", j_call="J3",
                                                                              region_type=RegionType.IMGT_CDR3.name),
                              sequence_id="6")],
             metadata={"CD": True}, path=path)
 
         dataset = RepertoireDataset(repertoires=[repertoire])
-        sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(chain="A", v_call="V1", j_call="J2",
+        sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(locus="A", v_call="V1", j_call="J2",
                                                                           region_type=RegionType.IMGT_CDR3.name),
                                       sequence_id="1"),
-                     ReceptorSequence("TADQV", metadata=SequenceMetadata(chain="A", v_call="V1", j_call="J3",
+                     ReceptorSequence("TADQV", metadata=SequenceMetadata(locus="A", v_call="V1", j_call="J3",
                                                                          region_type=RegionType.IMGT_CDR3.name),
                                       sequence_id="2")]
 
@@ -61,19 +61,19 @@ class TestSequenceMatcher(TestCase):
         PathBuilder.remove_old_and_build(path)
 
         seq_objs = [ReceptorSequence(sequence_aa="AAAAAA", sequence_id="1",
-                                     metadata=SequenceMetadata(chain="A", duplicate_count=3)),
+                                     metadata=SequenceMetadata(locus="A", duplicate_count=3)),
                     ReceptorSequence(sequence_aa="CCCCCC", sequence_id="2",
-                                     metadata=SequenceMetadata(chain="A", duplicate_count=2)),
+                                     metadata=SequenceMetadata(locus="A", duplicate_count=2)),
                     ReceptorSequence(sequence_aa="AAAACC", sequence_id="3",
-                                     metadata=SequenceMetadata(chain="A", duplicate_count=1)),
+                                     metadata=SequenceMetadata(locus="A", duplicate_count=1)),
                     ReceptorSequence(sequence_aa="TADQVF", sequence_id="4",
-                                     metadata=SequenceMetadata(chain="A", duplicate_count=4))]
+                                     metadata=SequenceMetadata(locus="A", duplicate_count=4))]
 
         repertoire = Repertoire.build_from_sequence_objects(sequence_objects=seq_objs,
                                                             metadata={"CD": True}, path=path)
 
-        sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(chain="A")),
-                     ReceptorSequence("TADQV", metadata=SequenceMetadata(chain="A"))]
+        sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(locus="A")),
+                     ReceptorSequence("TADQV", metadata=SequenceMetadata(locus="A"))]
 
         matcher = SequenceMatcher()
         result = matcher.match_repertoire(repertoire, 0, sequences, 2, SequenceMatchingSummaryType.COUNT)

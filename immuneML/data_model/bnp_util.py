@@ -188,8 +188,8 @@ def get_rows_by_indices(self, index1, index2) -> dict:
     assert row1['cell_id'] == row2['cell_id'], (row1['cell_id'], row2['cell_id'])
 
     return {
-        **{f'{Chain.get_chain(row1["chain"]).name.lower()}_{key}': val for key, val in row1.items()},
-        **{f'{Chain.get_chain(row2["chain"]).name.lower()}_{key}': val for key, val in row2.items()},
+        **{f'{Chain.get_chain(row1["locus"]).name.lower()}_{key}': val for key, val in row1.items()},
+        **{f'{Chain.get_chain(row2["locus"]).name.lower()}_{key}': val for key, val in row2.items()},
     }
 
 

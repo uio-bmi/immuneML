@@ -57,7 +57,7 @@ rep2.tsv,2""")
 
         self.assertEqual(2, dataset.get_example_count())
         for index, repertoire in enumerate(dataset.get_data()):
-            self.assertTrue(all(sequence.metadata.chain == Chain.ALPHA for sequence in repertoire.sequences))
+            self.assertTrue(all(sequence.metadata.locus == Chain.ALPHA for sequence in repertoire.sequences))
             if index == 0:
                 self.assertEqual(9, len(repertoire.sequences))
                 self.assertTrue(repertoire.sequences[0].sequence_aa in ["ALVTDSWGKLQ", "AVLETSGSRLT"])  # OSX/windows

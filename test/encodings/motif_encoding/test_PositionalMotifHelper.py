@@ -34,7 +34,7 @@ class TestPositionalMotifHelper(TestCase):
         return SequenceDataset.build_from_objects(sequences, 100, PathBuilder.build(path / 'data'), 'd2')
 
     def test_get_numpy_sequence_representation(self):
-        path = EnvironmentSettings.tmp_test_path / "positional_motif_sequence_encoder/test_np/"
+        path = EnvironmentSettings.tmp_test_path / "positional_motif_sequence_encoder_test_np/"
         dataset = self._prepare_dataset(path = path)
         output = PositionalMotifHelper.get_numpy_sequence_representation(dataset)
 
@@ -145,7 +145,7 @@ class TestPositionalMotifHelper(TestCase):
         self.assertListEqual(base_motif[1], ["A", "C"])
 
     def test_readwrite(self):
-        path = EnvironmentSettings.tmp_test_path / "positional_motif_sequence_encoder/test_readwrite/"
+        path = EnvironmentSettings.tmp_test_path / "positional_motif_sequence_encoder_test_readwrite/"
 
         original_motifs = [([0], ["A"]), ([1], ["A"]), ([0, 1], ["A", "A"])]
         PositionalMotifHelper.write_motifs_to_file(original_motifs, filepath=path / "motifs.tsv")

@@ -53,7 +53,6 @@ def prepare_specs(path) -> Path:
                                 "type": "OLGA",
                                 "model_path": None,
                                 "default_model_name": "humanTRB",
-                                "chain": 'beta',
                             }
                         },
                         "var2": {
@@ -69,7 +68,6 @@ def prepare_specs(path) -> Path:
                                 'type': 'OLGA',
                                 "model_path": None,
                                 "default_model_name": "humanTRB",
-                                "chain": "beta",
                             }
                         }
                     }

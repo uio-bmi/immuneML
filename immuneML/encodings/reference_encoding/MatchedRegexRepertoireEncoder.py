@@ -95,8 +95,8 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
                     v_gene = row[f"{chain_type}V"] if f"{chain_type}V" in row else None
 
                     for rep_seq in rep_seqs:
-                        if rep_seq.metadata.chain is not None:
-                            if rep_seq.metadata.chain.value == chain_type:
+                        if rep_seq.metadata.locus is not None:
+                            if rep_seq.metadata.locus.value == chain_type:
                                 if self._matches(rep_seq, regex, v_gene):
                                     n_matches = 1 if self.reads == ReadsType.UNIQUE else rep_seq.metadata.duplicate_count
                                     if n_matches is None:

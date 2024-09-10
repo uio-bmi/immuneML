@@ -206,8 +206,8 @@ class LigoSimInstruction(Instruction):
         for index, seq1, seq2 in zip(list(range(len(sequences1))), sequences1, sequences2):
             seq1.metadata.cell_id = index
             seq2.metadata.cell_id = index
-            seq1.sequence_id = f"{seq1.sequence_id}_{seq1.metadata.chain.value}"
-            seq2.sequence_id = f"{seq2.sequence_id}_{seq2.metadata.chain.value}"
+            seq1.sequence_id = f"{seq1.sequence_id}_{seq1.metadata.locus.value}"
+            seq2.sequence_id = f"{seq2.sequence_id}_{seq2.metadata.locus.value}"
             sequences.extend([seq1, seq2])
 
         return Repertoire.build_from_sequence_objects(sequences, path,
@@ -256,7 +256,7 @@ class LigoSimInstruction(Instruction):
                                                    metadata=make_signal_metadata(sim_item, self.state.signals),
                                                    immune_events=sim_item.immune_events,
                                                    custom_params=self._custom_fields,
-                                                   chain=sim_item.generative_model.chain)
+                                                   locus=sim_item.generative_model.locus)
 
         return sequences
 

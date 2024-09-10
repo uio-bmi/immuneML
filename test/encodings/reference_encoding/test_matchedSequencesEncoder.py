@@ -24,7 +24,7 @@ class TestMatchedSequencesEncoder(TestCase):
         labels = {"subject_id": ["subject_1", "subject_2", "subject_3"],
                   "label": ["yes", "yes", "no"]}
 
-        metadata = {"v_call": "TRBV1", "j_call": "TRBJ1", "chain": Chain.BETA.value}
+        metadata = {"v_call": "TRBV1", "j_call": "TRBJ1", "locus": Chain.BETA.value}
 
         repertoires, metadata = RepertoireBuilder.build(sequences=[["AAAA"],
                                                                    ["SSSS"],
@@ -86,7 +86,7 @@ class TestMatchedSequencesEncoder(TestCase):
                 self.assertListEqual(encoded.encoded_data.feature_names, ['TRBV1_AAAA_TRBJ1', 'TRBV1_SSSS_TRBJ1'])
 
                 self.assertListEqual(list(encoded.encoded_data.feature_annotations.sequence_id), ["100_TRB", "200_TRB"])
-                self.assertListEqual(list(encoded.encoded_data.feature_annotations.chain), ["beta", "beta"])
+                self.assertListEqual(list(encoded.encoded_data.feature_annotations.locus), ["beta", "beta"])
                 self.assertListEqual(list(encoded.encoded_data.feature_annotations.sequence), ["AAAA", "SSSS"])
                 self.assertListEqual(list(encoded.encoded_data.feature_annotations.v_gene), ["TRBV1", "TRBV1"])
                 self.assertListEqual(list(encoded.encoded_data.feature_annotations.j_gene), ["TRBJ1", "TRBJ1"])

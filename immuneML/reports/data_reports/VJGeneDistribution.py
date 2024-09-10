@@ -61,7 +61,8 @@ class VJGeneDistribution(DataReport):
 
         return VJGeneDistribution(**kwargs)
 
-    def __init__(self, dataset: Dataset = None, result_path: Path = None, number_of_processes: int = 1, name: str = None,
+    def __init__(self, dataset: Dataset = None, result_path: Path = None, number_of_processes: int = 1,
+                 name: str = None,
                  split_by_label: bool = None, label: str = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.split_by_label = split_by_label
@@ -88,7 +89,7 @@ class VJGeneDistribution(DataReport):
 
     def _get_sequence_receptor_results(self):
         attributes = [self.label_name] if self.split_by_label else []
-        attributes += ["v_call", "j_call", "chain"]
+        attributes += ["v_call", "j_call", "locus"]
         dataset_attributes = self.dataset.get_attributes(attributes=attributes,
                                                          as_list=False)
         dataset_attributes = {key: value.tolist() for key, value in dataset_attributes.items()}
@@ -99,8 +100,8 @@ class VJGeneDistribution(DataReport):
 
         return ReportResult(name=self.name,
                             info="V and J gene distributions",
-                            output_figures=v_plots+j_plots+vj_plots,
-                            output_tables=v_tables+j_tables+vj_tables)
+                            output_figures=v_plots + j_plots + vj_plots,
+                            output_tables=v_tables + j_tables + vj_tables)
 
     def _get_single_gene_results_from_attributes(self, dataset_attributes, call_type):
         vj = call_type[0].upper()
@@ -113,39 +114,39 @@ class VJGeneDistribution(DataReport):
                                                file_path=self.result_path / f"{vj}_gene_distribution.tsv",
                                                name=f"{vj} gene distribution"))
 
-        for chain in set(dataset_attributes["chain"]):
+        for chain in set(dataset_attributes["locus"]):
             plots.append(self._safe_plot(plot_callable="_plot_gene_distribution",
-                                         df=counts_df[counts_df["chain"] == chain],
+                                         df=counts_df[counts_df["locus"] == chain],
                                          title=f"{chain} {vj} gene distribution",
                                          filename=f"{chain}_{vj}_gene_distribution.html"))
 
         return tables, plots
 
     def _get_gene_count_df(self, dataset_attributes, call_type, include_label=True):
-        if self.label_name is None or include_label==False:
+        if self.label_name is None or include_label == False:
             genes_counter = Counter(zip(dataset_attributes[call_type],
-                                        dataset_attributes["chain"]))
-            colnames = ["genes", "chain"]
+                                        dataset_attributes["locus"]))
+            colnames = ["genes", "locus"]
         else:
             genes_counter = Counter(zip(dataset_attributes[call_type],
-                                        dataset_attributes["chain"],
+                                        dataset_attributes["locus"],
                                         dataset_attributes[self.label_name]))
-            colnames = ["genes", "chain", self.label_name]
+            colnames = ["genes", "locus", self.label_name]
 
         return self._counter_to_df(genes_counter, colnames)
 
     def _get_vj_combo_count_df(self, dataset_attributes, include_label=True):
-        if self.label_name is None or include_label==False:
+        if self.label_name is None or include_label == False:
             genes_counter = Counter(zip(dataset_attributes["v_call"],
                                         dataset_attributes["j_call"],
-                                        dataset_attributes["chain"]))
-            colnames = ["v_genes", "j_genes", "chain"]
+                                        dataset_attributes["locus"]))
+            colnames = ["v_genes", "j_genes", "locus"]
         else:
             genes_counter = Counter(zip(dataset_attributes["v_call"],
                                         dataset_attributes["j_call"],
-                                        dataset_attributes["chain"],
+                                        dataset_attributes["locus"],
                                         dataset_attributes[self.label_name]))
-            colnames = ["v_genes", "j_genes", "chain", self.label_name]
+            colnames = ["v_genes", "j_genes", "locus", self.label_name]
 
         return self._counter_to_df(genes_counter, colnames)
 
@@ -178,8 +179,8 @@ class VJGeneDistribution(DataReport):
                                                file_path=self.result_path / f"VJ_gene_distribution.tsv",
                                                name=f"Combined V+J gene distribution"))
 
-        for chain in set(dataset_attributes["chain"]):
-            chain_df = vj_combo_count_df[vj_combo_count_df["chain"] == chain]
+        for chain in set(dataset_attributes["locus"]):
+            chain_df = vj_combo_count_df[vj_combo_count_df["locus"] == chain]
 
             if not self.split_by_label:
                 plots.append(self._safe_plot(plot_callable="_plot_gene_combo_heatmap",
@@ -201,7 +202,8 @@ class VJGeneDistribution(DataReport):
 
         return tables, plots
 
-    def _plot_gene_combo_heatmap(self, chain_df, title, filename, value_to_plot="counts", zmax=None, color_name="Observed frequency"):
+    def _plot_gene_combo_heatmap(self, chain_df, title, filename, value_to_plot="counts", zmax=None,
+                                 color_name="Observed frequency"):
         zmax = max(chain_df[value_to_plot]) if zmax is None else zmax
 
         chain_df = chain_df.pivot(index="v_genes", columns="j_genes", values=value_to_plot).round(decimals=2)
@@ -215,7 +217,6 @@ class VJGeneDistribution(DataReport):
         figure.write_html(str(file_path))
         return ReportOutput(path=file_path, name=title)
 
-
     def _get_repertoire_results(self):
         v_df, j_df, vj_df = self._get_repertoire_count_dfs()
 
@@ -223,26 +224,24 @@ class VJGeneDistribution(DataReport):
 
         plots = []
 
-        for chain in set(vj_df["chain"]):
+        for chain in set(vj_df["locus"]):
             plots.append(self._safe_plot(plot_callable="_plot_gene_distribution_across_repertoires",
-                                         chain_df=v_df[v_df["chain"]==chain],
+                                         chain_df=v_df[v_df["locus"] == chain],
                                          title=f"{chain} V gene distribution per repertoire",
                                          filename=f"{chain}_V_gene_distribution.html"))
 
             plots.append(self._safe_plot(plot_callable="_plot_gene_distribution_across_repertoires",
-                                         chain_df=j_df[j_df["chain"]==chain],
+                                         chain_df=j_df[j_df["locus"] == chain],
                                          title=f"{chain} J gene distribution per repertoire",
                                          filename=f"{chain}_J_gene_distribution.html"))
 
-            mean_chain_vj_df = self._average_norm_counts_per_repertoire(chain_vj_df=vj_df[vj_df["chain"] == chain])
-
+            mean_chain_vj_df = self._average_norm_counts_per_repertoire(chain_vj_df=vj_df[vj_df["locus"] == chain])
 
             tables.append(self._write_output_table(mean_chain_vj_df,
                                                    file_path=self.result_path / f"VJ_gene_distribution_averaged_across_repertoires.tsv",
                                                    name=f"Combined V+J gene distribution averaged across repertoires"))
 
             plots.extend(self._get_repertoire_heatmaps(mean_chain_vj_df, chain))
-
 
         return ReportResult(name=self.name,
                             info="V and J gene distributions per repertoire",
@@ -261,7 +260,8 @@ class VJGeneDistribution(DataReport):
         else:
             for label_class in set(mean_chain_vj_df[self.label_name]):
                 plots.append(self._safe_plot(plot_callable="_plot_gene_combo_heatmap",
-                                             chain_df=mean_chain_vj_df[mean_chain_vj_df[self.label_name] == label_class],
+                                             chain_df=mean_chain_vj_df[
+                                                 mean_chain_vj_df[self.label_name] == label_class],
                                              title=f"Combined {chain} V+J gene distribution for {self.label_name}={label_class} averaged across repertoires",
                                              filename=f"{chain}_VJ_gene_distribution_{self.label_name}={label_class}_averaged_across_repertoires.html",
                                              zmax=max(mean_chain_vj_df["mean_norm_counts"]),
@@ -271,7 +271,7 @@ class VJGeneDistribution(DataReport):
         return plots
 
     def _average_norm_counts_per_repertoire(self, chain_vj_df):
-        groupby_cols = ["v_genes", "j_genes", "chain"]
+        groupby_cols = ["v_genes", "j_genes", "locus"]
         groupby_cols += [self.label_name] if self.label_name is not None else []
 
         mean_chain_vj_df = pd.DataFrame(chain_vj_df.groupby(groupby_cols)["norm_counts"].mean()).reset_index()
@@ -287,7 +287,7 @@ class VJGeneDistribution(DataReport):
         for repertoire in self.dataset.repertoires:
             repertoire_attributes = {"v_call": repertoire.get_v_genes(),
                                      "j_call": repertoire.get_j_genes(),
-                                     "chain": repertoire.get_attribute("chain", as_list=True)}
+                                     "locus": repertoire.get_attribute("locus", as_list=True)}
 
             v_rep_df = self._get_gene_count_df(repertoire_attributes, "v_call", include_label=False)
             j_rep_df = self._get_gene_count_df(repertoire_attributes, "j_call", include_label=False)
@@ -313,7 +313,6 @@ class VJGeneDistribution(DataReport):
 
         if self.label_name is not None:
             rep_df[self.label_name] = repertoire.metadata[self.label_name]
-
 
     def _write_repertoire_tables(self, v_df, j_df, vj_df):
         tables = []
@@ -346,19 +345,21 @@ class VJGeneDistribution(DataReport):
         if self.split_by_label:
             if self.label_name is None:
                 if len(self.dataset.get_label_names()) != 1:
-                    warnings.warn(f"{VJGeneDistribution.__name__}: ambiguous label: split_by_label was set to True but no label name was specified, and the number of available labels is {len(self.dataset.get_label_names())}: {self.dataset.get_label_names()}. Skipping this report...")
+                    warnings.warn(
+                        f"{VJGeneDistribution.__name__}: ambiguous label: split_by_label was set to True but no label name was specified, and the number of available labels is {len(self.dataset.get_label_names())}: {self.dataset.get_label_names()}. Skipping this report...")
                     return False
             else:
                 if self.label_name not in self.dataset.get_label_names():
-                    warnings.warn(f"{VJGeneDistribution.__name__}: the specified label name ({self.label_name}) was not available among the dataset labels: {self.dataset.get_label_names()}. Skipping this report...")
+                    warnings.warn(
+                        f"{VJGeneDistribution.__name__}: the specified label name ({self.label_name}) was not available among the dataset labels: {self.dataset.get_label_names()}. Skipping this report...")
                     return False
 
         if isinstance(self.dataset, ReceptorDataset) or isinstance(self.dataset, SequenceDataset):
             try:
-                self.dataset.get_attributes(attributes=["v_call", "j_call", "chain"])
+                self.dataset.get_attributes(attributes=["v_call", "j_call", "locus"])
             except AttributeError as e:
-                warnings.warn(f"{VJGeneDistribution.__name__}: the following attributes were expected to be present in the dataset: v_call, j_call, chain. The following error occurred when attempting to get these attributes: {e} Skipping this report...")
+                warnings.warn(
+                    f"{VJGeneDistribution.__name__}: the following attributes were expected to be present in the dataset: v_call, j_call, locus. The following error occurred when attempting to get these attributes: {e} Skipping this report...")
                 return False
 
         return True
-

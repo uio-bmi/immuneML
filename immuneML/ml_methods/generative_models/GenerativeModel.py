@@ -23,8 +23,8 @@ class GenerativeModel:
     DOCS_TITLE = "Generative models"
     OUTPUT_COLUMNS = []
 
-    def __init__(self, chain, name: str = None):
-        self.chain = chain
+    def __init__(self, locus, name: str = None):
+        self.locus = locus
         self.name = name
 
     @abc.abstractmethod

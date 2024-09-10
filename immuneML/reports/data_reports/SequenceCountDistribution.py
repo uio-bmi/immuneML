@@ -69,7 +69,7 @@ class SequenceCountDistribution(DataReport):
         PathBuilder.build(self.result_path)
 
         output_table = self._write_output_table(df, self.result_path / "sequence_count_distribution.tsv",
-                                 name="Duplicate counts of sequences in the dataset")
+                                                name="Duplicate counts of sequences in the dataset")
 
         report_output_fig = self._safe_plot(df=df, output_written=False)
         output_figures = None if report_output_fig is None else [report_output_fig]
@@ -107,9 +107,10 @@ class SequenceCountDistribution(DataReport):
         try:
             counts = self.dataset.get_attribute("duplicate_count")
         except AttributeError as e:
-            raise AttributeError(f"{SequenceCountDistribution.__name__}: SequenceDataset does not contain attribute 'duplicate_count'. This report can only be run when sequence counts are available.")
+            raise AttributeError(
+                f"{SequenceCountDistribution.__name__}: SequenceDataset does not contain attribute 'duplicate_count'. This report can only be run when sequence counts are available.")
 
-        chains = self.dataset.get_attribute(attribute="chain", as_list=True)
+        chains = self.dataset.get_attribute(attribute="locus", as_list=True)
 
         if self.split_by_label:
             label_classes = self.dataset.get_attribute(attribute=self.label_name, as_list=True)
@@ -118,8 +119,8 @@ class SequenceCountDistribution(DataReport):
             counter = Counter(zip(counts, chains))
 
         df = pd.DataFrame({"duplicate_count": [key[0] for key in counter.keys()],
-                            "chain": [key[1] for key in counter.keys()],
-                            "n_observations": counter.values()})
+                           "locus": [key[1] for key in counter.keys()],
+                           "n_observations": counter.values()})
 
         if self.split_by_label:
             df[self.label_name] = [key[2] for key in counter.keys()]
@@ -127,9 +128,9 @@ class SequenceCountDistribution(DataReport):
         return df
 
     def _plot(self, df: pd.DataFrame) -> ReportOutput:
-        figure = px.bar(df, x="duplicate_count", y="n_observations",  barmode="group",
+        figure = px.bar(df, x="duplicate_count", y="n_observations", barmode="group",
                         color=self.label_name if self.split_by_label else None,
-                        facet_col="chain" if isinstance(self.dataset, ReceptorDataset) else None,
+                        facet_col="locus" if isinstance(self.dataset, ReceptorDataset) else None,
                         color_discrete_sequence=px.colors.diverging.Tealrose,
                         labels={"n_observations": "Number of observations",
                                 "duplicate_count": "Sequence duplicate count"})
@@ -140,4 +141,3 @@ class SequenceCountDistribution(DataReport):
         file_path = self.result_path / "sequence_count_distribution.html"
         figure.write_html(str(file_path))
         return ReportOutput(path=file_path, name="Sequence duplicate count distribution")
-

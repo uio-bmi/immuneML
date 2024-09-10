@@ -25,7 +25,7 @@ def test_duplicate_seq_filter():
                                       sequence=["AAAAA", "CCAAA", "AACCC", "AAAAA", "AACCC", "AACCC", "AATTT"],
                                       v_call=["v1", "v1", "v1", "v1", "v1", "v1", "v1"],
                                       j_call=["j1", "j1", "j1", "j1", "j1", "j1", "j1"],
-                                      chain=[Chain.ALPHA, Chain.ALPHA, Chain.ALPHA, Chain.ALPHA, Chain.ALPHA,
+                                      locus=[Chain.ALPHA, Chain.ALPHA, Chain.ALPHA, Chain.ALPHA, Chain.ALPHA,
                                              Chain.ALPHA, Chain.BETA],
                                       duplicate_count=[10, 20, 30, 5, 20, None, 40],
                                       region_type=["IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3",
@@ -41,7 +41,7 @@ def test_duplicate_seq_filter():
 
     reduced_repertoire = dupfilter.process_dataset(dataset=dataset, result_path=path).repertoires[0]
 
-    attr = reduced_repertoire.get_attributes(["sequence_id", "sequence_aa", "sequence", "duplicate_count", "chain"],
+    attr = reduced_repertoire.get_attributes(["sequence_id", "sequence_aa", "sequence", "duplicate_count", "locus"],
                                              as_list=True)
 
     assert 3 == len(reduced_repertoire.get_sequence_identifiers())
@@ -49,7 +49,7 @@ def test_duplicate_seq_filter():
     assert ["AAAAA", "AACCC", "AATTT"] == attr["sequence"]
     assert [35, 50, 40] == attr["duplicate_count"]
     assert ['1', '3', '7'] == attr["sequence_id"]
-    assert ['ALPHA', 'ALPHA', 'BETA'] == attr["chain"]
+    assert ['ALPHA', 'ALPHA', 'BETA'] == attr["locus"]
 
     # collapse by nucleotides & use min counts
     dupfilter = DuplicateSequenceFilter(filter_sequence_type=SequenceType.NUCLEOTIDE,

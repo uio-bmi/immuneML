@@ -10,7 +10,7 @@ def test_fit_apply_gen_model():
     gen_models = [
         {
             "PWM": {
-                'chain': 'beta',
+                'locus': 'beta',
                 'sequence_type': 'amino_acid',
                 'region_type': 'IMGT_JUNCTION'
             }
@@ -35,7 +35,7 @@ def test_fit_apply_gen_model():
         },
         {
             "SimpleLSTM": {
-                'chain': 'beta',
+                'locus': 'beta',
                 'sequence_type': 'amino_acid',
                 'num_epochs': 10,
                 'hidden_size': 8,

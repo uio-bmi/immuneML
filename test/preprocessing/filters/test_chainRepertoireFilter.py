@@ -25,9 +25,9 @@ class TestChainRepertoireFilter(TestCase):
         path = EnvironmentSettings.root_path / "test/tmp/chain_filter/"
         PathBuilder.build(path)
 
-        rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", metadata=SequenceMetadata(chain="A"),
+        rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", metadata=SequenceMetadata(locus="A"),
                                                                         sequence_id="1")], path=path, metadata={})
-        rep2 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAC", metadata=SequenceMetadata(chain="B"),
+        rep2 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAC", metadata=SequenceMetadata(locus="B"),
                                                                         sequence_id="2")], path=path, metadata={})
 
         metadata = pd.DataFrame({"CD": [1, 0]})

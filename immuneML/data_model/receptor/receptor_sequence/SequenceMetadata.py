@@ -21,12 +21,12 @@ class SequenceMetadata:
 
     """
 
-    def __init__(self, v_call: str = None, j_call: str = None, chain=None, duplicate_count: int = None,
+    def __init__(self, v_call: str = None, j_call: str = None, locus=None, duplicate_count: int = None,
                  frame_type: Union[SequenceFrameType, str] = '',
                  region_type: str = None, cell_id: str = None, custom_params: dict = None):
         self.v_call = v_call
         self.j_call = j_call
-        self.chain = Chain.get_chain(chain) if chain and isinstance(chain, str) else chain if isinstance(chain,
+        self.locus = Chain.get_chain(locus) if locus and isinstance(locus, str) else locus if isinstance(locus,
                                                                                                          Chain) else None
         self.duplicate_count = int(float(duplicate_count)) if isinstance(duplicate_count, str) else duplicate_count
         self.frame_type = SequenceFrameType(frame_type.upper()) \

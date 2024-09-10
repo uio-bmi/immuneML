@@ -40,7 +40,7 @@ class RepertoireBuilder:
                 subject_ids.append("rep_" + str(rep_index))
             for seq_index, sequence in enumerate(sequence_list):
                 if seq_metadata is None:
-                    m = SequenceMetadata(v_call="TRBV1-1*01", j_call="TRBJ1-1*01", duplicate_count=1, chain="TRB", region_type="IMGT_CDR3")
+                    m = SequenceMetadata(v_call="TRBV1-1*01", j_call="TRBJ1-1*01", duplicate_count=1, locus="TRB", region_type="IMGT_CDR3")
                 else:
                     m = SequenceMetadata(**seq_metadata[rep_index][seq_index])
 

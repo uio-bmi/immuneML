@@ -19,8 +19,8 @@ class TestLeaveOneOutSplitter(TestCase):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "leave_one_out_splitter/")
         receptors = []
         for i in range(10):
-            receptors.append(TCABReceptor(ReceptorSequence(metadata=SequenceMetadata(chain='alpha')),
-                                          ReceptorSequence(metadata=SequenceMetadata(chain='beta')),
+            receptors.append(TCABReceptor(ReceptorSequence(metadata=SequenceMetadata(locus='alpha')),
+                                          ReceptorSequence(metadata=SequenceMetadata(locus='beta')),
                                           {"subject": i % 3}))
 
         dataset = ReceptorDataset.build_from_objects(receptors, 100, path, 'd1')

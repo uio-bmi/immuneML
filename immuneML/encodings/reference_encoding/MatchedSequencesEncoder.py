@@ -173,13 +173,13 @@ class MatchedSequencesEncoder(DatasetEncoder):
 
         for i, sequence in enumerate(self.reference_sequences):
             features[i] = [sequence.sequence_id,
-                           sequence.get_attribute("chain").name.lower(),
+                           sequence.get_attribute("locus").name.lower(),
                            sequence.get_sequence(),
                            sequence.get_attribute("v_gene"),
                            sequence.get_attribute("j_gene"),
                            self._get_sequence_desc(sequence)]
 
-        features = pd.DataFrame(features, columns=["sequence_id", "chain", "sequence", "v_gene", "j_gene", "sequence_desc"])
+        features = pd.DataFrame(features, columns=["sequence_id", "locus", "sequence", "v_gene", "j_gene", "sequence_desc"])
         if features['sequence_desc'].unique().shape[0] < features.shape[0]:
             features.loc[:, 'sequence_desc'] = [row['sequence_desc'] + "_" + row['sequence_id'] for ind, row in features.iterrows()]
 

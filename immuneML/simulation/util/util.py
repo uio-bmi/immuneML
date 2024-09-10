@@ -67,13 +67,13 @@ def get_bnp_data(sequence_path, bnp_data_class):
 
 
 def make_receptor_sequence_objects(sequences: BackgroundSequences, metadata, immune_events: dict, custom_params: list,
-                                   chain) -> List[ReceptorSequence]:
+                                   locus) -> List[ReceptorSequence]:
     return [ReceptorSequence(seq.sequence_aa.to_string(), seq.sequence.to_string(), sequence_id=uuid.uuid4().hex,
                              metadata=construct_sequence_metadata_object(seq, metadata, custom_params, immune_events,
-                                                                         chain)) for seq in sequences]
+                                                                         locus)) for seq in sequences]
 
 
-def construct_sequence_metadata_object(sequence, metadata: dict, custom_params, immune_events: dict, chain: Chain) \
+def construct_sequence_metadata_object(sequence, metadata: dict, custom_params, immune_events: dict, locus: Chain) \
         -> SequenceMetadata:
     custom = {}
 
@@ -84,7 +84,7 @@ def construct_sequence_metadata_object(sequence, metadata: dict, custom_params, 
         else:
             custom[key] = getattr(sequence, key).item()
 
-    return SequenceMetadata(custom_params={**metadata, **custom, **immune_events}, chain=chain,
+    return SequenceMetadata(custom_params={**metadata, **custom, **immune_events}, locus=locus,
                             v_call=sequence.v_call.to_string(), j_call=sequence.j_call.to_string(),
                             region_type=sequence.region_type.to_string())
 

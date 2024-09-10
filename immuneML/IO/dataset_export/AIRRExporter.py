@@ -162,7 +162,7 @@ class AIRRExporter(DataExporter):
         sequence_aa_field = AIRRExporter.get_sequence_aa_field(region_type)
 
         main_data_dict = {"sequence_id": [], sequence_field: [], sequence_aa_field: []}
-        attributes_dict = {"chain": [], "v_call": [], "j_call": [], "duplicate_count": [], "cell_id": [], "frame_type": []}
+        attributes_dict = {"locus": [], "v_call": [], "j_call": [], "duplicate_count": [], "cell_id": [], "frame_type": []}
 
         for i, sequence in enumerate(sequences):
             main_data_dict["sequence_id"].append(sequence.sequence_id)
@@ -185,9 +185,6 @@ class AIRRExporter(DataExporter):
                     attributes_dict[attribute].append('')
 
         df = pd.DataFrame({**attributes_dict, **main_data_dict})
-
-        df.rename(columns={"chain": "locus"}, inplace=True)
-
         return df
 
     @staticmethod

@@ -37,7 +37,6 @@ def test_galaxy_sim_tool():
                             'is_noise': False,
                             'receptors_in_repertoire_count': 6,
                             'generative_model': {
-                                'chain': 'heavy',
                                 'default_model_name': 'humanIGH',
                                 'type': 'OLGA'},
                         },
@@ -48,7 +47,6 @@ def test_galaxy_sim_tool():
                             'is_noise': False,
                             'receptors_in_repertoire_count': 6,
                             'generative_model': {
-                                'chain': 'heavy',
                                 'default_model_name': 'humanIGH',
                                 'type': 'OLGA'
                             }

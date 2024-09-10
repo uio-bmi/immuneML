@@ -29,8 +29,8 @@ class TestMatches(unittest.TestCase):
         labels = {"subject_id": ["subject_1", "subject_2"],
                   "label": ["yes", "no"]}
 
-        metadata_alpha = {"v_call": "TRAV1", "j_call": "TRAJ1", "chain": Chain.ALPHA.value}
-        metadata_beta = {"v_call": "TRBV1", "j_call": "TRBJ1", "chain": Chain.BETA.value}
+        metadata_alpha = {"v_call": "TRAV1", "j_call": "TRAJ1", "locus": Chain.ALPHA.value}
+        metadata_beta = {"v_call": "TRBV1", "j_call": "TRBJ1", "locus": Chain.BETA.value}
 
         repertoires, metadata = RepertoireBuilder.build(sequences=[["AAAA", "TTTT"], ["SSSS", "TTTT"]],
                                                         path=path, labels=labels,
@@ -118,7 +118,7 @@ class TestMatches(unittest.TestCase):
         # Setting up dummy data
         labels = {"label": ["yes", "no"]}
 
-        metadata_beta = {"v_call": "TRBV1", "j_call": "TRBJ1", "chain": Chain.BETA.value}
+        metadata_beta = {"v_call": "TRBV1", "j_call": "TRBJ1", "locus": Chain.BETA.value}
 
         repertoires, metadata = RepertoireBuilder.build(sequences=[["AAAA", "TTTT"], ["SSSS", "TTTT"]],
                                                         path=path, labels=labels,
@@ -192,8 +192,8 @@ class TestMatches(unittest.TestCase):
         labels = {"subject_id": ["subject_1", "subject_2", "subject_3"],
                   "label": ["yes", "no", "no"]}
 
-        metadata_alpha = {"v_call": "V1", "j_call": "J1", "chain": Chain.ALPHA.value}
-        metadata_beta = {"v_call": "V1", "j_call": "J1", "chain": Chain.BETA.value}
+        metadata_alpha = {"v_call": "V1", "j_call": "J1", "locus": Chain.ALPHA.value}
+        metadata_beta = {"v_call": "V1", "j_call": "J1", "locus": Chain.BETA.value}
 
         repertoires, metadata = RepertoireBuilder.build(
             sequences=[["FFAGQFGSSNTGKLIFF", "FFAGQFGSSNTGKLIYY", "FFSAGQGETQYFF"],

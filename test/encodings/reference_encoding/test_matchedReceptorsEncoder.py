@@ -24,8 +24,8 @@ class TestMatchedReceptorsEncoder(TestCase):
         labels = {"subject_id": ["subject_1", "subject_1", "subject_2", "subject_2", "subject_3"],
                   "label": ["yes", "yes", "no", "no", "no"]}
 
-        metadata_alpha = {"v_call": "TRAV1", "j_call": "TRAJ1", "chain": Chain.ALPHA.value}
-        metadata_beta = {"v_call": "TRBV1", "j_call": "TRBJ1", "chain": Chain.BETA.value}
+        metadata_alpha = {"v_call": "TRAV1", "j_call": "TRAJ1", "locus": Chain.ALPHA.value}
+        metadata_beta = {"v_call": "TRBV1", "j_call": "TRBJ1", "locus": Chain.BETA.value}
 
         repertoires, metadata = RepertoireBuilder.build(sequences=[["AAAA"], ["SSSS"], ["AAAA", "CCCC"],
                                                                    ["SSSS", "TTTT"], ["AAAA", "CCCC", "SSSS", "TTTT"]],
@@ -99,7 +99,7 @@ class TestMatchedReceptorsEncoder(TestCase):
                 self.assertListEqual(encoded.encoded_data.feature_names, ["100.alpha", "100.beta", "200.alpha", "200.beta"])
 
                 self.assertListEqual(list(encoded.encoded_data.feature_annotations.receptor_id), ["100", "100", "200", "200"])
-                self.assertListEqual(list(encoded.encoded_data.feature_annotations.chain), ["alpha", "beta", "alpha", "beta"])
+                self.assertListEqual(list(encoded.encoded_data.feature_annotations.locus), ["alpha", "beta", "alpha", "beta"])
                 self.assertListEqual(list(encoded.encoded_data.feature_annotations.sequence), ["AAAA", "SSSS", "CCCC", "TTTT"])
                 self.assertListEqual(list(encoded.encoded_data.feature_annotations.v_gene), ["TRAV1", "TRBV1", "TRAV1", "TRBV1"])
                 self.assertListEqual(list(encoded.encoded_data.feature_annotations.j_gene), ["TRAJ1", "TRBJ1", "TRAJ1", "TRBJ1"])

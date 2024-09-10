@@ -20,10 +20,10 @@ class TestRepertoire(TestCase):
         PathBuilder.build(path)
 
         sequences = [ReceptorSequence(sequence_aa="AAA", sequence_id="1",
-                                      metadata=SequenceMetadata(v_call="V1*01", cell_id="1", chain=Chain.ALPHA,
+                                      metadata=SequenceMetadata(v_call="V1*01", cell_id="1", locus=Chain.ALPHA,
                                                                 custom_params={"cmv": "no", "coeliac": False})),
                      ReceptorSequence(sequence_aa="CCC", sequence_id="2",
-                                      metadata=SequenceMetadata(j_call="J1*01", cell_id="1", chain=Chain.BETA,
+                                      metadata=SequenceMetadata(j_call="J1*01", cell_id="1", locus=Chain.BETA,
                                                                 custom_params={"cmv": "yes", "coeliac": True}))]
 
         obj = Repertoire.build_from_sequence_objects(sequences, path, {"cmv": "yes", 'subject_id': "1"})
@@ -57,22 +57,22 @@ class TestRepertoire(TestCase):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "receptortestingpathrepertoire/")
 
         sequences = [ReceptorSequence(sequence_aa="AAA", sequence_id="1",
-                                      metadata=SequenceMetadata(v_call="V1", cell_id="1", chain=Chain.ALPHA,
+                                      metadata=SequenceMetadata(v_call="V1", cell_id="1", locus=Chain.ALPHA,
                                                                 custom_params={"cmv": "no", "coeliac": False})),
                      ReceptorSequence(sequence_aa="CCC", sequence_id="2",
-                                      metadata=SequenceMetadata(j_call="J1", cell_id="1", chain=Chain.BETA,
+                                      metadata=SequenceMetadata(j_call="J1", cell_id="1", locus=Chain.BETA,
                                                                 custom_params={"cmv": "yes", "coeliac": True})),
                      ReceptorSequence(sequence_aa="FFF", sequence_id="3",
-                                      metadata=SequenceMetadata(v_call="V1", cell_id="2", chain=Chain.ALPHA,
+                                      metadata=SequenceMetadata(v_call="V1", cell_id="2", locus=Chain.ALPHA,
                                                                 custom_params={"cmv": "no", "coeliac": False})),
                      ReceptorSequence(sequence_aa="EEE", sequence_id="4",
-                                      metadata=SequenceMetadata(j_call="J1", cell_id="2", chain=Chain.BETA,
+                                      metadata=SequenceMetadata(j_call="J1", cell_id="2", locus=Chain.BETA,
                                                                 custom_params={"cmv": "yes", "coeliac": True})),
                      ReceptorSequence(sequence_aa="FFF", sequence_id="5",
-                                      metadata=SequenceMetadata(v_call="V1", cell_id="3", chain=Chain.GAMMA,
+                                      metadata=SequenceMetadata(v_call="V1", cell_id="3", locus=Chain.GAMMA,
                                                                 custom_params={"cmv": "no", "coeliac": False})),
                      ReceptorSequence(sequence_aa="EEE", sequence_id="6",
-                                      metadata=SequenceMetadata(j_call="J1", cell_id="3", chain=Chain.DELTA,
+                                      metadata=SequenceMetadata(j_call="J1", cell_id="3", locus=Chain.DELTA,
                                                                 custom_params={"cmv": "yes", "coeliac": True}))
                      ]
 

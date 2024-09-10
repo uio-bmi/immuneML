@@ -161,7 +161,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
             chains = self.reference_receptors[0].get_chains()
             feature_names = [f"sum_of_{self.reads.value}_reads_{chains[0]}", f"sum_of_{self.reads.value}_reads_{chains[1]}"]
         else:
-            feature_names = [f"{row['receptor_id']}.{row['chain']}" for index, row in feature_annotations.iterrows()]
+            feature_names = [f"{row['receptor_id']}.{row['locus']}" for index, row in feature_annotations.iterrows()]
 
         encoded_repertoires, labels, example_ids = self._encode_repertoires(dataset, params)
         encoded_repertoires = self._normalize(dataset, encoded_repertoires) if self.normalize else encoded_repertoires
@@ -225,7 +225,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
                                    second_chain.metadata.j_gene]
 
         features = pd.DataFrame(features,
-                                columns=["receptor_id", "clonotype_id", "chain", "dual_chain_id", "sequence", "v_gene", "j_gene"])
+                                columns=["receptor_id", "clonotype_id", "locus", "dual_chain_id", "sequence", "v_gene", "j_gene"])
 
         features.dropna(axis="columns", how="all", inplace=True)
 

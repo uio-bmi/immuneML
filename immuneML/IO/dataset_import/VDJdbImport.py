@@ -129,7 +129,7 @@ class VDJdbImport(DataImport):
         ImportHelper.load_chains(df)
 
         df["receptor_id"] = df["sequence_id"]
-        df["sequence_id"] = VDJdbImport.get_sequence_identifiers(df["sequence_id"], df["chain"])
+        df["sequence_id"] = VDJdbImport.get_sequence_identifiers(df["sequence_id"], df["locus"])
 
         df = VDJdbImport.extract_meta_columns(df, params)
 

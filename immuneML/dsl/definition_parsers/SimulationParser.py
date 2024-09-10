@@ -105,7 +105,7 @@ def _check_paired_specs(sim_obj: SimConfig):
             assert sim_item1.number_of_examples == sim_item2.number_of_examples
             assert sim_item1.receptors_in_repertoire_count == sim_item2.receptors_in_repertoire_count
 
-            ChainPair.get_chain_pair([sim_item1.generative_model.chain, sim_item2.generative_model.chain])
+            ChainPair.get_chain_pair([sim_item1.generative_model.locus, sim_item2.generative_model.locus])
 
         assert len(list(set(chain.from_iterable(sim_obj.paired)))) == 2 * len(sim_obj.paired)
         assert all(item.name in list(chain.from_iterable(sim_obj.paired)) for item in sim_obj.sim_items)

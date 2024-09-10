@@ -89,11 +89,11 @@ class SimpleLSTM(GenerativeModel):
 
     ITER_TO_REPORT = 100
 
-    def __init__(self, chain: str, sequence_type: str, hidden_size: int, learning_rate: float, num_epochs: int,
+    def __init__(self, locus: str, sequence_type: str, hidden_size: int, learning_rate: float, num_epochs: int,
                  batch_size: int, num_layers: int, embed_size: int, temperature, device: str, name=None,
                  region_type: str = None):
 
-        super().__init__(Chain.get_chain(chain))
+        super().__init__(Chain.get_chain(locus))
         self._model = None
         self.region_type = RegionType[region_type.upper()] if region_type else None
         self.sequence_type = SequenceType[sequence_type.upper()]
@@ -229,7 +229,7 @@ class SimpleLSTM(GenerativeModel):
     def _export_dataset(self, sequences, count, path):
         sequence_objs = [ReceptorSequence(**{
             self.sequence_type.value: sequence,
-            'metadata': SequenceMetadata(region_type=self.region_type.name, chain=self.chain.name,
+            'metadata': SequenceMetadata(region_type=self.region_type.name, locus=self.locus.name,
                                          custom_params={'gen_model_name': self.name})
         }) for i, sequence in enumerate(sequences)]
 
@@ -261,7 +261,7 @@ class SimpleLSTM(GenerativeModel):
         write_yaml(filename=model_path / 'model_overview.yaml',
                    yaml_dict={**{k: v for k, v in vars(self).items() if k not in skip_keys_for_export},
                               **{'type': self.__class__.__name__, 'region_type': self.region_type.name,
-                                 'sequence_type': self.sequence_type.name, 'chain': self.chain.name}})
+                                 'sequence_type': self.sequence_type.name, 'locus': self.locus.name}})
 
         store_weights(self._model, model_path / 'state_dict.yaml')
 

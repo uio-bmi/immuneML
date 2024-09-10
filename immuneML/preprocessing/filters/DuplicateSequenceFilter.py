@@ -146,7 +146,7 @@ class DuplicateSequenceFilter(Filter):
 
         # Chain objects can not be aggregated, convert to strings
         if "chain" in columns:
-            data["chain"] = data.chain.tolist()
+            data["chain"] = data.locus.tolist()
         else:
             data["chain"] = None
 

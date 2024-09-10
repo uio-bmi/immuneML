@@ -5,7 +5,7 @@ column_mapping:
   J: j_call
   CDR3: sequence_aa
   complex.id: sequence_id
-  Gene: chain
+  Gene: locus
 metadata_column_mapping:
   Epitope: epitope
   Epitope gene: epitope_gene

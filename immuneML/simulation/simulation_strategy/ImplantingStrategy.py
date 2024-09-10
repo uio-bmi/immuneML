@@ -152,7 +152,7 @@ class ImplantingStrategy(SimulationStrategy):
                         f'from_default_model': 0, 'duplicate_count': -1, 'signals_aggregated': signal.id,
                         f'original_sequence': getattr(sequence_row, sequence_type.value).to_string(),
                         'original_p_gen': getattr(sequence_row, 'p_gen'),
-                        'chain': getattr(sequence_row, 'chain').to_string()}
+                        'locus': getattr(sequence_row, 'locus').to_string()}
 
         return new_sequence
 

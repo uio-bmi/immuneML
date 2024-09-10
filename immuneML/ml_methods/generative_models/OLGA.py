@@ -75,7 +75,7 @@ class OLGA(GenerativeModel):
 
     model_path: Path = None
     default_model_name: str = None
-    chain: Chain = None
+    locus: Chain = None
     region_type: RegionType = RegionType.IMGT_JUNCTION
     _olga_model: InternalOlgaModel = None
 
@@ -88,18 +88,18 @@ class OLGA(GenerativeModel):
                        'v_gene_anchor': 'V_gene_CDR3_anchors.csv',
                        'j_gene_anchor': 'J_gene_CDR3_anchors.csv'}
     OUTPUT_COLUMNS = ["sequence", 'sequence_aa', 'v_call', 'j_call', 'region_type', "frame_type", "p_gen",
-                      "from_default_model", 'duplicate_count', 'chain']
+                      "from_default_model", 'duplicate_count', 'locus']
 
     @classmethod
     def build_object(cls, **kwargs):
 
         location = OLGA.__name__
 
-        ParameterValidator.assert_keys(list(kwargs.keys()), ['model_path', 'default_model_name', 'chain'], location,
+        ParameterValidator.assert_keys(list(kwargs.keys()), ['model_path', 'default_model_name', 'locus'], location,
                                        'OLGA generative model', exclusive=False)
 
         if 'model_path' in kwargs and kwargs['model_path']:
-            assert 'chain' in kwargs, f"{OLGA.__name__}: chain not defined."
+            assert 'locus' in kwargs, f"{OLGA.__name__}: locus not defined."
             assert Path(kwargs['model_path']).is_dir(), \
                 f"{OLGA.__name__}: the model path is not a directory. It has to be a directory and contain files with the exact names as " \
                 f"described in the OLGA package documentation: https://github.com/statbiophys/OLGA."
@@ -110,16 +110,16 @@ class OLGA(GenerativeModel):
 
             assert kwargs['default_model_name'] is None, \
                 f"{OLGA.__name__}: default_model_name must be None when model_path is set, but now it is {kwargs['default_model_name']}."
-            chain = Chain.get_chain(kwargs['chain'])
+            locus = Chain.get_chain(kwargs['locus'])
         else:
             ParameterValidator.assert_in_valid_list(kwargs['default_model_name'],
                                                     list(OLGA.DEFAULT_MODEL_FOLDER_MAP.keys()), location,
                                                     'default_model_name')
-            chain = Chain.get_chain(kwargs['default_model_name'][-3:])
+            locus = Chain.get_chain(kwargs['default_model_name'][-3:])
             kwargs['model_path'] = Path(
                 load_model.__file__).parent / f"default_models/{OLGA.DEFAULT_MODEL_FOLDER_MAP[kwargs['default_model_name']]}"
 
-        return OLGA(**{**kwargs, **{'chain': chain}})
+        return OLGA(**{**kwargs, **{'locus': locus}})
 
     @classmethod
     def load_model(cls, path: Path):
@@ -137,7 +137,7 @@ class OLGA(GenerativeModel):
 
     @property
     def is_vdj(self):
-        return self.chain in [Chain.BETA, Chain.HEAVY]
+        return self.locus in [Chain.BETA, Chain.HEAVY]
 
     def fit(self, data, path: Path = None):
         raise NotImplementedError("Fitting an OLGA model is currently not supported by immuneML.")
@@ -187,7 +187,7 @@ class OLGA(GenerativeModel):
             sequences.loc[i] = (
             seq_row[0], seq_row[1], olga_model.v_gene_mapping[seq_row[2]], olga_model.j_gene_mapping[seq_row[3]],
             RegionType.IMGT_JUNCTION.name, SequenceFrameType.IN.value, p_gen, int(olga_model == self._olga_model),
-            -1, self.chain.value)
+            -1, self.locus.value)
 
         sequences.to_csv(path, index=False, sep='\t')
         return path
@@ -254,14 +254,14 @@ class OLGA(GenerativeModel):
         return sequences
 
     def is_same(self, model) -> bool:
-        return type(model) == type(self) and self.chain == model.chain and self.model_path == model.model_path and \
+        return type(model) == type(self) and self.locus == model.locus and self.model_path == model.model_path and \
             self.default_model_name == model.default_model_name
 
     def save_model(self, path: Path) -> Path:
         PathBuilder.build(path / 'model')
 
         write_yaml(path / 'model_overview.yaml',
-                   {'type': 'OLGA', 'default_model_name': self.default_model_name, 'chain': self.chain.name,
+                   {'type': 'OLGA', 'default_model_name': self.default_model_name, 'locus': self.locus.name,
                     'region_type': self.region_type.name})
 
         shutil.copytree(str(self.model_path), str(path / 'model'), dirs_exist_ok=True)

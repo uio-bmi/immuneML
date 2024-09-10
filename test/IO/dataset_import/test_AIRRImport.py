@@ -35,23 +35,15 @@ IVKNQEJ01AJ44V	1	IVKNQEJ01AJ44V	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCT
         if add_metadata:
             pd.DataFrame({'filename': ['rep1.tsv', 'rep2.tsv'], 'subject_id': [1, 2]}).to_csv(str(path / 'metadata.csv'), index=False)
 
-    def get_column_mapping(self):
-        column_mapping = {
-            "locus": "chain"
-        }
-
-        return column_mapping
-
     def test_import_repertoire_dataset(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "ioairr_repertoire/")
         self.create_dummy_dataset(path, True)
 
-        column_mapping = self.get_column_mapping()
         params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path / "metadata.csv",
                   "import_out_of_frame": False, "import_with_stop_codon": False, "import_illegal_characters": False,
                   "import_productive": True, "import_unknown_productivity": True,
                   "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
-                  "column_mapping": column_mapping,
+                  "column_mapping": {},
                   "separator": "\t"}
 
         dataset = AIRRImport.import_dataset(params, "airr_repertoire_dataset")
@@ -77,12 +69,11 @@ IVKNQEJ01AJ44V	1	IVKNQEJ01AJ44V	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCT
         PathBuilder.remove_old_and_build(path)
         self.create_dummy_dataset(path, False)
 
-        column_mapping = self.get_column_mapping()
         params = {"is_repertoire": False, "result_path": path, "path": path,
                   "import_out_of_frame": False, "import_with_stop_codon": False,
                   "import_productive": True, "import_unknown_productivity": True,
                   "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
-                  "column_mapping": column_mapping, "import_illegal_characters": False,
+                  "column_mapping": {}, "import_illegal_characters": False,
                   "separator": "\t", "sequence_file_size": 1}
 
         dataset = AIRRImport.import_dataset(params, "airr_sequence_dataset")
@@ -110,14 +101,13 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         with open(path / "rep1.tsv", "w") as file:
             file.writelines(file_content)
 
-        column_mapping = self.get_column_mapping()
         params = {"is_repertoire": False, "result_path": path, "path": path,
                   "paired": True, "import_illegal_characters": False,
                   "import_out_of_frame": False, "import_with_stop_codon": False,
                   "import_productive": True, "import_unknown_productivity": True,
                   "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True,
                   "import_empty_aa_sequences": False,
-                  "column_mapping": column_mapping, "receptor_chains": "IGH_IGL",
+                  "column_mapping": {}, "receptor_chains": "IGH_IGL",
                   "separator": "\t", "sequence_file_size": 1}
 
         dataset = AIRRImport.import_dataset(params, "airr_receptor_dataset")
@@ -135,12 +125,11 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         PathBuilder.build(path / 'initial')
         self.create_dummy_dataset(path / 'initial', True)
 
-        column_mapping = self.get_column_mapping()
         params = {"is_repertoire": True, "result_path": path / 'imported', "path": path / 'initial', "metadata_file": path / "initial/metadata.csv",
                   "import_out_of_frame": False, "import_with_stop_codon": False,
                   "import_productive": True, "import_unknown_productivity": True,
                   "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
-                  "column_mapping": column_mapping, "import_illegal_characters": False,
+                  "column_mapping": {}, "import_illegal_characters": False,
                   "separator": "\t"}
 
         dataset1 = AIRRImport.import_dataset(params, "airr_repertoire_dataset1")
@@ -153,7 +142,7 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         params["result_path"] = path / "final_output"
         dataset2 = AIRRImport.import_dataset(params, "airr_repertoire_dataset2")
 
-        for attribute in ["amino_acid_sequence", "nucleotide_sequence", "v_call", "j_call", "chain", "frame_type", "custom_params"]:
+        for attribute in ["amino_acid_sequence", "nucleotide_sequence", "v_call", "j_call", "locus", "frame_type", "custom_params"]:
             self.assertListEqual([sequence.get_attribute(attribute) for sequence in dataset1.repertoires[0].sequences],
                                  [sequence.get_attribute(attribute) for sequence in dataset2.repertoires[0].sequences])
 
@@ -177,13 +166,11 @@ IVKNQEJ01EI5S4	CASGVAGTFDYW"""
             file.writelines("""filename,subject_id
 rep1.tsv,1""")
 
-        column_mapping = self.get_column_mapping()
-
         params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path / "metadata.csv",
                   "import_out_of_frame": False, "import_with_stop_codon": False,
                   "import_productive": True,"import_unknown_productivity": True,
                   "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
-                  "column_mapping": column_mapping, "import_illegal_characters": False,
+                  "column_mapping": {}, "import_illegal_characters": False,
                   "separator": "\t"}
 
         AIRRImport.import_dataset(params, "airr_minimal_repertoire_dataset")

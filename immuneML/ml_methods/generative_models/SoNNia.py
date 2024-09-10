@@ -77,7 +77,7 @@ class SoNNia(GenerativeModel):
             model_data = json.load(json_file)
 
         sonnia._model = InternalSoNNia(custom_pgen_model=sonnia._model_path,
-                                       vj=sonnia.chain in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
+                                       vj=sonnia.locus in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
                                        include_joint_genes=sonnia.include_joint_genes,
                                        include_indep_genes=not sonnia.include_joint_genes)
 
@@ -85,13 +85,13 @@ class SoNNia(GenerativeModel):
 
         return sonnia
 
-    def __init__(self, chain=None, batch_size: int = None, epochs: int = None, deep: bool = False, name: str = None,
+    def __init__(self, locus=None, batch_size: int = None, epochs: int = None, deep: bool = False, name: str = None,
                  default_model_name: str = None, n_gen_seqs: int = None, include_joint_genes: bool = True,
                  custom_model_path: str = None):
-        if chain is not None:
-            super().__init__(chain)
+        if locus is not None:
+            super().__init__(locus)
         elif default_model_name is not None:
-            super().__init__(chain=Chain.get_chain(default_model_name[-3:]))
+            super().__init__(locus=Chain.get_chain(default_model_name[-3:]))
         self.epochs = epochs
         self.batch_size = int(batch_size)
         self.deep = deep
@@ -121,7 +121,7 @@ class SoNNia(GenerativeModel):
         self._model = InternalSoNNia(data_seqs=data_seqs,
                                      gen_seqs=[],
                                      custom_pgen_model=self._model_path,
-                                     vj=self.chain in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
+                                     vj=self.locus in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
                                      include_joint_genes=self.include_joint_genes,
                                      include_indep_genes=not self.include_joint_genes)
 
@@ -168,9 +168,9 @@ class SoNNia(GenerativeModel):
     def save_model(self, path: Path) -> Path:
         PathBuilder.build(path / 'model')
 
-        write_yaml(path / 'model/model_overview.yaml', {'type': 'SoNNia', 'chain': self.chain.name,
+        write_yaml(path / 'model/model_overview.yaml', {'type': 'SoNNia', 'locus': self.locus.name,
                                                         **{k: v for k, v in vars(self).items()
-                                                           if k not in ['_model', 'chain', '_model_path']}})
+                                                           if k not in ['_model', 'locus', '_model_path']}})
         attributes_to_save = ['data_seqs', 'gen_seqs', 'log']
         self._model.save_model(path / 'model', attributes_to_save)
 
