@@ -4,7 +4,7 @@ from dataclasses import fields as get_fields
 from enum import Enum
 from itertools import chain
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Tuple, List
 
 import bionumpy as bnp
 import numpy as np
@@ -12,8 +12,8 @@ import yaml
 from bionumpy import EncodedArray
 from bionumpy.bnpdataclass import bnpdataclass
 
-from immuneML.data_model.SequenceSet import SequenceSet
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
@@ -44,14 +44,14 @@ def read_yaml(filename: Path) -> dict:
 
 def load_type_dict(full_dict: dict) -> dict:
     if 'type_dict' in full_dict:
-        full_dict['type_dict'] = {key: SequenceSet.STR_TO_TYPE[val] for key, val in full_dict['type_dict'].items()}
+        full_dict['type_dict'] = {key: AIRRSequenceSet.STR_TO_TYPE[val] for key, val in full_dict['type_dict'].items()}
     return full_dict
 
 
 def build_dynamic_bnp_dataclass(all_fields_dict: Dict[str, Any]):
-    sequence_field_names = {**{field.name: field.type for field in dataclasses.fields(SequenceSet)},
-                            **SequenceSet.additional_fields_with_types()}
+    sequence_field_names = {field.name: field.type for field in dataclasses.fields(AIRRSequenceSet)}
     types = {}
+
     for key, value in all_fields_dict.items():
         if key in sequence_field_names:
             field_type = sequence_field_names[key]
@@ -85,7 +85,7 @@ def prepare_values_for_bnp(field_values: dict, types: dict) -> dict:
 
 def add_neutral_values(field_values: dict, types: dict) -> dict:
     return {
-        field: [val if val is not None else SequenceSet.get_neutral_value(types[field]) for val in values]
+        field: [val if val is not None else AIRRSequenceSet.get_neutral_value(types[field]) for val in values]
         for field, values in field_values.items()
     }
 
@@ -110,6 +110,19 @@ def make_dynamic_seq_set_dataclass(type_dict: Dict[str, Any]):
         setattr(bnp_dc, method_name, method)
 
     return bnp_dc
+
+
+def extend_dataclass_with_dynamic_fields(cls, fields: List[Tuple[str, type]], cls_name: str = None):
+    cls_name = cls_name if cls_name is not None else "Dynamic" + cls.__name__
+    new_cls = dataclasses.make_dataclass(cls_name,
+                                         fields=[(name, field_type, dataclasses.field(default=None)) for name, field_type in fields], bases=(cls,))
+
+    def dynamic_fields(cls):
+        return [el[0] for el in fields]
+
+    new_cls.dynamic_fields = classmethod(dynamic_fields)
+
+    return new_cls
 
 
 def get_receptor_attributes_for_bnp(receptors, receptor_dc, types) -> dict:
@@ -219,7 +232,7 @@ def make_buffer_type_from_dataset_file(dataset_file: Path):
         with dataset_file.open('r') as file:
             metadata = yaml.safe_load(file)
 
-        type_dict = {key: SequenceSet.STR_TO_TYPE[val] for key, val in metadata["type_dict"].items()}
+        type_dict = {key: AIRRSequenceSet.STR_TO_TYPE[val] for key, val in metadata["type_dict"].items()}
         dataclass = make_dynamic_seq_set_dataclass(type_dict)
         return bnp.io.delimited_buffers.get_bufferclass_for_datatype(dataclass, delimiter='\t', has_header=True)
     else:
@@ -241,8 +254,9 @@ def merge_dataclass_objects(objects: list, fill_unmatched: bool = False):
             tmp_objs.append(obj)
         else:
             logging.info(f"Filling in missing fields when merging dataclass objects: {missing_fields}\nObject:\n{obj}")
-            tmp_objs.append(obj.add_fields({field_name: [SequenceSet.get_neutral_value(fields[field_name])] * len(obj)
-                                            for field_name in missing_fields}))
+            tmp_objs.append(
+                obj.add_fields({field_name: [AIRRSequenceSet.get_neutral_value(fields[field_name])] * len(obj)
+                                for field_name in missing_fields}))
 
     cls = make_dynamic_seq_set_dataclass(fields)
     return cls(

@@ -1,15 +1,14 @@
-# quality: gold
 import copy
 import logging
-import uuid
 from pathlib import Path
+from uuid import uuid4
 
 import pandas as pd
 
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.data_model.repertoire.Repertoire import Repertoire
-from immuneML.environment.Constants import Constants
+from immuneML import Constants
+from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.SequenceSet import Repertoire
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -52,20 +51,20 @@ class RepertoireDataset(Dataset):
                 filename = filename.parent.parent / Path(row['filename']).name
             repertoire = Repertoire(data_filename=filename,
                                     metadata_filename=filename.parent / f'{filename.stem}_metadata.yaml',
-                                    identifier=row['identifier'] if 'identifier' in row else uuid.uuid4().hex)
+                                    identifier=row['identifier'] if 'identifier' in row else uuid4().hex)
             repertoires.append(repertoire)
 
         if "repertoire_id" in kwargs.keys() and "repertoires" not in kwargs.keys() and kwargs['repertoire_id'] is not None:
             assert all(rep.identifier == kwargs['repertoire_id'][i] for i, rep in enumerate(repertoires)), \
-                f"{RepertoireDataset.__name__}: repertoire ids from the iml_dataset file and metadata file don't match for the dataset " \
+                f"{RepertoireDataset.__name__}: repertoire ids from the dataset file and metadata file don't match for the dataset " \
                 f"{kwargs['name']} with identifier {kwargs['identifier']}."
 
         return RepertoireDataset(**{**kwargs, **{"repertoires": repertoires}})
 
-    def __init__(self, labels: dict = None, encoded_data: EncodedData = None, repertoires: list = None, identifier: str = None,
-                 metadata_file: Path = None, name: str = None, metadata_fields: list = None, repertoire_ids: list = None,
-                 example_weights: list = None):
-        super().__init__(encoded_data, name, identifier if identifier is not None else uuid.uuid4().hex, labels, example_weights)
+    def __init__(self, labels: dict = None, encoded_data: EncodedData = None, repertoires: list = None,
+                 identifier: str = None, metadata_file: Path = None, name: str = None, metadata_fields: list = None,
+                 repertoire_ids: list = None):
+        super().__init__(encoded_data, name, identifier if identifier is not None else uuid4().hex, labels)
         self.metadata_file = Path(metadata_file) if metadata_file is not None else None
         self.metadata_fields = metadata_fields
         self.repertoire_ids = repertoire_ids
@@ -78,15 +77,15 @@ class RepertoireDataset(Dataset):
             dataset.identifier = self.identifier
         return dataset
 
-    def get_data(self, batch_size: int = 1):
-        return self.repertoires
+    def add_encoded_data(self, encoded_data: EncodedData):
+        self.encoded_data = encoded_data
 
-    def get_batch(self, batch_size: int = 1):
+    def get_data(self, batch_size: int = 1):
         return self.repertoires
 
     def get_repertoire(self, index: int = -1, repertoire_identifier: str = "") -> Repertoire:
         assert index != -1 or repertoire_identifier != "", \
-            "RepertoireDataset: cannot import_dataset repertoire since the index nor identifier are set."
+            "RepertoireDataset: cannot get repertoire since the index nor identifier are set."
         return self.repertoires[index] if index != -1 else [rep for rep in self.repertoires if rep.identifier == repertoire_identifier][0]
 
     def get_example_count(self):
@@ -111,22 +110,9 @@ class RepertoireDataset(Dataset):
         return all_metadata_fields
 
     def get_metadata(self, field_names: list, return_df: bool = False):
-        """
-        A function to get the metadata of the repertoires. It can be useful in encodings or reports when the repertoire information needed is not
-        present only in the label chosen for the ML model (e.g., disease), but also other information (e.g., age, HLA).
-
-        Args:
-            field_names (list): list of the metadata fields to return; the fields must be present in the metadata files. To find fields available, use :py:obj:`~immuneML.data_model.dataset.RepertoireDataset.RepertoireDataset.get_label_names` function.
-            return_df (bool): determines if the results should be returned as a dataframe where each column corresponds to a field or as a dictionary
-
-        Returns:
-
-            a dictionary where keys are fields names and values are lists of field values for each repertoire; alternatively returns the same information in dataframe format
-
-        """
         assert isinstance(self.metadata_file, Path) and self.metadata_file.is_file(), \
-            f"RepertoireDataset: for dataset {self.name} (id: {self.identifier}) metadata file is not set properly. The metadata file points to " \
-            f"{self.metadata_file}."
+            (f"RepertoireDataset: for dataset {self.name} (id: {self.identifier}) metadata file is not set properly. "
+             f"The metadata file points to {self.metadata_file}.")
 
         df = pd.read_csv(self.metadata_file, sep=",", usecols=field_names, comment=Constants.COMMENT_SIGN)
         if return_df:
@@ -135,7 +121,6 @@ class RepertoireDataset(Dataset):
             return df.to_dict("list")
 
     def get_filenames(self):
-        """Returns the paths to files in which repertoire information is stored"""
         return [Path(filename) for filename in self.get_metadata(["filename"])["filename"]]
 
     def _build_new_metadata(self, indices, path: Path) -> Path:
@@ -164,11 +149,7 @@ class RepertoireDataset(Dataset):
 
         metadata_file = self._build_new_metadata(example_indices, path / f"{dataset_type}_metadata.csv")
         new_dataset = RepertoireDataset(repertoires=[self.repertoires[i] for i in example_indices], labels=copy.deepcopy(self.labels),
-                                        metadata_file=metadata_file, identifier=str(uuid.uuid1()))
-
-        original_example_weights = self.get_example_weights()
-        if original_example_weights is not None:
-            new_dataset.set_example_weights([original_example_weights[i] for i in example_indices])
+                                        metadata_file=metadata_file, identifier=str(uuid4()))
 
         return new_dataset
 

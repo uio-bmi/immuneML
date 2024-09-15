@@ -1,211 +1,163 @@
-from typing import Any, Dict
+from dataclasses import dataclass, field, fields
+from pathlib import Path
+from typing import Any, Dict, List
+from uuid import uuid4
 
-import bionumpy as bnp
-import numpy as np
-from bionumpy import AminoAcidEncoding, DNAEncoding
-from bionumpy.bnpdataclass import bnpdataclass
-from bionumpy.encodings import AlphabetEncoding
+from bionumpy import AminoAcidEncoding, DNAEncoding, get_bufferclass_for_datatype
+
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
+from immuneML.data_model.SequenceParams import ChainPair, Chain, RegionType
+from immuneML.data_model.bnp_util import get_field_type_from_values, \
+    extend_dataclass_with_dynamic_fields, bnp_write_to_file, write_yaml, bnp_read_from_file, read_yaml
 
 
-@bnpdataclass
-class AIRRSequenceSet:
+@dataclass
+class ReceptorSequence:
     sequence_id: str = None
     sequence: DNAEncoding = None
-    quality: str = None
     sequence_aa: AminoAcidEncoding = None
-    rev_comp: bool = None
     productive: bool = None
     vj_in_frame: bool = None
     stop_codon: bool = None
-    complete_vdj: bool = None
     locus: str = None
     locus_species: str = None
     v_call: str = None
     d_call: str = None
-    d2_call: str = None
     j_call: str = None
     c_call: str = None
-    sequence_alignment: str = None
-    quality_alignment: str = None
-    sequence_alignment_aa: str = None
-    germline_alignment: str = None
-    germline_alignment_aa: str = None
-    junction: DNAEncoding = None
-    junction_aa: AminoAcidEncoding = None
-    np1: DNAEncoding = None
-    np1_aa: AminoAcidEncoding = None
-    np2: DNAEncoding = None
-    np2_aa: AminoAcidEncoding = None
-    np3: DNAEncoding = None
-    np3_aa: AminoAcidEncoding = None
-    cdr1: DNAEncoding = None
-    cdr1_aa: AminoAcidEncoding = None
-    cdr2: DNAEncoding = None
-    cdr2_aa: AminoAcidEncoding = None
-    cdr3: DNAEncoding = None
-    cdr3_aa: AminoAcidEncoding = None
-    fwr1: DNAEncoding = None
-    fwr1_aa: AminoAcidEncoding = None
-    fwr2: DNAEncoding = None
-    fwr2_aa: AminoAcidEncoding = None
-    fwr3: DNAEncoding = None
-    fwr3_aa: AminoAcidEncoding = None
-    fwr4: DNAEncoding = None
-    fwr4_aa: AminoAcidEncoding = None
-    v_score: float = None
-    v_identity: float = None
-    v_support: float = None
-    v_cigar: str = None
-    d_score: float = None
-    d_identity: float = None
-    d_support: float = None
-    d_cigar: str = None
-    d2_score: float = None
-    d2_identity: float = None
-    d2_support: float = None
-    d2_cigar: str = None
-    j_score: float = None
-    j_identity: float = None
-    j_support: float = None
-    j_cigar: str = None
-    c_score: float = None
-    c_identity: float = None
-    c_support: float = None
-    c_cigar: str = None
-    v_sequence_start: int = None
-    v_sequence_end: int = None
-    v_germline_start: int = None
-    v_germline_end: int = None
-    v_alignment_start: int = None
-    v_alignment_end: int = None
-    d_sequence_start: int = None
-    d_sequence_end: int = None
-    d_germline_start: int = None
-    d_germline_end: int = None
-    d_alignment_start: int = None
-    d_alignment_end: int = None
-    d2_sequence_start: int = None
-    d2_sequence_end: int = None
-    d2_germline_start: int = None
-    d2_germline_end: int = None
-    d2_alignment_start: int = None
-    d2_alignment_end: int = None
-    j_sequence_start: int = None
-    j_sequence_end: int = None
-    j_germline_start: int = None
-    j_germline_end: int = None
-    j_alignment_start: int = None
-    j_alignment_end: int = None
-    c_sequence_start: int = None
-    c_sequence_end: int = None
-    c_germline_start: int = None
-    c_germline_end: int = None
-    c_alignment_start: int = None
-    c_alignment_end: int = None
-    cdr1_start: int = None
-    cdr1_end: int = None
-    cdr2_start: int = None
-    cdr2_end: int = None
-    cdr3_start: int = None
-    cdr3_end: int = None
-    fwr1_start: int = None
-    fwr1_end: int = None
-    fwr2_start: int = None
-    fwr2_end: int = None
-    fwr3_start: int = None
-    fwr3_end: int = None
-    fwr4_start: int = None
-    fwr4_end: int = None
-    v_sequence_alignment: str = None
-    v_sequence_alignment_aa: str = None
-    d_sequence_alignment: str = None
-    d_sequence_alignment_aa: str = None
-    d2_sequence_alignment: str = None
-    d2_sequence_alignment_aa: str = None
-    j_sequence_alignment: str = None
-    j_sequence_alignment_aa: str = None
-    c_sequence_alignment: str = None
-    c_sequence_alignment_aa: str = None
-    v_germline_alignment: str = None
-    v_germline_alignment_aa: str = None
-    d_germline_alignment: str = None
-    d_germline_alignment_aa: str = None
-    d2_germline_alignment: str = None
-    d2_germline_alignment_aa: str = None
-    j_germline_alignment: str = None
-    j_germline_alignment_aa: str = None
-    c_germline_alignment: str = None
-    c_germline_alignment_aa: str = None
-    junction_length: int = None
-    junction_aa_length: int = None
-    np1_length: int = None
-    np2_length: int = None
-    np3_length: int = None
-    n1_length: int = None
-    n2_length: int = None
-    n3_length: int = None
-    p3v_length: int = None
-    p5d_length: int = None
-    p3d_length: int = None
-    p5d2_length: int = None
-    p3d2_length: int = None
-    p5j_length: int = None
-    v_frameshift: bool = None
-    j_frameshift: bool = None
-    d_frame: int = None
-    d2_frame: int = None
-    consensus_count: int = None
+    metadata: dict = field(default_factory=dict)
     duplicate_count: int = None
-    umi_count: int = None
     cell_id: str = None
-    clone_id: str = None
-    repertoire_id: str = None
-    sample_processing_id: str = None
-    data_processing_id: str = None
-    rearrangement_id: str = None
-    rearrangement_set_id: str = None
-    germline_database: str = None
-
-    STR_TO_TYPE = {'str': str, 'int': int, 'float': float, 'bool': bool,
-                   'AminoAcidEncoding': bnp.encodings.AminoAcidEncoding,
-                   'DNAEncoding': bnp.encodings.DNAEncoding}
-
-    TYPE_TO_STR = {**{val: key for key, val in STR_TO_TYPE.items()},
-                   **{AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY*'): 'AminoAcidEncoding',
-                      AlphabetEncoding('ACGT'): 'DNAEncoding'}}
-
-    @classmethod
-    def get_neutral_value(cls, field_type):
-        neutral_values = {str: '', int: -1, DNAEncoding: '', AminoAcidEncoding: '', float: np.nan}
-        return neutral_values.get(field_type, None)
 
 
-@bnpdataclass
-class SequenceSet:
-    sequence_aa: AminoAcidEncoding = None
-    sequence: DNAEncoding = None
-    v_call: str = None
-    j_call: str = None
-    region_type: str = None
-    frame_type: str = None
-    duplicate_count: int = None
-    sequence_id: str = None
-    locus: str = None
+@dataclass
+class Receptor:
+    chain_pair: str
+    chain_1: ReceptorSequence
+    chain_2: ReceptorSequence
+    receptor_id: str
+    cell_id: str
+    metadata: dict = field(default_factory=dict)
 
-    STR_TO_TYPE = {'str': str, 'int': int, 'float': float, 'bool': bool,
-                   'AminoAcidEncoding': bnp.encodings.AminoAcidEncoding,
-                   'DNAEncoding': bnp.encodings.DNAEncoding}
+    def __post_init__(self):
+        new_metadata = {}
+        for key, val in self.metadata.items():
+            if isinstance(val, list) and len(val) == 1:
+                new_metadata[key] = val[0]
+            else:
+                new_metadata[key] = val
+        self.metadata = new_metadata
 
-    TYPE_TO_STR = {**{val: key for key, val in STR_TO_TYPE.items()},
-                   **{AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY*'): 'AminoAcidEncoding',
-                      AlphabetEncoding('ACGT'): 'DNAEncoding'}}
+
+@dataclass
+class Repertoire:
+    data_filename: Path = None
+    metadata_filename: Path = None
+    metadata: dict = None
+    identifier: str = None
+    dynamic_fields: list = None
+
+    bnp_dataclass = None
+    element_count: int = None
+    _buffer_type = None
 
     @classmethod
-    def additional_fields_with_types(cls) -> Dict[str, Any]:
-        return {'cell_id': str,  'vj_in_frame': int, 'stop_codon': int, 'productive': int, 'rev_comp': int,
-                'locus': str}
+    def build(cls, path: Path, metadata: dict, filename_base: str = None, identifier: str = None, **kwargs):
+        identifier = uuid4().hex if identifier is None else identifier
+        filename_base = filename_base if filename_base is not None else identifier
+        data_filename = path / f"{filename_base}.tsv"
 
-    @classmethod
-    def get_neutral_value(cls, field_type):
-        neutral_values = {str: '', int: -1, DNAEncoding: '', AminoAcidEncoding: '', float: np.nan}
-        return neutral_values.get(field_type, None)
+        bnp_dc, type_dict = build_dynamic_airr_sequence_set_dataclass(kwargs)
+        data = bnp_dc(**kwargs)
+        bnp_write_to_file(data_filename, data)
+
+        metadata_filename = path / f"{filename_base}_metadata.yaml"
+        metadata = {} if metadata is None else metadata
+        metadata['type_dict_dynamic_fields'] = {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()}
+        write_yaml(metadata_filename, metadata)
+
+        repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier, list(type_dict.keys()),
+                                bnp_dataclass=bnp_dc, element_count=len(data))
+        return repertoire
+
+    def __post_init__(self):
+        if not self.metadata:
+            self.metadata = read_yaml(self.metadata_filename)
+        if not self.dynamic_fields:
+            self.dynamic_fields = list(self.metadata['type_dict_dynamic_fields'].items())
+        if not self.bnp_dataclass:
+            self.bnp_dataclass = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, self.dynamic_fields)
+
+    @property
+    def buffer_type(self):
+        if not self._buffer_type:
+            self._buffer_type = get_bufferclass_for_datatype(self.bnp_dataclass, delimiter='\t', has_header=True)
+        return self._buffer_type
+
+    @property
+    def data(self) -> AIRRSequenceSet:
+        return bnp_read_from_file(self.data_filename, self.buffer_type, self.bnp_dataclass)
+
+    def sequences(self, region_type: RegionType) -> List[ReceptorSequence]:
+        return make_sequences_from_data(self.data, self.dynamic_fields, region_type)
+
+    @property
+    def receptors(self) -> List[Receptor]:
+        return make_receptors_from_data(self.data, self.dynamic_fields, f'Repertoire {self.identifier}')
+
+
+def build_dynamic_airr_sequence_set_dataclass(all_fields_dict: Dict[str, Any]):
+    sequence_field_names = {seq_field.name: seq_field.type for seq_field in fields(AIRRSequenceSet)}
+    types = {}
+
+    for key, values in all_fields_dict.items():
+        if key not in sequence_field_names:
+            field_type = get_field_type_from_values(values)
+            types[key] = field_type
+
+    if types:
+        dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, tuple(types.items()))
+    else:
+        dc = AIRRSequenceSet
+    return dc, types
+
+
+def make_sequences_from_data(data, dynamic_fields: list, region_type):
+    seqs = []
+    for el in data.to_iter():
+        seq, seq_aa = get_sequence_value(el, region_type)
+        seqs.append(ReceptorSequence(el.sequence_id, seq, seq_aa, el.productive, el.vj_in_frame, el.stop_codon,
+                                     el.locus, el.locus_species, el.v_call, el.d_call, el.j_call, el.c_call,
+                                     {dynamic_field: getattr(el, dynamic_field) for dynamic_field in dynamic_fields}))
+    return seqs
+
+
+def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: list, location):
+    df = data.topandas()
+    receptors = []
+    for name, group in df.groupby('cell_id'):
+        assert group.shape[0] == 2, \
+            (f"{location}: receptor objects cannot be created from the data file, there are "
+             f"{group.shape[0]} sequences with cell id {group['cell_id'].unique()[0]}.")
+        sorted_group = group.sort_values(by='locus')
+        seqs = [ReceptorSequence(el.sequence_id, el.sequence, el.sequence_aa, el.productive,
+                                 el.vj_in_frame, el.stop_codon, el.locus, el.locus_species, el.v_call, el.d_call,
+                                 el.j_call, el.c_call, {dynamic_field: getattr(el, dynamic_field) for dynamic_field
+                                                        in Repertoire.dynamic_fields()}) for index, el in
+                sorted_group.iterrows()]
+
+        receptor = Receptor(chain_pair=ChainPair.get_chain_pair([Chain.get_chain(locus) for locus in group.locus]),
+                            chain_1=seqs[0], chain_2=seqs[1], cell_id=group['cell_id'].unique()[0],
+                            receptor_id=uuid4().hex,
+                            metadata={key: list({seqs[0].metadata[key], seqs[1].metadata[key]})
+                                      for key in dynamic_fields})
+        receptors.append(receptor)
+
+    return receptors
+
+
+def get_sequence_value(el: AIRRSequenceSet, region_type):
+    if region_type.FULL_SEQUENCE:
+        return el.sequence, el.sequence_aa
+    else:
+        return getattr(el, region_type.value), getattr(el, region_type.value + "_aa")

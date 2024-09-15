@@ -1,7 +1,5 @@
 import pandas as pd
 import numpy as np
-from scipy.sparse import issparse
-import torch
 
 
 class EncodedData:
@@ -62,9 +60,18 @@ class EncodedData:
             return self.examples
         elif isinstance(self.examples, pd.DataFrame):
             return self.examples.to_numpy()
-        elif issparse(self.examples):
-            return self.examples.toarray()
-        elif torch.is_tensor(self.examples):
-            return self.examples.numpy()
-        else:
-            raise ValueError(f"EncodedData: examples matrix of type '{type(self.examples)}' cannot be converted to a numpy matrix.")
+        try:
+            from scipy.sparse import issparse
+            if issparse(self.examples):
+                return self.examples.toarray()
+        except ImportError as e:
+            pass
+
+        try:
+            import torch
+            if torch.is_tensor(self.examples):
+                return self.examples.numpy()
+        except ImportError as e:
+            pass
+
+        raise ValueError(f"EncodedData: examples matrix of type '{type(self.examples)}' cannot be converted to a numpy matrix.")

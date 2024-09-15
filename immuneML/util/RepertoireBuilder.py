@@ -3,9 +3,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.SequenceSet import ReceptorSequence, Repertoire
+from immuneML.data_model.bnp_util import write_yaml
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -38,14 +37,17 @@ class RepertoireBuilder:
             rep_sequences = []
             if len(subject_ids) < len(sequences):
                 subject_ids.append("rep_" + str(rep_index))
-            for seq_index, sequence in enumerate(sequence_list):
-                if seq_metadata is None:
-                    m = SequenceMetadata(v_call="TRBV1-1*01", j_call="TRBJ1-1*01", duplicate_count=1, locus="TRB", region_type="IMGT_CDR3")
-                else:
-                    m = SequenceMetadata(**seq_metadata[rep_index][seq_index])
 
-                s = ReceptorSequence(sequence_aa=sequence, metadata=m, sequence_id=str(uuid.uuid4().hex))
-                rep_sequences.append(s)
+            df = pd.DataFrame({
+                'cdr3_aa': sequence_list,
+            })
+
+            if seq_metadata is None:
+                df['v_call'], df['j_call'], df['duplicate_count'], df['locus'] = "TRBV1-1*01", "TRBJ1-1*01", 1, "TRB"
+            else:
+                df = pd.concat([df, pd.DataFrame.from_records(seq_metadata[rep_index])], axis=1)
+
+            df.to_csv(str(rep_path / ''))
 
             if labels is not None:
                 metadata = {key: labels[key][rep_index] for key in labels.keys()}
@@ -53,8 +55,9 @@ class RepertoireBuilder:
                 metadata = {}
 
             metadata = {**metadata, **{"subject_id": subject_ids[rep_index]}}
+            write_yaml(rep_path / f"_rep_{rep_index}.yaml", metadata)
 
-            repertoire = Repertoire.build_from_sequence_objects(rep_sequences, rep_path, metadata, filename_base=f"rep_{rep_index}")
+            repertoire = Repertoire(rep_path / f"rep_{rep_index}.tsv", rep_path / f"_rep_{rep_index}.yaml")
             repertoires.append(repertoire)
 
         df = pd.DataFrame({**{"filename": [repertoire.data_filename for repertoire in repertoires],

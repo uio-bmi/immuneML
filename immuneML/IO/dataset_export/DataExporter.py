@@ -3,8 +3,7 @@
 import abc
 from pathlib import Path
 
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.datasets.Dataset import Dataset
 
 
 class DataExporter(metaclass=abc.ABCMeta):
