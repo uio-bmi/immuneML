@@ -1,6 +1,5 @@
 from collections import Counter
 
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 

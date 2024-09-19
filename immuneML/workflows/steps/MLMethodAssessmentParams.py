@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.Label import Label
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric

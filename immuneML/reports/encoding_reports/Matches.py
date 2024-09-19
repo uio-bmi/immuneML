@@ -6,8 +6,8 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport

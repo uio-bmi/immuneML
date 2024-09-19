@@ -4,7 +4,7 @@ import bionumpy as bnp
 from .TrainGenModelReport import TrainGenModelReport
 from ..ReportOutput import ReportOutput
 from ..ReportResult import ReportResult
-from ...data_model.dataset.Dataset import Dataset
+from ...data_model.datasets.Dataset import Dataset
 from ...ml_methods.generative_models.GenerativeModel import GenerativeModel
 from ...ml_methods.generative_models.KLEvaluator import evaluate_similarities, KLEvaluator
 from ...ml_methods.generative_models.MultinomialKmerModel import estimate_kmer_model

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.util.Logger import print_log

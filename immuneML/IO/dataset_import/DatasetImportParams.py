@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from immuneML.data_model.receptor.ChainPair import ChainPair
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.SequenceParams import ChainPair, RegionType
 
 
 @dataclass

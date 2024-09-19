@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport

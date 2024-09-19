@@ -1,20 +1,17 @@
 import copy
 import glob
-import math
 import shutil
 import subprocess
 from pathlib import Path
 from typing import List
 
-import numpy as np
 import pandas as pd
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.SequenceSet import ReceptorSequence, Repertoire
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.reference_encoding.MatchedReferenceUtil import MatchedReferenceUtil
 from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.util.CompAIRRHelper import CompAIRRHelper

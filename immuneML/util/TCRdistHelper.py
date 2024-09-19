@@ -3,8 +3,8 @@ import logging
 import pandas as pd
 
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
+from immuneML.data_model.SequenceParams import RegionType
 
 
 class TCRdistHelper:

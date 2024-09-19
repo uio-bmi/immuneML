@@ -3,7 +3,7 @@ import warnings
 from pathlib import Path
 
 from immuneML.analysis.data_manipulation.DataReshaper import DataReshaper
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport

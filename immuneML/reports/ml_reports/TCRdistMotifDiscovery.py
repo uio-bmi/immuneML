@@ -2,8 +2,8 @@ import logging
 from pathlib import Path
 from typing import List, Tuple
 
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.classifiers.TCRdistClassifier import TCRdistClassifier

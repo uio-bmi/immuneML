@@ -1,12 +1,10 @@
 import copy
 import pickle
-import warnings
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.ElementDataset import ElementDataset
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import ElementDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration

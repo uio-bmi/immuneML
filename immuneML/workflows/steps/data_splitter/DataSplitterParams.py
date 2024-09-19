@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType

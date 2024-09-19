@@ -1,7 +1,7 @@
 import pandas as pd
 
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.ImportHelper import ImportHelper
 

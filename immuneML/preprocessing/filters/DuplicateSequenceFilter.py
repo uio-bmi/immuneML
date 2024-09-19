@@ -7,9 +7,8 @@ from uuid import uuid4
 import pandas as pd
 
 from immuneML.data_model.bnp_util import write_yaml
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.preprocessing.filters.CountAggregationFunction import CountAggregationFunction
 from immuneML.preprocessing.filters.Filter import Filter

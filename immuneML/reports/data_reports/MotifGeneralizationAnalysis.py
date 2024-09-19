@@ -5,8 +5,8 @@ import pandas as pd
 import os
 import warnings
 
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder

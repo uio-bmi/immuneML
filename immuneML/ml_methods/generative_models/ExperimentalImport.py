@@ -3,7 +3,7 @@ from pathlib import Path
 
 import numpy as np
 
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.dsl.import_parsers.ImportParser import ImportParser
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences

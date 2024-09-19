@@ -3,7 +3,6 @@ from multiprocessing.pool import Pool
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.caching.CacheObjectType import CacheObjectType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from immuneML.util.Logger import log

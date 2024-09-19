@@ -7,7 +7,7 @@ import pkg_resources
 import torch
 from sklearn.preprocessing import label_binarize
 
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 
 

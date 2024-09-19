@@ -6,7 +6,7 @@ class Constants:
     FEATURE_DELIMITER = "-"
 
     # importing constants
-    UNKNOWN = None
+    UNKNOWN = ''
     ALLELE_DELIMITER = "*"
     GENE_DELIMITER = "-"
     STOP_CODON = "*"

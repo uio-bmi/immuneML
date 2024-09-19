@@ -1,7 +1,7 @@
 import pandas as pd
 from scipy.sparse import issparse
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 
 
 class DataReshaper:

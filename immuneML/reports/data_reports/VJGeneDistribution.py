@@ -5,10 +5,9 @@ from collections import Counter
 import pandas as pd
 import plotly.express as px
 
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ReportUtil import ReportUtil

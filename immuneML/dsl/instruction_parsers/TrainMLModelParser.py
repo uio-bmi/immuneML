@@ -3,7 +3,7 @@ from inspect import signature
 from pathlib import Path
 from typing import Tuple
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.definition_parsers.PreprocessingParser import PreprocessingParser
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper

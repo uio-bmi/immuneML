@@ -1,6 +1,6 @@
 import warnings
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.util.ParameterValidator import ParameterValidator
 

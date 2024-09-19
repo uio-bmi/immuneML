@@ -9,11 +9,10 @@ import pandas as pd
 
 from immuneML.IO.dataset_import.AIRRImport import AIRRImport
 from immuneML.IO.dataset_import.DataImport import DataImport
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.ChainPair import ChainPair
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceParams import ChainPair, RegionType
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.util.ImportHelper import ImportHelper
 from immuneML.util.PathBuilder import PathBuilder
 from scripts.specification_util import update_docs_per_mapping

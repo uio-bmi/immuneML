@@ -23,7 +23,6 @@ class MLMethodAssessment(Step):
         predicted_y = input_params.method.predict(X, input_params.label)
         predicted_proba_y_per_class = input_params.method.predict_proba(X, input_params.label)
         true_y = input_params.dataset.encoded_data.labels
-        example_weights = input_params.dataset.get_example_weights()
 
         example_ids = input_params.dataset.get_example_ids()
 
@@ -35,14 +34,14 @@ class MLMethodAssessment(Step):
         scores = MLMethodAssessment._score(metrics_list=input_params.metrics, optimization_metric=input_params.optimization_metric,
                                            label=input_params.label, split_index=input_params.split_index, predicted_y=predicted_y,
                                            predicted_proba_y_per_class=predicted_proba_y_per_class, true_y=true_y,
-                                           example_weights=example_weights, method=input_params.method,
+                                           method=input_params.method,
                                            ml_score_path=input_params.ml_score_path)
 
         return scores
 
     @staticmethod
-    def _score(metrics_list: set, optimization_metric: ClassificationMetric, label: Label, predicted_y, predicted_proba_y_per_class, true_y, example_weights, ml_score_path: Path,
-               split_index: int, method: MLMethod):
+    def _score(metrics_list: set, optimization_metric: ClassificationMetric, label: Label, predicted_y,
+               predicted_proba_y_per_class, true_y, ml_score_path: Path, split_index: int, method: MLMethod):
         results = {}
         scores = {}
 
@@ -58,7 +57,6 @@ class MLMethodAssessment(Step):
             score = MetricUtil.score_for_metric(metric=metric,
                                                 predicted_y=predicted_y[label.name],
                                                 true_y=true_y[label.name],
-                                                example_weights=example_weights,
                                                 classes=label.values,
                                                 predicted_proba_y=predicted_proba_y)
             results[f"{label.name}_{metric.name.lower()}"] = score

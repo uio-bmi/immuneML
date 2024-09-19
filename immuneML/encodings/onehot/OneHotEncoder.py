@@ -4,7 +4,6 @@ import math
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder as SklearnOneHotEncoder
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams

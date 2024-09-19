@@ -4,8 +4,9 @@ import shutil
 from pathlib import Path
 from typing import List
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
-from immuneML.data_model.dataset.Dataset import Dataset
+
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.EncoderParams import EncoderParams
 
 
@@ -187,4 +188,4 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
         """
         Stores the given encoded dataset using the ImmuneMLExporter. This method should not be overwritten.
         """
-        ImmuneMLExporter.export(encoded_dataset, params.result_path)
+        AIRRExporter.export(encoded_dataset, params.result_path)

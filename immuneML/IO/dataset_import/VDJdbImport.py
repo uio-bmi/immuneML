@@ -5,11 +5,9 @@ import pandas as pd
 
 from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.receptor.ChainPair import ChainPair
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.SequenceParams import ChainPair, RegionType
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.util.ImportHelper import ImportHelper
 from scripts.specification_util import update_docs_per_mapping
 

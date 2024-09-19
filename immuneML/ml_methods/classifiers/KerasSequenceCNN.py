@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 import yaml
 
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.onehot.OneHotSequenceEncoder import OneHotSequenceEncoder
 from immuneML.environment.Label import Label
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod

@@ -9,8 +9,8 @@ import numpy as np
 from sklearn.metrics import precision_score, recall_score, confusion_matrix
 
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.motif_encoding.PositionalMotifParams import PositionalMotifParams

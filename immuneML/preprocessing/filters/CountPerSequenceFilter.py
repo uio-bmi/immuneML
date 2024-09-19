@@ -4,8 +4,8 @@ from pathlib import Path
 
 import numpy as np
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.preprocessing.filters.Filter import Filter
 
 
@@ -71,8 +71,7 @@ class CountPerSequenceFilter(Filter):
 
     def _process_repertoire(self, repertoire: Repertoire) -> Repertoire:
 
-        counts = repertoire.get_counts()
-        counts = counts if counts is not None else np.full(repertoire.get_element_count(), None)
+        counts = repertoire.data.duplicate_count
         not_none_indices = counts != None
         counts[not_none_indices] = counts[not_none_indices].astype(int)
         indices_to_keep = np.full(repertoire.get_element_count(), False)

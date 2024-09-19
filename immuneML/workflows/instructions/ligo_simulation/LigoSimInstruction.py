@@ -15,12 +15,12 @@ from bionumpy.bnpdataclass import BNPDataClass
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.app.LigoApp import SimError
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.receptor.Receptor import Receptor
 from immuneML.data_model.receptor.ReceptorBuilder import ReceptorBuilder
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.LigoSimState import LigoSimState

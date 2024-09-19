@@ -4,7 +4,7 @@ from pathlib import Path
 
 from gensim.models import Word2Vec
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.word2vec.model_creator.ModelCreatorStrategy import ModelCreatorStrategy
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType

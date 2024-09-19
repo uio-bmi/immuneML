@@ -3,8 +3,8 @@ from abc import ABC
 
 import pandas as pd
 
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.util.PathBuilder import PathBuilder
 

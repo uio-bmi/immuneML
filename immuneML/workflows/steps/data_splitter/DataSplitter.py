@@ -3,8 +3,7 @@ import random
 import numpy as np
 from sklearn.model_selection import KFold, StratifiedKFold
 
-from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.workflows.steps.Step import Step
 from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
 from immuneML.workflows.steps.data_splitter.LeaveOneOutSplitter import LeaveOneOutSplitter

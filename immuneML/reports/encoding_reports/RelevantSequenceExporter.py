@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
 from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from immuneML.reports.ReportOutput import ReportOutput

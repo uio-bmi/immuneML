@@ -3,9 +3,9 @@ from multiprocessing.pool import Pool
 import numpy as np
 from editdistance import eval as edit_distance
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceSet import ReceptorSequence
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 
 

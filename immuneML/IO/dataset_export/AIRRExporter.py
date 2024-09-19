@@ -43,7 +43,7 @@ class AIRRExporter(DataExporter):
 
                 for repertoire in dataset.repertoires:
                     shutil.copyfile(repertoire.data_filename, repertoire_path / repertoire.data_filename.name)
-                    shutil.copyfile(repertoire.metadata_filename, repertoire_path / repertoire.metadata.name)
+                    shutil.copyfile(repertoire.metadata_filename, repertoire_path / repertoire.metadata_filename.name)
 
                 shutil.copyfile(dataset.metadata_file, path / dataset.metadata_file.name)
 

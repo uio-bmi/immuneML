@@ -2,7 +2,7 @@ import copy
 from pathlib import Path
 from typing import List
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.Constants import Constants
 from immuneML.environment.Label import Label

@@ -5,7 +5,7 @@ import numpy as np
 import plotly.graph_objects as go
 from scipy.stats import beta
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.classifiers.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier

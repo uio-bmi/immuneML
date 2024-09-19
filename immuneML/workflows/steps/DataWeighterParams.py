@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.example_weighting.ExampleWeightingParams import ExampleWeightingParams
 from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeightingStrategy
 from immuneML.workflows.steps.StepParams import StepParams

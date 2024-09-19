@@ -5,12 +5,11 @@ import numpy as np
 import pandas as pd
 
 from immuneML.data_model.bnp_util import write_yaml, read_yaml
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.SequenceParams import Chain
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel

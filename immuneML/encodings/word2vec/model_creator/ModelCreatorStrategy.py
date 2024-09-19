@@ -1,7 +1,7 @@
 import abc
 from pathlib import Path
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.environment.SequenceType import SequenceType
 
 

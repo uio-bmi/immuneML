@@ -8,8 +8,8 @@ from sklearn.preprocessing import StandardScaler
 
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.data_model.receptor.receptor_sequence import ReceptorSequence
+from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType

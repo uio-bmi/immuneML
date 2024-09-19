@@ -63,12 +63,13 @@ class RepertoireDataset(Dataset):
 
     def __init__(self, labels: dict = None, encoded_data: EncodedData = None, repertoires: list = None,
                  identifier: str = None, metadata_file: Path = None, name: str = None, metadata_fields: list = None,
-                 repertoire_ids: list = None):
+                 repertoire_ids: list = None, dataset_file: Path = None):
         super().__init__(encoded_data, name, identifier if identifier is not None else uuid4().hex, labels)
         self.metadata_file = Path(metadata_file) if metadata_file is not None else None
         self.metadata_fields = metadata_fields
         self.repertoire_ids = repertoire_ids
         self.repertoires = repertoires
+        self.dataset_file = dataset_file
 
     def clone(self, keep_identifier: bool = False):
         dataset = RepertoireDataset(self.labels, copy.deepcopy(self.encoded_data), copy.deepcopy(self.repertoires),

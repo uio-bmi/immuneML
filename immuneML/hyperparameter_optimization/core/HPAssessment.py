@@ -1,7 +1,7 @@
 import copy
 from pathlib import Path
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting

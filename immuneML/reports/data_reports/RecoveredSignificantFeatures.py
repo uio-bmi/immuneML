@@ -5,7 +5,7 @@ from typing import List
 import pandas as pd
 import plotly.express as px
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.reports.ReportOutput import ReportOutput

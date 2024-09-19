@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 
-import numpy as np
-
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod

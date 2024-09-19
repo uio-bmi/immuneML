@@ -1,6 +1,6 @@
 import logging
 
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingStrategy import SequenceEncodingStrategy
 from immuneML.environment.Constants import Constants
@@ -27,7 +27,8 @@ class IMGTKmerSequenceEncoder(SequenceEncodingStrategy):
             logging.warning('Sequence length is less than k. Ignoring sequence')
             return None
 
-        kmers = KmerHelper.create_IMGT_kmers_from_sequence(sequence=sequence, k=k, sequence_type=sequence_type)
+        kmers = KmerHelper.create_IMGT_kmers_from_sequence(sequence=sequence, k=k, sequence_type=sequence_type,
+                                                           region_type=params.region_type)
 
         kmers = [Constants.FEATURE_DELIMITER.join([str(mer) for mer in kmer]) for kmer in kmers]
 

@@ -6,9 +6,9 @@ from tempfile import NamedTemporaryFile
 import numpy as np
 import pandas as pd
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.util.CompAIRRHelper import CompAIRRHelper

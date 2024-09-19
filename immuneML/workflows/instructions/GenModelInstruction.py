@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models import GenerativeModel
 from immuneML.reports.ReportResult import ReportResult

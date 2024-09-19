@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.util.PathBuilder import PathBuilder
 
 

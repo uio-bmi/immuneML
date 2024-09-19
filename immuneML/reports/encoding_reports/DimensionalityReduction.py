@@ -1,12 +1,11 @@
 import logging
-import warnings
 from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
 
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport

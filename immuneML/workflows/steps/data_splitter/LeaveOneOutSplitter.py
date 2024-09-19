@@ -1,8 +1,7 @@
 import numpy as np
 
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
 from immuneML.workflows.steps.data_splitter.Util import Util
 

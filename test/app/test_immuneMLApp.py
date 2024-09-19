@@ -5,10 +5,10 @@ from unittest import TestCase
 
 import yaml
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.app import ImmuneMLApp
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
@@ -21,36 +21,31 @@ class TestImmuneMLApp(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_dataset(self, root_path):
-        path = PathBuilder.build(root_path / 'initial_dataset')
+        path = PathBuilder.remove_old_and_build(root_path / 'initial_dataset')
 
         repertoire_count = 30
         repertoires, metadata = RepertoireBuilder.build([["AA", "AAAA", "AAAA", "AAA"] for i in range(repertoire_count)], path,
                                                         {"CD": ['yes' if i % 2 == 0 else 'no' for i in range(repertoire_count)],
                                                          "CMV": [True if i % 2 == 1 else False for i in range(repertoire_count)]},
-                                                        [[{"locus": "A" if i % 2 == 0 else "B", "duplicate_count": random.randint(3, 5),
-                                                           "region_type": "IMGT_CDR3"}
+                                                        [[{"locus": "A" if i % 2 == 0 else "B", "duplicate_count": random.randint(3, 5)}
                                                           for i in range(4)]
                                                          for j in range(repertoire_count)])
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"CD": ["yes", "no"], "CMV": [True, False]}, name="d1")
-        ImmuneMLExporter.export(dataset, path)
+        AIRRExporter.export(dataset, path)
 
-        return path / "d1.yaml"
+        return {"format": "AIRR",
+                "params": {"path": str(path), "metadata_file": str(metadata), "separator": "\\t", "number_of_processes": 1,
+                           "result_path": str(root_path / "imported_data/")}}
 
     def test_run(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "immuneml_app/")
-        dataset_path = self.create_dataset(path)
+        dataset_spec = self.create_dataset(path)
 
         specs = {
             "definitions": {
                 "datasets": {
-                    "d1": {
-                        "format": "ImmuneML",
-                        "params": {
-                            "path": str(dataset_path),
-                            "result_path": str(dataset_path.parents[0] / "imported_data/")
-                        }
-                    }
+                    "d1": dataset_spec
                 },
                 "encodings": {
                     "e1": {

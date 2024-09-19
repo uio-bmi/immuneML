@@ -1,6 +1,6 @@
 import abc
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 
 
 class ClusteringMethod:

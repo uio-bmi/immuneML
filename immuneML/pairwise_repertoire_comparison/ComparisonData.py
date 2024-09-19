@@ -5,7 +5,7 @@ from pathlib import Path
 
 import numpy as np
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.pairwise_repertoire_comparison.ComparisonDataBatch import ComparisonDataBatch
 from immuneML.util.Logger import log
 from immuneML.util.PathBuilder import PathBuilder

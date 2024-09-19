@@ -6,8 +6,8 @@ import numpy as np
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.data_model.bnp_util import merge_dataclass_objects, bnp_write_to_file, get_type_dict_from_bnp_object
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.reports.data_reports.DataReport import DataReport

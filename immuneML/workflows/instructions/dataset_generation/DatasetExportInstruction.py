@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import List
 
 from immuneML.IO.dataset_export.DataExporter import DataExporter
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.util.Logger import print_log
 from immuneML.util.ReflectionHandler import ReflectionHandler

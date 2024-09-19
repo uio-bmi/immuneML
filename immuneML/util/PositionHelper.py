@@ -2,8 +2,8 @@ import logging
 
 import numpy as np
 
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.environment.SequenceType import SequenceType
 
 

@@ -7,7 +7,7 @@ import numpy as np
 
 from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.import_parsers.ImportParser import ImportParser
 from immuneML.encodings.EncoderParams import EncoderParams

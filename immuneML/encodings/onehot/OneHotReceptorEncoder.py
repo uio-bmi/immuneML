@@ -1,10 +1,9 @@
 import numpy as np
 
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
-from immuneML.util.EncoderHelper import EncoderHelper
 
 
 class OneHotReceptorEncoder(OneHotEncoder):

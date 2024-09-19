@@ -1,5 +1,5 @@
 from immuneML.IO.dataset_import.DataImport import DataImport
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.ParameterValidator import ParameterValidator
 

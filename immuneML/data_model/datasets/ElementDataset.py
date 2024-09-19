@@ -252,7 +252,7 @@ def make_all_fields_dict_from_sequences(sequences: List[ReceptorSequence],
             elif key in dynamic_fields:
                 dynamic_fields[key].append(sequence.metadata[key])
             else:
-                dynamic_fields[key] = [None for _ in range(index * 2 + index)] + sequence.metadata[key]
+                dynamic_fields[key] = [None for _ in range(index * 2 + index)] + [sequence.metadata[key]]
         for key in [f.name for f in fields(ReceptorSequence) if
                     f.name not in ['metadata', 'sequence_aa', 'sequence']]:
             all_fields[key].append(getattr(sequence, key))

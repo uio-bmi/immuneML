@@ -1,6 +1,6 @@
 from sklearn.cluster import KMeans as SklearnKmeans
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod, get_data_for_clustering
 
 

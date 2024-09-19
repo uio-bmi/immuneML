@@ -114,8 +114,9 @@ def make_dynamic_seq_set_dataclass(type_dict: Dict[str, Any]):
 
 def extend_dataclass_with_dynamic_fields(cls, fields: List[Tuple[str, type]], cls_name: str = None):
     cls_name = cls_name if cls_name is not None else "Dynamic" + cls.__name__
-    new_cls = dataclasses.make_dataclass(cls_name,
-                                         fields=[(name, field_type, dataclasses.field(default=None)) for name, field_type in fields], bases=(cls,))
+    new_cls = bnpdataclass(dataclasses.make_dataclass(cls_name,
+                                                      fields=[(name, field_type, dataclasses.field(default=None)) for
+                                                              name, field_type in fields], bases=(cls,)))
 
     def dynamic_fields(cls):
         return [el[0] for el in fields]

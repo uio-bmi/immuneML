@@ -3,8 +3,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.environment.Constants import Constants
 from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.util.PathBuilder import PathBuilder

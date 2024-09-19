@@ -1,8 +1,8 @@
 from multiprocessing import Pool
 from pathlib import Path
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.preprocessing.filters.Filter import Filter
 from immuneML.util.ParameterValidator import ParameterValidator

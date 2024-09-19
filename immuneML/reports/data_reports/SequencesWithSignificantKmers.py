@@ -4,7 +4,7 @@ from typing import List
 
 import pandas as pd
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult

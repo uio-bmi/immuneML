@@ -34,7 +34,6 @@ class RepertoireBuilder:
             subject_ids = []
 
         for rep_index, sequence_list in enumerate(sequences):
-            rep_sequences = []
             if len(subject_ids) < len(sequences):
                 subject_ids.append("rep_" + str(rep_index))
 
@@ -47,7 +46,7 @@ class RepertoireBuilder:
             else:
                 df = pd.concat([df, pd.DataFrame.from_records(seq_metadata[rep_index])], axis=1)
 
-            df.to_csv(str(rep_path / ''))
+            df.to_csv(str(rep_path / f'rep_{rep_index}.tsv'), sep='\t', index=False)
 
             if labels is not None:
                 metadata = {key: labels[key][rep_index] for key in labels.keys()}
@@ -55,9 +54,9 @@ class RepertoireBuilder:
                 metadata = {}
 
             metadata = {**metadata, **{"subject_id": subject_ids[rep_index]}}
-            write_yaml(rep_path / f"_rep_{rep_index}.yaml", metadata)
+            write_yaml(rep_path / f"rep_{rep_index}.yaml", metadata)
 
-            repertoire = Repertoire(rep_path / f"rep_{rep_index}.tsv", rep_path / f"_rep_{rep_index}.yaml")
+            repertoire = Repertoire(rep_path / f"rep_{rep_index}.tsv", rep_path / f"rep_{rep_index}.yaml")
             repertoires.append(repertoire)
 
         df = pd.DataFrame({**{"filename": [repertoire.data_filename for repertoire in repertoires],

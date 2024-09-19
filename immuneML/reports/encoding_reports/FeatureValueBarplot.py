@@ -4,7 +4,7 @@ from typing import List, Tuple
 import numpy as np
 import plotly.express as px
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.encoding_reports.FeatureReport import FeatureReport
 

@@ -13,9 +13,8 @@ from olga.sequence_generation import SequenceGenerationVJ, SequenceGenerationVDJ
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.IO.dataset_import.OLGAImport import OLGAImport
 from immuneML.data_model.bnp_util import read_yaml, write_yaml
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
-from immuneML.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
@@ -186,7 +185,7 @@ class OLGA(GenerativeModel):
 
             sequences.loc[i] = (
             seq_row[0], seq_row[1], olga_model.v_gene_mapping[seq_row[2]], olga_model.j_gene_mapping[seq_row[3]],
-            RegionType.IMGT_JUNCTION.name, SequenceFrameType.IN.value, p_gen, int(olga_model == self._olga_model),
+            RegionType.IMGT_JUNCTION.name, 1, p_gen, int(olga_model == self._olga_model),
             -1, self.locus.value)
 
         sequences.to_csv(path, index=False, sep='\t')

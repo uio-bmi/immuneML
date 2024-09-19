@@ -12,10 +12,9 @@ from torch.utils.data import DataLoader
 
 from immuneML import Constants
 from immuneML.data_model.bnp_util import write_yaml, read_yaml
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
@@ -291,9 +290,10 @@ class SimpleVAE(GenerativeModel):
         seq_objs = [ReceptorSequence(**{
             self.sequence_type.value: ''.join([self.vocab[Categorical(letter).sample()] for letter in sequences[i]])
                                      .replace(Constants.GAP_LETTER, ''),
-            'metadata': SequenceMetadata(v_call=self.unique_v_genes[Categorical(v_genes[i]).sample()],
-                                         j_call=self.unique_j_genes[Categorical(j_genes[i]).sample()], locus=self.locus,
-                                         region_type=self.region_type.name, custom_params={'gen_model_name': self.name})
+            'v_call': self.unique_v_genes[Categorical(v_genes[i]).sample()],
+            'j_call': self.unique_j_genes[Categorical(j_genes[i]).sample()],
+            'locus': self.locus,
+            'metadata': {'gen_model_name': self.name}
         }) for i in range(count)]
 
         # for obj in seq_objs:

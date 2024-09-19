@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.reports.Report import Report
 
 

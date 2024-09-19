@@ -7,7 +7,7 @@ import numpy as np
 from bionumpy.bnpdataclass import BNPDataClass
 from olga.utils import nt2aa
 
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.SimConfigItem import SimConfigItem

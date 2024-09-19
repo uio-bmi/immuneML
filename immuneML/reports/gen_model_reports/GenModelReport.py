@@ -1,7 +1,7 @@
 from abc import ABC
 from pathlib import Path
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.reports.Report import Report
 

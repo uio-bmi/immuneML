@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.CompAIRRParams import CompAIRRParams

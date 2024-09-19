@@ -5,7 +5,7 @@ import pandas as pd
 
 from immuneML.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
 from immuneML.analysis.criteria_matches.CriteriaTypeInstantiator import CriteriaTypeInstantiator
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.preprocessing.filters.Filter import Filter
 
 

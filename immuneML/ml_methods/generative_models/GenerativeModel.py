@@ -3,7 +3,7 @@ from pathlib import Path
 
 import numpy as np
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.SequenceType import SequenceType
 
 

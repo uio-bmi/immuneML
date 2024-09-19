@@ -3,8 +3,8 @@ from typing import Tuple
 
 from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.IO.dataset_import.IReceptorImport import IReceptorImport
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.receptor.ChainPair import ChainPair
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.SequenceParams import ChainPair
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
@@ -56,8 +56,7 @@ class ImportParser:
                     ParameterValidator.assert_in_valid_list(params["receptor_chains"], ["_".join(cp.value) for cp in ChainPair], location, "receptor_chains")
 
         try:
-            dataset = import_cls.import_dataset(params, key)
-            dataset.name = key
+            dataset = import_cls(params, key).import_dataset()
             ImportParser.log_dataset_info(dataset)
         except KeyError as key_error:
             raise KeyError(f"{key_error}\n\nAn error occurred during parsing of dataset {key}. "

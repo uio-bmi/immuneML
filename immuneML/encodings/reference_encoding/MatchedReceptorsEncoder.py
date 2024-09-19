@@ -5,13 +5,10 @@ import pandas as pd
 
 from immuneML.analysis.SequenceMatcher import SequenceMatcher
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.data_model.receptor.BCReceptor import BCReceptor
-from immuneML.data_model.receptor.Receptor import Receptor
-from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
-from immuneML.data_model.receptor.TCGDReceptor import TCGDReceptor
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.SequenceSet import Receptor
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.reference_encoding.MatchedReferenceUtil import MatchedReferenceUtil

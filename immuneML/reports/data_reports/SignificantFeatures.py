@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.encodings.abundance_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
 from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder

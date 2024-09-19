@@ -1,17 +1,14 @@
+import logging
 from pathlib import Path
 
-import logging
-import plotly.express as px
 import pandas as pd
-from multiprocessing import Pool
-from functools import partial
+import plotly.express as px
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 
-
-from immuneML.data_model.dataset import SequenceDataset
+from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
-from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder

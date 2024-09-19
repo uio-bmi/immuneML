@@ -1,4 +1,4 @@
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
 

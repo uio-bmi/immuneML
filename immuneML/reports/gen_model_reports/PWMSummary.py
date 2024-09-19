@@ -1,12 +1,10 @@
 from pathlib import Path
 from typing import Tuple, List
 
-import logomaker
 import pandas as pd
 import plotly.express as px
-from matplotlib import pyplot as plt
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.ml_methods.generative_models.PWM import PWM

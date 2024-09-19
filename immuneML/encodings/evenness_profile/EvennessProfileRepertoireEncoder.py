@@ -7,8 +7,7 @@ import numpy as np
 from immuneML.analysis.entropy_calculations.EntropyCalculator import EntropyCalculator
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.caching.CacheObjectType import CacheObjectType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
 from immuneML.util.Logger import log

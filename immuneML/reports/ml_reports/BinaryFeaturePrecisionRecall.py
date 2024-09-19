@@ -9,7 +9,7 @@ import plotly.express as px
 from sklearn.metrics import precision_score, recall_score, accuracy_score, balanced_accuracy_score
 
 from immuneML.ml_methods.util.Util import Util
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.classifiers.BinaryFeatureClassifier import BinaryFeatureClassifier

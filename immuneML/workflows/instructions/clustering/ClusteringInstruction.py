@@ -6,7 +6,7 @@ from typing import List, Dict, Tuple
 import pandas as pd
 import sklearn
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.ml_metrics.ClusteringMetric import is_internal, is_external

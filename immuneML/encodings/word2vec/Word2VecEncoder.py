@@ -10,8 +10,8 @@ from gensim.models import Word2Vec
 from sklearn.preprocessing import StandardScaler
 
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
@@ -185,18 +185,17 @@ class Word2VecEncoder(DatasetEncoder):
                                                    example_ids=dataset.get_example_ids(),
                                                    feature_names=feature_names,
                                                    feature_annotations=feature_annotations,
-                                                   example_weights=dataset.get_example_weights(),
                                                    encoding=Word2VecEncoder.__name__)
         return encoded_dataset
 
     def _encode_examples(self, encoded_dataset, vectors, params):
         examples = np.zeros(shape=[encoded_dataset.get_example_count(), vectors.vector_size])
         for (index, example) in enumerate(encoded_dataset.get_data()):
-            examples[index] = self._encode_item(example, vectors, params.model.get('sequence_type', EnvironmentSettings.sequence_type))
+            examples[index] = self._encode_item(example, vectors, params)
         return examples
 
     @abc.abstractmethod
-    def _encode_item(self, example, vectors, sequence_type):
+    def _encode_item(self, example, vectors, params: EncoderParams):
         pass
 
     def _load_model(self, params):

@@ -18,11 +18,8 @@ from npstructures import RaggedArray
 from scipy.stats import zipf
 
 from immuneML import Constants
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.SequenceParams import RegionType, Chain
+from immuneML.data_model.SequenceSet import ReceptorSequence, Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.SimConfigItem import SimConfigItem
@@ -74,7 +71,7 @@ def make_receptor_sequence_objects(sequences: BackgroundSequences, metadata, imm
 
 
 def construct_sequence_metadata_object(sequence, metadata: dict, custom_params, immune_events: dict, locus: Chain) \
-        -> SequenceMetadata:
+        -> dict:
     custom = {}
 
     for param in custom_params:
@@ -84,9 +81,7 @@ def construct_sequence_metadata_object(sequence, metadata: dict, custom_params, 
         else:
             custom[key] = getattr(sequence, key).item()
 
-    return SequenceMetadata(custom_params={**metadata, **custom, **immune_events}, locus=locus,
-                            v_call=sequence.v_call.to_string(), j_call=sequence.j_call.to_string(),
-                            region_type=sequence.region_type.to_string())
+    return {**metadata, **custom, **immune_events}
 
 
 def write_bnp_data(path: Path, data, append_if_exists: bool = True):

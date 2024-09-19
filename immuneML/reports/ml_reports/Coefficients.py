@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.express as px
 import yaml
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod

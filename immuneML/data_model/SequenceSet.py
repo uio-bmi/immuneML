@@ -1,3 +1,4 @@
+import typing
 from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import Any, Dict, List
@@ -9,6 +10,7 @@ from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.SequenceParams import ChainPair, Chain, RegionType
 from immuneML.data_model.bnp_util import get_field_type_from_values, \
     extend_dataclass_with_dynamic_fields, bnp_write_to_file, write_yaml, bnp_read_from_file, read_yaml
+from immuneML.environment.SequenceType import SequenceType
 
 
 @dataclass
@@ -29,10 +31,12 @@ class ReceptorSequence:
     duplicate_count: int = None
     cell_id: str = None
 
+    def get_sequence(self, sequence_type: SequenceType = SequenceType.AMINO_ACID):
+        return self.sequence_aa if sequence_type == SequenceType.AMINO_ACID else self.sequence
 
 @dataclass
 class Receptor:
-    chain_pair: str
+    chain_pair: ChainPair
     chain_1: ReceptorSequence
     chain_2: ReceptorSequence
     receptor_id: str
@@ -55,10 +59,9 @@ class Repertoire:
     metadata_filename: Path = None
     metadata: dict = None
     identifier: str = None
-    dynamic_fields: list = None
-
-    bnp_dataclass = None
+    dynamic_fields: dict = None
     element_count: int = None
+    _bnp_dataclass: typing.Type = None
     _buffer_type = None
 
     @classmethod
@@ -76,17 +79,41 @@ class Repertoire:
         metadata['type_dict_dynamic_fields'] = {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()}
         write_yaml(metadata_filename, metadata)
 
-        repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier, list(type_dict.keys()),
-                                bnp_dataclass=bnp_dc, element_count=len(data))
+        repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier, type_dict, len(data))
+        return repertoire
+
+    @classmethod
+    def build_like(cls, repertoire: 'Repertoire', indices_to_keep, result_path: Path, filename_base: str):
+        identifier = uuid4().hex
+        filename_base = filename_base if filename_base is not None else identifier
+        data = bnp_read_from_file(repertoire.data_filename, repertoire.buffer_type)
+        data = data[indices_to_keep]
+
+        data_filename = result_path / f"{filename_base}.tsv"
+        bnp_write_to_file(data_filename, data)
+
+        metadata_filename = result_path / f"{filename_base}_metadata.yaml"
+        metadata = read_yaml(repertoire.metadata_filename)
+        write_yaml(metadata_filename, metadata)
+
+        repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier,
+                                dynamic_fields=repertoire.dynamic_fields, element_count=len(data))
         return repertoire
 
     def __post_init__(self):
         if not self.metadata:
             self.metadata = read_yaml(self.metadata_filename)
-        if not self.dynamic_fields:
-            self.dynamic_fields = list(self.metadata['type_dict_dynamic_fields'].items())
-        if not self.bnp_dataclass:
-            self.bnp_dataclass = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, self.dynamic_fields)
+        if not self.dynamic_fields and 'type_dict_dynamic_fields' in self.metadata:
+            self.dynamic_fields = self.metadata['type_dict_dynamic_fields']
+
+    @property
+    def bnp_dataclass(self):
+        if not self._bnp_dataclass:
+            if self.dynamic_fields:
+                self._bnp_dataclass = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(self.dynamic_fields.items()))
+            else:
+                self._bnp_dataclass = AIRRSequenceSet
+        return self._bnp_dataclass
 
     @property
     def buffer_type(self):
@@ -99,11 +126,16 @@ class Repertoire:
         return bnp_read_from_file(self.data_filename, self.buffer_type, self.bnp_dataclass)
 
     def sequences(self, region_type: RegionType) -> List[ReceptorSequence]:
-        return make_sequences_from_data(self.data, self.dynamic_fields, region_type)
+        return make_sequences_from_data(self.data, list(self.dynamic_fields.keys()), region_type)
 
     @property
     def receptors(self) -> List[Receptor]:
-        return make_receptors_from_data(self.data, self.dynamic_fields, f'Repertoire {self.identifier}')
+        return make_receptors_from_data(self.data, list(self.dynamic_fields.keys()), f'Repertoire {self.identifier}')
+
+    def get_element_count(self):
+        if not self.element_count:
+            self.element_count = len(self.data)
+        return self.element_count
 
 
 def build_dynamic_airr_sequence_set_dataclass(all_fields_dict: Dict[str, Any]):
@@ -143,7 +175,7 @@ def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: list, locati
         seqs = [ReceptorSequence(el.sequence_id, el.sequence, el.sequence_aa, el.productive,
                                  el.vj_in_frame, el.stop_codon, el.locus, el.locus_species, el.v_call, el.d_call,
                                  el.j_call, el.c_call, {dynamic_field: getattr(el, dynamic_field) for dynamic_field
-                                                        in Repertoire.dynamic_fields()}) for index, el in
+                                                        in dynamic_fields}) for index, el in
                 sorted_group.iterrows()]
 
         receptor = Receptor(chain_pair=ChainPair.get_chain_pair([Chain.get_chain(locus) for locus in group.locus]),

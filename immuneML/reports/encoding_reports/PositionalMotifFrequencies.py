@@ -5,7 +5,7 @@ import plotly.express as px
 import pandas as pd
 from typing import List
 
-from immuneML.data_model.dataset import SequenceDataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import (
     PositionalMotifHelper,
 )

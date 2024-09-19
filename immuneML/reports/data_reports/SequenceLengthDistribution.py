@@ -7,11 +7,10 @@ import pandas as pd
 import plotly.express as px
 from pandas import DataFrame
 
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult

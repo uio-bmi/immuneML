@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 import plotly.express as px
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.encoding_reports.FeatureReport import FeatureReport
 from immuneML.util.ParameterValidator import ParameterValidator
