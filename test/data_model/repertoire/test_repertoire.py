@@ -4,10 +4,8 @@ from unittest import TestCase
 
 import numpy as np
 
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.SequenceParams import Chain
+from immuneML.data_model.SequenceSet import ReceptorSequence, Repertoire
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -56,27 +54,26 @@ class TestRepertoire(TestCase):
     def test_receptor(self):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "receptortestingpathrepertoire/")
 
-        sequences = [ReceptorSequence(sequence_aa="AAA", sequence_id="1",
-                                      metadata=SequenceMetadata(v_call="V1", cell_id="1", locus=Chain.ALPHA,
-                                                                custom_params={"cmv": "no", "coeliac": False})),
+        sequences = [ReceptorSequence(sequence_aa="AAA", sequence_id="1", v_call="V1", cell_id="1", locus=Chain.ALPHA.name,
+                                      metadata={"cmv": "no", "coeliac": False}),
                      ReceptorSequence(sequence_aa="CCC", sequence_id="2",
-                                      metadata=SequenceMetadata(j_call="J1", cell_id="1", locus=Chain.BETA,
-                                                                custom_params={"cmv": "yes", "coeliac": True})),
+                                      j_call="J1", cell_id="1", locus=Chain.BETA.name,
+                                      metadata={"cmv": "yes", "coeliac": True}),
                      ReceptorSequence(sequence_aa="FFF", sequence_id="3",
-                                      metadata=SequenceMetadata(v_call="V1", cell_id="2", locus=Chain.ALPHA,
-                                                                custom_params={"cmv": "no", "coeliac": False})),
+                                      v_call="V1", cell_id="2", locus=Chain.ALPHA.name,
+                                                                metadata={"cmv": "no", "coeliac": False}),
                      ReceptorSequence(sequence_aa="EEE", sequence_id="4",
-                                      metadata=SequenceMetadata(j_call="J1", cell_id="2", locus=Chain.BETA,
-                                                                custom_params={"cmv": "yes", "coeliac": True})),
+                                      j_call="J1", cell_id="2", locus=Chain.BETA.name,
+                                                                metadata={"cmv": "yes", "coeliac": True}),
                      ReceptorSequence(sequence_aa="FFF", sequence_id="5",
-                                      metadata=SequenceMetadata(v_call="V1", cell_id="3", locus=Chain.GAMMA,
-                                                                custom_params={"cmv": "no", "coeliac": False})),
+                                      v_call="V1", cell_id="3", locus=Chain.GAMMA.name,
+                                                                metadata={"cmv": "no", "coeliac": False}),
                      ReceptorSequence(sequence_aa="EEE", sequence_id="6",
-                                      metadata=SequenceMetadata(j_call="J1", cell_id="3", locus=Chain.DELTA,
-                                                                custom_params={"cmv": "yes", "coeliac": True}))
+                                      j_call="J1", cell_id="3", locus=Chain.DELTA.name,
+                                                                metadata={"cmv": "yes", "coeliac": True})
                      ]
 
-        obj = Repertoire.build_from_sequence_objects(sequences, path, {"cmv": "yes", 'subject_id': "1"})
+        obj = Repertoire.build(sequences, path, {"cmv": "yes", 'subject_id': "1"})
         receptors = obj.receptors
 
         self.assertEqual(3, len(receptors))

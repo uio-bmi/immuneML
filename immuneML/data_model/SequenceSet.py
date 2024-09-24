@@ -15,21 +15,21 @@ from immuneML.environment.SequenceType import SequenceType
 
 @dataclass
 class ReceptorSequence:
-    sequence_id: str = None
-    sequence: DNAEncoding = None
-    sequence_aa: AminoAcidEncoding = None
-    productive: bool = None
-    vj_in_frame: bool = None
-    stop_codon: bool = None
-    locus: str = None
-    locus_species: str = None
-    v_call: str = None
-    d_call: str = None
-    j_call: str = None
-    c_call: str = None
+    sequence_id: str = ''
+    sequence: DNAEncoding = ''
+    sequence_aa: AminoAcidEncoding = ''
+    productive: bool = True
+    vj_in_frame: bool = True
+    stop_codon: bool = False
+    locus: str = ''
+    locus_species: str = ''
+    v_call: str = ''
+    d_call: str = ''
+    j_call: str = ''
+    c_call: str = ''
     metadata: dict = field(default_factory=dict)
-    duplicate_count: int = None
-    cell_id: str = None
+    duplicate_count: int = -1
+    cell_id: str = ''
 
     def get_sequence(self, sequence_type: SequenceType = SequenceType.AMINO_ACID):
         return self.sequence_aa if sequence_type == SequenceType.AMINO_ACID else self.sequence
@@ -98,6 +98,24 @@ class Repertoire:
 
         repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier,
                                 dynamic_fields=repertoire.dynamic_fields, element_count=len(data))
+        return repertoire
+
+    @classmethod
+    def build_from_sequences(cls, sequences: List[ReceptorSequence], result_path: Path, filename_base: str,
+                             metadata: dict):
+        identifier = uuid4().hex
+        filename_base = filename_base if filename_base is not None else identifier
+
+        # TODO: make bnp dc from sequence objects
+        data = make_airr_seq_set_object_from_sequences(sequences)
+
+        data_filename = result_path / f"{filename_base}.tsv"
+        bnp_write_to_file(data_filename, data)
+
+        metadata_filename = result_path / f"{filename_base}_metadata.yaml"
+        write_yaml(metadata_filename, metadata)
+
+        repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier, element_count=len(data))
         return repertoire
 
     def __post_init__(self):
@@ -186,6 +204,11 @@ def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: list, locati
         receptors.append(receptor)
 
     return receptors
+
+
+def make_airr_seq_set_object_from_sequences(sequences: List[ReceptorSequence]):
+    pass
+
 
 
 def get_sequence_value(el: AIRRSequenceSet, region_type):

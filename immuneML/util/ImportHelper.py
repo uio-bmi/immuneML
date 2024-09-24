@@ -169,12 +169,12 @@ class ImportHelper:
                     if n_illegal > 0:
                         dataframe.drop(dataframe.loc[is_illegal_seq].index, inplace=True)
                         logging.warning(
-                            f"{ImportHelper.__name__}: {n_illegal}/{n_total} sequences were removed from the dataset because their {sequence_name}"
-                            f" sequence contained illegal characters. ")
+                            f"{ImportHelper.__name__}: {n_illegal}/{n_total} sequences were removed from the dataset "
+                            f"because their {sequence_name} sequence contained illegal characters. ")
 
                 else:
-                    logging.warning(
-                        f"{ImportHelper.__name__}: column {sequence_col_name} is missing, illegal characters were not checked.")
+                    logging.warning(f"{ImportHelper.__name__}: column {sequence_col_name} is missing, illegal "
+                                    f"characters were not checked.")
 
         return dataframe
 

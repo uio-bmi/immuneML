@@ -87,7 +87,7 @@ class SequenceDataset(ElementDataset):
 
         dataset_metadata = {
             'type_dict_dynamic_fields': {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()},
-            'dataset_class': cls.__name___,
+            'dataset_class': cls.__class__.__name__,
             'filename': filename}
         metadata_filename = path / f'dataset_{name}.yaml'
         write_yaml(metadata_filename, dataset_metadata)
@@ -101,7 +101,7 @@ class SequenceDataset(ElementDataset):
         provided field names"""
         result = self.data.topandas()[field_names]
 
-        return result if return_df else result.to_dict()
+        return result if return_df else result.to_dict("list")
 
     def make_subset(self, example_indices, path, dataset_type: str):
         data = self.data[example_indices]
@@ -178,7 +178,7 @@ class ReceptorDataset(ElementDataset):
         else:
             result = result[field_names]
 
-        return result if return_df else result.to_dict()
+        return result if return_df else result.to_dict('list')
 
     def make_subset(self, example_indices, path, dataset_type: str):
         true_indices = np.array([[ind, ind + 1] for ind in example_indices]).flatten()
@@ -242,7 +242,8 @@ def make_all_fields_dict_from_receptors(receptors: List[Receptor], region_type: 
 
 def make_all_fields_dict_from_sequences(sequences: List[ReceptorSequence],
                                         region_type: RegionType = RegionType.IMGT_CDR3):
-    all_fields = {seq_field.name: [] for seq_field in fields(AIRRSequenceSet)}
+    airr_fields = fields(AIRRSequenceSet)
+    all_fields = {seq_field.name: [] for seq_field in airr_fields}
     dynamic_fields = {}
 
     for index, sequence in enumerate(sequences):
@@ -252,11 +253,18 @@ def make_all_fields_dict_from_sequences(sequences: List[ReceptorSequence],
             elif key in dynamic_fields:
                 dynamic_fields[key].append(sequence.metadata[key])
             else:
-                dynamic_fields[key] = [None for _ in range(index * 2 + index)] + [sequence.metadata[key]]
+                dynamic_fields[key] = ['' for _ in range(index)] + [sequence.metadata[key]]
         for key in [f.name for f in fields(ReceptorSequence) if
                     f.name not in ['metadata', 'sequence_aa', 'sequence']]:
             all_fields[key].append(getattr(sequence, key))
         all_fields[region_type.value].append(sequence.sequence)
         all_fields[region_type.value + "_aa"].append(sequence.sequence_aa)
+
+    for f in airr_fields:
+        neutral_val = AIRRSequenceSet.get_neutral_value(f.type)
+        if len(all_fields[f.name]) == 0:
+            all_fields[f.name] = [neutral_val for _ in range(len(sequences))]
+        elif any(val is None for val in all_fields[f.name]):
+            all_fields[f.name] = [val if val is not None else neutral_val for val in all_fields[f.name]]
 
     return {**all_fields, **dynamic_fields}

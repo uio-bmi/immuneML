@@ -19,7 +19,7 @@ class TestReceptorDataset(TestCase):
         self.assertTrue("l1" in dataset.get_label_names())
         self.assertTrue("l2" in dataset.get_label_names())
 
-        self.assertTrue(np.array_equal(['True', 'True', 'True', 'True'], dataset.get_metadata(['l1'])['l1']))
-        self.assertTrue(np.array_equal(['2', '2', '2', '2'], dataset.get_metadata(['l1', 'l2'])['l2']))
+        self.assertTrue(np.array_equal(['True', 'True'], dataset.get_metadata(['l1'])['l1']))
+        self.assertTrue(np.array_equal(['2', '2'], dataset.get_metadata(['l1', 'l2'])['l2']))
 
         shutil.rmtree(path)
