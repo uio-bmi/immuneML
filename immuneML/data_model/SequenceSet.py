@@ -9,7 +9,8 @@ from bionumpy import AminoAcidEncoding, DNAEncoding, get_bufferclass_for_datatyp
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.SequenceParams import ChainPair, Chain, RegionType
 from immuneML.data_model.bnp_util import get_field_type_from_values, \
-    extend_dataclass_with_dynamic_fields, bnp_write_to_file, write_yaml, bnp_read_from_file, read_yaml
+    extend_dataclass_with_dynamic_fields, bnp_write_to_file, write_yaml, bnp_read_from_file, read_yaml, \
+    build_dynamic_bnp_dataclass_obj
 from immuneML.environment.SequenceType import SequenceType
 
 
@@ -102,20 +103,24 @@ class Repertoire:
 
     @classmethod
     def build_from_sequences(cls, sequences: List[ReceptorSequence], result_path: Path, filename_base: str,
-                             metadata: dict):
+                             metadata: dict, region_type: RegionType = RegionType.IMGT_CDR3):
         identifier = uuid4().hex
         filename_base = filename_base if filename_base is not None else identifier
 
-        # TODO: make bnp dc from sequence objects
-        data = make_airr_seq_set_object_from_sequences(sequences)
+        data = make_airr_seq_set_object_from_sequences(sequences, region_type)
 
         data_filename = result_path / f"{filename_base}.tsv"
         bnp_write_to_file(data_filename, data)
 
+        dynamic_fields = {f.name: f.type for f in fields(data)
+                          if f not in [airr_f.name for airr_f in fields(AIRRSequenceSet)]}
+
         metadata_filename = result_path / f"{filename_base}_metadata.yaml"
+        metadata['type_dict_dynamic_fields'] = dynamic_fields
         write_yaml(metadata_filename, metadata)
 
-        repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier, element_count=len(data))
+        repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier, element_count=len(data),
+                                _bnp_dataclass=type(data), dynamic_fields=dynamic_fields)
         return repertoire
 
     def __post_init__(self):
@@ -146,9 +151,9 @@ class Repertoire:
     def sequences(self, region_type: RegionType) -> List[ReceptorSequence]:
         return make_sequences_from_data(self.data, list(self.dynamic_fields.keys()), region_type)
 
-    @property
-    def receptors(self) -> List[Receptor]:
-        return make_receptors_from_data(self.data, list(self.dynamic_fields.keys()), f'Repertoire {self.identifier}')
+    def receptors(self, region_type: RegionType) -> List[Receptor]:
+        return make_receptors_from_data(self.data, list(self.dynamic_fields.keys()),
+                                        f'Repertoire {self.identifier}', region_type)
 
     def get_element_count(self):
         if not self.element_count:
@@ -172,7 +177,7 @@ def build_dynamic_airr_sequence_set_dataclass(all_fields_dict: Dict[str, Any]):
     return dc, types
 
 
-def make_sequences_from_data(data, dynamic_fields: list, region_type):
+def make_sequences_from_data(data, dynamic_fields: list, region_type: RegionType = RegionType.IMGT_CDR3):
     seqs = []
     for el in data.to_iter():
         seq, seq_aa = get_sequence_value(el, region_type)
@@ -182,7 +187,7 @@ def make_sequences_from_data(data, dynamic_fields: list, region_type):
     return seqs
 
 
-def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: list, location):
+def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: list, location, region_type: RegionType.IMGT_CDR3):
     df = data.topandas()
     receptors = []
     for name, group in df.groupby('cell_id'):
@@ -190,11 +195,11 @@ def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: list, locati
             (f"{location}: receptor objects cannot be created from the data file, there are "
              f"{group.shape[0]} sequences with cell id {group['cell_id'].unique()[0]}.")
         sorted_group = group.sort_values(by='locus')
-        seqs = [ReceptorSequence(el.sequence_id, el.sequence, el.sequence_aa, el.productive,
-                                 el.vj_in_frame, el.stop_codon, el.locus, el.locus_species, el.v_call, el.d_call,
-                                 el.j_call, el.c_call, {dynamic_field: getattr(el, dynamic_field) for dynamic_field
-                                                        in dynamic_fields}) for index, el in
-                sorted_group.iterrows()]
+        seqs = [ReceptorSequence(el.sequence_id, getattr(el, region_type.value), getattr(el, region_type.value + "_aa"),
+                                 el.productive, el.vj_in_frame, el.stop_codon, el.locus, el.locus_species, el.v_call,
+                                 el.d_call, el.j_call, el.c_call,
+                                 {dynamic_field: getattr(el, dynamic_field) for dynamic_field in dynamic_fields})
+                for index, el in sorted_group.iterrows()]
 
         receptor = Receptor(chain_pair=ChainPair.get_chain_pair([Chain.get_chain(locus) for locus in group.locus]),
                             chain_1=seqs[0], chain_2=seqs[1], cell_id=group['cell_id'].unique()[0],
@@ -206,13 +211,35 @@ def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: list, locati
     return receptors
 
 
-def make_airr_seq_set_object_from_sequences(sequences: List[ReceptorSequence]):
-    pass
+def make_airr_seq_set_object_from_sequences(sequences: List[ReceptorSequence],
+                                            region_type: RegionType = RegionType.IMGT_CDR3):
+    seq_fields = {key: [] for key in vars(ReceptorSequence()).keys()
+                  if key not in ['metadata', 'sequence', 'sequence_aa']}
+    seq_content_fields = {region_type.value: [], region_type.value + "_aa": []}
+
+    dynamic_fields = {}
+    for index, sequence in enumerate(sequences):
+        seq_content_fields[region_type.value].append(sequence.sequence)
+        seq_content_fields[region_type.value + "_aa"].append(sequence.sequence_aa)
+
+        for key in seq_fields.keys():
+            seq_fields[key].append(getattr(sequence, key))
+        if sequence.metadata:
+            for key in sequence.metadata.keys():
+                if key in dynamic_fields:
+                    dynamic_fields[key].append(sequence.metadata[key])
+                elif index == 0:
+                    dynamic_fields[key] = [sequence.metadata[key]]
+                else:
+                    raise RuntimeError("Sequences cannot be converted to AIRRSequenceSet because the metadata "
+                                       "attributes between sequences differ.")
+
+    all_fields_dict = {**seq_fields, **dynamic_fields, **seq_content_fields}
+    return build_dynamic_bnp_dataclass_obj(all_fields_dict)[0]
 
 
-
-def get_sequence_value(el: AIRRSequenceSet, region_type):
-    if region_type.FULL_SEQUENCE:
+def get_sequence_value(el: AIRRSequenceSet, region_type: RegionType = RegionType.IMGT_CDR3):
+    if region_type == region_type.FULL_SEQUENCE:
         return el.sequence, el.sequence_aa
     else:
         return getattr(el, region_type.value), getattr(el, region_type.value + "_aa")
