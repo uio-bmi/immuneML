@@ -4,8 +4,8 @@ import fisher
 import numpy as np
 
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class AbundanceEncoderHelper:
@@ -75,7 +75,7 @@ class AbundanceEncoderHelper:
 
     @staticmethod
     def _write_contingency_table(contingency_table, result_path):
-        contingency_table_path = result_path / 'contingency_table.csv'
+        contingency_table_path = PathBuilder.build(result_path) / 'contingency_table.csv'
 
         np.savetxt(contingency_table_path, contingency_table, fmt="%s", delimiter=",",
                    header="positive_present,negative_present,positive_absent,negative_absent", comments='')

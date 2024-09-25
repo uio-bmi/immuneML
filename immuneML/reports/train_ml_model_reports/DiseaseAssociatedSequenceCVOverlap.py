@@ -65,6 +65,10 @@ class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
         self.compare_in_assessment = compare_in_assessment
 
     def _generate(self) -> ReportResult:
+
+        assert self.state, (f"{self.__class__.__name__}: this report can only be used in combination with TrainMLModel "
+                            f"instruction. The instruction output is not available here so the report will be skipped.")
+
         PathBuilder.build(self.result_path)
 
         tables, figures = [], []
