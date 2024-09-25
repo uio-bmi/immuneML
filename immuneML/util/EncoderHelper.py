@@ -102,13 +102,14 @@ class EncoderHelper:
 
     @staticmethod
     def check_positive_class_labels(label_config: LabelConfiguration, location: str):
-        '''
+        """
         Performs checks for Encoders that explicitly predict a positive class. These Encoders can only be trained for a
         single binary label at a time.
-        '''
+        """
 
         labels = label_config.get_label_objects()
-        assert len(labels) == 1, f"{location}: this encoding works only for single label."
+        assert len(labels) == 1, (f"{location}: this encoding works only for single label, there are now "
+                                  f"{len(labels)} labels specified.")
 
         label = labels[0]
 
