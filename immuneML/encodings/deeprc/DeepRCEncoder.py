@@ -21,6 +21,11 @@ class DeepRCEncoder(DatasetEncoder):
 
     Note: sequences where count is None, the count value will be set to 1
 
+    **Dataset type:**
+
+    - RepertoireDatasets
+
+
     **YAML specification:**
 
     .. indent with spaces

@@ -29,11 +29,17 @@ from scripts.specification_util import update_docs_per_mapping
 class Word2VecEncoder(DatasetEncoder):
     """
 
-    Word2VecEncoder learns the vector representations of k-mers based on the context (receptor sequence). It works for
-    sequence and repertoire datasets. Similar idea was discussed in: Ostrovsky-Berman, M., Frankel, B., Polak, P. & Yaari, G.
+    Word2VecEncoder learns the vector representations of k-mers based on the context (receptor sequence).
+    Similar idea was discussed in: Ostrovsky-Berman, M., Frankel, B., Polak, P. & Yaari, G.
     Immune2vec: Embedding B/T Cell Receptor Sequences in ℝN Using Natural Language Processing. Frontiers in Immunology 12, (2021).
 
     This encoder relies on gensim's implementation of Word2Vec and KmerHelper for k-mer extraction. Currently it works on amino acid level.
+
+    **Dataset type:**
+
+    - SequenceDatasets
+
+    - RepertoireDatasets
 
 
     **Specification arguments:**
