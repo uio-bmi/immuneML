@@ -3,6 +3,7 @@ from bionumpy import DNAEncoding, AminoAcidEncoding
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.encodings import AlphabetEncoding
 import bionumpy as bnp
+from bionumpy.encodings.bool_encoding import bool_string
 
 
 @bnpdataclass
@@ -11,11 +12,11 @@ class AIRRSequenceSet:
     sequence: DNAEncoding = None
     quality: str = None
     sequence_aa: AminoAcidEncoding = None
-    rev_comp: bool = None
-    productive: bool = None
-    vj_in_frame: bool = None
-    stop_codon: bool = None
-    complete_vdj: bool = None
+    rev_comp: bool_string = None
+    productive: bool_string = None
+    vj_in_frame: bool_string = None
+    stop_codon: bool_string = None
+    complete_vdj: bool_string = None
     locus: str = None
     locus_species: str = None
     v_call: str = None
@@ -148,8 +149,8 @@ class AIRRSequenceSet:
     p5d2_length: int = None
     p3d2_length: int = None
     p5j_length: int = None
-    v_frameshift: bool = None
-    j_frameshift: bool = None
+    v_frameshift: bool_string = None
+    j_frameshift: bool_string = None
     d_frame: int = None
     d2_frame: int = None
     consensus_count: int = None
@@ -164,7 +165,7 @@ class AIRRSequenceSet:
     rearrangement_set_id: str = None
     germline_database: str = None
 
-    STR_TO_TYPE = {'str': str, 'int': int, 'float': float, 'bool': bool,
+    STR_TO_TYPE = {'str': str, 'int': int, 'float': float, 'bool_string': bool_string,
                    'AminoAcidEncoding': bnp.encodings.AminoAcidEncoding,
                    'DNAEncoding': bnp.encodings.DNAEncoding}
 
@@ -175,6 +176,6 @@ class AIRRSequenceSet:
     @classmethod
     def get_neutral_value(cls, field_type):
         neutral_values = {str: '', int: -1, DNAEncoding: '', AminoAcidEncoding: '', float: -1.,
-                          bool: True}
+                          bool_string: ''}
         return neutral_values[field_type]
 

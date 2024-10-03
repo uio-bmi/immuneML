@@ -57,8 +57,12 @@ class RandomSequenceDatasetImport(DataImport):
                                 0: 0.7 # 70% of the generated sequences will have class 0
     """
 
-    @staticmethod
-    def import_dataset(params, name: str) -> SequenceDataset:
+    def __init__(self, params: dict, dataset_name: str):
+        super().__init__({}, dataset_name)
+        self.params = params
+        self.dataset_name = dataset_name
+
+    def import_dataset(self) -> SequenceDataset:
         """
         Returns randomly generated receptor dataset according to the parameters;
 
@@ -79,10 +83,10 @@ class RandomSequenceDatasetImport(DataImport):
 
         """
         valid_keys = ["sequence_count", "length_probabilities", "labels", "result_path", 'region_type']
-        ParameterValidator.assert_all_in_valid_list(list(params.keys()), valid_keys, "RandomSequenceDatasetImport", "params")
+        ParameterValidator.assert_all_in_valid_list(list(self.params.keys()), valid_keys, "RandomSequenceDatasetImport", "params")
 
-        return RandomDatasetGenerator.generate_sequence_dataset(sequence_count=params["sequence_count"],
-                                                                length_probabilities=params["length_probabilities"],
-                                                                labels=params["labels"],
-                                                                path=params["result_path"],
-                                                                region_type=params['region_type'])
+        return RandomDatasetGenerator.generate_sequence_dataset(sequence_count=self.params["sequence_count"],
+                                                                length_probabilities=self.params["length_probabilities"],
+                                                                labels=self.params["labels"],
+                                                                path=self.params["result_path"],
+                                                                region_type=self.params['region_type'])

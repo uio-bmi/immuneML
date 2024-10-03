@@ -11,6 +11,8 @@ import numpy as np
 import yaml
 from bionumpy import EncodedArray
 from bionumpy.bnpdataclass import bnpdataclass
+from bionumpy.encoded_array import Encoding
+from bionumpy.encodings.string_encodings import StringEncoding
 
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.SequenceParams import Chain

@@ -5,6 +5,7 @@ from typing import Any, Dict, List
 from uuid import uuid4
 
 from bionumpy import AminoAcidEncoding, DNAEncoding, get_bufferclass_for_datatype
+from bionumpy.encodings.bool_encoding import BoolStringEncoding
 
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.SequenceParams import ChainPair, Chain, RegionType
@@ -19,9 +20,9 @@ class ReceptorSequence:
     sequence_id: str = ''
     sequence: DNAEncoding = ''
     sequence_aa: AminoAcidEncoding = ''
-    productive: bool = True
-    vj_in_frame: bool = True
-    stop_codon: bool = False
+    productive: BoolStringEncoding = True
+    vj_in_frame: BoolStringEncoding = True
+    stop_codon: BoolStringEncoding = False
     locus: str = ''
     locus_species: str = ''
     v_call: str = ''
@@ -34,6 +35,7 @@ class ReceptorSequence:
 
     def get_sequence(self, sequence_type: SequenceType = SequenceType.AMINO_ACID):
         return self.sequence_aa if sequence_type == SequenceType.AMINO_ACID else self.sequence
+
 
 @dataclass
 class Receptor:
@@ -127,13 +129,14 @@ class Repertoire:
         if not self.metadata:
             self.metadata = read_yaml(self.metadata_filename)
         if not self.dynamic_fields and 'type_dict_dynamic_fields' in self.metadata:
-            self.dynamic_fields = self.metadata['type_dict_dynamic_fields']
+            self.dynamic_fields = self.metadata.get('type_dict_dynamic_fields', {})
 
     @property
     def bnp_dataclass(self):
         if not self._bnp_dataclass:
             if self.dynamic_fields:
-                self._bnp_dataclass = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(self.dynamic_fields.items()))
+                self._bnp_dataclass = extend_dataclass_with_dynamic_fields(AIRRSequenceSet,
+                                                                           list(self.dynamic_fields.items()))
             else:
                 self._bnp_dataclass = AIRRSequenceSet
         return self._bnp_dataclass
@@ -149,7 +152,8 @@ class Repertoire:
         return bnp_read_from_file(self.data_filename, self.buffer_type, self.bnp_dataclass)
 
     def sequences(self, region_type: RegionType) -> List[ReceptorSequence]:
-        return make_sequences_from_data(self.data, list(self.dynamic_fields.keys()), region_type)
+        return make_sequences_from_data(self.data, list(self.dynamic_fields.keys()) if self.dynamic_fields else [],
+                                        region_type)
 
     def receptors(self, region_type: RegionType) -> List[Receptor]:
         return make_receptors_from_data(self.data, list(self.dynamic_fields.keys()),
@@ -242,4 +246,4 @@ def get_sequence_value(el: AIRRSequenceSet, region_type: RegionType = RegionType
     if region_type == region_type.FULL_SEQUENCE:
         return el.sequence, el.sequence_aa
     else:
-        return getattr(el, region_type.value), getattr(el, region_type.value + "_aa")
+        return getattr(el, region_type.value, ''), getattr(el, region_type.value + "_aa", '')

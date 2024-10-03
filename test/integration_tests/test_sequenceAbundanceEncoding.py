@@ -5,10 +5,10 @@ from unittest import TestCase
 import pandas as pd
 import yaml
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
@@ -39,7 +39,7 @@ class TestSequenceAbundanceEncoding(TestCase):
                                                                        True, True, False, False]}, path=path)
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"l1": [True, False]})
-        ImmuneMLExporter.export(dataset, path)
+        AIRRExporter.export(dataset, path)
 
         specs = {
             "definitions": {

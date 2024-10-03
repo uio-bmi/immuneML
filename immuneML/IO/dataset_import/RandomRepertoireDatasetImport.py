@@ -62,14 +62,17 @@ class RandomRepertoireDatasetImport(DataImport):
                                 False: 0.5
 
     """
+    def __init__(self, params: dict, dataset_name: str):
+        super().__init__({}, dataset_name)
+        self.params = params
+        self.dataset_name = dataset_name
 
-    @staticmethod
-    def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
+    def import_dataset(self) -> RepertoireDataset:
         valid_keys = ["result_path", "repertoire_count", "sequence_count_probabilities", "sequence_length_probabilities", "labels"]
-        ParameterValidator.assert_all_in_valid_list(list(params.keys()), valid_keys, "RandomRepertoireDatasetImport", "params")
+        ParameterValidator.assert_all_in_valid_list(list(self.params.keys()), valid_keys, "RandomRepertoireDatasetImport", "params")
 
-        return RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=params["repertoire_count"],
-                                                                  sequence_count_probabilities=params["sequence_count_probabilities"],
-                                                                  sequence_length_probabilities=params["sequence_length_probabilities"],
-                                                                  labels=params["labels"],
-                                                                  path=params["result_path"])
+        return RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=self.params["repertoire_count"],
+                                                                  sequence_count_probabilities=self.params["sequence_count_probabilities"],
+                                                                  sequence_length_probabilities=self.params["sequence_length_probabilities"],
+                                                                  labels=self.params["labels"],
+                                                                  path=self.params["result_path"])

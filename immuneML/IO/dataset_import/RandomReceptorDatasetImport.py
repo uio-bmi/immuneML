@@ -60,9 +60,12 @@ class RandomReceptorDatasetImport(DataImport):
                                 0: 0.7 # 70% of the generated receptors will have class 0
 
     """
+    def __init__(self, params: dict, dataset_name: str):
+        super().__init__({}, dataset_name)
+        self.params = params
+        self.dataset_name = dataset_name
 
-    @staticmethod
-    def import_dataset(params, name: str) -> ReceptorDataset:
+    def import_dataset(self) -> ReceptorDataset:
         """
         Returns randomly generated receptor dataset according to the parameters;
 
@@ -86,10 +89,10 @@ class RandomReceptorDatasetImport(DataImport):
 
         """
         valid_keys = ["receptor_count", "chain_1_length_probabilities", "chain_2_length_probabilities", "labels", "result_path"]
-        ParameterValidator.assert_all_in_valid_list(list(params.keys()), valid_keys, "RandomReceptorDatasetImport", "params")
+        ParameterValidator.assert_all_in_valid_list(list(self.params.keys()), valid_keys, "RandomReceptorDatasetImport", "params")
 
-        return RandomDatasetGenerator.generate_receptor_dataset(receptor_count=params["receptor_count"],
-                                                                chain_1_length_probabilities=params["chain_1_length_probabilities"],
-                                                                chain_2_length_probabilities=params["chain_2_length_probabilities"],
-                                                                labels=params["labels"],
-                                                                path=params["result_path"])
+        return RandomDatasetGenerator.generate_receptor_dataset(receptor_count=self.params["receptor_count"],
+                                                                chain_1_length_probabilities=self.params["chain_1_length_probabilities"],
+                                                                chain_2_length_probabilities=self.params["chain_2_length_probabilities"],
+                                                                labels=self.params["labels"],
+                                                                path=self.params["result_path"])

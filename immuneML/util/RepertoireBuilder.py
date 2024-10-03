@@ -1,10 +1,12 @@
 import uuid
+from dataclasses import fields
 from pathlib import Path
 
 import pandas as pd
 
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.SequenceSet import ReceptorSequence, Repertoire
-from immuneML.data_model.bnp_util import write_yaml
+from immuneML.data_model.bnp_util import write_yaml, build_dynamic_bnp_dataclass_obj
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -39,6 +41,9 @@ class RepertoireBuilder:
 
             df = pd.DataFrame({
                 'cdr3_aa': sequence_list,
+                'cdr3': ['' for _ in range(len(sequence_list))],
+                'sequence_id': [uuid.uuid4().hex for _ in range(len(sequence_list))],
+                'productive': [True for _ in range(len(sequence_list))]
             })
 
             if seq_metadata is None:
@@ -56,7 +61,10 @@ class RepertoireBuilder:
             metadata = {**metadata, **{"subject_id": subject_ids[rep_index]}}
             write_yaml(rep_path / f"rep_{rep_index}.yaml", metadata)
 
-            repertoire = Repertoire(rep_path / f"rep_{rep_index}.tsv", rep_path / f"rep_{rep_index}.yaml")
+            bnp_dc_obj, _ = build_dynamic_bnp_dataclass_obj(df.to_dict(orient='list'))
+
+            repertoire = Repertoire(rep_path / f"rep_{rep_index}.tsv", rep_path / f"rep_{rep_index}.yaml", metadata,
+                                    _bnp_dataclass=type(bnp_dc_obj))
             repertoires.append(repertoire)
 
         df = pd.DataFrame({**{"filename": [repertoire.data_filename for repertoire in repertoires],
