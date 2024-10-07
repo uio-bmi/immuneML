@@ -7,6 +7,7 @@ from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.environment.Constants import Constants
@@ -49,13 +50,15 @@ class TestMotifEncoder(TestCase):
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2], positive_class=1)
 
-        encoder = MotifEncoder.build_object(dataset, **{
+        default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "encodings/", "motif")
+
+        encoder = MotifEncoder.build_object(dataset, **{**default_params, **{
                 "min_positions": 1,
                 "max_positions": 2,
                 "min_precision": 0.9,
                 "min_recall": 0.5,
                 "min_true_positives": 1,
-            })
+            }})
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(
             result_path=path / "encoder_result/",

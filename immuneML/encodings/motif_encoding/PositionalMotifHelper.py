@@ -11,7 +11,7 @@ from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
-
+from sklearn.metrics import precision_score, recall_score
 
 class PositionalMotifHelper:
 
@@ -66,6 +66,18 @@ class PositionalMotifHelper:
                                       index, amino_acid in zip(indices, amino_acids)])
 
     @staticmethod
+    def check_motif(motif, np_sequences, y_true, weights, min_precision, min_true_positives, min_recall):
+        indices, amino_acids = motif
+
+        pred = PositionalMotifHelper.test_motif(np_sequences, indices, amino_acids)
+
+        if sum(pred & y_true) >= min_true_positives:
+            if precision_score(y_true=y_true, y_pred=pred, sample_weight=weights) >= min_precision:
+                if len(indices) in min_recall.keys():
+                    if recall_score(y_true=y_true, y_pred=pred, sample_weight=weights) >= min_recall[len(indices)]:
+                        return motif
+
+    @staticmethod
     def _test_new_position(existing_positions, new_position, negative_aa=False):
         if new_position in existing_positions:
             return False
@@ -90,12 +102,19 @@ class PositionalMotifHelper:
         return new_index, new_aas
 
     @staticmethod
-    def extend_motif(base_motif, np_sequences, legal_positional_aas, count_threshold=10, negative_aa=False):
+    def extend_motif(base_motif, np_sequences, legal_positional_aas, count_threshold=10, negative_aa=False, no_gaps=False):
         new_candidates = []
 
         sequence_length = len(np_sequences[0])
 
-        for new_position in range(sequence_length):
+        if no_gaps:
+            new_positions = [base_motif[0][-1] + 1]
+            if new_positions[0] >= sequence_length:
+                new_positions = []
+        else:
+            new_positions = range(len(np_sequences[0]))
+
+        for new_position in new_positions:
             if PositionalMotifHelper._test_new_position(base_motif[0], new_position, negative_aa=negative_aa):
                 for new_aa in legal_positional_aas[new_position]:
                     new_aa = new_aa.lower() if negative_aa else new_aa
@@ -161,7 +180,7 @@ class PositionalMotifHelper:
             with Pool(params.pool_size) as pool:
                 partial_func = partial(PositionalMotifHelper.extend_motif, np_sequences=np_sequences,
                                        legal_positional_aas=legal_positional_aas, count_threshold=params.count_threshold,
-                                       negative_aa=False)
+                                       negative_aa=False, no_gaps=params.no_gaps)
                 new_candidates = pool.map(partial_func, candidate_motifs[n_positions - 1])
 
                 candidate_motifs[n_positions] = list(
