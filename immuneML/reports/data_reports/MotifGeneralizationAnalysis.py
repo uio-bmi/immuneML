@@ -62,6 +62,8 @@ class MotifGeneralizationAnalysis(DataReport):
 
     - min_positions (int): :py:obj:`~immuneML.encodings.motif_encoding.MotifEncoder.MotifEncoder` parameter. The minimum motif size (see also: max_positions). The default value for min_positions is 1.
 
+    - no_gaps (bool): :py:obj:`~immuneML.encodings.motif_encoding.MotifEncoder.MotifEncoder` parameter. Must be set to True if only contiguous motifs (position-specific k-mers) are allowed. By default, no_gaps is False, meaning both gapped and ungapped motifs are searched for.
+
     - smoothen_combined_precision (bool): whether to add a smoothed line representing the combined precision to the precision-vs-TP plot. When set to True, this may take considerable extra time to compute. By default, plot_smoothed_combined_precision is set to True.
 
     - min_points_in_window (int): Parameter for smoothing the combined_precision line in the precision-vs-TP plot through lognormal kernel smoothing with adaptive window size. This parameter determines the minimum number of points that need to be present in a window to determine the adaptive window size. By default, min_points_in_window is 50.
@@ -97,7 +99,7 @@ class MotifGeneralizationAnalysis(DataReport):
 
     def __init__(self, training_set_identifier_path: str = None, training_percentage: float = None,
                  max_positions: int = None, min_positions: int = None, min_precision: float = None, min_recall: float = None,
-                 min_true_positives: int = None,
+                 min_true_positives: int = None, no_gaps: bool = False,
                  test_precision_threshold: float = None,
                  split_by_motif_size: bool = None, random_seed: int = None, label: dict = None,
                  min_points_in_window: int = None, smoothing_constant1: float = None, smoothing_constant2: float = None,
@@ -113,6 +115,7 @@ class MotifGeneralizationAnalysis(DataReport):
         self.test_precision_threshold = test_precision_threshold
         self.min_recall = min_recall
         self.min_true_positives = min_true_positives
+        self.no_gaps = no_gaps
         self.split_by_motif_size = split_by_motif_size
         self.min_points_in_window = min_points_in_window
         self.smoothing_constant1 = smoothing_constant1
@@ -132,6 +135,7 @@ class MotifGeneralizationAnalysis(DataReport):
 
         ParameterValidator.assert_type_and_value(kwargs["max_positions"], int, location, "max_positions", min_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_positions"], int, location, "min_positions", min_inclusive=1)
+        ParameterValidator.assert_type_and_value(kwargs["no_gaps"], bool, location, "no_gaps")
         assert kwargs["max_positions"] >= kwargs["min_positions"], f"{location}: max_positions ({kwargs['max_positions']}) must be greater than or equal to min_positions ({kwargs['min_positions']})"
 
         ParameterValidator.assert_type_and_value(kwargs["min_precision"], (int, float), location, "min_precision", min_inclusive=0, max_inclusive=1)
@@ -306,6 +310,7 @@ class MotifGeneralizationAnalysis(DataReport):
                                                             "min_precision": self.min_precision,
                                                             "min_recall": self.min_recall,
                                                             "min_true_positives": self.min_true_positives,
+                                                             "no_gaps": self.no_gaps,
                                                             "label": None,
                                                             "name": f"motif_encoder"})
 

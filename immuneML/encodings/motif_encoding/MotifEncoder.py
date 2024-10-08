@@ -51,6 +51,8 @@ class MotifEncoder(DatasetEncoder):
 
     - min_positions (int): The minimum motif size (see also: max_positions). The default value for max_positions is 1.
 
+    - no_gaps (bool): Must be set to True if only contiguous motifs (position-specific k-mers) are allowed. By default, no_gaps is False, meaning both gapped and ungapped motifs are searched for.
+
     - min_precision (float): The minimum precision threshold for keeping a motif. The default value for min_precision is 0.8.
 
     - min_recall (float): The minimum recall threshold for keeping a motif. The default value for min_precision is 0.
@@ -95,14 +97,11 @@ class MotifEncoder(DatasetEncoder):
                             4: 0.001
                         min_true_positives: 10
 
-
-
-
     """
 
     def __init__(self, max_positions: int = None, min_positions: int = None,
                  min_precision: float = None, min_recall: dict = None,
-                 min_true_positives: int = None,
+                 min_true_positives: int = None, no_gaps: bool = False,
                  candidate_motif_filepath: str = None, label: str = None, name: str = None):
         super().__init__(name=name)
         self.max_positions = max_positions
@@ -110,6 +109,7 @@ class MotifEncoder(DatasetEncoder):
         self.min_precision = min_precision
         self.min_recall = min_recall
         self.min_true_positives = min_true_positives
+        self.no_gaps = no_gaps
         self.candidate_motif_filepath = Path(candidate_motif_filepath) if candidate_motif_filepath is not None else None
         self.learned_motif_filepath = None
 
@@ -117,13 +117,14 @@ class MotifEncoder(DatasetEncoder):
         self.context = None
 
     @staticmethod
-    def _prepare_parameters(max_positions: int = None, min_positions: int = None, min_precision: float = None, min_recall: dict = None,
+    def _prepare_parameters(max_positions: int = None, min_positions: int = None, no_gaps: bool = None, min_precision: float = None, min_recall: dict = None,
                             min_true_positives: int = None, candidate_motif_filepath: str = None, label: str = None, name: str = None):
 
         location = MotifEncoder.__name__
 
         ParameterValidator.assert_type_and_value(max_positions, int, location, "max_positions", min_inclusive=1)
         ParameterValidator.assert_type_and_value(min_positions, int, location, "min_positions", min_inclusive=1)
+        ParameterValidator.assert_type_and_value(no_gaps, bool, location, "no_gaps")
         assert max_positions >= min_positions, f"{location}: max_positions ({max_positions}) must be greater than or equal to min_positions ({min_positions})"
 
         ParameterValidator.assert_type_and_value(min_precision, (int, float), location, "min_precision", min_inclusive=0, max_inclusive=1)
@@ -153,6 +154,7 @@ class MotifEncoder(DatasetEncoder):
         return {
             "max_positions": max_positions,
             "min_positions": min_positions,
+            "no_gaps": no_gaps,
             "min_precision": min_precision,
             "min_recall": min_recall,
             "min_true_positives": min_true_positives,
@@ -206,7 +208,7 @@ class MotifEncoder(DatasetEncoder):
             data = {}
 
             data["motif_size"] = list(range(self.min_positions, self.max_positions + 1))
-            data["min_precision"] = [self.min_precision] * self.max_positions
+            data["min_precision"] = [self.min_precision] * len(data["motif_size"])
             data["min_recall"] = [self.min_recall.get(motif_size, 1) for motif_size in range(self.min_positions, self.max_positions + 1)]
 
             all_motif_sizes = [len(motif[0]) for motif in learned_motifs]
@@ -215,7 +217,8 @@ class MotifEncoder(DatasetEncoder):
             df = pd.DataFrame(data)
             df.to_csv(motif_stats_filepath, index=False, sep="\t")
         except Exception as e:
-            warnings.warn(f"{MotifEncoder.__name__}: could not write motif stats. Exception was: {e}")
+            warnings.warn(f"{MotifEncoder.__name__}: could not write motif stats. Exception was: {e},"
+                          f"{data}")
 
     def get_encoded_dataset_from_motifs(self, dataset, motifs, params):
         labels = EncoderHelper.encode_element_dataset_labels(dataset, params.label_config)
@@ -277,7 +280,8 @@ class MotifEncoder(DatasetEncoder):
     def _compute_candidate_motifs(self, full_dataset, pool_size=4):
         np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(full_dataset)
         params = PositionalMotifParams(max_positions=self.max_positions, min_positions=self.min_positions,
-                                       count_threshold=self.min_true_positives, pool_size=pool_size)
+                                       count_threshold=self.min_true_positives, no_gaps=self.no_gaps,
+                                       pool_size=pool_size)
         return PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params)
 
     def _get_y_true(self, dataset, label_config: LabelConfiguration):
@@ -325,7 +329,8 @@ class MotifEncoder(DatasetEncoder):
         weights = dataset.get_example_weights()
 
         with Pool(pool_size) as pool:
-            partial_func = partial(self._check_motif,  np_sequences=np_sequences, y_true=y_true, weights=weights)
+            partial_func = partial(PositionalMotifHelper.check_motif, np_sequences=np_sequences, y_true=y_true, weights=weights,
+                                   min_precision=self.min_precision, min_true_positives=self.min_true_positives, min_recall=self.min_recall)
 
             filtered_motifs = list(filter(None, pool.map(partial_func, candidate_motifs)))
 
@@ -335,19 +340,6 @@ class MotifEncoder(DatasetEncoder):
         logging.info(f"{MotifEncoder.__name__}: filtering {motif_type} done, {len(filtered_motifs)} motifs left")
 
         return filtered_motifs
-
-    def _check_motif(self, motif, np_sequences, y_true, weights):
-        indices, amino_acids = motif
-
-        pred = PositionalMotifHelper.test_motif(np_sequences, indices, amino_acids)
-
-        if sum(pred & y_true) >= self.min_true_positives:
-            if precision_score(y_true=y_true, y_pred=pred, sample_weight=weights) >= self.min_precision:
-                if len(indices) in self.min_recall.keys():
-                    if recall_score(y_true=y_true, y_pred=pred, sample_weight=weights) >= self.min_recall[len(indices)]:
-                        return motif
-
-
 
     def _construct_encoded_data_matrix(self, dataset, motifs, label_config, number_of_processes):
         feature_names = [PositionalMotifHelper.motif_to_string(indices, amino_acids, motif_sep="-", newline=False)
@@ -360,11 +352,11 @@ class MotifEncoder(DatasetEncoder):
         logging.info(f"{MotifEncoder.__name__}: building encoded data matrix...")
 
         with Pool(number_of_processes) as pool:
-            predictions = pool.starmap(partial(self._test_motif, np_sequences=np_sequences), motifs)
-            conf_matrix_raw = np.array(pool.map(partial(self._get_confusion_matrix, y_true=y_true, weights=None), predictions))
+            predictions = pool.starmap(partial(MotifEncoder._test_motif, np_sequences=np_sequences), motifs)
+            conf_matrix_raw = np.array(pool.map(partial(MotifEncoder._get_confusion_matrix, y_true=y_true, weights=None), predictions))
 
             if weights is not None:
-                conf_matrix_weighted = np.array(pool.map(partial(self._get_confusion_matrix, y_true=y_true, weights=weights), predictions))
+                conf_matrix_weighted = np.array(pool.map(partial(MotifEncoder._get_confusion_matrix, y_true=y_true, weights=weights), predictions))
             else:
                 conf_matrix_weighted = None
 
@@ -397,25 +389,18 @@ class MotifEncoder(DatasetEncoder):
 
     def _get_predictions(self, np_sequences, motifs, number_of_processes):
         with Pool(number_of_processes) as pool:
-            partial_func = partial(self._test_motif, np_sequences=np_sequences)
+            partial_func = partial(MotifEncoder._test_motif, np_sequences=np_sequences)
             predictions = pool.starmap(partial_func, motifs)
 
         return predictions
 
-    def _test_motif(self, indices, amino_acids, np_sequences):
+    @staticmethod
+    def _test_motif(indices, amino_acids, np_sequences):
         return PositionalMotifHelper.test_motif(np_sequences=np_sequences, indices=indices, amino_acids=amino_acids)
 
-    def _get_confusion_matrix(self, pred, y_true, weights):
+    @staticmethod
+    def _get_confusion_matrix(pred, y_true, weights):
         return confusion_matrix(y_true=y_true, y_pred=pred, sample_weight=weights).ravel()
-    #
-    # def _get_precision(self, pred, y_true, weights):
-    #     return precision_score(y_true=y_true, y_pred=pred, sample_weight=weights, zero_division=0)
-    #
-    # def _get_recall(self, pred, y_true, weights):
-    #     return recall_score(y_true=y_true, y_pred=pred, sample_weight=weights, zero_division=0)
-
-    # def _get_tp(self, pred, y_true):
-    #     return sum(pred & y_true)
 
     def set_context(self, context: dict):
         self.context = context
