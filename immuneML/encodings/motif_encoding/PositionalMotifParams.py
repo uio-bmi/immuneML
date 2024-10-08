@@ -7,3 +7,4 @@ class PositionalMotifParams:
     count_threshold: int
     pool_size: int = 4
     allow_negative_aas: bool = False
+    no_gaps: bool = False

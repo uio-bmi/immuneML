@@ -74,7 +74,7 @@ rep2.tsv,2""")
         dataset = TenxGenomicsImport.import_dataset(params, "tenx_dataset_sequence")
 
         self.assertEqual(6, dataset.get_example_count())
-        self.assertEqual(6, len(dataset.get_filenames()))
+        self.assertEqual(6, len(dataset.filenames))
 
         data = dataset.get_data(1)
         for receptorseq in data:

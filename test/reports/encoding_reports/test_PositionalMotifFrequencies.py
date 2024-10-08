@@ -82,6 +82,7 @@ class TestPositionalMotifFrequencies(TestCase):
                 "min_precision": 0.9,
                 "min_recall": 0.5,
                 "min_true_positives": 1,
+                "no_gaps": False
             }
         )
 

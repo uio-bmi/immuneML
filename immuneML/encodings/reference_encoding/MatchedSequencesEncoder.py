@@ -137,9 +137,6 @@ class MatchedSequencesEncoder(DatasetEncoder):
                 ("encoding_params", encoding_params_desc),)
 
     def _encode_new_dataset(self, dataset, params: EncoderParams):
-        encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires, labels=dataset.labels,
-                                            metadata_file=dataset.metadata_file)
-
         encoded_repertoires, labels = self._encode_repertoires(dataset, params)
 
         encoded_repertoires = self._normalize(dataset, encoded_repertoires) if self.normalize else encoded_repertoires
@@ -147,14 +144,15 @@ class MatchedSequencesEncoder(DatasetEncoder):
         feature_annotations = None if self.sum_matches else self._get_feature_info()
         feature_names = [f"sum_of_{self.reads.value}_reads"] if self.sum_matches else list(feature_annotations["sequence_desc"])
 
-        encoded_dataset.add_encoded_data(EncodedData(
+        encoded_dataset = dataset.clone()
+        encoded_dataset.encoded_data = EncodedData(
             examples=encoded_repertoires,
             labels=labels,
             feature_names=feature_names,
             feature_annotations=feature_annotations,
             example_ids=[repertoire.identifier for repertoire in dataset.get_data()],
             encoding=MatchedSequencesEncoder.__name__
-        ))
+        )
 
         return encoded_dataset
 
