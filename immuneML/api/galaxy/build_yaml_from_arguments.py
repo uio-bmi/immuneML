@@ -187,7 +187,7 @@ def build_specs(args):
                 "labels": [],
                 "dataset": "dataset",
                 "strategy": "GridSearch",
-                "metrics": [],
+                "metrics": ["accuracy", "balanced_accuracy", "precision", "recall", "auc"],
                 "number_of_processes": 8,
                 "reports": ["benchmark"],
                 "optimization_metric": "accuracy",
