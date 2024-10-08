@@ -28,12 +28,15 @@ class MotifGeneralizationAnalysis(DataReport):
     :py:obj:`~immuneML.encodings.motif_encoding.MotifEncoder.MotifEncoder`
     on the training set and plots the precision/recall and precision/true positive predictions of motifs
     on both the training and validation sets. This can be used to:
+
     - determine the optimal recall cutoff for motifs of a given size
     - investigate how well motifs learned on a training set generalize to a test set
 
     After running this report and determining the optimal recall cutoffs, the report
     :py:obj:`~immuneML.reports.encoding_reports.MotifTestSetPerformance.MotifTestSetPerformance` can be run to
     plot the performance on an independent test set.
+
+    Note: the MotifEncoder (and thus this report) can only be used for sequences of the same length.
 
     **Specification arguments:**
 

@@ -90,7 +90,7 @@ class GenericImport(DataImport):
                         import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
                         region_type: IMGT_CDR3 # what part of the sequence to import
                         column_mapping: # column mapping file: immuneML
-                            file_column_amino_acids: sequence_aas
+                            file_column_amino_acids: sequence_aa
                             file_column_v_genes: v_call
                             file_column_j_genes: j_call
                             file_column_frequencies: duplicate_count

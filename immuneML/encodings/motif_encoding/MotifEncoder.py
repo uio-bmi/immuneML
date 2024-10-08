@@ -25,7 +25,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class MotifEncoder(DatasetEncoder):
     """
-    This encoder enumerates every possible positional motif, and keeps only the motifs associated with the positive class.
+    This encoder enumerates every possible positional motif in a sequence dataset, and keeps only the motifs associated with the positive class.
     A 'motif' is defined as a combination of position-specific amino acids. These motifs may contain one or multiple gaps.
     Motifs are filtered out based on a minimal precision and recall threshold for predicting the positive class.
 
@@ -39,6 +39,10 @@ class MotifEncoder(DatasetEncoder):
     learn a minimal set of compatible motifs for predicting the positive class.
     Alternatively, it may be combined with scikit-learn methods, such as for example :py:obj:`~immuneML.ml_methods.LogisticRegression`,
     to learn a weight per motif.
+
+    **Dataset type:**
+
+    - SequenceDatasets
 
 
     **Specification arguments:**

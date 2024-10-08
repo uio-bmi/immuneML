@@ -6,6 +6,16 @@ The class docstrings are used to automatically generate the documentation web pa
 
 #. Optional extended description, including any references or specific cases that should bee considered. For instance: if a class can only be used for a particular dataset type. Compatibility between Encoders, MLMethods and Reports should also be described.
 
+#. For encoders, the appropriate dataset type(s). For example:
+
+   .. code::
+
+     **Dataset type:**
+
+     - SequenceDatasets
+
+     - RepertoireDatasets
+
 #. A list of arguments, when applicable. This should follow the format below:
 
    .. code::

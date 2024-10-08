@@ -26,6 +26,11 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
     Any sequence within a given hamming distance from a positive training sequence will be classified positive,
     all other sequences will be classified negative.
 
+    **Dataset type:**
+
+    - SequenceDatasets
+
+
     **Specification arguments:**
 
     - hamming_distance (int): Maximum number of differences allowed between any positive sequence of the training set and a

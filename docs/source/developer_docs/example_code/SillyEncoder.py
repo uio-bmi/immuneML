@@ -16,6 +16,14 @@ class SillyEncoder(DatasetEncoder):
     This SillyEncoder class is a placeholder for a real encoder.
     It computes a set of random numbers as features for a given dataset.
 
+    **Dataset type:**
+
+    - SequenceDatasets
+
+    - ReceptorDatasets
+
+    - RepertoireDatasets
+
 
     **Specification arguments:**
 
