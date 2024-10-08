@@ -19,9 +19,15 @@ class TCRdistEncoder(DatasetEncoder):
     For the implementation, `TCRdist3 <https://tcrdist3.readthedocs.io/en/latest/>`_ library was used (source code available
     `here <https://github.com/kmayerb/tcrdist3>`_).
 
+    **Dataset type:**
+
+    - ReceptorDatasets
+
+
     **Specification arguments:**
 
     - cores (int): number of processes to use for the computation
+
 
     **YAML specification:**
 

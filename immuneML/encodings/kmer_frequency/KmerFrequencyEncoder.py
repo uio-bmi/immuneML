@@ -28,6 +28,14 @@ class KmerFrequencyEncoder(DatasetEncoder):
     A k-mer is a sequence of letters of length k into which an immune receptor sequence can be decomposed.
     K-mers can be defined in different ways, as determined by the sequence_encoding.
 
+    **Dataset type:**
+
+    - SequenceDatasets
+
+    - ReceptorDatasets
+
+    - RepertoireDatasets
+
 
     **Specification arguments:**
 

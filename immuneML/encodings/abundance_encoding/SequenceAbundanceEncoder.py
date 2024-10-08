@@ -38,6 +38,11 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
     For full example of using this encoder, see :ref:`Reproduction of the CMV status predictions study`.
 
+    **Dataset type:**
+
+    - RepertoireDatasets
+
+
     **Specification arguments:**
 
     - comparison_attributes (list): The attributes to be considered to group receptors into clonotypes. Only the fields specified in

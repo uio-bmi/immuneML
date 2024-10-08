@@ -40,6 +40,11 @@ class KmerAbundanceEncoder(DatasetEncoder):
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
     See :ref:`Reproduction of the CMV status predictions study` for an example using :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
 
+    **Dataset type:**
+
+    - RepertoireDatasets
+
+
     **Specification arguments:**
 
     - p_value_threshold (float): The p value threshold to be used by the statistical test.
