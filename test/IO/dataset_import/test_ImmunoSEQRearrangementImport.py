@@ -80,7 +80,7 @@ rep2.tsv,TRB,1234a,no"""
 
         dataset = ImmunoSEQRearrangementImport(params, dataset_name).import_dataset()
 
-        self.assertEqual(dataset.repertoires[0].sequences(RegionType.IMGT_CDR3)[1].vj_in_frame, 'True')
+        self.assertEqual(dataset.repertoires[0].sequences(RegionType.IMGT_CDR3)[1].vj_in_frame, 'T')
 
         self.assertListEqual(list(dataset.repertoires[0].data.duplicate_count), [10, 1772, 1763, -1, 566, 506, 398, 394, 363, 363])
         self.assertListEqual(dataset.repertoires[0].data.locus.tolist(), [Chain.BETA.value for _ in range(10)])
@@ -124,7 +124,7 @@ rep2.tsv,TRB,1234a,no"""
 
         seqs = [sequence for sequence in dataset.get_data()]
         self.assertTrue(seqs[0].sequence_aa in ["ASSLPGTNTGELF", "SVEESYEQY"])  # OSX/windows
-        self.assertEqual('True', seqs[0].vj_in_frame)
+        self.assertEqual('T', seqs[0].vj_in_frame)
         self.assertTrue(seqs[0].v_call in ['TRBV7-9*01', 'TRBV29-1*01'])  # OSX/windows
         self.assertTrue(seqs[0].j_call in ['TRBJ2-2*01', 'TRBJ2-7*01'])  # OSX/windows
 

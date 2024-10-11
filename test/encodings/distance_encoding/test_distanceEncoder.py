@@ -6,7 +6,7 @@ from unittest import TestCase
 import numpy as np
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.distance_encoding.DistanceEncoder import DistanceEncoder
 from immuneML.encodings.distance_encoding.DistanceMetricType import DistanceMetricType

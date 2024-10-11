@@ -124,7 +124,7 @@ class IGoRImport(DataImport):
             df["cdr3_aa"] = df["cdr3"].apply(IGoRImport.translate_sequence)
 
         if 'vj_in_frame' in df.columns:
-            df['vj_in_frame'] = df['vj_in_frame'].astype(str).replace('1', 'True').replace('0', 'False')
+            df['vj_in_frame'] = df['vj_in_frame'].astype(str).replace('1', 'T').replace('0', 'F')
 
         if 'anchors_found' in df.columns:
             df = df[df.anchors_found == 1]

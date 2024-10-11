@@ -4,7 +4,7 @@ import unittest
 
 from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.api.galaxy.build_train_gen_model_specs import main as yamlbuilder_main
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder

@@ -6,7 +6,7 @@ import pandas as pd
 import yaml
 
 from immuneML.api.galaxy.build_dataset_overview_yaml import main as yamlbuilder_main
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder

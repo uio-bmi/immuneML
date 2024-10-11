@@ -1,4 +1,5 @@
 import copy
+import itertools
 import logging
 import shutil
 import typing
@@ -214,31 +215,8 @@ class ReceptorDataset(ElementDataset):
 
 
 def make_all_fields_dict_from_receptors(receptors: List[Receptor], region_type: RegionType = RegionType.IMGT_CDR3):
-    all_fields = {seq_field.name: [] for seq_field in fields(AIRRSequenceSet)}
-    field_types = {seq_field.name: seq_field.type for seq_field in fields(AIRRSequenceSet)}
-    dynamic_fields = {}
-
-    for index, receptor in enumerate(receptors):
-        for seq_index, seq in enumerate([receptor.chain_1, receptor.chain_2]):
-            for key in seq.metadata.keys():
-                if key in all_fields:
-                    all_fields[key].append(seq.metadata[key])
-                elif key in dynamic_fields:
-                    dynamic_fields[key].append(seq.metadata[key])
-                else:
-                    dynamic_fields[key] = [None for _ in range(index * 2 + seq_index)] + [seq.metadata[key]]
-            for key in [f.name for f in fields(ReceptorSequence) if
-                        f.name not in ['metadata', 'sequence_aa', 'sequence']]:
-                all_fields[key].append(getattr(seq, key))
-            all_fields[region_type.value].append(seq.sequence)
-            all_fields[region_type.value + "_aa"].append(seq.sequence_aa)
-
-    for field, values in all_fields.items():
-        if all(val is None for val in values) or isinstance(values, list) and len(values) == 0:
-            neutral_val = AIRRSequenceSet.get_neutral_value(field_types[field])
-            all_fields[field] = [neutral_val for _ in range(len(receptors * 2))]
-
-    return {**all_fields, **dynamic_fields}
+    sequences = list(itertools.chain.from_iterable([r.chain_1, r.chain_2] for r in receptors))
+    return make_all_fields_dict_from_sequences(sequences, region_type)
 
 
 def make_all_fields_dict_from_sequences(sequences: List[ReceptorSequence],
@@ -248,6 +226,7 @@ def make_all_fields_dict_from_sequences(sequences: List[ReceptorSequence],
     dynamic_fields = {}
 
     for index, sequence in enumerate(sequences):
+
         for key in sequence.metadata.keys():
             if key in all_fields:
                 all_fields[key].append(sequence.metadata[key])
@@ -255,9 +234,15 @@ def make_all_fields_dict_from_sequences(sequences: List[ReceptorSequence],
                 dynamic_fields[key].append(sequence.metadata[key])
             else:
                 dynamic_fields[key] = ['' for _ in range(index)] + [sequence.metadata[key]]
-        for key in [f.name for f in fields(ReceptorSequence) if
-                    f.name not in ['metadata', 'sequence_aa', 'sequence']]:
+
+        for missing_key in dynamic_fields.keys():
+            if len(dynamic_fields[missing_key]) == index:
+                dynamic_fields[missing_key].append('')
+
+        keys_not_to_add = ['metadata', 'sequence_aa', 'sequence'] + list(sequence.metadata.keys())
+        for key in [f.name for f in fields(ReceptorSequence) if f.name not in keys_not_to_add]:
             all_fields[key].append(getattr(sequence, key))
+
         all_fields[region_type.value].append(sequence.sequence)
         all_fields[region_type.value + "_aa"].append(sequence.sequence_aa)
 

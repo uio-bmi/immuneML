@@ -5,7 +5,7 @@ import yaml
 from yaml import YAMLError
 
 from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression

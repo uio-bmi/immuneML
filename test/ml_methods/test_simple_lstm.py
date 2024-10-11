@@ -2,8 +2,8 @@ import shutil
 
 import pandas as pd
 
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.SimpleLSTM import SimpleLSTM

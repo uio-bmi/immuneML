@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.util.PositionHelper import PositionHelper
 
 

@@ -3,7 +3,7 @@ import shutil
 from unittest import TestCase
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from immuneML.encodings.word2vec.model_creator.ModelType import ModelType
 from immuneML.environment.Constants import Constants

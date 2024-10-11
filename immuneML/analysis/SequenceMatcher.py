@@ -56,29 +56,29 @@ class SequenceMatcher:
         :param max_distance: max allowed Levenshtein distance between two sequences to be considered a match
         :return: True if chain, v_gene and j_gene are the same and sequences are within given Levenshtein distance
         """
-        return reference_sequence.metadata.locus == original_sequence.metadata.locus \
-            and self.matches_gene(reference_sequence.metadata.v_call, original_sequence.metadata.v_call) \
-            and self.matches_gene(reference_sequence.metadata.j_call, original_sequence.metadata.j_call) \
+        return reference_sequence.locus == original_sequence.locus \
+            and self.matches_gene(reference_sequence.v_call, original_sequence.v_call) \
+            and self.matches_gene(reference_sequence.j_call, original_sequence.j_call) \
             and edit_distance(original_sequence.get_sequence(), reference_sequence.get_sequence()) <= max_distance
 
     def match_repertoire(self, repertoire: Repertoire, index: int, reference_sequences: list, max_distance: int,
                          summary_type: SequenceMatchingSummaryType) -> dict:
 
         matched = {"sequences": [], "repertoire": repertoire.identifier, "repertoire_index": index}
-        arguments = [(seq, reference_sequences, max_distance) for seq in repertoire.sequences]
+        arguments = [(seq, reference_sequences, max_distance) for seq in repertoire.sequences()]
 
         with Pool(SequenceMatcher.CORES) as pool:
             matched["sequences"] = pool.starmap(self.match_sequence, arguments)
 
         if summary_type == SequenceMatchingSummaryType.CLONAL_PERCENTAGE:
-            total_count = np.sum([sequence.metadata.duplicate_count for sequence in repertoire.sequences])
-            matched["clonal_percentage"] = np.sum([sequence.metadata.duplicate_count for index, sequence in enumerate(repertoire.sequences) if len(matched["sequences"][index]["matching_sequences"]) > 0]) / total_count
+            total_count = np.sum([sequence.duplicate_count for sequence in repertoire.sequences()])
+            matched["clonal_percentage"] = np.sum([sequence.duplicate_count for index, sequence in enumerate(repertoire.sequences()) if len(matched["sequences"][index]["matching_sequences"]) > 0]) / total_count
         else:
             matched["count"] = len([r for r in matched["sequences"] if len(r["matching_sequences"]) > 0])
             matched["percentage"] = matched["count"] / len(matched["sequences"])
         matched["metadata"] = repertoire.metadata
         matched["patient_id"] = repertoire.identifier
-        matched["locus"] = list(set([sequence.metadata.locus for sequence in repertoire.sequences]))
+        matched["locus"] = list(set([sequence.locus for sequence in repertoire.sequences()]))
 
         return matched
 
@@ -89,7 +89,7 @@ class SequenceMatcher:
         return {
             "matching_sequences": matching_sequences,
             "sequence": sequence.get_sequence(),
-            "v_call": sequence.metadata.v_call,
-            "j_call": sequence.metadata.j_call,
-            "locus": sequence.metadata.locus
+            "v_call": sequence.v_call,
+            "j_call": sequence.j_call,
+            "locus": sequence.locus
         }

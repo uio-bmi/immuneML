@@ -19,9 +19,9 @@ class ReceptorSequence:
     sequence_id: str = ''
     sequence: DNAEncoding = ''
     sequence_aa: AminoAcidEncoding = ''
-    productive: str = 'True'
-    vj_in_frame: str = 'True'
-    stop_codon: str = 'False'
+    productive: str = 'T'
+    vj_in_frame: str = 'T'
+    stop_codon: str = 'F'
     locus: str = ''
     locus_species: str = ''
     v_call: str = ''
@@ -106,8 +106,8 @@ class Repertoire:
         return repertoire
 
     @classmethod
-    def build_from_sequences(cls, sequences: List[ReceptorSequence], result_path: Path, filename_base: str,
-                             metadata: dict, region_type: RegionType = RegionType.IMGT_CDR3):
+    def build_from_sequences(cls, sequences: List[ReceptorSequence], result_path: Path, filename_base: str = None,
+                             metadata: dict = None, region_type: RegionType = RegionType.IMGT_CDR3):
         identifier = uuid4().hex
         filename_base = filename_base if filename_base is not None else identifier
 

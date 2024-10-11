@@ -4,9 +4,9 @@ import shutil
 import pytest
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
+from immuneML.data_model.SequenceSet import Receptor
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder

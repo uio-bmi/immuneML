@@ -143,13 +143,6 @@ class IReceptorImport(DataImport):
 
         return dataset
 
-    def preprocess_file(self, df: pd.DataFrame) -> pd.DataFrame:
-
-        df.replace('T', 'True', inplace=True)
-        df.replace('F', 'False', inplace=True)
-
-        return df
-
     @staticmethod
     def _create_airr_repertoiredataset(input_zips_path: Path, base_result_path: Path, metadata_file_path: Path):
         unzipped_path = base_result_path / "tmp_unzipped/"

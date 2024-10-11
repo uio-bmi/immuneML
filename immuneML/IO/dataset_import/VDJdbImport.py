@@ -88,8 +88,8 @@ class VDJdbImport(DataImport):
     }
 
     def preprocess_file(self, df: pd.DataFrame) -> pd.DataFrame:
-        df["vj_in_frame"] = 'True'
-        df['productive'] = 'True'
+        df["vj_in_frame"] = 'T'
+        df['productive'] = 'T'
         df['cdr3_aa'] = df['junction_aa'].str[1:-1]
         df['cell_id'] = df['cell_id'].astype(int).astype(str)
 

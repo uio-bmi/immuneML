@@ -3,7 +3,7 @@ from unittest import TestCase
 
 import pandas as pd
 
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 

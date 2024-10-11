@@ -226,14 +226,14 @@ class ImportHelper:
     def filter_illegal_sequences(cls, df: pd.DataFrame, params: DatasetImportParams, location: str):
         try:
             if params.import_productive:
-                df = df[df.productive == 'True']
+                df = df[df.productive == 'T']
         except AttributeError as e:
             logging.warning(f"An error occurred while filtering unproductive sequences while importing the "
                             f"dataset {location}. Error: {e}\n\nFiltering will be skipped.")
 
         try:
             if not params.import_out_of_frame:
-                df = df[df.vj_in_frame != 'False']
+                df = df[df.vj_in_frame != 'F']
         except AttributeError as e:
             logging.warning(f"An error occurred while filtering out-of-frame sequences while importing the "
                             f"dataset {location}. Error: {e}\n\nFiltering will be skipped.")

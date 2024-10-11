@@ -30,6 +30,7 @@ class DatasetImportParams:
     organism: str = None
     import_empty_nt_sequences: bool = None
     import_empty_aa_sequences: bool = None
+    dataset_file: Path = None
 
     @classmethod
     def build_object(cls, path: Path = None, metadata_file: Path = None, result_path: Path = None,

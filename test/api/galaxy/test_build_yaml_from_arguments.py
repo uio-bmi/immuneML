@@ -7,7 +7,7 @@ from immuneML.api.galaxy.build_yaml_from_arguments import build_settings_specs, 
     get_sequence_enc_type, \
     build_encodings_specs, build_labels
 from immuneML.api.galaxy.build_yaml_from_arguments import main as yamlbuilder_main
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
