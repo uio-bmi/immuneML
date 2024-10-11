@@ -2,7 +2,7 @@ import shutil
 from unittest import TestCase
 
 from immuneML.IO.dataset_import.MiXCRImport import MiXCRImport
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
@@ -53,23 +53,25 @@ rep2.tsv,2""")
         params["path"] = path
         params["metadata_file"] = path / "metadata.csv"
 
-        dataset = MiXCRImport.import_dataset(params, "mixcr_repertoire_dataset")
+        dataset = MiXCRImport(params, "mixcr_repertoire_dataset").import_dataset()
 
         self.assertEqual(2, dataset.get_example_count())
         for index, repertoire in enumerate(dataset.get_data()):
-            self.assertTrue(all(sequence.metadata.locus == Chain.ALPHA for sequence in repertoire.sequences))
+            self.assertTrue(all(sequence.locus == Chain.ALPHA.value for sequence in repertoire.sequences()))
             if index == 0:
-                self.assertEqual(9, len(repertoire.sequences))
-                self.assertTrue(repertoire.sequences[0].sequence_aa in ["ALVTDSWGKLQ", "AVLETSGSRLT"])  # OSX/windows
-                self.assertTrue(repertoire.sequences[0].metadata.v_call in ["TRAV6", "TRAV21"])  # OSX/windows
+                seqs = repertoire.sequences()
+                self.assertEqual(9, len(seqs))
+                self.assertTrue(seqs[0].sequence_aa in ["ALVTDSWGKLQ", "AVLETSGSRLT"])  # OSX/windows
+                self.assertTrue(seqs[0].v_call in ["TRAV6", "TRAV21"])  # OSX/windows
 
-                self.assertListEqual([Chain.ALPHA for i in range(9)], list(repertoire.get_chains()))
-                self.assertListEqual(sorted([956023, 90101, 69706, 56658, 55692, 43466, 42172, 41647, 19133]), sorted(list(repertoire.get_counts())))
+                self.assertListEqual([Chain.ALPHA.value for i in range(9)], repertoire.data.locus.tolist())
+                self.assertListEqual(sorted([956023, 90101, 69706, 56658, 55692, 43466, 42172, 41647, 19133]),
+                                     sorted(repertoire.data.duplicate_count.tolist()))
 
             elif index == 1:
-                self.assertEqual(5, len(repertoire.sequences))
-                self.assertTrue(repertoire.sequences[0].sequence in ["GCTGTGCTGGAAACCAGTGGCTCTAGGTTGACC",
-                                                                                "GCTCTAGTAACTGACAGCTGGGGGAAATTGCAG"])  # OSX/windows
+                self.assertEqual(5, len(repertoire.sequences()))
+                self.assertTrue(repertoire.sequences()[0].sequence in ["GCTGTGCTGGAAACCAGTGGCTCTAGGTTGACC",
+                                                                       "GCTCTAGTAACTGACAGCTGGGGGAAATTGCAG"])  # OSX/windows
 
         shutil.rmtree(path)
 
@@ -84,11 +86,11 @@ rep2.tsv,2""")
         params["result_path"] = path
         params["path"] = path
 
-        dataset = MiXCRImport.import_dataset(params, "mixcr_repertoire_dataset")
+        dataset = MiXCRImport(params, "mixcr_repertoire_dataset").import_dataset()
 
         seqs = [sequence for sequence in dataset.get_data()]
 
         self.assertTrue(seqs[0].sequence_aa in ["AVLETSGSRLT", "ALVTDSWGKLQ"])  # OSX/windows
-        self.assertTrue(seqs[0].metadata.v_call in ["TRAV21", "TRAV6"])  # OSX/windows
+        self.assertTrue(seqs[0].v_call in ["TRAV21", "TRAV6"])  # OSX/windows
 
         shutil.rmtree(path)

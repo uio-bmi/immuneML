@@ -199,8 +199,9 @@ class ReceptorDataset(ElementDataset):
             self.element_count = len(self.data) // 2
         return self.element_count
 
-    def get_data(self, batch_size: int = 1):
-        return make_receptors_from_data(self.data, self.dynamic_fields, f"ReceptorDataset {self.identifier}")
+    def get_data(self, batch_size: int = 1, region_type: RegionType = RegionType.IMGT_CDR3):
+        return make_receptors_from_data(self.data, self.dynamic_fields,
+                                        f"ReceptorDataset {self.identifier}", region_type)
 
     def get_example_ids(self):
         return np.unique(self.data.cell_id).tolist()

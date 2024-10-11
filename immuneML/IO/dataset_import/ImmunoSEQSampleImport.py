@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 
 from immuneML.IO.dataset_import.DataImport import DataImport
@@ -51,15 +53,8 @@ class ImmunoSEQSampleImport(DataImport):
         .. indent with spaces
         .. code-block:: yaml
 
-            nucleotide: sequence
-            aminoAcid: sequence_aa
-            vGeneName: v_call
-            jGeneName: j_call
-            sequenceStatus: frame_type
-            vFamilyName: v_family
-            jFamilyName: j_family
-            vGeneAllele: v_allele
-            jGeneAllele: j_allele
+            nucleotide: cdr3
+            aminoAcid: cdr3_aa
             count (templates/reads): duplicate_count
 
     - column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For immunoSEQ sample .tsv files, there is no default column_mapping_synonyms.
@@ -121,13 +116,8 @@ class ImmunoSEQSampleImport(DataImport):
 
     """
 
-    @staticmethod
-    def import_dataset(params: dict, dataset_name: str) -> Dataset:
-        return ImportHelper.import_dataset(ImmunoSEQSampleImport, params, dataset_name)
-
-    @staticmethod
-    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        return AdaptiveImportHelper.preprocess_dataframe(df, params)
+    def preprocess_file(self, df: pd.DataFrame) -> pd.DataFrame:
+        return AdaptiveImportHelper.preprocess_dataframe(df, self.params)
 
     @staticmethod
     def get_documentation():

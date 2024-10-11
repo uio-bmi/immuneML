@@ -227,7 +227,7 @@ class RandomDatasetGenerator:
                                                              k=random.choices(list(length_probabilities.keys()),
                                                                               length_probabilities.values())[0])),
                                       locus=chain, v_call=chain + "V1-1*01", j_call=chain + "J1-1*01",
-                                      duplicate_count=1, productive='True', vj_in_frame='True',
+                                      duplicate_count=1,
                                       metadata={
                                           **{label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]
                                              for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}})

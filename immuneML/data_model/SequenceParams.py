@@ -32,6 +32,14 @@ class Chain(Enum):
         else:
             return None
 
+    @staticmethod
+    def get_chain_value(item: str):
+        chain = Chain.get_chain(item)
+        if chain:
+            return chain.value
+        else:
+            return ''
+
     def __str__(self):
         return self.name
 

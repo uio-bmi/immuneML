@@ -105,40 +105,15 @@ class TenxGenomicsImport(DataImport):
 
     """
 
-    @staticmethod
-    def import_dataset(params: dict, dataset_name: str) -> Dataset:
-        return ImportHelper.import_dataset(TenxGenomicsImport, params, dataset_name)
+    def preprocess_file(self, df: pd.DataFrame) -> pd.DataFrame:
 
-    @staticmethod
-    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        df["frame_type"] = SequenceFrameType.UNDEFINED.value
-        df.loc[df['productive']=="True", "frame_type"] = SequenceFrameType.IN.value
-        df.loc[df['productive']=="False", "frame_type"] = SequenceFrameType.OUT.value
+        additional_str_columns = [col for col in ['d_gene', 'c_gene'] if col in df.columns]
+        df.loc[:, additional_str_columns] = df.loc[:, additional_str_columns].astype(str).replace("None", "")
 
-        allowed_productive_values = []
-        if params.import_productive:
-            allowed_productive_values.append('True')
-        if params.import_unproductive:
-            allowed_productive_values.append('False')
-        if params.import_unknown_productivity:
-            allowed_productive_values.append('')
-            allowed_productive_values.append('NA')
-
-        df = df[df.productive.isin(allowed_productive_values)]
-        df.drop(columns=["productive"], inplace=True)
-
-        ImportHelper.junction_to_cdr3(df, params.region_type)
-        df.loc[:, "region_type"] = params.region_type.name
-        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
-        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters, params.import_with_stop_codon)
-        ImportHelper.load_chains(df)
+        additional_int_columns = [col for col in ['full_length', 'reads'] if col in df.columns]
+        df.loc[:, additional_int_columns] = df.loc[:, additional_int_columns].astype(int)
 
         return df
-
-    @staticmethod
-    def import_receptors(df, params):
-        df["receptor_id"] = df["cell_id"]
-        return ImportHelper.import_receptors(df, params)
 
     @staticmethod
     def get_documentation():

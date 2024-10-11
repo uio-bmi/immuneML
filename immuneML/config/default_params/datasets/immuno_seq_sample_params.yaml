@@ -5,19 +5,15 @@ import_productive: True
 import_with_stop_codon: False
 import_out_of_frame: False
 import_illegal_characters: False
-region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing first and last amino acid as ImmunoSEQ uses IMGT junction as CDR3
+region_type: "IMGT_CDR3" # which region to on import
 separator: "\t"
-columns_to_load: [nucleotide, aminoAcid, count (templates/reads), vFamilyName, vGeneName, vGeneAllele, jFamilyName, jGeneName, jGeneAllele, sequenceStatus] # columns from the original file that will be imported
+columns_to_load: [nucleotide, aminoAcid, count (templates/reads), vGeneName, jGeneName, sequenceStatus] # columns from the original file that will be imported
 column_mapping: # immunoSEQ column names -> immuneML repertoire fields
   nucleotide: sequence # nucleotide is the immunoSEQ name, which will be mapped to sequence in immuneML
-  aminoAcid: sequence_aa
+  aminoAcid: junction_aa
   vGeneName: v_call
   jGeneName: j_call
   sequenceStatus: frame_type
-  vFamilyName: v_family
-  jFamilyName: j_family
-  vGeneAllele: v_allele
-  jGeneAllele: j_allele
   count (templates/reads): duplicate_count
 import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
 import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set

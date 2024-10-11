@@ -2,7 +2,7 @@ import shutil
 from unittest import TestCase
 
 from immuneML.IO.dataset_import.ImmunoSEQSampleImport import ImmunoSEQSampleImport
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.SequenceParams import Chain, RegionType
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
@@ -55,16 +55,16 @@ rep1.tsv,TRA,1234a,no"""
         params["metadata_file"] = path / "metadata.csv"
         params["path"] = path
 
-        dataset = ImmunoSEQSampleImport.import_dataset(params, "immunoseq_dataset")
+        dataset = ImmunoSEQSampleImport(params, "immunoseq_dataset").import_dataset()
 
         self.assertEqual(1, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
             self.assertEqual("1234a", rep.metadata["subject_id"])
-            self.assertEqual(18, len(rep.sequences))
-            self.assertEqual("ATSDQLNRWGTGELF", rep.sequences[0].get_sequence())
-            self.assertEqual("TRBV25-1*01", rep.sequences[2].metadata.v_call)
-            self.assertListEqual([38, 48, 37, 53, 28, 16, 72, 14, 26, 13, 8, 16, 8, 28, 7, 1, 9, 1], list(rep.get_counts()))
-            self.assertListEqual([Chain.BETA for i in range(18)], list(rep.get_chains()))
+            self.assertEqual(18, len(rep.sequences()))
+            self.assertEqual("ATSDQLNRWGTGELF", rep.sequences()[0].sequence_aa)
+            self.assertEqual("TRBV25-1", rep.sequences()[2].v_call)
+            self.assertListEqual([38, 48, 37, 53, 28, 16, 72, 14, 26, 13, 8, 16, 8, 28, 7, 1, 9, 1], rep.data.duplicate_count.tolist())
+            self.assertListEqual([Chain.BETA.value for i in range(18)], rep.data.locus.tolist())
 
         shutil.rmtree(path)
 
@@ -79,7 +79,7 @@ rep1.tsv,TRA,1234a,no"""
         params["result_path"] = path
         params["path"] = path
 
-        dataset = ImmunoSEQSampleImport.import_dataset(params, "immunoseq_dataset")
+        dataset = ImmunoSEQSampleImport(params, "immunoseq_dataset").import_dataset()
 
         seqs = [sequence for sequence in dataset.get_data()]
 

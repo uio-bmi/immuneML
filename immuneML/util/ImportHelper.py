@@ -1,26 +1,20 @@
 import logging
-import logging
-import warnings
 from dataclasses import fields
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.SequenceParams import RegionType, Chain
-from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
-from immuneML.util.PathBuilder import PathBuilder
 
 
 class ImportHelper:
     DATASET_FORMAT = "yaml"
-
 
     @staticmethod
     def make_new_metadata_file(repertoires: list, metadata: pd.DataFrame, result_path: Path, dataset_name: str) -> Path:
@@ -40,27 +34,6 @@ class ImportHelper:
             filename = params.path / f"repertoires/{metadata_row['filename']}"
         return filename
 
-
-    @staticmethod
-    def load_sequence_dataframe(filepath, params, alternative_load_func=None):
-        try:
-            if alternative_load_func:
-                df = alternative_load_func(filepath, params)
-            else:
-                df = ImportHelper.safe_load_dataframe(filepath, params)
-        except Exception as ex:
-            raise Exception(
-                f"{ex}\n\nImportHelper: an error occurred during dataset import while parsing the input file: {filepath}.\n"
-                f"Please make sure this is a correct immune receptor data file (not metadata).\n"
-                f"The parameters used for import are {params}.\nFor technical description of the error, see the log above. "
-                f"For details on how to specify the dataset import, see the documentation.").with_traceback(
-                ex.__traceback__)
-
-        ImportHelper.rename_dataframe_columns(df, params)
-        ImportHelper.standardize_none_values(df)
-
-        return df
-
     @staticmethod
     def filter_illegal_receptors(df: pd.DataFrame) -> pd.DataFrame:
         assert "cell_id" in df.columns, "Receptor datasets cannot be constructed if cell_id field is missing."
@@ -71,12 +44,12 @@ class ImportHelper:
             logging.warning("There are cells in the dataset that don't have exactly two chains. "
                             "Those will be filtered out from the dataset.")
 
-        return df.loc[cell_id_counts == 2, :]
+            return df.loc[df.cell_id.isin(cell_id_counts[cell_id_counts == 2].index)]
+        else:
+            return df
 
     @staticmethod
     def parse_sequence_dataframe(df: pd.DataFrame, params: DatasetImportParams, dataset_name: str) -> pd.DataFrame:
-        if hasattr(params, "column_mapping") and params.column_mapping is not None:
-            df.rename(columns=params.column_mapping, inplace=True)
 
         df = ImportHelper.standardize_column_names(df)
         df = ImportHelper.standardize_none_values(df)
@@ -98,10 +71,9 @@ class ImportHelper:
             val = AIRRSequenceSet.get_neutral_value(f_type)
             fields_dict[f_name] = [val for _ in range(df.shape[0])]
 
-        df = pd.concat([df, pd.DataFrame(fields_dict)], axis=1)
+        df = pd.concat([df.reset_index().drop(columns='index'), pd.DataFrame(fields_dict)], axis=1)
 
         return df
-
 
     @staticmethod
     def standardize_column_names(df):
@@ -116,9 +88,31 @@ class ImportHelper:
         return df.rename(columns=invalid_col_names)
 
     @staticmethod
+    def extract_locus_from_data(df: pd.DataFrame, params: DatasetImportParams, dataset_name: str):
+        if 'locus' not in df.columns or any(df['locus'] == ''):
+            if 'v_call' in df.columns and all(df.v_call != ''):
+                locus_list = [v_call[:3] for v_call in df.v_call]
+            elif 'j_call' in df.columns and all(df.j_call != ''):
+                locus_list = [j_call[:3] for j_call in df.j_call]
+            else:
+                logging.info(f"{ImportHelper.__name__}: locus could not be extracted for dataset {dataset_name}.")
+                return df
+            df['locus'] = [Chain.get_chain_value(item) for item in locus_list]
+        return df
+
+    @staticmethod
     def standardize_none_values(dataframe: pd.DataFrame):
-        return dataframe.replace(
-            {key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown"]})
+        return (dataframe.replace(
+            {key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown", 'nan']})
+                .replace(np.nan, AIRRSequenceSet.get_neutral_value(float)))
+
+    @staticmethod
+    def add_cdr3_from_junction(df: pd.DataFrame):
+        if 'junction' in df.columns and ('cdr3' not in df.columns or all(df['cdr3'] == '')):
+            df['cdr3'] = df.junction.str[3:-3]
+        if 'junction_aa' in df.columns and ('cdr3_aa' not in df.columns or all(df['cdr3_aa'] == '')):
+            df['cdr3_aa'] = df.junction_aa.str[1:-1]
+        return df
 
     @staticmethod
     def drop_empty_sequences(dataframe: pd.DataFrame, import_empty_aa_sequences: bool,
@@ -135,15 +129,19 @@ class ImportHelper:
             sequence_name = sequence_type.name.lower().replace("_", " ")
 
             if sequence_colname in dataframe.columns:
-                n_empty = sum(dataframe[sequence_colname].isnull())
+                try:
+                    empty = dataframe[sequence_colname].isnull() | (dataframe[sequence_colname] == '')
+                    n_empty = sum(empty)
+                except Exception as e:
+                    raise e
+
                 if n_empty > 0:
-                    dataframe.drop(dataframe.loc[dataframe[sequence_colname].isnull()].index, inplace=True)
-                    warnings.warn(
-                        f"{ImportHelper.__name__}: {n_empty} sequences were removed from the dataset because they contained an empty {sequence_name} "
-                        f"sequence after preprocessing. ")
+                    dataframe = dataframe.loc[~empty]
+                    logging.warning(f"{ImportHelper.__name__}: {n_empty} sequences were removed from the dataset "
+                                    f"because they contained an empty {sequence_name} sequence after preprocessing. ")
             else:
-                warnings.warn(
-                    f"{ImportHelper.__name__}: column {sequence_colname} was not set, but is required for filtering. Skipping this filtering...")
+                logging.warning(f"{ImportHelper.__name__}: column {sequence_colname} was not set, but is required "
+                                f"for filtering. Skipping this filtering...")
 
         return dataframe
 
@@ -182,61 +180,10 @@ class ImportHelper:
     def is_illegal_sequence(sequence, legal_alphabet) -> bool:
         if sequence is None:
             return False
+        elif not isinstance(sequence, str):
+            return True
         else:
             return not all(character in legal_alphabet for character in sequence)
-
-    @staticmethod
-    def load_chains(df: pd.DataFrame):
-        if "locus" in df.columns:
-            df["locus"] = ImportHelper.load_chains_from_chains(df)
-        else:
-            df["locus"] = ImportHelper.load_chains_from_genes(df)
-
-    @staticmethod
-    def load_chains_from_chains(df: pd.DataFrame) -> list:
-        return [Chain.get_chain(chain_str).value if chain_str is not None else None for chain_str in df["locus"]]
-
-    @staticmethod
-    def load_chains_from_genes(df: pd.DataFrame) -> list:
-        return df.apply(ImportHelper.get_chain_for_row, axis=1)
-
-    @staticmethod
-    def get_chain_for_row(row):
-        for col in ["v_call", "j_call"]:
-            if col in row and row[col] is not None:
-                chain = Chain.get_chain(str(row[col])[0:3])
-                return chain.value if chain is not None else None
-        return None
-
-    @staticmethod
-    def junction_to_cdr3(df: pd.DataFrame, region_type: RegionType):
-        """
-        If RegionType is CDR3, the leading C and trailing W are removed from the sequence to match the IMGT CDR3 definition.
-        This method alters the data in the provided dataframe.
-        """
-
-        if region_type == RegionType.IMGT_CDR3:
-            if "sequence_aa" in df:
-                df.loc[:, "sequence_aa"] = df["sequence_aa"].str[1:-1]
-            if "sequence" in df:
-                df.loc[:, "sequence"] = df["sequence"].str[3:-3]
-            df["region_type"] = region_type.name
-
-    @staticmethod
-    def strip_alleles(df: pd.DataFrame, column_name):
-        return ImportHelper.strip_suffix(df, column_name, Constants.ALLELE_DELIMITER)
-
-    @staticmethod
-    def strip_genes(df: pd.DataFrame, column_name):
-        return ImportHelper.strip_suffix(df, column_name, Constants.GENE_DELIMITER)
-
-    @staticmethod
-    def strip_suffix(df: pd.DataFrame, column_name, delimiter):
-        """
-        Safely removes everything after a delimiter from a column in the DataFrame
-        """
-        if column_name in df.columns:
-            return df[column_name].apply(lambda gene_col: None if gene_col is None else gene_col.rsplit(delimiter)[0])
 
     @staticmethod
     def get_sequence_filenames(path: Path, dataset_name: str):
@@ -251,34 +198,13 @@ class ImportHelper:
                 filenames.extend(list(path.glob(pattern)))
         else:
             raise ValueError(f"ImportHelper: path '{path}' given in YAML specification is not a valid path. "
-                             f"This parameter can either point to a single file with immune receptor data or to a directory containing such files.")
+                             f"This parameter can either point to a single file with immune receptor data or to a "
+                             f"directory containing such files.")
 
         assert len(
             filenames) >= 1, f"ImportHelper: the dataset {dataset_name} cannot be imported, no files were found under {path}.\n" \
                              f"Note that only files with the following extensions can be imported: {data_file_extensions}"
         return filenames
-
-    @staticmethod
-    def import_sequence_dataset(import_class, params, dataset_name: str):
-        PathBuilder.build(params.result_path)
-
-        filenames = ImportHelper.get_sequence_filenames(params.path, dataset_name)
-
-        dataset_params = {}
-        items = None
-
-        for index, filename in enumerate(filenames):
-            new_items = ImportHelper.import_items(import_class, filename, params)
-            items = np.append(items, new_items) if items is not None else new_items
-            dataset_params = ImportHelper.extract_sequence_dataset_params(items, params)
-
-        cls = ReceptorDataset if params.paired else SequenceDataset
-        dataset = cls.build_from_objects(items, params.sequence_file_size, params.result_path, dataset_name,
-                                         dataset_params)
-
-        AIRRExporter.export(dataset, params.result_path)
-
-        return dataset
 
     @staticmethod
     def extract_sequence_dataset_params(items=None, params=None) -> dict:
@@ -296,36 +222,20 @@ class ImportHelper:
                         result[key] = {metadata[key]}
         return result
 
-    @staticmethod
-    def import_items(import_class, path, params: DatasetImportParams):
-        alternative_load_func = getattr(import_class, "alternative_load_func", None)
-        df = ImportHelper.load_sequence_dataframe(path, params, alternative_load_func)
-        df = import_class.preprocess_dataframe(df, params)
-
-        if params.paired:
-            import_receptor_func = getattr(import_class, "import_receptors", None)
-            if import_receptor_func:
-                sequences = import_receptor_func(df, params)
-            else:
-                raise NotImplementedError(
-                    f"{import_class.__name__}: import of paired receptor data has not been implemented.")
-        else:
-            metadata_columns = params.metadata_column_mapping.values() if params.metadata_column_mapping else None
-            sequences = df.apply(ImportHelper.import_sequence, metadata_columns=metadata_columns, axis=1).values
-
-        return sequences
-
     @classmethod
     def filter_illegal_sequences(cls, df: pd.DataFrame, params: DatasetImportParams, location: str):
         try:
-
-            if not params.import_out_of_frame:
-                df = df[df.vj_in_frame]
             if params.import_productive:
-                df = df[df.productive]
-
+                df = df[df.productive == 'True']
         except AttributeError as e:
-            logging.warning(f"An error occurred while filtering illegal sequences while importing the "
+            logging.warning(f"An error occurred while filtering unproductive sequences while importing the "
+                            f"dataset {location}. Error: {e}\n\nFiltering will be skipped.")
+
+        try:
+            if not params.import_out_of_frame:
+                df = df[df.vj_in_frame != 'False']
+        except AttributeError as e:
+            logging.warning(f"An error occurred while filtering out-of-frame sequences while importing the "
                             f"dataset {location}. Error: {e}\n\nFiltering will be skipped.")
 
         return df

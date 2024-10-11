@@ -88,13 +88,12 @@ class GenericImport(DataImport):
                         import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
                         import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
                         import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
-                        region_type: IMGT_CDR3 # what part of the sequence to import
-                        column_mapping: # column mapping file: immuneML
-                            file_column_amino_acids: sequence_aas
+                        region_type: IMGT_CDR3 # which column to check for illegal characters/empty strings etc
+                        column_mapping: # column mapping file: immuneML/AIRR column names
+                            file_column_amino_acids: junction_aa
                             file_column_v_genes: v_call
                             file_column_j_genes: j_call
                             file_column_frequencies: duplicate_count
-                        metadata_column_mapping: # metadata column mapping file: immuneML
                             file_column_antigen_specificity: antigen_specificity
                         columns_to_load:  # which subset of columns to load from the file
                             - file_column_amino_acids
@@ -104,25 +103,6 @@ class GenericImport(DataImport):
                             - file_column_antigen_specificity
 
     """
-
-    @staticmethod
-    def import_dataset(params: dict, dataset_name: str) -> Dataset:
-        return ImportHelper.import_dataset(GenericImport, params, dataset_name)
-
-    @staticmethod
-    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
-        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters, params.import_with_stop_codon)
-        ImportHelper.junction_to_cdr3(df, params.region_type)
-        df.loc[:, "region_type"] = params.region_type.name
-        ImportHelper.load_chains(df)
-
-        return df
-
-    @staticmethod
-    def import_receptors(df, params):
-        df["receptor_id"] = df["sequence_id"]
-        return ImportHelper.import_receptors(df, params)
 
     @staticmethod
     def get_documentation():

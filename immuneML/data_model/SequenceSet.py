@@ -4,8 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 from uuid import uuid4
 
-from bionumpy import AminoAcidEncoding, DNAEncoding, get_bufferclass_for_datatype
-from bionumpy.encodings.bool_encoding import BoolStringEncoding
+from bionumpy import DNAEncoding, get_bufferclass_for_datatype, AminoAcidEncoding
 
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.SequenceParams import ChainPair, Chain, RegionType
@@ -20,9 +19,9 @@ class ReceptorSequence:
     sequence_id: str = ''
     sequence: DNAEncoding = ''
     sequence_aa: AminoAcidEncoding = ''
-    productive: BoolStringEncoding = True
-    vj_in_frame: BoolStringEncoding = True
-    stop_codon: BoolStringEncoding = False
+    productive: str = 'True'
+    vj_in_frame: str = 'True'
+    stop_codon: str = 'False'
     locus: str = ''
     locus_species: str = ''
     v_call: str = ''
@@ -54,6 +53,9 @@ class Receptor:
             else:
                 new_metadata[key] = val
         self.metadata = new_metadata
+
+        setattr(self, Chain.get_chain(self.chain_pair.value[0]).name.lower(), self.chain_1)
+        setattr(self, Chain.get_chain(self.chain_pair.value[1]).name.lower(), self.chain_2)
 
 
 @dataclass
@@ -151,7 +153,7 @@ class Repertoire:
     def data(self) -> AIRRSequenceSet:
         return bnp_read_from_file(self.data_filename, self.buffer_type, self.bnp_dataclass)
 
-    def sequences(self, region_type: RegionType) -> List[ReceptorSequence]:
+    def sequences(self, region_type: RegionType = RegionType.IMGT_CDR3) -> List[ReceptorSequence]:
         return make_sequences_from_data(self.data, list(self.dynamic_fields.keys()) if self.dynamic_fields else [],
                                         region_type)
 
@@ -185,13 +187,16 @@ def make_sequences_from_data(data, dynamic_fields: list, region_type: RegionType
     seqs = []
     for el in data.to_iter():
         seq, seq_aa = get_sequence_value(el, region_type)
-        seqs.append(ReceptorSequence(el.sequence_id, seq, seq_aa, el.productive, el.vj_in_frame, el.stop_codon,
-                                     el.locus, el.locus_species, el.v_call, el.d_call, el.j_call, el.c_call,
-                                     {dynamic_field: getattr(el, dynamic_field) for dynamic_field in dynamic_fields}))
+        seqs.append(ReceptorSequence(sequence_id=el.sequence_id, sequence=seq, sequence_aa=seq_aa,
+                                     productive=el.productive, vj_in_frame=el.vj_in_frame, stop_codon=el.stop_codon,
+                                     locus=el.locus, locus_species=el.locus_species, v_call=el.v_call, d_call=el.d_call,
+                                     j_call=el.j_call, c_call=el.c_call, duplicate_count=el.duplicate_count,
+                                     metadata={dynamic_field: getattr(el, dynamic_field)
+                                               for dynamic_field in dynamic_fields}))
     return seqs
 
 
-def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: list, location, region_type: RegionType.IMGT_CDR3):
+def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: list, location, region_type: RegionType = RegionType.IMGT_CDR3):
     df = data.topandas()
     receptors = []
     for name, group in df.groupby('cell_id'):
@@ -199,10 +204,14 @@ def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: list, locati
             (f"{location}: receptor objects cannot be created from the data file, there are "
              f"{group.shape[0]} sequences with cell id {group['cell_id'].unique()[0]}.")
         sorted_group = group.sort_values(by='locus')
-        seqs = [ReceptorSequence(el.sequence_id, getattr(el, region_type.value), getattr(el, region_type.value + "_aa"),
-                                 el.productive, el.vj_in_frame, el.stop_codon, el.locus, el.locus_species, el.v_call,
-                                 el.d_call, el.j_call, el.c_call,
-                                 {dynamic_field: getattr(el, dynamic_field) for dynamic_field in dynamic_fields})
+        seqs = [ReceptorSequence(sequence_id=el.sequence_id, sequence=getattr(el, region_type.value),
+                                 sequence_aa=getattr(el, region_type.value + "_aa"),
+                                 productive=el.productive, vj_in_frame=el.vj_in_frame, stop_codon=el.stop_codon,
+                                 locus=el.locus, locus_species=el.locus_species, v_call=el.v_call,
+                                 d_call=el.d_call, j_call=el.j_call, c_call=el.c_call,
+                                 duplicate_count=el.duplicate_count,
+                                 metadata={dynamic_field: getattr(el, dynamic_field)
+                                           for dynamic_field in dynamic_fields})
                 for index, el in sorted_group.iterrows()]
 
         receptor = Receptor(chain_pair=ChainPair.get_chain_pair([Chain.get_chain(locus) for locus in group.locus]),

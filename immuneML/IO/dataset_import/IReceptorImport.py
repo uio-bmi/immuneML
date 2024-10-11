@@ -115,47 +115,40 @@ class IReceptorImport(DataImport):
     """
     REPERTOIRES_FOLDER = "repertoires/"
 
-    @staticmethod
-    def import_dataset(params: dict, dataset_name: str) -> Dataset:
-        if params["is_repertoire"]:
-            dataset = IReceptorImport.import_repertoire_dataset(params, dataset_name)
-        else:
-            dataset = IReceptorImport.import_sequence_dataset(params, dataset_name)
-
-        return dataset
-
-    @staticmethod
-    def import_repertoire_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
-        base_result_path = params['result_path'] / "tmp_airr"
+    def import_repertoire_dataset(self) -> RepertoireDataset:
+        base_result_path = self.params.result_path / "tmp_airr"
         metadata_file_path = base_result_path / "metadata.csv"
 
-        IReceptorImport._create_airr_repertoiredataset(params['path'], base_result_path, metadata_file_path)
+        IReceptorImport._create_airr_repertoiredataset(self.params.path, base_result_path, metadata_file_path)
 
-        airr_params = copy.deepcopy(params)
-        airr_params["path"] = base_result_path
-        airr_params["metadata_file"] = metadata_file_path
+        self.params.path = base_result_path
+        self.params.metadata_file = metadata_file_path
 
-        dataset = ImportHelper.import_dataset(AIRRImport, airr_params, dataset_name)
+        dataset = super().import_repertoire_dataset()
 
         shutil.rmtree(base_result_path)
 
         return dataset
 
-    @staticmethod
-    def import_sequence_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
-        base_result_path = params['result_path'] / "tmp_airr"
+    def import_sequence_dataset(self):
+        base_result_path = self.params.result_path / "tmp_airr"
 
         unzipped_path = base_result_path / "tmp_unzipped"
-        IReceptorImport._unzip_files(params['path'], unzipped_path, unzip_metadata=False)
+        IReceptorImport._unzip_files(self.params.path, unzipped_path, unzip_metadata=False)
+        self.params.path = unzipped_path
 
-        airr_params = copy.deepcopy(params)
-        airr_params["path"] = unzipped_path
-
-        dataset = ImportHelper.import_dataset(AIRRImport, airr_params, dataset_name)
+        dataset = super().import_sequence_dataset()
 
         shutil.rmtree(unzipped_path)
 
         return dataset
+
+    def preprocess_file(self, df: pd.DataFrame) -> pd.DataFrame:
+
+        df.replace('T', 'True', inplace=True)
+        df.replace('F', 'False', inplace=True)
+
+        return df
 
     @staticmethod
     def _create_airr_repertoiredataset(input_zips_path: Path, base_result_path: Path, metadata_file_path: Path):
@@ -183,7 +176,7 @@ class IReceptorImport(DataImport):
 
 
     @staticmethod
-    def _unzip_files(path: Path, unzipped_path: Path, unzip_metadata=True) -> Dataset:
+    def _unzip_files(path: Path, unzipped_path: Path, unzip_metadata=True):
         for zip_filename in path.glob("*.zip"):
             with zipfile.ZipFile(zip_filename, "r") as zip_object:
                 for file in zip_object.filelist:
@@ -328,13 +321,10 @@ class IReceptorImport(DataImport):
 
         chain_pair_values = str([chain_pair.name for chain_pair in ChainPair])[1:-1].replace("'", "`")
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
-        repertoire_fields = list(Repertoire.FIELDS)
-        repertoire_fields.remove("region_type")
 
         mapping = {
             "Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum.": f"Valid values are {chain_pair_values}.",
             "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
-            "Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS": f"Valid immuneML fields that can be specified here are {repertoire_fields}."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

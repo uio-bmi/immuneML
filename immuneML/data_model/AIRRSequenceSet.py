@@ -1,36 +1,36 @@
-import numpy as np
+import bionumpy as bnp
 from bionumpy import DNAEncoding, AminoAcidEncoding
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.encodings import AlphabetEncoding
-import bionumpy as bnp
-from bionumpy.encodings.bool_encoding import bool_string
+
+AminoAcidXEncoding = AlphabetEncoding('ACDEFGHIKLMNPQRSTVWXY*')
 
 
 @bnpdataclass
 class AIRRSequenceSet:
-    sequence_id: str = None
-    sequence: DNAEncoding = None
-    quality: str = None
-    sequence_aa: AminoAcidEncoding = None
-    rev_comp: bool_string = None
-    productive: bool_string = None
-    vj_in_frame: bool_string = None
-    stop_codon: bool_string = None
-    complete_vdj: bool_string = None
-    locus: str = None
-    locus_species: str = None
-    v_call: str = None
-    d_call: str = None
-    d2_call: str = None
-    j_call: str = None
-    c_call: str = None
-    sequence_alignment: str = None
-    quality_alignment: str = None
-    sequence_alignment_aa: str = None
-    germline_alignment: str = None
-    germline_alignment_aa: str = None
+    sequence_id: str = ''
+    sequence: DNAEncoding = ''
+    quality: str = ''
+    sequence_aa: AminoAcidXEncoding = ''
+    rev_comp: str = 'False'
+    productive: str = 'False'
+    vj_in_frame: str = 'False'
+    stop_codon: str = 'False'
+    complete_vdj: str = 'False'
+    locus: str = ''
+    locus_species: str = ''
+    v_call: str = ''
+    d_call: str = ''
+    d2_call: str = ''
+    j_call: str = ''
+    c_call: str = ''
+    sequence_alignment: str = ''
+    quality_alignment: str = ''
+    sequence_alignment_aa: str = ''
+    germline_alignment: str = ''
+    germline_alignment_aa: str = ''
     junction: DNAEncoding = None
-    junction_aa: AminoAcidEncoding = None
+    junction_aa: AminoAcidXEncoding = None
     np1: DNAEncoding = None
     np1_aa: AminoAcidEncoding = None
     np2: DNAEncoding = None
@@ -42,7 +42,7 @@ class AIRRSequenceSet:
     cdr2: DNAEncoding = None
     cdr2_aa: AminoAcidEncoding = None
     cdr3: DNAEncoding = None
-    cdr3_aa: AminoAcidEncoding = None
+    cdr3_aa: AminoAcidXEncoding = None
     fwr1: DNAEncoding = None
     fwr1_aa: AminoAcidEncoding = None
     fwr2: DNAEncoding = None
@@ -54,23 +54,23 @@ class AIRRSequenceSet:
     v_score: float = None
     v_identity: float = None
     v_support: float = None
-    v_cigar: str = None
+    v_cigar: str = ''
     d_score: float = None
     d_identity: float = None
     d_support: float = None
-    d_cigar: str = None
+    d_cigar: str = ''
     d2_score: float = None
     d2_identity: float = None
     d2_support: float = None
-    d2_cigar: str = None
+    d2_cigar: str = ''
     j_score: float = None
     j_identity: float = None
     j_support: float = None
-    j_cigar: str = None
+    j_cigar: str = ''
     c_score: float = None
     c_identity: float = None
     c_support: float = None
-    c_cigar: str = None
+    c_cigar: str = ''
     v_sequence_start: int = None
     v_sequence_end: int = None
     v_germline_start: int = None
@@ -115,26 +115,26 @@ class AIRRSequenceSet:
     fwr3_end: int = None
     fwr4_start: int = None
     fwr4_end: int = None
-    v_sequence_alignment: str = None
-    v_sequence_alignment_aa: str = None
-    d_sequence_alignment: str = None
-    d_sequence_alignment_aa: str = None
-    d2_sequence_alignment: str = None
-    d2_sequence_alignment_aa: str = None
-    j_sequence_alignment: str = None
-    j_sequence_alignment_aa: str = None
-    c_sequence_alignment: str = None
-    c_sequence_alignment_aa: str = None
-    v_germline_alignment: str = None
-    v_germline_alignment_aa: str = None
-    d_germline_alignment: str = None
-    d_germline_alignment_aa: str = None
-    d2_germline_alignment: str = None
-    d2_germline_alignment_aa: str = None
-    j_germline_alignment: str = None
-    j_germline_alignment_aa: str = None
-    c_germline_alignment: str = None
-    c_germline_alignment_aa: str = None
+    v_sequence_alignment: str = ''
+    v_sequence_alignment_aa: str = ''
+    d_sequence_alignment: str = ''
+    d_sequence_alignment_aa: str = ''
+    d2_sequence_alignment: str = ''
+    d2_sequence_alignment_aa: str = ''
+    j_sequence_alignment: str = ''
+    j_sequence_alignment_aa: str = ''
+    c_sequence_alignment: str = ''
+    c_sequence_alignment_aa: str = ''
+    v_germline_alignment: str = ''
+    v_germline_alignment_aa: str = ''
+    d_germline_alignment: str = ''
+    d_germline_alignment_aa: str = ''
+    d2_germline_alignment: str = ''
+    d2_germline_alignment_aa: str = ''
+    j_germline_alignment: str = ''
+    j_germline_alignment_aa: str = ''
+    c_germline_alignment: str = ''
+    c_germline_alignment_aa: str = ''
     junction_length: int = None
     junction_aa_length: int = None
     np1_length: int = None
@@ -149,33 +149,33 @@ class AIRRSequenceSet:
     p5d2_length: int = None
     p3d2_length: int = None
     p5j_length: int = None
-    v_frameshift: bool_string = None
-    j_frameshift: bool_string = None
+    v_frameshift: str = 'False'
+    j_frameshift: str = 'False'
     d_frame: int = None
     d2_frame: int = None
     consensus_count: int = None
     duplicate_count: int = None
     umi_count: int = None
-    cell_id: str = None
-    clone_id: str = None
-    repertoire_id: str = None
-    sample_processing_id: str = None
-    data_processing_id: str = None
-    rearrangement_id: str = None
-    rearrangement_set_id: str = None
-    germline_database: str = None
+    cell_id: str = ''
+    clone_id: str = ''
+    repertoire_id: str = ''
+    sample_processing_id: str = ''
+    data_processing_id: str = ''
+    rearrangement_id: str = ''
+    rearrangement_set_id: str = ''
+    germline_database: str = ''
 
-    STR_TO_TYPE = {'str': str, 'int': int, 'float': float, 'bool_string': bool_string,
+    STR_TO_TYPE = {'str': str, 'int': int, 'float': float,
                    'AminoAcidEncoding': bnp.encodings.AminoAcidEncoding,
+                   'AminoAcidXEncoding': AminoAcidXEncoding,
                    'DNAEncoding': bnp.encodings.DNAEncoding}
 
     TYPE_TO_STR = {**{val: key for key, val in STR_TO_TYPE.items()},
                    **{AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY*'): 'AminoAcidEncoding',
-                      AlphabetEncoding('ACGT'): 'DNAEncoding'}}
+                      AlphabetEncoding('ACGT'): 'DNAEncoding',
+                      AlphabetEncoding('ACDEFGHIKLMNPQRSTVWXY*'): 'AminoAcidXEncoding'}}
 
     @classmethod
     def get_neutral_value(cls, field_type):
-        neutral_values = {str: '', int: -1, DNAEncoding: '', AminoAcidEncoding: '', float: -1.,
-                          bool_string: ''}
+        neutral_values = {str: '', int: -1, DNAEncoding: '', AminoAcidEncoding: '', AminoAcidXEncoding: '', float: -1.}
         return neutral_values[field_type]
-

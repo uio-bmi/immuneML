@@ -5,7 +5,7 @@ import pandas as pd
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.IO.dataset_import.AIRRImport import AIRRImport
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -46,21 +46,21 @@ IVKNQEJ01AJ44V	1	IVKNQEJ01AJ44V	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCT
                   "column_mapping": {},
                   "separator": "\t"}
 
-        dataset = AIRRImport.import_dataset(params, "airr_repertoire_dataset")
+        dataset = AIRRImport(params, "airr_repertoire_dataset").import_dataset()
 
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
+            data = rep.data
             if index == 0:
-                self.assertEqual(3, len(rep.sequences))
-                self.assertListEqual(["IVKNQEJ01BVGQ6", "IVKNQEJ01AQVWS", "IVKNQEJ01EI5S4"], rep.get_sequence_identifiers().tolist())
-                self.assertListEqual(['IGHV4-31*03', 'IGHV4-31*03', 'IGHV4-31*03'], rep.get_attribute("v_call", as_list=True))
-                self.assertListEqual(['IGHV4-31', 'IGHV4-31', 'IGHV4-31'], rep.get_v_genes())
-                self.assertListEqual([36, 36, 36], rep.get_attribute("junction_length").tolist())
-                self.assertListEqual(["ASGVAGTFDY", "ASGVAGTFDY", "ASGVAGTFDY"], rep.get_sequence_aas().tolist())
-                self.assertListEqual([1247, 4, 2913], rep.get_counts().tolist())
-                self.assertListEqual([Chain.HEAVY for i in range(3)], rep.get_chains().tolist())
+                self.assertEqual(3, len(rep.sequences()))
+                self.assertListEqual(["IVKNQEJ01BVGQ6", "IVKNQEJ01AQVWS", "IVKNQEJ01EI5S4"], data.sequence_id.tolist())
+                self.assertListEqual(['IGHV4-31*03', 'IGHV4-31*03', 'IGHV4-31*03'], data.v_call.tolist())
+                self.assertListEqual([36, 36, 36], data.junction_length.tolist())
+                self.assertListEqual(["ASGVAGTFDY", "ASGVAGTFDY", "ASGVAGTFDY"], data.cdr3_aa.tolist())
+                self.assertListEqual([1247, 4, 2913], data.duplicate_count.tolist())
+                self.assertListEqual([Chain.HEAVY.value for _ in range(3)], data.locus.tolist())
             else:
-                self.assertEqual(2, len(rep.sequences))
+                self.assertEqual(2, len(rep.sequences()))
 
         shutil.rmtree(path)
 
@@ -76,16 +76,15 @@ IVKNQEJ01AJ44V	1	IVKNQEJ01AJ44V	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCT
                   "column_mapping": {}, "import_illegal_characters": False,
                   "separator": "\t", "sequence_file_size": 1}
 
-        dataset = AIRRImport.import_dataset(params, "airr_sequence_dataset")
+        dataset = AIRRImport(params, "airr_sequence_dataset").import_dataset()
 
         self.assertEqual(5, dataset.get_example_count())
-        self.assertEqual(5, len(dataset.get_filenames()))
 
         for idx, sequence in enumerate(dataset.get_data()):
             self.assertEqual(sequence.sequence_aa, "ASGVAGTFDY")
 
         v_genes = sorted(["IGHV4-31*03", "IGHV4-31*03", "IGHV4-31*03", "IGHV4-34*09", "IGHV4-59*06"])
-        self.assertListEqual(sorted([sequence.metadata.v_call for sequence in dataset.get_data()]), v_genes)
+        self.assertListEqual(sorted([sequence.v_call for sequence in dataset.get_data()]), v_genes)
 
         shutil.rmtree(path)
 
@@ -110,10 +109,9 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
                   "column_mapping": {}, "receptor_chains": "IGH_IGL",
                   "separator": "\t", "sequence_file_size": 1}
 
-        dataset = AIRRImport.import_dataset(params, "airr_receptor_dataset")
+        dataset = AIRRImport(params, "airr_receptor_dataset").import_dataset()
 
         self.assertEqual(2, dataset.get_example_count())
-        self.assertEqual(2, len(dataset.get_filenames()))
 
         for idx, receptor in enumerate(dataset.get_data()):
             self.assertTrue(receptor.heavy.sequence_aa in ['ASGVAGTFDY', 'ASGVAGNFLL'])
@@ -132,21 +130,19 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
                   "column_mapping": {}, "import_illegal_characters": False,
                   "separator": "\t"}
 
-        dataset1 = AIRRImport.import_dataset(params, "airr_repertoire_dataset1")
+        dataset1 = AIRRImport(params, "airr_repertoire_dataset1").import_dataset()
 
         path_exported = path / "exported_repertoires"
         AIRRExporter.export(dataset1, path_exported)
 
         params["path"] = path_exported
-        params["metadata_file"] = path_exported / "metadata.csv"
+        params["metadata_file"] = path_exported / dataset1.metadata_file.name
         params["result_path"] = path / "final_output"
-        dataset2 = AIRRImport.import_dataset(params, "airr_repertoire_dataset2")
+        dataset2 = AIRRImport(params, "airr_repertoire_dataset2").import_dataset()
 
-        for attribute in ["amino_acid_sequence", "nucleotide_sequence", "v_call", "j_call", "locus", "frame_type", "custom_params"]:
-            self.assertListEqual([sequence.get_attribute(attribute) for sequence in dataset1.repertoires[0].sequences],
-                                 [sequence.get_attribute(attribute) for sequence in dataset2.repertoires[0].sequences])
-
-        self.assertEqual(dataset1.repertoires[0].get_region_type(), dataset2.repertoires[0].get_region_type())
+        for attribute in ["sequence_aa", "sequence", "v_call", "j_call", "locus", "metadata", "vj_in_frame"]:
+            self.assertListEqual([getattr(sequence, attribute) for sequence in dataset1.repertoires[0].sequences()],
+                                 [getattr(sequence, attribute) for sequence in dataset2.repertoires[0].sequences()])
 
         shutil.rmtree(path)
 
@@ -173,6 +169,6 @@ rep1.tsv,1""")
                   "column_mapping": {}, "import_illegal_characters": False,
                   "separator": "\t"}
 
-        AIRRImport.import_dataset(params, "airr_minimal_repertoire_dataset")
+        AIRRImport(params, "airr_minimal_repertoire_dataset").import_dataset()
 
         shutil.rmtree(path)

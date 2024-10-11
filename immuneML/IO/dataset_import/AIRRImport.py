@@ -1,4 +1,10 @@
+from dataclasses import fields
+
+import pandas as pd
+from bionumpy import AminoAcidEncoding, DNAEncoding
+
 from immuneML.IO.dataset_import.DataImport import DataImport
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet, AminoAcidXEncoding
 from immuneML.data_model.SequenceParams import ChainPair, RegionType
 from immuneML.data_model.SequenceSet import Repertoire
 from scripts.specification_util import update_docs_per_mapping
@@ -83,6 +89,13 @@ class AIRRImport(DataImport):
                             locus: chain
 
     """
+
+    def preprocess_file(self, df: pd.DataFrame) -> pd.DataFrame:
+
+        df.replace('T', 'True', inplace=True)
+        df.replace('F', 'False', inplace=True)
+
+        return df
 
     @staticmethod
     def get_documentation():

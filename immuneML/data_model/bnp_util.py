@@ -9,10 +9,8 @@ from typing import Dict, Any, Tuple, List
 import bionumpy as bnp
 import numpy as np
 import yaml
-from bionumpy import EncodedArray
 from bionumpy.bnpdataclass import bnpdataclass
-from bionumpy.encoded_array import Encoding
-from bionumpy.encodings.string_encodings import StringEncoding
+from bionumpy.encoded_array import EncodedArray
 
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.SequenceParams import Chain
@@ -269,3 +267,4 @@ def merge_dataclass_objects(objects: list, fill_unmatched: bool = False):
 
 def get_type_dict_from_bnp_object(bnp_object) -> dict:
     return {field.name: field.type for field in get_fields(bnp_object)}
+
