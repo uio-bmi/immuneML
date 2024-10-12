@@ -15,11 +15,14 @@
         <p>immuneML version: {{immuneML_version}}</p>
         <p>Full specification is available <a href="{{{full_specs}}}">here</a>.</p>
 
-        <pre>
-        {{logfile_content}}
-        </pre>
+        <details>
+        <summary>View exception</summary>
+        <pre>{{exception}}</pre>
+        </details>
 
-        <p>Exception: {{exception}}</p>
-        <p></p>
+        <details>
+        <summary>View log file content</summary>
+        <pre>{{logfile_content}}</pre>
+        </details>
 </body>
 </html>
