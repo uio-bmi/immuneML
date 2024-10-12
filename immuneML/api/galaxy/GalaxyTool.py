@@ -19,7 +19,7 @@ class GalaxyTool(metaclass=ABCMeta):
         except Exception as e:
             print("exception")
             self._make_failed_galaxy_run_html()
-            raise e
+            # raise e
         finally:
             print(glob.glob(str(self.result_path / "*")))
             print("finally")
