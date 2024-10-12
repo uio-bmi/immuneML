@@ -3,7 +3,7 @@ import os
 import shutil
 from abc import ABCMeta
 from pathlib import Path
-
+import glob
 from immuneML.presentation.html.FailedGalaxyHTMLBuilder import FailedGalaxyHTMLBuilder
 
 
@@ -21,6 +21,7 @@ class GalaxyTool(metaclass=ABCMeta):
             self._make_failed_galaxy_run_html()
             raise e
         finally:
+            print(glob.glob("*"))
             print("finally")
             shutil.make_archive(Path("./immuneML_output"), "zip", self.result_path)
             shutil.move(str(Path("./immuneML_output.zip")), str(self.result_path))
