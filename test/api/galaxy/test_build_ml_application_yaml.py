@@ -41,12 +41,13 @@ class MyTestCase(unittest.TestCase):
             yamlbuilder_main(["-o", str(output_dir), "-f", output_filename,
                               "-t", "mytrainedmodel.zip"])
 
-            loaded_yaml = yaml.load(output_dir / output_filename, Loader=yaml.FullLoader)
+            with open(output_dir / output_filename, "r") as file:
+                loaded_yaml = yaml.load(file, Loader=yaml.FullLoader)
 
-            self.assertDictEqual(loaded_yaml["instructions"], {"apply_ml_model": {"config_path": "mytrainedmodel.zip",
-                                                                                  "dataset": "dataset",
-                                                                                  "number_of_processes": 8,
-                                                                                  "type": "MLApplication"}})
+                self.assertDictEqual(loaded_yaml["instructions"], {"apply_ml_model": {"config_path": "mytrainedmodel.zip",
+                                                                                      "dataset": "dataset",
+                                                                                      "number_of_processes": 8,
+                                                                                      "type": "MLApplication"}})
 
             # immuneML parser doenst work since there is no real zip
             # ImmuneMLParser.parse_yaml_file(output_dir / output_filename, path / "result_path")
