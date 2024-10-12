@@ -19,9 +19,9 @@ class GalaxyTool(metaclass=ABCMeta):
         except Exception as e:
             self._make_failed_galaxy_run_html()
             raise e
-
-        shutil.make_archive(Path("./immuneML_output"), "zip", self.result_path)
-        shutil.move(str(Path("./immuneML_output.zip")), str(self.result_path))
+        finally:
+            shutil.make_archive(Path("./immuneML_output"), "zip", self.result_path)
+            shutil.move(str(Path("./immuneML_output.zip")), str(self.result_path))
 
     @abc.abstractmethod
     def _run(self):
