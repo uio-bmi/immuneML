@@ -18,7 +18,7 @@ class GalaxyTool(metaclass=ABCMeta):
             self._run()
         except Exception as e:
             print("exception")
-            self._make_failed_galaxy_run_html()
+            self._make_failed_galaxy_run_html(e)
             # raise e
         finally:
             print(glob.glob(str(self.result_path / "*")))
@@ -31,7 +31,7 @@ class GalaxyTool(metaclass=ABCMeta):
     def _run(self):
         pass
 
-    def _make_failed_galaxy_run_html(self):
+    def _make_failed_galaxy_run_html(self, exception):
         print("make failed galaxy run html")
         FailedGalaxyHTMLBuilder.build(self.result_path)
 
