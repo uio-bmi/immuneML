@@ -20,6 +20,7 @@ class GalaxyTool(metaclass=ABCMeta):
             self._make_failed_galaxy_run_html()
             raise e
         finally:
+            print("finally")
             shutil.make_archive(Path("./immuneML_output"), "zip", self.result_path)
             shutil.move(str(Path("./immuneML_output.zip")), str(self.result_path))
 
@@ -28,5 +29,6 @@ class GalaxyTool(metaclass=ABCMeta):
         pass
 
     def _make_failed_galaxy_run_html(self):
+        print("make failed galaxy run html")
         FailedGalaxyHTMLBuilder.build(self.result_path)
 
