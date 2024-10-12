@@ -33,5 +33,5 @@ class GalaxyTool(metaclass=ABCMeta):
 
     def _make_failed_galaxy_run_html(self, exception):
         print("make failed galaxy run html")
-        FailedGalaxyHTMLBuilder.build(self.result_path)
+        FailedGalaxyHTMLBuilder.build(self.result_path, exception)
 
