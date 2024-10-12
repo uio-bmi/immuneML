@@ -17,6 +17,7 @@ class GalaxyTool(metaclass=ABCMeta):
         try:
             self._run()
         except Exception as e:
+            print("exception")
             self._make_failed_galaxy_run_html()
             raise e
         finally:
