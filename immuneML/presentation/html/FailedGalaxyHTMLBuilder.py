@@ -16,11 +16,10 @@ class FailedGalaxyHTMLBuilder:
 
     @staticmethod
     def build(result_path) -> Path:
-        base_path = PathBuilder.build(result_path / "../HTML_output/")
         html_map = {
             "css_style": Util.get_css_content(FailedGalaxyHTMLBuilder.CSS_PATH),
-            "full_specs": Util.get_full_specs_path(base_path),
-            "logfile": Util.get_logfile_path(base_path),
+            "full_specs": result_path.glob("full*.yaml"),
+            "logfile": result_path.glob("*log.txt"),
             'immuneML_version': MLUtil.get_immuneML_version()}
 
         result_file = result_path / f"index.html"
