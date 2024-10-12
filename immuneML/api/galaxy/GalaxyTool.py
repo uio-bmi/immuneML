@@ -4,6 +4,7 @@ import shutil
 from abc import ABCMeta
 from pathlib import Path
 import glob
+import traceback
 from immuneML.presentation.html.FailedGalaxyHTMLBuilder import FailedGalaxyHTMLBuilder
 
 
@@ -17,7 +18,8 @@ class GalaxyTool(metaclass=ABCMeta):
         try:
             self._run()
         except Exception as e:
-            self._make_failed_galaxy_run_html(e)
+            traceback_str = traceback.format_exc()
+            self._make_failed_galaxy_run_html(traceback_str)
             raise e
         finally:
             shutil.make_archive(Path("./immuneML_output"), "zip", self.result_path)
@@ -27,6 +29,6 @@ class GalaxyTool(metaclass=ABCMeta):
     def _run(self):
         pass
 
-    def _make_failed_galaxy_run_html(self, exception):
-        FailedGalaxyHTMLBuilder.build(self.result_path, exception)
+    def _make_failed_galaxy_run_html(self, traceback_str):
+        FailedGalaxyHTMLBuilder.build(self.result_path, traceback_str)
 

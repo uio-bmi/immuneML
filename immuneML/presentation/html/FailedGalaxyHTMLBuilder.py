@@ -15,12 +15,12 @@ class FailedGalaxyHTMLBuilder:
     CSS_PATH = EnvironmentSettings.html_templates_path / "css/custom.css"
 
     @staticmethod
-    def build(result_path, exception) -> Path:
+    def build(result_path, traceback_str) -> Path:
         html_map = {
             "css_style": Util.get_css_content(FailedGalaxyHTMLBuilder.CSS_PATH),
             "full_specs": "../full_specs.yaml",
-            "logfile": "../log.txt",
-            "exception": str(exception.__traceback__),
+            "logfile_content": open(result_path / "log.txt", 'r').read(),
+            "exception": traceback_str,
             'immuneML_version': MLUtil.get_immuneML_version()}
 
         result_file = result_path / f"index.html"

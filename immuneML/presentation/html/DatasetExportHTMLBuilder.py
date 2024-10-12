@@ -33,9 +33,6 @@ class DatasetExportHTMLBuilder:
 
     @staticmethod
     def make_html_map(state: DatasetExportState, base_path: Path) -> dict:
-        print(Util.get_full_specs_path(base_path))
-        print(Util.get_logfile_path(base_path))
-
         html_map = {
             "css_style": Util.get_css_content(DatasetExportHTMLBuilder.CSS_PATH),
             "name": state.name,
