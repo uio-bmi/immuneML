@@ -17,21 +17,16 @@ class GalaxyTool(metaclass=ABCMeta):
         try:
             self._run()
         except Exception as e:
-            print("exception")
             self._make_failed_galaxy_run_html(e)
-            # raise e
+            raise e
         finally:
-            print(glob.glob(str(self.result_path / "*")))
-            print("finally")
             shutil.make_archive(Path("./immuneML_output"), "zip", self.result_path)
             shutil.move(str(Path("./immuneML_output.zip")), str(self.result_path))
-            print(glob.glob(str(self.result_path / "*")))
 
     @abc.abstractmethod
     def _run(self):
         pass
 
     def _make_failed_galaxy_run_html(self, exception):
-        print("make failed galaxy run html")
         FailedGalaxyHTMLBuilder.build(self.result_path, exception)
 
