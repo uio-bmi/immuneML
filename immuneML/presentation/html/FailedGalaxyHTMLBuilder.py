@@ -18,6 +18,9 @@ class FailedGalaxyHTMLBuilder:
     def build(result_path, exception) -> Path:
         base_path = PathBuilder.build(result_path / "../HTML_output/")
 
+        print(Util.get_full_specs_path(base_path))
+        print(Util.get_logfile_path(base_path))
+
         html_map = {
             "css_style": Util.get_css_content(FailedGalaxyHTMLBuilder.CSS_PATH),
             "full_specs": Util.get_full_specs_path(base_path),
