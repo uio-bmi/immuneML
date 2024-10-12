@@ -41,6 +41,6 @@ class ApplyGenModelTool(GalaxyTool):
                                                ApplyGenModelTool.__name__, instruction_name)
 
         assert os.path.isfile(specs['instructions'][instruction_name]['ml_config_path']), \
-            f"{ApplyGenModelTool.__name__}: file specified under 'config_path' parameter " \
-            f"({specs['instructions'][instruction_name]['config_path']}) is not available. Please check if it was " \
+            f"{ApplyGenModelTool.__name__}: file specified under 'ml_config_path' parameter " \
+            f"({specs['instructions'][instruction_name]['ml_config_path']}) is not available. Please check if it was " \
             f"correctly uploaded or if the file name is correct."
