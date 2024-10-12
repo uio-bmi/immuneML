@@ -23,7 +23,7 @@ class FailedGalaxyHTMLBuilder:
             "logfile": Util.get_logfile_path(base_path),
             'immuneML_version': MLUtil.get_immuneML_version()}
 
-        result_file = base_path / f"index.html"
+        result_file = result_path / f"index.html"
 
         TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "FailedGalaxy.html",
                              template_map=html_map, result_path=result_file)
