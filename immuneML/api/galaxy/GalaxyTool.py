@@ -25,6 +25,7 @@ class GalaxyTool(metaclass=ABCMeta):
             print("finally")
             shutil.make_archive(Path("./immuneML_output"), "zip", self.result_path)
             shutil.move(str(Path("./immuneML_output.zip")), str(self.result_path))
+            print(glob.glob("*"))
 
     @abc.abstractmethod
     def _run(self):
