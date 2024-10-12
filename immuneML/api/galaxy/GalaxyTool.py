@@ -4,6 +4,8 @@ import shutil
 from abc import ABCMeta
 from pathlib import Path
 
+from immuneML.presentation.html.FailedGalaxyHTMLBuilder import FailedGalaxyHTMLBuilder
+
 
 class GalaxyTool(metaclass=ABCMeta):
 
@@ -26,5 +28,5 @@ class GalaxyTool(metaclass=ABCMeta):
         pass
 
     def _make_failed_galaxy_run_html(self):
-        print("test")
-        pass
+        FailedGalaxyHTMLBuilder.build(self.result_path)
+
