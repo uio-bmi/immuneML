@@ -21,7 +21,7 @@ def parse_command_line_arguments(args):
                         help="Type of dataset to generate (RepertoireDataset or SequenceDataset, ReceptorDataset is currently not available)")
     parser.add_argument("-c", "--chain_type",  choices=["humanTRA", "humanTRB", "humanIGH", "humanIGK", "humanIGL"], required=True,
                         help="Chain type for the simulated dataset, to be used for default OLGA model selection.")
-    parser.add_argument("-p", "--signal_percentage",  type=float, required=True,
+    parser.add_argument("-p", "--signal_percentage",  type=float, default=100,
                         help="Percentage of sequences that contain the signal.")
     parser.add_argument("-r", "--repertoire_size",  type=int, required=True,
                         help="Number of sequences per repertoire, if dataset_type is repertoire.")
