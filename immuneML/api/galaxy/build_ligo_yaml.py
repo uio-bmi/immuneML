@@ -51,7 +51,7 @@ def build_specs(parsed_args):
             "simulations": {
                 "sim1": {
                     "sim_items": {
-                        "simulation_with_signal": {
+                        "signal": {
                             "generative_model": {
                                 "default_model_name": parsed_args.chain_type,
                                 "type": "OLGA"
@@ -61,7 +61,7 @@ def build_specs(parsed_args):
                             "seed": 100,
                             "receptors_in_repertoire_count": parsed_args.repertoire_size if parsed_args.dataset_type == "repertoire" else None
                         },
-                        "simulation_without_signal": {
+                        "no_signal": {
                             "generative_model": {
                                 "default_model_name": parsed_args.chain_type,
                                 "type": "OLGA"
