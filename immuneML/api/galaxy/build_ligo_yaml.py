@@ -23,7 +23,7 @@ def parse_command_line_arguments(args):
                         help="Chain type for the simulated dataset, to be used for default OLGA model selection.")
     parser.add_argument("-p", "--signal_percentage",  type=float, default=100,
                         help="Percentage of sequences that contain the signal.")
-    parser.add_argument("-r", "--repertoire_size",  type=int, required=True,
+    parser.add_argument("-r", "--repertoire_size",  type=int, required=False,
                         help="Number of sequences per repertoire, if dataset_type is repertoire.")
 
     parser.add_argument("-o", "--output_path", required=True,
