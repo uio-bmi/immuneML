@@ -4,8 +4,11 @@ from pathlib import Path
 
 import yaml
 
+from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
 from immuneML.api.galaxy.Util import Util
+from immuneML.app.ImmuneMLApp import ImmuneMLApp
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class GalaxySimulationTool(GalaxyTool):
@@ -85,17 +88,21 @@ class GalaxySimulationTool(GalaxyTool):
         super().__init__(specification_path, result_path, **kwargs)
 
     def _run(self):
-        specs = self.prepare_specs()
+        PathBuilder.build(self.result_path)
+        specs = self._prepare_specs()
 
         Util.check_instruction_type(specs, 'GalaxySimulationTool', "LigoSim")
-        Util.run_tool(self.yaml_path, self.result_path)
 
-        dataset_location = list(self.result_path.glob("*/exported_dataset/*/"))[0]
-        shutil.copytree(dataset_location, self.result_path / 'galaxy_dataset/')
+        app = ImmuneMLApp(self.yaml_path, self.result_path)
+        state = app.run()[0]
+
+        dataset = state.resulting_dataset
+        dataset.name = "dataset"
+        ImmuneMLExporter.export(dataset, self.result_path / "galaxy_dataset/")
 
         logging.info(f"{GalaxySimulationTool.__name__}: the simulation is finished.")
 
-    def prepare_specs(self) -> dict:
+    def _prepare_specs(self) -> dict:
         with self.yaml_path.open("r") as file:
             specs = yaml.safe_load(file)
 
