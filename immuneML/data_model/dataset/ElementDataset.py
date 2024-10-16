@@ -1,4 +1,5 @@
 import uuid
+import warnings
 from pathlib import Path
 from uuid import uuid4
 
@@ -14,17 +15,48 @@ class ElementDataset(Dataset):
     This is the base class for ReceptorDataset and SequenceDataset which implements all the functionality for both classes. The only difference between
     these two classes is whether paired or single chain data is stored.
     """
+    ILLEGAL_LABEL_NAMES = ('region_type', 'receptor_chains', 'organism', 'type_dict')
+
+    @classmethod
+    def build_metadata_yaml(cls, dataset_file: Path, element_class_name: str, types: dict, filenames: list = None, batchfiles_path: Path = None, labels: dict = None, identifier: str = None, name: str = None):
+        assert types is not None, "ElementDataset: 'types' dict must be specified when exporting a new dataset.yaml file"
+
+        classification_labels = {label_name: list(label_classes)
+                                 for label_name, label_classes in labels.items()
+                                 if label_name not in ElementDataset.ILLEGAL_LABEL_NAMES and type(label_classes) in (list, set, tuple)} \
+            if labels is not None else dict()
+
+        if labels is not None and classification_labels.keys() != labels.keys():
+            warnings.warn(f"Some illegal labels were removed when exporting the dataset file to '{dataset_file}', due to illegal label names or class formatting\n"
+                            f"Received labels: {labels}\n"
+                            f"Stored labels: {labels}")
+
+        metadata = {
+            "type_dict": {**{key: str for key in classification_labels.keys()},
+                          **{key: SequenceSet.TYPE_TO_STR[val] for key, val in types.items()}},
+            "dataset_class": cls.__name__,
+            "element_class_name": element_class_name,
+            "filenames": [str(file) for file in filenames],
+            "batchfiles_path": str(batchfiles_path),
+            "labels": classification_labels
+        }
+
+        if identifier is not None:
+            metadata["identifier"] = identifier
+
+        if name is not None:
+            metadata["name"] = name
+
+        write_yaml(dataset_file, metadata)
 
     @classmethod
     def build(cls, dataset_file: Path, types: dict = None, filenames: list = None, batchfiles_path: Path = None, **kwargs):
         if not Path(dataset_file).exists():
-            metadata = {
-                'type_dict': {key: SequenceSet.TYPE_TO_STR[val] for key, val in types.items()},
-                'dataset_class': cls.__name__, 'element_class_name': kwargs['element_class_name'],
-                'filenames': [str(file) for file in filenames],
-                'batchfiles_path': str(batchfiles_path)
-            }
-            write_yaml(dataset_file, metadata)
+            cls.build_metadata_yaml(dataset_file,
+                                    filenames=filenames,
+                                    batchfiles_path=batchfiles_path,
+                                    types=types,
+                                    **kwargs)
         return cls(**{**kwargs, 'dataset_file': dataset_file, 'filenames': filenames, 'batchfiles_path': batchfiles_path})
 
     @staticmethod
@@ -118,7 +150,7 @@ class ElementDataset(Dataset):
 
         types = read_yaml(self.dataset_file)['type_dict']
 
-        new_dataset = self.__class__.build(labels=self.labels, file_size=self.file_size,
+        new_dataset = self.__class__.build(labels=self.labels,
                                            filenames=batch_filenames, batchfiles_path=path,
                                            element_class_name=self.element_generator.element_class_name,
                                            dataset_file=path / f"{dataset_name}.yaml", types=types,
@@ -133,7 +165,7 @@ class ElementDataset(Dataset):
     def get_label_names(self):
         """Returns the list of metadata fields which can be used as labels"""
         return [label for label in list(self.labels.keys()) if
-                label not in ['region_type', 'receptor_chains', 'organism', 'type_dict']] if self.labels else []
+                label not in ElementDataset.ILLEGAL_LABEL_NAMES] if self.labels else []
 
     def clone(self, keep_identifier: bool = False):
         raise NotImplementedError

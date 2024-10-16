@@ -41,7 +41,7 @@ class TestImmuneMLImport(TestCase):
         base_path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "iml_import_receptors/")
         orig_dataset_folder = base_path / "orig_dataset"
 
-        orig_dataset = RandomDatasetGenerator.generate_receptor_dataset(10, {2: 1}, {3: 1}, {}, orig_dataset_folder)
+        orig_dataset = RandomDatasetGenerator.generate_receptor_dataset(10, {2: 1}, {3: 1}, {"l": {"a": 0.6, "b": 0.4}}, orig_dataset_folder)
         dataset_path = ImmuneMLExporter.export(orig_dataset, orig_dataset_folder)
 
         imported_dataset = ImmuneMLImport.import_dataset({"path": dataset_path}, "d2")
@@ -58,6 +58,8 @@ class TestImmuneMLImport(TestCase):
                                                                "dataset_name")
         self.assertEqual(orig_dataset.get_example_count(), moved_imported_dataset.get_example_count())
         self.assertListEqual(orig_dataset.get_example_ids(), moved_imported_dataset.get_example_ids())
+        self.assertListEqual(orig_dataset.get_label_names(), moved_imported_dataset.get_label_names())
+        self.assertDictEqual(orig_dataset.labels, moved_imported_dataset.labels)
 
         # original data has been deleted so get_data doesnt work, testing this way instead
         self.assertEqual(orig_dataset.get_example_count(), len(list(moved_imported_dataset.get_data())))

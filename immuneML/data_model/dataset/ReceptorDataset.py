@@ -32,17 +32,17 @@ class ReceptorDataset(ElementDataset):
             receptor_matrix = receptor_dc(**field_vals)
             bnp_write_to_file(path / filenames[index], receptor_matrix)
 
-        dataset_metadata = {'type_dict': {key: SequenceSet.TYPE_TO_STR[val] for key, val in types.items()},
-                            'element_class_name': type(receptors[0]).__name__,
-                            'dataset_class': 'ReceptorDataset',
-                            'filenames': filenames,
-                            'batchfiles_path': str(path)}
-        metadata_filename = path / f'dataset_{name}.yaml'
-        write_yaml(metadata_filename, dataset_metadata)
+        dataset_file = path / f'dataset_{name}.yaml'
+        cls.build_metadata_yaml(dataset_file=dataset_file,
+                                element_class_name=type(receptors[0]).__name__,
+                                types=types,
+                                filenames=filenames,
+                                batchfiles_path=path,
+                                labels=labels)
 
         return ReceptorDataset(filenames=filenames, file_size=file_size, name=name, labels=labels,
                                element_class_name=type(receptors[0]).__name__ if len(receptors) > 0 else None,
-                               dataset_file=metadata_filename, batchfiles_path=path,
+                               dataset_file=dataset_file, batchfiles_path=path,
                                buffer_type=bnp.io.delimited_buffers.get_bufferclass_for_datatype(receptor_dc,
                                                                                                  delimiter='\t',
                                                                                                  has_header=True))

@@ -40,13 +40,13 @@ class SequenceDataset(ElementDataset):
             sequence_matrix = seq_set_dc(**vals)
             bnp_write_to_file(path / filenames[index], sequence_matrix)
 
-        metadata = {
-            'type_dict': {key: SequenceSet.TYPE_TO_STR[val] for key, val in types.items()},
-            'dataset_class': 'SequenceDataset', 'element_class_name': ReceptorSequence.__name__,
-            'filenames': filenames
-        }
         dataset_file = path / f'dataset_{name}.yaml'
-        write_yaml(dataset_file, metadata)
+        cls.build_metadata_yaml(dataset_file=dataset_file,
+                                element_class_name=ReceptorSequence.__name__,
+                                types=types,
+                                filenames=filenames,
+                                batchfiles_path=path,
+                                labels=labels)
 
         return SequenceDataset(filenames=filenames, batchfiles_path=path, file_size=file_size,
                                name=name, labels=labels,
