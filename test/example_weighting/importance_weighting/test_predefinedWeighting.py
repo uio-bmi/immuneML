@@ -33,7 +33,7 @@ class TestPredefinedWeighting(TestCase):
         return dataset, weights_path
 
     def test_compute_weights(self):
-        path = EnvironmentSettings.tmp_test_path / "positional_motif_sequence_encoder/test/"
+        path = EnvironmentSettings.tmp_test_path / "predefinedweighting/test/"
         dataset, weights_path = self._prepare_dataset(path)
 
         importance_weighter = PredefinedWeighting.build_object(dataset,

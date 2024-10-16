@@ -278,7 +278,7 @@ class ImportHelper:
 
                 else:
                     logging.warning(
-                        f"{ImportHelper.__name__}: column {sequence_type.value} is missing, illegal characters were not checked.")
+                        f"{ImportHelper.__name__}: column '{sequence_type.value}' is missing, illegal characters were not checked.")
 
         return dataframe
 

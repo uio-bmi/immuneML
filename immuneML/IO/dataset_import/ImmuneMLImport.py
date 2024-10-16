@@ -7,7 +7,6 @@ import yaml
 from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.ElementDataset import ElementDataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.environment.Constants import Constants
 from immuneML.util.ReflectionHandler import ReflectionHandler
