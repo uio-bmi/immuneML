@@ -1,10 +1,10 @@
+import os
 from pathlib import Path
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.util.Util import Util as MLUtil
 from immuneML.presentation.TemplateParser import TemplateParser
 from immuneML.presentation.html.Util import Util
-from immuneML.util.PathBuilder import PathBuilder
 
 
 class FailedGalaxyHTMLBuilder:
@@ -16,10 +16,11 @@ class FailedGalaxyHTMLBuilder:
 
     @staticmethod
     def build(result_path, traceback_str) -> Path:
+        logfile = result_path / "log.txt"
+
         html_map = {
             "css_style": Util.get_css_content(FailedGalaxyHTMLBuilder.CSS_PATH),
-            "full_specs": "../full_specs.yaml",
-            "logfile_content": open(result_path / "log.txt", 'r').read(),
+            "logfile_content": open(logfile, 'r').read() if  os.path.isfile(logfile) else "Log file not found",
             "exception": traceback_str,
             'immuneML_version': MLUtil.get_immuneML_version()}
 
