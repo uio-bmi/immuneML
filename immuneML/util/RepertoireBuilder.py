@@ -48,7 +48,8 @@ class RepertoireBuilder:
                 'cdr3': ['' for _ in range(len(sequence_list))],
                 'sequence_id': [uuid.uuid4().hex for _ in range(len(sequence_list))],
                 'productive': ['T' for _ in range(len(sequence_list))],
-                'vj_in_frame': ['T' for _ in range(len(sequence_list))]
+                'vj_in_frame': ['T' for _ in range(len(sequence_list))],
+                'stop_codon': ['F' for _ in range(len(sequence_list))]
             })
 
             if seq_metadata is None:

@@ -215,8 +215,9 @@ def make_sequences_from_data(data, dynamic_fields: list, region_type: RegionType
         seq, seq_aa = get_sequence_value(el, region_type)
         seqs.append(ReceptorSequence(sequence_id=el.sequence_id, sequence=seq, sequence_aa=seq_aa,
                                      productive=el.productive, vj_in_frame=el.vj_in_frame, stop_codon=el.stop_codon,
-                                     locus=el.locus, locus_species=el.locus_species, v_call=el.v_call, d_call=el.d_call,
-                                     j_call=el.j_call, c_call=el.c_call, duplicate_count=el.duplicate_count,
+                                     locus=el.locus, v_call=el.v_call, d_call=el.d_call if hasattr(el, 'd_call') else '',
+                                     c_call=getattr(el, 'c_call', ''),
+                                     j_call=el.j_call, duplicate_count=el.duplicate_count,
                                      metadata={dynamic_field: getattr(el, dynamic_field)
                                                for dynamic_field in dynamic_fields}))
     return seqs
