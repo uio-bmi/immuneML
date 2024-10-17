@@ -1,3 +1,5 @@
+from dataclasses import fields
+
 import bionumpy as bnp
 from bionumpy import DNAEncoding, AminoAcidEncoding
 from bionumpy.bnpdataclass import bnpdataclass
@@ -179,3 +181,7 @@ class AIRRSequenceSet:
     def get_neutral_value(cls, field_type):
         neutral_values = {str: '', int: -1, DNAEncoding: '', AminoAcidEncoding: '', AminoAcidXEncoding: '', float: -1.}
         return neutral_values[field_type]
+
+    @classmethod
+    def get_field_type_dict(cls):
+        return {f.name: f.type for f in fields(cls)}

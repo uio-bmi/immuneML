@@ -5,7 +5,7 @@ from unittest import TestCase
 import pandas as pd
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.reports.encoding_reports.RelevantSequenceExporter import RelevantSequenceExporter

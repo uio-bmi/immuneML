@@ -55,7 +55,7 @@ class OLGAImport(DataImport):
                         metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
                         import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
                         import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                        import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+                        import_empty_aa_sequences: False # filter out sequences if they don't have amino acid sequence set
                         # Optional fields with OLGA-specific defaults, only change when different behavior is required:
                         separator: "\\t" # column separator
                         columns_to_load: [0, 1, 2, 3]

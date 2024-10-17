@@ -34,8 +34,7 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
     else:
         metadata_path = Path(metadata_path)
 
-    loader = MiXCRImport()
-    dataset = loader.import_dataset({
+    loader = MiXCRImport({
         "is_repertoire": True,
         "path": path_to_dataset_directory,
         "metadata_file": metadata_path,
@@ -50,6 +49,7 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
             "allJHitsWithScore": "j_call"
         },
     }, "mixcr_dataset")
+    dataset = loader.import_dataset()
 
     label_name = list(dataset.labels.keys())[0]  # label that can be used for ML prediction - by default: "disease" with values True/False
 

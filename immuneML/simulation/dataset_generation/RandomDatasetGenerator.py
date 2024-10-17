@@ -4,7 +4,7 @@ import uuid
 from pathlib import Path
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
-from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.SequenceParams import RegionType, ChainPair
 from immuneML.data_model.SequenceSet import ReceptorSequence, Receptor
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
@@ -164,7 +164,7 @@ class RandomDatasetGenerator:
 
         receptors = [Receptor(chain_1=get_random_sequence(chain_1_length_probabilities, "TRA", i),
                               chain_2=get_random_sequence(chain_2_length_probabilities, "TRB", i),
-                              chain_pair="TRA_TRB",
+                              chain_pair=ChainPair["TRA_TRB"],
                               cell_id=str(i), receptor_id=uuid.uuid4().hex,
                               metadata={
                                   **{label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]

@@ -13,7 +13,7 @@ from bionumpy import AminoAcidEncoding, DNAEncoding
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet, AminoAcidXEncoding
 from immuneML.data_model.SequenceSet import Repertoire, build_dynamic_airr_sequence_set_dataclass
-from immuneML.data_model.bnp_util import bnp_write_to_file, write_yaml
+from immuneML.data_model.bnp_util import bnp_write_to_file, write_yaml, read_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset, ReceptorDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
@@ -40,9 +40,14 @@ class DataImport(metaclass=abc.ABCMeta):
         else:
             dataset = self.import_sequence_dataset()
 
+        dataset.labels['organism'] = self.params.organism
+
         return dataset
 
     def import_repertoire_dataset(self) -> RepertoireDataset:
+
+        self.check_or_discover_metadata_file()
+
         try:
             metadata = pd.read_csv(self.params.metadata_file, sep=",")
         except Exception as e:
@@ -102,6 +107,12 @@ class DataImport(metaclass=abc.ABCMeta):
         return ReceptorDataset(name=self.dataset_name, bnp_dataclass=dc, dataset_file=dataset_file,
                                dynamic_fields=list(types.keys()), filename=filename)
 
+    def check_or_discover_metadata_file(self):
+        if self.params.metadata_file is None and self.params.dataset_file and self.params.dataset_file.is_file():
+            dataset_metadata = read_yaml(self.params.dataset_file)
+            if 'metadata_file' in dataset_metadata:
+                self.params.metadata_file = self.params.dataset_file.parent / dataset_metadata['metadata_file']
+
     def _make_dataset_file_for_repertoire_dataset(self, repertoires: List[Repertoire]):
         dataset_filename = self.params.result_path / f"{self.dataset_name}_dataset.yaml"
         metadata = {'dataset_name': self.dataset_name, 'example_count': len(repertoires)}
@@ -122,6 +133,8 @@ class DataImport(metaclass=abc.ABCMeta):
         return dataset_filename
 
     def _prepare_values_for_element_dataset(self, final_data_dict, dc, types):
+        PathBuilder.build(self.params.result_path)
+
         data = dc(**final_data_dict)
         bnp_write_to_file(self.params.result_path / f'{self.dataset_name}.tsv', data)
 
@@ -203,7 +216,7 @@ class DataImport(metaclass=abc.ABCMeta):
 
         df.loc[:, str_cols] = df.loc[:, str_cols].astype(str).replace('nan', '').replace('-1.0', '')
 
-        invalid_cols = df.columns[~df.applymap(type).nunique().eq(1)]
+        invalid_cols = df.columns[~df.map(type).nunique().eq(1)]
         df[invalid_cols] = df[invalid_cols].astype(str)
 
         int_cols = [f.name for f in fields(AIRRSequenceSet) if f.type == int and f.name in df.columns]

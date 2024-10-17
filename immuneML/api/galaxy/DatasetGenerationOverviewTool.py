@@ -2,7 +2,7 @@ from pathlib import Path
 
 import yaml
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
 from immuneML.api.galaxy.Util import Util
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
@@ -33,7 +33,7 @@ class DatasetGenerationOverviewTool(GalaxyTool):
         state = ImmuneMLApp(self.yaml_path, self.result_path).run()[0]
         dataset = list(state.exploratory_analysis_units.values())[0].dataset
 
-        ImmuneMLExporter.export(dataset, self.result_path / "galaxy_dataset/")
+        AIRRExporter.export(dataset, self.result_path / "galaxy_dataset/")
 
         print_log(f"Exported dataset.")
 

@@ -1,4 +1,3 @@
-import copy
 import json
 import shutil
 import zipfile
@@ -7,13 +6,9 @@ from pathlib import Path
 import airr
 import pandas as pd
 
-from immuneML.IO.dataset_import.AIRRImport import AIRRImport
 from immuneML.IO.dataset_import.DataImport import DataImport
-from immuneML.data_model.datasets.Dataset import Dataset
-from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.SequenceParams import ChainPair, RegionType
-from immuneML.data_model.SequenceSet import Repertoire
-from immuneML.util.ImportHelper import ImportHelper
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.util.PathBuilder import PathBuilder
 from scripts.specification_util import update_docs_per_mapping
 
@@ -59,23 +54,6 @@ class IReceptorImport(DataImport):
 
     - region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as AIRR uses the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
-    - column_mapping (dict): A mapping from AIRR column names to immuneML's internal data representation. For AIRR, this is by default set to the values shown in YAML below.  A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the AIRR file, or using alternative column names). Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the AIRR file, or using alternative column names). Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS.
-
-        .. indent with spaces
-        .. code-block:: yaml
-
-                junction: sequences
-                junction_aa: sequence_aas
-                v_call: v_alleles
-                j_call: j_alleles
-                locus: chains
-                duplicate_count: counts
-                sequence_id: sequence_identifiers
-
-    - column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For AIRR format, there is no default column_mapping_synonyms.
-
-    - metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDatasets. This should specify a mapping similar to column_mapping where keys are AIRR column names and values are the names that are internally used in immuneML as metadata fields. These metadata fields can be used as prediction labels for Sequence- and ReceptorDatasets. For AIRR format, there is no default metadata_column_mapping. When importing a RepertoireDataset, the metadata is automatically extracted from the metadata json files.
-
     - separator (str): Column separator, for AIRR this is by default "\\t".
 
 
@@ -103,14 +81,6 @@ class IReceptorImport(DataImport):
                         # Optional fields with AIRR-specific defaults, only change when different behavior is required:
                         separator: "\\t" # column separator
                         region_type: IMGT_CDR3 # what part of the sequence to import
-                        column_mapping: # column mapping AIRR: immuneML
-                            junction: sequences
-                            junction_aa: sequence_aas
-                            v_call: v_alleles
-                            j_call: j_alleles
-                            locus: chains
-                            duplicate_count: counts
-                            sequence_id: sequence_identifiers
 
     """
     REPERTOIRES_FOLDER = "repertoires/"

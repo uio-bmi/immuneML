@@ -55,11 +55,10 @@ class ImmunoSEQRearrangementImport(DataImport):
         .. code-block:: yaml
 
             rearrangement: sequence
-            amino_acid: sequence_aa
+            amino_acid: junction_aa
             v_resolved: v_call
             j_resolved: j_call
             templates: duplicate_count
-            locus: chain
 
     - columns_to_load (list): Specifies which subset of columns must be loaded from the file. By default, this is: [rearrangement, v_family, v_gene, v_allele, j_family, j_gene, j_allele, amino_acid, templates, frame_type, locus]
 

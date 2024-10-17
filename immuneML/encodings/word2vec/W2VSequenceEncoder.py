@@ -14,7 +14,7 @@ class W2VSequenceEncoder(Word2VecEncoder):
 
         for sequence in dataset.get_data():
             for label_name in params.label_config.get_labels_by_name():
-                label = sequence.get_attribute(label_name)
+                label = sequence.metadata[label_name]
                 labels[label_name].append(label)
 
         return np.array([labels[name] for name in labels.keys()])

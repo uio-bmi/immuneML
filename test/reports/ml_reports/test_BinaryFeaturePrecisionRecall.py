@@ -7,7 +7,7 @@ import random
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings

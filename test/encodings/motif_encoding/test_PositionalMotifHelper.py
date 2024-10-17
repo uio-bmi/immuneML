@@ -7,7 +7,6 @@ from unittest import TestCase
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.SequenceSet import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
 from immuneML.encodings.motif_encoding.PositionalMotifParams import PositionalMotifParams
 from immuneML.environment.Constants import Constants
@@ -22,16 +21,16 @@ class TestPositionalMotifHelper(TestCase):
 
     def _prepare_dataset(self, path):
         sequences = [ReceptorSequence(sequence_aa="AA", sequence_id="1",
-                                      metadata=SequenceMetadata(custom_params={"l1": 1})),
+                                      metadata={"l1": 1}),
                      ReceptorSequence(sequence_aa="CC", sequence_id="2",
-                                      metadata=SequenceMetadata(custom_params={"l1": 1})),
+                                      metadata={"l1": 1}),
                      ReceptorSequence(sequence_aa="AC", sequence_id="3",
-                                      metadata=SequenceMetadata(custom_params={"l1": 1})),
+                                      metadata={"l1": 1}),
                      ReceptorSequence(sequence_aa="CA", sequence_id="4",
-                                      metadata=SequenceMetadata(custom_params={"l1": 1}))]
+                                      metadata={"l1": 1})]
 
         PathBuilder.build(path)
-        return SequenceDataset.build_from_objects(sequences, 100, PathBuilder.build(path / 'data'), 'd2')
+        return SequenceDataset.build_from_objects(sequences, PathBuilder.build(path / 'data'), 'd2')
 
     def test_get_numpy_sequence_representation(self):
         path = EnvironmentSettings.tmp_test_path / "positional_motif_sequence_encoder_test_np/"

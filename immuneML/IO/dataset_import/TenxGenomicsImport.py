@@ -55,8 +55,8 @@ class TenxGenomicsImport(DataImport):
         .. indent with spaces
         .. code-block:: yaml
 
-                cdr3: sequence_aa
-                cdr3_nt: sequence
+                cdr3: junction
+                cdr3_nt: junction_aa
                 v_gene: v_call
                 j_gene: j_call
                 umis: duplicate_count
@@ -64,8 +64,6 @@ class TenxGenomicsImport(DataImport):
                 consensus_id: sequence_id
 
     - column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For 10xGenomics format, there is no default column_mapping_synonyms.
-
-    - metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDatasets. This should specify a mapping similar to column_mapping where keys are 10xGenomics column names and values are the names that are internally used in immuneML as metadata fields. These metadata fields can be used as prediction labels for Sequence- and ReceptorDatasets. This parameter can also be used to specify sequence-level metadata columns for RepertoireDatasets, which can be used by reports. To set prediction label metadata for RepertoireDatasets, see metadata_file instead. For 10xGenomics format, there is no default metadata_column_mapping.
 
     - separator (str): Column separator, for 10xGenomics this is by default ",".
 
@@ -85,18 +83,15 @@ class TenxGenomicsImport(DataImport):
                         metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
                         paired: False # whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False
                         receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
-                        metadata_column_mapping: # metadata column mapping 10xGenomics: immuneML for SequenceDataset
-                            tenx_column_name1: metadata_label1
-                            tenx_column_name2: metadata_label2
                         import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
                         import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                        import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+                        import_empty_aa_sequences: False # filter out sequences if they don't have amino acid sequence set
                         # Optional fields with 10xGenomics-specific defaults, only change when different behavior is required:
                         separator: "," # column separator
                         region_type: IMGT_CDR3 # what part of the sequence to import
                         column_mapping: # column mapping 10xGenomics: immuneML
-                            cdr3: sequence_aa
-                            cdr3_nt: sequence
+                            cdr3: junction_aa
+                            cdr3_nt: junction
                             v_gene: v_call
                             j_gene: j_call
                             umis: duplicate_count
@@ -108,10 +103,13 @@ class TenxGenomicsImport(DataImport):
     def preprocess_file(self, df: pd.DataFrame) -> pd.DataFrame:
 
         additional_str_columns = [col for col in ['d_gene', 'c_gene'] if col in df.columns]
-        df.loc[:, additional_str_columns] = df.loc[:, additional_str_columns].astype(str).replace("None", "")
+        df.loc[:, additional_str_columns] = df.loc[:, additional_str_columns].astype(str).replace("None", "").replace("-1.0", "")
 
         additional_int_columns = [col for col in ['full_length', 'reads'] if col in df.columns]
         df.loc[:, additional_int_columns] = df.loc[:, additional_int_columns].astype(int)
+
+        bool_str_columns = [col for col in ['productive', 'vj_in_frame', 'stop_codon'] if col in df.columns]
+        df.loc[:, bool_str_columns] = df.loc[:, bool_str_columns].astype(str).replace("True", "T").replace("False", "F").replace("None", "")
 
         return df
 

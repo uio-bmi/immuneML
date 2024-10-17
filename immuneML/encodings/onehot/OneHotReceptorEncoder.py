@@ -26,29 +26,29 @@ class OneHotReceptorEncoder(OneHotEncoder):
         return encoded_dataset
 
     def _encode_data(self, dataset: ReceptorDataset, params: EncoderParams):
-        receptor_objs = [receptor for receptor in dataset.get_data()]
-        sequences = [[getattr(obj, chain).get_sequence(self.sequence_type) for chain in obj.get_chains()] for obj in receptor_objs]
-        first_chain_seqs, second_chain_seqs = zip(*sequences)
+        data = dataset.data
 
-        if any(seq is None for seq in first_chain_seqs) or any(seq is None for seq in second_chain_seqs):
-            raise ValueError(f"{OneHotEncoder.__name__}: receptor dataset {dataset.name} (id: {dataset.identifier}) contains empty sequences for the "
-                             f"specified sequence type {self.sequence_type.name.lower()}. Please check that the dataset is imported correctly.")
+        chains = sorted(np.unique(dataset.data.locus.tolist()).tolist())
+        assert len(chains) == 2, f"OneHotEncoder: {len(chains)} different loci in the dataset, expected 2."
 
-        max_seq_len = max(max([len(seq) for seq in first_chain_seqs]), max([len(seq) for seq in second_chain_seqs]))
+        first_chain_seqs = getattr(data, params.get_sequence_field_name())[np.array(data.locus.tolist()) == chains[0]]
+        second_chain_seqs = getattr(data, params.get_sequence_field_name())[np.array(data.locus.tolist()) == chains[1]]
 
-        labels = self._get_labels(receptor_objs, params) if params.encode_labels else None
+        max_seq_len = max(getattr(data, params.get_sequence_field_name()).lengths)
 
-        examples_first_chain = self._encode_sequence_list(first_chain_seqs, pad_n_sequences=len(receptor_objs),
+        labels = self._get_labels(data, params) if params.encode_labels else None
+
+        examples_first_chain = self._encode_sequence_list(first_chain_seqs, pad_n_sequences=len(data) / 2,
                                                           pad_sequence_len=max_seq_len)
-        examples_second_chain = self._encode_sequence_list(second_chain_seqs, pad_n_sequences=len(receptor_objs),
+        examples_second_chain = self._encode_sequence_list(second_chain_seqs, pad_n_sequences=len(data) / 2,
                                                            pad_sequence_len=max_seq_len)
 
         examples = np.stack((examples_first_chain, examples_second_chain), axis=1)
 
-        feature_names = self._get_feature_names(max_seq_len, receptor_objs[0].get_chains())
+        feature_names = self._get_feature_names(max_seq_len, chains)
 
         if self.flatten:
-            examples = examples.reshape((len(receptor_objs), 2*max_seq_len*len(self.onehot_dimensions)))
+            examples = examples.reshape((len(data) / 2, 2*max_seq_len*len(self.onehot_dimensions)))
             feature_names = [item for sublist in feature_names for subsublist in sublist for item in subsublist]
 
         encoded_data = EncodedData(examples=examples,
@@ -56,20 +56,17 @@ class OneHotReceptorEncoder(OneHotEncoder):
                                    example_ids=dataset.get_example_ids(),
                                    feature_names=feature_names,
                                    encoding=OneHotEncoder.__name__,
-                                   example_weights=dataset.get_example_weights(),
-                                   info={"chain_names": receptor_objs[0].get_chains() if all(receptor_obj.get_chains() == receptor_objs[0].get_chains() for receptor_obj in receptor_objs) else None})
+                                   info={"chain_names": chains})
 
         return encoded_data
 
     def _get_feature_names(self, max_seq_len, chains):
         return [[[f"{chain}_{pos}_{dim}" for dim in self.onehot_dimensions] for pos in range(max_seq_len)] for chain in chains]
 
-    def _get_labels(self, receptor_objs, params: EncoderParams):
+    def _get_labels(self, data, params: EncoderParams):
         label_names = params.label_config.get_labels_by_name()
-        labels = {name: [None] * len(receptor_objs) for name in label_names}
-
-        for idx, receptor in enumerate(receptor_objs):
-            for name in label_names:
-                labels[name][idx] = receptor.metadata[name]
+        labels = {
+            label_name: getattr(data, label_name).tolist() for label_name in label_names
+        }
 
         return labels

@@ -19,9 +19,9 @@ class AdaptiveImportHelper:
         dataframe['cdr3_aa'] = dataframe['junction_aa'].str[1:-1]
 
         if "frame_type" in dataframe.columns:
-            dataframe['vj_in_frame'] = (dataframe.frame_type.str.upper() == 'IN').astype(str)
-            dataframe['stop_codon'] = (dataframe.frame_type.str.upper() == 'STOP').astype(str)
-            dataframe['productive'] = dataframe.junction_aa.notnull().astype(str)
+            dataframe['vj_in_frame'] = (dataframe.frame_type.str.upper() == 'IN').astype(str).str[:1]
+            dataframe['stop_codon'] = (dataframe.frame_type.str.upper() == 'STOP').astype(str).str[:1]
+            dataframe['productive'] = dataframe.junction_aa.notnull().astype(str).str[:1]
             dataframe.drop(columns=['frame_type'], inplace=True)
 
         if 'duplicate_count' in dataframe.columns:

@@ -45,24 +45,17 @@ class GenericImport(DataImport):
 
     - region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means immuneML assumes the IMGT junction (including leading C and trailing Y/F amino acids) is used in the input file, and the first and last amino acids will be removed from the sequences to retrieve the IMGT CDR3 sequence. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
-    - column_mapping (dict): Required for all datasets. A mapping where the keys are the column names in the input file, and the values correspond to the names used in immuneML's internal data representation. Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS. At least sequences (nucleotide) or sequence_aas (amino acids) must be specified, but all other fields are optional. A column mapping can look for example like this:
+    - column_mapping (dict): Required for all datasets. A mapping where the keys are the column names in the input file, and the values correspond to the names in the AIRR format. A column mapping can look for example like this:
 
         .. indent with spaces
         .. code-block:: yaml
 
-            file_column_amino_acids: sequence_aa
+            file_column_amino_acids: cdr3_aa
             file_column_v_genes: v_call
             file_column_j_genes: j_call
             file_column_frequencies: duplicate_count
 
     - column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For Generic import, there is no default column_mapping_synonyms.
-
-    - metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDatasets. This should specify a mapping similar to column_mapping where keys are file column names and values are the names that are internally used in immuneML as metadata fields. These metadata fields can be used as prediction labels for Sequence- and ReceptorDatasets. This parameter can also be used to specify sequence-level metadata columns for RepertoireDatasets, which can be used by reports. To set prediction label metadata for RepertoireDatasets, see metadata_file instead. There is no default metadata_column_mapping.
-
-        .. indent with spaces
-        .. code-block:: yaml
-
-                file_column_antigen_specificity: antigen_specificity
 
     - columns_to_load (list): Optional; specifies which columns to load from the input file. This may be useful if the input files contain many unused columns. If no value is specified, all columns are loaded.
 
@@ -87,7 +80,7 @@ class GenericImport(DataImport):
                         separator: "\\t" # column separator
                         import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
                         import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                        import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+                        import_empty_aa_sequences: False # filter out sequences if they don't have amino acid sequence set
                         region_type: IMGT_CDR3 # which column to check for illegal characters/empty strings etc
                         column_mapping: # column mapping file: immuneML/AIRR column names
                             file_column_amino_acids: junction_aa

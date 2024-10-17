@@ -3,7 +3,7 @@ import random as rn
 import shutil
 from unittest import TestCase
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.api.galaxy.RepertoireClassificationTool import RepertoireClassificationTool
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -17,9 +17,9 @@ class TestRepertoireClassificationTool(TestCase):
         alphabet = EnvironmentSettings.get_sequence_alphabet()
         sequences = [["".join([rn.choice(alphabet) for i in range(20)]) for i in range(100)] for i in range(40)]
 
-        repertoires, metadata = RepertoireBuilder.build(sequences, path, subject_ids=[i % 2 for i in range(len(sequences))])
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, name="dataset")
-        ImmuneMLExporter.export(dataset, path)
+        repertoires, metadata, dataset_file = RepertoireBuilder.build(sequences, path, subject_ids=[i % 2 for i in range(len(sequences))])
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, name="dataset", dataset_file=dataset_file)
+        AIRRExporter.export(dataset, path)
 
     def test_run(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "galaxy_repertoire_classification/")

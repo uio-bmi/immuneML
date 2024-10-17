@@ -2,7 +2,7 @@ import os
 import shutil
 import unittest
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.api.galaxy.build_train_gen_model_specs import main as yamlbuilder_main
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
@@ -18,7 +18,7 @@ class MyTestCase(unittest.TestCase):
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
         dataset.name = "my_dataset"
-        ImmuneMLExporter.export(dataset, path)
+        AIRRExporter.export(dataset, path)
 
         return f"{dataset.name}.yaml"
 
@@ -50,9 +50,3 @@ class MyTestCase(unittest.TestCase):
             os.chdir(old_wd)
 
         shutil.rmtree(path)
-
-
-
-
-if __name__ == '__main__':
-    unittest.main()

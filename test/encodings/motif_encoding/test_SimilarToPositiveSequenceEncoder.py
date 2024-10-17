@@ -7,7 +7,6 @@ from unittest import TestCase
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.SequenceSet import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.motif_encoding.SimilarToPositiveSequenceEncoder import SimilarToPositiveSequenceEncoder
@@ -24,21 +23,21 @@ class TestSimilarToPositiveSequenceEncoder(TestCase):
 
     def _prepare_dataset(self, path):
         sequences = [ReceptorSequence(sequence_aa="AACC", sequence_id="5",
-                                      metadata=SequenceMetadata(custom_params={"l1": "yes"})),
+                                      metadata={"l1": "yes"}),
                      ReceptorSequence(sequence_aa="AGDD", sequence_id="3",
-                                      metadata=SequenceMetadata(custom_params={"l1": "yes"})),
+                                      metadata={"l1": "yes"}),
                      ReceptorSequence(sequence_aa="AAEE", sequence_id="4",
-                                      metadata=SequenceMetadata(custom_params={"l1": "yes"})),
+                                      metadata={"l1": "yes"}),
                      ReceptorSequence(sequence_aa="CCCC", sequence_id="1",
-                                      metadata=SequenceMetadata(custom_params={"l1": "no"})),
+                                      metadata={"l1": "no"}),
                      ReceptorSequence(sequence_aa="AGDE", sequence_id="2",
-                                      metadata=SequenceMetadata(custom_params={"l1": "no"})),
+                                      metadata={"l1": "no"}),
                      ReceptorSequence(sequence_aa="EEEE", sequence_id="6",
-                                      metadata=SequenceMetadata(custom_params={"l1": "no"}))]
+                                      metadata={"l1": "no"})]
 
 
         PathBuilder.build(path)
-        dataset = SequenceDataset.build_from_objects(sequences, 100, PathBuilder.build(path / 'data'), 'd2')
+        dataset = SequenceDataset.build_from_objects(sequences, PathBuilder.build(path / 'data'), 'd2')
 
         lc = LabelConfiguration()
         lc.add_label("l1", ["yes", "no"], positive_class="yes")

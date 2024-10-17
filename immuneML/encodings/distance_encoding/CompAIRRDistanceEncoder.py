@@ -143,7 +143,6 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
                                                    labels=labels,
                                                    feature_names=distance_matrix.columns.values,
                                                    example_ids=distance_matrix.index.values,
-                                                   example_weights=EncoderHelper.get_example_weights_by_identifiers(dataset, distance_matrix.index.values),
                                                    encoding=CompAIRRDistanceEncoder.__name__)
         return encoded_dataset
 
@@ -200,9 +199,9 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
         return raw_distance_matrix, repertoire_sizes, repertoire_indices
 
     def _run_compairr(self, dataset, params, filename):
-        repertoire_sizes, repertoire_indices = self._prepare_repertoire_file(dataset, filename)
+        repertoire_sizes, repertoire_indices = self._prepare_repertoire_file(dataset, filename, params)
 
-        self.compairr_params.is_cdr3 = dataset.repertoires[0].get_region_type() == RegionType.IMGT_CDR3
+        self.compairr_params.is_cdr3 = params.region_type == RegionType.IMGT_CDR3
         args = CompAIRRHelper.get_cmd_args(self.compairr_params, [filename], params.result_path)
         compairr_result = subprocess.run(args, capture_output=True, text=True)
 
@@ -210,7 +209,7 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
 
         return raw_distance_matrix, repertoire_sizes, repertoire_indices
 
-    def _prepare_repertoire_file(self, dataset, filename):
+    def _prepare_repertoire_file(self, dataset, filename, params: EncoderParams):
         repertoire_sizes = {}
         repertoire_indices = {}
 
@@ -218,7 +217,7 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
         header = True
 
         for repertoire in dataset.get_data():
-            repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, self.compairr_params)
+            repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, self.compairr_params, params)
 
             repertoire_counts = repertoire_contents["duplicate_count"].astype(int)
 

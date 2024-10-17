@@ -1,5 +1,6 @@
 import abc
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from pathlib import Path
 from typing import List
 
 from immuneML.data_model.EncodedData import EncodedData
@@ -10,7 +11,8 @@ class Dataset:
     identifier: str = None
     name: str = None
     encoded_data: EncodedData = None
-    labels: dict = None
+    labels: dict = field(default_factory=dict)
+    dataset_file: Path = None
 
     TRAIN = "train"
     TEST = "test"

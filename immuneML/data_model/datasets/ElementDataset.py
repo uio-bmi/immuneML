@@ -61,6 +61,9 @@ class ElementDataset(Dataset, ABC):
         dataset.element_ids = self.element_ids
         return dataset
 
+    def get_label_names(self):
+        return list(self.labels.keys()) if isinstance(self.labels, dict) else []
+
 
 class SequenceDataset(ElementDataset):
     """A dataset class for sequence datasets (single chain). """
@@ -127,9 +130,6 @@ class SequenceDataset(ElementDataset):
 
     def get_example_ids(self):
         return self.data.sequence_id
-
-    def get_label_names(self):
-        return list(self.labels.keys())
 
     def get_data_from_index_range(self, start_index: int, end_index: int):
         return self.data[start_index: end_index]
@@ -205,10 +205,7 @@ class ReceptorDataset(ElementDataset):
                                         f"ReceptorDataset {self.identifier}", region_type)
 
     def get_example_ids(self):
-        return np.unique(self.data.cell_id).tolist()
-
-    def get_label_names(self):
-        return list(self.labels.keys())
+        return np.unique(self.data.cell_id.tolist()).tolist()
 
     def get_data_from_index_range(self, start_index: int, end_index: int):
         return self.data[start_index * 2: end_index * 2]
@@ -216,6 +213,12 @@ class ReceptorDataset(ElementDataset):
 
 def make_all_fields_dict_from_receptors(receptors: List[Receptor], region_type: RegionType = RegionType.IMGT_CDR3):
     sequences = list(itertools.chain.from_iterable([r.chain_1, r.chain_2] for r in receptors))
+    for index, receptor in enumerate(receptors):
+        sequences[index * 2].metadata = {**sequences[index * 2].metadata, **receptor.metadata,
+                                         'receptor_id': receptor.receptor_id, 'cell_id': receptor.cell_id}
+        sequences[index * 2 + 1].metadata = {**sequences[index * 2 + 1].metadata, **receptor.metadata,
+                                             'receptor_id': receptor.receptor_id, 'cell_id': receptor.cell_id}
+
     return make_all_fields_dict_from_sequences(sequences, region_type)
 
 

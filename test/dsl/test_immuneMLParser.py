@@ -4,7 +4,7 @@ import pytest
 import yaml
 from yaml import YAMLError
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -16,17 +16,16 @@ from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 def test_parse_iml_yaml_file():
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "parser/")
-    reps, metadata = RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path / 'tmp_data', {"default": [1, 2]})
-    dataset = RepertoireDataset(repertoires=reps, metadata_file=metadata, labels={"default": [1, 2]})
-    ImmuneMLExporter.export(dataset, path)
+    dataset = RepertoireBuilder.build_dataset([["AAA", "CCC"], ["TTTT"]], path / 'tmp_data', {"default": [1, 2]})
+    AIRRExporter.export(dataset, path)
 
     spec = {
         "definitions": {
             "datasets": {
                 "d1": {
-                    "format": "ImmuneML",
+                    "format": "AIRR",
                     "params": {
-                        "path": str(path / f"{dataset.name}.yaml")
+                        "dataset_file": str(path / dataset.dataset_file.name)
                     }
                 }
             },
@@ -42,7 +41,7 @@ def test_parse_iml_yaml_file():
             },
             "ml_methods": {
                 "simpleLR": {
-                    "LogisticRegression":{
+                    "LogisticRegression": {
                         "penalty": "l1"
                     },
                     "model_selection_cv": False,

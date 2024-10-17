@@ -30,15 +30,15 @@ class TestKmerFrequencyEncoder(TestCase):
 
         PathBuilder.remove_old_and_build(path)
 
-        rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", sequence="AAA", sequence_id="1"),
-                                                       ReceptorSequence("ATA", sequence="ATA", sequence_id="2"),
-                                                       ReceptorSequence("ATA", sequence="ATA", sequence_id='3')],
-                                                      metadata={"l1": 1, "l2": 2, "subject_id": "1"}, path=path)
+        rep1 = Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="AAA", sequence="AAA", sequence_id="1"),
+                                                ReceptorSequence(sequence_aa="ATA", sequence="ATA", sequence_id="2"),
+                                                ReceptorSequence(sequence_aa="ATA", sequence="ATA", sequence_id='3')],
+                                               metadata={"l1": 1, "l2": 2, "subject_id": "1"}, result_path=path)
 
-        rep2 = Repertoire.build_from_sequence_objects([ReceptorSequence("ATA", sequence="ATA", sequence_id="1"),
-                                                       ReceptorSequence("TAA", sequence="TAA", sequence_id="2"),
-                                                       ReceptorSequence("AAC", sequence="AAC", sequence_id="3")],
-                                                      metadata={"l1": 0, "l2": 3, "subject_id": "2"}, path=path)
+        rep2 = Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="ATA", sequence="ATA", sequence_id="1"),
+                                                ReceptorSequence(sequence_aa="TAA", sequence="TAA", sequence_id="2"),
+                                                ReceptorSequence(sequence_aa="AAC", sequence="AAC", sequence_id="3")],
+                                               metadata={"l1": 0, "l2": 3, "subject_id": "2"}, result_path=path)
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
@@ -47,12 +47,12 @@ class TestKmerFrequencyEncoder(TestCase):
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
 
         encoder = KmerFrequencyEncoder.build_object(dataset, **{
-                "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
-                "reads": ReadsType.UNIQUE.name,
-                "sequence_encoding": SequenceEncodingType.IDENTITY.name,
-                "sequence_type": SequenceType.AMINO_ACID.name,
-                "k": 3
-            })
+            "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
+            "reads": ReadsType.UNIQUE.name,
+            "sequence_encoding": SequenceEncodingType.IDENTITY.name,
+            "sequence_type": SequenceType.AMINO_ACID.name,
+            "k": 3
+        })
 
         d1 = encoder.encode(dataset, EncoderParams(
             result_path=path / "1/",
@@ -62,12 +62,12 @@ class TestKmerFrequencyEncoder(TestCase):
         ))
 
         encoder = KmerFrequencyEncoder.build_object(dataset, **{
-                "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
-                "reads": ReadsType.UNIQUE.name,
-                "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
-                "sequence_type": SequenceType.AMINO_ACID.name,
-                "k": 3
-            })
+            "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
+            "reads": ReadsType.UNIQUE.name,
+            "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
+            "sequence_type": SequenceType.AMINO_ACID.name,
+            "k": 3
+        })
 
         d2 = encoder.encode(dataset, EncoderParams(
             result_path=path / "2/",

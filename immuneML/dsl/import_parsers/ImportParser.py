@@ -45,8 +45,12 @@ class ImportParser:
 
             if params["is_repertoire"]:
                 if import_cls != IReceptorImport:
-                    assert "metadata_file" in params, f"{location}: Missing parameter: metadata_file under {key}/params/"
-                    ParameterValidator.assert_type_and_value(params["metadata_file"], Path, location, "metadata_file")
+                    assert "metadata_file" in params or "dataset_file" in params, \
+                        f"{location}: Missing parameter: metadata_file and dataset_file under {key}/params/"
+                    if 'metadata_file' in params:
+                        ParameterValidator.assert_type_and_value(params["metadata_file"], Path, location, "metadata_file")
+                    else:
+                        ParameterValidator.assert_type_and_value(params["dataset_file"], Path, location, "dataset_file")
             else:
                 assert "paired" in params, f"{location}: Missing parameter: paired under {key}/params/"
                 ParameterValidator.assert_type_and_value(params["paired"], bool, location, "paired")
@@ -82,6 +86,8 @@ class ImportParser:
             params["path"] = Path(params["path"])
         if "metadata_file" in params:
             params["metadata_file"] = Path(params["metadata_file"])
+        if "dataset_file" in params:
+            params['dataset_file'] = Path(params['dataset_file'])
         dataset_specs["params"] = params
         return params
 

@@ -6,6 +6,7 @@ from itertools import chain
 from multiprocessing import Pool
 from pathlib import Path
 from typing import List, Dict, Tuple
+import bionumpy as bnp
 
 import math
 
@@ -18,8 +19,7 @@ from immuneML.app.LigoApp import SimError
 from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
-from immuneML.data_model.receptor.Receptor import Receptor
-from immuneML.data_model.receptor.ReceptorBuilder import ReceptorBuilder
+from immuneML.data_model.SequenceSet import Receptor
 from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences
@@ -153,12 +153,10 @@ class LigoSimInstruction(Instruction):
         elif self.state.simulation.paired:
             self.state.resulting_dataset = ReceptorDataset.build_from_objects(examples, path=self.state.result_path,
                                                                               name='simulated_dataset',
-                                                                              file_size=SequenceDataset.DEFAULT_FILE_SIZE,
                                                                               labels=labels)
         else:
             self.state.resulting_dataset = SequenceDataset.build_from_objects(examples, path=self.state.result_path,
                                                                               name='simulated_dataset',
-                                                                              file_size=SequenceDataset.DEFAULT_FILE_SIZE,
                                                                               labels=labels)
 
     def _create_examples_wrapper(self) -> list:
@@ -201,17 +199,14 @@ class LigoSimInstruction(Instruction):
     def _pair_two_repertories(self, repertoire1: Repertoire, repertoire2: Repertoire, path: Path) -> Repertoire:
         assert repertoire1.get_element_count() == repertoire2.get_element_count(), f"{LigoSimInstruction.__name__}: cannot pair repertoires {repertoire1.identifier} and {repertoire2.identifier}, they have different number of sequences: {repertoire1.get_element_count()} and {repertoire2.get_element_count()}."
 
-        sequences = []
-        sequences1, sequences2 = repertoire1.sequences, repertoire2.sequences
-        for index, seq1, seq2 in zip(list(range(len(sequences1))), sequences1, sequences2):
-            seq1.metadata.cell_id = index
-            seq2.metadata.cell_id = index
-            seq1.sequence_id = f"{seq1.sequence_id}_{seq1.metadata.locus.value}"
-            seq2.sequence_id = f"{seq2.sequence_id}_{seq2.metadata.locus.value}"
-            sequences.extend([seq1, seq2])
+        data = []
+        for sequences in [repertoire1.data, repertoire2.data]:
+            sequences.sequence_id = bnp.as_encoded_array([f"{sid}_{locus}" for sid, locus in zip(sequences.sequence_id.to_list(), sequences.locus.to_list())])
+            sequences.cell_id = bnp.as_encoded_array([f"cell_{index}" for index in range(sequences.shape[0])])
+            data.append(sequences)
 
-        return Repertoire.build_from_sequence_objects(sequences, path,
-                                                      metadata={**repertoire1.metadata, **repertoire2.metadata})
+        return Repertoire.build_from_dc_object(path, {**repertoire1.metadata, **repertoire2.metadata}, None, None,
+                                               merge_dataclass_objects(data))
 
     def _pair_sequences(self, sequences1: list, sequences2: list, path: Path = None) -> List[Receptor]:
         assert len(sequences1) == len(sequences2), (f"{LigoSimInstruction.__name__}: could not create paired dataset, "

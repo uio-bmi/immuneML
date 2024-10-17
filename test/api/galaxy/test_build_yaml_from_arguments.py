@@ -2,7 +2,7 @@ import os
 import shutil
 import unittest
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.api.galaxy.build_yaml_from_arguments import build_settings_specs, build_ml_methods_specs, \
     get_sequence_enc_type, \
     build_encodings_specs, build_labels
@@ -25,7 +25,7 @@ class MyTestCase(unittest.TestCase):
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
         dataset.name = "my_dataset"
-        ImmuneMLExporter.export(dataset, path)
+        AIRRExporter.export(dataset, path)
 
         return f"{dataset.name}.yaml"
 

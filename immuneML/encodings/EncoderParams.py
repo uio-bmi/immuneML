@@ -16,3 +16,9 @@ class EncoderParams:
     encode_labels: bool = True
     sequence_type: SequenceType = SequenceType.AMINO_ACID
     region_type: RegionType = RegionType.IMGT_CDR3
+
+    def get_sequence_field_name(self):
+        return self.region_type.value + "_aa" if self.sequence_type == SequenceType.AMINO_ACID else ""
+
+    def get_seq_name_for_seq_object(self):
+        return 'sequence' if self.sequence_type == SequenceType.NUCLEOTIDE else "sequence_aa"

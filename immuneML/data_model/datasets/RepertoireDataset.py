@@ -1,5 +1,7 @@
 import copy
 import logging
+from collections import ChainMap
+from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -8,6 +10,7 @@ import pandas as pd
 from immuneML import Constants
 from immuneML.data_model.EncodedData import EncodedData
 from immuneML.data_model.SequenceSet import Repertoire
+from immuneML.data_model.bnp_util import write_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
@@ -17,12 +20,15 @@ class RepertoireDataset(Dataset):
 
     @classmethod
     def build_from_objects(cls, **kwargs):
-        ParameterValidator.assert_keys_present(list(kwargs.keys()), ['repertoires', 'path'], RepertoireDataset.__name__, RepertoireDataset.__name__)
-        ParameterValidator.assert_all_type_and_value(kwargs['repertoires'], Repertoire, RepertoireDataset.__name__, 'repertoires')
+        ParameterValidator.assert_keys_present(list(kwargs.keys()), ['repertoires', 'path'], RepertoireDataset.__name__,
+                                               RepertoireDataset.__name__)
+        ParameterValidator.assert_all_type_and_value(kwargs['repertoires'], Repertoire, RepertoireDataset.__name__,
+                                                     'repertoires')
 
         assert len(kwargs['repertoires']) > 0, "Cannot to construct a repertoire dataset without repertories."
 
-        metadata_df = pd.DataFrame.from_records([{**rep.metadata, **{'filename': rep.data_filename}} for rep in kwargs['repertoires']])
+        metadata_df = pd.DataFrame.from_records(
+            [{**rep.metadata, **{'filename': rep.data_filename}} for rep in kwargs['repertoires']])
 
         if 'field_list' in metadata_df.columns:
             metadata_df.drop(columns=['field_list'], inplace=True)
@@ -37,11 +43,23 @@ class RepertoireDataset(Dataset):
         label_names = list(dataset.get_label_names(refresh=True))
         dataset.labels = {label: list(set(values)) for label, values in dataset.get_metadata(label_names).items()}
 
+        dataset_file = PathBuilder.build(kwargs['path']) / 'dataset.yaml'
+        dataset_meta_content = {"type_dict_dynamic_fields":
+                                    {k: v for tmp_dict in
+                                     [rep.metadata['type_dict_dynamic_fields'] for rep in kwargs['repertoires']]
+                                     for k, v in tmp_dict.items()},
+                                "labels": dataset.labels, 'identifier': dataset.identifier, "name": dataset.name,
+                                "timestamp": datetime.now()}
+
+        write_yaml(dataset_file, dataset_meta_content)
+        dataset.dataset_file = dataset_file
+
         return dataset
 
     @classmethod
     def build(cls, **kwargs):
-        ParameterValidator.assert_keys_present(list(kwargs.keys()), ['metadata_file', 'name', 'repertoire_ids', 'metadata_fields'],
+        ParameterValidator.assert_keys_present(list(kwargs.keys()),
+                                               ['metadata_file', 'name', 'repertoire_ids', 'metadata_fields'],
                                                RepertoireDataset.__name__, "repertoire dataset")
         repertoires = []
         metadata_df = pd.read_csv(kwargs['metadata_file'], comment=Constants.COMMENT_SIGN)
@@ -54,7 +72,8 @@ class RepertoireDataset(Dataset):
                                     identifier=row['identifier'] if 'identifier' in row else uuid4().hex)
             repertoires.append(repertoire)
 
-        if "repertoire_id" in kwargs.keys() and "repertoires" not in kwargs.keys() and kwargs['repertoire_id'] is not None:
+        if "repertoire_id" in kwargs.keys() and "repertoires" not in kwargs.keys() and kwargs[
+            'repertoire_id'] is not None:
             assert all(rep.identifier == kwargs['repertoire_id'][i] for i, rep in enumerate(repertoires)), \
                 f"{RepertoireDataset.__name__}: repertoire ids from the dataset file and metadata file don't match for the dataset " \
                 f"{kwargs['name']} with identifier {kwargs['identifier']}."
@@ -87,7 +106,8 @@ class RepertoireDataset(Dataset):
     def get_repertoire(self, index: int = -1, repertoire_identifier: str = "") -> Repertoire:
         assert index != -1 or repertoire_identifier != "", \
             "RepertoireDataset: cannot get repertoire since the index nor identifier are set."
-        return self.repertoires[index] if index != -1 else [rep for rep in self.repertoires if rep.identifier == repertoire_identifier][0]
+        return self.repertoires[index] if index != -1 else \
+            [rep for rep in self.repertoires if rep.identifier == repertoire_identifier][0]
 
     def get_example_count(self):
         return len(self.repertoires)
@@ -149,7 +169,8 @@ class RepertoireDataset(Dataset):
         """
 
         metadata_file = self._build_new_metadata(example_indices, path / f"{dataset_type}_metadata.csv")
-        new_dataset = RepertoireDataset(repertoires=[self.repertoires[i] for i in example_indices], labels=copy.deepcopy(self.labels),
+        new_dataset = RepertoireDataset(repertoires=[self.repertoires[i] for i in example_indices],
+                                        labels=copy.deepcopy(self.labels),
                                         metadata_file=metadata_file, identifier=str(uuid4()))
 
         return new_dataset
@@ -169,4 +190,4 @@ class RepertoireDataset(Dataset):
         return self.get_metadata(["subject_id"])["subject_id"]
 
     def get_data_from_index_range(self, start_index: int, end_index: int):
-        return self.repertoires[start_index:end_index+1]
+        return self.repertoires[start_index:end_index + 1]

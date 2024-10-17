@@ -37,7 +37,7 @@ class DistanceEncoder(DatasetEncoder):
 
     - attributes_to_match (list): The attributes to consider when determining whether a sequence is present in both repertoires.
       Only the fields defined under attributes_to_match will be considered, all other fields are ignored.
-      Valid values include any repertoire attribute (sequence, amino acid sequence, V gene etc). The default value is ['sequence_aas']
+      Valid values include any repertoire attribute as defined in AIRR rearrangement schema (cdr3_aa, v_call, j_call, etc).
 
     **YAML specification:**
 
@@ -51,11 +51,9 @@ class DistanceEncoder(DatasetEncoder):
                         distance_metric: JACCARD
                         sequence_batch_size: 1000
                         attributes_to_match:
-                            - sequence_aa
+                            - cdr3_aa
                             - v_call
                             - j_call
-                            - chain
-                            - region_type
 
     """
 
@@ -127,7 +125,6 @@ class DistanceEncoder(DatasetEncoder):
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=distance_matrix, labels=labels, example_ids=distance_matrix.index.values,
-                                                   example_weights=EncoderHelper.get_example_weights_by_identifiers(dataset, distance_matrix.index.values),
                                                    encoding=DistanceEncoder.__name__)
 
         return encoded_dataset
@@ -145,11 +142,8 @@ class DistanceEncoder(DatasetEncoder):
 
         valid_values = [metric.name for metric in DistanceMetricType]
         valid_values = str(valid_values)[1:-1].replace("'", "`")
-        valid_field_values = str(Repertoire.FIELDS)[1:-1].replace("'", "`")
         mapping = {
             "Names of different distance metric types are allowed values in the specification.": f"Valid values are: {valid_values}.",
-            "Valid values include any repertoire attribute (sequence, amino acid sequence, V gene etc).":
-                f"Valid values are {valid_field_values}."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

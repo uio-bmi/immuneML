@@ -122,7 +122,6 @@ class EvennessProfileEncoder(DatasetEncoder):
                                    feature_names=feature_names,
                                    example_ids=example_ids,
                                    feature_annotations=feature_annotations,
-                                   example_weights=EncoderHelper.get_example_weights_by_identifiers(dataset, example_ids),
                                    encoding=EvennessProfileEncoder.__name__)
 
         return encoded_data

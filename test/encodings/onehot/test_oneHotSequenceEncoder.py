@@ -3,7 +3,6 @@ from unittest import TestCase
 
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.SequenceSet import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -16,9 +15,9 @@ class TestOneHotSequenceEncoder(TestCase):
 
     def _construct_test_dataset(self, path):
         sequences = [
-            ReceptorSequence(sequence_aa="AAAA", sequence_id="1", metadata=SequenceMetadata(custom_params={"l1": 1, "l2": 1})),
-            ReceptorSequence(sequence_aa="ATA", sequence_id="2", metadata=SequenceMetadata(custom_params={"l1": 2, "l2": 1})),
-            ReceptorSequence(sequence_aa="ATT", sequence_id="3", metadata=SequenceMetadata(custom_params={"l1": 1, "l2": 2}))]
+            ReceptorSequence(sequence_aa="AAAA", sequence_id="1", metadata={"l1": 1,"l2": 1}),
+            ReceptorSequence(sequence_aa="ATA", sequence_id="2", metadata={"l1": 2,"l2": 1}),
+            ReceptorSequence(sequence_aa="ATT", sequence_id="3", metadata={"l1": 1,"l2": 2})]
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
@@ -62,8 +61,8 @@ class TestOneHotSequenceEncoder(TestCase):
         shutil.rmtree(path)
 
     def construct_test_flatten_dataset(self, path):
-        sequences = [ReceptorSequence(sequence_aa="AAATTT", sequence_id="1", metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(sequence_aa="ATATAT", sequence_id="2", metadata=SequenceMetadata(custom_params={"l1": 2}))]
+        sequences = [ReceptorSequence(sequence_aa="AAATTT", sequence_id="1", metadata={"l1": 1}),
+                     ReceptorSequence(sequence_aa="ATATAT", sequence_id="2", metadata={"l1": 2})]
 
         PathBuilder.build(path)
 

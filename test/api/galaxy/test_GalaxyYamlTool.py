@@ -5,7 +5,7 @@ from unittest import TestCase
 
 import yaml
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.app.ImmuneMLApp import run_immuneML
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
@@ -20,13 +20,13 @@ class TestGalaxyYamlTool(TestCase):
 
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {10: 1}, {12: 1}, {}, result_path)
         dataset.name = "d1"
-        ImmuneMLExporter.export(dataset, result_path)
+        AIRRExporter.export(dataset, result_path)
 
         specs = {
             "definitions": {
                 "datasets": {
                     "new_d1": {
-                        "format": "ImmuneML",
+                        "format": "AIRR",
                         "params": {
                             "metadata_file": str(result_path / "d1_metadata.csv")
                         }

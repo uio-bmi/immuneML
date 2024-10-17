@@ -37,7 +37,6 @@ class SequenceModelCreator(ModelCreatorStrategy):
         return model
 
     def _create_for_sequences(self, dataset: SequenceDataset, batch_size, k, model, all_kmers, sequence_type):
-        for sequence_batch in dataset.get_batch(batch_size):
-            sentences = [KmerHelper.create_kmers_from_sequence(seq, k, sequence_type) for seq in sequence_batch]
-            model.train(corpus_iterable=sentences, total_words=len(all_kmers), epochs=self.epochs)
+        sentences = [KmerHelper.create_kmers_from_sequence(seq, k, sequence_type) for seq in dataset.get_data()]
+        model.train(corpus_iterable=sentences, total_words=len(all_kmers), epochs=self.epochs)
         return model

@@ -104,7 +104,7 @@ class ImmunoSEQSampleImport(DataImport):
                         region_type: IMGT_CDR3 # what part of the sequence to import
                         column_mapping: # column mapping immunoSEQ: immuneML
                             nucleotide: sequence
-                            aminoAcid: sequence_aa
+                            aminoAcid: junction_aa
                             vGeneName: v_call
                             jGeneName: j_call
                             sequenceStatus: frame_type
@@ -124,12 +124,9 @@ class ImmunoSEQSampleImport(DataImport):
         doc = str(ImmunoSEQSampleImport.__doc__)
 
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
-        repertoire_fields = list(Repertoire.FIELDS)
-        repertoire_fields.remove("region_type")
 
         mapping = {
             "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
-            "Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS": f"Valid immuneML fields that can be specified here are {repertoire_fields}."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

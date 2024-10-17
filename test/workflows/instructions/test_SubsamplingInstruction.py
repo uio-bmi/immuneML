@@ -3,7 +3,7 @@ import random
 import shutil
 from unittest import TestCase
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
@@ -18,7 +18,7 @@ class TestSubsamplingInstruction(TestCase):
                                                                    chain_1_length_probabilities={3: 1}, chain_2_length_probabilities={4: 1})
         dataset.name = "d1"
 
-        inst = SubsamplingInstruction(dataset=dataset, subsampled_dataset_sizes=[100, 50], dataset_export_formats=[ImmuneMLExporter],
+        inst = SubsamplingInstruction(dataset=dataset, subsampled_dataset_sizes=[100, 50], dataset_export_formats=[AIRRExporter],
                                       name="subsampling_inst")
 
         state = inst.run(path / "result/")

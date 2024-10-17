@@ -6,7 +6,6 @@ from unittest import TestCase
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.SequenceSet import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.reports.encoding_reports.PositionalMotifFrequencies import PositionalMotifFrequencies
@@ -26,49 +25,49 @@ class TestPositionalMotifFrequencies(TestCase):
             ReceptorSequence(
                 sequence_aa="AACC",
                 sequence_id="1",
-                metadata=SequenceMetadata(custom_params={"l1": 1}),
+                metadata={"l1": 1},
             ),
             ReceptorSequence(
                 sequence_aa="AGDD",
                 sequence_id="2",
-                metadata=SequenceMetadata(custom_params={"l1": 1}),
+                metadata={"l1": 1},
             ),
             ReceptorSequence(
                 sequence_aa="AAEE",
                 sequence_id="3",
-                metadata=SequenceMetadata(custom_params={"l1": 1}),
+                metadata={"l1": 1},
             ),
             ReceptorSequence(
                 sequence_aa="AGFF",
                 sequence_id="4",
-                metadata=SequenceMetadata(custom_params={"l1": 1}),
+                metadata={"l1": 1},
             ),
             ReceptorSequence(
                 sequence_aa="CCCC",
                 sequence_id="5",
-                metadata=SequenceMetadata(custom_params={"l1": 2}),
+                metadata={"l1": 2},
             ),
             ReceptorSequence(
                 sequence_aa="DDDD",
                 sequence_id="6",
-                metadata=SequenceMetadata(custom_params={"l1": 2}),
+                metadata={"l1": 2},
             ),
             ReceptorSequence(
                 sequence_aa="EEEE",
                 sequence_id="7",
-                metadata=SequenceMetadata(custom_params={"l1": 2}),
+                metadata={"l1": 2},
             ),
             ReceptorSequence(
                 sequence_aa="FFFF",
                 sequence_id="8",
-                metadata=SequenceMetadata(custom_params={"l1": 2}),
+                metadata={"l1": 2},
             ),
         ]
 
         PathBuilder.build(path)
 
         dataset = SequenceDataset.build_from_objects(
-            sequences, 100, PathBuilder.build(path / "data"), "d1"
+            sequences, PathBuilder.build(path / "data"), "d1"
         )
 
         lc = LabelConfiguration()
@@ -100,7 +99,7 @@ class TestPositionalMotifFrequencies(TestCase):
 
     def test_generate(self):
         path = EnvironmentSettings.tmp_test_path / "positional_motif_frequencies/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         encoded_dataset = self._create_dummy_encoded_data(path)
 

@@ -36,7 +36,7 @@ class ComparisonData:
         self.iteration_repertoire_ids = iteration_repertoire_ids
 
     def build_matching_fn(self):
-        return lambda repertoire: list(set(zip(*[value for value in [item.tolist() for item in repertoire.get_attributes(self.comparison_attributes).values()] if value is not None])))
+        return lambda repertoire: list(set(zip(*[value for value in [item.tolist() for item in repertoire.data.topandas()[self.comparison_attributes].values] if value is not None])))
 
     def get_item_names(self):
         return np.array([item for items in [batch.get_items() for batch in self.batches] for item in items])

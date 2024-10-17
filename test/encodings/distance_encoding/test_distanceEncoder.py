@@ -37,7 +37,7 @@ class TestDistanceEncoder(TestCase):
         dataset = self.create_dataset(path)
 
         enc = DistanceEncoder.build_object(dataset, **{"distance_metric": DistanceMetricType.JACCARD.name,
-                                                       "attributes_to_match": ["sequence_aa"],
+                                                       "attributes_to_match": ["cdr3_aa"],
                                                        "sequence_batch_size": 20})
 
         enc.set_context({"dataset": dataset})

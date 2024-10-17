@@ -43,7 +43,7 @@ class VDJdbImport(DataImport):
 
                 V: v_call
                 J: j_call
-                CDR3: sequence_aa
+                CDR3: junction_aa
                 complex.id: cell_id
                 Gene: locus
 
@@ -67,14 +67,14 @@ class VDJdbImport(DataImport):
                         receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
                         import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
                         import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                        import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+                        import_empty_aa_sequences: False # filter out sequences if they don't have amino acid sequence set
                         # Optional fields with VDJdb-specific defaults, only change when different behavior is required:
                         separator: "\\t" # column separator
                         region_type: IMGT_CDR3 # what part of the sequence to import
                         column_mapping: # column mapping VDJdb: immuneML
                             V: v_call
                             J: j_call
-                            CDR3: sequence_aa
+                            CDR3: junction_aa
                             complex.id: sequence_id
                             Gene: chain
                             Epitope: epitope
@@ -91,7 +91,7 @@ class VDJdbImport(DataImport):
         df["vj_in_frame"] = 'T'
         df['productive'] = 'T'
         df['cdr3_aa'] = df['junction_aa'].str[1:-1]
-        df['cell_id'] = df['cell_id'].astype(int).astype(str)
+        df['cell_id'] = df['cell_id'].astype(str) if df['cell_id'].dtype != float else df.cell_id.astype(int).astype(str)
 
         if not self.params.is_repertoire and self.params.paired:
             n_single_chains = sum(df["cell_id"] == "0")
@@ -155,13 +155,15 @@ class VDJdbImport(DataImport):
                                     f"analysis will continue, but none of the information from the '{col}' field will be "
                                     f"available. More details on the error: {e}")
 
-                df.drop(columns=['Meta', 'CDR3fix'], inplace=True)
+                df.drop(columns=['Meta', 'CDR3fix'], inplace=True, errors='ignore')
 
         return df
 
     @staticmethod
     def get_sequence_identifiers(receptor_identifiers, chains):
-        sequence_identifiers = pd.Series([el + "_" + chains[i] for i, el in enumerate(receptor_identifiers.values.astype(int).astype(str))])
+        receptor_ids_parsed = receptor_identifiers.values.astype(int).astype(str) \
+            if receptor_identifiers.dtype == float else receptor_identifiers.values.astype(str)
+        sequence_identifiers = pd.Series([el + "_" + chains[i] for i, el in enumerate(receptor_ids_parsed)])
         if sequence_identifiers.is_unique:
             return sequence_identifiers
         else:

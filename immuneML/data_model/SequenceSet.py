@@ -35,14 +35,18 @@ class ReceptorSequence:
     def get_sequence(self, sequence_type: SequenceType = SequenceType.AMINO_ACID):
         return self.sequence_aa if sequence_type == SequenceType.AMINO_ACID else self.sequence
 
+    def __post_init__(self):
+        if self.sequence_id is None or self.sequence_id == "":
+            self.sequence_id = uuid4().hex
+
 
 @dataclass
 class Receptor:
     chain_pair: ChainPair
     chain_1: ReceptorSequence
     chain_2: ReceptorSequence
-    receptor_id: str
-    cell_id: str
+    receptor_id: str = None
+    cell_id: str = None
     metadata: dict = field(default_factory=dict)
 
     def __post_init__(self):
@@ -53,6 +57,12 @@ class Receptor:
             else:
                 new_metadata[key] = val
         self.metadata = new_metadata
+
+        if self.receptor_id is None:
+            self.receptor_id = uuid4().hex
+
+        if isinstance(self.chain_pair, str):
+            self.chain_pair = ChainPair[self.chain_pair]
 
         setattr(self, Chain.get_chain(self.chain_pair.value[0]).name.lower(), self.chain_1)
         setattr(self, Chain.get_chain(self.chain_pair.value[1]).name.lower(), self.chain_2)
@@ -69,23 +79,39 @@ class Repertoire:
     _bnp_dataclass: typing.Type = None
     _buffer_type = None
 
+    def __post_init__(self):
+        if not self.identifier:
+            self.identifier = uuid4().hex
+
     @classmethod
-    def build(cls, path: Path, metadata: dict, filename_base: str = None, identifier: str = None, **kwargs):
+    def build_from_dc_object(cls, path: Path, metadata: dict, filename_base: str = None, identifier: str = None,
+                             data=None, type_dict: dict = None):
         identifier = uuid4().hex if identifier is None else identifier
         filename_base = filename_base if filename_base is not None else identifier
         data_filename = path / f"{filename_base}.tsv"
 
-        bnp_dc, type_dict = build_dynamic_airr_sequence_set_dataclass(kwargs)
-        data = bnp_dc(**kwargs)
         bnp_write_to_file(data_filename, data)
 
         metadata_filename = path / f"{filename_base}_metadata.yaml"
         metadata = {} if metadata is None else metadata
+
+        if not type_dict:
+            type_dict = {f.name: f.type for f in fields(data)
+                         if f.name not in [airr_field.name for airr_field in fields(AIRRSequenceSet)]}
+
         metadata['type_dict_dynamic_fields'] = {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()}
         write_yaml(metadata_filename, metadata)
 
         repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier, type_dict, len(data))
         return repertoire
+
+    @classmethod
+    def build(cls, path: Path, metadata: dict, filename_base: str = None, identifier: str = None, **kwargs):
+
+        bnp_dc, type_dict = build_dynamic_airr_sequence_set_dataclass(kwargs)
+        data = bnp_dc(**kwargs)
+
+        return Repertoire.build_from_dc_object(path, metadata, filename_base, identifier, data, type_dict)
 
     @classmethod
     def build_like(cls, repertoire: 'Repertoire', indices_to_keep, result_path: Path, filename_base: str):
@@ -196,7 +222,8 @@ def make_sequences_from_data(data, dynamic_fields: list, region_type: RegionType
     return seqs
 
 
-def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: list, location, region_type: RegionType = RegionType.IMGT_CDR3):
+def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: list, location,
+                             region_type: RegionType = RegionType.IMGT_CDR3):
     df = data.topandas()
     receptors = []
     for name, group in df.groupby('cell_id'):
@@ -214,9 +241,14 @@ def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: list, locati
                                            for dynamic_field in dynamic_fields})
                 for index, el in sorted_group.iterrows()]
 
+        if 'receptor_id' in group and group['receptor_id'].nunique() == 1:
+            receptor_id = group['receptor_id'].unique()[0]
+        else:
+            receptor_id = uuid4().hex
+
         receptor = Receptor(chain_pair=ChainPair.get_chain_pair([Chain.get_chain(locus) for locus in group.locus]),
                             chain_1=seqs[0], chain_2=seqs[1], cell_id=group['cell_id'].unique()[0],
-                            receptor_id=uuid4().hex,
+                            receptor_id=receptor_id,
                             metadata={key: list({seqs[0].metadata[key], seqs[1].metadata[key]})
                                       for key in dynamic_fields})
         receptors.append(receptor)

@@ -105,10 +105,10 @@ class PositionHelper:
 
     @staticmethod
     def gen_imgt_positions_from_sequence(sequence: ReceptorSequence,
-                                         sequence_type: SequenceType = SequenceType.AMINO_ACID):
+                                         sequence_type: SequenceType = SequenceType.AMINO_ACID,
+                                         region_type: RegionType = RegionType.IMGT_CDR3):
         if sequence_type != SequenceType.AMINO_ACID:
             raise NotImplementedError(f"{sequence_type.name} is currently not supported for obtaining IMGT positions")
-        region_type = sequence.get_attribute("region_type")
         input_length = len(sequence.get_sequence(sequence_type=sequence_type))
 
         return PositionHelper.gen_imgt_positions_from_length(input_length, region_type)

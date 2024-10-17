@@ -33,7 +33,7 @@ def bnp_read_from_file(filename: Path, buffer_type: bnp.io.delimited_buffers.Del
 
 def write_yaml(filename: Path, yaml_dict):
     with filename.open('w') as file:
-        yaml.dump(yaml_dict, file)
+        yaml.dump({k: str(v) if isinstance(v, Path) else v for k, v in yaml_dict.items()}, file)
 
 
 def read_yaml(filename: Path) -> dict:

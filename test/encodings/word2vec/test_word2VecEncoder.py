@@ -25,14 +25,14 @@ class TestWord2VecEncoder(TestCase):
 
         test_path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "w2v_repertoire/")
 
-        sequence1 = ReceptorSequence("CASSVFA", sequence_id="1")
-        sequence2 = ReceptorSequence("CASSCCC", sequence_id="2")
+        sequence1 = ReceptorSequence(sequence_aa="CASSVFA", sequence_id="1")
+        sequence2 = ReceptorSequence(sequence_aa="CASSCCC", sequence_id="2")
 
         metadata1 = {"T1D": "T1D", "subject_id": "1"}
-        rep1 = Repertoire.build_from_sequence_objects([sequence1, sequence2], test_path, metadata1)
+        rep1 = Repertoire.build_from_sequences([sequence1, sequence2], test_path, metadata=metadata1)
 
         metadata2 = {"T1D": "CTL", "subject_id": "2"}
-        rep2 = Repertoire.build_from_sequence_objects([sequence1], test_path, metadata2)
+        rep2 = Repertoire.build_from_sequences([sequence1], test_path, metadata=metadata2)
 
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
 
@@ -69,7 +69,7 @@ class TestWord2VecEncoder(TestCase):
 
         test_path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "w2v_seqs/")
 
-        dataset = RandomDatasetGenerator.generate_sequence_dataset(10, {6: 1.}, {"l1": {True: 0.5, False: 0.5}}, path=test_path)
+        dataset = RandomDatasetGenerator.generate_sequence_dataset(10, {6: 1.}, {"l1": {'True': 0.5, 'False': 0.5}}, path=test_path)
 
         label_configuration = LabelConfiguration()
         label_configuration.add_label("l1", [True, False])

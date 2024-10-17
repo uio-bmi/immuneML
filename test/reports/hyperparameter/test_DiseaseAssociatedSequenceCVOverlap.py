@@ -4,7 +4,7 @@ from unittest import TestCase
 
 import yaml
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
@@ -44,13 +44,13 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
                                                                        True, False, True, False, True, False]}, path=path)
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"l1": [True, False]})
-        ImmuneMLExporter.export(dataset, path)
+        AIRRExporter.export(dataset, path)
 
         specs = {
             "definitions": {
                 "datasets": {
                     "d1": {
-                        "format": "ImmuneML",
+                        "format": "AIRR",
                         "params": {
                             "path": str(path / f"{dataset.name}.yaml"),
                         }

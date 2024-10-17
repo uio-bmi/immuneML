@@ -46,6 +46,8 @@ class AIRRExporter(DataExporter):
                     shutil.copyfile(repertoire.metadata_filename, repertoire_path / repertoire.metadata_filename.name)
 
                 shutil.copyfile(dataset.metadata_file, path / dataset.metadata_file.name)
+                if dataset.dataset_file and dataset.dataset_file.is_file():
+                    shutil.copyfile(dataset.dataset_file, path / dataset.dataset_file.name)
 
             elif isinstance(dataset, ElementDataset):
                 shutil.copyfile(dataset.filename, path / dataset.filename.name)

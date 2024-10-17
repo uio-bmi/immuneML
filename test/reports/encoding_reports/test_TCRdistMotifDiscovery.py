@@ -4,10 +4,10 @@ import shutil
 import pytest
 
 from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.SequenceParams import ChainPair
 from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
 from immuneML.data_model.SequenceSet import Receptor
 from immuneML.data_model.SequenceSet import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
 from immuneML.environment.Constants import Constants
@@ -46,16 +46,15 @@ mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagc
     for line in data.split("\n"):
         if not line.startswith('subject,epitope'):
             receptor_info = line.split(",")
-            receptor = TCABReceptor(alpha=ReceptorSequence(sequence_aa=receptor_info[5], sequence=receptor_info[6],
-                                                           metadata=SequenceMetadata(v_call=receptor_info[3], locus='TRA',
-                                                                                     j_call=receptor_info[4])),
-                                    beta=ReceptorSequence(sequence_aa=receptor_info[9], sequence=receptor_info[10],
-                                                          metadata=SequenceMetadata(v_call=receptor_info[7], locus='TRB',
-                                                                                    j_call=receptor_info[9])),
-                                    metadata={'epitope': receptor_info[1]})
+            receptor = Receptor(chain_1=ReceptorSequence(sequence_aa=receptor_info[5], sequence=receptor_info[6],
+                                                         v_call=receptor_info[3], locus='TRA', j_call=receptor_info[4]),
+                                chain_2=ReceptorSequence(sequence_aa=receptor_info[9], sequence=receptor_info[10],
+                                                         v_call=receptor_info[7], locus='TRB', j_call=receptor_info[9]),
+                                metadata={'epitope': receptor_info[1]}, chain_pair=ChainPair.TRA_TRB,
+                                cell_id=receptor_info[-1], receptor_id=receptor_info[-1])
             receptors.append(receptor)
 
-    return ReceptorDataset.build_from_objects(receptors, 100, path, labels={'epitope': ['PA'], 'organism': 'mouse'})
+    return ReceptorDataset.build_from_objects(receptors, path, labels={'epitope': ['PA'], 'organism': 'mouse'})
 
 
 def test_generate():
@@ -64,7 +63,8 @@ def test_generate():
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "tcrdist_motif_discovery/")
     dataset = _create_dataset(PathBuilder.build(path / 'dataset'))
 
-    dataset = TCRdistEncoder(8).encode(dataset, EncoderParams(path / "result", LabelConfiguration([Label("epitope", None)])))
+    dataset = TCRdistEncoder(8).encode(dataset,
+                                       EncoderParams(path / "result", LabelConfiguration([Label("epitope", None)])))
 
     report = TCRdistMotifDiscovery(train_dataset=dataset, test_dataset=dataset, result_path=path / "report",
                                    name="report name", cores=8, positive_class_name="PA", min_cluster_size=3)

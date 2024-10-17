@@ -18,13 +18,10 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TestAIRRExporter(TestCase):
     def create_dummy_repertoire(self, path):
-        sequence_objects = [ReceptorSequence(sequence_aa="AAA",
-                                             sequence="GCTGCTGCT",
-                                             sequence_id="receptor_1",
+        sequence_objects = [ReceptorSequence(sequence_aa="AAA", sequence="GCTGCTGCT", sequence_id="receptor_1",
                                              v_call="TRBV1", j_call="TRBJ1", locus=Chain.BETA.value,
                                              duplicate_count=5, vj_in_frame="T", productive='T',
-                                             metadata={"d_call": "TRBD1",
-                                                       "custom_test": "cust1",
+                                             metadata={"d_call": "TRBD1", "custom_test": "cust1",
                                                        'sig1': 0}),
                             ReceptorSequence(sequence_aa="GGG",
                                              sequence="GGTGGTGGT",
@@ -35,22 +32,20 @@ class TestAIRRExporter(TestCase):
 
         repertoire = Repertoire.build_from_sequences(sequences=sequence_objects, result_path=path,
                                                      metadata={"subject_id": "REP1"}, filename_base="REP1")
-        df = pd.DataFrame({"filename": [f"{repertoire.identifier}_data.tsv"], "subject_id": ["REP1"],
-                           "repertoire_identifier": [repertoire.identifier]})
-        df.to_csv(path / "metadata.csv", index=False)
 
-        return repertoire, path / "metadata.csv"
+        dataset = RepertoireDataset.build_from_objects(repertoires=[repertoire], path=path)
+
+        return dataset
 
     def test_repertoire_export(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "airr_exporter_repertoire/")
 
-        repertoire, metadata_path = self.create_dummy_repertoire(path)
-        dataset = RepertoireDataset(repertoires=[repertoire], metadata_file=metadata_path)
+        dataset = self.create_dummy_repertoire(path)
 
         path_exported = path / "exported"
         AIRRExporter.export(dataset, path_exported)
 
-        resulting_data = pd.read_csv(path_exported / f"repertoires/{repertoire.metadata['subject_id']}.tsv", sep="\t")
+        resulting_data = pd.read_csv(path_exported / f"repertoires/{dataset.repertoires[0].metadata['subject_id']}.tsv", sep="\t")
 
         self.assertListEqual(resulting_data["sequence_id"].to_list(), ["receptor_1", "receptor_2"])
         self.assertListEqual(resulting_data["cdr3"].to_list(), ["GCTGCTGCT", "GGTGGTGGT"])

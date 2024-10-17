@@ -6,7 +6,6 @@ from unittest import TestCase
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.SequenceSet import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.environment.Constants import Constants
@@ -22,25 +21,25 @@ class TestMotifEncoder(TestCase):
 
     def _prepare_dataset(self, path):
         sequences = [ReceptorSequence(sequence_aa="AACC", sequence_id="1",
-                                      metadata=SequenceMetadata(custom_params={"l1": 1})),
+                                      metadata={"l1": 1}),
                      ReceptorSequence(sequence_aa="AGDD", sequence_id="2",
-                                      metadata=SequenceMetadata(custom_params={"l1": 1})),
+                                      metadata={"l1": 1}),
                      ReceptorSequence(sequence_aa="AAEE", sequence_id="3",
-                                      metadata=SequenceMetadata(custom_params={"l1": 1})),
+                                      metadata={"l1": 1}),
                      ReceptorSequence(sequence_aa="AGFF", sequence_id="4",
-                                      metadata=SequenceMetadata(custom_params={"l1": 1})),
+                                      metadata={"l1": 1}),
                      ReceptorSequence(sequence_aa="CCCC", sequence_id="5",
-                                      metadata=SequenceMetadata(custom_params={"l1": 2})),
+                                      metadata={"l1": 2}),
                      ReceptorSequence(sequence_aa="DDDD", sequence_id="6",
-                                      metadata=SequenceMetadata(custom_params={"l1": 2})),
+                                      metadata={"l1": 2}),
                      ReceptorSequence(sequence_aa="EEEE", sequence_id="7",
-                                      metadata=SequenceMetadata(custom_params={"l1": 2})),
+                                      metadata={"l1": 2}),
                      ReceptorSequence(sequence_aa="FFFF", sequence_id="8",
-                                      metadata=SequenceMetadata(custom_params={"l1": 2}))]
+                                      metadata={"l1": 2})]
 
 
         PathBuilder.build(path)
-        return SequenceDataset.build_from_objects(sequences, 100, PathBuilder.build(path / 'data'), 'd2')
+        return SequenceDataset.build_from_objects(sequences, PathBuilder.build(path / 'data'), 'd2')
 
     def test(self):
         path = EnvironmentSettings.tmp_test_path / "significant_motif_sequence_encoder_test/"

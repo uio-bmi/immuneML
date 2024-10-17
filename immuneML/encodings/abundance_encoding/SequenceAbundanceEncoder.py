@@ -62,11 +62,9 @@ class SequenceAbundanceEncoder(DatasetEncoder):
                 my_sa_encoding:
                     SequenceAbundance:
                         comparison_attributes:
-                            - sequence_aa
+                            - cdr3_aa
                             - v_call
                             - j_call
-                            - chain
-                            - region_type
                         p_value_threshold: 0.05
                         sequence_batch_size: 100000
                         repertoire_batch_size: 32
@@ -120,7 +118,6 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
         encoded_data = EncodedData(examples, dataset.get_metadata([label_name]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [SequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE, SequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
-                                   example_weights=dataset.get_example_weights(),
                                    encoding=SequenceAbundanceEncoder.__name__, info={'relevant_sequence_path': self.relevant_sequence_path,
                                                                                      "contingency_table_path": self.contingency_table_path,
                                                                                      "p_values_path": self.p_values_path})

@@ -94,8 +94,6 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         ParameterValidator.assert_type_and_value(normalize, bool, location, "normalize")
         ParameterValidator.assert_in_valid_list(reads.upper(), [item.name for item in ReadsType], location, "reads")
 
-        legal_chains = [chain for receptor in (TCABReceptor(), TCGDReceptor(), BCReceptor()) for chain in receptor.get_chains()]
-
         if type(max_edit_distances) is int:
             max_edit_distances = {chain: max_edit_distances for chain in legal_chains}
         elif type(max_edit_distances) is dict:

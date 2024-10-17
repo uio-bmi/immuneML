@@ -24,18 +24,18 @@ class TestOneHotEncoder(unittest.TestCase):
     def _construct_test_repertoiredataset(self, path, positional):
 
         if positional:
-            receptors1 = [ReceptorSequence("AAAAAAAAAAAAAAAAA", sequence="AAAAAAAAAAAAAAAAA", sequence_id="1"),
-                          ReceptorSequence("AAAAAAAAAAAAAAAAA", sequence="AAAAAAAAAAAAAAAAA", sequence_id="1")]
-            receptors2 = [ReceptorSequence("TTTTTTTTTTTTT", sequence='TTTTTTTTTTTTT', sequence_id="1")]
+            receptors1 = [ReceptorSequence(sequence_aa="AAAAAAAAAAAAAAAAA", sequence="AAAAAAAAAAAAAAAAA", sequence_id="1"),
+                          ReceptorSequence(sequence_aa="AAAAAAAAAAAAAAAAA", sequence="AAAAAAAAAAAAAAAAA", sequence_id="1")]
+            receptors2 = [ReceptorSequence(sequence_aa="TTTTTTTTTTTTT", sequence='TTTTTTTTTTTTT', sequence_id="1")]
         else:
-            receptors1 = [ReceptorSequence("AAAA", sequence="AAAA", sequence_id="1"),
-                          ReceptorSequence("ATA", sequence="ATA", sequence_id="2"),
-                          ReceptorSequence("ATA", sequence="ATA", sequence_id='3')]
-            receptors2 = [ReceptorSequence("ATA", sequence="ATA", sequence_id="1"),
-                          ReceptorSequence("TAA", sequence="TAA", sequence_id="2")]
+            receptors1 = [ReceptorSequence(sequence_aa="AAAA", sequence="AAAA", sequence_id="1"),
+                          ReceptorSequence(sequence_aa="ATA", sequence="ATA", sequence_id="2"),
+                          ReceptorSequence(sequence_aa="ATA", sequence="ATA", sequence_id='3')]
+            receptors2 = [ReceptorSequence(sequence_aa="ATA", sequence="ATA", sequence_id="1"),
+                          ReceptorSequence(sequence_aa="TAA", sequence="TAA", sequence_id="2")]
 
-        rep1 = Repertoire.build_from_sequence_objects(receptors1, metadata={"l1": 1, "l2": 2, "subject_id": "1"}, path=path)
-        rep2 = Repertoire.build_from_sequence_objects(receptors2, metadata={"l1": 0, "l2": 3, "subject_id": "2"}, path=path)
+        rep1 = Repertoire.build_from_sequences(receptors1, metadata={"l1": 1, "l2": 2, "subject_id": "1"}, result_path=path)
+        rep2 = Repertoire.build_from_sequences(receptors2, metadata={"l1": 0, "l2": 3, "subject_id": "2"}, result_path=path)
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])

@@ -137,7 +137,6 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
                                                    feature_annotations=None,
                                                    example_ids=dataset.get_example_ids(),
                                                    encoding=SimilarToPositiveSequenceEncoder.__name__,
-                                                   example_weights=dataset.get_example_weights(),
                                                    info={})
 
         return encoded_dataset
