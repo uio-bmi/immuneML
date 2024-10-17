@@ -21,48 +21,48 @@ class TestSequenceAbundanceEncoding(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encoding(self):
-        path = EnvironmentSettings.tmp_test_path / "integration_test_emerson_encoding/"
-        PathBuilder.build(path)
+        path = PathBuilder.remove_old_and_build(
+            EnvironmentSettings.tmp_test_path / "integration_test_emerson_encoding/")
 
         ref_path = path / "reference.csv"
-        pd.DataFrame({"sequence_aa": ["GGG", "III", "TTT", "EFEF"], "v_call": ["TRBV6-1*01", "TRBV6-1*01", "TRBV6-1*01", "TRBV6-1*01"], 'j_call': ["TRBJ2-7", "TRBJ2-7", "TRBJ2-7", "TRBJ2-7"]}).to_csv(ref_path, index=False)
+        pd.DataFrame({"sequence_aa": ["GGG", "III", "TTT", "EFEF"],
+                      "v_call": ["TRBV6-1*01", "TRBV6-1*01", "TRBV6-1*01", "TRBV6-1*01"],
+                      'j_call': ["TRBJ2-7", "TRBJ2-7", "TRBJ2-7", "TRBJ2-7"]}).to_csv(ref_path, index=False)
 
-        repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"], ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
-                                                         ["CCC", "FFF", "MMM"], ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"],
-                                                         ["GGG", "III", "LLL", "MMM"], ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
-                                                         ["CCC", "FFF", "MMM"], ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"],
-                                                         ["GGG", "III", "LLL", "MMM"], ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
-                                                         ["CCC", "FFF", "MMM"], ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"],
-                                                         ["GGG", "III", "LLL", "MMM"], ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
-                                                         ["CCC", "FFF", "MMM"], ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]],
-                                                        labels={"l1": [True, True, False, False, True, True, False, False, True, True, False, False,
-                                                                       True, True, False, False]}, path=path)
-
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"l1": [True, False]})
-        AIRRExporter.export(dataset, path)
+        dataset = RepertoireBuilder.build_dataset(
+            [["GGG", "III", "LLL", "MMM"], ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
+             ["CCC", "FFF", "MMM"], ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"],
+             ["GGG", "III", "LLL", "MMM"], ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
+             ["CCC", "FFF", "MMM"], ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"],
+             ["GGG", "III", "LLL", "MMM"], ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
+             ["CCC", "FFF", "MMM"], ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"],
+             ["GGG", "III", "LLL", "MMM"], ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
+             ["CCC", "FFF", "MMM"], ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]],
+            labels={"l1": [True, True, False, False, True, True, False, False, True, True, False, False,
+                           True, True, False, False]}, path=path)
 
         specs = {
             "definitions": {
                 "datasets": {
                     "d1": {
-                        "format": "ImmuneML",
+                        "format": "AIRR",
                         "params": {
-                            "path": str(path / f"{dataset.name}.yaml"),
+                            "dataset_file": str(path / f"{dataset.name}.yaml"),
                         }
                     }
                 },
                 "encodings": {
                     "e1": {
                         "SequenceAbundance": {
-                            'comparison_attributes': ["sequence_aa", "v_call", "j_call"]
+                            'comparison_attributes': ["cdr3_aa", "v_call", "j_call"]
                         }
                     }
                 },
                 "ml_methods": {
                     "knn": {
-                         "KNN": {
-                             "n_neighbors": 1
-                         },
+                        "KNN": {
+                            "n_neighbors": 1
+                        },
                     }
                 },
                 "reports": {

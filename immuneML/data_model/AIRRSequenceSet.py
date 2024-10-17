@@ -167,7 +167,7 @@ class AIRRSequenceSet:
     rearrangement_set_id: str = ''
     germline_database: str = ''
 
-    STR_TO_TYPE = {'str': str, 'int': int, 'float': float,
+    STR_TO_TYPE = {'str': str, 'int': int, 'float': float, 'bool': bool,
                    'AminoAcidEncoding': bnp.encodings.AminoAcidEncoding,
                    'AminoAcidXEncoding': AminoAcidXEncoding,
                    'DNAEncoding': bnp.encodings.DNAEncoding}

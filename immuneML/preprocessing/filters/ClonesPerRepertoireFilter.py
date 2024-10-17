@@ -50,9 +50,9 @@ class ClonesPerRepertoireFilter(Filter):
         repertoires, indices = [], []
 
         for index, repertoire in enumerate(dataset.get_data()):
-            if self.lower_limit != -1 and len(repertoire.sequences) < self.lower_limit:
+            if self.lower_limit != -1 and len(repertoire.data) < self.lower_limit:
                 continue
-            if self.upper_limit != -1 and len(repertoire.sequences) > self.upper_limit:
+            if self.upper_limit != -1 and len(repertoire.data) > self.upper_limit:
                 continue
             repertoires.append(dataset.repertoires[index])
             indices.append(index)

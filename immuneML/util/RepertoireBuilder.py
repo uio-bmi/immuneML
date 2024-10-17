@@ -92,11 +92,11 @@ class RepertoireBuilder:
         type_dict = {k: v for tmp_dict in [rep.metadata['type_dict_dynamic_fields'] for rep in reps]
                      for k, v in tmp_dict.items()}
 
-        write_yaml(path / 'dataset.yaml', {
+        write_yaml(path / 'd1.yaml', {
             "type_dict_dynamic_fields": type_dict, 'metadata_file': str(metadata_file.name),
             'identifier': uuid.uuid4().hex, "name": "d1", "labels": list(labels.keys()),
             "timestamp": datetime.now()
         })
 
         return RepertoireDataset(repertoires=reps, metadata_file=metadata_file, name="d1",
-                                 dataset_file=path / 'dataset.yaml')
+                                 dataset_file=path / 'd1.yaml')

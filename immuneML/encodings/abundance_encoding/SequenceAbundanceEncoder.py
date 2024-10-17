@@ -41,7 +41,8 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     **Specification arguments:**
 
     - comparison_attributes (list): The attributes to be considered to group receptors into clonotypes. Only the fields specified in
-      comparison_attributes will be considered, all other fields are ignored. Valid comparison value can be any repertoire field name.
+      comparison_attributes will be considered, all other fields are ignored. Valid comparison value can be any
+      repertoire field name (e.g., as specified in the AIRR rearrangement schema).
 
     - p_value_threshold (float): The p value threshold to be used by the statistical test.
 
@@ -150,7 +151,10 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
         all_sequences = comparison_data.get_item_names()
         relevant_sequences = all_sequences[relevant_sequence_indices]
-        df = pd.DataFrame(relevant_sequences, columns=self.comparison_attributes)
+        if relevant_sequences is not None and sum(relevant_sequence_indices) > 0:
+            df = pd.DataFrame({attr: relevant_sequences[i] for i, attr in enumerate(self.comparison_attributes)})
+        else:
+            df = pd.DataFrame(columns=self.comparison_attributes)
         sequence_csv_path = result_path / 'relevant_sequences.csv'
         df.to_csv(sequence_csv_path, sep=',', index=False)
 
@@ -188,14 +192,3 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         encoder.relevant_indices_path = DatasetEncoder.load_attribute(encoder, encoder_file, "relevant_indices_path")
         encoder.comparison_data = UtilIO.import_comparison_data(encoder_file.parent)
         return encoder
-
-    @staticmethod
-    def get_documentation():
-        doc = str(SequenceAbundanceEncoder.__doc__)
-
-        valid_field_values = str(Repertoire.FIELDS)[1:-1].replace("'", "`")
-        mapping = {
-            "Valid comparison value can be any repertoire field name.": f"Valid values are {valid_field_values}."
-        }
-        doc = update_docs_per_mapping(doc, mapping)
-        return doc

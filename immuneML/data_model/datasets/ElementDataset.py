@@ -182,7 +182,7 @@ class ReceptorDataset(ElementDataset):
         return result if return_df else result.to_dict('list')
 
     def make_subset(self, example_indices, path, dataset_type: str):
-        true_indices = np.array([[ind, ind + 1] for ind in example_indices]).flatten()
+        true_indices = np.array([[ind * 2, ind * 2 + 1] for ind in example_indices]).flatten()
         data = self.data[true_indices]
         name = f"subset_{self.name}"
 

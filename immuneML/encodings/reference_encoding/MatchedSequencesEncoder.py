@@ -117,7 +117,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
     def _prepare_caching_params(self, dataset, params: EncoderParams):
 
         encoding_params_desc = {"max_edit_distance": self.max_edit_distance,
-                                "reference_sequences": sorted([seq.get_sequence() + seq.metadata.v_gene + seq.metadata.j_gene
+                                "reference_sequences": sorted([seq.get_sequence() + seq.v_call + seq.j_call
                                                                for seq in self.reference_sequences]),
                                 "reads": self.reads.name,
                                 "sum_matches": self.sum_matches,
@@ -187,13 +187,13 @@ class MatchedSequencesEncoder(DatasetEncoder):
 
     def _get_sequence_desc(self, sequence: ReceptorSequence) -> str:
         desc = ""
-        if sequence.get_attribute('v_gene') not in [None, ""]:
-            desc += f"{sequence.get_attribute('v_gene')}_"
+        if sequence.v_call not in [None, ""]:
+            desc += f"{sequence.v_call}_"
 
         desc += sequence.get_sequence()
 
-        if sequence.get_attribute('j_gene') not in ["", None]:
-            desc += f"_{sequence.get_attribute('j_gene')}"
+        if sequence.j_call not in ["", None]:
+            desc += f"_{sequence.j_call}"
 
         return desc
 
@@ -224,14 +224,14 @@ class MatchedSequencesEncoder(DatasetEncoder):
     def _compute_matches_to_reference(self, repertoire: Repertoire):
         matcher = SequenceMatcher()
         matches = np.zeros(self.feature_count, dtype=int)
-        rep_seqs = repertoire.sequences
+        rep_seqs = repertoire.sequences()
 
         for i, reference_seq in enumerate(self.reference_sequences):
 
             for repertoire_seq in rep_seqs:
                 if matcher.matches_sequence(reference_seq, repertoire_seq, max_distance=self.max_edit_distance):
                     matches_idx = 0 if self.sum_matches else i
-                    match_count = 1 if self.reads == ReadsType.UNIQUE else repertoire_seq.metadata.duplicate_count
+                    match_count = 1 if self.reads == ReadsType.UNIQUE else repertoire_seq.duplicate_count
                     matches[matches_idx] += match_count
 
         return matches
