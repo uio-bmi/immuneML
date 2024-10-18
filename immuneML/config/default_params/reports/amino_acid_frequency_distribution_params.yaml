@@ -1,4 +1,4 @@
-imgt_positions: True
-relative_frequency: True
+alignment: CENTER
+relative_frequency: False
 split_by_label: False
 label: null
