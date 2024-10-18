@@ -22,6 +22,7 @@ class TestAminoAcidFrequencyDistribution(TestCase):
         params["dataset"] = dataset
         params["split_by_label"] = True
         params["result_path"] = path / "result"
+        params["alignment"] = "IMGT"
 
         report = AminoAcidFrequencyDistribution.build_object(**params)
         self.assertTrue(report.check_prerequisites())
