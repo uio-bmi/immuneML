@@ -8,12 +8,14 @@ from typing import Dict, Any, Tuple, List
 
 import bionumpy as bnp
 import numpy as np
+import pandas as pd
 import yaml
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.encoded_array import EncodedArray
 
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
-from immuneML.data_model.SequenceParams import Chain
+from immuneML.data_model.SequenceParams import Chain, RegionType
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
@@ -41,6 +43,9 @@ def read_yaml(filename: Path) -> dict:
         content = yaml.safe_load(file)
     return load_type_dict(content)
 
+
+def get_sequence_field_name(region_type: RegionType = RegionType.IMGT_CDR3, sequence_type: SequenceType = SequenceType.AMINO_ACID):
+    return region_type.value + "_aa" if sequence_type == SequenceType.AMINO_ACID else ""
 
 def load_type_dict(full_dict: dict) -> dict:
     if 'type_dict' in full_dict:
@@ -257,9 +262,10 @@ def merge_dataclass_objects(objects: list, fill_unmatched: bool = False):
             logging.info(f"Filling in missing fields when merging dataclass objects: {missing_fields}\nObject:\n{obj}")
             tmp_objs.append(
                 obj.add_fields({field_name: [AIRRSequenceSet.get_neutral_value(fields[field_name])] * len(obj)
-                                for field_name in missing_fields}))
+                                for field_name in missing_fields},
+                               {field_name: field_type for field_name, field_type in fields.items() if field_name in missing_fields}))
 
-    cls = make_dynamic_seq_set_dataclass(fields)
+    cls = type(tmp_objs[0])
     return cls(
         **{field_name: list(chain.from_iterable([getattr(obj, field_name) for obj in tmp_objs])) for field_name in
            fields.keys()})
@@ -267,4 +273,12 @@ def merge_dataclass_objects(objects: list, fill_unmatched: bool = False):
 
 def get_type_dict_from_bnp_object(bnp_object) -> dict:
     return {field.name: field.type for field in get_fields(bnp_object)}
+
+
+def make_full_airr_seq_set_df(df):
+    field_type_dict = AIRRSequenceSet.get_field_type_dict()
+    default_fields = pd.DataFrame({
+        f_name: [AIRRSequenceSet.get_neutral_value(f_type) for _ in range(df.shape[0])]
+        for f_name, f_type in field_type_dict.items() if f_name not in df.columns})
+    return pd.concat([df, default_fields], axis=1)
 

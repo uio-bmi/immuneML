@@ -1,9 +1,11 @@
 from dataclasses import fields
+from typing import Dict
 
 import bionumpy as bnp
 from bionumpy import DNAEncoding, AminoAcidEncoding
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.encodings import AlphabetEncoding
+from numpy._typing import ArrayLike
 
 AminoAcidXEncoding = AlphabetEncoding('ACDEFGHIKLMNPQRSTVWXY*')
 
@@ -179,9 +181,20 @@ class AIRRSequenceSet:
 
     @classmethod
     def get_neutral_value(cls, field_type):
-        neutral_values = {str: '', int: -1, DNAEncoding: '', AminoAcidEncoding: '', AminoAcidXEncoding: '', float: -1.}
+        neutral_values = {str: '', int: -1, DNAEncoding: '', AminoAcidEncoding: '', AminoAcidXEncoding: '', float: -1.,
+                          bool: False}
         return neutral_values[field_type]
 
     @classmethod
-    def get_field_type_dict(cls):
-        return {f.name: f.type for f in fields(cls)}
+    def get_field_type_dict(cls, all_fields: bool = True):
+        if all_fields:
+            return {f.name: f.type for f in fields(cls)}
+        else:
+            return {f.name: f.type for f in fields(cls)
+                    if f.name not in [airr_f.name for airr_f in fields(AIRRSequenceSet)]}
+
+    def add_fields(self, fields: Dict[str, ArrayLike], field_type_map: dict):
+        fields_with_types = [(field_name, field_type, self.__class__.get_neutral_value(field_type))
+                             for field_name, field_type in field_type_map.items()]
+        new_class = self.__class__.extend(fields_with_types)
+        return new_class(**{**vars(self), **fields})

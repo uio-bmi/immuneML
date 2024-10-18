@@ -69,11 +69,13 @@ class SequenceDataset(ElementDataset):
     """A dataset class for sequence datasets (single chain). """
 
     @classmethod
-    def build(cls, filename: Path, metadata_filename: Path, name: str = None):
+    def build(cls, filename: Path, metadata_filename: Path, name: str = None, bnp_dc=None):
         metadata = read_yaml(metadata_filename)
-        dynamic_fields = metadata['type_dict_dynamic_fields']
-        bnp_dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet,
-                                                      tuple(dynamic_fields.items()))
+        dynamic_fields = {key: AIRRSequenceSet.STR_TO_TYPE[val]
+                          for key, val in metadata['type_dict_dynamic_fields'].items()}
+        if bnp_dc is None:
+            bnp_dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet,
+                                                          tuple(dynamic_fields.items()))
 
         return SequenceDataset(name=name, filename=filename, dataset_file=metadata_filename,
                                dynamic_fields=list(dynamic_fields.keys()),
@@ -91,7 +93,6 @@ class SequenceDataset(ElementDataset):
 
         dataset_metadata = {
             'type_dict_dynamic_fields': {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()},
-            'dataset_class': cls.__class__.__name__,
             'filename': filename}
         metadata_filename = path / f'dataset_{name}.yaml'
         write_yaml(metadata_filename, dataset_metadata)
@@ -106,6 +107,9 @@ class SequenceDataset(ElementDataset):
         result = self.data.topandas()[field_names]
 
         return result if return_df else result.to_dict("list")
+
+    def get_attribute(self, attribute_name):
+        return getattr(self.data, attribute_name)
 
     def make_subset(self, example_indices, path, dataset_type: str):
         data = self.data[example_indices]
@@ -173,9 +177,11 @@ class ReceptorDataset(ElementDataset):
     def get_metadata(self, field_names: list, return_df: bool = False):
         """Returns a dict or an equivalent pandas DataFrame with metadata information from Receptor objects for
         provided field names"""
-        result = self.data.topandas().groupby('cell_id', sort=False).agg(lambda x: "_".join([str(el) for el in list(set(x))])).reset_index()
+        result = self.data.topandas().groupby('cell_id', sort=False).agg(
+            lambda x: "_".join([str(el) for el in list(set(x))])).reset_index()
         if any(field_name not in result.columns for field_name in field_names):
-            logging.warning(f"ReceptorDataset {self.name}: not all requested metadata fields are available: {field_names}.")
+            logging.warning(
+                f"ReceptorDataset {self.name}: not all requested metadata fields are available: {field_names}.")
         else:
             result = result[field_names]
 

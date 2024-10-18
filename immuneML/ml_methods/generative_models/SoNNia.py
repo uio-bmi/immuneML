@@ -107,14 +107,10 @@ class SoNNia(GenerativeModel):
     def fit(self, dataset: Dataset, path: Path = None):
         from sonnia.sonnia import SoNNia as InternalSoNNia
 
-        region_types = list(set(dataset.get_attribute('region_type', as_list=True)))
-        assert len(region_types) == 1 and RegionType[region_types[0].upper()] == RegionType.IMGT_JUNCTION, \
-            f"SoNNia supports only IMGT_JUNCTION for the input sequences, got {region_types}"
         print_log(f"{SoNNia.__name__}: fitting a selection model...", True)
 
-        data = dataset.get_attributes(['sequence_aa', 'v_call', 'j_call'], as_list=True)
-        data_seqs = [[data['sequence_aa'][i], data['v_call'][i], data['j_call'][i]]
-                     for i in range(len(data['sequence_aa']))]
+        data = dataset.data.topandas()[['junction_aa', 'v_call', 'j_call']]
+        data_seqs = data.to_records(index=False).tolist()
 
         self._model = InternalSoNNia(data_seqs=data_seqs,
                                      gen_seqs=[],
@@ -138,14 +134,10 @@ class SoNNia(GenerativeModel):
         gen_model = SequenceGeneration(self._model)
         sequences = gen_model.generate_sequences_post(count)
         return SequenceDataset.build_from_objects(sequences=[ReceptorSequence(sequence_aa=seq[0], sequence=seq[3],
-                                                                              metadata=SequenceMetadata(
-                                                                                  v_call=seq[1],
-                                                                                  j_call=seq[2],
-                                                                                  region_type=RegionType.IMGT_JUNCTION.name,
-                                                                              custom_params={'gen_model_name': self.name}))
+                                                                              v_call=seq[1], j_call=seq[2],
+                                                                              metadata={'gen_model_name': self.name})
                                                              for seq in sequences],
-                                                  file_size=len(sequences), path=PathBuilder.build(path),
-                                                  name='SoNNiaDataset')
+                                                path=PathBuilder.build(path), name='SoNNiaDataset')
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         raise NotImplementedError

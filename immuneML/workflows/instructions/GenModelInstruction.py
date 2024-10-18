@@ -30,7 +30,7 @@ class GenModelState:
 
 class GenModelInstruction(Instruction, ABC):
 
-    def __init__(self, state: GenModelState, method: GenerativeModel = None, reports: list = None):
+    def __init__(self, state=None, method: GenerativeModel = None, reports: list = None):
         self.generated_dataset = None
         self.method = method
         self.state = state

@@ -44,7 +44,8 @@ def test_fit_apply_gen_model():
                 'embed_size': 4,
                 'temperature': 0.4,
                 'num_layers': 2,
-                'device': 'cpu'
+                'device': 'cpu',
+                'region_type': 'IMGT_CDR3'
             }
         }
     ]

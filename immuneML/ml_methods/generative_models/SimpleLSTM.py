@@ -8,7 +8,7 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, TensorDataset
 
-from immuneML.data_model.bnp_util import write_yaml, read_yaml
+from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.SequenceParams import RegionType, Chain
 from immuneML.data_model.SequenceSet import ReceptorSequence
@@ -89,7 +89,7 @@ class SimpleLSTM(GenerativeModel):
 
     def __init__(self, locus: str, sequence_type: str, hidden_size: int, learning_rate: float, num_epochs: int,
                  batch_size: int, num_layers: int, embed_size: int, temperature, device: str, name=None,
-                 region_type: str = None):
+                 region_type: str = RegionType.IMGT_CDR3):
 
         super().__init__(Chain.get_chain(locus))
         self._model = None
@@ -170,15 +170,9 @@ class SimpleLSTM(GenerativeModel):
             loss_summary['epoch'].append(epoch + 1)
         return loss_summary
 
-    def _encode_dataset(self, dataset):
-        dataset_attributes = dataset.get_attributes([self.sequence_type.value, 'region_type'], as_list=True)
-
-        unique_region_types = list(set(dataset_attributes['region_type']))
-        assert len(unique_region_types) == 1, \
-            f'{SimpleLSTM.__name__}: only one region type in the dataset is supported: {unique_region_types}.'
-        self.region_type = RegionType[unique_region_types[0].upper()]
-
-        sequences = dataset_attributes[self.sequence_type.value]
+    def _encode_dataset(self, dataset: SequenceDataset):
+        seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
+        sequences = dataset.get_attribute(seq_col).tolist()
 
         sequences = list(chain.from_iterable(
             [[self.letter_to_index[letter] for letter in seq] + [self.letter_to_index['*']] for seq in sequences]))
@@ -227,13 +221,11 @@ class SimpleLSTM(GenerativeModel):
     def _export_dataset(self, sequences, count, path):
         sequence_objs = [ReceptorSequence(**{
             self.sequence_type.value: sequence,
-            'metadata': SequenceMetadata(region_type=self.region_type.name, locus=self.locus.name,
-                                         custom_params={'gen_model_name': self.name})
+            'locus': self.locus.name, 'metadata': {'gen_model_name': self.name}
         }) for i, sequence in enumerate(sequences)]
 
-        dataset = SequenceDataset.build_from_objects(sequence_objs, count, path, 'synthetic_lstm')
-
-        return dataset
+        return SequenceDataset.build_from_objects(sequences=sequence_objs, path=PathBuilder.build(path),
+                                                  name='synthetic_lstm_dataset')
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         raise RuntimeError

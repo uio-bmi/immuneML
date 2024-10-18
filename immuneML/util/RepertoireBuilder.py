@@ -7,7 +7,7 @@ import pandas as pd
 
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.SequenceSet import ReceptorSequence, Repertoire
-from immuneML.data_model.bnp_util import write_yaml, build_dynamic_bnp_dataclass_obj
+from immuneML.data_model.bnp_util import write_yaml, build_dynamic_bnp_dataclass_obj, make_full_airr_seq_set_df
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -57,6 +57,8 @@ class RepertoireBuilder:
             else:
                 df = pd.concat([df, pd.DataFrame.from_records(seq_metadata[rep_index])], axis=1)
 
+            df = make_full_airr_seq_set_df(df)
+
             df.to_csv(str(rep_path / f'rep_{rep_index}.tsv'), sep='\t', index=False)
 
             if labels is not None:
@@ -96,7 +98,7 @@ class RepertoireBuilder:
         write_yaml(path / 'd1.yaml', {
             "type_dict_dynamic_fields": type_dict, 'metadata_file': str(metadata_file.name),
             'identifier': uuid.uuid4().hex, "name": "d1", "labels": list(labels.keys()),
-            "timestamp": datetime.now()
+            "timestamp": str(datetime.now())
         })
 
         return RepertoireDataset(repertoires=reps, metadata_file=metadata_file, name="d1",

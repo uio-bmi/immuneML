@@ -11,7 +11,8 @@ from torch.nn.functional import cross_entropy, one_hot
 from torch.utils.data import DataLoader
 
 from immuneML import Constants
-from immuneML.data_model.bnp_util import write_yaml, read_yaml
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
+from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.SequenceSet import ReceptorSequence
@@ -242,13 +243,14 @@ class SimpleVAE(GenerativeModel):
         return loss
 
     def encode_dataset(self, dataset, batch_size=None, shuffle=True):
-        data = dataset.get_attributes([self.sequence_type.value, 'v_call', 'j_call'], as_list=True)
+        seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
+        data = dataset.data.topandas()[[seq_col, 'v_call', 'j_call']]
         if self.unique_v_genes is None:
             self.unique_v_genes = sorted(list(set([el.split("*")[0] for el in data['v_call']])))
         if self.unique_j_genes is None:
             self.unique_j_genes = sorted(list(set([el.split("*")[0] for el in data['j_call']])))
         if self.max_cdr3_len is None:
-            self.max_cdr3_len = max(len(el) for el in data[self.sequence_type.value])
+            self.max_cdr3_len = max(len(el) for el in data[seq_col])
 
         encoded_v_genes = one_hot(
             torch.as_tensor([self.unique_v_genes.index(v_gene.split("*")[0]) for v_gene in data['v_call']],
@@ -261,7 +263,7 @@ class SimpleVAE(GenerativeModel):
         padded_encoded_cdr3s = one_hot(torch.as_tensor([
             [self.vocab.index(letter) for letter in
              StringHelper.pad_sequence_in_the_middle(seq, self.max_cdr3_len, Constants.GAP_LETTER)]
-            for seq in data[self.sequence_type.value]], device=self.device), num_classes=self.vocab_size)
+            for seq in data[seq_col]], device=self.device), num_classes=self.vocab_size)
 
         pytorch_dataset = PyTorchSequenceDataset({'v_gene': encoded_v_genes, 'j_gene': encoded_j_genes,
                                                   'cdr3': padded_encoded_cdr3s})
@@ -302,7 +304,7 @@ class SimpleVAE(GenerativeModel):
         #                                   self.sequence_type)
         #     obj.metadata.custom_params = {'log_prob': log_prob}
 
-        dataset = SequenceDataset.build_from_objects(seq_objs, count, path, 'synthetic_vae')
+        dataset = SequenceDataset.build_from_objects(seq_objs, PathBuilder.build(path), f'synthetic_{self.name}_dataset')
 
         return dataset
 

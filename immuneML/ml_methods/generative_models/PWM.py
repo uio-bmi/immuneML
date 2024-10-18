@@ -1,10 +1,13 @@
 import shutil
+from datetime import datetime
 from pathlib import Path
+from typing import List
 
 import numpy as np
 import pandas as pd
 
-from immuneML.data_model.bnp_util import write_yaml, read_yaml
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
+from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name, make_full_airr_seq_set_df
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.SequenceParams import RegionType
@@ -72,7 +75,8 @@ class PWM(GenerativeModel):
             assert file.exists(), f"{cls.__name__}: {file} is not a file."
             pwm_matrix[length] = pd.read_csv(str(file))
 
-            assert pwm_matrix[length].iloc[:, 0].tolist() == EnvironmentSettings.get_sequence_alphabet(pwm.sequence_type), \
+            assert pwm_matrix[length].iloc[:, 0].tolist() == EnvironmentSettings.get_sequence_alphabet(
+                pwm.sequence_type), \
                 (f"{cls.__name__}: the row names in the PWM for length {length} don't match the expected row names.\n"
                  f"Obtained:\n{pwm_matrix[length].index.tolist()}\nExpected:"
                  f"\n{EnvironmentSettings.get_sequence_alphabet(pwm.sequence_type)}")
@@ -95,8 +99,8 @@ class PWM(GenerativeModel):
         self.pwm_matrix = None
         self.length_probs = None
 
-    def fit(self, data: Dataset, path: Path = None):
-        sequences = data.get_attribute(self.sequence_type.value)
+    def fit(self, data: SequenceDataset, path: Path = None):
+        sequences = data.get_attribute(get_sequence_field_name(self.region_type, self.sequence_type))
         lengths, counts = np.unique(sequences.lengths, return_counts=True)
 
         self.length_probs = dict(zip(lengths, counts))
@@ -133,14 +137,28 @@ class PWM(GenerativeModel):
 
             sequences.append(sequence)
 
-        dataset = SequenceDataset.build_from_objects(
-            [ReceptorSequence(sequence_aa=seq,
-                              metadata=SequenceMetadata(locus=self.locus, region_type=self.region_type.name,
-                                                        custom_params={'gen_model_name': self.name}))
-             for seq in sequences],
-            count, path, 'synthetic_dataset')
+        dataset = self._export_gen_dataset(sequences, path)
 
         return dataset
+
+    def _export_gen_dataset(self, sequences: List[str], path: Path) -> SequenceDataset:
+        count = len(sequences)
+        df = pd.DataFrame({get_sequence_field_name(self.region_type, self.sequence_type): sequences,
+                           'locus': [self.locus for _ in range(count)],
+                           'gen_model_name': [self.name for _ in range(count)]})
+
+        df = make_full_airr_seq_set_df(df)
+
+        df.to_csv(str(PathBuilder.build(path) / 'synthetic_dataset.tsv'), sep='\t', index=False)
+
+        write_yaml(path / 'synthetic_metadata.yaml', {
+            'type_dict_dynamic_fields': {'gen_model_name': 'str'},
+            'name': 'synthetic_dataset', 'labels': ['gen_model_name'],
+            'timestamp': str(datetime.now())
+        })
+
+        return SequenceDataset.build(path / 'synthetic_dataset.tsv', path / 'synthetic_metadata.yaml',
+                                     'synthetic_dataset')
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         raise NotImplementedError

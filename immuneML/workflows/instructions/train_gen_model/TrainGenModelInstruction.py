@@ -1,15 +1,21 @@
 import copy
 import logging
+from dataclasses import field, dataclass
+from datetime import datetime
 from pathlib import Path
+from typing import Dict, List
 
 import numpy as np
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
-from immuneML.data_model.bnp_util import merge_dataclass_objects, bnp_write_to_file, get_type_dict_from_bnp_object
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
+from immuneML.data_model.bnp_util import merge_dataclass_objects, bnp_write_to_file, get_type_dict_from_bnp_object, \
+    write_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
+from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.reports.train_gen_model_reports.TrainGenModelReport import TrainGenModelReport
 from immuneML.util.Logger import print_log
@@ -19,7 +25,16 @@ from immuneML.workflows.steps.data_splitter.DataSplitter import DataSplitter
 from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
 
 
-class TrainGenModelState(GenModelState):
+@dataclass
+class TrainGenModelState:
+    result_path: Path = None
+    name: str = None
+    gen_examples_count: int = None
+    model_path: Path = None
+    generated_dataset: Dataset = None
+    exported_datasets: Dict[str, Path] = field(default_factory=dict)
+    report_results: Dict[str, List[ReportResult]] = field(
+        default_factory=lambda: {'data_reports': [], 'ml_reports': [], 'instruction_reports': []})
     combined_dataset: Dataset = None
     train_dataset: Dataset = None
     test_dataset: Dataset = None
@@ -77,9 +92,10 @@ class TrainGenModelInstruction(GenModelInstruction):
 
     MAX_ELEMENT_COUNT_TO_SHOW = 10
 
-    def __init__(self, dataset: Dataset = None, method: GenerativeModel = None, number_of_processes: int = 1,
-                 gen_examples_count: int = 100, result_path: Path = None, name: str = None, reports: list = None,
-                 export_generated_dataset: bool = True, export_combined_dataset: bool = False, training_percentage: float = None):
+    def __init__(self, dataset: Dataset = None, method: GenerativeModel = None,
+                 number_of_processes: int = 1, gen_examples_count: int = 100, result_path: Path = None,
+                 name: str = None, reports: list = None, export_generated_dataset: bool = True,
+                 export_combined_dataset: bool = False, training_percentage: float = None):
         super().__init__(TrainGenModelState(result_path, name, gen_examples_count), method, reports)
         self.dataset = dataset
         self.number_of_processes = number_of_processes
@@ -143,20 +159,25 @@ class TrainGenModelInstruction(GenModelInstruction):
                                                                np.ones(self.dataset.get_example_count()))
             combined_data = merge_dataclass_objects([org_data, gen_data], fill_unmatched=True)
 
-        bnp_write_to_file(path / 'batch1.tsv', combined_data)
+        bnp_write_to_file(path / f'combined_{self.state.name}_dataset.tsv', combined_data)
+
+        write_yaml(path / f'combined_{self.state.name}_dataset.yaml', {
+            'type_dict_dynamic_fields': {key: AIRRSequenceSet.TYPE_TO_STR[val]
+                                         for key, val in type(combined_data).get_field_type_dict(all_fields=False).items()},
+            "name": f'combined_{self.state.name}_dataset.tsv',
+            "filename": f'combined_{self.state.name}_dataset.tsv',
+            "labels": ['gen_model_name', "from_gen_model"], "timestamp": str(datetime.now())
+        })
 
         self.state.combined_dataset = SequenceDataset.build(
-            dataset_file=path / f'combined_{self.state.name}_dataset.yaml', filenames=['batch1.tsv'],
-            batchfiles_path=path, types=get_type_dict_from_bnp_object(combined_data), element_class_name='ReceptorSequence')
+            metadata_filename=path / f'combined_{self.state.name}_dataset.yaml',
+            filename=path / f'combined_{self.state.name}_dataset.tsv', name=f'combined_{self.state.name}_dataset')
 
     def _get_dataclass_object_from_dataset(self, dataset: Dataset, from_gen_model_vals: np.ndarray,
                                            used_for_training_vals: np.ndarray):
-        data = merge_dataclass_objects(list(dataset.get_data(batch_size=dataset.get_example_count(),
-                                                             return_objects=False)))
-        data = data.add_fields({'from_gen_model': from_gen_model_vals, 'used_for_training': used_for_training_vals},
-                               {'from_gen_model': bool, 'used_for_training': bool})
-
-        return data
+        return dataset.data.add_fields(
+            {'from_gen_model': from_gen_model_vals, 'used_for_training': used_for_training_vals},
+            {'from_gen_model': bool, 'used_for_training': bool})
 
     def _make_and_export_combined_dataset(self):
         if self.export_combined_dataset and isinstance(self.dataset, SequenceDataset):

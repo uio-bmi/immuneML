@@ -135,7 +135,7 @@ class TestMLIE(TestCase):
         return path / "specs_import.yaml"
 
     def test_ml(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "integration_ml/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "integration_ml/")
         specs_path = self.prepare_specs(path)
 
         PathBuilder.build(path / "result_export/")

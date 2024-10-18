@@ -2,6 +2,7 @@ import logging
 from multiprocessing.pool import Pool
 from pathlib import Path
 
+import dill
 import numpy as np
 
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
@@ -58,7 +59,7 @@ class CountPerSequenceFilter(Filter):
         self.result_path = result_path if result_path is not None else self.result_path
 
         with Pool(self.batch_size) as pool:
-            repertoires = pool.map(self._process_repertoire, dataset.repertoires)
+            repertoires = pool.map(self._process_repertoire, [dill.dumps(rep) for rep in dataset.repertoires])
 
         if self.remove_empty_repertoires:
             repertoires = self._remove_empty_repertoires(repertoires)
@@ -71,8 +72,11 @@ class CountPerSequenceFilter(Filter):
 
     def _process_repertoire(self, repertoire: Repertoire) -> Repertoire:
 
+        if isinstance(repertoire, bytes):
+            repertoire = dill.loads(repertoire)
+
         counts = repertoire.data.duplicate_count
-        not_none_indices = counts != None
+        not_none_indices = counts != -1
         counts[not_none_indices] = counts[not_none_indices].astype(int)
         indices_to_keep = np.full(repertoire.get_element_count(), False)
         if self.remove_without_count and self.low_count_limit is not None:

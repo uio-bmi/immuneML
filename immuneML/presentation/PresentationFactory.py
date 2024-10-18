@@ -16,7 +16,7 @@ from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisSta
 from immuneML.workflows.instructions.ligo_sim_feasibility.FeasibilitySummaryInstruction import FeasibilitySummaryState
 from immuneML.workflows.instructions.ml_model_application.MLApplicationState import MLApplicationState
 from immuneML.workflows.instructions.subsampling.SubsamplingState import SubsamplingState
-from immuneML.workflows.instructions.train_gen_model.TrainGenModelInstruction import GenModelState
+from immuneML.workflows.instructions.train_gen_model.TrainGenModelInstruction import GenModelState, TrainGenModelState
 
 
 class PresentationFactory:
@@ -37,7 +37,7 @@ class PresentationFactory:
             return LIgOSimulationHTMLBuilder
         elif isinstance(state, FeasibilitySummaryState) and presentation_format == PresentationFormat.HTML:
             return FeasibilitySummaryHTMLBuilder
-        elif isinstance(state, GenModelState) and presentation_format == PresentationFormat.HTML:
+        elif (isinstance(state, TrainGenModelState) or isinstance(state, GenModelState)) and presentation_format == PresentationFormat.HTML:
             return GenModelHTMLBuilder
         elif isinstance(state, ClusteringState) and presentation_format == PresentationFormat.HTML:
             return ClusteringHTMLBuilder
