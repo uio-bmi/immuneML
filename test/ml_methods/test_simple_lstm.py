@@ -23,10 +23,10 @@ def test_simple_lstm():
 
     lstm.generate_sequences(5, 1, path / 'generated', SequenceType.AMINO_ACID, False)
 
-    assert (path / 'generated/batch1.tsv').is_file()
+    assert (path / 'generated/synthetic_lstm_dataset.tsv').is_file()
     assert (path / 'generated/dataset_synthetic_lstm.yaml').is_file()
 
-    sequence_df = pd.read_csv(str(path / 'generated/batch1.tsv'), sep='\t')
+    sequence_df = pd.read_csv(str(path / 'generated/synthetic_lstm_dataset.tsv'), sep='\t')
     assert sequence_df.shape[0] == 5
     assert all(sequence_df['sequence_aa'].str.len() >= 1)
 

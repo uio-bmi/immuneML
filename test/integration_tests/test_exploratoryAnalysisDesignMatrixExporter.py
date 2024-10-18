@@ -29,7 +29,7 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
 
     def test_run(self):
         path = EnvironmentSettings.tmp_test_path / "explanalysisprocintegration/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset = self.create_dataset(path)
 

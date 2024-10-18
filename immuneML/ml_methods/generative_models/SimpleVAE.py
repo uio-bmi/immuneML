@@ -295,7 +295,7 @@ class SimpleVAE(GenerativeModel):
             'v_call': self.unique_v_genes[Categorical(v_genes[i]).sample()],
             'j_call': self.unique_j_genes[Categorical(j_genes[i]).sample()],
             'locus': self.locus,
-            'metadata': {'gen_model_name': self.name}
+            'metadata': {'gen_model_name': self.name if self.name else "SimpleVAE"}
         }) for i in range(count)]
 
         # for obj in seq_objs:

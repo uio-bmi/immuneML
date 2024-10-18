@@ -46,7 +46,9 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
         "column_mapping": {
             "cloneCount": "duplicate_count",
             "allVHitsWithScore": "v_call",
-            "allJHitsWithScore": "j_call"
+            "allJHitsWithScore": "j_call",
+            "aaSeqCDR3": "junction_aa",
+            "nSeqCDR3": "junction"
         },
     }, "mixcr_dataset")
     dataset = loader.import_dataset()

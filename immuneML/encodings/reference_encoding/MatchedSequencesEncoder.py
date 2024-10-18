@@ -1,6 +1,7 @@
 from multiprocessing.pool import Pool
 from typing import List
 
+import dill
 import numpy as np
 import pandas as pd
 
@@ -173,10 +174,10 @@ class MatchedSequencesEncoder(DatasetEncoder):
 
         for i, sequence in enumerate(self.reference_sequences):
             features[i] = [sequence.sequence_id,
-                           sequence.get_attribute("locus").name.lower(),
-                           sequence.get_sequence(),
-                           sequence.get_attribute("v_gene"),
-                           sequence.get_attribute("j_gene"),
+                           sequence.locus,
+                           sequence.sequence_aa,
+                           sequence.v_call,
+                           sequence.j_call,
                            self._get_sequence_desc(sequence)]
 
         features = pd.DataFrame(features, columns=["sequence_id", "locus", "sequence", "v_gene", "j_gene", "sequence_desc"])
@@ -190,7 +191,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
         if sequence.v_call not in [None, ""]:
             desc += f"{sequence.v_call}_"
 
-        desc += sequence.get_sequence()
+        desc += sequence.sequence_aa if sequence.sequence_aa != "" else sequence.sequence
 
         if sequence.j_call not in ["", None]:
             desc += f"_{sequence.j_call}"
@@ -201,7 +202,8 @@ class MatchedSequencesEncoder(DatasetEncoder):
         labels = {label: [] for label in params.label_config.get_labels_by_name()} if params.encode_labels else None
 
         with Pool(params.pool_size) as pool:
-            encoded_repertories = np.array(pool.map(self._get_repertoire_matches_to_reference, dataset.repertoires))
+            encoded_repertories = np.array(pool.map(self._get_repertoire_matches_to_reference,
+                                                    [dill.dumps(rep) for rep in dataset.repertoires]))
 
         for repertoire in dataset.repertoires:
             for label_name in params.label_config.get_labels_by_name():
@@ -210,6 +212,10 @@ class MatchedSequencesEncoder(DatasetEncoder):
         return encoded_repertories, labels
 
     def _get_repertoire_matches_to_reference(self, repertoire):
+
+        if isinstance(repertoire, bytes):
+            repertoire = dill.loads(repertoire)
+
         return CacheHandler.memo_by_params(
             (("repertoire_identifier", repertoire.identifier),
              ("encoding", MatchedSequencesEncoder.__name__),
@@ -217,8 +223,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
              ("sum_matches", self.sum_matches),
              ("max_edit_distance", self.max_edit_distance),
              ("reference_sequences", tuple(
-                 [(seq.get_attribute("chain"), seq.get_sequence(), seq.get_attribute("v_gene"), seq.get_attribute("j_gene")) for seq in
-                  self.reference_sequences]))),
+                 [(seq.locus, seq.sequence_aa, seq.v_call, seq.j_call) for seq in self.reference_sequences]))),
             lambda: self._compute_matches_to_reference(repertoire))
 
     def _compute_matches_to_reference(self, repertoire: Repertoire):
