@@ -21,10 +21,8 @@ class DummyArguments:
 
 class MyTestCase(unittest.TestCase):
     def create_dummy_dataset(self, path):
-        repertoires, metadata = RepertoireBuilder.build([["AA"], ["CC"]], path, labels={"label1": ["val1", "val2"], "label2": ["val1", "val2"]})
+        dataset = RepertoireBuilder.build_dataset([["AA"], ["CC"]], path, labels={"label1": ["val1", "val2"], "label2": ["val1", "val2"]})
 
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
-        dataset.name = "my_dataset"
         AIRRExporter.export(dataset, path)
 
         return f"{dataset.name}.yaml"

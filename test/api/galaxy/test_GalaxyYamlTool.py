@@ -28,7 +28,7 @@ class TestGalaxyYamlTool(TestCase):
                     "new_d1": {
                         "format": "AIRR",
                         "params": {
-                            "metadata_file": str(result_path / "d1_metadata.csv")
+                            "metadata_file": str(dataset.metadata_file)
                         }
                     }
                 },

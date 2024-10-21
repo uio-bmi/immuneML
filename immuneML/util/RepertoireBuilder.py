@@ -98,9 +98,9 @@ class RepertoireBuilder:
 
         write_yaml(path / f'dataset_{name}.yaml', {
             "type_dict_dynamic_fields": type_dict, 'metadata_file': str(metadata_file.name),
-            'identifier': uuid.uuid4().hex, "name": name, "labels": list(labels.keys()),
+            'identifier': uuid.uuid4().hex, "name": name, "labels": labels,
             "timestamp": str(datetime.now())
         })
 
-        return RepertoireDataset(repertoires=reps, metadata_file=metadata_file, name=name,
+        return RepertoireDataset(repertoires=reps, metadata_file=metadata_file, name=name, labels=labels,
                                  dataset_file=path / f'dataset_{name}.yaml')

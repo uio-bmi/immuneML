@@ -29,7 +29,7 @@ class SoNNia(GenerativeModel):
 
     **Specification arguments:**
 
-    - chain (str)
+    - locus (str)
 
     - batch_size (int)
 

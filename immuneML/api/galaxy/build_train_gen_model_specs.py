@@ -53,7 +53,7 @@ def build_specs(parsed_args):
     elif parsed_args.generative_method == "PWM":
         reports['generative_model_overview'] = "PWMSummary"
 
-    gen_model_args = {"chain": parsed_args.chain_type}
+    gen_model_args = {"locus": parsed_args.chain_type}
 
     if parsed_args.generative_method == "SoNNia":
         gen_model_args["default_model_name"] = f"human{parsed_args.chain_type}"
@@ -62,7 +62,7 @@ def build_specs(parsed_args):
         "definitions": {
             "datasets": {
                 "dataset": {
-                    "format": "ImmuneML",
+                    "format": "AIRR",
                     "params": discover_dataset_params()
                 }
             },
@@ -89,6 +89,7 @@ def build_specs(parsed_args):
     }
 
     return specs
+
 
 def main(args):
     parsed_args = parse_command_line_arguments(args)

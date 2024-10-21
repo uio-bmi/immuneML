@@ -75,4 +75,5 @@ class RandomRepertoireDatasetImport(DataImport):
                                                                   sequence_count_probabilities=self.params["sequence_count_probabilities"],
                                                                   sequence_length_probabilities=self.params["sequence_length_probabilities"],
                                                                   labels=self.params["labels"],
-                                                                  path=self.params["result_path"])
+                                                                  path=self.params["result_path"],
+                                                                  name=self.dataset_name)

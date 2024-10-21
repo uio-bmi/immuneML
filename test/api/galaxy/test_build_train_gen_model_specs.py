@@ -11,13 +11,12 @@ from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
-
 class MyTestCase(unittest.TestCase):
     def create_dummy_dataset(self, path):
-        repertoires, metadata = RepertoireBuilder.build([["AA"], ["CC"]], path, labels={"label1": ["val1", "val2"], "label2": ["val1", "val2"]})
+        dataset = RepertoireBuilder.build_dataset([["AA"], ["CC"]], path,
+                                                  labels={"label1": ["val1", "val2"], "label2": ["val1", "val2"]},
+                                                  name='my_dataset')
 
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
-        dataset.name = "my_dataset"
         AIRRExporter.export(dataset, path)
 
         return f"{dataset.name}.yaml"
@@ -30,7 +29,6 @@ class MyTestCase(unittest.TestCase):
 
         output_dir = path / "output_dir"
         output_filename = "yaml_out.yaml"
-
 
         old_wd = os.getcwd()
 
