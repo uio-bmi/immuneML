@@ -44,8 +44,10 @@ def read_yaml(filename: Path) -> dict:
     return load_type_dict(content)
 
 
-def get_sequence_field_name(region_type: RegionType = RegionType.IMGT_CDR3, sequence_type: SequenceType = SequenceType.AMINO_ACID):
+def get_sequence_field_name(region_type: RegionType = RegionType.IMGT_CDR3,
+                            sequence_type: SequenceType = SequenceType.AMINO_ACID):
     return region_type.value + "_aa" if sequence_type == SequenceType.AMINO_ACID else ""
+
 
 def load_type_dict(full_dict: dict) -> dict:
     if 'type_dict' in full_dict:
@@ -263,7 +265,8 @@ def merge_dataclass_objects(objects: list, fill_unmatched: bool = False):
             tmp_objs.append(
                 obj.add_fields({field_name: [AIRRSequenceSet.get_neutral_value(fields[field_name])] * len(obj)
                                 for field_name in missing_fields},
-                               {field_name: field_type for field_name, field_type in fields.items() if field_name in missing_fields}))
+                               {field_name: field_type for field_name, field_type in fields.items() if
+                                field_name in missing_fields}))
 
     cls = type(tmp_objs[0])
     return cls(
@@ -281,4 +284,3 @@ def make_full_airr_seq_set_df(df):
         f_name: [AIRRSequenceSet.get_neutral_value(f_type) for _ in range(df.shape[0])]
         for f_name, f_type in field_type_dict.items() if f_name not in df.columns})
     return pd.concat([df, default_fields], axis=1)
-

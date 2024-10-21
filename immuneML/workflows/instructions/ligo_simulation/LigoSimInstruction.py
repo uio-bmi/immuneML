@@ -1,4 +1,5 @@
 import copy
+import math
 import os
 import random
 from dataclasses import fields, field
@@ -6,21 +7,20 @@ from itertools import chain
 from multiprocessing import Pool
 from pathlib import Path
 from typing import List, Dict, Tuple
+
 import bionumpy as bnp
-
-import math
-
 import dill
 import numpy as np
+from bionumpy import as_encoded_array
 from bionumpy.bnpdataclass import BNPDataClass
+from bionumpy.encoded_array import BaseEncoding
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.app.LigoApp import SimError
-from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
-from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.datasets.ElementDataset import SequenceDataset
-from immuneML.data_model.SequenceSet import Receptor
 from immuneML.data_model.SequenceSet import Repertoire
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.LigoSimState import LigoSimState
@@ -29,10 +29,10 @@ from immuneML.simulation.SimConfigItem import SimConfigItem
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.simulation_strategy.ImplantingStrategy import ImplantingStrategy
 from immuneML.simulation.util.bnp_util import merge_dataclass_objects
-from immuneML.simulation.util.util import get_bnp_data, make_receptor_sequence_objects, make_annotated_dataclass, \
+from immuneML.simulation.util.util import get_bnp_data, make_annotated_dataclass, \
     get_sequence_per_signal_count, \
     update_seqs_without_signal, update_seqs_with_signal, check_iteration_progress, make_sequence_paths, \
-    make_signal_metadata, needs_seqs_with_signal, \
+    needs_seqs_with_signal, \
     check_sequence_count, make_repertoire_from_sequences, get_no_signal_sequences, get_signal_sequences, \
     annotate_sequences, get_signal_sequence_count, filter_sequences_by_length
 from immuneML.util.ExporterHelper import ExporterHelper
@@ -166,11 +166,11 @@ class LigoSimInstruction(Instruction):
             with Pool(processes=max(self._number_of_processes, len(self.state.simulation.sim_items))) as pool:
                 result = pool.map(self._create_examples, [dill.dumps(item) for item in self.state.simulation.sim_items],
                                   chunksize=chunk_size)
-                examples = {k: v for d in result for k, v in d.items()}
+                examples = {k: [dill.loads(el) for el in v] for d in result for k, v in d.items()}
         else:
             examples = {}
             for item in self.state.simulation.sim_items:
-                examples = {**examples, **self._create_examples(item)}
+                examples = {**examples, **{k: dill.loads(v) for k, v in self._create_examples(item).items()}}
 
         if self.state.simulation.paired:
             examples = self._pair_examples(examples, self.state.result_path / 'paired')
@@ -208,14 +208,16 @@ class LigoSimInstruction(Instruction):
         return Repertoire.build_from_dc_object(path, {**repertoire1.metadata, **repertoire2.metadata}, None, None,
                                                merge_dataclass_objects(data))
 
-    def _pair_sequences(self, sequences1: list, sequences2: list, path: Path = None) -> List[Receptor]:
+    def _pair_sequences(self, sequences1, sequences2, path: Path = None) -> BNPDataClass:
         assert len(sequences1) == len(sequences2), (f"{LigoSimInstruction.__name__}: could not create paired dataset, "
                                                     f"the number of sequences in two simulation items did not match.")
 
-        random.shuffle(sequences1)
-        random.shuffle(sequences2)
+        cell_ids = [f'cell_{i}' for i in range(len(sequences1))]
+        sequences1.cell_id = as_encoded_array(cell_ids, BaseEncoding)
+        random.shuffle(cell_ids)
+        sequences2.cell_id = as_encoded_array(cell_ids, BaseEncoding)
 
-        return ReceptorBuilder.build_objects_from_pairs(sequences1, sequences2)
+        return merge_dataclass_objects([sequences1, sequences2])
 
     def _create_examples(self, item_in) -> Dict[str, list]:
 
@@ -228,7 +230,7 @@ class LigoSimInstruction(Instruction):
 
         return {item.name: res}
 
-    def _create_receptors(self, sim_item: SimConfigItem) -> list:
+    def _create_receptors(self, sim_item: SimConfigItem) -> BNPDataClass:
 
         assert len(sim_item.signals) in [0,
                                          1], f"{LigoSimInstruction.__name__}: for sequence datasets, only 0 or 1 signal or a signal pair per " \
@@ -246,12 +248,6 @@ class LigoSimInstruction(Instruction):
                     [sequences, signal_sequences])
 
         sequences = self._compute_p_gens_for_export(sequences, sim_item)
-
-        sequences = make_receptor_sequence_objects(sequences,
-                                                   metadata=make_signal_metadata(sim_item, self.state.signals),
-                                                   immune_events=sim_item.immune_events,
-                                                   custom_params=self._custom_fields,
-                                                   locus=sim_item.generative_model.locus)
 
         return sequences
 
@@ -290,9 +286,8 @@ class LigoSimInstruction(Instruction):
 
             sequences = self._compute_p_gens_for_export(sequences, item)
 
-            repertoire = make_repertoire_from_sequences(sequences, repertoires_path, item, self.state.signals,
-                                                        self._custom_fields)
-            repertoires.append(repertoire)
+            repertoire = make_repertoire_from_sequences(sequences, repertoires_path, item, self.state.signals)
+            repertoires.append(dill.dumps(repertoire))
 
         return repertoires
 

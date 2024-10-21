@@ -9,6 +9,7 @@ from typing import List, Dict, Union
 import bionumpy as bnp
 import dill
 import numpy as np
+import pandas as pd
 from bionumpy import AminoAcidEncoding, DNAEncoding, EncodedRaggedArray, get_motif_scores
 from bionumpy.bnpdataclass import bnpdataclass, BNPDataClass
 from bionumpy.encodings import BaseEncoding
@@ -18,8 +19,10 @@ from npstructures import RaggedArray
 from scipy.stats import zipf
 
 from immuneML import Constants
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.SequenceParams import RegionType, Chain
 from immuneML.data_model.SequenceSet import ReceptorSequence, Repertoire
+from immuneML.data_model.bnp_util import make_full_airr_seq_set_df
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.SimConfigItem import SimConfigItem
@@ -61,13 +64,6 @@ def get_bnp_data(sequence_path, bnp_data_class):
             data = file.read()
 
         return data
-
-
-def make_receptor_sequence_objects(sequences: BackgroundSequences, metadata, immune_events: dict, custom_params: list,
-                                   locus) -> List[ReceptorSequence]:
-    return [ReceptorSequence(seq.sequence_aa.to_string(), seq.sequence.to_string(), sequence_id=uuid.uuid4().hex,
-                             metadata=construct_sequence_metadata_object(seq, metadata, custom_params, immune_events,
-                                                                         locus)) for seq in sequences]
 
 
 def construct_sequence_metadata_object(sequence, metadata: dict, custom_params, immune_events: dict, locus: Chain) \
@@ -284,11 +280,26 @@ def make_signal_metadata(sim_item, signals) -> Dict[str, bool]:
 
 
 def make_repertoire_from_sequences(sequences: BNPDataClass, repertoires_path, sim_item: SimConfigItem,
-                                   signals: List[Signal], custom_fields: list) \
-        -> Repertoire:
+                                   signals: List[Signal]) -> Repertoire:
     metadata = {**make_signal_metadata(sim_item, signals), **sim_item.immune_events, 'sim_item': sim_item.name}
-    rep_data = prepare_data_for_repertoire_obj(sequences, custom_fields)
-    return Repertoire.build(**rep_data, path=repertoires_path, metadata=metadata)
+    rep_data = prepare_data_for_repertoire_obj(sequences)
+    return Repertoire.build(path=repertoires_path, metadata=metadata, **rep_data)
+
+
+def prepare_data_for_repertoire_obj(sequences):
+
+    df = sequences.topandas()
+
+    region_type = RegionType[df.region_type.unique()[0]].value
+
+    df = df.rename(columns={
+        'sequence_aa': region_type + "_aa",
+        'sequence': region_type
+    }).drop(columns=['frame_type', 'region_type'])
+
+    df = make_full_airr_seq_set_df(df)
+
+    return df.to_dict(orient='list')
 
 
 def make_bnp_annotated_sequences(sequences: BackgroundSequences, bnp_data_class, all_signals: list,
@@ -359,25 +370,6 @@ def check_sequence_count(sim_item, sequences: BackgroundSequences):
     assert len(sequences) == sim_item.receptors_in_repertoire_count, \
         f"Error when simulating repertoire, needed {sim_item.receptors_in_repertoire_count} sequences, " \
         f"but got {len(sequences)}."
-
-
-def prepare_data_for_repertoire_obj(sequences: BNPDataClass, custom_fields: list) -> dict:
-    custom_lists = {}
-    for field in custom_fields:
-        if field[1] is int or field[1] is float:
-            custom_lists[field[0]] = getattr(sequences, field[0])
-        else:
-            custom_lists[field[0]] = [el.to_string() for el in getattr(sequences, field[0])]
-
-    default_lists = {}
-    for field in dataclasses.fields(sequences):
-        if field.name not in custom_lists:
-            if isinstance(getattr(sequences, field.name), EncodedRaggedArray):
-                default_lists[field.name] = [el.to_string() for el in getattr(sequences, field.name)]
-            else:
-                default_lists[field.name] = getattr(sequences, field.name)
-
-    return {**default_lists, **custom_lists}
 
 
 def update_seqs_without_signal(max_count, annotated_sequences, seqs_no_signal_path: Path):
