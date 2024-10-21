@@ -18,7 +18,8 @@ class RepertoireBuilder:
     """
 
     @staticmethod
-    def build(sequences: list, path: Path, labels: dict = None, seq_metadata: list = None, subject_ids: list = None):
+    def build(sequences: list, path: Path, labels: dict = None, seq_metadata: list = None, subject_ids: list = None,
+              name: str = "d1"):
 
         if subject_ids is not None:
             assert len(subject_ids) == len(sequences)
@@ -83,23 +84,23 @@ class RepertoireBuilder:
                               "subject_id": subject_ids,
                               "identifier": [repertoire.identifier for repertoire in repertoires]},
                            **(labels if labels is not None else {})})
-        df.to_csv(path / "metadata.csv", index=False)
+        df.to_csv(path / f"{name}_metadata.csv", index=False)
 
-        return repertoires, path / "metadata.csv"
+        return repertoires, path / f"{name}_metadata.csv"
 
     @staticmethod
     def build_dataset(sequences: list, path: Path, labels: dict = None, seq_metadata: list = None,
-                      subject_ids: list = None):
-        reps, metadata_file = RepertoireBuilder.build(sequences, path, labels, seq_metadata, subject_ids)
+                      subject_ids: list = None, name: str = "d1"):
+        reps, metadata_file = RepertoireBuilder.build(sequences, path, labels, seq_metadata, subject_ids, name)
 
         type_dict = {k: v for tmp_dict in [rep.metadata['type_dict_dynamic_fields'] for rep in reps]
                      for k, v in tmp_dict.items()}
 
-        write_yaml(path / 'd1.yaml', {
+        write_yaml(path / f'dataset_{name}.yaml', {
             "type_dict_dynamic_fields": type_dict, 'metadata_file': str(metadata_file.name),
-            'identifier': uuid.uuid4().hex, "name": "d1", "labels": list(labels.keys()),
+            'identifier': uuid.uuid4().hex, "name": name, "labels": list(labels.keys()),
             "timestamp": str(datetime.now())
         })
 
-        return RepertoireDataset(repertoires=reps, metadata_file=metadata_file, name="d1",
-                                 dataset_file=path / 'd1.yaml')
+        return RepertoireDataset(repertoires=reps, metadata_file=metadata_file, name=name,
+                                 dataset_file=path / f'dataset_{name}.yaml')

@@ -94,8 +94,7 @@ class RandomDatasetGenerator:
 
         processed_labels, dataset_params = RandomDatasetGenerator._make_labels(labels, repertoire_count)
 
-        repertoires, metadata = RepertoireBuilder.build(sequences=sequences, path=path, labels=processed_labels)
-        dataset = RepertoireDataset(labels=dataset_params, repertoires=repertoires, metadata_file=metadata, name=name)
+        dataset = RepertoireBuilder.build_dataset(sequences=sequences, path=path, labels=processed_labels, name=name)
 
         AIRRExporter.export(dataset, path)
 
