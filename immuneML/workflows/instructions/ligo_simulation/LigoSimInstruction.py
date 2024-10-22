@@ -209,7 +209,8 @@ class LigoSimInstruction(Instruction):
         else:
             examples = {}
             for item in self.state.simulation.sim_items:
-                examples = {**examples, **{k: dill.loads(v) for k, v in self._create_sequence_sets(item).items()}}
+                res = self._create_sequence_sets(item)
+                examples = {**examples, **{k: [dill.loads(el) for el in v] for k, v in res.items()}}
 
         return examples
 

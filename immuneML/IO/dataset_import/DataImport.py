@@ -87,7 +87,7 @@ class DataImport(metaclass=abc.ABCMeta):
         filename, dataset_file = self._prepare_values_for_element_dataset(final_data_dict, dc, types)
 
         return SequenceDataset(name=self.dataset_name, bnp_dataclass=dc, dataset_file=dataset_file,
-                               dynamic_fields=list(types.keys()), filename=filename)
+                               dynamic_fields=types, filename=filename)
 
     def import_receptor_dataset(self) -> ReceptorDataset:
         filenames = ImportHelper.get_sequence_filenames(self.params.path, self.dataset_name)
@@ -105,7 +105,7 @@ class DataImport(metaclass=abc.ABCMeta):
         filename, dataset_file = self._prepare_values_for_element_dataset(final_data_dict, dc, types)
 
         return ReceptorDataset(name=self.dataset_name, bnp_dataclass=dc, dataset_file=dataset_file,
-                               dynamic_fields=list(types.keys()), filename=filename)
+                               dynamic_fields=types, filename=filename)
 
     def check_or_discover_metadata_file(self):
         if self.params.metadata_file is None and self.params.dataset_file and self.params.dataset_file.is_file():

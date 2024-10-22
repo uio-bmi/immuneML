@@ -47,7 +47,7 @@ class TestSequenceAbundanceEncoding(TestCase):
                     "d1": {
                         "format": "AIRR",
                         "params": {
-                            "dataset_file": str(path / f"{dataset.name}.yaml"),
+                            "dataset_file": str(dataset.dataset_file),
                         }
                     }
                 },

@@ -26,20 +26,17 @@ class ElementDataset(Dataset, ABC):
     element_count: int = None
     element_ids: list = None
     dataset_file: Path = None
-    dynamic_fields: list = None
+    dynamic_fields: dict = None
     bnp_dataclass: typing.Type = None
     _buffer_type = None
 
     def __post_init__(self):
-        metadata = None
         if self.dynamic_fields is None:
             metadata = read_yaml(self.dataset_file)
-            self.dynamic_fields = list(metadata['type_dict_dynamic_fields'].keys())
+            self.dynamic_fields = {key: AIRRSequenceSet.STR_TO_TYPE[val]
+                                   for key, val in metadata['type_dict_dynamic_fields'].items()}
         if self.bnp_dataclass is None:
-            if metadata is None:
-                metadata = read_yaml(self.dataset_file)
-                dynamic_fields = tuple(metadata['type_dict_dynamic_fields'].items())
-            self.bnp_dataclass = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, dynamic_fields)
+            self.bnp_dataclass = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(self.dynamic_fields.items()))
 
     @property
     def buffer_type(self):
@@ -75,13 +72,13 @@ class SequenceDataset(ElementDataset):
         dynamic_fields = {key: AIRRSequenceSet.STR_TO_TYPE[val]
                           for key, val in metadata['type_dict_dynamic_fields'].items()}
         if bnp_dc is None:
-            bnp_dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, tuple(dynamic_fields.items()))
+            bnp_dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(dynamic_fields.items()))
 
         if labels is None and 'labels' in metadata:
             labels = metadata['labels']
 
         return SequenceDataset(name=name, filename=filename, dataset_file=metadata_filename,
-                               dynamic_fields=list(dynamic_fields.keys()), labels=labels,
+                               dynamic_fields=dynamic_fields, labels=labels,
                                bnp_dataclass=bnp_dc)
 
     @classmethod
@@ -100,8 +97,7 @@ class SequenceDataset(ElementDataset):
         metadata_filename = path / f'dataset_{name}.yaml'
         write_yaml(metadata_filename, dataset_metadata)
 
-        return SequenceDataset(filename=filename, name=name, labels=labels,
-                               dynamic_fields=list(dataset_metadata['type_dict_dynamic_fields'].keys()),
+        return SequenceDataset(filename=filename, name=name, labels=labels, dynamic_fields=type_dict,
                                dataset_file=metadata_filename, bnp_dataclass=bnp_dc)
 
     def get_metadata(self, field_names: list, return_df: bool = False):
@@ -148,15 +144,14 @@ class ReceptorDataset(ElementDataset):
     @classmethod
     def build(cls, filename: Path, metadata_filename: Path, name: str = None, labels: dict = None):
         metadata = read_yaml(metadata_filename)
-        dynamic_fields = metadata['type_dict_dynamic_fields']
-        bnp_dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet,
-                                                      tuple(dynamic_fields.items()))
+        dynamic_fields = {k: AIRRSequenceSet.STR_TO_TYPE[v] for k, v in metadata['type_dict_dynamic_fields'].items()}
+        bnp_dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(dynamic_fields.items()))
 
         if labels is None and 'labels' in metadata:
             labels = metadata['labels']
 
         return ReceptorDataset(name=name, filename=filename, dataset_file=metadata_filename,
-                               dynamic_fields=list(dynamic_fields.keys()), labels=labels,
+                               dynamic_fields=dynamic_fields, labels=labels,
                                bnp_dataclass=bnp_dc)
 
     @classmethod
@@ -176,8 +171,7 @@ class ReceptorDataset(ElementDataset):
         metadata_filename = path / f'dataset_{name}.yaml'
         write_yaml(metadata_filename, dataset_metadata)
 
-        return ReceptorDataset(filename=filename, name=name, labels=labels,
-                               dynamic_fields=list(dataset_metadata['type_dict_dynamic_fields'].keys()),
+        return ReceptorDataset(filename=filename, name=name, labels=labels, dynamic_fields=type_dict,
                                dataset_file=metadata_filename, bnp_dataclass=bnp_dc)
 
     def get_metadata(self, field_names: list, return_df: bool = False):

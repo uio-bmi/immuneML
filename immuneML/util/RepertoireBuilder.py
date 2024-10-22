@@ -96,11 +96,14 @@ class RepertoireBuilder:
         type_dict = {k: v for tmp_dict in [rep.metadata['type_dict_dynamic_fields'] for rep in reps]
                      for k, v in tmp_dict.items()}
 
+        labels_unique = {k: list(set(v)) for k, v in labels.items()}
+        identifier = uuid.uuid4().hex
+
         write_yaml(path / f'dataset_{name}.yaml', {
             "type_dict_dynamic_fields": type_dict, 'metadata_file': str(metadata_file.name),
-            'identifier': uuid.uuid4().hex, "name": name, "labels": labels,
+            'identifier': identifier, "name": name, "labels": labels_unique,
             "timestamp": str(datetime.now())
         })
 
-        return RepertoireDataset(repertoires=reps, metadata_file=metadata_file, name=name, labels=labels,
-                                 dataset_file=path / f'dataset_{name}.yaml')
+        return RepertoireDataset(repertoires=reps, metadata_file=metadata_file, name=name, labels=labels_unique,
+                                 dataset_file=path / f'dataset_{name}.yaml', identifier=identifier)

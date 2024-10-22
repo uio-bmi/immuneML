@@ -82,6 +82,10 @@ class Repertoire:
     def __post_init__(self):
         if not self.identifier:
             self.identifier = uuid4().hex
+        if not self.metadata:
+            self.metadata = read_yaml(self.metadata_filename)
+        if not self.dynamic_fields and 'type_dict_dynamic_fields' in self.metadata:
+            self.dynamic_fields = self.metadata.get('type_dict_dynamic_fields', {})
 
     @classmethod
     def build_from_dc_object(cls, path: Path, metadata: dict, filename_base: str = None, identifier: str = None,
@@ -153,12 +157,6 @@ class Repertoire:
                                 _bnp_dataclass=type(data), dynamic_fields=dynamic_fields)
         return repertoire
 
-    def __post_init__(self):
-        if not self.metadata:
-            self.metadata = read_yaml(self.metadata_filename)
-        if not self.dynamic_fields and 'type_dict_dynamic_fields' in self.metadata:
-            self.dynamic_fields = self.metadata.get('type_dict_dynamic_fields', {})
-
     @property
     def bnp_dataclass(self):
         if not self._bnp_dataclass:
@@ -180,12 +178,11 @@ class Repertoire:
         return bnp_read_from_file(self.data_filename, self.buffer_type, self.bnp_dataclass)
 
     def sequences(self, region_type: RegionType = RegionType.IMGT_CDR3) -> List[ReceptorSequence]:
-        return make_sequences_from_data(self.data, list(self.dynamic_fields.keys()) if self.dynamic_fields else [],
-                                        region_type)
+        return make_sequences_from_data(self.data, self.dynamic_fields, region_type)
 
     def receptors(self, region_type: RegionType) -> List[Receptor]:
-        return make_receptors_from_data(self.data, list(self.dynamic_fields.keys()),
-                                        f'Repertoire {self.identifier}', region_type)
+        return make_receptors_from_data(self.data, self.dynamic_fields, f'Repertoire {self.identifier}',
+                                        region_type)
 
     def get_element_count(self):
         if not self.element_count:
@@ -209,7 +206,7 @@ def build_dynamic_airr_sequence_set_dataclass(all_fields_dict: Dict[str, Any]):
     return dc, types
 
 
-def make_sequences_from_data(data, dynamic_fields: list, region_type: RegionType = RegionType.IMGT_CDR3):
+def make_sequences_from_data(data, dynamic_fields: dict, region_type: RegionType = RegionType.IMGT_CDR3):
     seqs = []
     for el in data.to_iter():
         seq, seq_aa = get_sequence_value(el, region_type)
@@ -219,11 +216,11 @@ def make_sequences_from_data(data, dynamic_fields: list, region_type: RegionType
                                      c_call=getattr(el, 'c_call', ''),
                                      j_call=el.j_call, duplicate_count=el.duplicate_count,
                                      metadata={dynamic_field: getattr(el, dynamic_field)
-                                               for dynamic_field in dynamic_fields}))
+                                               for dynamic_field in dynamic_fields.keys()}))
     return seqs
 
 
-def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: list, location,
+def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: dict, location,
                              region_type: RegionType = RegionType.IMGT_CDR3):
     df = data.topandas()
     receptors = []
@@ -239,7 +236,7 @@ def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: list, locati
                                  d_call=el.d_call, j_call=el.j_call, c_call=el.c_call,
                                  duplicate_count=el.duplicate_count,
                                  metadata={dynamic_field: getattr(el, dynamic_field)
-                                           for dynamic_field in dynamic_fields})
+                                           for dynamic_field in dynamic_fields.keys()})
                 for index, el in sorted_group.iterrows()]
 
         if 'receptor_id' in group and group['receptor_id'].nunique() == 1:
@@ -251,7 +248,7 @@ def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: list, locati
                             chain_1=seqs[0], chain_2=seqs[1], cell_id=group['cell_id'].unique()[0],
                             receptor_id=receptor_id,
                             metadata={key: list({seqs[0].metadata[key], seqs[1].metadata[key]})
-                                      for key in dynamic_fields})
+                                      for key in dynamic_fields.keys()})
         receptors.append(receptor)
 
     return receptors

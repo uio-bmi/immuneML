@@ -120,7 +120,7 @@ def test_simulation():
     dataset = result[0].resulting_dataset
 
     for repertoire in dataset.get_data():
-        signal_vectors = repertoire.get_attributes(["signal1", "signal2"])
+        signal_vectors = repertoire.data.topandas()[['signal1', 'signal2']]
         if repertoire.metadata['sim_item'] == 'var1':
             assert len(signal_vectors['signal1']) == 6
             assert sum(signal_vectors['signal1']) == 3

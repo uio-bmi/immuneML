@@ -85,11 +85,14 @@ class SoNNia(GenerativeModel):
 
     def __init__(self, locus=None, batch_size: int = None, epochs: int = None, deep: bool = False, name: str = None,
                  default_model_name: str = None, n_gen_seqs: int = None, include_joint_genes: bool = True,
-                 custom_model_path: str = None):
+                 custom_model_path: str = None, region_type: RegionType = RegionType.IMGT_CDR3):
+        if region_type is not None and isinstance(region_type, str):
+            region_type = RegionType[region_type]
+
         if locus is not None:
-            super().__init__(locus)
+            super().__init__(locus, region_type=region_type)
         elif default_model_name is not None:
-            super().__init__(locus=Chain.get_chain(default_model_name[-3:]))
+            super().__init__(locus=Chain.get_chain(default_model_name[-3:]), region_type=region_type)
         self.epochs = epochs
         self.batch_size = int(batch_size)
         self.deep = deep
@@ -159,8 +162,9 @@ class SoNNia(GenerativeModel):
         PathBuilder.build(path / 'model')
 
         write_yaml(path / 'model/model_overview.yaml', {'type': 'SoNNia', 'locus': self.locus.name,
+                                                        'region_type': self.region_type.name,
                                                         **{k: v for k, v in vars(self).items()
-                                                           if k not in ['_model', 'locus', '_model_path']}})
+                                                           if k not in ['_model', 'locus', '_model_path', 'region_type']}})
         attributes_to_save = ['data_seqs', 'gen_seqs', 'log']
         self._model.save_model(path / 'model', attributes_to_save)
 

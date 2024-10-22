@@ -12,7 +12,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 def prepare_specs(path) -> Path:
     with (path / 'sample_source.py').open("w") as file:
-        file.write("def is_present(sequence_aa: str, sequence: str, v_call: str, j_call: str) -> bool:\n\t"
+        file.write("def is_present(sequence_aa: str, sequence: str, v_call: str, j_call: str, region_type: str) -> bool:\n\t"
                    "return any(aa in sequence_aa for aa in ['A', 'T']) and len(sequence_aa) > 12")
 
     specs = {
