@@ -3,6 +3,7 @@ from pathlib import Path
 
 import numpy as np
 
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.SequenceType import SequenceType
 
@@ -23,9 +24,10 @@ class GenerativeModel:
     DOCS_TITLE = "Generative models"
     OUTPUT_COLUMNS = []
 
-    def __init__(self, locus, name: str = None):
+    def __init__(self, locus, name: str = None, region_type: RegionType = None):
         self.locus = locus
         self.name = name
+        self.region_type = region_type
 
     @abc.abstractmethod
     def fit(self, data, path: Path = None):

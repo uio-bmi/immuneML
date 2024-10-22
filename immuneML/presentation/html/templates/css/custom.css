@@ -203,3 +203,30 @@ code {
     max-width: 100%;
     white-space: pre-wrap;
 }
+
+.nested-list-container {
+    font-family: Arial, sans-serif;
+    padding: 10px;
+    max-width: 600px;
+}
+
+.nested-list-container ul {
+    list-style-type: none;  /* Remove default bullet points */
+    padding-left: 20px;      /* Indentation for nested lists */
+}
+
+.nested-list-container ul li {
+    margin: 8px 0;
+    padding: 5px;
+    padding-left: 10px;
+}
+
+.nested-list-container ul li ul {
+    padding-left: 20px;
+    margin-top: 8px;
+}
+
+.nested-list-container ul li ul li {
+    border-left: 1px solid #68b5b3;  /* Accent for nested items */
+    margin: 4px 0;
+}

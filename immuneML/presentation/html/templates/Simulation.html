@@ -75,60 +75,11 @@
                     </div>
                 </div>
                 <div class="col-container">
-                    <div>
+                    <div class="nested-list-container">
                         <h3>Simulation details</h3>
-                        {{#simulation_items}}
-                        <div>
-                            <h5>{{name}}</h5>
-                            {{#dataset_implanting_rate}}
-                            <div class="padded-md">Dataset implanting rate: {{dataset_implanting_rate}}</div>
-                            {{/dataset_implanting_rate}}
-                            {{#number_of_examples}}
-                            <div class="padded-md">Number of examples: {{number_of_examples}}</div>
-                            {{/number_of_examples}}
-                            {{#repertoire_implanting_rate}}
-                            <div class="padded-md">Repertoire implanting rate: {{repertoire_implanting_rate}}</div>
-                            {{/repertoire_implanting_rate}}
-                            {{#simulation_strategy}}
-                            <div class="padded-md">Simulation strategy: {{simulation_strategy}}</div>
-                            {{/simulation_strategy}}
-                            {{#use_generation_probabilities}}
-                            <div class="padded-md">Use generation probabilities: {{use_generation_probabilities}}</div>
-                            {{/use_generation_probabilities}}
-                            {{#paired}}
-                            <div class="padded-md">Simulate paired chain receptors: {{paired}}</div>
-                            {{/paired}}
-                            <div class="padded-md">Signals:
-                                {{#signals}}
-                                <div class="padded-md">
-                                    <div>Signal id: {{id}}</div>
-                                    <div class="padded-top">Motifs: </div>
-                                    {{#motifs}}
-                                    <div class="padded-md">
-                                        <div>Motif id: {{identifier}}</div>
-                                        {{#seed}}
-                                        <div>Seed: {{seed}}</div>
-                                        {{/seed}}
-                                        {{#seed_chain1}}
-                                        <div>Seed chain 1: {{seed_chain1}}</div>
-                                        {{/seed_chain1}}
-                                        {{#seed_chain2}}
-                                        <div>Seed chain 2: {{seed_chain2}}</div>
-                                        {{/seed_chain2}}
-                                        {{#name_chain1}}
-                                        <div>Name chain 1: {{name_chain1}}</div>
-                                        {{/name_chain1}}
-                                        {{#name_chain2}}
-                                        <div>Name chain 2: {{name_chain2}}</div>
-                                        {{/name_chain2}}
-                                        <div>Instantiation: <pre><code>{{instantiation}}</code></pre></div>
-                                    </div>
-                                    {{/motifs}}
-                                </div>
-                                {{/signals}}
-                            </div>
-                        </div>
-                        {{/simulation_items}}
+                        <ul>
+                        {{{simulation_details}}}
+                        </ul>
                     </div>
                 </div>
             </div>

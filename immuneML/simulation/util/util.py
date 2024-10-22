@@ -123,7 +123,8 @@ def get_region_type(sequences) -> RegionType:
         raise RuntimeError(f"The region types could not be obtained.")
 
 
-def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annotated_dc, sim_item_name: str = None):
+def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annotated_dc, sim_item_name: str = None,
+                       region_type: RegionType = RegionType.IMGT_CDR3):
     encoding = AminoAcidEncoding if is_amino_acid else DNAEncoding
     sequence_array = sequences.sequence_aa if is_amino_acid else sequences.sequence
 
@@ -132,7 +133,7 @@ def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annota
 
     for index, signal in enumerate(all_signals):
         _annotate_with_signal(sequences, sequence_array, is_amino_acid, encoding, signal_matrix, signal, index,
-                              signal_positions, sim_item_name)
+                              signal_positions, sim_item_name, region_type)
 
     signal_matrix = make_bnp_annotated_sequences(sequences, annotated_dc, all_signals, signal_matrix, signal_positions)
 
@@ -142,30 +143,31 @@ def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annota
 
 
 def _annotate_with_signal(sequences, sequence_array, is_amino_acid, encoding, signal_matrix, signal, signal_index,
-                          signal_positions, sim_item_name: str = None):
+                          signal_positions, sim_item_name: str = None, region_type: RegionType = RegionType.IMGT_CDR3):
     if signal.motifs is not None:
         return _annotate_with_signal_motifs(sequences, sequence_array, is_amino_acid, encoding, signal_matrix, signal,
-                                            signal_index, signal_positions, sim_item_name)
+                                            signal_index, signal_positions, sim_item_name, region_type)
     else:
         return _annotate_with_signal_func(sequences, sequence_array, is_amino_acid, encoding, signal_matrix, signal,
-                                          signal_index, signal_positions)
+                                          signal_index, signal_positions, region_type)
 
 
 def _annotate_with_signal_func(sequences, sequence_array, is_amino_acid, encoding, signal_matrix, signal, signal_index,
-                               signal_positions):
-
+                               signal_positions, region_type: RegionType):
     signal_matrix[:, signal_index] = [signal.is_present_custom_func(seq.sequence_aa.to_string(),
                                                                     seq.sequence.to_string(),
                                                                     seq.v_call.to_string(),
-                                                                    seq.j_call.to_string())
+                                                                    seq.j_call.to_string(),
+                                                                    region_type.name)
                                       for seq in sequences]
     signal_positions[f'{signal.id}_positions'] = ["" for _ in range(len(sequences))]
 
 
 def _annotate_with_signal_motifs(sequences, sequence_array, is_amino_acid, encoding, signal_matrix, signal,
-                                 signal_index, signal_positions, sim_item_name = None):
+                                 signal_index, signal_positions, sim_item_name: str = None,
+                                 region_type: RegionType = RegionType.IMGT_CDR3):
     signal_pos_col = None
-    allowed_positions = get_allowed_positions(signal, sequence_array, get_region_type(sequences))
+    allowed_positions = get_allowed_positions(signal, sequence_array, region_type)
     matches_gene = match_genes(signal.v_call, sequences.v_call, signal.j_call, sequences.j_call)
 
     for motifs in signal.get_all_motif_instances(SequenceType.AMINO_ACID if is_amino_acid else SequenceType.NUCLEOTIDE):
@@ -287,19 +289,22 @@ def make_repertoire_from_sequences(sequences: BNPDataClass, repertoires_path, si
 
 
 def prepare_data_for_repertoire_obj(sequences):
-
     df = sequences.topandas()
+    df = prepare_data_for_airr_seq_set(df)
 
-    region_type = RegionType[df.region_type.unique()[0]].value
+    return df.to_dict(orient='list')
 
-    df = df.rename(columns={
+
+def prepare_data_for_airr_seq_set(in_df: pd.DataFrame) -> pd.DataFrame:
+    region_type = RegionType[in_df.region_type.unique()[0]].value
+
+    df = in_df.rename(columns={
         'sequence_aa': region_type + "_aa",
         'sequence': region_type
     }).drop(columns=['frame_type', 'region_type'])
 
     df = make_full_airr_seq_set_df(df)
-
-    return df.to_dict(orient='list')
+    return df
 
 
 def make_bnp_annotated_sequences(sequences: BackgroundSequences, bnp_data_class, all_signals: list,
@@ -319,7 +324,7 @@ def make_bnp_annotated_sequences(sequences: BackgroundSequences, bnp_data_class,
     kwargs['signals_aggregated'] = [s if s != "" else "no_signal" for s in
                                     ["_".join(
                                         s for index, s in enumerate([sig.id for sig in all_signals]) if el[index] == 1)
-                                     for el in signal_matrix]]
+                                        for el in signal_matrix]]
 
     for field in dc_fields:
         if field.name not in kwargs:
@@ -497,7 +502,6 @@ def get_min_seq_length(sim_item: SimConfigItem, sequence_type: SequenceType, reg
 
 
 def get_max_seq_length(sim_item: SimConfigItem, sequence_type: SequenceType, region_type: RegionType) -> int:
-
     conversion_constant = 1 if sequence_type == SequenceType.AMINO_ACID else 3
 
     if region_type == RegionType.IMGT_JUNCTION:

@@ -99,13 +99,7 @@ class Util:
 
     @staticmethod
     def get_immuneML_version():
-        try:
-            return 'immuneML ' + pkg_resources.get_distribution('immuneML').version
-        except pkg_resources.DistributionNotFound as err:
-            try:
-                return 'immuneML ' + Constants.VERSION
-            except Exception as e:
-                return f'immuneML-dev-{datetime.now()}'
+        return 'immuneML ' + Constants.VERSION
 
     @staticmethod
     def get_train_val_indices(n_examples, training_percentage, random_seed=None):

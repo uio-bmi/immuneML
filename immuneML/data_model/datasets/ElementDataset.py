@@ -69,16 +69,19 @@ class SequenceDataset(ElementDataset):
     """A dataset class for sequence datasets (single chain). """
 
     @classmethod
-    def build(cls, filename: Path, metadata_filename: Path, name: str = None, bnp_dc=None):
+    def build(cls, filename: Path, metadata_filename: Path, name: str = None, bnp_dc=None, labels: dict = None):
         metadata = read_yaml(metadata_filename)
+
         dynamic_fields = {key: AIRRSequenceSet.STR_TO_TYPE[val]
                           for key, val in metadata['type_dict_dynamic_fields'].items()}
         if bnp_dc is None:
-            bnp_dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet,
-                                                          tuple(dynamic_fields.items()))
+            bnp_dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, tuple(dynamic_fields.items()))
+
+        if labels is None and 'labels' in metadata:
+            labels = metadata['labels']
 
         return SequenceDataset(name=name, filename=filename, dataset_file=metadata_filename,
-                               dynamic_fields=list(dynamic_fields.keys()),
+                               dynamic_fields=list(dynamic_fields.keys()), labels=labels,
                                bnp_dataclass=bnp_dc)
 
     @classmethod
@@ -143,14 +146,17 @@ class ReceptorDataset(ElementDataset):
     """A dataset class for receptor datasets (paired chain)."""
 
     @classmethod
-    def build(cls, filename: Path, metadata_filename: Path, name: str = None):
+    def build(cls, filename: Path, metadata_filename: Path, name: str = None, labels: dict = None):
         metadata = read_yaml(metadata_filename)
         dynamic_fields = metadata['type_dict_dynamic_fields']
         bnp_dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet,
                                                       tuple(dynamic_fields.items()))
 
+        if labels is None and 'labels' in metadata:
+            labels = metadata['labels']
+
         return ReceptorDataset(name=name, filename=filename, dataset_file=metadata_filename,
-                               dynamic_fields=list(dynamic_fields.keys()),
+                               dynamic_fields=list(dynamic_fields.keys()), labels=labels,
                                bnp_dataclass=bnp_dc)
 
     @classmethod
