@@ -1,10 +1,10 @@
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
-from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model import bnp_util
 from immuneML.data_model.SequenceSet import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.environment.Constants import Constants
 from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.util.PathBuilder import PathBuilder
@@ -46,16 +46,14 @@ class SubjectRepertoireCollector(Preprocessor):
         processed_dataset = dataset.clone()
 
         for index, repertoire in enumerate(processed_dataset.get_data()):
+
             if repertoire.metadata["subject_id"] in rep_map.keys():
-                sequences = np.append(repertoire.sequences, rep_map[repertoire.metadata["subject_id"]].sequences)
-                del rep_map[repertoire.metadata["subject_id"]]
-                repertoires.append(self._store_repertoire(repertoire, sequences))
+                rep_map[repertoire.metadata['subject_id']].append(repertoire)
             else:
-                rep_map[repertoire.metadata["subject_id"]] = repertoire
-                indices_to_keep.append(index)
+                rep_map[repertoire.metadata['subject_id']] = [repertoire]
 
         for key in rep_map.keys():
-            repertoires.append(self._store_repertoire(rep_map[key], rep_map[key].sequences))
+            repertoires.append(self._store_repertoire(rep_map[key]))
 
         processed_dataset.repertoires = repertoires
         processed_dataset.metadata_file = self._build_new_metadata(dataset, indices_to_keep)
@@ -64,15 +62,19 @@ class SubjectRepertoireCollector(Preprocessor):
 
     def _build_new_metadata(self, dataset, indices_to_keep):
         if dataset.metadata_file:
-            df = pd.read_csv(dataset.metadata_file, index_col=0, comment=Constants.COMMENT_SIGN).iloc[indices_to_keep, :]
+            df = pd.read_csv(dataset.metadata_file, index_col=0, comment=Constants.COMMENT_SIGN).iloc[indices_to_keep,
+                 :]
             path = Path(self.result_path / f"{dataset.metadata_file.stem}_collected_repertoires.csv")
             df.to_csv(path)
         else:
             path = None
         return path
 
-    def _store_repertoire(self, repertoire, sequences):
-        new_repertoire = Repertoire.build_from_sequence_objects(sequence_objects=sequences, path=self.result_path, metadata=repertoire.metadata)
+    def _store_repertoire(self, repertoires: list):
+        metadata = {k: v for d in [r.metadata for r in repertoires] for k, v in d.items()}
+        new_repertoire = Repertoire.build_from_dc_object(self.result_path, metadata,
+                                                         data=bnp_util.merge_dataclass_objects(
+                                                             [r.data for r in repertoires]))
         return new_repertoire
 
     def keeps_example_count(self) -> bool:

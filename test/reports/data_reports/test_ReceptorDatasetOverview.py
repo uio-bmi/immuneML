@@ -22,8 +22,8 @@ class TestReceptorDatasetOverview(TestCase):
         result = report._generate()
 
         self.assertTrue(os.path.isfile(path / "result/sequence_length_distribution.html"))
-        self.assertTrue(os.path.isfile(path / "result/sequence_length_distribution_chain_alpha.csv"))
-        self.assertTrue(os.path.isfile(path / "result/sequence_length_distribution_chain_beta.csv"))
+        self.assertTrue(os.path.isfile(path / "result/sequence_length_distribution_chain_TRA.csv"))
+        self.assertTrue(os.path.isfile(path / "result/sequence_length_distribution_chain_TRB.csv"))
         self.assertTrue(isinstance(result, ReportResult))
 
         shutil.rmtree(path)

@@ -1,12 +1,15 @@
 from pathlib import Path
 import numpy as np
 import os
+
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
 from immuneML.encodings.abundance_encoding.KmerAbundanceEncoder import KmerAbundanceEncoder
 from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.ParameterValidator import ParameterValidator
 
 
@@ -14,7 +17,7 @@ class SignificantFeaturesHelper:
 
     @staticmethod
     def parse_parameters(kwargs, location):
-        ParameterValidator.assert_keys_present(kwargs.keys(), ["p_values", "k_values", "label"], location, location)
+        ParameterValidator.assert_keys_present(kwargs.keys(), ["p_values", "k_values", "label", 'region_type', 'sequence_type'], location, location)
 
         ParameterValidator.assert_type_and_value(kwargs["p_values"], list, location, "p_values")
         ParameterValidator.assert_type_and_value(kwargs["k_values"], list, location, "k_values")
@@ -33,6 +36,11 @@ class SignificantFeaturesHelper:
         assert len(kwargs["k_values"]) == len(set( kwargs["k_values"])), f"{location}: k_values should only contain unique values, found {kwargs['k_values']}"
 
         ParameterValidator.assert_all_type_and_value(kwargs["p_values"], float, "location", "p_values", min_inclusive=0)
+        ParameterValidator.assert_region_type(kwargs, SignificantFeaturesHelper.__name__)
+        ParameterValidator.assert_sequence_type(kwargs, SignificantFeaturesHelper.__name__)
+
+        kwargs['region_type'] = RegionType[kwargs['region_type'].upper()]
+        kwargs['sequence_type'] = SequenceType[kwargs['sequence_type'].upper()]
 
         for value in kwargs["k_values"]:
             if value != "full_sequence":
@@ -56,13 +64,10 @@ class SignificantFeaturesHelper:
         return kwargs
 
     @staticmethod
-    def load_sequences(groundtruth_sequences_path, trim_leading_trailing=False):
-        with open(groundtruth_sequences_path) as f:
-            readlines = f.readlines()
-            if trim_leading_trailing:
-                sequences = [seq.strip()[1:-1] for seq in readlines]
-            else:
-                sequences = [seq.strip() for seq in readlines]
+    def load_sequences(ground_truth_sequences_path: Path):
+        with open(ground_truth_sequences_path) as f:
+            lines = f.readlines()
+            sequences = [seq.strip() for seq in lines]
         return sequences
 
     @staticmethod
@@ -71,12 +76,14 @@ class SignificantFeaturesHelper:
         return encoder_name
 
     @staticmethod
-    def _build_encoder_params(label_config, encoder_result_path):
+    def _build_encoder_params(label_config, encoder_result_path, region_type: RegionType, sequence_type: SequenceType):
         encoder_params = EncoderParams(result_path=encoder_result_path,
                                        label_config=label_config,
                                        pool_size=1,
                                        learn_model=True,
-                                       encode_labels=False)
+                                       encode_labels=False,
+                                       region_type=region_type,
+                                       sequence_type=sequence_type)
 
         return encoder_params
 

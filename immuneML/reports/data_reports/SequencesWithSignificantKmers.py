@@ -134,7 +134,8 @@ class SequencesWithSignificantKmers(DataReport):
 
     def _compute_significant_kmers(self, k, p_value):
         encoder_result_path = self._get_encoder_result_path(k, p_value)
-        encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path)
+        encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path,
+                                                                         self.region_type, self.sequence_type)
         encoder = SignificantFeaturesHelper._build_kmer_encoder(self.dataset, k, p_value, encoder_params)
         sequences = pd.read_csv(encoder.relevant_sequence_path)
 

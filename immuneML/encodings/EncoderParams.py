@@ -8,8 +8,8 @@ from immuneML.environment.SequenceType import SequenceType
 
 @dataclass
 class EncoderParams:
-    result_path: Path
-    label_config: LabelConfiguration
+    result_path: Path = None
+    label_config: LabelConfiguration = None
     pool_size: int = 4
     model: dict = None
     learn_model: bool = True

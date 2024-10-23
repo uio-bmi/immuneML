@@ -48,21 +48,22 @@ class GLIPH2Exporter(DataReport):
         PathBuilder.build(self.result_path)
         alpha_chains, beta_chains, trbv, trbj, subject_condition, count = [], [], [], [], [], []
         for index, receptor in enumerate(self.dataset.get_data()):
-            alpha_chains.append(receptor.get_chain("alpha").sequence_aa)
-            beta_chains.append(receptor.get_chain("beta").sequence_aa)
-            trbv.append(receptor.get_chain("beta").metadata.v_call)
-            trbj.append(receptor.get_chain("beta").metadata.j_call)
+            alpha_chains.append(receptor.alpha.sequence_aa)
+            beta_chains.append(receptor.beta.sequence_aa)
+            trbv.append(receptor.beta.v_call)
+            trbj.append(receptor.beta.j_call)
             subject_condition.append(f"{getattr(receptor.metadata, 'subject_id', str(index))}:{receptor.metadata[self.condition]}")
-            count.append(receptor.get_chain("beta").metadata.duplicate_count
-                         if receptor.get_chain('beta').metadata is not None and receptor.get_chain('beta').metadata.duplicate_count is not None else 1)
+            count.append(receptor.beta.duplicate_count
+                         if receptor.beta.duplicate_count is not None else 1)
 
-        df = pd.DataFrame({"CDR3b": beta_chains, "TRBV": trbv, "TRBJ": trbj, "CDR3a": alpha_chains, "subject:condition": subject_condition,
-                           "count": count})
+        df = pd.DataFrame({"CDR3b": beta_chains, "TRBV": trbv, "TRBJ": trbj, "CDR3a": alpha_chains,
+                           "subject:condition": subject_condition, "count": count})
         file_path = self.result_path / "exported_data.tsv"
         df.to_csv(file_path, sep="\t", index=False)
 
         return ReportResult(self.name,
-                            info="Report which exports the receptor data to GLIPH2 format so that it can be directly used in GLIPH2 tool.",
+                            info="Report which exports the receptor data to GLIPH2 format so that it can be directly "
+                                 "used in GLIPH2 tool.",
                             output_tables=[ReportOutput(file_path, "exported data in GLIPH2 format")])
 
     def check_prerequisites(self):

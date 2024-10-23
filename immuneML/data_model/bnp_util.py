@@ -46,7 +46,8 @@ def read_yaml(filename: Path) -> dict:
 
 def get_sequence_field_name(region_type: RegionType = RegionType.IMGT_CDR3,
                             sequence_type: SequenceType = SequenceType.AMINO_ACID):
-    return region_type.value + "_aa" if sequence_type == SequenceType.AMINO_ACID else ""
+    suffix = "_aa" if sequence_type == SequenceType.AMINO_ACID else ""
+    return region_type.value + suffix
 
 
 def load_type_dict(full_dict: dict) -> dict:
@@ -66,7 +67,8 @@ def build_dynamic_bnp_dataclass(all_fields_dict: Dict[str, Any]):
             field_type = get_field_type_from_values(value)
         types[key] = field_type
 
-    dc = make_dynamic_seq_set_dataclass(type_dict=types)
+    dc = AIRRSequenceSet.extend(tuple((name, t) for name, t in types.items()
+                                 if name not in list(AIRRSequenceSet.get_field_type_dict().keys())))
     return dc, types
 
 
@@ -74,6 +76,7 @@ def build_dynamic_bnp_dataclass_obj(all_fields_dict: Dict[str, Any]):
     dc, types = build_dynamic_bnp_dataclass(all_fields_dict)
     all_fields_dict = add_neutral_values(all_fields_dict, types)
     all_fields_dict = convert_to_expected_types(all_fields_dict, types)
+    all_fields_dict = make_full_airr_seq_set_df(pd.DataFrame(all_fields_dict)).to_dict(orient='list')
     return dc(**all_fields_dict), types
 
 
@@ -104,21 +107,6 @@ def convert_enums_to_str(field_values: dict) -> dict:
     }
 
 
-def make_dynamic_seq_set_dataclass(type_dict: Dict[str, Any]):
-    bnp_dc = bnpdataclass(dataclasses.make_dataclass('DynamicSequenceSet', fields=type_dict.items()))
-
-    methods = {'get_row_by_index': lambda self, index: get_row_by_index(self, index),
-               'get_single_row_value': lambda self, attr_name: get_single_row_value(self, attr_name),
-               'to_dict': lambda self: {field: getattr(self, field).tolist() for field in type_dict.keys()},
-               'get_rows_by_indices': lambda self, index1, index2: get_rows_by_indices(self, index1, index2)
-               }
-
-    for method_name, method in methods.items():
-        setattr(bnp_dc, method_name, method)
-
-    return bnp_dc
-
-
 def extend_dataclass_with_dynamic_fields(cls, fields: List[Tuple[str, type]], cls_name: str = None):
     cls_name = cls_name if cls_name is not None else "Dynamic" + cls.__name__
     new_cls = bnpdataclass(dataclasses.make_dataclass(cls_name,
@@ -131,38 +119,6 @@ def extend_dataclass_with_dynamic_fields(cls, fields: List[Tuple[str, type]], cl
     new_cls.dynamic_fields = classmethod(dynamic_fields)
 
     return new_cls
-
-
-def get_receptor_attributes_for_bnp(receptors, receptor_dc, types) -> dict:
-    field_vals = {}
-    for field_obj in dataclasses.fields(receptor_dc):
-        if receptors[0].metadata and field_obj.name in receptors[0].metadata:
-            field_vals[field_obj.name] = list(chain.from_iterable(
-                (receptor.get_attribute(field_obj.name), receptor.get_attribute(field_obj.name)) for receptor in
-                receptors))
-        elif field_obj.name == 'identifier':
-            field_vals[field_obj.name] = list(
-                chain.from_iterable((receptor.identifier, receptor.identifier) for receptor in receptors))
-        else:
-            field_vals[field_obj.name] = list(chain.from_iterable([receptor.get_chain(ch).get_attribute(field_obj.name)
-                                                                   for ch in receptor.get_chains()]
-                                                                  for receptor in receptors))
-        field_vals[field_obj.name] = [el.to_string() if hasattr(el, 'to_string') else el
-                                      for el in field_vals[field_obj.name]]
-    return add_neutral_values(field_vals, types)
-
-
-def make_dynamic_seq_set_from_objs(objs: list):
-    fields = list(set(chain.from_iterable(obj.get_all_attribute_names() for obj in objs)))
-    all_fields_dict = {}
-
-    for field in fields:
-        vals = [obj.get_attribute(field) for obj in objs]
-        if any(isinstance(el, list) for el in vals):
-            vals = list(chain.from_iterable(vals))
-        all_fields_dict[field] = vals
-
-    return build_dynamic_bnp_dataclass(all_fields_dict)
 
 
 def get_field_type_from_values(values):
@@ -241,7 +197,7 @@ def make_buffer_type_from_dataset_file(dataset_file: Path):
             metadata = yaml.safe_load(file)
 
         type_dict = {key: AIRRSequenceSet.STR_TO_TYPE[val] for key, val in metadata["type_dict"].items()}
-        dataclass = make_dynamic_seq_set_dataclass(type_dict)
+        dataclass = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(type_dict.items()))
         return bnp.io.delimited_buffers.get_bufferclass_for_datatype(dataclass, delimiter='\t', has_header=True)
     else:
         raise RuntimeError(f"Dataset file {dataset_file} doesn't exist, cannot load the dataset.")

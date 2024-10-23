@@ -113,7 +113,14 @@ class Repertoire:
     def build(cls, path: Path, metadata: dict, filename_base: str = None, identifier: str = None, **kwargs):
 
         bnp_dc, type_dict = build_dynamic_airr_sequence_set_dataclass(kwargs)
-        data = bnp_dc(**kwargs)
+        el_count = list(kwargs.values())[0]
+        el_count = len(el_count) if isinstance(el_count, list) else el_count.shape[0]
+        kwargs_with_missing_fields = {
+            **kwargs,
+            **{k: [AIRRSequenceSet.get_neutral_value(t) for _ in range(el_count)]
+               for k, t in AIRRSequenceSet.get_field_type_dict().items() if k not in kwargs}
+        }
+        data = bnp_dc(**kwargs_with_missing_fields)
 
         return Repertoire.build_from_dc_object(path, metadata, filename_base, identifier, data, type_dict)
 
@@ -150,6 +157,7 @@ class Repertoire:
                           if f not in [airr_f.name for airr_f in fields(AIRRSequenceSet)]}
 
         metadata_filename = result_path / f"{filename_base}_metadata.yaml"
+        metadata = {} if metadata is None else metadata
         metadata['type_dict_dynamic_fields'] = dynamic_fields
         write_yaml(metadata_filename, metadata)
 
@@ -200,7 +208,7 @@ def build_dynamic_airr_sequence_set_dataclass(all_fields_dict: Dict[str, Any]):
             types[key] = field_type
 
     if types:
-        dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, tuple(types.items()))
+        dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(types.items()))
     else:
         dc = AIRRSequenceSet
     return dc, types
@@ -212,7 +220,8 @@ def make_sequences_from_data(data, dynamic_fields: dict, region_type: RegionType
         seq, seq_aa = get_sequence_value(el, region_type)
         seqs.append(ReceptorSequence(sequence_id=el.sequence_id, sequence=seq, sequence_aa=seq_aa,
                                      productive=el.productive, vj_in_frame=el.vj_in_frame, stop_codon=el.stop_codon,
-                                     locus=el.locus, v_call=el.v_call, d_call=el.d_call if hasattr(el, 'd_call') else '',
+                                     locus=el.locus, v_call=el.v_call,
+                                     d_call=el.d_call if hasattr(el, 'd_call') else '',
                                      c_call=getattr(el, 'c_call', ''),
                                      j_call=el.j_call, duplicate_count=el.duplicate_count,
                                      metadata={dynamic_field: getattr(el, dynamic_field)

@@ -180,7 +180,8 @@ class SignificantFeatures(DataReport):
 
     def _compute_significant_feature_counts(self, k, p_value):
         encoder_result_path = self._get_encoder_result_path(k, p_value)
-        encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path)
+        encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path,
+                                                                         self.region_type, self.sequence_type)
 
         if type(k) == int:
             pos_class_feature_counts, neg_class_feature_counts = self._compute_significant_kmer_counts(k, p_value, encoder_params)

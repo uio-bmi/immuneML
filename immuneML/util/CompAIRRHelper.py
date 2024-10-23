@@ -65,8 +65,8 @@ class CompAIRRHelper:
                indels_args + frequency_args + ignore_genes + output_args + [str(file) for file in input_file_list] + output_pairs + cdr3_indicator
 
     @staticmethod
-    def write_repertoire_file(repertoire_dataset=None, filename=None, compairr_params=None, repertoires: list = None,
-                              export_sequence_id: bool = False):
+    def write_repertoire_file(repertoire_dataset=None, filename=None, compairr_params: CompAIRRParams = None,
+                              repertoires: list = None, export_sequence_id: bool = False):
         mode = "w"
         header = True
 
@@ -75,8 +75,11 @@ class CompAIRRHelper:
         if repertoire_dataset is not None and repertoires is None:
             repertoires = repertoire_dataset.get_data()
 
+        encoder_params = EncoderParams(region_type=RegionType.IMGT_CDR3 if compairr_params.is_cdr3 else RegionType.IMGT_JUNCTION)
+
         for ind, repertoire in enumerate(repertoires):
-            repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, compairr_params, export_sequence_id)
+            repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, compairr_params, encoder_params,
+                                                                         export_sequence_id)
 
             if ind == 0:
                 columns_in_order = sorted(repertoire_contents.columns)
@@ -124,7 +127,7 @@ class CompAIRRHelper:
         repertoire_contents = repertoire.data.topandas()[attributes]
         repertoire_contents = pd.DataFrame({**repertoire_contents, "identifier": repertoire.identifier})
         if export_sequence_id:
-            repertoire_contents['sequence_id'] = repertoire.get_attribute('sequence_id')
+            repertoire_contents['sequence_id'] = repertoire.data.sequence_id.tolist()
 
         check_na_rows = [encoder_params.get_sequence_field_name()]
         check_na_rows += [] if compairr_params.ignore_counts else ["duplicate_count"]

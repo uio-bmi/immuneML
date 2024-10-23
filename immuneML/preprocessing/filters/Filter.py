@@ -27,7 +27,7 @@ class Filter(Preprocessor, ABC):
         filtered_repertoires = []
         removed_repertoire_info = []
         for repertoire in repertoires:
-            if len(repertoire.sequences) > 0:
+            if len(repertoire.data) > 0:
                 filtered_repertoires.append(repertoire)
             else:
                 removed_repertoire_info.append({"id": repertoire.identifier,
@@ -41,4 +41,3 @@ class Filter(Preprocessor, ABC):
     def check_dataset_not_empty(self, processed_dataset: Dataset, location="Filter"):
         assert processed_dataset.get_example_count() > 0, f"{location}: {type(processed_dataset).__name__} ended up empty after filtering. " \
                                                           f"Please adjust filter settings."
-

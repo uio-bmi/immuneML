@@ -20,12 +20,11 @@ class TestChainRepertoireFilter(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_process(self):
-        path = EnvironmentSettings.root_path / "test/tmp/chain_filter/"
-        PathBuilder.build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.root_path / "test/tmp/chain_filter/")
 
-        rep1 = Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="AAA", locus="A",
+        rep1 = Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="AAA", locus="ALPHA",
                                                                  sequence_id="1")], result_path=path)
-        rep2 = Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="AAC", locus="B",
+        rep2 = Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="AAC", locus="BETA",
                                                                  sequence_id="2")], result_path=path)
 
         metadata = pd.DataFrame({"CD": [1, 0]})
@@ -43,7 +42,7 @@ class TestChainRepertoireFilter(TestCase):
         self.assertEqual(1, metadata_dict["CD"][0])
 
         for rep in dataset2.get_data():
-            self.assertEqual("AAA", rep.sequences[0].get_sequence())
+            self.assertEqual("AAA", rep.sequences()[0].get_sequence())
 
         self.assertRaises(AssertionError, ChainRepertoireFilter(**{"keep_chain": "GAMMA"}).process_dataset, dataset,
                           path / "results")

@@ -91,12 +91,13 @@ class TestSignificantFeatures(TestCase):
                                                               "p_values": [0.5, 0.0],
                                                               "k_values": ["full_sequence", 3],
                                                               "compairr_path": compairr_path,
-                                                              "groundtruth_sequences_path": implanted_sequences_path,
+                                                              "ground_truth_sequences_path": implanted_sequences_path,
                                                               "label": {"mylabel": {"positive_class": "+"}},
                                                               "result_path": path,
-                                                              "trim_leading_trailing": False})
+                                                              "sequence_type": 'amino_acid',
+                                                              'region_type': "IMGT_CDR3"})
 
-        self.assertListEqual(report.groundtruth_sequences, ["MMM", "GGG"])
+        self.assertListEqual(report.ground_truth_sequences, ["MMM", "GGG"])
 
         result = report._generate()
 

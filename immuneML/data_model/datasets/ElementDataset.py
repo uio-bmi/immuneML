@@ -94,7 +94,7 @@ class SequenceDataset(ElementDataset):
         dataset_metadata = {
             'type_dict_dynamic_fields': {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()},
             'filename': filename}
-        metadata_filename = path / f'dataset_{name}.yaml'
+        metadata_filename = path / f'{name}.yaml'
         write_yaml(metadata_filename, dataset_metadata)
 
         return SequenceDataset(filename=filename, name=name, labels=labels, dynamic_fields=type_dict,

@@ -44,7 +44,7 @@ class ChainRepertoireFilter(Filter):
         repertoires = []
         indices = []
         for index, repertoire in enumerate(dataset.get_data()):
-            if all(sequence.metadata.locus == self.keep_chain for sequence in repertoire.sequences):
+            if all([el == self.keep_chain.name or el == self.keep_chain.value for el in repertoire.data.locus.tolist()]):
                 repertoires.append(repertoire)
                 indices.append(index)
 

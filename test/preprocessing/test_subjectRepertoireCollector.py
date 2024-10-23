@@ -21,12 +21,12 @@ class TestSubjectRepertoireCollector(TestCase):
         path = EnvironmentSettings.root_path / "test/tmp/subject_rep_collector"
         PathBuilder.build(path)
 
-        reps = [Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", sequence_id="1")], path=path,
-                                                       metadata={"subject_id": "patient1"}),
-                Repertoire.build_from_sequence_objects([ReceptorSequence("AAC", sequence_id="2")], path=path,
-                                                       metadata={"subject_id": "patient1"}),
-                Repertoire.build_from_sequence_objects([ReceptorSequence("AAC", sequence_id="3")], path=path,
-                                                       metadata={"subject_id": "patient3"})]
+        reps = [Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="AAA", sequence_id="1")], result_path=path,
+                                                metadata={"subject_id": "patient1"}),
+                Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="AAC", sequence_id="2")], result_path=path,
+                                                metadata={"subject_id": "patient1"}),
+                Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="AAC", sequence_id="3")], result_path=path,
+                                                metadata={"subject_id": "patient3"})]
 
         dataset = RepertoireDataset(repertoires=reps)
 
@@ -37,6 +37,6 @@ class TestSubjectRepertoireCollector(TestCase):
 
         values = [2, 1]
         for index, rep in enumerate(dataset2.get_data()):
-            self.assertEqual(values[index], len(rep.sequences))
+            self.assertEqual(values[index], len(rep.data))
 
         shutil.rmtree(path)
