@@ -30,7 +30,8 @@ class EncoderHelper:
 
     @staticmethod
     def get_current_dataset(dataset, context):
-        '''Retrieves the full dataset (training+validation+test) if present in context, otherwise return the given dataset'''
+        """Retrieves the full dataset (training+validation+test) if present in context, otherwise return the given
+        dataset"""
         return dataset if context is None or "dataset" not in context else context["dataset"]
 
     @staticmethod

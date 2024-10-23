@@ -173,7 +173,6 @@ class KmerAbundanceEncoder(DatasetEncoder):
         encoded_data = EncodedData(examples, dataset.get_metadata([label.name]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [KmerAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE,
                                     KmerAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
-                                   example_weights=dataset.get_example_weights(),
                                    encoding=KmerAbundanceEncoder.__name__,
                                    info={"relevant_sequence_path": self.relevant_sequence_path,
                                          "contingency_table_path": self.contingency_table_path,

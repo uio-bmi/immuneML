@@ -4,6 +4,7 @@ import shutil
 from pathlib import Path
 from typing import List
 
+import dill
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.data_model.datasets.Dataset import Dataset
@@ -98,7 +99,7 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
             the loaded Encoder object
         """
         with encoder_file.open("rb") as file:
-            encoder = pickle.load(file)
+            encoder = dill.load(file)
         return encoder
 
     @staticmethod
@@ -135,7 +136,7 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
 
         """
         with encoder_file.open("wb") as file:
-            pickle.dump(encoder, file)
+            dill.dump(encoder, file)
 
         encoder_dir = encoder_file.parent
         for file in encoder.get_additional_files():

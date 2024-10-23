@@ -96,7 +96,7 @@ class RepertoireBuilder:
         type_dict = {k: v for tmp_dict in [rep.metadata['type_dict_dynamic_fields'] for rep in reps]
                      for k, v in tmp_dict.items()}
 
-        labels_unique = {k: list(set(v)) for k, v in labels.items()}
+        labels_unique = {k: list(set(v)) for k, v in labels.items()} if isinstance(labels, dict) else {}
         identifier = uuid.uuid4().hex
 
         write_yaml(path / f'dataset_{name}.yaml', {

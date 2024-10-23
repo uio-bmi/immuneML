@@ -48,6 +48,7 @@ class MLExporter:
     @staticmethod
     def _store_encoder(encoder, path: Path) -> Path:
         filename = path / "encoder.pickle"
+        print(encoder)
         type(encoder).store_encoder(encoder, filename)
         return filename
 
