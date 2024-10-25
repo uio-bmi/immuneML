@@ -98,8 +98,8 @@ class SignificantFeaturesHelper:
         return encoder
 
     @staticmethod
-    def _build_sequence_encoder(dataset, p_value, encoder_params):
-        encoder = SequenceAbundanceEncoder(comparison_attributes=[EnvironmentSettings.get_sequence_type().value],
+    def _build_sequence_encoder(dataset, p_value, encoder_params: EncoderParams):
+        encoder = SequenceAbundanceEncoder(comparison_attributes=[encoder_params.get_sequence_field_name()],
                                            p_value_threshold=p_value, sequence_batch_size=100000, repertoire_batch_size=16)
 
         encoder.encode(dataset, encoder_params)

@@ -154,15 +154,15 @@ class AminoAcidFrequencyDistribution(DataReport):
     def _get_receptor_dataset_plotting_data(self):
         result_dfs = []
 
-        receptors = self.dataset.get_data()
-        chains = next(receptors).get_chains()
+        data = self.dataset.data
+        chains = list(set(data.locus.tolist()))
 
         for chain in chains:
             raw_count_dict_per_class = self._count_aa_frequencies(self._chain_class_iterator(chain))
 
             for class_name, raw_count_dict in raw_count_dict_per_class.items():
                 result_df = self._count_dict_to_df(raw_count_dict)
-                result_df["chain"] = chain
+                result_df["locus"] = chain
                 result_df["class"] = class_name
                 result_dfs.append(result_df)
 

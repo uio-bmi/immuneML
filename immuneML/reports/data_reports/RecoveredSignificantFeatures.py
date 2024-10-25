@@ -227,7 +227,7 @@ class RecoveredSignificantFeatures(DataReport):
         encoder = SignificantFeaturesHelper._build_sequence_encoder(self.dataset, p_value, encoder_params)
         sequences = pd.read_csv(encoder.relevant_sequence_path)
 
-        return list(sequences[EnvironmentSettings.get_sequence_type().value])
+        return list(sequences[encoder_params.get_sequence_field_name()])
 
     def _compute_significant_compairr_sequences(self, p_value, encoder_params):
         encoder = SignificantFeaturesHelper._build_compairr_sequence_encoder(self.dataset, p_value, encoder_params, self.compairr_path)
