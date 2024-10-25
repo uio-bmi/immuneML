@@ -2,3 +2,4 @@ imgt_positions: True
 relative_frequency: True
 split_by_label: False
 label: null
+region_type: IMGT_CDR3
