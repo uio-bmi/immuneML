@@ -101,7 +101,7 @@ class VDJdbImport(DataImport):
                     f"VDJdbImport: {n_single_chains} single chains were removed when trying to create a "
                     f"ReceptorDataset.\nTo import all chains as a SequenceDataset, use paired = False")
         else:
-            df.loc[df["cell_id"] == "0", "cell_id"] = None
+            df.loc[df["cell_id"] == "0", "cell_id"] = ''
 
         df["receptor_id"] = df["cell_id"]
         df["sequence_id"] = VDJdbImport.get_sequence_identifiers(df["cell_id"], df["locus"])
@@ -141,7 +141,7 @@ class VDJdbImport(DataImport):
                                 if key in meta_df:
                                     meta_df[key].append(val_parsed)
                                 else:
-                                    meta_df[key] = ['' for _ in range(index + 1)] + [val_parsed]
+                                    meta_df[key] = ['' for _ in range(index)] + [val_parsed]
 
                     meta_df = pd.DataFrame(meta_df).astype(str)
 

@@ -97,8 +97,8 @@ class VAESummary(GenModelReport):
         embeddings = pca.fit_transform(embeddings.numpy())
 
         df = pd.DataFrame(data=embeddings, columns=['PC1', 'PC2'])
-        df['v_gene'] = [v_call.split("*")[0] for v_call in self.dataset.get_attribute('v_call', True)]
-        df['j_gene'] = [j_call.split("*")[0] for j_call in self.dataset.get_attribute('j_call', True)]
+        df['v_gene'] = [v_call.split("*")[0] for v_call in self.dataset.data.v_call.tolist()]
+        df['j_gene'] = [j_call.split("*")[0] for j_call in self.dataset.data.j_call.tolist()]
 
         path = self.result_path / 'latent_space_2_component_PCA.csv'
 

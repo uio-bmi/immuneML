@@ -156,7 +156,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
         if self.reads == ReadsType.UNIQUE:
             repertoire_totals = np.asarray([[repertoire.get_element_count() for repertoire in dataset.get_data()]]).T
         else:
-            repertoire_totals = np.asarray([[sum(repertoire.get_counts()) for repertoire in dataset.get_data()]]).T
+            repertoire_totals = np.asarray([[sum(repertoire.data.duplicate_count) for repertoire in dataset.get_data()]]).T
 
         return encoded_repertoires / repertoire_totals
 
@@ -166,8 +166,8 @@ class MatchedSequencesEncoder(DatasetEncoder):
          - sequence id
          - chain
          - amino acid sequence
-         - v gene
-         - j gene
+         - v call
+         - j call
         """
 
         features = [[] for i in range(0, self.feature_count)]
@@ -180,7 +180,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
                            sequence.j_call,
                            self._get_sequence_desc(sequence)]
 
-        features = pd.DataFrame(features, columns=["sequence_id", "locus", "sequence", "v_gene", "j_gene", "sequence_desc"])
+        features = pd.DataFrame(features, columns=["sequence_id", "locus", "sequence", "v_call", "j_call", "sequence_desc"])
         if features['sequence_desc'].unique().shape[0] < features.shape[0]:
             features.loc[:, 'sequence_desc'] = [row['sequence_desc'] + "_" + row['sequence_id'] for ind, row in features.iterrows()]
 

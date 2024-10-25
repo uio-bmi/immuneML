@@ -5,6 +5,7 @@ import pandas as pd
 
 from immuneML.analysis.SequenceMatcher import SequenceMatcher
 from immuneML.caching.CacheHandler import CacheHandler
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.EncodedData import EncodedData
 from immuneML.data_model.SequenceSet import Receptor
@@ -94,6 +95,8 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         ParameterValidator.assert_type_and_value(normalize, bool, location, "normalize")
         ParameterValidator.assert_in_valid_list(reads.upper(), [item.name for item in ReadsType], location, "reads")
 
+        legal_chains = [chain.value for chain in Chain]
+
         if type(max_edit_distances) is int:
             max_edit_distances = {chain: max_edit_distances for chain in legal_chains}
         elif type(max_edit_distances) is dict:
@@ -129,13 +132,15 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
     def _prepare_caching_params(self, dataset, params: EncoderParams):
 
-        chains = [(receptor.get_chain(receptor.get_chains()[0]), receptor.get_chain(receptor.get_chains()[1]))
+        chains = [(receptor.chain_1, receptor.chain_2)
                   for receptor in self.reference_receptors]
 
         encoding_params_desc = {"max_edit_distance": sorted(self.max_edit_distances.items()),
-                                "reference_receptors": sorted([chain_a.get_sequence() + chain_a.metadata.v_gene +
-                                                               chain_a.metadata.j_gene + "|" + chain_b.get_sequence() +
-                                                               chain_b.metadata.v_gene + chain_b.metadata.j_gene
+                                "reference_receptors": sorted([getattr(chain_a, params.sequence_type.value)
+                                                               + chain_a.v_call +
+                                                               chain_a.j_call + "|"
+                                                               + getattr(chain_b, params.sequence_type.value) +
+                                                               chain_b.v_call + chain_b.j_call
                                                                for chain_a, chain_b in chains]),
                                 "reads": self.reads.name,
                                 "sum_matches": self.sum_matches,
@@ -153,7 +158,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         feature_annotations = None if self.sum_matches else self._get_feature_info()
 
         if self.sum_matches:
-            chains = self.reference_receptors[0].get_chains()
+            chains = self.reference_receptors[0].chain_pair.value
             feature_names = [f"sum_of_{self.reads.value}_reads_{chains[0]}", f"sum_of_{self.reads.value}_reads_{chains[1]}"]
         else:
             feature_names = [f"{row['receptor_id']}.{row['locus']}" for index, row in feature_annotations.iterrows()]
@@ -195,32 +200,33 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         features = [[] for i in range(0, self.feature_count)]
 
         for i, receptor in enumerate(self.reference_receptors):
-            id = receptor.identifier
-            chain_names = receptor.get_chains()
-            first_chain = receptor.get_chain(chain_names[0])
-            second_chain = receptor.get_chain(chain_names[1])
+            id = receptor.receptor_id
+            chain_names = receptor.chain_pair.value
+            first_chain = receptor.chain_1
+            second_chain = receptor.chain_2
 
             clonotype_id = receptor.metadata["clonotype_id"] if "clonotype_id" in receptor.metadata else None
 
-            if first_chain.metadata.custom_params is not None:
-                first_dual_chain_id = first_chain.metadata.custom_params["dual_chain_id"] if "dual_chain_id" in first_chain.metadata.custom_params else None
+            if first_chain.metadata is not None:
+                first_dual_chain_id = first_chain.metadata["dual_chain_id"] if "dual_chain_id" in first_chain.metadata else None
 
-            if second_chain.metadata.custom_params is not None:
-                second_dual_chain_id = second_chain.metadata.custom_params["dual_chain_id"] if "dual_chain_id" in second_chain.metadata.custom_params else None
+            if second_chain.metadata is not None:
+                second_dual_chain_id = second_chain.metadata["dual_chain_id"] if "dual_chain_id" in second_chain.metadata else None
 
             features[i * 2] = [id, clonotype_id, chain_names[0],
                                first_dual_chain_id,
                                first_chain.sequence_aa,
-                               first_chain.metadata.v_gene,
-                               first_chain.metadata.j_gene]
+                               first_chain.v_call,
+                               first_chain.j_call]
             features[i * 2 + 1] = [id, clonotype_id, chain_names[1],
                                    second_dual_chain_id,
                                    second_chain.sequence_aa,
-                                   second_chain.metadata.v_gene,
-                                   second_chain.metadata.j_gene]
+                                   second_chain.v_call,
+                                   second_chain.j_call]
 
         features = pd.DataFrame(features,
-                                columns=["receptor_id", "clonotype_id", "locus", "dual_chain_id", "sequence", "v_gene", "j_gene"])
+                                columns=["receptor_id", "clonotype_id", "locus", "dual_chain_id", "sequence",
+                                         "v_call", "j_call"])
 
         features.dropna(axis="columns", how="all", inplace=True)
 
@@ -234,7 +240,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         labels = {label: [] for label in params.label_config.get_labels_by_name()} if params.encode_labels else None
 
         for i, repertoire in enumerate(dataset.get_data()):
-            encoded_repertories[i] = self._compute_matches_to_reference(repertoire)
+            encoded_repertories[i] = self._compute_matches_to_reference(repertoire, params)
 
             if labels is not None:
                 for label_name in params.label_config.get_labels_by_name():
@@ -261,19 +267,19 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
         return tuple(params)
 
-    def _compute_matches_to_reference(self, repertoire: Repertoire):
+    def _compute_matches_to_reference(self, repertoire: Repertoire, params: EncoderParams):
         matcher = SequenceMatcher()
         matches = np.zeros(self.feature_count, dtype=int)
-        rep_seqs = repertoire.sequences
+        rep_seqs = repertoire.sequences(params.region_type)
 
         for i, ref_receptor in enumerate(self.reference_receptors):
-            chain_names = ref_receptor.get_chains()
-            first_chain = ref_receptor.get_chain(chain_names[0])
-            second_chain = ref_receptor.get_chain(chain_names[1])
+            chain_names = ref_receptor.chain_pair.value
+            first_chain = ref_receptor.chain_1
+            second_chain = ref_receptor.chain_2
 
             for rep_seq in rep_seqs:
                 matches_idx = 0 if self.sum_matches else i * 2
-                match_count = 1 if self.reads == ReadsType.UNIQUE else rep_seq.metadata.duplicate_count
+                match_count = 1 if self.reads == ReadsType.UNIQUE else rep_seq.duplicate_count
 
                 # Match with first chain: add to even columns in matches.
                 # Match with second chain: add to odd columns

@@ -25,7 +25,7 @@ from immuneML.util.PathBuilder import PathBuilder
 class DataImport(metaclass=abc.ABCMeta):
 
     def __init__(self, params: dict, dataset_name: str):
-        self.params = DatasetImportParams.build_object(**params)
+        self.params = DatasetImportParams.build_object(**params) if isinstance(params, dict) else params
         self.dataset_name = dataset_name
 
     def import_dataset(self) -> Dataset:

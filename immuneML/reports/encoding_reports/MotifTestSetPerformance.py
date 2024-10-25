@@ -1,7 +1,7 @@
 import logging
+import shutil
 import warnings
 from pathlib import Path
-import shutil
 
 import numpy as np
 
@@ -17,7 +17,6 @@ from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
-from immuneML.util.ImportHelper import ImportHelper
 from immuneML.util.MotifPerformancePlotHelper import MotifPerformancePlotHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -306,7 +305,7 @@ class MotifTestSetPerformance(EncodingReport):
         self.test_dataset_import_params.result_path = self.result_path / f"test_dataset_{self.name}"
 
     def _import_test_dataset(self):
-        return ImportHelper.import_sequence_dataset(self.test_dataset_import_cls, self.test_dataset_import_params, f"test_dataset_{self.name}")
+        return self.test_dataset_import_cls(self.test_dataset_import_params, f"test_dataset_{self.name}").import_dataset()
 
     def check_prerequisites(self) -> bool:
         location = MotifTestSetPerformance.__name__

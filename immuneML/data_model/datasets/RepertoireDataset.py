@@ -83,7 +83,8 @@ class RepertoireDataset(Dataset):
     def __init__(self, labels: dict = None, encoded_data: EncodedData = None, repertoires: list = None,
                  identifier: str = None, metadata_file: Path = None, name: str = None, metadata_fields: list = None,
                  repertoire_ids: list = None, dataset_file: Path = None):
-        super().__init__(encoded_data, name, identifier if identifier is not None else uuid4().hex, labels)
+        super().__init__(encoded_data=encoded_data, name=name,
+                         identifier=identifier if identifier is not None else uuid4().hex, labels=labels)
         self.metadata_file = Path(metadata_file) if metadata_file is not None else None
         self.metadata_fields = metadata_fields
         self.repertoire_ids = repertoire_ids

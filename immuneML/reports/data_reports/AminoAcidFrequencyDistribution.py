@@ -6,6 +6,8 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 
+from immuneML.data_model import bnp_util
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
@@ -52,6 +54,8 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     - label (str): if split_by_label is set to True, a label can be specified here.
 
+    - region_type (str): which part of the sequence to check; e.g., IMGT_CDR3
+
     **YAML specification:**
 
     .. indent with spaces
@@ -64,6 +68,7 @@ class AminoAcidFrequencyDistribution(DataReport):
                         relative_frequency: False
                         split_by_label: True
                         label: CMV
+                        region_type: IMGT_CDR3
 
     """
 
@@ -73,19 +78,21 @@ class AminoAcidFrequencyDistribution(DataReport):
         ParameterValidator.assert_type_and_value(kwargs["imgt_positions"], bool, location, "imgt_positions")
         ParameterValidator.assert_type_and_value(kwargs["relative_frequency"], bool, location, "relative_frequency")
         ParameterValidator.assert_type_and_value(kwargs["split_by_label"], bool, location, "split_by_label")
+        ParameterValidator.assert_region_type(kwargs, location)
 
         ReportUtil.update_split_by_label_kwargs(kwargs, location)
 
         return AminoAcidFrequencyDistribution(**kwargs)
 
     def __init__(self, dataset: Dataset = None, imgt_positions: bool = None, relative_frequency: bool = None,
-                 split_by_label: bool = None, label: str = None,
+                 split_by_label: bool = None, label: str = None, region_type: RegionType = RegionType.IMGT_CDR3,
                  result_path: Path = None, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.imgt_positions = imgt_positions
         self.relative_frequency = relative_frequency
         self.split_by_label = split_by_label
         self.label_name = label
+        self.region_type = region_type
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
@@ -130,6 +137,10 @@ class AminoAcidFrequencyDistribution(DataReport):
         return plotting_data
 
     def _get_sequence_dataset_plotting_data(self):
+
+        data = getattr(self.dataset.data, bnp_util.get_sequence_field_name(self.region_type, SequenceType.AMINO_ACID))
+        unique_lengths = np.unique(data.lengths.tolist())
+
         return self._count_dict_per_class_to_df(self._count_aa_frequencies(self._sequence_class_iterator()))
 
     def _count_dict_per_class_to_df(self, raw_count_dict_per_class):
@@ -258,7 +269,7 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         figure = px.bar(freq_dist, x="position", y=y, color="amino acid", text="amino acid",
                         facet_col="class" if "class" in freq_dist.columns else None,
-                        facet_row="chain" if "chain" in freq_dist.columns else None,
+                        facet_row="locus" if "locus" in freq_dist.columns else None,
                         color_discrete_map=PlotlyUtil.get_amino_acid_color_map(),
                         category_orders=category_orders,
                         labels={"position": "IMGT position" if self.imgt_positions else "Position",
@@ -287,7 +298,7 @@ class AminoAcidFrequencyDistribution(DataReport):
         class_b_df = freq_dist[freq_dist["class"] == classes[1]]
 
         on = ["amino acid", "position"]
-        on = on + ["chain"] if "chain" in freq_dist.columns else on
+        on = on + ["locus"] if "locus" in freq_dist.columns else on
 
         merged_dfs = pd.merge(class_a_df, class_b_df, on=on, how="outer", suffixes=["_a", "_b"])
         merged_dfs = merged_dfs[(merged_dfs["relative frequency_a"] + merged_dfs["relative frequency_b"]) > 0]
@@ -310,7 +321,7 @@ class AminoAcidFrequencyDistribution(DataReport):
     def _plot_frequency_change(self, frequency_change):
         figure = px.bar(frequency_change, x="position", y="frequency_change", color="amino acid", text="amino acid",
                         facet_col="positive_class",
-                        facet_row="chain" if "chain" in frequency_change.columns else None,
+                        facet_row="locus" if "locus" in frequency_change.columns else None,
                         color_discrete_map=PlotlyUtil.get_amino_acid_color_map(),
                         labels={"position": "IMGT position" if self.imgt_positions else "Position",
                                 "positive_class": "Class",

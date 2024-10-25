@@ -4,7 +4,10 @@ import bionumpy as bnp
 from .TrainGenModelReport import TrainGenModelReport
 from ..ReportOutput import ReportOutput
 from ..ReportResult import ReportResult
+from ...data_model import bnp_util
+from ...data_model.SequenceParams import RegionType
 from ...data_model.datasets.Dataset import Dataset
+from ...environment.SequenceType import SequenceType
 from ...ml_methods.generative_models.GenerativeModel import GenerativeModel
 from ...ml_methods.generative_models.KLEvaluator import evaluate_similarities, KLEvaluator
 from ...ml_methods.generative_models.MultinomialKmerModel import estimate_kmer_model
@@ -38,7 +41,8 @@ class KLKmerComparison(TrainGenModelReport):
 
     def __init__(self, original_dataset: Dataset = None, generated_dataset: Dataset = None, result_path: Path = None,
                  name: str = None, number_of_processes: int = 1, model: GenerativeModel = None, k: int = 3,
-                 n_sequences: int = 50):
+                 n_sequences: int = 50, sequence_type: SequenceType = SequenceType.AMINO_ACID,
+                 region_type: RegionType = RegionType.IMGT_CDR3):
         """
         The arguments defined below are set at runtime by the instruction.
 
@@ -68,6 +72,8 @@ class KLKmerComparison(TrainGenModelReport):
         self.result_path = result_path
         self.k = k
         self.n_sequences = n_sequences
+        self.region_type = region_type
+        self.sequence_type = sequence_type
 
     @staticmethod
     def get_title():
@@ -104,7 +110,10 @@ class KLKmerComparison(TrainGenModelReport):
         return self._get_kmer_kl_evaluator()
 
     def _get_kmer_kl_evaluator(self):
-        o_kmers, g_kmers = (bnp.sequence.get_kmers(dataset.get_attribute("sequence_aa"), self.k)
+        o_kmers, g_kmers = (bnp.sequence.get_kmers(getattr(dataset.data,
+                                                           bnp_util.get_sequence_field_name(self.region_type,
+                                                                                            self.sequence_type)),
+                                                   self.k)
                             for dataset in (self.original_dataset, self.generated_dataset))
         estimator = partial(estimate_kmer_model, prior_count=1.0)
         return KLEvaluator(o_kmers, g_kmers, estimator, n_sequences=self.n_sequences)

@@ -24,7 +24,7 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
         path = EnvironmentSettings.tmp_test_path / "disease_assoc_seq_cv/"
         PathBuilder.remove_old_and_build(path)
 
-        repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
+        dataset = RepertoireBuilder.build_dataset([["GGG", "III", "LLL", "MMM"],
                                                          ["DDD", "EEE", "FFF"], ["GGG", "III", "LLL", "MMM"],
                                                          ["DDD", "EEE", "FFF"], ["GGG", "III", "LLL", "MMM"],
                                                          ["DDD", "EEE", "FFF"], ["GGG", "III", "LLL", "MMM"],
@@ -43,7 +43,6 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
                                                                        True, False, True, False, True, False, True, False, True, False,
                                                                        True, False, True, False, True, False]}, path=path)
 
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"l1": [True, False]})
         AIRRExporter.export(dataset, path)
 
         specs = {
@@ -52,7 +51,7 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
                     "d1": {
                         "format": "AIRR",
                         "params": {
-                            "path": str(path / f"{dataset.name}.yaml"),
+                            "dataset_file": str(dataset.dataset_file),
                         }
                     }
                 },

@@ -79,7 +79,7 @@ class Matches(EncodingReport):
 
     def _write_match_table(self):
         id_df = pd.DataFrame({"repertoire_id": self.dataset.encoded_data.example_ids,
-                              'subject_id': self.dataset.get_subject_ids()})
+                              'subject_id': self.dataset.get_metadata(['subject_id'])['subject_id']})
         label_df = pd.DataFrame(self.dataset.encoded_data.labels)
         matches_df = pd.DataFrame(self.dataset.encoded_data.examples, columns=self.dataset.encoded_data.feature_names)
         different_cols = label_df.columns.difference(id_df.columns)
@@ -133,7 +133,7 @@ class Matches(EncodingReport):
         annotation_df = self.dataset.encoded_data.feature_annotations
 
         for receptor_id in sorted(set(annotation_df["receptor_id"])):
-            chain_ids = list(annotation_df.loc[annotation_df["receptor_id"] == receptor_id]["chain_id"])
+            chain_ids = list(annotation_df.loc[annotation_df["receptor_id"] == receptor_id]["locus_id"])
 
             if len(chain_ids) == 2:
                 first_match_idx = self.dataset.encoded_data.feature_names.index(chain_ids[0])
@@ -152,7 +152,7 @@ class Matches(EncodingReport):
         """
         Writes the repertoire sizes (# clones & # reads) per subject, per chain.
         """
-        all_subjects = sorted(set(self.dataset.get_subject_ids()))
+        all_subjects = sorted(set(self.dataset.get_metadata(['subject_id'])['subject_id']))
         all_chains = sorted(set(self.dataset.encoded_data.feature_annotations["locus"]))
 
         results_df = pd.DataFrame(list(itertools.product(all_subjects, all_chains)),
@@ -161,11 +161,11 @@ class Matches(EncodingReport):
         results_df["n_clones"] = 0
 
         for repertoire in self.dataset.repertoires:
-            rep_counts = repertoire.get_counts()
-            rep_chains = repertoire.get_chains()
+            rep_counts = repertoire.data.duplicate_count
+            rep_chains = repertoire.data.locus.tolist()
 
             for chain in all_chains:
-                indices = rep_chains == Chain.get_chain(chain.upper())
+                indices = [el == chain for el in rep_chains]
                 results_df.loc[(results_df.subject_id == repertoire.metadata["subject_id"]) & (results_df.locus == chain),
                                'n_reads'] += np.sum(rep_counts[indices])
                 results_df.loc[(results_df.subject_id == repertoire.metadata["subject_id"]) & (results_df.locus == chain),
@@ -196,10 +196,10 @@ class Matches(EncodingReport):
                              on=on_cols,
                              suffixes=(f"_{chain_types[0]}", f"_{chain_types[1]}"))
 
-        unique_alpha_chains = first_chains.drop_duplicates(subset=["sequence", "v_gene", "j_gene"])
-        unique_beta_chains = second_chains.drop_duplicates(subset=["sequence", "v_gene", "j_gene"])
-        unique_receptors = receptors.drop_duplicates(subset=[f"sequence_{chain_types[0]}", f"v_gene_{chain_types[0]}", f"j_gene_{chain_types[0]}",
-                                                             f"sequence_{chain_types[1]}", f"v_gene_{chain_types[1]}", f"j_gene_{chain_types[1]}"])
+        unique_alpha_chains = first_chains.drop_duplicates(subset=["sequence", "v_call", "j_call"])
+        unique_beta_chains = second_chains.drop_duplicates(subset=["sequence", "v_call", "j_call"])
+        unique_receptors = receptors.drop_duplicates(subset=[f"sequence_{chain_types[0]}", f"v_call_{chain_types[0]}", f"j_call_{chain_types[0]}",
+                                                             f"sequence_{chain_types[1]}", f"v_call_{chain_types[1]}", f"j_call_{chain_types[1]}"])
 
         receptor_chains_path = receptor_info_path / "all_chains.csv"
         receptor_chains.to_csv(receptor_chains_path, index=False)
@@ -222,7 +222,7 @@ class Matches(EncodingReport):
         PathBuilder.build(sequence_info_path)
 
         chains = self.dataset.encoded_data.feature_annotations
-        unique_chains = chains.drop_duplicates(subset=["sequence", "v_gene", "j_gene"])
+        unique_chains = chains.drop_duplicates(subset=["sequence", "v_call", "j_call"])
 
         chains_path = sequence_info_path / "all_chains.csv"
         chains.to_csv(chains_path, index=False)

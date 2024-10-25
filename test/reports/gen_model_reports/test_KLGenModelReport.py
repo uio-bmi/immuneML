@@ -19,7 +19,7 @@ def kl_gen_model_report(path):
     params["generated_dataset"] = RandomDatasetGenerator.generate_sequence_dataset(4, {5: 1},
                                                                                    {'A': {True: 1, False: 0}},
                                                                                    path / 'gen_test_dataset2')
-    params["result_path"] = path / "result"
+    params["result_path"] = EnvironmentSettings.tmp_test_path / "result"
 
     return KLKmerComparison.build_object(**params)
 
