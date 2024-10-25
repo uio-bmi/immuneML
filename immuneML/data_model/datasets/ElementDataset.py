@@ -31,11 +31,11 @@ class ElementDataset(Dataset, ABC):
     _buffer_type = None
 
     def __post_init__(self):
-        if self.dynamic_fields is None:
+        if self.dynamic_fields is None and self.dataset_file is not None:
             metadata = read_yaml(self.dataset_file)
             self.dynamic_fields = {key: AIRRSequenceSet.STR_TO_TYPE[val]
                                    for key, val in metadata['type_dict_dynamic_fields'].items()}
-        if self.bnp_dataclass is None:
+        if self.bnp_dataclass is None and self.dynamic_fields is not None:
             self.bnp_dataclass = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(self.dynamic_fields.items()))
 
     @property
