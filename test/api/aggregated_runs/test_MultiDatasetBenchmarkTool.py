@@ -58,7 +58,7 @@ class TestMultiDatasetBenchmarkTool(TestCase):
                     "e1": "SequenceAbundance",
                     "e2": {
                         "SequenceAbundance": {
-                            "comparison_attributes": ["sequence_aa"],
+                            "comparison_attributes": ["cdr3_aa"],
                             "p_value_threshold": 0.25,
                             "sequence_batch_size": 500
                         }

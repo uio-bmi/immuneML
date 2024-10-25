@@ -67,8 +67,8 @@ def build_dynamic_bnp_dataclass(all_fields_dict: Dict[str, Any]):
             field_type = get_field_type_from_values(value)
         types[key] = field_type
 
-    dc = AIRRSequenceSet.extend(tuple((name, t) for name, t in types.items()
-                                 if name not in list(AIRRSequenceSet.get_field_type_dict().keys())))
+    dc = AIRRSequenceSet.extend(tuple((name, t, AIRRSequenceSet.get_neutral_value(t)) for name, t in types.items()
+                                      if name not in list(AIRRSequenceSet.get_field_type_dict().keys())))
     return dc, types
 
 
