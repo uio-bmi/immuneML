@@ -78,7 +78,8 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         "RepertoireDataset": "MatchedReceptorsRepertoireEncoder"
     }
 
-    def __init__(self, reference: List[Receptor], max_edit_distances: dict, reads: ReadsType, sum_matches: bool, normalize: bool, name: str = None):
+    def __init__(self, reference: List[Receptor], max_edit_distances: dict, reads: ReadsType, sum_matches: bool,
+                 normalize: bool, name: str = None):
         super().__init__(name=name)
         self.reference_receptors = reference
         self.max_edit_distances = max_edit_distances
@@ -88,7 +89,8 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         self.feature_count = 2 if self.sum_matches else len(self.reference_receptors) * 2
 
     @staticmethod
-    def _prepare_parameters(reference: dict, max_edit_distances: dict, reads: str, sum_matches: bool, normalize: bool, name: str = None):
+    def _prepare_parameters(reference: dict, max_edit_distances: dict, reads: str, sum_matches: bool, normalize: bool,
+                            name: str = None):
         location = "MatchedReceptorsEncoder"
 
         ParameterValidator.assert_type_and_value(sum_matches, bool, location, "sum_matches")
@@ -100,7 +102,8 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         if type(max_edit_distances) is int:
             max_edit_distances = {chain: max_edit_distances for chain in legal_chains}
         elif type(max_edit_distances) is dict:
-            ParameterValidator.assert_keys(max_edit_distances.keys(), legal_chains, location, "max_edit_distances", exclusive=False)
+            ParameterValidator.assert_keys(max_edit_distances.keys(), legal_chains, location, "max_edit_distances",
+                                           exclusive=False)
         else:
             ParameterValidator.assert_type_and_value(max_edit_distances, dict, location, 'max_edit_distances')
 
@@ -121,7 +124,8 @@ class MatchedReceptorsEncoder(DatasetEncoder):
             prepared_parameters = MatchedReceptorsEncoder._prepare_parameters(**params)
             return MatchedReceptorsEncoder(**prepared_parameters)
         else:
-            raise ValueError("MatchedSequencesEncoder is not defined for dataset types which are not RepertoireDataset.")
+            raise ValueError(
+                "MatchedReceptorsEncoder is not defined for dataset types which are not RepertoireDataset.")
 
     def encode(self, dataset, params: EncoderParams):
         cache_key = CacheHandler.generate_cache_key(self._prepare_caching_params(dataset, params))
@@ -152,14 +156,15 @@ class MatchedReceptorsEncoder(DatasetEncoder):
                 ("labels", tuple(params.label_config.get_labels_by_name())),
                 ("encoding", MatchedReceptorsEncoder.__name__),
                 ("learn_model", params.learn_model),
-                ("encoding_params", encoding_params_desc), )
+                ("encoding_params", encoding_params_desc),)
 
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         feature_annotations = None if self.sum_matches else self._get_feature_info()
 
         if self.sum_matches:
             chains = self.reference_receptors[0].chain_pair.value
-            feature_names = [f"sum_of_{self.reads.value}_reads_{chains[0]}", f"sum_of_{self.reads.value}_reads_{chains[1]}"]
+            feature_names = [f"sum_of_{self.reads.value}_reads_{chains[0]}",
+                             f"sum_of_{self.reads.value}_reads_{chains[1]}"]
         else:
             feature_names = [f"{row['receptor_id']}.{row['locus']}" for index, row in feature_annotations.iterrows()]
 
@@ -182,10 +187,10 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         if self.reads == ReadsType.UNIQUE:
             repertoire_totals = np.asarray([[repertoire.get_element_count() for repertoire in dataset.get_data()]]).T
         else:
-            repertoire_totals = np.asarray([[sum(repertoire.data.duplicate_count) for repertoire in dataset.get_data()]]).T
+            repertoire_totals = np.asarray(
+                [[sum(repertoire.data.duplicate_count) for repertoire in dataset.get_data()]]).T
 
         return encoded_repertoires / repertoire_totals
-
 
     def _get_feature_info(self):
         """
@@ -208,10 +213,12 @@ class MatchedReceptorsEncoder(DatasetEncoder):
             clonotype_id = receptor.metadata["clonotype_id"] if "clonotype_id" in receptor.metadata else None
 
             if first_chain.metadata is not None:
-                first_dual_chain_id = first_chain.metadata["dual_chain_id"] if "dual_chain_id" in first_chain.metadata else None
+                first_dual_chain_id = first_chain.metadata[
+                    "dual_chain_id"] if "dual_chain_id" in first_chain.metadata else None
 
             if second_chain.metadata is not None:
-                second_dual_chain_id = second_chain.metadata["dual_chain_id"] if "dual_chain_id" in second_chain.metadata else None
+                second_dual_chain_id = second_chain.metadata[
+                    "dual_chain_id"] if "dual_chain_id" in second_chain.metadata else None
 
             features[i * 2] = [id, clonotype_id, chain_names[0],
                                first_dual_chain_id,
@@ -249,13 +256,14 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         return encoded_repertories, labels, dataset.get_repertoire_ids()
 
     def _get_repertoire_matches_to_reference(self, repertoire):
-         return CacheHandler.memo_by_params(
-             (("repertoire_identifier", repertoire.identifier),
-              ("encoding", MatchedReceptorsEncoder.__name__),
-              ("readstype", self.reads.name),
-              ("sum_matches", self.sum_matches),
-              ("max_edit_distances", tuple(self.max_edit_distances.items())),
-              ("reference_receptors", tuple([self.get_receptor_params(receptor) for receptor in self.reference_receptors]))),
+        return CacheHandler.memo_by_params(
+            (("repertoire_identifier", repertoire.identifier),
+             ("encoding", MatchedReceptorsEncoder.__name__),
+             ("readstype", self.reads.name),
+             ("sum_matches", self.sum_matches),
+             ("max_edit_distances", tuple(self.max_edit_distances.items())),
+             ("reference_receptors",
+              tuple([self.get_receptor_params(receptor) for receptor in self.reference_receptors]))),
             lambda: self._compute_matches_to_reference(repertoire))
 
     def get_receptor_params(self, receptor):
@@ -263,7 +271,8 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
         for chain in receptor.get_chains():
             receptor_sequence = receptor.get_chain(chain)
-            params.append((chain, receptor_sequence.get_sequence(), receptor_sequence.get_attribute("v_gene"), receptor_sequence.get_attribute("j_gene")))
+            params.append((chain, receptor_sequence.get_sequence(), receptor_sequence.get_attribute("v_gene"),
+                           receptor_sequence.get_attribute("j_gene")))
 
         return tuple(params)
 
@@ -285,7 +294,8 @@ class MatchedReceptorsEncoder(DatasetEncoder):
                 # Match with second chain: add to odd columns
                 if matcher.matches_sequence(first_chain, rep_seq, max_distance=self.max_edit_distances[chain_names[0]]):
                     matches[matches_idx] += match_count
-                if matcher.matches_sequence(second_chain, rep_seq, max_distance=self.max_edit_distances[chain_names[1]]):
+                if matcher.matches_sequence(second_chain, rep_seq,
+                                            max_distance=self.max_edit_distances[chain_names[1]]):
                     matches[matches_idx + 1] += match_count
 
         return matches

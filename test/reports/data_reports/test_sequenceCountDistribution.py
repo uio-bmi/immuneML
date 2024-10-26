@@ -23,7 +23,7 @@ class TestSequenceCountDistribution(TestCase):
 
         scd = SequenceCountDistribution(dataset, path, 1, split_by_label=True, label="l1")
 
-        result = scd.generate_report()
+        result = scd._generate()
         self.assertTrue(os.path.isfile(result.output_figures[0].path))
 
         shutil.rmtree(path)
@@ -55,7 +55,7 @@ class TestSequenceCountDistribution(TestCase):
 
         scd = SequenceCountDistribution(dataset, path, 1, split_by_label=True)
 
-        result = scd.generate_report()
+        result = scd._generate()
         self.assertTrue(os.path.isfile(result.output_figures[0].path))
 
         shutil.rmtree(path)

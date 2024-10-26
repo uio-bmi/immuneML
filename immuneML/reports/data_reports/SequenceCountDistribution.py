@@ -91,7 +91,7 @@ class SequenceCountDistribution(DataReport):
             else:
                 label_class = None
 
-            repertoire_counter = Counter(repertoire.get_attribute("duplicate_count"))
+            repertoire_counter = Counter(repertoire.data.duplicate_count)
             sequence_counts += Counter({(key, label_class): value for key, value in repertoire_counter.items()})
 
         df = pd.DataFrame({"n_observations": list(sequence_counts.values()),
@@ -103,16 +103,20 @@ class SequenceCountDistribution(DataReport):
         return df
 
     def _get_sequence_receptor_df(self):
+
+        data = self.dataset.data
+
         try:
-            counts = self.dataset.get_attribute("duplicate_count")
+            counts = data.duplicate_count
         except AttributeError as e:
             raise AttributeError(
-                f"{SequenceCountDistribution.__name__}: SequenceDataset does not contain attribute 'duplicate_count'. This report can only be run when sequence counts are available.")
+                f"{SequenceCountDistribution.__name__}: SequenceDataset does not contain attribute 'duplicate_count'. "
+                f"This report can only be run when sequence counts are available.")
 
-        chains = self.dataset.get_attribute(attribute="locus", as_list=True)
+        chains = data.locus.tolist()
 
         if self.split_by_label:
-            label_classes = self.dataset.get_attribute(attribute=self.label_name, as_list=True)
+            label_classes = getattr(data, self.label_name)
             counter = Counter(zip(counts, chains, label_classes))
         else:
             counter = Counter(zip(counts, chains))
