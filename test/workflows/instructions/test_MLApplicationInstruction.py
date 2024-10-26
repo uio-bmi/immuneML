@@ -6,8 +6,10 @@ import pandas as pd
 
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFreqRepertoireEncoder import KmerFreqRepertoireEncoder
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
@@ -40,7 +42,8 @@ class TestMLApplicationInstruction(TestCase):
         label = Label("l1", [1, 2])
         label_config = LabelConfiguration([label])
 
-        enc_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=label_config, pool_size=4))
+        enc_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=label_config, pool_size=4,
+                                                            region_type=RegionType.IMGT_CDR3, sequence_type=SequenceType.AMINO_ACID))
         ml_method.fit(enc_dataset.encoded_data, label)
 
         hp_setting = HPSetting(encoder, {"normalization_type": "relative_frequency", "reads": "unique", "sequence_encoding": "continuous_kmer",

@@ -42,7 +42,7 @@ class TestApplyGenModelInstruction(TestCase):
         self.assertEqual(result.result_path, path / "Test/")
         self.assertEqual(result.report_results["data_reports"], ["Data Report Result"])
 
-        df = pd.read_csv(path / "Test/generated_sequences/batch1.tsv")
+        df = pd.read_csv(path / "Test/generated_sequences/sequence_dataset.tsv")
         self.assertEqual(2, df.shape[0])
 
         shutil.rmtree(path)

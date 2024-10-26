@@ -76,8 +76,8 @@ class TestSignificantFeatures(TestCase):
 
         dataset = self._get_example_dataset(path)
 
-        report = SignificantFeatures.build_object(**{"dataset": dataset,
-                                                     "p_values": [0.5, 0.0],
+        report = SignificantFeatures.build_object(**{"dataset": dataset, "region_type": "IMGT_CDR3",
+                                                     "p_values": [0.5, 0.0], "sequence_type": "AMINO_ACID",
                                                      "k_values": ["full_sequence", 3],
                                                      "compairr_path": compairr_path,
                                                      "label": {"mylabel": {"positive_class": "+"}},

@@ -182,7 +182,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         if self.reads == ReadsType.UNIQUE:
             repertoire_totals = np.asarray([[repertoire.get_element_count() for repertoire in dataset.get_data()]]).T
         else:
-            repertoire_totals = np.asarray([[sum(repertoire.get_counts()) for repertoire in dataset.get_data()]]).T
+            repertoire_totals = np.asarray([[sum(repertoire.data.duplicate_count) for repertoire in dataset.get_data()]]).T
 
         return encoded_repertoires / repertoire_totals
 

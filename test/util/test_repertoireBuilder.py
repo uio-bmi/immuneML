@@ -16,12 +16,12 @@ class TestRepertoireBuilder(TestCase):
         self.assertEqual(2, len(repertoires))
         self.assertEqual((2, 4), pd.read_csv(metadata).shape)
 
-        self.assertEqual(2, len(repertoires[0].sequences))
-        self.assertTrue(all([isinstance(seq, ReceptorSequence) for seq in repertoires[0].sequences]))
+        self.assertEqual(2, len(repertoires[0].sequences()))
+        self.assertTrue(all([isinstance(seq, ReceptorSequence) for seq in repertoires[0].sequences()]))
         self.assertEqual(1, repertoires[0].metadata["default"])
 
-        self.assertEqual(1, len(repertoires[1].sequences))
-        self.assertTrue(all([isinstance(seq, ReceptorSequence) for seq in repertoires[1].sequences]))
+        self.assertEqual(1, len(repertoires[1].sequences()))
+        self.assertTrue(all([isinstance(seq, ReceptorSequence) for seq in repertoires[1].sequences()]))
         self.assertEqual(2, repertoires[1].metadata["default"])
         self.assertEqual("rep_1", repertoires[1].metadata["subject_id"])
 

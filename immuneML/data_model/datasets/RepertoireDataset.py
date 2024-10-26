@@ -28,7 +28,7 @@ class RepertoireDataset(Dataset):
         assert len(kwargs['repertoires']) > 0, "Cannot to construct a repertoire dataset without repertories."
 
         metadata_df = pd.DataFrame.from_records(
-            [{**rep.metadata, **{'filename': rep.data_filename}} for rep in kwargs['repertoires']])
+            [{**rep.metadata, **{'filename': rep.data_filename.name}} for rep in kwargs['repertoires']])
 
         if 'field_list' in metadata_df.columns:
             metadata_df.drop(columns=['field_list'], inplace=True)

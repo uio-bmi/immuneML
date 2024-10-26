@@ -27,7 +27,7 @@ class TestSubsamplingInstruction(TestCase):
         self.assertEqual(100, state.subsampled_datasets[0].get_example_count())
         self.assertEqual(50, state.subsampled_datasets[1].get_example_count())
 
-        self.assertTrue(all(os.path.isfile(state.subsampled_dataset_paths[name]['immuneml'])
+        self.assertTrue(all(os.path.isfile(state.subsampled_dataset_paths[name]['airr'])
                             for name in [dataset.name for dataset in state.subsampled_datasets]))
 
         shutil.rmtree(path)

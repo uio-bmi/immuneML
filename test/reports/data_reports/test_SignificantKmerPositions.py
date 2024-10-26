@@ -22,38 +22,38 @@ class TestSignificantKmerPositions(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def _get_example_dataset(self, path):
-        rep1 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence(sequence_aa="AAA", sequence_id="1"),
+        rep1 = Repertoire.build_from_sequences(
+            sequences=[ReceptorSequence(sequence_aa="AAA", sequence_id="1"),
                               ReceptorSequence(sequence_aa="III", sequence_id="2"),
                               ReceptorSequence(sequence_aa="GGGG", sequence_id="3"),
                               ReceptorSequence(sequence_aa="MMM", sequence_id="4")],
-            path=path, metadata={"mylabel": "+"})
-        rep2 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence(sequence_aa="IAIAA", sequence_id="1"),
+            result_path=path, metadata={"mylabel": "+"})
+        rep2 = Repertoire.build_from_sequences(
+            sequences=[ReceptorSequence(sequence_aa="IAIAA", sequence_id="1"),
                               ReceptorSequence(sequence_aa="GGGG", sequence_id="3"),
                               ReceptorSequence(sequence_aa="MMM", sequence_id="4")],
-            path=path, metadata={"mylabel": "+"})
-        rep21 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence(sequence_aa="IAIAA", sequence_id="1"),
+            result_path=path, metadata={"mylabel": "+"})
+        rep21 = Repertoire.build_from_sequences(
+            sequences=[ReceptorSequence(sequence_aa="IAIAA", sequence_id="1"),
                               ReceptorSequence(sequence_aa="GGGG", sequence_id="3"),
                               ReceptorSequence(sequence_aa="MMM", sequence_id="4")],
-            path=path, metadata={"mylabel": "+"})
-        rep22 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence(sequence_aa="IAIAA", sequence_id="1"),
+            result_path=path, metadata={"mylabel": "+"})
+        rep22 = Repertoire.build_from_sequences(
+            sequences=[ReceptorSequence(sequence_aa="IAIAA", sequence_id="1"),
                               ReceptorSequence(sequence_aa="IIII", sequence_id="3"),
                               ReceptorSequence(sequence_aa="IIII", sequence_id="4")],
-            path=path, metadata={"mylabel": "-"})
-        rep23 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence(sequence_aa="AAAAA", sequence_id="1"),
+            result_path=path, metadata={"mylabel": "-"})
+        rep23 = Repertoire.build_from_sequences(
+            sequences=[ReceptorSequence(sequence_aa="AAAAA", sequence_id="1"),
                               ReceptorSequence(sequence_aa="IIII", sequence_id="3"),
                               ReceptorSequence(sequence_aa="IIII", sequence_id="4")],
-            path=path, metadata={"mylabel": "-"})
-        rep3 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence(sequence_aa="KKKK", sequence_id="5"),
+            result_path=path, metadata={"mylabel": "-"})
+        rep3 = Repertoire.build_from_sequences(
+            sequences=[ReceptorSequence(sequence_aa="KKKK", sequence_id="5"),
                               ReceptorSequence(sequence_aa="HHH", sequence_id="6"),
                               ReceptorSequence(sequence_aa="AAAA", sequence_id="7"),
                               ReceptorSequence(sequence_aa="IIII", sequence_id="8")],
-            path=path, metadata={"mylabel": "-"})
+            result_path=path, metadata={"mylabel": "-"})
 
         dataset = RepertoireDataset(repertoires=[rep1, rep2, rep21, rep22, rep23, rep3],
                                     labels={"mylabel": ["+", "-"]})

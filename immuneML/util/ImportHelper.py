@@ -29,6 +29,8 @@ class ImportHelper:
 
     @staticmethod
     def get_repertoire_filename_from_metadata_row(metadata_row: pd.Series, params: DatasetImportParams) -> Path:
+        if params.path is None:
+            params.path = params.dataset_file.parent if params.dataset_file else params.metadata_file.parent
         filename = params.path / f"{metadata_row['filename']}"
         if not filename.is_file():
             filename = params.path / f"repertoires/{metadata_row['filename']}"

@@ -150,7 +150,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
     def encode(self, dataset, params: EncoderParams):
         EncoderHelper.check_positive_class_labels(params.label_config, CompAIRRSequenceAbundanceEncoder.__name__)
-        self.compairr_params.is_cdr3 = dataset.repertoires[0].get_region_type() == RegionType.IMGT_CDR3
+        self.compairr_params.is_cdr3 = params.region_type == RegionType.IMGT_CDR3
 
         self.compairr_sequence_presence = self._prepare_sequence_presence_data(dataset, params)
 

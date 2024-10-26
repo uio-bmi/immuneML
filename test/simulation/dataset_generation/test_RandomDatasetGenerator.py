@@ -24,7 +24,7 @@ class TestRandomDatasetGenerator(TestCase):
         self.assertEqual(100, dataset.get_example_count())
         for repertoire in dataset.repertoires:
             self.assertTrue(repertoire.get_element_count() == 5 or repertoire.get_element_count() == 6)
-            self.assertTrue(all(len(sequence_aa) in [4, 5] for sequence_aa in repertoire.get_sequence_aas().tolist()))
+            self.assertTrue(all(seq_len in [4, 5] for seq_len in repertoire.data.cdr3_aa.lengths.tolist()))
             self.assertTrue(repertoire.metadata["HLA"] in ["A", "B"])
 
         shutil.rmtree(path)
@@ -62,6 +62,6 @@ class TestRandomDatasetGenerator(TestCase):
 
         for sequence in dataset.get_data():
             self.assertTrue(len(sequence.sequence_aa) in [4, 5])
-            self.assertTrue(sequence.get_attribute("HLA") in ["A", "B"])
+            self.assertTrue(sequence.metadata["HLA"] in ["A", "B"])
 
         shutil.rmtree(path)

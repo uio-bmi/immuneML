@@ -13,3 +13,5 @@ selection: # inner loop of nested CV
   training_percentage: 0.7
 example_weighting: null
 export_all_ml_settings: False # only export the optimal model
+region_type: IMGT_CDR3
+sequence_type: AMINO_ACID

@@ -2,11 +2,13 @@ import copy
 from pathlib import Path
 from typing import List
 
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.Constants import Constants
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.example_weighting.ExampleWeightingParams import ExampleWeightingParams
 from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeightingStrategy
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
@@ -44,13 +46,15 @@ class HPUtil:
 
     @staticmethod
     def get_average_performance(performances):
-        if performances is not None and isinstance(performances, list) and len(performances) > 0 and all(isinstance(perf, float) for perf in performances):
+        if performances is not None and isinstance(performances, list) and len(performances) > 0 and all(
+                isinstance(perf, float) for perf in performances):
             return sum(perf for perf in performances) / len(performances)
         else:
             return Constants.NOT_COMPUTED
 
     @staticmethod
-    def preprocess_dataset(dataset: Dataset, preproc_sequence: list, path: Path, context: dict = None, hp_setting: HPSetting = None) -> Dataset:
+    def preprocess_dataset(dataset: Dataset, preproc_sequence: list, path: Path, context: dict = None,
+                           hp_setting: HPSetting = None) -> Dataset:
         if dataset is not None:
             if isinstance(preproc_sequence, list) and len(preproc_sequence) > 0:
                 PathBuilder.build(path)
@@ -72,7 +76,8 @@ class HPUtil:
                 return dataset
 
     @staticmethod
-    def weight_examples(dataset, weighting_strategy: ExampleWeightingStrategy, path: Path, learn_model: bool, number_of_processes: int):
+    def weight_examples(dataset, weighting_strategy: ExampleWeightingStrategy, path: Path, learn_model: bool,
+                        number_of_processes: int):
         weighted_dataset = DataWeighter.run(DataWeighterParams(
             dataset=dataset,
             weighting_strategy=weighting_strategy,
@@ -84,10 +89,12 @@ class HPUtil:
         ))
         return weighted_dataset
 
-
     @staticmethod
-    def encode_dataset(dataset, hp_setting: HPSetting, path: Path, learn_model: bool, context: dict, number_of_processes: int,
-                       label_configuration: LabelConfiguration, encode_labels: bool = True):
+    def encode_dataset(dataset, hp_setting: HPSetting, path: Path, learn_model: bool, context: dict,
+                       number_of_processes: int,
+                       label_configuration: LabelConfiguration, encode_labels: bool = True,
+                       sequence_type: SequenceType = SequenceType.AMINO_ACID,
+                       region_type: RegionType = RegionType.IMGT_CDR3):
         PathBuilder.build(path)
 
         encoded_dataset = DataEncoder.run(DataEncoderParams(
@@ -105,7 +112,8 @@ class HPUtil:
         return encoded_dataset
 
     @staticmethod
-    def assess_performance(method, metrics, optimization_metric, dataset, split_index, current_path: Path, test_predictions_path: Path, label: Label,
+    def assess_performance(method, metrics, optimization_metric, dataset, split_index, current_path: Path,
+                           test_predictions_path: Path, label: Label,
                            ml_score_path: Path):
         return MLMethodAssessment.run(MLMethodAssessmentParams(
             method=method,
@@ -132,7 +140,8 @@ class HPUtil:
         return report_results
 
     @staticmethod
-    def run_selection_reports(state: TrainMLModelState, dataset, train_datasets: list, val_datasets: list, selection_state: HPSelectionState):
+    def run_selection_reports(state: TrainMLModelState, dataset, train_datasets: list, val_datasets: list,
+                              selection_state: HPSelectionState):
         path = selection_state.path
         data_split_reports = state.selection.reports.data_split_reports.values()
         for index in range(len(train_datasets)):

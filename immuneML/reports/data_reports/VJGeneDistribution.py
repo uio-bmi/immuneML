@@ -89,8 +89,7 @@ class VJGeneDistribution(DataReport):
     def _get_sequence_receptor_results(self):
         attributes = [self.label_name] if self.split_by_label else []
         attributes += ["v_call", "j_call", "locus"]
-        dataset_attributes = self.dataset.get_attributes(attributes=attributes,
-                                                         as_list=False)
+        dataset_attributes = self.dataset.data.topandas()[attributes]
         dataset_attributes = {key: value.tolist() for key, value in dataset_attributes.items()}
 
         v_tables, v_plots = self._get_single_gene_results_from_attributes(dataset_attributes, "v_call")
@@ -284,9 +283,10 @@ class VJGeneDistribution(DataReport):
         vj_dfs = []
 
         for repertoire in self.dataset.repertoires:
-            repertoire_attributes = {"v_call": repertoire.get_v_genes(),
-                                     "j_call": repertoire.get_j_genes(),
-                                     "locus": repertoire.get_attribute("locus", as_list=True)}
+            data = repertoire.data
+            repertoire_attributes = {"v_call": data.v_call.tolist(),
+                                     "j_call": data.j_call.tolist(),
+                                     "locus": data.locus.tolist()}
 
             v_rep_df = self._get_gene_count_df(repertoire_attributes, "v_call", include_label=False)
             j_rep_df = self._get_gene_count_df(repertoire_attributes, "j_call", include_label=False)
@@ -355,10 +355,12 @@ class VJGeneDistribution(DataReport):
 
         if isinstance(self.dataset, ReceptorDataset) or isinstance(self.dataset, SequenceDataset):
             try:
-                self.dataset.get_attributes(attributes=["v_call", "j_call", "locus"])
+                self.dataset.data.topandas()[["v_call", "j_call", "locus"]]
             except AttributeError as e:
                 warnings.warn(
-                    f"{VJGeneDistribution.__name__}: the following attributes were expected to be present in the dataset: v_call, j_call, locus. The following error occurred when attempting to get these attributes: {e} Skipping this report...")
+                    f"{VJGeneDistribution.__name__}: the following attributes were expected to be present in the "
+                    f"dataset: v_call, j_call, locus. The following error occurred when attempting to get these "
+                    f"attributes: {e} Skipping this report...")
                 return False
 
         return True
