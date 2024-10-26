@@ -32,22 +32,28 @@ class TestMLApplicationInstruction(TestCase):
     def test_run(self):
 
         path = EnvironmentSettings.tmp_test_path / "mlapplicationtest/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
-        dataset = RandomDatasetGenerator.generate_repertoire_dataset(50, {5: 1}, {5: 1}, {"l1": {1: 0.5, 2: 0.5}}, path / 'training_dataset/')
-        test_dataset = RandomDatasetGenerator.generate_repertoire_dataset(20, {5: 1}, {5: 1}, {"l1": {1: 0.5, 2: 0.5}}, path / 'test_dataset/')
+        dataset = RandomDatasetGenerator.generate_repertoire_dataset(50, {5: 1}, {5: 1}, {"l1": {1: 0.5, 2: 0.5}},
+                                                                     path / 'training_dataset/')
+        test_dataset = RandomDatasetGenerator.generate_repertoire_dataset(20, {5: 1}, {5: 1}, {"l1": {1: 0.5, 2: 0.5}},
+                                                                          path / 'test_dataset/')
         ml_method = LogisticRegression()
-        encoder = KmerFreqRepertoireEncoder(NormalizationType.RELATIVE_FREQUENCY, ReadsType.UNIQUE, SequenceEncodingType.CONTINUOUS_KMER, 3,
+        encoder = KmerFreqRepertoireEncoder(NormalizationType.RELATIVE_FREQUENCY, ReadsType.UNIQUE,
+                                            SequenceEncodingType.CONTINUOUS_KMER, 3,
                                             scale_to_zero_mean=True, scale_to_unit_variance=True)
         label = Label("l1", [1, 2])
         label_config = LabelConfiguration([label])
 
         enc_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=label_config, pool_size=4,
-                                                            region_type=RegionType.IMGT_CDR3, sequence_type=SequenceType.AMINO_ACID))
+                                                            region_type=RegionType.IMGT_CDR3,
+                                                            sequence_type=SequenceType.AMINO_ACID))
         ml_method.fit(enc_dataset.encoded_data, label)
 
-        hp_setting = HPSetting(encoder, {"normalization_type": "relative_frequency", "reads": "unique", "sequence_encoding": "continuous_kmer",
-                                         "k": 3, "scale_to_zero_mean": True, "scale_to_unit_variance": True}, ml_method, {}, [], 'enc1', 'ml1')
+        hp_setting = HPSetting(encoder, {"normalization_type": "relative_frequency", "reads": "unique",
+                                         "sequence_encoding": "continuous_kmer",
+                                         "k": 3, "scale_to_zero_mean": True, "scale_to_unit_variance": True}, ml_method,
+                               {}, [], 'enc1', 'ml1')
 
         PathBuilder.build(path / 'result/instr1/')
 

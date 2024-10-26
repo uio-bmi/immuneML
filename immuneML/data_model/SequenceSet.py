@@ -12,6 +12,7 @@ from immuneML.data_model.bnp_util import get_field_type_from_values, \
     extend_dataclass_with_dynamic_fields, bnp_write_to_file, write_yaml, bnp_read_from_file, read_yaml, \
     build_dynamic_bnp_dataclass_obj
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.util.PathBuilder import PathBuilder
 
 
 @dataclass
@@ -130,6 +131,8 @@ class Repertoire:
         filename_base = filename_base if filename_base is not None else identifier
         data = bnp_read_from_file(repertoire.data_filename, repertoire.buffer_type)
         data = data[indices_to_keep]
+
+        PathBuilder.build(result_path)
 
         data_filename = result_path / f"{filename_base}.tsv"
         bnp_write_to_file(data_filename, data)
