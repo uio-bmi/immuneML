@@ -11,9 +11,10 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TestSimpleDatasetOverview(TestCase):
     def test_generate_sequence_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "overview_sequence_dataset/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "overview_sequence_dataset/")
 
-        dataset = RandomDatasetGenerator.generate_sequence_dataset(100, {10: 0.5, 11:0.25, 20:0.25}, {"l1": {"a": 0.5, "b": 0.5}}, path / "dataset")
+        dataset = RandomDatasetGenerator.generate_sequence_dataset(100, {10: 0.5, 11: 0.25, 20: 0.25},
+                                                                   {"l1": {"a": 0.5, "b": 0.5}}, path / "dataset")
 
         params = {"dataset": dataset, "result_path": path / "result"}
 
@@ -29,12 +30,14 @@ class TestSimpleDatasetOverview(TestCase):
         shutil.rmtree(path)
 
     def test_generate_receptor_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "overview_receptor_dataset/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "overview_receptor_dataset/")
 
-
-        dataset = RandomDatasetGenerator.generate_receptor_dataset(100, chain_1_length_probabilities={10: 0.5, 11:0.25, 20:0.25},
-                                                                   chain_2_length_probabilities={10: 0.5, 11: 0.25, 15: 0.25},
-                                                                   labels={"l1": {"a": 0.5, "b": 0.5}}, path=path / "dataset")
+        dataset = RandomDatasetGenerator.generate_receptor_dataset(100, chain_1_length_probabilities={10: 0.5, 11: 0.25,
+                                                                                                      20: 0.25},
+                                                                   chain_2_length_probabilities={10: 0.5, 11: 0.25,
+                                                                                                 15: 0.25},
+                                                                   labels={"l1": {"a": 0.5, "b": 0.5}},
+                                                                   path=path / "dataset")
 
         params = {"dataset": dataset, "result_path": path / "result"}
 
@@ -52,10 +55,11 @@ class TestSimpleDatasetOverview(TestCase):
     def test_generate_repertoire_dataset(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "overview_repertoire_dataset/")
 
-
-        dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=5, sequence_count_probabilities={20:1},
+        dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=5,
+                                                                     sequence_count_probabilities={20: 1},
                                                                      sequence_length_probabilities={10: 1},
-                                                                     labels={"l1": {"a": 0.5, "b": 0.5}}, path=path / "dataset")
+                                                                     labels={"l1": {"a": 0.5, "b": 0.5}},
+                                                                     path=path / "dataset")
 
         params = {"dataset": dataset, "result_path": path / "result"}
 

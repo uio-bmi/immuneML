@@ -25,7 +25,7 @@ class TestSequenceAbundanceEncoding(TestCase):
             EnvironmentSettings.tmp_test_path / "integration_test_emerson_encoding/")
 
         ref_path = path / "reference.csv"
-        pd.DataFrame({"sequence_aa": ["GGG", "III", "TTT", "EFEF"],
+        pd.DataFrame({"cdr3_aa": ["GGG", "III", "TTT", "EFEF"],
                       "v_call": ["TRBV6-1*01", "TRBV6-1*01", "TRBV6-1*01", "TRBV6-1*01"],
                       'j_call': ["TRBJ2-7", "TRBJ2-7", "TRBJ2-7", "TRBJ2-7"]}).to_csv(ref_path, index=False)
 
@@ -67,7 +67,7 @@ class TestSequenceAbundanceEncoding(TestCase):
                 },
                 "reports": {
                     "r1": {"ReferenceSequenceOverlap": {"reference_path": str(ref_path),
-                                                        'comparison_attributes': ["sequence_aa", "v_call", "j_call"]}}
+                                                        'comparison_attributes': ["cdr3_aa", "v_call", "j_call"]}}
                 }
             },
             "instructions": {

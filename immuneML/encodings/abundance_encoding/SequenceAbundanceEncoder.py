@@ -153,7 +153,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         all_sequences = comparison_data.get_item_names()
         relevant_sequences = all_sequences[relevant_sequence_indices]
         if relevant_sequences is not None and sum(relevant_sequence_indices) > 0:
-            df = pd.DataFrame({attr: relevant_sequences[i] for i, attr in enumerate(self.comparison_attributes)})
+            df = pd.DataFrame({attr: relevant_sequences[:, i] for i, attr in enumerate(self.comparison_attributes)})
         else:
             df = pd.DataFrame(columns=self.comparison_attributes)
         sequence_csv_path = result_path / 'relevant_sequences.csv'
