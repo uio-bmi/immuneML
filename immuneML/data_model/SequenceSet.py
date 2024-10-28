@@ -1,3 +1,4 @@
+import logging
 import typing
 from dataclasses import dataclass, field, fields
 from pathlib import Path
@@ -35,6 +36,17 @@ class ReceptorSequence:
 
     def get_sequence(self, sequence_type: SequenceType = SequenceType.AMINO_ACID):
         return self.sequence_aa if sequence_type == SequenceType.AMINO_ACID else self.sequence
+
+    def get_attribute(self, attr_name):
+        try:
+            if hasattr(self, attr_name):
+                return getattr(self, attr_name)
+            else:
+                return self.metadata.get(attr_name)
+        except KeyError as e:
+            logging.error(f"ReceptorSequence object has no attribute {e}. In metadata, "
+                          f"it has: {list(self.metadata.keys()) if isinstance(self.metadata, dict) else []}")
+            raise e
 
     def __post_init__(self):
         if self.sequence_id is None or self.sequence_id == "":

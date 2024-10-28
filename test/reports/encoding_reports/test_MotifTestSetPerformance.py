@@ -10,12 +10,14 @@ from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.reports.encoding_reports.MotifTestSetPerformance import MotifTestSetPerformance
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestMotifTestSetPerformance(TestCase):
 
     def _get_exported_test_dataset(self, path):
-        test_dataset = RandomDatasetGenerator.generate_sequence_dataset(50, {10: 1}, {"is_binder": {"yes": 0.5, "no": 0.5}},
+        test_dataset = RandomDatasetGenerator.generate_sequence_dataset(50, {10: 1},
+                                                                        {"is_binder": {"yes": 0.5, "no": 0.5}},
                                                                         path / "test_random_dataset")
 
         export_path = path / "test_airr_dataset"
@@ -55,17 +57,15 @@ class TestMotifTestSetPerformance(TestCase):
 
         return file_path
 
-
     def test_generate(self):
-        path = EnvironmentSettings.tmp_test_path / "motif_test_set_performance/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "motif_test_set_performance/")
 
         test_dataset_path = self._get_exported_test_dataset(path)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/",
                                           "MotifTestSetPerformance")
         params["test_dataset"] = {"format": "AIRR",
-                                  "params": {"path": str(test_dataset_path),
-                                             "metadata_column_mapping": {"is_binder": "is_binder"}}}
+                                  "params": {"path": str(test_dataset_path)}}
         params["name"] = "motif_set_perf"
         params["highlight_motifs_path"] = str(self._write_highlight_motifs_file(path))
 
@@ -85,5 +85,3 @@ class TestMotifTestSetPerformance(TestCase):
         self.assertTrue(os.path.isfile(path / "result_path/test_precision_per_tp_motif_size=1.html"))
 
         shutil.rmtree(path)
-
-

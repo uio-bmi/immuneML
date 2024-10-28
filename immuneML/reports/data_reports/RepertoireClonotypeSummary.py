@@ -78,12 +78,10 @@ class RepertoireClonotypeSummary(DataReport):
 
     def _get_clonotype_count_with_label(self, repertoire: Repertoire) -> Tuple[int, str]:
 
-        sequences = repertoire.get_attribute('sequences')
-        if sequences is None:
-            sequences = repertoire.get_sequence_aas()
+        sequences = repertoire.data
 
-        sequence_count = sequences.shape[0]
-        unique_sequence_count = np.unique(sequences.tolist()).shape[0]
+        sequence_count = len(sequences)
+        unique_sequence_count = np.unique(sequences.cdr3_aa.tolist()).shape[0]
         if sequence_count != unique_sequence_count:
             logging.warning(f"{RepertoireClonotypeSummary.__name__}: for repertoire {repertoire.identifier}, there are {sequence_count} sequences, "
                             f"but {unique_sequence_count} unique sequences.")

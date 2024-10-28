@@ -8,7 +8,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 def test_generate():
 
-    path = PathBuilder.build(EnvironmentSettings.tmp_test_path / 'repertoire_clonotype_summary')
+    path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'repertoire_clonotype_summary')
 
     dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {3: 0.33, 4: 0.07, 5: 0.2, 6: 0.2, 7: 0.2}, {2: 1.},
                                                                  {"celiac": {True: 0.5, False: 0.5}}, path / 'dataset')

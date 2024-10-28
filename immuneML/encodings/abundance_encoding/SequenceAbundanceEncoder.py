@@ -6,15 +6,13 @@ import pandas as pd
 
 from immuneML.IO.ml_method.UtilIO import UtilIO
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.EncodedData import EncodedData
-from immuneML.data_model.SequenceSet import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.abundance_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
 from immuneML.pairwise_repertoire_comparison.ComparisonData import ComparisonData
 from immuneML.util.EncoderHelper import EncoderHelper
-from scripts.specification_util import update_docs_per_mapping
 
 
 class SequenceAbundanceEncoder(DatasetEncoder):

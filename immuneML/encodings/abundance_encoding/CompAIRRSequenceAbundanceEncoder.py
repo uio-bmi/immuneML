@@ -173,14 +173,12 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     def get_sequence_set(self, repertoire_dataset):
         attributes = self.get_relevant_sequence_attributes()
         sequence_set = set()
+        rep_seq_set_func = AbundanceEncoderHelper.get_matching_func_for_repertoire(attributes)
 
         for repertoire in repertoire_dataset.get_data():
-            sequence_set.update(self.get_sequence_set_for_repertoire(repertoire, attributes))
+            sequence_set.update(rep_seq_set_func(repertoire))
 
         return np.array(list(sequence_set))
-
-    def get_sequence_set_for_repertoire(self, repertoire, sequence_attributes):
-        return set(zip(*[value for value in repertoire.get_attributes(sequence_attributes, True).values() if value is not None]))
 
     def _get_sequence_presence(self, full_dataset, full_sequence_set, params):
         compairr_sequence_presence = CacheHandler.memo_by_params(
@@ -203,7 +201,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
                 "sequence_attributes", tuple(self.get_relevant_sequence_attributes()))
 
     def _compute_sequence_presence_with_compairr(self, dataset, full_sequence_set, params):
-        self._prepare_compairr_input_files(dataset, full_sequence_set, params.result_path)
+        self._prepare_compairr_input_files(dataset, full_sequence_set, params.result_path, params)
 
         arguments = [(sequences_filepath, params.result_path) for sequences_filepath in self.sequences_filepaths]
 
@@ -215,7 +213,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         return CompAIRRBatchIterator(paths, self.sequence_batch_size)
 
-    def _prepare_compairr_input_files(self, dataset, full_sequence_set, result_path):
+    def _prepare_compairr_input_files(self, dataset, full_sequence_set, result_path, params: EncoderParams):
         PathBuilder.build(result_path)
 
         if self.repertoires_filepath is None:
@@ -235,7 +233,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
                 self.sequences_filepaths.append(filename)
                 sequence_subset = full_sequence_set[subset_start_index:subset_end_index]
 
-                self.write_sequence_set_file(sequence_subset, filename, offset=subset_start_index, region_type=dataset.repertoires[0].get_region_type())
+                self.write_sequence_set_file(sequence_subset, filename, offset=subset_start_index,
+                                             region_type=params.region_type)
 
                 subset_start_index += self.sequence_batch_size
                 subset_end_index = min(subset_end_index + self.sequence_batch_size, len(full_sequence_set))
@@ -283,10 +282,10 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         examples = self._calculate_abundance_matrix(dataset, self.compairr_sequence_presence, params)
 
-        encoded_data = EncodedData(examples, dataset.get_metadata([label.name]) if params.encode_labels else None, dataset.get_repertoire_ids(),
+        encoded_data = EncodedData(examples, dataset.get_metadata([label.name]) if params.encode_labels else None,
+                                   dataset.get_repertoire_ids(),
                                    [CompAIRRSequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE,
                                     CompAIRRSequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
-                                   example_weights=dataset.get_example_weights(),
                                    encoding=CompAIRRSequenceAbundanceEncoder.__name__,
                                    info={"relevant_sequence_path": self.relevant_sequence_path,
                                          "contingency_table_path": self.contingency_table_path,
@@ -352,7 +351,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         df.to_csv(self.relevant_sequence_path, sep=",", index=False)
 
     def get_relevant_sequence_attributes(self):
-        attributes = [EnvironmentSettings.get_sequence_type().value]
+        attributes = ['cdr3_aa']
 
         if not self.compairr_params.ignore_genes:
             attributes += ["v_call", "j_call"]

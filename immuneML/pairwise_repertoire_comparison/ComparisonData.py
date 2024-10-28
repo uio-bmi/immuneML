@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.encodings.abundance_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
 from immuneML.pairwise_repertoire_comparison.ComparisonDataBatch import ComparisonDataBatch
 from immuneML.util.Logger import log
 from immuneML.util.PathBuilder import PathBuilder
@@ -34,16 +35,6 @@ class ComparisonData:
     def set_iteration_repertoire_ids(self, iteration_repertoire_ids):
         """Defines the subset and order of repertoires to iterate over"""
         self.iteration_repertoire_ids = iteration_repertoire_ids
-
-    def build_matching_fn(self):
-        def matching_func(repertoire):
-            tmp_df = repertoire.data.topandas()[self.comparison_attributes]
-            tmp_df = tmp_df[tmp_df.astype(bool).any(axis=1)]
-            unique_tuples = list(tmp_df.drop_duplicates().itertuples(index=False, name=None))
-
-            return unique_tuples
-
-        return matching_func
 
     def get_item_names(self):
         return np.array([item for items in [batch.get_items() for batch in self.batches] for item in items])
@@ -93,7 +84,7 @@ class ComparisonData:
 
     @log
     def process_dataset(self, dataset: RepertoireDataset):
-        extract_fn = self.build_matching_fn()
+        extract_fn = AbundanceEncoderHelper.get_matching_func_for_repertoire(self.comparison_attributes)
         repertoire_count = dataset.get_example_count()
         for index, repertoire in enumerate(dataset.get_data()):
             self.process_repertoire(repertoire, str(repertoire.identifier), extract_fn)

@@ -5,6 +5,7 @@ from typing import List
 import pandas as pd
 import plotly.express as px
 
+from immuneML.data_model import bnp_util
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
@@ -233,7 +234,7 @@ class RecoveredSignificantFeatures(DataReport):
         encoder = SignificantFeaturesHelper._build_compairr_sequence_encoder(self.dataset, p_value, encoder_params, self.compairr_path)
         sequences = pd.read_csv(encoder.relevant_sequence_path)
 
-        return list(sequences[EnvironmentSettings.get_sequence_type().value])
+        return list(sequences[bnp_util.get_sequence_field_name(self.region_type, self.sequence_type)])
 
     def _compute_true_features(self, k):
         if type(k) == int:

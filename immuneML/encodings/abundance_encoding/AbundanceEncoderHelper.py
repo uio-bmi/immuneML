@@ -102,3 +102,14 @@ class AbundanceEncoderHelper:
             abundance_matrix[idx_in_dataset] = [relevant_sequence_abundance, total_sequence_abundance]
 
         return abundance_matrix
+
+    @staticmethod
+    def get_matching_func_for_repertoire(comparison_attributes: list):
+        def matching_func(repertoire):
+            tmp_df = repertoire.data.topandas()[comparison_attributes]
+            tmp_df = tmp_df[tmp_df.astype(bool).any(axis=1)]
+            unique_tuples = list(tmp_df.drop_duplicates().itertuples(index=False, name=None))
+
+            return unique_tuples
+
+        return matching_func
