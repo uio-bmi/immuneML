@@ -29,7 +29,9 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
             feature_names=list(feature_annotations["locus_id"]),
             feature_annotations=feature_annotations,
             labels=labels,
-            encoding=MatchedRegexEncoder.__name__
+            encoding=MatchedRegexEncoder.__name__,
+            info={'sequence_type': params.sequence_type,
+                  'region_type': params.region_type}
         )
 
         return encoded_dataset

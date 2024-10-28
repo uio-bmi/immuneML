@@ -240,7 +240,9 @@ class MotifEncoder(DatasetEncoder):
                                                    info={"candidate_motif_filepath": self.candidate_motif_filepath,
                                                          "learned_motif_filepath": self.learned_motif_filepath,
                                                          "positive_class": self._get_positive_class(
-                                                             params.label_config)})
+                                                             params.label_config),
+                                                         "sequence_type": params.sequence_type,
+                                                         'region_type': params.region_type})
 
         return encoded_dataset
 

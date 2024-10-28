@@ -147,7 +147,9 @@ class MatchedSequencesEncoder(DatasetEncoder):
             feature_names=feature_names,
             feature_annotations=feature_annotations,
             example_ids=[repertoire.identifier for repertoire in dataset.get_data()],
-            encoding=MatchedSequencesEncoder.__name__
+            encoding=MatchedSequencesEncoder.__name__,
+            info={'sequence_type': params.sequence_type,
+                  'region_type': params.region_type}
         )
 
         return encoded_dataset

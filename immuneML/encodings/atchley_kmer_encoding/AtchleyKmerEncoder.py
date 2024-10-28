@@ -6,6 +6,7 @@ from typing import Tuple, List
 import math
 
 import dill
+from immuneML.environment.SequenceType import SequenceType
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
@@ -108,7 +109,9 @@ class AtchleyKmerEncoder(DatasetEncoder):
         feature_names = [f"atchley_factor_{j}_aa_{i}" for i in range(1, self.k + 1) for j in range(1, Util.ATCHLEY_FACTOR_COUNT + 1)] + ["abundance"]
         encoded_data = EncodedData(examples=examples, example_ids=dataset.get_example_ids(),
                                    feature_names=feature_names, labels=labels,
-                                   encoding=AtchleyKmerEncoder.__name__, info={"kmer_keys": self.kmer_keys})
+                                   encoding=AtchleyKmerEncoder.__name__, info={"kmer_keys": self.kmer_keys,
+                                                                               'sequence_type': SequenceType.AMINO_ACID,
+                                                                               'region_type': params.region_type})
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = encoded_data

@@ -178,7 +178,9 @@ class MatchedReceptorsEncoder(DatasetEncoder):
             feature_names=feature_names,
             feature_annotations=feature_annotations,
             labels=labels,
-            encoding=MatchedReceptorsEncoder.__name__
+            encoding=MatchedReceptorsEncoder.__name__,
+            info={'sequence_type': params.sequence_type,
+                  'region_type': params.region_type}
         )
 
         return encoded_dataset

@@ -185,7 +185,9 @@ class Word2VecEncoder(DatasetEncoder):
                                                    example_ids=dataset.get_example_ids(),
                                                    feature_names=feature_names,
                                                    feature_annotations=feature_annotations,
-                                                   encoding=Word2VecEncoder.__name__)
+                                                   encoding=Word2VecEncoder.__name__,
+                                                   info={'sequence_type': params.sequence_type,
+                                                         'region_type': params.region_type})
         return encoded_dataset
 
     def _encode_examples(self, encoded_dataset, vectors, params):

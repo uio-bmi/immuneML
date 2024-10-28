@@ -231,7 +231,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
                                    feature_names=feature_names,
                                    example_ids=example_ids,
                                    feature_annotations=feature_annotations,
-                                   encoding=KmerFrequencyEncoder.__name__)
+                                   encoding=KmerFrequencyEncoder.__name__,
+                                   info={"sequence_type": self.sequence_type, 'region_type': params.region_type})
 
         return encoded_data
 
