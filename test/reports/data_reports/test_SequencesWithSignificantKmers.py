@@ -75,7 +75,8 @@ class TestSequencesWithSignificantKmers(TestCase):
         dataset = self._get_example_dataset(path)
         implanted_sequences_path = self._get_implanted_sequences(path)
 
-        report = SequencesWithSignificantKmers.build_object(**{"dataset": dataset,
+        report = SequencesWithSignificantKmers.build_object(**{"dataset": dataset, 'region_type': "IMGT_CDR3",
+                                                               'sequence_type': 'AMINO_ACID',
                                                                "p_values": [1.0, 0.1],
                                                                "k_values": [2, 3],
                                                                "reference_sequences_path": implanted_sequences_path,

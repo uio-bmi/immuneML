@@ -13,7 +13,7 @@ from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class TestOneHotSequenceEncoder(TestCase):
+class TestOneHotReceptorEncoder(TestCase):
 
     def _construct_test_dataset(self, path, dataset_size: int = 50):
         receptors = [Receptor(chain_1=ReceptorSequence(sequence_aa="AAAA", locus='alpha'),
@@ -82,7 +82,7 @@ class TestOneHotSequenceEncoder(TestCase):
                               chain_2=ReceptorSequence(sequence_aa="AAAAAA", sequence_id="2b",
                                                        locus='beta'),
                               metadata={"l1": 2},
-                              cell_id="2", chain_pair=ChainPair.TRA_TRB)]
+                              cell_id="3", chain_pair=ChainPair.TRA_TRB)]
 
         return ReceptorDataset.build_from_objects(receptors, path)
 

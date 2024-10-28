@@ -132,7 +132,7 @@ class SequenceDataset(ElementDataset):
         return make_sequences_from_data(self.data, self.dynamic_fields, region_type)
 
     def get_example_ids(self):
-        return self.data.sequence_id
+        return self.data.sequence_id.tolist()
 
     def get_data_from_index_range(self, start_index: int, end_index: int):
         return self.data[start_index: end_index]

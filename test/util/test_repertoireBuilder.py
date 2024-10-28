@@ -30,10 +30,10 @@ class TestRepertoireBuilder(TestCase):
         repertoires, metadata = RepertoireBuilder.build([["AAA", "CCC"]], path / "rep2",
                                                         seq_metadata=[[{"v_call": "v5", "j_call": "j5"}, {"v_call": "v2", "j_call": "j2"}]])
 
-        self.assertEqual(repertoires[0].sequences[0].v_call, "v5")
-        self.assertEqual(repertoires[0].sequences[0].j_call, "j5")
-        self.assertEqual(repertoires[0].sequences[1].v_call, "v2")
-        self.assertEqual(repertoires[0].sequences[1].j_call, "j2")
+        self.assertEqual(repertoires[0].sequences()[0].v_call, "v5")
+        self.assertEqual(repertoires[0].sequences()[0].j_call, "j5")
+        self.assertEqual(repertoires[0].sequences()[1].v_call, "v2")
+        self.assertEqual(repertoires[0].sequences()[1].j_call, "j2")
 
         shutil.rmtree(path)
 

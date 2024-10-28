@@ -1,6 +1,10 @@
 import abc
 import math
 
+from npstructures import RaggedArray
+
+from immuneML.data_model import bnp_util
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder as SklearnOneHotEncoder
 
@@ -9,9 +13,11 @@ from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.simulation.util.bnp_util import pad_ragged_array
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
+import bionumpy as bnp
 
 
 class OneHotEncoder(DatasetEncoder):
@@ -95,7 +101,8 @@ class OneHotEncoder(DatasetEncoder):
         "ReceptorDataset": "OneHotReceptorEncoder"
     }
 
-    def __init__(self, use_positional_info: bool, distance_to_seq_middle: int, flatten: bool, name: str = None, sequence_type: SequenceType = None):
+    def __init__(self, use_positional_info: bool, distance_to_seq_middle: int, flatten: bool, name: str = None,
+                 sequence_type: SequenceType = None):
         super().__init__(name=name)
         self.use_positional_info = use_positional_info
         self.distance_to_seq_middle = distance_to_seq_middle
@@ -112,22 +119,26 @@ class OneHotEncoder(DatasetEncoder):
         if self.sequence_type == SequenceType.NUCLEOTIDE and self.distance_to_seq_middle is not None:  # todo check this / explain in docs
             self.distance_to_seq_middle = self.distance_to_seq_middle * 3
 
-        self.onehot_dimensions = self.alphabet + ["start", "mid", "end"] if self.use_positional_info else self.alphabet  # todo test this
+        self.onehot_dimensions = self.alphabet + ["start", "mid",
+                                                  "end"] if self.use_positional_info else self.alphabet  # todo test this
 
     @staticmethod
-    def _prepare_parameters(use_positional_info: bool, distance_to_seq_middle: int, flatten: bool, sequence_type: str, name: str = None):
+    def _prepare_parameters(use_positional_info: bool, distance_to_seq_middle: int, flatten: bool, sequence_type: str,
+                            name: str = None):
 
         location = OneHotEncoder.__name__
 
         ParameterValidator.assert_type_and_value(use_positional_info, bool, location, "use_positional_info")
         if use_positional_info:
-            ParameterValidator.assert_type_and_value(distance_to_seq_middle, int, location, "distance_to_seq_middle", min_inclusive=1)
+            ParameterValidator.assert_type_and_value(distance_to_seq_middle, int, location, "distance_to_seq_middle",
+                                                     min_inclusive=1)
         else:
             distance_to_seq_middle = None
 
         ParameterValidator.assert_type_and_value(flatten, bool, location, "flatten")
         ParameterValidator.assert_type_and_value(sequence_type, str, location, 'sequence_type')
-        ParameterValidator.assert_in_valid_list(sequence_type.upper(), [item.name for item in SequenceType], location, 'sequence_type')
+        ParameterValidator.assert_in_valid_list(sequence_type.upper(), [item.name for item in SequenceType], location,
+                                                'sequence_type')
 
         return {"use_positional_info": use_positional_info,
                 "distance_to_seq_middle": distance_to_seq_middle,
@@ -140,7 +151,7 @@ class OneHotEncoder(DatasetEncoder):
 
         prepared_params = OneHotEncoder._prepare_parameters(**params)
         encoder = ReflectionHandler.get_class_by_name(OneHotEncoder.dataset_mapping[dataset.__class__.__name__],
-                                                          "onehot/")(**prepared_params)
+                                                      "onehot/")(**prepared_params)
         return encoder
 
     def encode(self, dataset, params: EncoderParams):
@@ -161,28 +172,43 @@ class OneHotEncoder(DatasetEncoder):
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         pass
 
-    def _encode_sequence_list(self, sequences, pad_n_sequences, pad_sequence_len):
-        char_array = np.array(sequences, dtype=str)
-        char_array = char_array.view('U1').reshape((char_array.size, -1))
+    def _encode_sequence_list(self, sequences: AIRRSequenceSet, params: EncoderParams, pad_n_sequences: int = None,
+                              pad_sequence_len: int = None):
+        # Get sequence field based on sequence_type
+        sequence_field = bnp_util.get_sequence_field_name(params.region_type, params.sequence_type)
 
-        n_sequences, sequence_len = char_array.shape
+        # Extract sequences from AIRRSequenceSet
+        sequence_array = getattr(sequences, sequence_field)
 
-        sklearn_enc = SklearnOneHotEncoder(categories=[self.alphabet for i in range(sequence_len)], handle_unknown='ignore')
-        encoded_data = sklearn_enc.fit_transform(char_array).toarray()
+        sequence_alphabet = "".join(AIRRSequenceSet.get_field_type_dict()[sequence_field].get_alphabet()).replace("*",
+                                                                                                                  "").replace(
+            "X", "")
 
-        encoded_data = np.pad(encoded_data, pad_width=((0, pad_n_sequences - n_sequences), (0, 0)))
-        encoded_data = encoded_data.reshape((pad_n_sequences, sequence_len, len(self.alphabet)))
-        positional_dims = int(self.use_positional_info) * 3
-        encoded_data = np.pad(encoded_data, pad_width=((0, 0), (0, pad_sequence_len - sequence_len), (0, positional_dims)))
+        # noinspection PyTypeChecker
+        encoded_sequences = np.array([
+            np.pad(np.array((sequence_array[i][..., np.newaxis] == sequence_alphabet).tolist()),
+                   [[0, pad_sequence_len - sequence_array.lengths[i]], [0, 0]], mode='constant',
+                   constant_values=False) for i in range(len(sequence_array))
+        ])
 
+        if encoded_sequences.shape[0] != pad_n_sequences:
+            encoded_sequences = np.concatenate([encoded_sequences,
+                                                np.zeros(
+                                                    (pad_n_sequences - encoded_sequences.shape[0], pad_sequence_len,
+                                                     len(sequence_alphabet)))], axis=0)
+
+        # Add positional encoding if needed
         if self.use_positional_info:
-            pos_info = [self._get_imgt_position_weights(len(sequence), pad_length=pad_sequence_len).T for sequence in sequences]
+            pos_info = ([self._get_imgt_position_weights(seq_len,
+                                                         pad_length=pad_sequence_len).T
+                         for seq_len in sequence_array.lengths]
+                        + [[[0, 0, 0] for _ in range(pad_sequence_len)] for s in range(pad_n_sequences - len(sequence_array))])
             pos_info = np.stack(pos_info)
-            pos_info = np.pad(pos_info, pad_width=((0, pad_n_sequences - n_sequences), (0, 0), (0, 0)))
 
-            encoded_data[:, :, len(self.alphabet):] = pos_info
+            # Combine one-hot encoding with positional information
+            encoded_sequences = np.concatenate([encoded_sequences, pos_info], axis=-1)
 
-        return encoded_data
+        return encoded_sequences
 
     def _get_imgt_position_weights(self, seq_length, pad_length=None):
         start_weights = self._get_imgt_start_weights(seq_length)

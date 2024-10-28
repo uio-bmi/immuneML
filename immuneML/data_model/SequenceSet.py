@@ -306,7 +306,7 @@ def make_airr_seq_set_object_from_sequences(sequences: List[ReceptorSequence],
 
 
 def get_sequence_value(el: AIRRSequenceSet, region_type: RegionType = RegionType.IMGT_CDR3):
-    if region_type == region_type.FULL_SEQUENCE:
+    if region_type == RegionType.FULL_SEQUENCE:
         return el.sequence, el.sequence_aa
     else:
         return getattr(el, region_type.value, ''), getattr(el, region_type.value + "_aa", '')

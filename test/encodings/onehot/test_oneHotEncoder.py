@@ -13,6 +13,7 @@ from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -181,7 +182,9 @@ class TestOneHotEncoder(unittest.TestCase):
         encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False, "distance_to_seq_middle": None,
                                                          "flatten": False, 'sequence_type': 'nucleotide'})
 
-        encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=lc, pool_size=1, learn_model=True, model={}))
+        encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=lc, pool_size=1,
+                                                                learn_model=True, model={},
+                                                                sequence_type=SequenceType.NUCLEOTIDE))
 
         self.assertTrue(isinstance(encoded_dataset, RepertoireDataset))
         self.assertEqual((2, 3, 4, 4), encoded_dataset.encoded_data.examples.shape)

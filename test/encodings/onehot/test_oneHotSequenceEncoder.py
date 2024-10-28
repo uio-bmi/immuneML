@@ -23,7 +23,7 @@ class TestOneHotSequenceEncoder(TestCase):
         lc.add_label("l1", [1, 2])
         lc.add_label("l2", [1, 2])
 
-        dataset = SequenceDataset.build_from_objects(sequences=sequences, file_size=10, path=path)
+        dataset = SequenceDataset.build_from_objects(sequences=sequences, path=path)
 
         return dataset, lc
 
@@ -66,7 +66,7 @@ class TestOneHotSequenceEncoder(TestCase):
 
         PathBuilder.build(path)
 
-        return SequenceDataset.build_from_objects(sequences=sequences, file_size=10, path=path)
+        return SequenceDataset.build_from_objects(sequences=sequences, path=path)
 
 
     def test_sequence_flattened(self):

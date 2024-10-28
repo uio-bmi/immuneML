@@ -93,9 +93,8 @@ class OneHotRepertoireEncoder(OneHotEncoder):
         if isinstance(repertoire, bytes):
             repertoire = dill.loads(repertoire)
 
-        sequences = getattr(repertoire.data, params.get_sequence_field_name()).tolist()
-
-        onehot_encoded = self._encode_sequence_list(sequences, pad_n_sequences=self.max_rep_len, pad_sequence_len=self.max_seq_len)
+        onehot_encoded = self._encode_sequence_list(repertoire.data, pad_n_sequences=self.max_rep_len,
+                                                    pad_sequence_len=self.max_seq_len, params=params)
         example_id = repertoire.identifier
         labels = self._get_repertoire_labels(repertoire, params) if params.encode_labels else None
 

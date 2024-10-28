@@ -31,24 +31,24 @@ class OneHotReceptorEncoder(OneHotEncoder):
         chains = sorted(np.unique(dataset.data.locus.tolist()).tolist())
         assert len(chains) == 2, f"OneHotEncoder: {len(chains)} different loci in the dataset, expected 2."
 
-        first_chain_seqs = getattr(data, params.get_sequence_field_name())[np.array(data.locus.tolist()) == chains[0]]
-        second_chain_seqs = getattr(data, params.get_sequence_field_name())[np.array(data.locus.tolist()) == chains[1]]
+        first_chain_seqs = data[np.array(data.locus.tolist()) == chains[0]]
+        second_chain_seqs = data[np.array(data.locus.tolist()) == chains[1]]
 
         max_seq_len = max(getattr(data, params.get_sequence_field_name()).lengths)
 
         labels = self._get_labels(data, params) if params.encode_labels else None
 
-        examples_first_chain = self._encode_sequence_list(first_chain_seqs, pad_n_sequences=len(data) / 2,
-                                                          pad_sequence_len=max_seq_len)
-        examples_second_chain = self._encode_sequence_list(second_chain_seqs, pad_n_sequences=len(data) / 2,
-                                                           pad_sequence_len=max_seq_len)
+        examples_first_chain = self._encode_sequence_list(first_chain_seqs, pad_n_sequences=len(data) // 2,
+                                                          pad_sequence_len=max_seq_len, params=params)
+        examples_second_chain = self._encode_sequence_list(second_chain_seqs, pad_n_sequences=len(data) // 2,
+                                                           pad_sequence_len=max_seq_len, params=params)
 
         examples = np.stack((examples_first_chain, examples_second_chain), axis=1)
 
         feature_names = self._get_feature_names(max_seq_len, chains)
 
         if self.flatten:
-            examples = examples.reshape((len(data) / 2, 2*max_seq_len*len(self.onehot_dimensions)))
+            examples = examples.reshape((len(data) // 2, 2*max_seq_len*len(self.onehot_dimensions)))
             feature_names = [item for sublist in feature_names for subsublist in sublist for item in subsublist]
 
         encoded_data = EncodedData(examples=examples,
@@ -65,8 +65,6 @@ class OneHotReceptorEncoder(OneHotEncoder):
 
     def _get_labels(self, data, params: EncoderParams):
         label_names = params.label_config.get_labels_by_name()
-        labels = {
-            label_name: getattr(data, label_name).tolist() for label_name in label_names
-        }
+        labels = data.topandas().groupby('cell_id').aggregate({ln: 'first' for ln in label_names})[label_names].to_dict('list')
 
         return labels

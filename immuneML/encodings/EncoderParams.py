@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+from immuneML.data_model import bnp_util
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
@@ -18,7 +19,7 @@ class EncoderParams:
     region_type: RegionType = RegionType.IMGT_CDR3
 
     def get_sequence_field_name(self):
-        return self.region_type.value + "_aa" if self.sequence_type == SequenceType.AMINO_ACID else ""
+        return bnp_util.get_sequence_field_name(self.region_type, self.sequence_type)
 
     def get_seq_name_for_seq_object(self):
         return 'sequence' if self.sequence_type == SequenceType.NUCLEOTIDE else "sequence_aa"
