@@ -80,7 +80,9 @@ class TestSignificantKmerPositions(TestCase):
                                                           "k_values": [2, 3],
                                                           "reference_sequences_path": implanted_sequences_path,
                                                           "label": {"mylabel": {"positive_class": "+"}},
-                                                          "result_path": path})
+                                                          "result_path": path,
+                                                          "region_type": "IMGT_CDR3",
+                                                          "sequence_type": "AMINO_ACID"})
 
         self.assertListEqual(report.reference_sequences, ["IAIAA", "GGGG"])
 
