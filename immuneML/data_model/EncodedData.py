@@ -27,15 +27,18 @@ class EncodedData:
                  feature_annotations: pd.DataFrame = None, encoding: str = None, example_weights: list = None, info: dict = None,
                  dimensionality_reduced_data: np.ndarray = None):
 
-        assert feature_names is None or examples.shape[1] == len(feature_names), f"EncodedData: the length of feature_names ({len(feature_names)}) must match the feature dimension of the example matrix ({examples.shape[1]})"
+        assert feature_names is None or examples.shape[1] == len(feature_names), \
+            (f"EncodedData: the length of feature_names ({len(feature_names)}) must match the feature dimension of the "
+             f"example matrix ({examples.shape[1]})")
         if feature_names is not None:
             assert feature_annotations is None or feature_annotations.shape[0] == len(feature_names) == examples.shape[1]
         if example_ids is not None and labels is not None:
             for label in labels.values():
                 assert len(label) == len(example_ids), "EncodedData: there are {} labels, but {} examples"\
                     .format(len(label), len(example_ids))
-                assert examples is None or len(example_ids) == examples.shape[0], "EncodedData: there are {} example ids, but {} examples."\
-                    .format(len(example_ids), examples.shape[0])
+                assert examples is None or len(example_ids) == examples.shape[0], (
+                    "EncodedData: there are {} example ids, but {} examples."
+                    .format(len(example_ids), examples.shape[0]))
 
             if example_weights is not None:
                 assert len(example_weights) == len(example_ids)

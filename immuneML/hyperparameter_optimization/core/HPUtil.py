@@ -106,7 +106,9 @@ class HPUtil:
                 pool_size=number_of_processes,
                 label_config=label_configuration,
                 learn_model=learn_model,
-                encode_labels=encode_labels
+                encode_labels=encode_labels,
+                sequence_type=sequence_type,
+                region_type=region_type
             ),
         ))
         return encoded_dataset

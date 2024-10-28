@@ -4,10 +4,12 @@ import pandas as pd
 from unittest import TestCase
 
 from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.reports.encoding_reports.PositionalMotifFrequencies import PositionalMotifFrequencies
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.Constants import Constants
@@ -91,9 +93,12 @@ class TestPositionalMotifFrequencies(TestCase):
                 label_config=lc,
                 pool_size=2,
                 learn_model=True,
-                model={},
+                model={}
             ),
         )
+
+        encoded_dataset.encoded_data.info = dict(sequence_type=SequenceType.AMINO_ACID,
+                                                 region_type=RegionType.IMGT_CDR3)
 
         return encoded_dataset
 
