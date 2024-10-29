@@ -4,6 +4,7 @@ from unittest import TestCase
 
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
@@ -32,7 +33,6 @@ class TestSequenceClassification(TestCase):
         path = EnvironmentSettings.tmp_test_path / "integration_sequence_classification/"
         dataset = RandomDatasetGenerator.generate_sequence_dataset(50, {4: 1}, {'l1': {1: 0.5, 2: 0.5}}, path / 'data')
 
-        os.environ["cache_type"] = "test"
         encoder_params = {
             "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
             "reads": ReadsType.UNIQUE.name,
@@ -51,7 +51,8 @@ class TestSequenceClassification(TestCase):
         instruction = TrainMLModelInstruction(dataset, GridSearch([hp_setting]), [hp_setting],
                                               SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
                                               SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
-                                              {ClassificationMetric.BALANCED_ACCURACY}, ClassificationMetric.BALANCED_ACCURACY, lc, path)
+                                              {ClassificationMetric.BALANCED_ACCURACY}, ClassificationMetric.BALANCED_ACCURACY, lc, path,
+                                              sequence_type=SequenceType.AMINO_ACID, region_type=RegionType.IMGT_CDR3)
 
         result = instruction.run(result_path=path)
 

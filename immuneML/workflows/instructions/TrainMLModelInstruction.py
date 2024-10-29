@@ -148,7 +148,8 @@ class TrainMLModelInstruction(Instruction):
         self.state = TrainMLModelState(dataset, hp_strategy, hp_settings, assessment, selection, metrics,
                                        optimization_metric, label_configuration, path, context, number_of_processes,
                                        reports if reports is not None else {}, name, refit_optimal_model,
-                                       export_all_ml_settings, example_weighting, sequence_type, region_type)
+                                       export_all_ml_settings, example_weighting, sequence_type=sequence_type,
+                                       region_type=region_type)
 
     def run(self, result_path: Path):
         self.state.path = result_path
