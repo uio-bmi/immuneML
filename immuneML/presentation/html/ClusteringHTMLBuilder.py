@@ -85,11 +85,19 @@ class ClusteringHTMLBuilder:
                                           and state.clustering_items[cl_setting.get_key()].external_performance
         }
 
-        with state.clustering_items[cl_setting.get_key()].internal_performance.path.open('r') as file:
-            html_map["internal_performances"] = Util.get_table_string_from_csv_string(file.read(), separator=",")
+        if state.clustering_items[cl_setting.get_key()].internal_performance.path is not None and \
+                state.clustering_items[cl_setting.get_key()].internal_performance.path.is_file():
+            with state.clustering_items[cl_setting.get_key()].internal_performance.path.open('r') as file:
+                html_map["internal_performances"] = Util.get_table_string_from_csv_string(file.read(), separator=",")
+        else:
+            html_map["show_internal_performances"] = False
 
-        with state.clustering_items[cl_setting.get_key()].external_performance.path.open('r') as file:
-            html_map['external_performances'] = Util.get_table_string_from_csv_string(file.read(), separator=",")
+        if state.clustering_items[cl_setting.get_key()].external_performance.path is not None and \
+                state.clustering_items[cl_setting.get_key()].external_performance.path.is_file():
+            with state.clustering_items[cl_setting.get_key()].external_performance.path.open('r') as file:
+                html_map['external_performances'] = Util.get_table_string_from_csv_string(file.read(), separator=",")
+        else:
+            html_map["external_performances"] = False
 
         TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "ClusteringSettingDetails.html",
                              template_map=html_map, result_path=result_path)
