@@ -37,7 +37,9 @@ class ClusteringParser:
 def parse_labels(key, instruction, dataset) -> LabelConfiguration:
     if 'labels' in instruction and instruction['labels'] is not None:
         label_config = LabelHelper.create_label_config(instruction['labels'], dataset, key, 'labels')
-        return label_config
+    else:
+        label_config = LabelConfiguration()
+    return label_config
 
 
 def parse_reports(key, instruction, symbol_table) -> List[Report]:

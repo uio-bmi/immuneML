@@ -97,7 +97,11 @@ class ClusteringInstruction(Instruction):
         self._setup_paths(result_path)
         self._init_report_result_structure()
 
-        predictions_df = self.state.dataset.get_metadata(self.state.label_config.get_labels_by_name(), return_df=True)
+        if len(self.state.label_config.get_labels_by_name()) > 0:
+            predictions_df = self.state.dataset.get_metadata(self.state.label_config.get_labels_by_name(), return_df=True)
+        else:
+            predictions_df = pd.DataFrame(index=range(self.state.dataset.get_example_count()))
+
         predictions_df['example_id'] = self.state.dataset.get_example_ids()
 
         for cl_setting in self.state.clustering_settings:
