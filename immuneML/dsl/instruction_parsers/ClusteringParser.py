@@ -83,7 +83,8 @@ def parse_clustering_settings(key: str, instruction: dict, symbol_table: SymbolT
 
 
 def make_setting_obj(setting, valid_encodings, valid_clusterings, valid_dim_red, symbol_table, instruction):
-    ParameterValidator.assert_keys(setting.keys(), ['encoding', 'dim_reduction', 'method'], 'ClusteringParser', 'clustering_settings')
+    ParameterValidator.assert_keys_present(setting.keys(), ['encoding', 'method'], 'ClusteringParser', 'clustering_settings')
+    ParameterValidator.assert_keys(setting.keys(), ['encoding', 'dim_reduction', 'method'], 'ClusteringParser', 'clustering_settings', exclusive=False)
 
     ParameterValidator.assert_in_valid_list(setting['encoding'], valid_encodings, 'ClusteringParser', 'encoding')
     ParameterValidator.assert_in_valid_list(setting['method'], valid_clusterings, 'ClusteringParser',

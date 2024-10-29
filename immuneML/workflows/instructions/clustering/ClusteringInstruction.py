@@ -58,8 +58,8 @@ class ClusteringInstruction(Instruction):
 
     - labels (list): an optional list of labels to use for external evaluation of clustering
 
-    - clustering_settings (list): a list of combinations of encoding, optional dimensionality reduction algorithm, and
-      the clustering algorithm that will be evaluated
+    - clustering_settings (list): a list where each element represents a :py:obj:`~immuneML.workflows.clustering.clustering_run_model.ClusteringSetting`; a combinations of encoding,
+      optional dimensionality reduction algorithm, and the clustering algorithm that will be evaluated
 
     - reports (list): a list of reports to be run on the clustering results or the encoded data
 
