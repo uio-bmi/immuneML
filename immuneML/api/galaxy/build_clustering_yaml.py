@@ -77,10 +77,10 @@ def build_specs(parsed_args):
         }
     }
 
-    if parsed_args.dimensionality_reduction_method in ["PCA", "TSNE", "UMAP"]:
-        specs["definitions"]["ml_methods"][parsed_args.dimensionality_reduction_method.lower()] = {parsed_args.dimensionality_reduction_method: {"n_components": 2}}
+    if parsed_args.dim_red_method in ["PCA", "TSNE", "UMAP"]:
+        specs["definitions"]["ml_methods"][parsed_args.dim_red_method.lower()] = {parsed_args.dim_red_method: {"n_components": 2}}
         specs["definitions"]["reports"] = {'dim_reduction': 'DimensionalityReduction'}
-        specs["instructions"]["clustering"]["clustering_settings"][0]["dim_reduction"] = parsed_args.dimensionality_reduction_method.lower()
+        specs["instructions"]["clustering"]["clustering_settings"][0]["dim_reduction"] = parsed_args.dim_red_method.lower()
 
     return specs
 
