@@ -25,7 +25,7 @@ def parse_command_line_arguments(args):
 
     parser.add_argument("-k", "--encoding_k", type=int, required=True, help="")
     parser.add_argument("-n", "--n_clusters", type=int, required=True, help="")
-    parser.add_argument("-d", "--dimensionality_reduction_method", type=str, choices=["PCA", "UMAP", "TSNE", "None"], default="None",
+    parser.add_argument("-d", "--dim_red_method", type=str, choices=["PCA", "UMAP", "TSNE", "None"], default="None",
                         help="External evaluation metrics to use for clustering, for these metrics, clusters are compared to a provided label.")
 
 
