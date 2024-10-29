@@ -216,7 +216,6 @@ class SimpleLSTM(GenerativeModel):
         print_log(f"{SimpleLSTM.__name__} {self.name}: generated {count} sequences.", True)
 
         sequences = predicted.split('*')[1:-1]
-        print(sequences)
         return self._export_dataset(sequences, count, path)
 
     def _export_dataset(self, sequences, count, path):

@@ -115,8 +115,7 @@ class HPUtil:
 
     @staticmethod
     def assess_performance(method, metrics, optimization_metric, dataset, split_index, current_path: Path,
-                           test_predictions_path: Path, label: Label,
-                           ml_score_path: Path):
+                           test_predictions_path: Path, label: Label, ml_score_path: Path):
         return MLMethodAssessment.run(MLMethodAssessmentParams(
             method=method,
             dataset=dataset,

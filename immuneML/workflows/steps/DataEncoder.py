@@ -22,8 +22,10 @@ class DataEncoder(Step):
         if encoded_dataset.encoded_data.info is None:
             encoded_dataset.encoded_data.info = {}
 
-        encoded_dataset.encoded_data.info['sequence_type'] = encoder_params.sequence_type
-        encoded_dataset.encoded_data.info['region_type'] = encoder_params.region_type
+        if 'sequence_type' not in encoded_dataset.encoded_data.info:
+            encoded_dataset.encoded_data.info['sequence_type'] = encoder_params.sequence_type
+        if 'region_type' not in encoded_dataset.encoded_data.info:
+            encoded_dataset.encoded_data.info['region_type'] = encoder_params.region_type
 
         print_log(f"Encoding finished.", include_datetime=True)
 

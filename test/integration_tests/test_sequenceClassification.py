@@ -38,7 +38,7 @@ class TestSequenceClassification(TestCase):
             "reads": ReadsType.UNIQUE.name,
             "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
             "sequence_type": SequenceType.AMINO_ACID.name,
-            "k": 3
+            "k": 3,
         }
 
         hp_setting = HPSetting(encoder=KmerFrequencyEncoder.build_object(dataset, **encoder_params), encoder_params=encoder_params,

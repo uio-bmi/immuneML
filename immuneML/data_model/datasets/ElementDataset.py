@@ -37,6 +37,8 @@ class ElementDataset(Dataset, ABC):
                                    for key, val in metadata['type_dict_dynamic_fields'].items()}
         if self.bnp_dataclass is None and self.dynamic_fields is not None:
             self.bnp_dataclass = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(self.dynamic_fields.items()))
+        if self.identifier is None:
+            self.identifier = uuid4().hex
 
     @property
     def buffer_type(self):
@@ -166,13 +168,14 @@ class ReceptorDataset(ElementDataset):
 
         dataset_metadata = {
             'type_dict_dynamic_fields': {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()},
-            'dataset_class': 'ReceptorDataset',
+            'dataset_class': 'ReceptorDataset', "identifier": uuid4().hex,
             'filename': filename}
         metadata_filename = path / f'dataset_{name}.yaml'
         write_yaml(metadata_filename, dataset_metadata)
 
         return ReceptorDataset(filename=filename, name=name, labels=labels, dynamic_fields=type_dict,
-                               dataset_file=metadata_filename, bnp_dataclass=bnp_dc)
+                               dataset_file=metadata_filename, bnp_dataclass=bnp_dc,
+                               identifier=dataset_metadata['identifier'])
 
     def get_metadata(self, field_names: list, return_df: bool = False):
         """Returns a dict or an equivalent pandas DataFrame with metadata information from Receptor objects for
@@ -194,7 +197,7 @@ class ReceptorDataset(ElementDataset):
 
         bnp_write_to_file(path / f"{name}.tsv", data)
 
-        metadata_filename = path / f'dataset_{name}.yaml'
+        metadata_filename = path / f'{name}.yaml'
         metadata = read_yaml(self.dataset_file)
         write_yaml(metadata_filename, {
             **metadata, **{'filename': f"{name}.tsv", 'name': name}
