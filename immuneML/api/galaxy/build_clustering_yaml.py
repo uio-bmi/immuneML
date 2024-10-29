@@ -69,13 +69,15 @@ def build_specs(parsed_args):
                 "type": "Clustering",
                 "dataset": "dataset",
                 'metrics': parsed_args.eval_metrics,
-                'labels': build_labels(parsed_args.labels),
                 'clustering_settings': [
                     {'encoding': 'kmer', 'method': 'kmeans'},
                 ],
             }
         }
     }
+
+    if parsed_args.labels != "":
+        specs["instructions"]["clustering"]["labels"] = build_labels(parsed_args.labels)
 
     if parsed_args.dim_red_method in ["PCA", "TSNE", "UMAP"]:
         specs["definitions"]["ml_methods"][parsed_args.dim_red_method.lower()] = {parsed_args.dim_red_method: {"n_components": 2}}
