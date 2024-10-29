@@ -27,6 +27,11 @@ class MatchedRegexEncoder(DatasetEncoder):
     This encoding can be used in combination with the :ref:`Matches` report.
 
 
+    **Dataset type:**
+
+    - RepertoireDatasets
+
+
     **Specification arguments:**
 
     - match_v_genes (bool): Whether V gene matches are required. If this is True, a match is only counted if the

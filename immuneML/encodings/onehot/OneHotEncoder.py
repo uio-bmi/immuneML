@@ -26,6 +26,14 @@ class OneHotEncoder(DatasetEncoder):
     (amino acid or nucleotide) is replaced by a sparse vector with one 1 and the rest zeroes. The position of the
     1 represents the alphabet character.
 
+    **Dataset type:**
+
+    - SequenceDatasets
+
+    - ReceptorDatasets
+
+    - RepertoireDatasets
+
 
     **Specification arguments:**
 

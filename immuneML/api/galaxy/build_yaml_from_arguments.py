@@ -133,7 +133,7 @@ def build_settings_specs(enc_names, ml_names):
 def discover_dataset_params():
     dataset = glob.glob("*dataset*.yaml")
 
-    assert len(dataset) > 0, "no *dataset.yaml file was present in the current working directory"
+    assert len(dataset) > 0, "no *dataset.yaml file was present in the current working directory. This usually means that the dataset attempted to be imported is not in immuneML format."
     assert len(dataset) < 2, f"multiple *dataset.yaml files were present in the current working directory: {list(glob.glob('*dataset.yaml'))}"
 
     dataset_path = dataset[0]
@@ -187,7 +187,7 @@ def build_specs(args):
                 "labels": [],
                 "dataset": "dataset",
                 "strategy": "GridSearch",
-                "metrics": [],
+                "metrics": ["accuracy", "balanced_accuracy", "precision", "recall", "auc"],
                 "number_of_processes": 8,
                 "reports": ["benchmark"],
                 "optimization_metric": "accuracy",

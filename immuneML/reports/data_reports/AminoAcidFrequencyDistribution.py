@@ -41,12 +41,25 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     **Specification arguments:**
 
-    - imgt_positions (bool): Whether to use IMGT positional numbering or sequence index numbering. When imgt_positions
-      is True, IMGT positions are used, meaning sequences of unequal length are aligned according to their IMGT
-      positions. By default, imgt_positions is True.
+    - alignment (str): Alignment style for aligning sequences of different lengths. Options are as follows:
+
+      - CENTER: center-align sequences of different lengths. The middle amino acid of any sequence be labelled position 0. By default, alignment is CENTER.
+
+      - LEFT: left-align sequences of different lengths, starting at 0.
+
+      - RIGHT: right align sequences of different lengths, ending at 0 (counting towards negative numbers).
+
+      - IMGT: align sequences based on their IMGT positional numbering, considering the sequence region_type (IMGT_CDR3 or IMGT_JUNCTION).
+        The main difference between CENTER and IMGT is that IMGT aligns the first and last amino acids, adding gaps in the middle,
+        whereas CENTER aligns the middle of the sequences, padding with gaps at the start and end of the sequence.
+        When region_type is IMGT_JUNCTION, the IMGT positions run from 104 (conserved C) to 118 (conserved W/F). When IMGT_CDR3 is used, these positions are 105 to 117.
+        For long CDR3 sequences, additional numbers are added in between IMGT positions 111 and 112.
+        See the official IMGT documentation for more details: https://www.imgt.org/IMGTScientificChart/Numbering/CDR3-IMGTgaps.html
 
     - relative_frequency (bool): Whether to plot relative frequencies (true) or absolute counts (false) of the
-      positional amino acids. By default, relative_frequency is True.
+      positional amino acids. Note that when sequences are of different length, setting relative_frequency to True will
+      produce different results depending on the alignment type, as some positions are only covered by the longest sequences.
+      By default, relative_frequency is False.
 
     - split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a
       single label, or alternatively the label of interest can be specified under 'label'. If split_by_label is set to
@@ -76,7 +89,12 @@ class AminoAcidFrequencyDistribution(DataReport):
     @classmethod
     def build_object(cls, **kwargs):
         location = AminoAcidFrequencyDistribution.__name__
-        ParameterValidator.assert_type_and_value(kwargs["imgt_positions"], bool, location, "imgt_positions")
+
+        if "imgt_positions" in kwargs:
+            raise ValueError(f"{location}: parameter 'imgt_positions' is deprecated. For 'imgt_positions: True', use 'alignment: IMGT'. For 'imgt_positions: False', use any other alignment option (CENTER/LEFT/RIGHT).")
+
+        ParameterValidator.assert_type_and_value(kwargs["alignment"], str, location, "alignment")
+        ParameterValidator.assert_in_valid_list(kwargs["alignment"].upper(), ["IMGT", "LEFT", "RIGHT", "CENTER"], location, "alignment")
         ParameterValidator.assert_type_and_value(kwargs["relative_frequency"], bool, location, "relative_frequency")
         ParameterValidator.assert_type_and_value(kwargs["split_by_label"], bool, location, "split_by_label")
         ParameterValidator.assert_region_type(kwargs, location)
@@ -85,11 +103,11 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         return AminoAcidFrequencyDistribution(**{**kwargs, 'region_type': RegionType[kwargs['region_type'].upper()]})
 
-    def __init__(self, dataset: Dataset = None, imgt_positions: bool = None, relative_frequency: bool = None,
+    def __init__(self, dataset: Dataset = None, alignment: bool = None, relative_frequency: bool = None,
                  split_by_label: bool = None, label: str = None, region_type: RegionType = RegionType.IMGT_CDR3,
                  result_path: Path = None, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
-        self.imgt_positions = imgt_positions
+        self.alignment = alignment
         self.relative_frequency = relative_frequency
         self.split_by_label = split_by_label
         self.label_name = label
@@ -227,12 +245,17 @@ class AminoAcidFrequencyDistribution(DataReport):
         return pd.DataFrame(df_dict)
 
     def _get_positions(self, sequence_length: int):
-        if self.imgt_positions:
+        if self.alignment == 'IMGT':
             positions = PositionHelper.gen_imgt_positions_from_length(sequence_length, self.region_type)
-        else:
-            positions = [str(pos) for pos in list(range(1, sequence_length + 1))]
+        elif self.alignment == 'LEFT':
+            positions = list(range(1, len(sequence.get_sequence(SequenceType.AMINO_ACID)) + 1))
+        elif self.alignment == "RIGHT":
+            positions = list(range(-len(sequence.get_sequence(SequenceType.AMINO_ACID)) + 2, 1))
+        else:  # self.alignment == "CENTER
+            positions = list(range(1, len(sequence.get_sequence(SequenceType.AMINO_ACID)) + 1))
+            positions = [pos - round(max(positions) / 2) for pos in positions]
 
-        return positions
+        return [str(pos) for pos in positions]
 
     def _write_results_table(self, results_table):
         file_path = self.result_path / "amino_acid_frequency_distribution.tsv"
@@ -252,7 +275,7 @@ class AminoAcidFrequencyDistribution(DataReport):
                         facet_row="locus" if "locus" in freq_dist.columns else None,
                         color_discrete_map=PlotlyUtil.get_amino_acid_color_map(),
                         category_orders=category_orders,
-                        labels={"position": "IMGT position" if self.imgt_positions else "Position",
+                        labels={"position": "IMGT position" if self.alignment=="IMGT" else "Position",
                                 "count": "Count",
                                 "relative frequency": "Relative frequency",
                                 "amino acid": "Amino acid"}, template="plotly_white")
@@ -268,7 +291,13 @@ class AminoAcidFrequencyDistribution(DataReport):
         return ReportOutput(path=file_path, name="Amino acid frequency distribution")
 
     def _get_position_order(self, positions):
-        return [str(int(pos)) if pos.is_integer() else str(pos) for pos in sorted(set(positions.astype(float)))]
+        if self.alignment == "IMGT":
+            if min(positions) == "105" and max(positions) == "117":
+                return PositionHelper.gen_imgt_positions_from_cdr3_length(len(set(positions)))
+            elif min(positions) == "104" and max(positions) == "118":
+                return ["104"] + PositionHelper.gen_imgt_positions_from_cdr3_length(len(set(positions))-2) + ["118"]
+        else:
+            return [str(pos) for pos in sorted(set(positions.astype(int)))]
 
     def _compute_frequency_change(self, freq_dist):
         classes = sorted(set(freq_dist["class"]))
@@ -305,7 +334,7 @@ class AminoAcidFrequencyDistribution(DataReport):
                         facet_col="positive_class",
                         facet_row="locus" if "locus" in frequency_change.columns else None,
                         color_discrete_map=PlotlyUtil.get_amino_acid_color_map(),
-                        labels={"position": "IMGT position" if self.imgt_positions else "Position",
+                        labels={"position": "IMGT position" if self.alignment=="IMGT" else "Position",
                                 "positive_class": "Class",
                                 "frequency_change": "Difference in relative frequency",
                                 "amino acid": "Amino acid"}, template="plotly_white")

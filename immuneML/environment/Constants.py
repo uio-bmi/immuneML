@@ -1,6 +1,6 @@
 class Constants:
 
-    VERSION = "3.0.0a5"
+    VERSION = "3.0.0a7"
 
     # encoding constants
     FEATURE_DELIMITER = "-"

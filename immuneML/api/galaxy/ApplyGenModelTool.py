@@ -1,10 +1,9 @@
 import os
-import shutil
 from pathlib import Path
 
 import yaml
 
-from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
+from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
 from immuneML.api.galaxy.Util import Util
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
@@ -24,10 +23,17 @@ class ApplyGenModelTool(GalaxyTool):
         PathBuilder.build(self.result_path)
         self._check_specs()
         state = ImmuneMLApp(self.yaml_path, self.result_path).run()[0]
-        exported_dataset_path = state.exported_datasets['generated_dataset']
-        shutil.copytree(exported_dataset_path, self.result_path / "galaxy_dataset/")
+
+        self._construct_galaxy_dataset(state)
 
         print_log("Run the generative model, the resulting dataset is exported.")
+
+    def _construct_galaxy_dataset(self, state):
+        dataset = state.generated_dataset
+
+        # rename to 'dataset' because in galaxy the dataset file should always be called dataset.yaml
+        dataset.name = "dataset"
+        ImmuneMLExporter.export(dataset, self.result_path / "galaxy_dataset/")
 
     def _check_specs(self):
         with open(self.yaml_path, "r") as file:
@@ -41,6 +47,6 @@ class ApplyGenModelTool(GalaxyTool):
                                                ApplyGenModelTool.__name__, instruction_name)
 
         assert os.path.isfile(specs['instructions'][instruction_name]['ml_config_path']), \
-            f"{ApplyGenModelTool.__name__}: file specified under 'config_path' parameter " \
-            f"({specs['instructions'][instruction_name]['config_path']}) is not available. Please check if it was " \
+            f"{ApplyGenModelTool.__name__}: file specified under 'ml_config_path' parameter " \
+            f"({specs['instructions'][instruction_name]['ml_config_path']}) is not available. Please check if it was " \
             f"correctly uploaded or if the file name is correct."

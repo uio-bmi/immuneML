@@ -27,6 +27,10 @@ class EvennessProfileEncoder(DatasetEncoder):
     Reference: Greiff et al. (2015). A bioinformatic framework for immune repertoire diversity profiling enables detection of immunological
     status. Genome Medicine, 7(1), 49. `doi.org/10.1186/s13073-015-0169-8 <https://doi.org/10.1186/s13073-015-0169-8>`_
 
+    **Dataset type:**
+
+    - RepertoireDatasets
+
 
     **Specification arguments:**
 

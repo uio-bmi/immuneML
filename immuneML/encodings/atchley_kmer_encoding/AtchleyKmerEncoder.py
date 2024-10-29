@@ -35,6 +35,11 @@ class AtchleyKmerEncoder(DatasetEncoder):
 
     Note that sequences in the repertoire with length shorter than skip_first_n_aa + skip_last_n_aa + k will not be encoded.
 
+    **Dataset type:**
+
+    - RepertoireDatasets
+
+
     **Specification arguments:**
 
     - k (int): k-mer length
