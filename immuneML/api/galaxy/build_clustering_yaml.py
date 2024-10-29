@@ -81,6 +81,7 @@ def build_specs(parsed_args):
         specs["definitions"]["ml_methods"][parsed_args.dim_red_method.lower()] = {parsed_args.dim_red_method: {"n_components": 2}}
         specs["definitions"]["reports"] = {'dim_reduction': 'DimensionalityReduction'}
         specs["instructions"]["clustering"]["clustering_settings"][0]["dim_reduction"] = parsed_args.dim_red_method.lower()
+        specs["instructions"]["clustering"]["reports"] = ["dim_reduction"]
 
     return specs
 
