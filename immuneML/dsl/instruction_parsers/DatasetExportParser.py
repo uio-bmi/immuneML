@@ -45,7 +45,6 @@ class DatasetExportParser:
         number_of_processes: 4
         export_formats: # list of formats to export the datasets to
           - AIRR
-          - ImmuneML
 
     """
 

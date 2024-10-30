@@ -1,10 +1,9 @@
 import logging
-import shutil
 from pathlib import Path
 
 import yaml
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
 from immuneML.api.galaxy.Util import Util
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
@@ -98,7 +97,7 @@ class GalaxySimulationTool(GalaxyTool):
 
         dataset = state.resulting_dataset
         dataset.name = "dataset"
-        ImmuneMLExporter.export(dataset, self.result_path / "galaxy_dataset/")
+        AIRRExporter.export(dataset, self.result_path / "galaxy_dataset/")
 
         logging.info(f"{GalaxySimulationTool.__name__}: the simulation is finished.")
 

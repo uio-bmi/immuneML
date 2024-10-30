@@ -334,6 +334,7 @@ class MotifEncoder(DatasetEncoder):
             f"{MotifEncoder.__name__}: filtering {len(candidate_motifs)} {motif_type} with precision >= {self.min_precision} and recall >= {self._get_recall_repr()}")
 
         np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(dataset)
+        weights = None
 
         with Pool(pool_size) as pool:
             partial_func = partial(PositionalMotifHelper.check_motif, np_sequences=np_sequences, y_true=y_true, weights=weights,

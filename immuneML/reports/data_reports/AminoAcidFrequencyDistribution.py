@@ -248,11 +248,11 @@ class AminoAcidFrequencyDistribution(DataReport):
         if self.alignment == 'IMGT':
             positions = PositionHelper.gen_imgt_positions_from_length(sequence_length, self.region_type)
         elif self.alignment == 'LEFT':
-            positions = list(range(1, len(sequence.get_sequence(SequenceType.AMINO_ACID)) + 1))
+            positions = list(range(1, sequence_length + 1))
         elif self.alignment == "RIGHT":
-            positions = list(range(-len(sequence.get_sequence(SequenceType.AMINO_ACID)) + 2, 1))
+            positions = list(range(-sequence_length + 2, 1))
         else:  # self.alignment == "CENTER
-            positions = list(range(1, len(sequence.get_sequence(SequenceType.AMINO_ACID)) + 1))
+            positions = list(range(1, sequence_length + 1))
             positions = [pos - round(max(positions) / 2) for pos in positions]
 
         return [str(pos) for pos in positions]
