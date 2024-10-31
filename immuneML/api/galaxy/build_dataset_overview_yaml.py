@@ -36,7 +36,7 @@ def build_specs(args):
     if args.existing_dataset == "True":
         assert os.path.exists(
             f"{args.dataset_name}.yaml"), f"no '{args.dataset_name}.yaml' file was present in the current working directory"
-        specs["definitions"]["datasets"][args.dataset_name] = {"format": "ImmuneML",
+        specs["definitions"]["datasets"][args.dataset_name] = {"format": "AIRR",
                                                                "params": {"path": f"{args.dataset_name}.yaml"}}
     else:
         specs["definitions"]["datasets"] = get_dataset_specs(args)

@@ -187,6 +187,6 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
 
     def store(self, encoded_dataset, params: EncoderParams):
         """
-        Stores the given encoded dataset using the ImmuneMLExporter. This method should not be overwritten.
+        Stores the given encoded dataset. This method should not be overwritten.
         """
         AIRRExporter.export(encoded_dataset, params.result_path)

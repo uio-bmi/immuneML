@@ -42,7 +42,7 @@ def build_specs(parsed_args):
         "definitions": {
             "datasets": {
                 "dataset": {
-                    "format": "ImmuneML",
+                    "format": "AIRR",
                     "params": discover_dataset_params()
                 }
             },
