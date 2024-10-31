@@ -54,7 +54,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
     SMALL_POSITIVE_NUMBER = 1e-15
 
-    def __init__(self, max_iterations: int = None, update_rate: float = None, likelihood_threshold: float = None):
+    def __init__(self, max_iterations: int, update_rate: float, likelihood_threshold: float):
         super().__init__()
         self.max_iterations = max_iterations
         self.update_rate = update_rate
@@ -64,7 +64,8 @@ class ProbabilisticBinaryClassifier(MLMethod):
         self.alpha_1 = None
         self.beta_0 = None
         self.beta_1 = None
-        self.likelihood_threshold = likelihood_threshold if likelihood_threshold is not None else -1e-10
+        self.likelihood_threshold = likelihood_threshold if isinstance(likelihood_threshold, float) \
+            else float(likelihood_threshold)
 
     def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
         X = encoded_data.examples
