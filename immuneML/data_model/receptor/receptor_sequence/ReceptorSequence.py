@@ -1,6 +1,8 @@
 # quality: gold
 from typing import List
 from uuid import uuid4
+import warnings
+
 
 from immuneML.data_model.DatasetItem import DatasetItem
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
@@ -68,6 +70,14 @@ class ReceptorSequence(DatasetItem):
             return self.sequence_aa
         else:
             return self.sequence
+
+    def get_duplicate_count(self):
+        duplicate_count = self.get_attribute("duplicate_count")
+        if duplicate_count == "":
+            warnings.warn("ReceptorSequence: attempted to retrieve 'duplicate_count' attribute but this field was not set. Assuming duplicate_count=1")
+            return 1
+
+        return duplicate_count
 
     def set_sequence(self, sequence: str, sequence_type: SequenceType):
         if sequence_type == SequenceType.AMINO_ACID:

@@ -1,6 +1,7 @@
 import random
 import uuid
 from pathlib import Path
+from random import randint
 
 from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
@@ -163,7 +164,7 @@ class RandomDatasetGenerator:
         get_random_sequence = lambda proba, chain, id: ReceptorSequence(
             "".join(random.choices(alphabet, k=random.choices(list(proba.keys()),
                                                               proba.values())[0])),
-            metadata=SequenceMetadata(duplicate_count=1, region_type='IMGT_CDR3',
+            metadata=SequenceMetadata(duplicate_count=randint(1, 10), region_type='IMGT_CDR3',
                                       v_call=chain + "V1-1*01",
                                       j_call=chain + "J1-1*01",
                                       chain=chain,
@@ -227,7 +228,7 @@ class RandomDatasetGenerator:
         sequences = [
             ReceptorSequence("".join(random.choices(alphabet, k=
             random.choices(list(length_probabilities.keys()), length_probabilities.values())[0])),
-                             metadata=SequenceMetadata(duplicate_count=1,
+                             metadata=SequenceMetadata(duplicate_count=randint(1, 10),
                                                        v_call=chain + "V1-1*01",
                                                        j_call=chain + "J1-1*01",
                                                        chain=chain,

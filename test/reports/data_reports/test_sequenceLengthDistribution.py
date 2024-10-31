@@ -5,7 +5,9 @@ from unittest import TestCase
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
@@ -22,20 +24,13 @@ class TestSequenceLengthDistribution(TestCase):
     def test_sequence_lengths_rep_dataset(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "seq_len_rep")
 
-        rep1 = Repertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence(sequence_aa="AAA", sequence_id="1"),
-                                                                        ReceptorSequence(sequence_aa="AAAA", sequence_id="2"),
-                                                                        ReceptorSequence(sequence_aa="AAAAA", sequence_id="3"),
-                                                                        ReceptorSequence(sequence_aa="AAA", sequence_id="4")],
-                                                      path=path, metadata={})
-        rep2 = Repertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence(sequence_aa="AAA", sequence_id="5"),
-                                                                        ReceptorSequence(sequence_aa="AAAA", sequence_id="6"),
-                                                                        ReceptorSequence(sequence_aa="AAAA", sequence_id="7"),
-                                                                        ReceptorSequence(sequence_aa="AAA", sequence_id="8")],
-                                                      path=path, metadata={})
+        dataset = RandomDatasetGenerator.generate_repertoire_dataset(2, {100:1}, {4: 0.33, 5: 0.33, 7: 0.33},
+                                                                   {"l1": {"a": 0.5, "b": 0.5}}, path / 'dataset')
 
-        dataset = RepertoireDataset(repertoires=[rep1, rep2])
-
-        sld = SequenceLengthDistribution.build_object(dataset=dataset, sequence_type='amino_acid', result_path=path)
+        default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "sequence_length_distribution")
+        sld = SequenceLengthDistribution.build_object(**{**default_params, **{"dataset": dataset,
+                                                                               "result_path": path,
+                                                                               "split_by_label": True}})
 
         self.assertTrue(sld.check_prerequisites())
         result = sld._generate()
@@ -47,15 +42,21 @@ class TestSequenceLengthDistribution(TestCase):
     def test_sequence_lengths_seq_dataset(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "seq_len_seq")
 
-        dataset = RandomDatasetGenerator.generate_sequence_dataset(50, {4: 0.33, 5: 0.33, 7: 0.33}, {}, path / 'dataset')
+        dataset = RandomDatasetGenerator.generate_sequence_dataset(1000, {4: 0.33, 5: 0.33, 7: 0.33}, {"l1": {"a": 0.5, "b": 0.5}}, path / 'dataset')
 
-        sld = SequenceLengthDistribution(dataset, 1, path, sequence_type=SequenceType.AMINO_ACID)
+        default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "sequence_length_distribution")
+        sld = SequenceLengthDistribution.build_object(**{**default_params, **{"dataset": dataset,
+                                                                               "result_path": path,
+                                                                               "split_by_label": True,
+                                                                              "plot_type": "LINE"}})
 
         self.assertTrue(sld.check_prerequisites())
         result = sld._generate()
         self.assertTrue(os.path.isfile(result.output_figures[0].path))
 
         shutil.rmtree(path)
+
+
 
     def test_sequence_lengths_receptor_dataset(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "seq_len_rec")
@@ -64,10 +65,13 @@ class TestSequenceLengthDistribution(TestCase):
         dataset = RandomDatasetGenerator.generate_receptor_dataset(receptor_count=50,
                                                                    chain_1_length_probabilities={4: 0.33, 5: 0.33, 7: 0.33},
                                                                    chain_2_length_probabilities={7: 0.33, 8: 0.33, 9: 0.33},
-                                                                   labels={}, path=path / 'dataset')
+                                                                   labels={"l1": {"a": 0.5, "b": 0.5}}, path=path / 'dataset')
 
-        sld = SequenceLengthDistribution(dataset, 1, path, sequence_type=SequenceType.AMINO_ACID)
-
+        default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "sequence_length_distribution")
+        sld = SequenceLengthDistribution.build_object(**{**default_params, **{"dataset": dataset,
+                                                                              "result_path": path,
+                                                                              "split_by_label": True,
+                                                                              "as_fraction": True}})
         result = sld.generate_report()
         self.assertTrue(os.path.isfile(result.output_figures[0].path))
 

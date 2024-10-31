@@ -1,1 +1,5 @@
 sequence_type: amino_acid
+split_by_label: False
+label: null
+as_fraction: False
+plot_type: BAR
