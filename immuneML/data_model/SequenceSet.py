@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 from uuid import uuid4
 
+import dill
 from bionumpy import DNAEncoding, get_bufferclass_for_datatype, AminoAcidEncoding
 
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
@@ -89,8 +90,8 @@ class Repertoire:
     identifier: str = None
     dynamic_fields: dict = None
     element_count: int = None
-    _bnp_dataclass: typing.Type = None
-    _buffer_type = None
+    _bnp_dataclass: bytes = None
+    _buffer_type: bytes = None
 
     def __post_init__(self):
         if not self.identifier:
@@ -184,17 +185,27 @@ class Repertoire:
     def bnp_dataclass(self):
         if not self._bnp_dataclass:
             if self.dynamic_fields:
-                self._bnp_dataclass = extend_dataclass_with_dynamic_fields(AIRRSequenceSet,
-                                                                           list(self.dynamic_fields.items()))
+                bnp_dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(self.dynamic_fields.items()))
+                self._bnp_dataclass = dill.dumps(bnp_dc)
+                return bnp_dc
             else:
-                self._bnp_dataclass = AIRRSequenceSet
-        return self._bnp_dataclass
+                self._bnp_dataclass = dill.dumps(AIRRSequenceSet)
+                return AIRRSequenceSet
+        elif isinstance(self._bnp_dataclass, bytes):
+            return dill.loads(self._bnp_dataclass)
+        else:
+            return self._bnp_dataclass
 
     @property
     def buffer_type(self):
         if not self._buffer_type:
-            self._buffer_type = get_bufferclass_for_datatype(self.bnp_dataclass, delimiter='\t', has_header=True)
-        return self._buffer_type
+            buffer_type = get_bufferclass_for_datatype(self.bnp_dataclass, delimiter='\t', has_header=True)
+            self._buffer_type = dill.dumps(buffer_type)
+            return buffer_type
+        elif isinstance(self._buffer_type, bytes):
+            return dill.loads(self._buffer_type)
+        else:
+            return self._buffer_type
 
     @property
     def data(self) -> AIRRSequenceSet:

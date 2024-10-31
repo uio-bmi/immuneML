@@ -96,8 +96,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     OUTPUT_FILENAME = "compairr_out.tsv"
     LOG_FILENAME = "compairr_log.txt"
 
-    def __init__(self, p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, keep_temporary_files: bool,
-                 threads: int, name: str = None):
+    def __init__(self, p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool,
+                 keep_temporary_files: bool, threads: int, name: str = None):
         super().__init__(name=name)
         self.p_value_threshold = p_value_threshold
         self.sequence_batch_size = sequence_batch_size
@@ -149,7 +149,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
     @staticmethod
     def build_object(dataset, **params):
-        assert isinstance(dataset, RepertoireDataset), "CompAIRRSequenceAbundanceEncoder: this encoding only works on repertoire datasets."
+        assert isinstance(dataset, RepertoireDataset), \
+            "CompAIRRSequenceAbundanceEncoder: this encoding only works on repertoire datasets."
         prepared_params = CompAIRRSequenceAbundanceEncoder._prepare_parameters(**params)
         return CompAIRRSequenceAbundanceEncoder(**prepared_params)
 
@@ -308,12 +309,15 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         is_positive_class = AbundanceEncoderHelper.check_is_positive_class(dataset, repertoire_ids, params.label_config)
 
         relevant_sequence_indices, file_paths = AbundanceEncoderHelper\
-            .get_relevant_sequence_indices(compairr_sequence_presence, is_positive_class, self.p_value_threshold, self.relevant_indices_path, params,
-                                           cache_params=self._build_sequence_presence_params(dataset, self.compairr_params))
+            .get_relevant_sequence_indices(compairr_sequence_presence, is_positive_class, self.p_value_threshold,
+                                           self.relevant_indices_path, params,
+                                           cache_params=self._build_sequence_presence_params(dataset,
+                                                                                             self.compairr_params))
         self._write_relevant_sequences_csv(dataset, relevant_sequence_indices, params.result_path)
         self._set_file_paths(file_paths)
 
-        abundance_matrix = self._build_abundance_matrix(compairr_sequence_presence, repertoire_ids, relevant_sequence_indices)
+        abundance_matrix = self._build_abundance_matrix(compairr_sequence_presence, repertoire_ids,
+                                                        relevant_sequence_indices)
 
         return abundance_matrix
 
@@ -331,7 +335,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
                 partial_repertoire_vector = batch[repertoire_id].to_numpy()
 
                 relevant_sequence_abundance = np.sum(
-                    partial_repertoire_vector[np.logical_and(partial_sequence_p_values_indices, partial_repertoire_vector)])
+                    partial_repertoire_vector[np.logical_and(partial_sequence_p_values_indices,
+                                                             partial_repertoire_vector)])
                 total_sequence_abundance = np.sum(partial_repertoire_vector)
                 abundance_matrix[idx] += [relevant_sequence_abundance, total_sequence_abundance]
 

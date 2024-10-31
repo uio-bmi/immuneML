@@ -68,10 +68,12 @@ class HPSelection:
     def run_setting(state: TrainMLModelState, hp_setting, train_dataset, val_dataset, split_index: int,
                     current_path: Path, label: Label, assessment_index: int):
 
-        hp_item = MLProcess(train_dataset=train_dataset, test_dataset=val_dataset, encoding_reports=state.selection.reports.encoding_reports.values(),
+        hp_item = MLProcess(train_dataset=train_dataset, test_dataset=val_dataset,
+                            encoding_reports=state.selection.reports.encoding_reports.values(),
                             label_config=LabelConfiguration([label]), report_context=state.context,
-                            number_of_processes=state.number_of_processes, metrics=state.metrics, optimization_metric=state.optimization_metric,
-                            ml_reports=state.selection.reports.model_reports.values(), label=label, path=current_path, hp_setting=hp_setting,
+                            number_of_processes=state.number_of_processes, metrics=state.metrics,
+                            optimization_metric=state.optimization_metric, hp_setting=hp_setting,
+                            ml_reports=state.selection.reports.model_reports.values(), label=label, path=current_path,
                             example_weighting=state.example_weighting).run(split_index)
 
         state.assessment_states[assessment_index].label_states[label.name].selection_state.hp_items[hp_setting.get_key()].append(hp_item)

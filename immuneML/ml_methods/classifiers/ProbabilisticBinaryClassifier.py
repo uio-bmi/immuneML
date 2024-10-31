@@ -68,10 +68,11 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
     def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
         X = encoded_data.examples
-        assert X.shape[1] == 2, "ProbabilisticBinaryClassifier: the shape of the input is not compatible with the classifier. " \
-                                "The classifier is defined when examples are encoded by two counts: the number of successful trials " \
-                                "and the total number of trials. If this is not targeted use-case and the encoding, please consider using " \
-                                "another classifier."
+        assert X.shape[1] == 2, \
+            "ProbabilisticBinaryClassifier: the shape of the input is not compatible with the classifier. " \
+            "The classifier is defined when examples are encoded by two counts: the number of successful trials " \
+            "and the total number of trials. If this is not targeted use-case and the encoding, please consider " \
+            "using another classifier."
 
         self.N_0 = int(np.sum(np.array(encoded_data.labels[self.label.name]) == self.class_mapping[0]))
         self.N_1 = int(np.sum(np.array(encoded_data.labels[self.label.name]) == self.class_mapping[1]))
@@ -82,7 +83,8 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
     def _predict(self, encoded_data: EncodedData):
         """
-        Predict the class assignment for examples in X (where X is validation or test set - examples not seen during training).
+        Predict the class assignment for examples in X (where X is validation or test set - examples not seen during
+        training).
 
         .. math::
 

@@ -31,7 +31,7 @@ class CompAIRRBatchIterator:
     def set_repertoire_ids(self, repertoire_ids):
         self.repertoire_ids = repertoire_ids
 
-    def get_batches(self, repertoire_ids = None):
+    def get_batches(self, repertoire_ids=None):
         for batch_idx in sorted(self.batch_paths):
             path = self.batch_paths[batch_idx]
             batch = CompAIRRHelper.read_compairr_output_file(path)
@@ -45,9 +45,7 @@ class CompAIRRBatchIterator:
 
             yield batch
 
-    def get_sequence_vectors(self, repertoire_ids = None):
+    def get_sequence_vectors(self, repertoire_ids=None):
         for batch in self.get_batches(repertoire_ids):
             for idx, sequence_vector in batch.iterrows():
                 yield sequence_vector.to_numpy()
-
-

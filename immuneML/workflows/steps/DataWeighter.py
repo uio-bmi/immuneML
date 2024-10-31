@@ -12,12 +12,13 @@ class DataWeighter(Step):
         assert isinstance(input_params, DataWeighterParams), \
             "DataWeighter step: input_params have to be an instance of DataWeighterParams class."
 
-        dataset = input_params.dataset.clone()
         weighting_strategy = input_params.weighting_strategy
         weighting_params = input_params.weighting_params
 
         if weighting_strategy is None:
-            return dataset
+            return input_params.dataset
+
+        dataset = input_params.dataset.clone()
 
         print(f"{datetime.datetime.now()}: Computing example weights...")
 
