@@ -19,7 +19,7 @@ class TestSequenceAssociationLikelihood(TestCase):
 
         path = EnvironmentSettings.tmp_test_path / "sequence_assoc_likelihood/"
 
-        classifier = ProbabilisticBinaryClassifier(10, 0.1)
+        classifier = ProbabilisticBinaryClassifier(10, 0.1, -1e-10)
         classifier.alpha_0 = 26.7
         classifier.beta_0 = 2814963.8
         classifier.alpha_1 = 4

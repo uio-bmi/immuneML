@@ -19,7 +19,7 @@ class TestProbabilisticBinaryClassifier(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def train_classifier(self):
-        classifier = ProbabilisticBinaryClassifier(100, 0.1)
+        classifier = ProbabilisticBinaryClassifier(100, 0.1, -1e-10)
 
         X = np.array([[3, 4], [1, 7], [5, 7], [3, 8]])
         y = {"cmv": [True, False, True, False]}

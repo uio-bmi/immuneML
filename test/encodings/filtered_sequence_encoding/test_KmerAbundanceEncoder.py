@@ -25,16 +25,15 @@ class TestKmerAbundanceEncoder(TestCase):
         path = EnvironmentSettings.tmp_test_path / "abundance_encoder/"
         PathBuilder.build(path)
 
-        repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
+        dataset = RepertoireBuilder.build_dataset([["GGG", "III", "LLL", "MMM"],
                                                          ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
                                                          ["CCC", "FFF", "MMM"],
                                                          ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]],
                                                         labels={"l1": [True, True, False, False]}, path=path)
 
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, identifier="1")
-
         encoder = KmerAbundanceEncoder.build_object(dataset, **{
-            "p_value_threshold": 0.4, "sequence_encoding": "continuous_kmer", "k":3, "k_left": 0, "k_right": 0, "min_gap": 0, "max_gap": 0
+            "p_value_threshold": 0.4, "sequence_encoding": "continuous_kmer", "k":3, "k_left": 0, "k_right": 0,
+            "min_gap": 0, "max_gap": 0
         })
 
         label_config = LabelConfiguration([Label("l1", [True, False], positive_class=True)])

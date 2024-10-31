@@ -32,13 +32,13 @@ class TestCVFeaturePerformance(TestCase):
                                   label_configuration=LabelConfiguration(labels=[Label(name="CMV", values=[True, False])]),
                                   hp_settings=[HPSetting(encoder_params={"p_value_threshold": 0.001}, encoder_name="e1",
                                                          encoder=SequenceAbundanceEncoder([], 0, 0, 0), preproc_sequence=[], ml_method_name="ml1",
-                                                         ml_method=ProbabilisticBinaryClassifier(10, 0.1), ml_params={}),
+                                                         ml_method=ProbabilisticBinaryClassifier(10, 0.1, -1e-10), ml_params={}),
                                                HPSetting(encoder_params={"p_value_threshold": 0.01}, encoder_name="e2",
                                                          encoder=SequenceAbundanceEncoder([], 0, 0, 0), preproc_sequence=[], ml_method_name="ml1",
-                                                         ml_method=ProbabilisticBinaryClassifier(10, 0.1), ml_params={}),
+                                                         ml_method=ProbabilisticBinaryClassifier(10, 0.1, -1e-10), ml_params={}),
                                                HPSetting(encoder_params={"p_value_threshold": 0.01},
                                                          encoder=SequenceAbundanceEncoder([], 0, 0, 0), preproc_sequence=[],
-                                                         ml_method=ProbabilisticBinaryClassifier(10, 0.01), ml_params={})
+                                                         ml_method=ProbabilisticBinaryClassifier(10, 0.01, -1e-10), ml_params={})
                                                ], dataset=None, hp_strategy=None, metrics=None)
 
         report = CVFeaturePerformance("p_value_threshold", state, path, is_feature_axis_categorical=True, name="report1")
