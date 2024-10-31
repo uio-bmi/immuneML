@@ -59,7 +59,7 @@ def test_clustering_workflow():
                 'metrics': ['adjusted_rand_score', 'adjusted_mutual_info_score', 'silhouette_score'],
                 'labels': ['epitope'],
                 'clustering_settings': [
-                    {'encoding': 'kmer', 'dim_reduction': 'pca', 'method': 'kmeans2'},
+                    {'encoding': 'kmer', 'method': 'kmeans2'},
                     {'encoding': 'kmer', 'dim_reduction': 'pca', 'method': 'kmeans3'}
                 ],
                 'reports': ['rep1'],
