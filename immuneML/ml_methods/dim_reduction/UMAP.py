@@ -8,7 +8,7 @@ class UMAP(DimRedMethod):
     """
     Uniform manifold approximation and projection (UMAP) method which wraps umap-learn's UMAP. Input arguments for the method are the
     same as supported by umap-learn (see `UMAP in the umap-learn documentation
-    <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html#sklearn.decomposition.PCA>`_ for details).
+    <https://umap-learn.readthedocs.io/en/latest/>`_ for details).
 
     Note that when providing the arguments for UMAP in the immuneML's specification, it is not possible to set
     functions as input values (e.g., for the metric parameter, it has to be one of the predefined metrics available

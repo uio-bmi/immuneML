@@ -3,7 +3,7 @@ from pathlib import Path
 
 import yaml
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
 from immuneML.api.galaxy.Util import Util
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
@@ -33,7 +33,7 @@ class ApplyGenModelTool(GalaxyTool):
 
         # rename to 'dataset' because in galaxy the dataset file should always be called dataset.yaml
         dataset.name = "dataset"
-        ImmuneMLExporter.export(dataset, self.result_path / "galaxy_dataset/")
+        AIRRExporter.export(dataset, self.result_path / "galaxy_dataset/")
 
     def _check_specs(self):
         with open(self.yaml_path, "r") as file:
