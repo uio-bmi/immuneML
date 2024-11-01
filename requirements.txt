@@ -1,5 +1,5 @@
 # main packages
-numpy
+numpy<2.0.0
 pytest>=4
 pandas
 PyYAML>=5.3
@@ -23,6 +23,5 @@ bionumpy>=0.2.31
 npstructures
 fisher>=0.1.9
 olga>=1.2.4
-
-# stitchr
-# IMGTgeneDL
+stitchr
+IMGTgeneDL
