@@ -1,23 +1,18 @@
 import abc
 import math
 
-from npstructures import RaggedArray
-
-from immuneML.data_model import bnp_util
-from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 import numpy as np
-from sklearn.preprocessing import OneHotEncoder as SklearnOneHotEncoder
 
 from immuneML.caching.CacheHandler import CacheHandler
+from immuneML.data_model import bnp_util
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
-from immuneML.simulation.util.bnp_util import pad_ragged_array
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
-import bionumpy as bnp
 
 
 class OneHotEncoder(DatasetEncoder):

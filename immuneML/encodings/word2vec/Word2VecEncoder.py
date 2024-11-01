@@ -6,7 +6,6 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-from gensim.models import Word2Vec
 from sklearn.preprocessing import StandardScaler
 
 from immuneML.caching.CacheHandler import CacheHandler
@@ -207,6 +206,8 @@ class Word2VecEncoder(DatasetEncoder):
         pass
 
     def _load_model(self, params):
+        from gensim.models import Word2Vec
+
         self.model_path = self._create_model_path(params) if self.model_path is None else self.model_path
         model = Word2Vec.load(str(self.model_path))
         return model

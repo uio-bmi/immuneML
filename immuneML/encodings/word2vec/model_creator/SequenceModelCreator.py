@@ -2,8 +2,6 @@
 
 from pathlib import Path
 
-from gensim.models import Word2Vec
-
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
@@ -16,6 +14,8 @@ from immuneML.util.KmerHelper import KmerHelper
 class SequenceModelCreator(ModelCreatorStrategy):
 
     def create_model(self, dataset: Dataset, k: int, vector_size: int, batch_size: int, model_path: Path, sequence_type: SequenceType):
+        from gensim.models import Word2Vec
+
         model = Word2Vec(vector_size=vector_size, min_count=1, window=self.window)  # creates an empty model
         all_kmers = KmerHelper.create_all_kmers(k=k, alphabet=EnvironmentSettings.get_sequence_alphabet())
         all_kmers = [[kmer] for kmer in all_kmers]

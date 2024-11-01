@@ -102,23 +102,32 @@ class ImplantingStrategy(SimulationStrategy):
         return remaining_seq_mask, implanted_sequences
 
     def _implant_in_sequence(self, sequence_row: BackgroundSequences, signal: Signal, motif_instance: MotifInstance,
-                             use_p_gens: bool, sequence_type: SequenceType, sim_item: SimConfigItem, all_signals: List[Signal]):
+                             use_p_gens: bool, sequence_type: SequenceType, sim_item: SimConfigItem,
+                             all_signals: List[Signal]):
 
         limit = len(motif_instance)
-        if sequence_type == SequenceType.NUCLEOTIDE:
-            limit = limit * 3
-
         sequence_length = len(getattr(sequence_row, sequence_type.value))
-        region_type = RegionType[getattr(sequence_row, 'region_type').to_string()]
-        position_weights = PositionHelper.get_imgt_position_weights_for_implanting(sequence_length, region_type,
-                                                                                   signal.sequence_position_weights,
-                                                                                   limit)
-        if sum(list(position_weights.values())) == 0:
-            logging.info(f"Sequence {sequence_row} has no valid positions where the signal could be implanted, "
-                         f"skipping the sequence.")
-            return None
 
-        implant_position = choose_implant_position(list(position_weights.keys()), position_weights)
+        if sequence_type == SequenceType.NUCLEOTIDE:
+            if signal.sequence_position_weights:
+                logging.warning(f"{ImplantingStrategy.__name__}: IMGT positions are defined for the signal {signal.id},"
+                                f" but positions is not supported for nucleotide sequences. Positions will be ignored "
+                                f"and signal implanted at a random position.")
+
+            implant_position = random.choice(list(range(sequence_length - limit)))
+            position_weights = {}
+        else:
+
+            region_type = RegionType[getattr(sequence_row, 'region_type').to_string()]
+            position_weights = PositionHelper.get_imgt_position_weights_for_implanting(sequence_length, region_type,
+                                                                                       signal.sequence_position_weights,
+                                                                                       limit)
+            if sum(list(position_weights.values())) == 0:
+                logging.info(f"Sequence {sequence_row} has no valid positions where the signal could be implanted, "
+                             f"skipping the sequence.")
+                return None
+
+            implant_position = choose_implant_position(list(position_weights.keys()), position_weights)
 
         new_sequence = self._make_new_sequence(sequence_row, motif_instance, implant_position, sequence_type)
 
@@ -139,10 +148,9 @@ class ImplantingStrategy(SimulationStrategy):
             new_sequence['p_gen'] = -1.
 
         new_sequence[signal.id] = 1
-        new_sequence[f'{signal.id}_positions'] = "m" + "".join("0" for _ in range(implant_position)) + "1" + \
-                                                 "".join("0" for _ in
-                                                         range(len(getattr(sequence_row,
-                                                                           sequence_type.value)) - implant_position))
+        new_sequence[f'{signal.id}_positions'] = ["m"] + ["0" if ind != implant_position else "1" for ind in
+                                                          range(sequence_length)]
+        new_sequence[f'{signal.id}_positions'] = "".join(new_sequence[f'{signal.id}_positions'])
 
         zero_mask = "m" + "".join(["0" for _ in range(len(new_sequence[sequence_type.value]))])
         new_sequence = {**{f"{s.id}_positions": zero_mask for s in all_signals},
@@ -164,8 +172,6 @@ class ImplantingStrategy(SimulationStrategy):
             motif_left = motif_instance.instance
             motif_right = ""
 
-        if sequence_type == SequenceType.NUCLEOTIDE:
-            position *= 3
         sequence_string = getattr(sequence_row, sequence_type.value).to_string()
 
         gap_start = position + len(motif_left)

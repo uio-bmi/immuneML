@@ -5,12 +5,6 @@ from setuptools import setup, find_packages
 from immuneML.environment.Constants import Constants
 
 
-def import_requirements(filename) -> list:
-    with open(filename, 'r') as file:
-        requirements = file.read().split("\n")
-    return requirements
-
-
 setup(
     name="immuneML",
     version=Constants.VERSION,
@@ -20,15 +14,20 @@ setup(
     author="immuneML Team",
     author_email="milenpa@student.matnat.uio.no",
     url="https://github.com/uio-bmi/immuneML",
-    install_requires=["numpy", "pandas>=1,<2.0", "PyYAML>=5.3", "scikit-learn>=0.23",
-                      "gensim>=4", "matplotlib>=3.1", "editdistance", "regex", "tzlocal", "airr>=1,<1.4",
-                      "fishersapi", "pystache", "torch>=1.5.1", "dill>=0.3", "plotly>=4", "logomaker>=0.8",
-                      "matplotlib-venn>=0.11", "scipy", "bionumpy>=0.2.31", "umap-learn", "fisher", "olga"],
+    install_requires=["pandas>=1,<2.0", "PyYAML>=5.3", "scikit-learn>=0.23",
+                      "matplotlib>=3.1", "editdistance", "regex", "tzlocal", "airr>=1,<1.4",
+                      "pystache", "dill>=0.3", "plotly>=4", "matplotlib-venn>=0.11", "scipy", "bionumpy>=0.2.31",
+                      "umap-learn", "olga", "numpy"],
     extras_require={
+        'word2vec': ['gensim'],
+        'fisher': ['fisher', 'fishersapi'],
         "TCRdist": ["tcrdist3>=0.1.6"],
         "gen_models": ['sonnia', 'torch'],
         "ligo": ['stitchr', 'IMGTgeneDL'],
-        "KerasSequenceCNN": ["keras==2.11.0", "tensorflow==2.11.0"]
+        "DL": ['torch', 'keras', 'tensorflow', 'logomaker'],
+        "KerasSequenceCNN": ["keras==2.11.0", "tensorflow==2.11.0"],
+        "all": ['tcrdist3', 'sonnia', 'torch', 'stitchr', 'IMGTgeneDL', 'keras', 'tensorflow', 'fisher', 'logomaker',
+                'fishersapi', 'gensim']
     },
     classifiers=[
         "Programming Language :: Python :: 3",

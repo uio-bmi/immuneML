@@ -10,6 +10,7 @@ from bionumpy.sequence.position_weight_matrix import PWM as bnp_PWM
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.implants.Motif import Motif
+from immuneML.simulation.implants.MotifInstance import MotifInstance
 
 
 @dataclass
@@ -58,11 +59,13 @@ class LigoPWM(Motif):
         return list(self.pwm_matrix.alphabet)
 
     def instantiate_motif(self, sequence_type: SequenceType = SequenceType.AMINO_ACID):
-        if len(EnvironmentSettings.get_sequence_alphabet(sequence_type)) != self.pwm_matrix.alphabet:
-            raise RuntimeError(f"{LigoPWM.__name__}: could not instantiate motif for sequence type {sequence_type.name},"
-                               f" check if the motif sequence type is a match at {self.file_path}.")
+        if EnvironmentSettings.get_sequence_alphabet(sequence_type) != sorted(list(self.pwm_matrix.alphabet)):
+            raise RuntimeError(
+                f"{LigoPWM.__name__}: could not instantiate motif for sequence type {sequence_type.name},"
+                f" check if the motif sequence type is a match at {self.file_path}.")
 
         counts_per_position = np.exp(self.pwm_matrix._matrix + np.log([0.25])[:, np.newaxis])
 
-        return "".join([random.choices(list(self.pwm_matrix.alphabet), weights=counts_per_position[:, position])[0]
-                        for position in range(self.pwm_matrix.window_size)])
+        return MotifInstance(
+            "".join([random.choices(list(self.pwm_matrix.alphabet), weights=counts_per_position[:, position])[0]
+                     for position in range(self.pwm_matrix.window_size)]), gap=0)

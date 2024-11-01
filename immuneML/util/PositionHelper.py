@@ -44,18 +44,18 @@ class PositionHelper:
         return [int(bool(weight)) for weight in position_weights.values()]
 
     @staticmethod
-    def get_imgt_position_weights_for_implanting(input_length: int, region_type: RegionType,
+    def get_imgt_position_weights_for_implanting(aa_input_length: int, region_type: RegionType,
                                                  sequence_position_weights: dict, limit: int):
-        position_weights = PositionHelper.get_imgt_position_weights_for_annotation(input_length, region_type,
+        position_weights = PositionHelper.get_imgt_position_weights_for_annotation(aa_input_length, region_type,
                                                                                    sequence_position_weights)
 
         for index, position in enumerate(position_weights.keys()):
-            if index > input_length - limit:
+            if index > aa_input_length - limit:
                 position_weights[position] = 0.
 
         weights_sum = sum(list(position_weights.values()))
         if weights_sum == 0:
-            logging.warning(f"Sequence of length {input_length} has no allowed positions for signal with sequence "
+            logging.warning(f"Sequence of length {aa_input_length} has no allowed positions for signal with sequence "
                             f"position weights {sequence_position_weights} and motif length {limit}, it will be discarded.")
             return position_weights
 
@@ -63,7 +63,7 @@ class PositionHelper:
                             for position, weight in position_weights.items()}
 
         assert np.isclose(sum(list(position_weights.values())), 1.), \
-            (input_length, region_type.name, position_weights, sum(list(position_weights.values())), limit)
+            (aa_input_length, region_type.name, position_weights, sum(list(position_weights.values())), limit)
 
         return position_weights
 
@@ -109,6 +109,7 @@ class PositionHelper:
                                          region_type: RegionType = RegionType.IMGT_CDR3):
         if sequence_type != SequenceType.AMINO_ACID:
             raise NotImplementedError(f"{sequence_type.name} is currently not supported for obtaining IMGT positions")
+
         input_length = len(sequence.get_sequence(sequence_type=sequence_type))
 
         return PositionHelper.gen_imgt_positions_from_length(input_length, region_type)

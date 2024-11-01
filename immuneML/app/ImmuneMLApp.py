@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import shutil
+from sys import exit as sys_exit
 import warnings
 from pathlib import Path
 
@@ -36,26 +37,32 @@ class ImmuneMLApp:
         del os.environ[Constants.CACHE_TYPE]
 
     def run(self):
-        print_log(f"Running immuneML version {Constants.VERSION}\n", include_datetime=True)
+        try:
+            print_log(f"Running immuneML version {Constants.VERSION}\n", include_datetime=True)
 
-        self.set_cache()
+            self.set_cache()
 
-        print_log(f"immuneML: parsing the specification...\n", include_datetime=True)
+            print_log(f"immuneML: parsing the specification...\n", include_datetime=True)
 
-        symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path, self._result_path)
+            symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path,
+                                                                                    self._result_path)
 
-        print_log(f"immuneML: starting the analysis...\n", include_datetime=True)
+            print_log(f"immuneML: starting the analysis...\n", include_datetime=True)
 
-        instructions = symbol_table.get_by_type(SymbolType.INSTRUCTION)
-        output = symbol_table.get("output")
-        model = SemanticModel([instruction.item for instruction in instructions], self._result_path, output)
-        result = model.run()
+            instructions = symbol_table.get_by_type(SymbolType.INSTRUCTION)
+            output = symbol_table.get("output")
+            model = SemanticModel([instruction.item for instruction in instructions], self._result_path, output)
+            result = model.run()
 
-        self.clear_cache()
+            self.clear_cache()
 
-        print_log(f"ImmuneML: finished analysis.\n", include_datetime=True)
+            print_log(f"ImmuneML: finished analysis.\n", include_datetime=True)
 
-        return result
+            return result
+
+        except (ModuleNotFoundError, ImportError) as e:
+            sys_exit(f"{e}\n\nAn error occurred when trying to import a package. Please check if all necessary "
+                     f"packages are installed correctly. See the log above for more details.")
 
 
 def run_immuneML(namespace: argparse.Namespace):
@@ -92,6 +99,7 @@ def main():
     namespace.result_path = Path(namespace.result_path)
 
     run_immuneML(namespace)
+
 
 if __name__ == "__main__":
     main()

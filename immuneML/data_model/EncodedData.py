@@ -1,3 +1,5 @@
+import logging
+
 import pandas as pd
 import numpy as np
 
@@ -68,13 +70,13 @@ class EncodedData:
             if issparse(self.examples):
                 return self.examples.toarray()
         except ImportError as e:
-            pass
+            logging.warning(f"{EncodedData.__name__}: scipy could not be imported.")
 
         try:
             import torch
             if torch.is_tensor(self.examples):
                 return self.examples.numpy()
         except ImportError as e:
-            pass
+            logging.warning(f"{EncodedData.__name__}: torch could not be imported.")
 
         raise ValueError(f"EncodedData: examples matrix of type '{type(self.examples)}' cannot be converted to a numpy matrix.")

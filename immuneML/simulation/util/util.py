@@ -1,6 +1,4 @@
-import dataclasses
 import logging
-import uuid
 from dataclasses import make_dataclass, fields as get_fields
 from itertools import chain
 from pathlib import Path
@@ -10,7 +8,7 @@ import bionumpy as bnp
 import dill
 import numpy as np
 import pandas as pd
-from bionumpy import AminoAcidEncoding, DNAEncoding, EncodedRaggedArray, get_motif_scores
+from bionumpy import AminoAcidEncoding, DNAEncoding, get_motif_scores
 from bionumpy.bnpdataclass import bnpdataclass, BNPDataClass
 from bionumpy.encodings import BaseEncoding
 from bionumpy.io import delimited_buffers
@@ -19,9 +17,8 @@ from npstructures import RaggedArray
 from scipy.stats import zipf
 
 from immuneML import Constants
-from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.SequenceParams import RegionType, Chain
-from immuneML.data_model.SequenceSet import ReceptorSequence, Repertoire
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.data_model.bnp_util import make_full_airr_seq_set_df
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences
@@ -29,7 +26,7 @@ from immuneML.simulation.SimConfigItem import SimConfigItem
 from immuneML.simulation.implants.LigoPWM import LigoPWM
 from immuneML.simulation.implants.MotifInstance import MotifInstance, MotifInstanceGroup
 from immuneML.simulation.implants.Signal import Signal, SignalPair
-from immuneML.simulation.util.bnp_util import merge_dataclass_objects
+from immuneML.simulation.util.bnp_util import merge_dataclass_objects, pad_ragged_array
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.PositionHelper import PositionHelper
 
@@ -244,6 +241,7 @@ def match_motif(motif: Union[str, LigoPWM], encoding, sequence_array):
         matches = matcher.rolling_window(sequence_array, mode='same')
     else:
         matches = get_motif_scores(sequence_array, motif.pwm_matrix) > motif.threshold
+        matches = pad_ragged_array(matches, sequence_array.shape, False)
     return matches
 
 
