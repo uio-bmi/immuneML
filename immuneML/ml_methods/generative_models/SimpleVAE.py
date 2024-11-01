@@ -289,14 +289,18 @@ class SimpleVAE(GenerativeModel):
                                        device=self.device).float()
             sequences, v_genes, j_genes = self.model.decode(z_sample)
 
-        seq_objs = [ReceptorSequence(**{
-            self.sequence_type.value: ''.join([self.vocab[Categorical(letter).sample()] for letter in sequences[i]])
-                                     .replace(Constants.GAP_LETTER, ''),
-            'v_call': self.unique_v_genes[Categorical(v_genes[i]).sample()],
-            'j_call': self.unique_j_genes[Categorical(j_genes[i]).sample()],
-            'locus': self.locus,
-            'metadata': {'gen_model_name': self.name if self.name else "SimpleVAE"}
-        }) for i in range(count)]
+        seq_objs = []
+        for i in range(count):
+            seq_content = [self.vocab[Categorical(letter).sample()] for letter in sequences[i]]
+            sequence = ReceptorSequence(**{
+                self.sequence_type.value: ''.join(seq_content).replace(Constants.GAP_LETTER, ''),
+                'v_call': self.unique_v_genes[Categorical(v_genes[i]).sample()],
+                'j_call': self.unique_j_genes[Categorical(j_genes[i]).sample()],
+                'locus': self.locus,
+                'metadata': {'gen_model_name': self.name if self.name else "SimpleVAE"}
+            })
+
+            seq_objs.append(sequence)
 
         # for obj in seq_objs:
         #     log_prob = self.compute_p_gen({self.sequence_type.value: obj.get_attribute(self.sequence_type.value),
@@ -304,7 +308,10 @@ class SimpleVAE(GenerativeModel):
         #                                   self.sequence_type)
         #     obj.metadata.custom_params = {'log_prob': log_prob}
 
-        dataset = SequenceDataset.build_from_objects(seq_objs, PathBuilder.build(path), f'synthetic_{self.name}_dataset')
+        dataset = SequenceDataset.build_from_objects(seq_objs, PathBuilder.build(path),
+                                                     f'synthetic_{self.name}_dataset',
+                                                     {'gen_model_name': ["SimpleVAE"]},
+                                                     self.region_type)
 
         return dataset
 

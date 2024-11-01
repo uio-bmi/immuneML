@@ -189,7 +189,7 @@ class TrainGenModelInstruction(GenModelInstruction):
             except AssertionError as e:
                 logging.warning(f"{TrainGenModelInstruction.__name__}: {self.state.name}: combined dataset could not "
                                 f"be exported due to the following error: {e}.")
-        else:
+        elif self.export_combined_dataset:
             logging.warning(f"{TrainGenModelInstruction.__name__}: {self.state.name}: export_combined_dataset is only "
                             f"supported for sequence datasets at this point.")
 

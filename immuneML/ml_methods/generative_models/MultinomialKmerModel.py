@@ -6,6 +6,7 @@ from bionumpy import EncodedRaggedArray, EncodedArray, count_encoded
 
 from immuneML.ml_methods.generative_models.SequenceTransitionDistribution import EncodedLookup
 
+
 @dataclasses.dataclass
 class Poisson:
     mu: float
@@ -15,6 +16,7 @@ class Poisson:
 
     def sample(self, n_samples):
         return poisson.rvs(self.mu, size=n_samples)
+
 
 class KmerDistribution(Protocol):
     def sample(self, count: int) -> EncodedRaggedArray:
@@ -51,7 +53,8 @@ class SmoothedLengthDistribution:
         return np.where(is_smooth, smooth_samples, empirical_samples)
 
     def log_prob(self, lengths: np.ndarray) -> np.ndarray:
-        return np.logaddexp(np.log(1-self.p_smooth) + self.empirical_distribution.log_prob(lengths), np.log(self.p_smooth) + self.smooth_distribution.log_prob(lengths))
+        return np.logaddexp(np.log(1 - self.p_smooth) + self.empirical_distribution.log_prob(lengths),
+                            np.log(self.p_smooth) + self.smooth_distribution.log_prob(lengths))
 
 
 class KmerModel:
@@ -80,7 +83,7 @@ class MultinomialKmerModel:
             sequence_length = np.full((count,), self.sequence_length, dtype=int)
         total_kmers = sequence_length.sum()
         kmers = self.kmer_model.sample(total_kmers)
-        #kmer_hashes = np.random.choice(self._raw_values, size=total_kmers,
+        # kmer_hashes = np.random.choice(self._raw_values, size=total_kmers,
         # p=self.kmer_probs.raw())
         # kmers = EncodedArray(kmer_hashes, self.kmer_probs.encoding)
         return EncodedRaggedArray(kmers, sequence_length)
@@ -109,6 +112,7 @@ def estimate_smoothed_length_distribution(lengths: np.ndarray, prior_count=1) ->
 def estimate_kmer_model(kmers: EncodedRaggedArray, prior_count=1) -> MultinomialKmerModel:
     length_distribution = estimate_smoothed_length_distribution(kmers.lengths, prior_count=prior_count)
     kmer_counts = count_encoded(kmers, axis=None)
-    lookup = EncodedLookup((kmer_counts.counts+prior_count/len(kmer_counts.counts)) / (kmers.size+prior_count), kmers.encoding)
+    lookup = EncodedLookup((kmer_counts.counts + prior_count / len(kmer_counts.counts)) / (kmers.size + prior_count),
+                           kmers.encoding)
 
     return MultinomialKmerModel(lookup, length_distribution)
