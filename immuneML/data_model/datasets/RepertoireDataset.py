@@ -125,7 +125,7 @@ class RepertoireDataset(Dataset):
         """Returns the list of metadata fields which can be used as labels; if refresh=True, it reloads the fields
         from disk"""
         all_metadata_fields = set(self.get_metadata_fields(refresh))
-        for non_label in ["subject_id", "filename", "repertoire_id", "identifier", "type_dict"]:
+        for non_label in ["subject_id", "filename", "repertoire_id", "identifier", "type_dict_dynamic_fields"]:
             if non_label in all_metadata_fields:
                 all_metadata_fields.remove(non_label)
 

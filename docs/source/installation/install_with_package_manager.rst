@@ -17,7 +17,11 @@ Install immuneML with pip
 
 0. To install immuneML with pip, make sure to have Python version 3.7 or later installed.
 
-1. Create a virtual environment where immuneML will be installed. It is possible to install immuneML as a global package, but it is not recommended as there might be conflicting versions of different packages. For more details, see `the official documentation on creating virtual environments with Python <https://docs.python.org/3/library/venv.html>`_. To create an environment, run the following in the terminal (for Windows-specific commands, see the virtual environment documentation linked above):
+1. Create a virtual environment where immuneML will be installed. It is possible to install immuneML as a global
+package, but it is not recommended as there might be conflicting versions of different packages. For more details,
+see `the official documentation on creating virtual environments with Python <https://docs.python.org/3/library/venv.html>`_.
+To create an environment, run the following in the terminal (for Windows-specific commands, see the virtual
+environment documentation linked above):
 
 .. code-block:: console
 
@@ -29,7 +33,10 @@ Install immuneML with pip
 
   source ./immuneml_venv/bin/activate
 
-Note: when creating a python virtual environment, it will automatically use the same Python version as the environment it was created in. To ensure that the preferred Python version (3.8) is used, it is possible to instead make a conda environment (see :ref:`Install immuneML with conda` steps 0-3) and proceed to install immuneML with pip inside the conda environment.
+Note: when creating a python virtual environment, it will automatically use the same Python version as the environment
+it was created in. To ensure that the preferred Python version (3.8) is used, it is possible to instead make a conda
+environment (see :ref:`Install immuneML with conda` steps 0-3) and proceed to install immuneML with pip inside the
+conda environment.
 
 
 3. If not already up-to-date, update pip:
@@ -38,13 +45,8 @@ Note: when creating a python virtual environment, it will automatically use the 
 
   python3 -m pip install --upgrade pip
 
-4. If not already installed, install the wheel package. If it is not installed, the installation of some of the dependencies might default to legacy 'setup.py install'.
 
-.. code-block:: console
-
-  pip install wheel
-
-5. To install `immuneML from PyPI <https://pypi.org/project/immuneML/>`_ in this virtual environment, run the following:
+4. To install `immuneML from PyPI <https://pypi.org/project/immuneML/>`_ in this virtual environment, run the following:
 
 .. code-block:: console
 
@@ -64,12 +66,12 @@ Install immuneML with conda
   mkdir immuneML/
   cd immuneML/
 
-2. Create a virtual environment using conda. immuneML has been tested extensively with Python versions 3.7, 3.8 and 3.11.
-   To create a conda virtual environment with Python version 3.8, use:
+2. Create a virtual environment using conda. immuneML has been tested extensively with Python version 3.11.
+   To create a conda virtual environment with Python version 3.11, use:
 
 .. code-block:: console
 
-  conda create --prefix immuneml_env/ python=3.8
+  conda create --prefix immuneml_env/ python=3.11
 
 3. Activate the created environment:
 
@@ -118,27 +120,33 @@ To install the DeepRC dependencies, run:
 See also this question under 'Troubleshooting': :ref:`I get an error when installing PyTorch (could not find a version that satisfies the requirement torch)`
 
 
-Keras-based sequence CNN
+Deep learning methods
 ************************
 
-In order to use the :ref:`KerasSequenceCNN`, optional dependencies :code:`keras` and :code:`tensorflow` need to be installed.
-By default, version 2.11.0 of both dependencies are used.
-Other versions may work as well, as long as the used versions of :code:`keras` and :code:`tensorflow` are compatible with eachother.
-
-To install the default versions of these packages, you can include the optional extra :code:`KerasSequenceCNN`:
+In order to use any of the supported deep learning models (KerasSequenceCNN or others), install DL optional dependencies:
 
 .. code-block:: console
 
-  pip install immuneML[KerasSequenceCNN]
+  pip install immuneML[DL]
 
-Or install the dependencies manually using the :download:`requirements_KerasSequenceCNN.txt <https://raw.githubusercontent.com/uio-bmi/immuneML/master/requirements_KerasSequenceCNN.txt>` file:
+Fisher's exact test
+**********************
+
+For using ProbabilisticBinaryClassifier or any of the abundance encoders (following Emerson et al. 2017 publication),
+please install 'fisher' optional dependencies:
 
 .. code-block:: console
 
-  pip install -r requirements_KerasSequenceCNN.txt
+  pip install immuneML[fisher]
 
+Full immuneML installation
+******************************
 
-The :ref:`KerasSequenceCNN` uses CPU, it does *not* rely on GPU.
+To install all optional dependencies and have access to the full set of immuneML features, use the following installation command:
+
+.. code-block:: console
+
+  pip install immuneML[all]
 
 CompAIRR
 ********

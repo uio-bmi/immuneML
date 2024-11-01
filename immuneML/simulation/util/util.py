@@ -337,7 +337,7 @@ def make_annotated_dataclass(annotation_fields: list, signals: list):
             [getattr(self, signal.id) for signal in signals]).T if signals and len(signals) > 0 else None,
         "get_signal_names": lambda self: [signal.id for signal in signals]}
 
-    fields = [f if len(f) != 3 else (f[0], f[1], dill.loads(f[2])) for f in annotation_fields]
+    fields = [f if len(f) != 3 else (f[0], f[1], f[2]) for f in annotation_fields]
 
     return bnpdataclass(
         make_dataclass("AnnotatedGenData", namespace=functions, bases=tuple([BackgroundSequences]), fields=fields))

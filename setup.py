@@ -24,7 +24,7 @@ setup(
         "TCRdist": ["tcrdist3>=0.1.6"],
         "gen_models": ['sonnia', 'torch'],
         "ligo": ['stitchr', 'IMGTgeneDL'],
-        "DL": ['torch', 'keras', 'tensorflow', 'logomaker'],
+        "DL": ['torch', 'keras', 'tensorflow', 'logomaker', 'gensim'],
         "KerasSequenceCNN": ["keras==2.11.0", "tensorflow==2.11.0"],
         "all": ['tcrdist3', 'sonnia', 'torch', 'stitchr', 'IMGTgeneDL', 'keras', 'tensorflow', 'fisher', 'logomaker',
                 'fishersapi', 'gensim']

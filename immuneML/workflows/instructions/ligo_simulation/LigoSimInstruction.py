@@ -101,18 +101,19 @@ class LigoSimInstruction(Instruction):
                               self.state.signals] if self._export_observed_signals else []
 
         if isinstance(self.state.simulation.simulation_strategy, ImplantingStrategy):
-            field_seq, field_p_gen = field(default='', metadata=None), field(default=-1., metadata=None)
-            implanting_fields = [('original_sequence', str, dill.dumps(field_seq)),
-                                 ('original_p_gen', float, dill.dumps(field_p_gen))]
+            implanting_fields = [('original_sequence', str, ''),
+                                 ('original_p_gen', float, -1.)]
         else:
             implanting_fields = []
 
         self._annotation_fields = sorted(
-            [(signal.id, int) for signal in self.state.signals] + [('signals_aggregated', str)] +
-            [(f"{signal.id}_positions", str) for signal in self.state.signals] + self._noise_fields,
+            [(signal.id, int, 0) for signal in self.state.signals] + [('signals_aggregated', str, '')] +
+            [(f"{signal.id}_positions", str, '') for signal in self.state.signals] + self._noise_fields,
             key=lambda x: x[0]) + implanting_fields
 
-        self._custom_fields = self._annotation_fields + [('p_gen', float), ('from_default_model', int)]
+        self._custom_fields = dill.dumps(self._annotation_fields + [('p_gen', float, -1.), ('from_default_model', int, 1)])
+        self._annotation_fields = dill.dumps(self._annotation_fields)
+
         self._background_fields = [(f.name, f.type) for f in fields(BackgroundSequences)]
 
     @property
@@ -120,8 +121,16 @@ class LigoSimInstruction(Instruction):
         return self.state.simulation.sequence_type
 
     @property
+    def custom_fields(self):
+        return dill.loads(self._custom_fields)
+
+    @property
+    def annotation_fields(self):
+        return dill.loads(self._annotation_fields)
+
+    @property
     def _annotated_dataclass(self):
-        return make_annotated_dataclass(self._annotation_fields, self.state.signals)
+        return make_annotated_dataclass(self.annotation_fields, self.state.signals)
 
     MIN_RANGE_PROBABILITY = 1e-5
 
@@ -177,7 +186,7 @@ class LigoSimInstruction(Instruction):
             else:
                 df.to_csv(str(data_filename), sep='\t', index=False, mode='w', header=True)
 
-        type_dict = {k: v for k, v in self._custom_fields}
+        type_dict = {k: v for k, v, default_value in self.custom_fields}
 
         write_yaml(metadata_filename, {
             'labels': labels,
