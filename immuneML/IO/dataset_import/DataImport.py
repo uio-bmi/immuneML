@@ -66,7 +66,7 @@ class DataImport(metaclass=abc.ABCMeta):
         new_metadata_file = ImportHelper.make_new_metadata_file(repertoires, metadata, self.params.result_path,
                                                                 self.dataset_name)
 
-        potential_labels = list(set(metadata.columns.tolist()) - {"filename"})
+        potential_labels = list(set(metadata.columns.tolist()) - {"filename", 'type_dict_dynamic_fields'})
         dataset_filename = self._make_dataset_file_for_repertoire_dataset(repertoires)
 
         return RepertoireDataset(labels={key: list(set(metadata[key].values.tolist())) for key in potential_labels},

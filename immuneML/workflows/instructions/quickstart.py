@@ -9,8 +9,6 @@ from pathlib import Path
 import yaml
 
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
-from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
-from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 
 
