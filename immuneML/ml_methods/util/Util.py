@@ -1,10 +1,7 @@
 import logging
-from datetime import datetime
 
 import random
 import numpy as np
-import pkg_resources
-import torch
 from sklearn.preprocessing import label_binarize
 
 from immuneML.data_model.EncodedData import EncodedData
@@ -99,6 +96,7 @@ class Util:
 
     @staticmethod
     def setup_pytorch(number_of_threads, random_seed, pytorch_device_name=None):
+        import torch
         torch.set_num_threads(number_of_threads)
         torch.manual_seed(random_seed)
         if pytorch_device_name is not None:
