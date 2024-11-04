@@ -166,7 +166,8 @@ class TrainGenModelInstruction(GenModelInstruction):
                                          for key, val in type(combined_data).get_field_type_dict(all_fields=False).items()},
             "name": f'combined_{self.state.name}_dataset.tsv',
             "filename": f'combined_{self.state.name}_dataset.tsv',
-            "labels": ['gen_model_name', "from_gen_model"], "timestamp": str(datetime.now())
+            "labels": {'gen_model_name': [self.method.name, ''], "from_gen_model": [True, False]},
+            "timestamp": str(datetime.now())
         })
 
         self.state.combined_dataset = SequenceDataset.build(

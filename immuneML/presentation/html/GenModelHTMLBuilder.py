@@ -39,7 +39,7 @@ class GenModelHTMLBuilder:
             "logfile": Util.get_logfile_path(base_path),
             "function": "Applied" if isinstance(state, ApplyGenModelState) else "Trained",
             'exported_datasets': exported_datasets,
-            "show_exported_datasets": len(exported_datasets) > 0
+            "show_exported_datasets": len(exported_datasets) > 0,
         }
 
         html_map = {**html_map, **{

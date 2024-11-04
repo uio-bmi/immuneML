@@ -20,7 +20,7 @@ class IdentitySequenceEncoder(SequenceEncodingStrategy):
         """
 
         res = []
-        sequence_type = params.model.get('sequence_type', EnvironmentSettings.sequence_type)
+        sequence_type = params.model.get('sequence_type', params.sequence_type)
         if params.model.get("sequence", True):
             res.append(sequence.get_sequence(sequence_type))
 

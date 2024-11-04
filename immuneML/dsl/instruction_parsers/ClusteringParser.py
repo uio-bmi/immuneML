@@ -5,10 +5,17 @@ from typing import List
 
 import sklearn.metrics as sklearn_metrics
 
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.SequenceType import SequenceType
+from immuneML.hyperparameter_optimization.config.LeaveOneOutConfig import LeaveOneOutConfig
+from immuneML.hyperparameter_optimization.config.ManualSplitConfig import ManualSplitConfig
+from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
+from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.reports.Report import Report
@@ -25,13 +32,63 @@ class ClusteringParser:
 
         ParameterValidator.assert_keys(instruction.keys(), valid_keys, ClusteringParser.__name__, key)
 
+        ParameterValidator.assert_region_type(instruction, ClusteringParser.__name__)
+        ParameterValidator.assert_sequence_type(instruction, ClusteringParser.__name__)
+
         dataset = symbol_table.get(instruction['dataset'])
         clustering_settings = parse_clustering_settings(key, instruction, symbol_table)
         metrics = parse_metrics(key, instruction, symbol_table)
         label_config = parse_labels(key, instruction, dataset)
         reports = parse_reports(key, instruction, symbol_table)
+        split_config = parse_split_config(key, instruction, symbol_table)
 
-        return ClusteringInstruction(dataset, metrics, clustering_settings, key, label_config, reports)
+        return ClusteringInstruction(dataset=dataset, metrics=metrics, clustering_settings=clustering_settings,
+                                     name=key, label_config=label_config, reports=reports,
+                                     sequence_type=SequenceType[instruction['sequence_type'].upper()],
+                                     region_type=RegionType[instruction['region_type'].upper()],
+                                     split_config=split_config)
+
+
+def parse_split_config(key, instruction, symbol_table) -> SplitConfig:
+
+    try:
+        split_key = 'split_config'
+        default_params = DefaultParamsLoader.load("instructions/", SplitConfig.__name__)
+        instruction[split_key] = {**default_params, **instruction[split_key]}
+
+        split_strategy = SplitType[instruction[split_key]["split_strategy"].upper()]
+        training_percentage = float(
+            instruction[split_key]["training_percentage"]) if split_strategy == SplitType.RANDOM else -1
+
+        if split_strategy == SplitType.RANDOM:
+            assert 0. <= training_percentage <= 1., \
+                f'{ClusteringParser.__name__}: training_percentage has to between 0 and 1 if split_strategy is RANDOM.'
+
+        elif split_strategy == SplitType.MANUAL:
+            ParameterValidator.assert_keys(keys=instruction[split_key]["manual_config"].keys(),
+                                           valid_keys=["discovery_data", "validation_data"],
+                                           location=ClusteringParser.__name__, parameter_name="manual_config",
+                                           exclusive=True)
+
+            ParameterValidator.assert_valid_tabular_file(instruction[split_key]["manual_config"]["discovery_data"],
+                                                         location=ClusteringParser.__name__,
+                                                         parameter_name="discovery_data")
+
+            ParameterValidator.assert_valid_tabular_file(instruction[split_key]["manual_config"]["validation_data"],
+                                                         location=ClusteringParser.__name__,
+                                                         parameter_name="validation_data")
+
+        return SplitConfig(split_strategy=split_strategy,
+                           split_count=1, training_percentage=training_percentage,
+                           manual_config=ManualSplitConfig(train_metadata_path=instruction[split_key]['discovery_data'],
+                                                           test_metadata_path=instruction[split_key]['validation_data'])
+                           if "manual_config" in instruction[split_key] else None,
+                           leave_one_out_config=LeaveOneOutConfig(**instruction[split_key]["leave_one_out_config"])
+                           if "leave_one_out_config" in instruction[split_key] else None)
+
+    except KeyError as key_error:
+        raise KeyError(
+            f"{ClusteringParser.__name__}: parameter {key_error.args[0]} was not defined under {split_key}.") from key_error
 
 
 def parse_labels(key, instruction, dataset) -> LabelConfiguration:

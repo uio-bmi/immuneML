@@ -153,7 +153,7 @@ class PWM(GenerativeModel):
 
         write_yaml(path / 'synthetic_metadata.yaml', {
             'type_dict_dynamic_fields': {'gen_model_name': 'str'},
-            'name': 'synthetic_dataset', 'labels': ['gen_model_name'],
+            'name': 'synthetic_dataset', 'labels': {'gen_model_name': [self.name]},
             'timestamp': str(datetime.now())
         })
 

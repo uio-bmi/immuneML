@@ -140,7 +140,8 @@ class SoNNia(GenerativeModel):
                                                                               v_call=seq[1], j_call=seq[2],
                                                                               metadata={'gen_model_name': self.name})
                                                              for seq in sequences],
-                                                path=PathBuilder.build(path), name='SoNNiaDataset')
+                                                  path=PathBuilder.build(path), name='SoNNiaDataset',
+                                                  labels={'gen_model_name': [self.name]})
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         raise NotImplementedError
@@ -164,7 +165,8 @@ class SoNNia(GenerativeModel):
         write_yaml(path / 'model/model_overview.yaml', {'type': 'SoNNia', 'locus': self.locus.name,
                                                         'region_type': self.region_type.name,
                                                         **{k: v for k, v in vars(self).items()
-                                                           if k not in ['_model', 'locus', '_model_path', 'region_type']}})
+                                                           if
+                                                           k not in ['_model', 'locus', '_model_path', 'region_type']}})
         attributes_to_save = ['data_seqs', 'gen_seqs', 'log']
         self._model.save_model(path / 'model', attributes_to_save)
 

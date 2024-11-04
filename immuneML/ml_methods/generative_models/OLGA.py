@@ -28,7 +28,10 @@ from immuneML.util.PathBuilder import PathBuilder
 @dataclass
 class OLGA(GenerativeModel):
     """
-    This is a wrapper for the OLGA package as described by Sethna et al. 2019 (OLGA package on PyPI or GitHub: https://github.com/statbiophys/OLGA).
+    This is a wrapper for the OLGA package as described by Sethna et al. 2019 (OLGA package on PyPI or GitHub:
+    https://github.com/statbiophys/OLGA ).
+    This model should be used only for LIgO simulation and is not yet supported for use with TrainGenModel instruction.
+
 
     Reference:
 

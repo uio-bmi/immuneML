@@ -225,7 +225,7 @@ class SimpleLSTM(GenerativeModel):
         }) for i, sequence in enumerate(sequences)]
 
         return SequenceDataset.build_from_objects(sequences=sequence_objs, path=PathBuilder.build(path),
-                                                  name='synthetic_lstm_dataset')
+                                                  name='synthetic_lstm_dataset', labels={'gen_model_name': [self.name]})
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         raise RuntimeError

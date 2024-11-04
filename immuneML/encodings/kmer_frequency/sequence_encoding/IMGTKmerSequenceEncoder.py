@@ -20,7 +20,7 @@ class IMGTKmerSequenceEncoder(SequenceEncodingStrategy):
         :return: SequenceEncodingResult consisting of features and feature information names
         """
         k = params.model["k"]
-        sequence_type = params.model.get('sequence_type', EnvironmentSettings.sequence_type)
+        sequence_type = params.model.get('sequence_type', params.sequence_type)
         length = len(sequence.get_sequence(sequence_type))
 
         if length < k:
@@ -28,7 +28,8 @@ class IMGTKmerSequenceEncoder(SequenceEncodingStrategy):
             return None
 
         kmers = KmerHelper.create_IMGT_kmers_from_sequence(sequence=sequence, k=k, sequence_type=sequence_type,
-                                                           region_type=params.region_type)
+                                                           region_type=params.model.get('region_type',
+                                                                                        params.region_type))
 
         kmers = [Constants.FEATURE_DELIMITER.join([str(mer) for mer in kmer]) for kmer in kmers]
 

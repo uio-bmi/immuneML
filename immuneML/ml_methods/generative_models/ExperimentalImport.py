@@ -16,6 +16,7 @@ from immuneML.util.PathBuilder import PathBuilder
 class ExperimentalImport(GenerativeModel):
     """
     Allows to import existing experimental data and do annotations and simulations on top of them.
+    This model should be used only for LIgO simulation and not with TrainGenModel instruction.
 
     **YAML specification:**
 

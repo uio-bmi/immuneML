@@ -39,37 +39,43 @@ class ClusteringHTMLBuilder:
             'immuneML_version': MLUtil.get_immuneML_version(),
             "full_specs": Util.get_full_specs_path(base_path),
             "logfile": Util.get_logfile_path(base_path),
-            "predictions_path": Path(os.path.relpath(path=str(state.predictions_path), start=str(base_path))),
-            "performance_table_internal_val": ClusteringHTMLBuilder.make_internal_performance_table(state),
-            "label_eval_tables": ClusteringHTMLBuilder.make_external_performance_tables(state),
-            "cluster_setting_pages": ClusteringHTMLBuilder.make_cluster_setting_pages(state, base_path)
+            "discovery_predictions_path": Path(os.path.relpath(path=str(state.predictions_paths['discovery']), start=str(base_path))),
+            "validation_predictions_path": Path(
+                os.path.relpath(path=str(state.predictions_paths['validation']), start=str(base_path))),
+            "performance_table_internal_val": ClusteringHTMLBuilder.make_internal_performance_table(state, 'validation'),
+            "performance_table_internal_disc": ClusteringHTMLBuilder.make_internal_performance_table(state, 'discovery'),
+            "label_eval_tables_val": ClusteringHTMLBuilder.make_external_performance_tables(state, 'validation'),
+            "label_eval_tables_disc": ClusteringHTMLBuilder.make_external_performance_tables(state, 'discovery'),
+            "cluster_setting_pages_val": ClusteringHTMLBuilder.make_cluster_setting_pages(state, base_path, 'validation'),
+            "cluster_setting_pages_disc": ClusteringHTMLBuilder.make_cluster_setting_pages(state, base_path, 'discovery')
         }
 
         html_map = {**html_map, **{'show_internal_eval': sum([is_internal(m) for m in state.metrics]) > 0,
                                    'show_external_eval': sum([is_external(m) for m in state.metrics]) > 0,
-                                   "show_cluster_setting_pages": len(html_map['cluster_setting_pages']) > 0},
+                                   "show_cluster_setting_pages_val": len(html_map['cluster_setting_pages_val']) > 0,
+                                   "show_cluster_setting_pages_disc": len(html_map['cluster_setting_pages_disc']) > 0},
                     **Util.make_dataset_html_map(state.dataset)}
 
         return html_map
 
     @staticmethod
-    def make_cluster_setting_pages(state: ClusteringState, base_path: Path) -> List[dict]:
+    def make_cluster_setting_pages(state: ClusteringState, base_path: Path, analysis_desc: str) -> List[dict]:
         cluster_setting_pages = []
         for cl_setting in state.clustering_settings:
-            if (state.cl_item_report_results[cl_setting.get_key()] is not None
-                    and len(state.cl_item_report_results[cl_setting.get_key()]) > 0):
+            if (state.cl_item_report_results[analysis_desc][cl_setting.get_key()] is not None
+                    and len(state.cl_item_report_results[analysis_desc][cl_setting.get_key()]) > 0):
                 cluster_setting_pages.append({
                     'name': cl_setting.get_key(),
-                    'path': ClusteringHTMLBuilder.make_cluster_setting_page(state, cl_setting, base_path)
+                    'path': ClusteringHTMLBuilder.make_cluster_setting_page(state, cl_setting, base_path, analysis_desc)
                 })
         return cluster_setting_pages
 
     @staticmethod
-    def make_cluster_setting_page(state: ClusteringState, cl_setting, base_path: Path) -> Path:
-        result_path = base_path / f"{state.name}_clustering_setting_{cl_setting.get_key()}.html"
+    def make_cluster_setting_page(state: ClusteringState, cl_setting, base_path: Path, analysis_desc: str) -> Path:
+        result_path = base_path / f"{state.name}_{analysis_desc}_clustering_setting_{cl_setting.get_key()}.html"
 
-        if state.cl_item_report_results[cl_setting.get_key()]:
-            report_results = Util.to_dict_recursive(state.cl_item_report_results[cl_setting.get_key()], base_path)
+        if state.cl_item_report_results[analysis_desc][cl_setting.get_key()]:
+            report_results = Util.to_dict_recursive(state.cl_item_report_results[analysis_desc][cl_setting.get_key()], base_path)
             report_results = list(chain.from_iterable(report_results.values()))
             report_results = ClusteringHTMLBuilder._move_reports_recursive(report_results, base_path)
         else:
@@ -78,24 +84,26 @@ class ClusteringHTMLBuilder:
         html_map = {
             "css_style": Util.get_css_content(ClusteringHTMLBuilder.CSS_PATH),
             "cl_setting_name": cl_setting.get_key(),
+            "analysis_desc": analysis_desc,
             "reports": report_results,
             'show_internal_performances': any(is_internal(m) for m in state.metrics)
-                                          and state.clustering_items[cl_setting.get_key()].internal_performance,
+                                          and state.clustering_items[analysis_desc][cl_setting.get_key()].internal_performance,
             'show_external_performances': any(is_external(m) for m in state.metrics)
-                                          and state.clustering_items[cl_setting.get_key()].external_performance
+                                          and state.clustering_items[analysis_desc][cl_setting.get_key()].external_performance
         }
 
-        if state.clustering_items[cl_setting.get_key()].internal_performance.path is not None and \
-                state.clustering_items[cl_setting.get_key()].internal_performance.path.is_file():
-            with state.clustering_items[cl_setting.get_key()].internal_performance.path.open('r') as file:
+        if state.clustering_items[analysis_desc][cl_setting.get_key()].internal_performance.path is not None and \
+                state.clustering_items[analysis_desc][cl_setting.get_key()].internal_performance.path.is_file():
+            with state.clustering_items[analysis_desc][cl_setting.get_key()].internal_performance.path.open('r') as file:
                 html_map["internal_performances"] = Util.get_table_string_from_csv_string(file.read(), separator=",")
         else:
             html_map["show_internal_performances"] = False
 
-        if state.clustering_items[cl_setting.get_key()].external_performance.path is not None and \
-                state.clustering_items[cl_setting.get_key()].external_performance.path.is_file():
-            with state.clustering_items[cl_setting.get_key()].external_performance.path.open('r') as file:
-                html_map['external_performances'] = Util.get_table_string_from_csv_string(file.read(), separator=",")
+        if state.clustering_items[analysis_desc][cl_setting.get_key()].external_performance.path is not None and \
+                state.clustering_items[analysis_desc][cl_setting.get_key()].external_performance.path.is_file():
+
+            with state.clustering_items[analysis_desc][cl_setting.get_key()].external_performance.path.open('r') as file:
+                html_map['external_performances'] = Util.get_table_string_from_csv_string(csv_string=file.read(), separator=",", has_header=True)
         else:
             html_map["external_performances"] = False
 
@@ -105,13 +113,13 @@ class ClusteringHTMLBuilder:
         return result_path.relative_to(base_path)
 
     @staticmethod
-    def make_external_performance_tables(state: ClusteringState) -> List[dict]:
+    def make_external_performance_tables(state: ClusteringState, analysis_desc: str) -> List[dict]:
         cl_item_keys = [cs.get_key() for cs in state.clustering_settings]
         external_eval = []
         for label in state.label_config.get_labels_by_name():
             performance_table = {
                 metric.replace("_", " "): [
-                    state.clustering_items[cl_item].external_performance.get_df().set_index(['metric']).loc[metric, label].item()
+                    state.clustering_items[analysis_desc][cl_item].external_performance.get_df().set_index(['metric']).loc[metric, label].item()
                     for cl_item in cl_item_keys]
                 for metric in state.metrics if is_external(metric)
             }
@@ -126,10 +134,10 @@ class ClusteringHTMLBuilder:
         return external_eval
 
     @staticmethod
-    def make_internal_performance_table(state: ClusteringState) -> str:
+    def make_internal_performance_table(state: ClusteringState, analysis_desc: str) -> str:
         cl_item_keys = [cs.get_key() for cs in state.clustering_settings]
         performance_metric = {
-            metric.replace("_", " "): [state.clustering_items[cl_item].internal_performance.get_df()[metric].values[0]
+            metric.replace("_", " "): [state.clustering_items[analysis_desc][cl_item].internal_performance.get_df()[metric].values[0]
                                        for cl_item in cl_item_keys]
             for metric in state.metrics if is_internal(metric)
         }

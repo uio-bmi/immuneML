@@ -310,7 +310,7 @@ class SimpleVAE(GenerativeModel):
 
         dataset = SequenceDataset.build_from_objects(seq_objs, PathBuilder.build(path),
                                                      f'synthetic_{self.name}_dataset',
-                                                     {'gen_model_name': ["SimpleVAE"]},
+                                                     {'gen_model_name': [self.name]},
                                                      self.region_type)
 
         return dataset
