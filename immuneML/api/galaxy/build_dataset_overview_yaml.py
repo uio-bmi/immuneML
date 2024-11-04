@@ -34,6 +34,10 @@ def build_specs(args):
     }
 
     if args.existing_dataset == "True":
+        import glob
+
+        print(glob.glob("*"))
+        print(os.getcwd())
         assert os.path.exists(
             f"{args.dataset_name}.yaml"), f"no '{args.dataset_name}.yaml' file was present in the current working directory"
         specs["definitions"]["datasets"][args.dataset_name] = {"format": "AIRR",
