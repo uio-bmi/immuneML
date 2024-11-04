@@ -119,7 +119,7 @@ class SequenceDataset(ElementDataset):
 
         bnp_write_to_file(path / self.filename.name, data)
 
-        metadata_filename = path / f'dataset_{name}.yaml'
+        metadata_filename = path / f'{name}.yaml'
         shutil.copyfile(self.dataset_file, metadata_filename)
 
         return SequenceDataset(filename=path / self.filename.name, name=name, labels=copy.deepcopy(self.labels),
@@ -171,7 +171,7 @@ class ReceptorDataset(ElementDataset):
             'type_dict_dynamic_fields': {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()},
             'dataset_class': 'ReceptorDataset', "identifier": uuid4().hex,
             'filename': filename}
-        metadata_filename = path / f'dataset_{name}.yaml'
+        metadata_filename = path / f'{name}.yaml'
         write_yaml(metadata_filename, dataset_metadata)
 
         return ReceptorDataset(filename=filename, name=name, labels=labels, dynamic_fields=type_dict,
