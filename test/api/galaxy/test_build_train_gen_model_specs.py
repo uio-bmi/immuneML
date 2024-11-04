@@ -7,44 +7,36 @@ from immuneML.api.galaxy.build_train_gen_model_specs import main as yamlbuilder_
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
-class MyTestCase(unittest.TestCase):
-    def create_dummy_dataset(self, path):
-        dataset = RepertoireBuilder.build_dataset([["AA"], ["CC"]], path,
-                                                  labels={"label1": ["val1", "val2"], "label2": ["val1", "val2"]},
-                                                  name='my_dataset')
+def test_main():
+    path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "args_to_yaml")
+    data_path = path / "dummy_pickle_data"
 
-        AIRRExporter.export(dataset, path)
+    RandomDatasetGenerator.generate_sequence_dataset(path=data_path, labels={'my_label': {1: 0.4, 2: 0.6}},
+                                                     sequence_count=10, length_probabilities={5: 1.})
 
-        return f"{dataset.name}.yaml"
+    output_dir = path / "output_dir"
+    output_filename = "yaml_out.yaml"
 
-    def test_main(self):
-        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "args_to_yaml")
-        data_path = path / "dummy_pickle_data"
+    old_wd = os.getcwd()
 
-        iml_dataset_name = self.create_dummy_dataset(data_path)
+    try:
+        os.chdir(data_path)
 
-        output_dir = path / "output_dir"
-        output_filename = "yaml_out.yaml"
+        yamlbuilder_main(["-o", str(output_dir), "-f", output_filename,
+                          "-c", "TRA",
+                          "-e", "10", "-m", "SoNNia", "-s", "True", "-q", "True",
+                          "-k", "True", "-t", "70",
+                          "-x", "generated_dataset"])
 
-        old_wd = os.getcwd()
+        # Use ImmuneML parser to test whether the yaml file created here is still valid
+        ImmuneMLParser.parse_yaml_file(output_dir / output_filename, path / "result_path")
 
-        try:
-            os.chdir(data_path)
+    finally:
+        os.chdir(old_wd)
 
-            yamlbuilder_main(["-o", str(output_dir), "-f", output_filename,
-                              "-c", "TRA",
-                              "-e", "10", "-m", "SoNNia", "-s", "True", "-q", "True",
-                              "-k", "True", "-t", "70",
-                              "-x", "generated_dataset"])
-
-            # Use ImmuneML parser to test whether the yaml file created here is still valid
-            ImmuneMLParser.parse_yaml_file(output_dir / output_filename, path / "result_path")
-
-        finally:
-            os.chdir(old_wd)
-
-        shutil.rmtree(path)
+    shutil.rmtree(path)

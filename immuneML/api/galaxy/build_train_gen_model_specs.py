@@ -58,12 +58,16 @@ def build_specs(parsed_args):
     if parsed_args.generative_method == "SoNNia":
         gen_model_args["default_model_name"] = f"human{parsed_args.chain_type}"
 
+    dataset_params = discover_dataset_params()
+    dataset_params['is_repertoire'] = False
+    dataset_params['paired'] = False
+
     specs = {
         "definitions": {
             "datasets": {
                 "dataset": {
                     "format": "AIRR",
-                    "params": discover_dataset_params()
+                    "params": dataset_params
                 }
             },
             "reports": reports,

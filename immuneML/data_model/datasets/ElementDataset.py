@@ -61,7 +61,8 @@ class ElementDataset(Dataset, ABC):
         return dataset
 
     def get_label_names(self):
-        return [el for el in list(self.labels.keys()) if el != 'type_dict_dynamic_fields'] if isinstance(self.labels, dict) else []
+        return [el for el in list(self.labels.keys()) if el not in ['type_dict_dynamic_fields', 'organism']] \
+            if isinstance(self.labels, dict) else []
 
 
 class SequenceDataset(ElementDataset):
