@@ -81,7 +81,8 @@ IVKNQEJ01AJ44V	1	IVKNQEJ01AJ44V	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCT
         dataset = AIRRImport(params, "airr_sequence_dataset").import_dataset()
 
         self.assertEqual(5, dataset.get_example_count())
-
+        self.assertEqual(["custom_label"], dataset.get_label_names())
+        
         for idx, sequence in enumerate(dataset.get_data()):
             self.assertEqual(sequence.sequence_aa, "ASGVAGTFDY")
 
