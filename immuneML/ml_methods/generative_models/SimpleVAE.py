@@ -369,7 +369,7 @@ class SimpleVAE(GenerativeModel):
                             'sequence_type', 'vocab_size']
         write_yaml(filename=model_path / 'model_overview.yaml',
                    yaml_dict={**{k: v for k, v in vars(self).items() if k not in skip_export_keys},
-                              **{'type': self.__class__.__name__}})
+                              **{'type': self.__class__.__name__}}) # todo add 'dataset_type': 'SequenceDataset',
 
         store_weights(self.model, model_path / 'state_dict.yaml')
 

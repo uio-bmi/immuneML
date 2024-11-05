@@ -1,5 +1,4 @@
 import copy
-from dataclasses import fields as get_fields
 from multiprocessing.pool import Pool
 from pathlib import Path
 from uuid import uuid4

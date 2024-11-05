@@ -166,7 +166,7 @@ class SoNNia(GenerativeModel):
                                                         'region_type': self.region_type.name,
                                                         **{k: v for k, v in vars(self).items()
                                                            if
-                                                           k not in ['_model', 'locus', '_model_path', 'region_type']}})
+                                                           k not in ['_model', 'locus', '_model_path', 'region_type']}}) # todo add 'dataset_type': 'SequenceDataset',
         attributes_to_save = ['data_seqs', 'gen_seqs', 'log']
         self._model.save_model(path / 'model', attributes_to_save)
 
