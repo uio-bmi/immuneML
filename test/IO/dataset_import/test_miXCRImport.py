@@ -85,6 +85,7 @@ rep2.tsv,2""")
         params["paired"] = False
         params["result_path"] = path
         params["path"] = path
+        params["columns_to_load"] = None
 
         dataset = MiXCRImport(params, "mixcr_repertoire_dataset").import_dataset()
 

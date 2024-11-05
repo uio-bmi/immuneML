@@ -112,6 +112,11 @@ class DataImport(metaclass=abc.ABCMeta):
         filename, dataset_file, metadata = self._prepare_values_for_element_dataset(final_data_dict, dc, types)
 
         potential_labels = {key: list(set(final_data_dict[key])) for key in types.keys()}
+        if self.params.label_columns:
+            label_variants = self.params.label_columns + [ImportHelper.get_standardized_name(label_name) for label_name
+                                                          in self.params.label_columns]
+            potential_labels = {key: value for key, value in potential_labels.items() if key in label_variants}
+
         labels = {**metadata['labels'], **potential_labels} \
             if 'labels' in metadata and isinstance(metadata['labels'], dict) else potential_labels
 

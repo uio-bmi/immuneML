@@ -15,6 +15,7 @@ from immuneML.environment.SequenceType import SequenceType
 
 class ImportHelper:
     DATASET_FORMAT = "yaml"
+    INVALID_COLNAME_CHARS = [" ", "#", "&", "."]
 
     @staticmethod
     def make_new_metadata_file(repertoires: list, metadata: pd.DataFrame, result_path: Path, dataset_name: str) -> Path:
@@ -78,10 +79,15 @@ class ImportHelper:
         return df
 
     @staticmethod
+    def get_standardized_name(column_name: str) -> str:
+        for invalid_char in ImportHelper.INVALID_COLNAME_CHARS:
+            column_name = column_name.replace(invalid_char, "_")
+        return column_name
+
+    @staticmethod
     def standardize_column_names(df):
-        invalid_chars = [" ", "#", "&"]
-        invalid_col_names = {col: col.replace(" ", "_").replace("#", "_").replace("&", "_")
-                             for col in df.columns if any(el in col for el in invalid_chars)}
+        invalid_col_names = {col: ImportHelper.get_standardized_name(col)
+                             for col in df.columns if any(el in col for el in ImportHelper.INVALID_COLNAME_CHARS)}
         if len(invalid_col_names.keys()) > 0:
             logging.warning(
                 f"Note that column names that contain characters which are not letters, numbers nor '_' signs"
