@@ -89,4 +89,5 @@ class RandomSequenceDatasetImport(DataImport):
                                                                 length_probabilities=self.params["length_probabilities"],
                                                                 labels=self.params["labels"],
                                                                 path=self.params["result_path"],
-                                                                region_type=self.params['region_type'])
+                                                                region_type=self.params['region_type'],
+                                                                name=self.dataset_name)

@@ -95,4 +95,5 @@ class RandomReceptorDatasetImport(DataImport):
                                                                 chain_1_length_probabilities=self.params["chain_1_length_probabilities"],
                                                                 chain_2_length_probabilities=self.params["chain_2_length_probabilities"],
                                                                 labels=self.params["labels"],
-                                                                path=self.params["result_path"])
+                                                                path=self.params["result_path"],
+                                                                name=self.dataset_name)

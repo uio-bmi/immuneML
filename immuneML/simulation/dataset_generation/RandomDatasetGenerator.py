@@ -126,7 +126,7 @@ class RandomDatasetGenerator:
     @staticmethod
     def generate_receptor_dataset(receptor_count: int, chain_1_length_probabilities: dict,
                                   chain_2_length_probabilities: dict, labels: dict,
-                                  path: Path):
+                                  path: Path, name="receptor_dataset"):
         """
         Creates receptor_count receptors where the length of sequences in each chain is sampled independently for each sequence from
         chain_n_length_probabilities distribution. The labels are also randomly assigned to receptors from the distribution given in
@@ -177,7 +177,7 @@ class RandomDatasetGenerator:
             receptor.chain_2.metadata = copy.deepcopy(receptor.metadata)
 
         processed_labels, dataset_params = RandomDatasetGenerator._make_labels(labels, receptor_count)
-        dataset = ReceptorDataset.build_from_objects(receptors=receptors, path=path, name="receptor_dataset",
+        dataset = ReceptorDataset.build_from_objects(receptors=receptors, path=path, name=name,
                                                      labels=dataset_params)
 
         AIRRExporter.export(dataset, path)
@@ -194,7 +194,7 @@ class RandomDatasetGenerator:
 
     @staticmethod
     def generate_sequence_dataset(sequence_count: int, length_probabilities: dict, labels: dict, path: Path,
-                                  region_type: str = RegionType.IMGT_CDR3.name):
+                                  region_type: str = RegionType.IMGT_CDR3.name, name="sequence_dataset"):
         """
         Creates sequence_count receptor sequences (single chain) where the length of sequences in each chain is sampled independently for each sequence from
         length_probabilities distribution. The labels are also randomly assigned to sequences from the distribution given in
@@ -235,7 +235,7 @@ class RandomDatasetGenerator:
                      for i in range(sequence_count)]
 
         processed_labels, dataset_params = RandomDatasetGenerator._make_labels(labels, sequence_count)
-        dataset = SequenceDataset.build_from_objects(sequences, path, name="sequence_dataset",
+        dataset = SequenceDataset.build_from_objects(sequences, path, name=name,
                                                      labels=dataset_params)
 
         AIRRExporter.export(dataset, path)
