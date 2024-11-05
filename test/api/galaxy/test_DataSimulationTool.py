@@ -51,7 +51,7 @@ class TestDataSimulationTool(TestCase):
         self.assertEqual(20, len([name for name in os.listdir(result_path / "galaxy_dataset/repertoires/")
                                    if os.path.isfile(os.path.join(result_path / "galaxy_dataset/repertoires/", name))]))
 
-        # shutil.rmtree(path)
+        shutil.rmtree(path)
 
     def test_run_sequence(self):
 

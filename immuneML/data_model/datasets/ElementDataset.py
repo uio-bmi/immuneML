@@ -3,6 +3,7 @@ import itertools
 import logging
 import shutil
 import typing
+from datetime import datetime
 from abc import ABC
 from dataclasses import dataclass, fields
 from pathlib import Path
@@ -39,6 +40,16 @@ class ElementDataset(Dataset, ABC):
             self.bnp_dataclass = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(self.dynamic_fields.items()))
         if self.identifier is None:
             self.identifier = uuid4().hex
+
+    @classmethod
+    def create_metadata_dict(cls, dataset_class, filename, type_dict, identifier, name, labels):
+         return {"type_dict_dynamic_fields": {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()},
+                 "identifier": identifier,
+                 "dataset_type": dataset_class,
+                 "filename": filename,
+                 "name": name,
+                 "labels": labels,
+                 "timestamp": str(datetime.now())}
 
     @property
     def buffer_type(self):
@@ -94,14 +105,18 @@ class SequenceDataset(ElementDataset):
         bnp_dc, type_dict = build_dynamic_airr_sequence_set_dataclass(all_fields_dict)
         bnp_write_to_file(filename, bnp_dc(**all_fields_dict))
 
-        dataset_metadata = {
-            'type_dict_dynamic_fields': {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()},
-            'filename': filename}
+        dataset_metadata = cls.create_metadata_dict(dataset_class=cls.__name__,
+                                                    filename=filename,
+                                                    type_dict=type_dict,
+                                                    identifier=uuid4().hex,
+                                                    name=name,
+                                                    labels=labels)
+
         metadata_filename = path / f'{name}.yaml'
         write_yaml(metadata_filename, dataset_metadata)
 
         return SequenceDataset(filename=filename, name=name, labels=labels, dynamic_fields=type_dict,
-                               dataset_file=metadata_filename, bnp_dataclass=bnp_dc)
+                               dataset_file=metadata_filename, bnp_dataclass=bnp_dc, identifier=dataset_metadata["identifier"])
 
     def get_metadata(self, field_names: list, return_df: bool = False):
         """Returns a dict or an equivalent pandas DataFrame with metadata information from Receptor objects for
@@ -167,11 +182,14 @@ class ReceptorDataset(ElementDataset):
         bnp_dc, type_dict = build_dynamic_airr_sequence_set_dataclass(all_fields_dict)
         bnp_write_to_file(filename, bnp_dc(**all_fields_dict))
 
-        dataset_metadata = {
-            'type_dict_dynamic_fields': {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()},
-            'dataset_class': 'ReceptorDataset', "identifier": uuid4().hex,
-            'filename': filename}
         metadata_filename = path / f'{name}.yaml'
+        dataset_metadata = cls.create_metadata_dict(dataset_class=cls.__name__,
+                                                    filename=filename,
+                                                    type_dict=type_dict,
+                                                    identifier=uuid4().hex,
+                                                    name=name,
+                                                    labels=labels)
+
         write_yaml(metadata_filename, dataset_metadata)
 
         return ReceptorDataset(filename=filename, name=name, labels=labels, dynamic_fields=type_dict,

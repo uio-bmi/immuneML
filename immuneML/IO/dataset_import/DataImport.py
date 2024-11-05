@@ -30,17 +30,33 @@ class DataImport(metaclass=abc.ABCMeta):
 
     def import_dataset(self) -> Dataset:
 
-        if self.params.is_repertoire is None and self.params.metadata_file is not None:
-            self.params.is_repertoire = True
-
-        if self.params.is_repertoire:
-            dataset = self.import_repertoire_dataset()
-        elif self.params.paired:
-            dataset = self.import_receptor_dataset()
+        if self.params.dataset_file is not None and self.params.dataset_file.is_file():
+            dataset = self.import_dataset_from_yaml()
         else:
-            dataset = self.import_sequence_dataset()
+            if self.params.is_repertoire is None and self.params.metadata_file is not None:
+                self.params.is_repertoire = True
+
+            if self.params.is_repertoire:
+                dataset = self.import_repertoire_dataset()
+            elif self.params.paired:
+                dataset = self.import_receptor_dataset()
+            else:
+                dataset = self.import_sequence_dataset()
 
         dataset.labels['organism'] = self.params.organism
+
+        return dataset
+
+    def import_dataset_from_yaml(self):
+        dataset_metadata = read_yaml(self.params.dataset_file)
+        if dataset_metadata["dataset_type"] == "RepertoireDataset":
+            dataset = self.import_repertoire_dataset()
+        elif dataset_metadata["dataset_type"] == "ReceptorDataset":
+            dataset = self.import_receptor_dataset()
+        elif dataset_metadata["dataset_type"] == "SequenceDataset":
+            dataset = self.import_sequence_dataset()
+        else:
+            raise TypeError(f"DataImport: Dataset type '{dataset_metadata['dataset_type']}' not recognized (expected one of: RepertoireDataset, ReceptorDataset, SequenceDataset)")
 
         return dataset
 

@@ -1,9 +1,9 @@
 import copy
 import logging
 from dataclasses import field, dataclass
-from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
+from uuid import uuid4
 
 import numpy as np
 
@@ -161,14 +161,14 @@ class TrainGenModelInstruction(GenModelInstruction):
 
         bnp_write_to_file(path / f'combined_{self.state.name}_dataset.tsv', combined_data)
 
-        write_yaml(path / f'combined_{self.state.name}_dataset.yaml', {
-            'type_dict_dynamic_fields': {key: AIRRSequenceSet.TYPE_TO_STR[val]
-                                         for key, val in type(combined_data).get_field_type_dict(all_fields=False).items()},
-            "name": f'combined_{self.state.name}_dataset.tsv',
-            "filename": f'combined_{self.state.name}_dataset.tsv',
-            "labels": {'gen_model_name': [self.method.name, ''], "from_gen_model": [True, False]},
-            "timestamp": str(datetime.now())
-        })
+        metadata_yaml = SequenceDataset.create_metadata_dict(dataset_class=SequenceDataset.__name__,
+                                             filename=f'combined_{self.state.name}_dataset.tsv',
+                                             type_dict=type(combined_data).get_field_type_dict(all_fields=False),
+                                             identifier=uuid4().hex,
+                                             name=f'combined_{self.state.name}_dataset',
+                                             labels={'gen_model_name': [self.method.name, ''], "from_gen_model": [True, False]})
+
+        write_yaml(path / f'combined_{self.state.name}_dataset.yaml', metadata_yaml)
 
         self.state.combined_dataset = SequenceDataset.build(
             metadata_filename=path / f'combined_{self.state.name}_dataset.yaml',

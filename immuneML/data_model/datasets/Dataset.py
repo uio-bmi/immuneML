@@ -28,6 +28,11 @@ class Dataset:
     def build_from_objects(cls, **kwargs):
         pass
 
+    @classmethod
+    @abc.abstractmethod
+    def create_metadata_dict(cls, **kwargs):
+        pass
+
     @abc.abstractmethod
     def make_subset(self, example_indices, path, dataset_type: str):
         pass

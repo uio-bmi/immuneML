@@ -44,12 +44,13 @@ class RepertoireDataset(Dataset):
         dataset.labels = {label: list(set(values)) for label, values in dataset.get_metadata(label_names).items()}
 
         dataset_file = PathBuilder.build(kwargs['path']) / 'dataset.yaml'
-        dataset_meta_content = {"type_dict_dynamic_fields":
-                                    {k: v for tmp_dict in
-                                     [rep.metadata['type_dict_dynamic_fields'] for rep in kwargs['repertoires']]
-                                     for k, v in tmp_dict.items()},
-                                "labels": dataset.labels, 'identifier': dataset.identifier, "name": dataset.name,
-                                "timestamp": datetime.now()}
+        dataset_meta_content = cls.create_metadata_dict(type_dict={k: v for tmp_dict in [rep.metadata['type_dict_dynamic_fields']
+                                                                    for rep in kwargs['repertoires']]
+                                                                    for k, v in tmp_dict.items()},
+                                                        labels=dataset.labels,
+                                                        identifier=dataset.identifier,
+                                                        name=dataset.name,
+                                                        metadata_file=str(metadata_path.name))
 
         write_yaml(dataset_file, dataset_meta_content)
         dataset.dataset_file = dataset_file
@@ -79,6 +80,16 @@ class RepertoireDataset(Dataset):
                 f"{kwargs['name']} with identifier {kwargs['identifier']}."
 
         return RepertoireDataset(**{**kwargs, **{"repertoires": repertoires}})
+
+    @classmethod
+    def create_metadata_dict(cls, metadata_file, type_dict, labels, identifier, name):
+         return {"metadata_file": metadata_file,
+                 "type_dict_dynamic_fields": type_dict,
+                 "labels": labels,
+                 'identifier': identifier,
+                 "name": name,
+                 "dataset_type": cls.__name__,
+                 "timestamp": datetime.now()}
 
     def __init__(self, labels: dict = None, encoded_data: EncodedData = None, repertoires: list = None,
                  identifier: str = None, metadata_file: Path = None, name: str = None, metadata_fields: list = None,
@@ -125,7 +136,7 @@ class RepertoireDataset(Dataset):
         """Returns the list of metadata fields which can be used as labels; if refresh=True, it reloads the fields
         from disk"""
         all_metadata_fields = set(self.get_metadata_fields(refresh))
-        for non_label in ["subject_id", "filename", "repertoire_id", "identifier", "type_dict_dynamic_fields"]:
+        for non_label in ["subject_id", "filename", "repertoire_id", "identifier", "type_dict_dynamic_fields", "dataset_type"]:
             if non_label in all_metadata_fields:
                 all_metadata_fields.remove(non_label)
 

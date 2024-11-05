@@ -99,11 +99,13 @@ class RepertoireBuilder:
         labels_unique = {k: list(set(v)) for k, v in labels.items()} if isinstance(labels, dict) else {}
         identifier = uuid.uuid4().hex
 
-        write_yaml(path / f'{name}.yaml', {
-            "type_dict_dynamic_fields": type_dict, 'metadata_file': str(metadata_file.name),
-            'identifier': identifier, "name": name, "labels": labels_unique,
-            "timestamp": str(datetime.now())
-        })
+        metadata_yaml = RepertoireDataset.create_metadata_dict(type_dict=type_dict,
+                                                               labels=labels_unique,
+                                                               identifier=identifier,
+                                                               metadata_file=str(metadata_file.name),
+                                                               name=name)
+
+        write_yaml(path / f'{name}.yaml', metadata_yaml)
 
         return RepertoireDataset(repertoires=reps, metadata_file=metadata_file, name=name, labels=labels_unique,
                                  dataset_file=path / f'{name}.yaml', identifier=identifier)
