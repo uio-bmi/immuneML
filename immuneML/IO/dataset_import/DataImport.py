@@ -114,7 +114,7 @@ class DataImport(metaclass=abc.ABCMeta):
                 self.params.metadata_file = self.params.dataset_file.parent / dataset_metadata['metadata_file']
 
     def _make_dataset_file_for_repertoire_dataset(self, repertoires: List[Repertoire]):
-        dataset_filename = self.params.result_path / f"{self.dataset_name}_dataset.yaml"
+        dataset_filename = self.params.result_path / f"{self.dataset_name}.yaml"
         metadata = {'dataset_name': self.dataset_name, 'example_count': len(repertoires)}
 
         try:
@@ -138,7 +138,7 @@ class DataImport(metaclass=abc.ABCMeta):
         data = dc(**final_data_dict)
         bnp_write_to_file(self.params.result_path / f'{self.dataset_name}.tsv', data)
 
-        dataset_filename = self.params.result_path / f"{self.dataset_name}_dataset.yaml"
+        dataset_filename = self.params.result_path / f"{self.dataset_name}.yaml"
         metadata = {'type_dict_dynamic_fields': {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in types.items()}}
         write_yaml(dataset_filename, metadata)
 

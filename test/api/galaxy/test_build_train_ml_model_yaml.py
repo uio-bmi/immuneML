@@ -3,10 +3,10 @@ import shutil
 import unittest
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
-from immuneML.api.galaxy.build_yaml_from_arguments import build_settings_specs, build_ml_methods_specs, \
+from immuneML.api.galaxy.build_train_ml_model_yaml import build_settings_specs, build_ml_methods_specs, \
     get_sequence_enc_type, \
     build_encodings_specs, build_labels
-from immuneML.api.galaxy.build_yaml_from_arguments import main as yamlbuilder_main
+from immuneML.api.galaxy.build_train_ml_model_yaml import main as yamlbuilder_main
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
@@ -21,11 +21,12 @@ class DummyArguments:
 
 class MyTestCase(unittest.TestCase):
     def create_dummy_dataset(self, path):
-        dataset = RepertoireBuilder.build_dataset([["AA"], ["CC"]], path, labels={"label1": ["val1", "val2"], "label2": ["val1", "val2"]})
+        dataset = RepertoireBuilder.build_dataset([["AA"], ["CC"]], path, labels={"label1": ["val1", "val2"], "label2": ["val1", "val2"]}, name="dataset")
 
+        # dataset.name = "dataset"
         AIRRExporter.export(dataset, path)
 
-        return f"{dataset.name}.yaml"
+        return f"dataset.yaml"
 
     def test_main(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "args_to_yaml")

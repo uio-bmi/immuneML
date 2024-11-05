@@ -85,7 +85,7 @@ rep2.tsv,2""")
         elif dataset_type == "already_imported":
             self.generate_random_dummy_dataset(path)
             specs["definitions"]["datasets"]["dataset"] = {"format": "AIRR",
-                                                           "params": {"dataset_file": f"dataset_dataset.yaml",
+                                                           "params": {"dataset_file": f"dataset.yaml",
                                                                       "result_path": "./"}}
 
         yaml_path = path / "specs.yaml"
@@ -111,7 +111,7 @@ rep2.tsv,2""")
                                           'tool': "DatasetGenerationOverviewTool"}))
 
                 self.assertTrue(os.path.isfile(result_path / "output/galaxy_dataset/dataset_metadata.csv"))
-                self.assertTrue(os.path.isfile(result_path / "output/galaxy_dataset/dataset_dataset.yaml"))
+                self.assertTrue(os.path.isfile(result_path / "output/galaxy_dataset/dataset.yaml"))
                 self.assertEqual(4, len([name for name in os.listdir(result_path / "output/galaxy_dataset/repertoires/")
                                          if os.path.isfile(
                         os.path.join(result_path / "output/galaxy_dataset/repertoires/", name))]))

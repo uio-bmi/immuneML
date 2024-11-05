@@ -8,6 +8,7 @@ from pathlib import Path
 
 import yaml
 
+from immuneML.api.galaxy.Util import Util
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
@@ -130,35 +131,27 @@ def build_settings_specs(enc_names, ml_names):
     return [{"encoding": enc_name, "ml_method": ml_name} for enc_name, ml_name in it.product(enc_names, ml_names)]
 
 
-def discover_dataset_params():
-    dataset = glob.glob("*dataset*.yaml")
-
-    assert len(dataset) > 0, ("no *dataset.yaml file was present in the current working directory. This usually means "
-                              "that the dataset attempted to be imported is not in desired format.")
-    assert len(dataset) < 2, (f"multiple *dataset.yaml files were present in the current working directory: "
-                              f"{list(glob.glob('*dataset.yaml'))}")
-
-    dataset_path = dataset[0]
-
-    return {"dataset_file": dataset_path}
-
-
 def build_labels(labels_str):
     labels = labels_str.split(",")
     return [label.strip().strip("'\"") for label in labels]
 
 
 def build_specs(args):
+    enc_specs = build_encodings_specs(args)
+    ml_specs = build_ml_methods_specs(args)
+    settings_specs = build_settings_specs(enc_specs.keys(), ml_specs.keys())
+    labels = build_labels(args.labels)
+
     specs = {
         "definitions": {
             "datasets": {
                 "dataset": {
                     "format": "AIRR",
-                    "params": None
+                    "params": {"dataset_file": Util.discover_dataset_path()}
                 }
             },
-            "encodings": dict(),
-            "ml_methods": dict(),
+            "encodings": enc_specs,
+            "ml_methods": ml_specs,
             "reports": {
                 "coefficients": {
                     "Coefficients": {
@@ -172,11 +165,11 @@ def build_specs(args):
         "instructions": {
             "inst1": {
                 "type": "TrainMLModel",
-                "settings": [],
+                "settings": settings_specs,
                 "assessment": {
                     "split_strategy": "random",
-                    "split_count": None,
-                    "training_percentage": None,
+                    "split_count": args.split_count,
+                    "training_percentage": args.training_percentage / 100,
                     "reports": {
                         "models": ["coefficients"]
                     }
@@ -186,7 +179,7 @@ def build_specs(args):
                     "split_count": 1,
                     "training_percentage": 0.7,
                 },
-                "labels": [],
+                "labels": labels,
                 "dataset": "dataset",
                 "strategy": "GridSearch",
                 "metrics": ["accuracy", "balanced_accuracy", "precision", "recall", "auc"],
@@ -198,19 +191,6 @@ def build_specs(args):
         }
     }
 
-    enc_specs = build_encodings_specs(args)
-    ml_specs = build_ml_methods_specs(args)
-    settings_specs = build_settings_specs(enc_specs.keys(), ml_specs.keys())
-    dataset_params = discover_dataset_params()
-    labels = build_labels(args.labels)
-
-    specs["definitions"]["datasets"]["dataset"]["params"] = dataset_params
-    specs["definitions"]["encodings"] = enc_specs
-    specs["definitions"]["ml_methods"] = ml_specs
-    specs["instructions"]["inst1"]["settings"] = settings_specs
-    specs["instructions"]["inst1"]["assessment"]["split_count"] = args.split_count
-    specs["instructions"]["inst1"]["assessment"]["training_percentage"] = args.training_percentage / 100
-    specs["instructions"]["inst1"]["labels"] = labels
 
     return specs
 

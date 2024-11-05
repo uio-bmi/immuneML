@@ -57,7 +57,6 @@ class MyTestCase(unittest.TestCase):
                                                                                     "params":
                                                                                         {"path": "./", "is_repertoire": False,
                                                                                          "paired": False,
-                                                                                         "metadata_column_mapping": {"a": "a", "b": "b"},
                                                                                          "region_type": RegionType.IMGT_CDR3.name,
                                                                                          "result_path": "./"}}})
 
@@ -105,7 +104,7 @@ class MyTestCase(unittest.TestCase):
                 loaded_specs = yaml.load(file, Loader=yaml.FullLoader)
 
                 self.assertDictEqual(loaded_specs["definitions"]["datasets"], {"dataset": {"format": "VDJdb", "params":
-                    {"path": "./", "is_repertoire": False, "paired": True, "receptor_chains": "TRA_TRB", "metadata_column_mapping": {"c": "c"},
+                    {"path": "./", "is_repertoire": False, "paired": True, "receptor_chains": "TRA_TRB",
                      "region_type": RegionType.IMGT_CDR3.name, "result_path": "./"}}})
 
                 self.assertDictEqual(loaded_specs["instructions"], {"my_dataset_generation_instruction":

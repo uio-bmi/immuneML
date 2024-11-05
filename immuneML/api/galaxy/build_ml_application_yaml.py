@@ -4,7 +4,7 @@ from pathlib import Path
 import os.path
 import warnings
 
-from immuneML.api.galaxy.build_yaml_from_arguments import discover_dataset_params
+from immuneML.api.galaxy.Util import Util
 from immuneML.data_model.bnp_util import write_yaml
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -28,7 +28,7 @@ def build_specs(parsed_args):
             "datasets": {
                 "dataset": {
                     "format": "AIRR",
-                    "params": discover_dataset_params()
+                    "params": {"dataset_file": Util.discover_dataset_path()}
                 }
             },
         },

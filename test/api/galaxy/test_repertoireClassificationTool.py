@@ -17,7 +17,7 @@ class TestRepertoireClassificationTool(TestCase):
         alphabet = EnvironmentSettings.get_sequence_alphabet()
         sequences = [["".join([rn.choice(alphabet) for i in range(20)]) for i in range(100)] for i in range(40)]
 
-        dataset = RepertoireBuilder.build_dataset(sequences, path, subject_ids=[i % 2 for i in range(len(sequences))])
+        dataset = RepertoireBuilder.build_dataset(sequences, path, subject_ids=[i % 2 for i in range(len(sequences))], name="dataset")
         AIRRExporter.export(dataset, path)
 
     def test_run(self):

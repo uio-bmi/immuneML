@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
-from immuneML.api.galaxy.build_yaml_from_arguments import main
+from immuneML.api.galaxy.build_train_ml_model_yaml import main
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
 from immuneML.util.PathBuilder import PathBuilder
 

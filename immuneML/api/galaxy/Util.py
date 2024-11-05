@@ -2,6 +2,8 @@ import logging
 from pathlib import Path
 
 import yaml
+import os
+import glob
 
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
 from immuneML.util.ParameterValidator import ParameterValidator
@@ -95,3 +97,17 @@ class Util:
         PathBuilder.build(result_path)
         app = ImmuneMLApp(yaml_path, result_path)
         app.run()
+
+    @staticmethod
+    def discover_dataset_path(dataset_name="dataset"):
+        if os.path.exists(f"{dataset_name}.yaml"):
+            dataset_path = f"{dataset_name}.yaml"
+        else:
+            discovered = glob.glob(f"*{dataset_name}*.yaml")
+
+            if len(discovered) == 1:
+                dataset_path = discovered[0]
+            else:
+                raise FileNotFoundError(f"Unable to locate '{dataset_name}.yaml'")
+
+        return dataset_path

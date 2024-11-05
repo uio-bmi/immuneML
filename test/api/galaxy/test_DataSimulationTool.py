@@ -47,7 +47,7 @@ class TestDataSimulationTool(TestCase):
         run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path, 'tool': "DataSimulationTool"}))
 
         self.assertTrue(os.path.isfile(result_path / "galaxy_dataset/dataset_metadata.csv"))
-        self.assertTrue(os.path.isfile(result_path / "galaxy_dataset/dataset_dataset.yaml"))
+        self.assertTrue(os.path.isfile(result_path / "galaxy_dataset/dataset.yaml"))
         self.assertEqual(200, len([name for name in os.listdir(result_path / "galaxy_dataset/repertoires/")
                                    if os.path.isfile(os.path.join(result_path / "galaxy_dataset/repertoires/", name))]))
 

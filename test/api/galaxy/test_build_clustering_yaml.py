@@ -31,7 +31,7 @@ class MyTestCase(unittest.TestCase):
         try:
             os.chdir(data_path)
 
-            yamlbuilder_main(["-o", str(output_dir), "-f", output_filename, "-k", "3", "-n", "2", "-d", "PCA", "-l", "label1", "-e", "silhouette_score", "mutual_info_score"])
+            yamlbuilder_main(["-o", str(output_dir), "-f", output_filename, "-k", "3", "-n", "2", "-d", "PCA", "-l", "label1", "-e", "silhouette_score", "mutual_info_score", "-t", "70"])
 
             # Use ImmuneML parser to test whether the yaml file created here is still valid
             ImmuneMLParser.parse_yaml_file(output_dir / output_filename, path / "result_path")

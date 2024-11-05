@@ -2,7 +2,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from immuneML.api.galaxy.build_yaml_from_arguments import discover_dataset_params
+from immuneML.api.galaxy.Util import Util
 from immuneML.data_model.bnp_util import write_yaml
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -58,16 +58,13 @@ def build_specs(parsed_args):
     if parsed_args.generative_method == "SoNNia":
         gen_model_args["default_model_name"] = f"human{parsed_args.chain_type}"
 
-    dataset_params = discover_dataset_params()
-    dataset_params['is_repertoire'] = False
-    dataset_params['paired'] = False
 
     specs = {
         "definitions": {
             "datasets": {
                 "dataset": {
                     "format": "AIRR",
-                    "params": dataset_params
+                    "params": {"dataset_file": Util.discover_dataset_path()}
                 }
             },
             "reports": reports,

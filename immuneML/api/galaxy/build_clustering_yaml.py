@@ -2,8 +2,7 @@ import argparse
 import sys
 from pathlib import Path
 
-
-from immuneML.api.galaxy.build_yaml_from_arguments import discover_dataset_params
+from immuneML.api.galaxy.Util import Util
 from immuneML.data_model.bnp_util import write_yaml
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -25,8 +24,9 @@ def parse_command_line_arguments(args):
 
     parser.add_argument("-k", "--encoding_k", type=int, required=True, help="")
     parser.add_argument("-n", "--n_clusters", type=int, required=True, help="")
-    parser.add_argument("-d", "--dim_red_method", type=str, choices=["PCA", "UMAP", "TSNE", "None"], default="None",
-                        help="External evaluation metrics to use for clustering, for these metrics, clusters are compared to a provided label.")
+    parser.add_argument("-d", "--dim_red_method", type=str, choices=["PCA", "UMAP", "TSNE", "None"], default="None",help="External evaluation metrics to use for clustering, for these metrics, clusters are compared to a provided label.")
+    parser.add_argument("-t", "--training_percentage", type=int, default=100)
+
 
 
     parser.add_argument("-o", "--output_path", required=True,
@@ -43,7 +43,7 @@ def build_specs(parsed_args):
             "datasets": {
                 "dataset": {
                     "format": "AIRR",
-                    "params": discover_dataset_params()
+                    "params": {"dataset_file": Util.discover_dataset_path()}
                 }
             },
             'reports': {
@@ -72,6 +72,10 @@ def build_specs(parsed_args):
                 'clustering_settings': [
                     {'encoding': 'kmer', 'method': 'kmeans'},
                 ],
+                'split_config': {
+                    'split_strategy': 'random',
+                    'training_percentage': parsed_args.training_percentage / 100
+                }
             }
         }
     }
