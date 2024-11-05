@@ -34,7 +34,8 @@ IVKNQEJ01AJ44V	1	IVKNQEJ01AJ44V	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCT
             file.writelines(file2_content)
 
         if add_metadata:
-            pd.DataFrame({'filename': ['rep1.tsv', 'rep2.tsv'], 'subject_id': [1, 2]}).to_csv(str(path / 'metadata.csv'), index=False)
+            pd.DataFrame({'filename': ['rep1.tsv', 'rep2.tsv'], 'subject_id': [1, 2]}).to_csv(
+                str(path / 'metadata.csv'), index=False)
 
     def test_import_repertoire_dataset(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "ioairr_repertoire/")
@@ -76,13 +77,11 @@ IVKNQEJ01AJ44V	1	IVKNQEJ01AJ44V	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCT
         params["result_path"] = path
         params["path"] = path
 
-        # todo add label import to this example: {custom_label: [labelvalue1, labelvalue2]}
-
         dataset = AIRRImport(params, "airr_sequence_dataset").import_dataset()
 
         self.assertEqual(5, dataset.get_example_count())
-        self.assertEqual(["custom_label"], dataset.get_label_names())
-        
+        self.assertEqual(['v_evalue', 'd_evalue', 'j_evalue', 'custom_label'], dataset.get_label_names())
+
         for idx, sequence in enumerate(dataset.get_data()):
             self.assertEqual(sequence.sequence_aa, "ASGVAGTFDY")
 
@@ -103,7 +102,6 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         with open(path / "rep1.tsv", "w") as file:
             file.writelines(file_content)
 
-
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "AIRR")
         params["is_repertoire"] = False
         params["paired"] = True
@@ -111,13 +109,10 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         params["path"] = path
         params["receptor_chains"] = "IGH_IGL"
 
-        # todo add label import to this example: {custom_label: [labelvalue1, labelvalue2]}
-
         dataset = AIRRImport(params, "airr_receptor_dataset").import_dataset()
 
         self.assertEqual(2, dataset.get_example_count())
-        self.assertEqual(["custom_label"], dataset.get_label_names())
-
+        self.assertEqual(['v_evalue', 'd_evalue', 'j_evalue', 'custom_label'], dataset.get_label_names())
 
         for idx, receptor in enumerate(dataset.get_data()):
             self.assertTrue(receptor.heavy.sequence_aa in ['ASGVAGTFDY', 'ASGVAGNFLL'])
@@ -134,7 +129,6 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         params["result_path"] = path / 'imported'
         params["metadata_file"] = path / "initial/metadata.csv"
         params["path"] = path / "initial"
-
 
         dataset1 = AIRRImport(params, "airr_repertoire_dataset1").import_dataset()
 

@@ -146,6 +146,11 @@ class Util:
 
     @staticmethod
     def export_galaxy_dataset(dataset, result_path):
-        dataset.name = "dataset"
-        AIRRExporter.export(dataset, result_path / "galaxy_dataset/")
-        Util.reformat_galaxy_dataset(result_path / "galaxy_dataset/")
+        try:
+            PathBuilder.build(result_path / 'galaxy_dataset')
+            AIRRExporter.export(dataset, result_path / "galaxy_dataset/")
+            dataset_file = list(glob.glob(str(result_path / "galaxy_dataset/*.yaml")))[0]
+            os.rename(dataset_file, result_path / "galaxy_dataset/dataset.yaml")
+            Util.reformat_galaxy_dataset(result_path / "galaxy_dataset/")
+        except Exception as e:
+            raise RuntimeError(f"Error when exporting Galaxy dataset: {e}.")

@@ -5,7 +5,7 @@ import logging
 from dataclasses import fields
 from multiprocessing import Pool
 from pathlib import Path
-from typing import List
+from typing import List, Tuple, Type
 
 import pandas as pd
 from bionumpy import AminoAcidEncoding, DNAEncoding
@@ -56,7 +56,8 @@ class DataImport(metaclass=abc.ABCMeta):
         elif dataset_metadata["dataset_type"] == "SequenceDataset":
             dataset = self.import_sequence_dataset()
         else:
-            raise TypeError(f"DataImport: Dataset type '{dataset_metadata['dataset_type']}' not recognized (expected one of: RepertoireDataset, ReceptorDataset, SequenceDataset)")
+            raise TypeError(
+                f"DataImport: Dataset type '{dataset_metadata['dataset_type']}' not recognized (expected one of: RepertoireDataset, ReceptorDataset, SequenceDataset)")
 
         return dataset
 
@@ -83,45 +84,45 @@ class DataImport(metaclass=abc.ABCMeta):
                                                                 self.dataset_name)
 
         potential_labels = list(set(metadata.columns.tolist()) - {"filename", 'type_dict_dynamic_fields'})
-        dataset_filename = self._make_dataset_file_for_repertoire_dataset(repertoires)
+        dataset_filename, dataset_file_content = self._make_dataset_file_for_repertoire_dataset(repertoires)
+
+        if 'labels' in dataset_file_content and dataset_file_content['labels']:
+            if any(label not in potential_labels for label in dataset_file_content['labels']):
+                logging.warning(f"{DataImport.__name__}: {self.dataset_name}: an error occurred when importing "
+                                f"dataset. Labels specified in the dataset file could not be found in the repertoire "
+                                f"fields. Proceeding with the following labels: {potential_labels}.")
 
         return RepertoireDataset(labels={key: list(set(metadata[key].values.tolist())) for key in potential_labels},
                                  repertoires=repertoires, metadata_file=new_metadata_file, name=self.dataset_name,
                                  dataset_file=dataset_filename)
 
-    def import_sequence_dataset(self) -> SequenceDataset:
+    def import_element_dataset(self, dataset_class: Type, filter_func=None):
         filenames = ImportHelper.get_sequence_filenames(self.params.path, self.dataset_name)
         final_df = None
 
         for filename in filenames:
             df = self.load_sequence_dataframe(filename)
+            if filter_func:
+                df = filter_func(df)
             final_df = pd.concat([final_df, df])
 
         final_data_dict = final_df.to_dict(orient='list')
 
         dc, types = build_dynamic_airr_sequence_set_dataclass(final_data_dict)
-        filename, dataset_file = self._prepare_values_for_element_dataset(final_data_dict, dc, types)
+        filename, dataset_file, metadata = self._prepare_values_for_element_dataset(final_data_dict, dc, types)
 
-        return SequenceDataset(name=self.dataset_name, bnp_dataclass=dc, dataset_file=dataset_file,
-                               dynamic_fields=types, filename=filename)
+        potential_labels = {key: list(set(final_data_dict[key])) for key in types.keys()}
+        labels = {**metadata['labels'], **potential_labels} \
+            if 'labels' in metadata and isinstance(metadata['labels'], dict) else potential_labels
+
+        return dataset_class(name=self.dataset_name, bnp_dataclass=dc, dataset_file=dataset_file,
+                             dynamic_fields=types, filename=filename, labels=labels)
+
+    def import_sequence_dataset(self) -> SequenceDataset:
+        return self.import_element_dataset(SequenceDataset)
 
     def import_receptor_dataset(self) -> ReceptorDataset:
-        filenames = ImportHelper.get_sequence_filenames(self.params.path, self.dataset_name)
-        final_df = None
-
-        for filename in filenames:
-            df = self.load_sequence_dataframe(filename)
-            df = ImportHelper.filter_illegal_receptors(df)
-            final_df = pd.concat([final_df, df])
-
-        final_data_dict = final_df.to_dict(orient='list')
-
-        dc, types = build_dynamic_airr_sequence_set_dataclass(final_data_dict)
-
-        filename, dataset_file = self._prepare_values_for_element_dataset(final_data_dict, dc, types)
-
-        return ReceptorDataset(name=self.dataset_name, bnp_dataclass=dc, dataset_file=dataset_file,
-                               dynamic_fields=types, filename=filename)
+        return self.import_element_dataset(ReceptorDataset, ImportHelper.filter_illegal_receptors)
 
     def check_or_discover_metadata_file(self):
         if self.params.metadata_file is None and self.params.dataset_file and self.params.dataset_file.is_file():
@@ -129,9 +130,12 @@ class DataImport(metaclass=abc.ABCMeta):
             if 'metadata_file' in dataset_metadata:
                 self.params.metadata_file = self.params.dataset_file.parent / dataset_metadata['metadata_file']
 
-    def _make_dataset_file_for_repertoire_dataset(self, repertoires: List[Repertoire]):
+    def _make_dataset_file_for_repertoire_dataset(self, repertoires: List[Repertoire]) -> Tuple[Path, dict]:
         dataset_filename = self.params.result_path / f"{self.dataset_name}.yaml"
-        metadata = {'dataset_name': self.dataset_name, 'example_count': len(repertoires)}
+
+        metadata = read_yaml(self.params.dataset_file) if self.params.dataset_file else {}
+
+        metadata = {**{'dataset_name': self.dataset_name, 'example_count': len(repertoires)}, **metadata}
 
         try:
             if all(repertoires[0].metadata['type_dict_dynamic_fields'] == rep.metadata['type_dict_dynamic_fields'] for
@@ -146,9 +150,9 @@ class DataImport(metaclass=abc.ABCMeta):
 
         write_yaml(dataset_filename, metadata)
 
-        return dataset_filename
+        return dataset_filename, metadata
 
-    def _prepare_values_for_element_dataset(self, final_data_dict, dc, types):
+    def _prepare_values_for_element_dataset(self, final_data_dict, dc, types) -> Tuple[Path, Path, dict]:
         PathBuilder.build(self.params.result_path)
 
         data = dc(**final_data_dict)
@@ -156,9 +160,12 @@ class DataImport(metaclass=abc.ABCMeta):
 
         dataset_filename = self.params.result_path / f"{self.dataset_name}.yaml"
         metadata = {'type_dict_dynamic_fields': {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in types.items()}}
+        if self.params.dataset_file:
+            dataset_file_content = read_yaml(self.params.dataset_file)
+            metadata = {**dataset_file_content, **metadata}
         write_yaml(dataset_filename, metadata)
 
-        return self.params.result_path / f'{self.dataset_name}.tsv', dataset_filename
+        return self.params.result_path / f'{self.dataset_name}.tsv', dataset_filename, metadata
 
     def load_repertoire_object(self, metadata_row: pd.Series) -> Repertoire:
         try:
