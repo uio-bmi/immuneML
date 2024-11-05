@@ -34,7 +34,10 @@ class DatasetGenerationTool(GalaxyTool):
         PathBuilder.build(self.result_path)
         self._update_specs()
         state = ImmuneMLApp(self.yaml_path, self.result_path).run()[0]
-        shutil.copytree(list(list(state.paths.values())[0].values())[0], self.result_path / "galaxy_dataset/")
+        dataset = state.datasets[0]
+
+        Util.export_galaxy_dataset(dataset, self.result_path)
+
         print_log("Exported dataset.")
 
     def _update_specs(self):

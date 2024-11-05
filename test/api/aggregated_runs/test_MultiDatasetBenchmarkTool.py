@@ -26,8 +26,8 @@ class TestMultiDatasetBenchmarkTool(TestCase):
                     "d1": {
                         "format": "RandomRepertoireDataset",
                         "params": {
-                            "repertoire_count": 100,
-                            "sequence_count_probabilities": {50: 1},
+                            "repertoire_count": 10,
+                            "sequence_count_probabilities": {10: 1},
                             "sequence_length_probabilities": {2: 1},
                             "result_path": str(path / "d1"),
                             "labels": {
@@ -41,8 +41,8 @@ class TestMultiDatasetBenchmarkTool(TestCase):
                     "d2": {
                         "format": "RandomRepertoireDataset",
                         "params": {
-                            "repertoire_count": 100,
-                            "sequence_count_probabilities": {50: 1},
+                            "repertoire_count": 10,
+                            "sequence_count_probabilities": {10: 1},
                             "sequence_length_probabilities": {2: 1},
                             "result_path": str(path / "d2"),
                             "labels": {

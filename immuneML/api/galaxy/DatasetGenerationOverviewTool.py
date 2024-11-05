@@ -33,7 +33,7 @@ class DatasetGenerationOverviewTool(GalaxyTool):
         state = ImmuneMLApp(self.yaml_path, self.result_path).run()[0]
         dataset = list(state.exploratory_analysis_units.values())[0].dataset
 
-        AIRRExporter.export(dataset, self.result_path / "galaxy_dataset/")
+        Util.export_galaxy_dataset(dataset, self.result_path)
 
         print_log(f"Exported dataset.")
 

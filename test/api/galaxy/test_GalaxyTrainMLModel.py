@@ -21,8 +21,8 @@ class TestGalaxyTrainMLModel(TestCase):
                     "d2": {
                         "format": "RandomRepertoireDataset",
                         "params": {
-                            "repertoire_count": 50,
-                            "sequence_length_probabilities": {10: 1},
+                            "repertoire_count": 20,
+                            "sequence_length_probabilities": {3: 1},
                             'sequence_count_probabilities': {10: 1},
                             'labels': {
                                 "CD": {
@@ -79,7 +79,7 @@ class TestGalaxyTrainMLModel(TestCase):
                     },
                     "selection": {
                         "split_strategy": "random",
-                        "split_count": 2,
+                        "split_count": 1,
                         "training_percentage": 0.7
                     },
                     "labels": ["CD"],

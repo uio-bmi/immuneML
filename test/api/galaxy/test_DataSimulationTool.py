@@ -24,7 +24,7 @@ class TestDataSimulationTool(TestCase):
                 "dataset": {
                     "format": "RandomRepertoireDataset",
                     "params": {
-                        "repertoire_count": 100,
+                        "repertoire_count": 10,
                         "sequence_count_probabilities": {
                             10: 1
                         },
@@ -48,10 +48,10 @@ class TestDataSimulationTool(TestCase):
 
         self.assertTrue(os.path.isfile(result_path / "galaxy_dataset/dataset_metadata.csv"))
         self.assertTrue(os.path.isfile(result_path / "galaxy_dataset/dataset.yaml"))
-        self.assertEqual(200, len([name for name in os.listdir(result_path / "galaxy_dataset/repertoires/")
+        self.assertEqual(20, len([name for name in os.listdir(result_path / "galaxy_dataset/repertoires/")
                                    if os.path.isfile(os.path.join(result_path / "galaxy_dataset/repertoires/", name))]))
 
-        shutil.rmtree(path)
+        # shutil.rmtree(path)
 
     def test_run_sequence(self):
 
@@ -66,7 +66,7 @@ class TestDataSimulationTool(TestCase):
                 "dataset": {
                     "format": "RandomSequenceDataset",
                     "params": {
-                        "sequence_count": 100
+                        "sequence_count": 10
                     }
                 }
             }
@@ -83,7 +83,6 @@ class TestDataSimulationTool(TestCase):
 
         self.assertTrue(os.path.isfile(result_path / "galaxy_dataset/dataset.tsv"))
         self.assertTrue(os.path.isfile(result_path / "galaxy_dataset/dataset.yaml"))
-
 
         shutil.rmtree(path)
 

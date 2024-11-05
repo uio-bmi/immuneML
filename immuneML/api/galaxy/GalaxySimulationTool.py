@@ -96,8 +96,7 @@ class GalaxySimulationTool(GalaxyTool):
         state = app.run()[0]
 
         dataset = state.resulting_dataset
-        dataset.name = "dataset"
-        AIRRExporter.export(dataset, self.result_path / "galaxy_dataset/")
+        Util.export_galaxy_dataset(dataset, self.result_path)
 
         logging.info(f"{GalaxySimulationTool.__name__}: the simulation is finished.")
 

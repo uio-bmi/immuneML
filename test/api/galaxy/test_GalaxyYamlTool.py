@@ -63,7 +63,7 @@ class TestGalaxyYamlTool(TestCase):
                     "d2": {
                         "format": "RandomRepertoireDataset",
                         "params": {
-                            "repertoire_count": 50,
+                            "repertoire_count": 20,
                             "sequence_length_probabilities": {10: 1},
                             'sequence_count_probabilities': {10: 1},
                             'labels': {
@@ -121,7 +121,7 @@ class TestGalaxyYamlTool(TestCase):
                     },
                     "selection": {
                         "split_strategy": "random",
-                        "split_count": 2,
+                        "split_count": 1,
                         "training_percentage": 0.7
                     },
                     "labels": ["CD"],

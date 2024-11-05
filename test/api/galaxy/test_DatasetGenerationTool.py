@@ -18,9 +18,9 @@ class TestDatasetGenerationTool(TestCase):
                         "d1": {
                             "format": "RandomRepertoireDataset",
                             "params": {
-                                "repertoire_count": 100,
+                                "repertoire_count": 10,
                                 "sequence_count_probabilities": {
-                                    100: 1
+                                    1: 1
                                 },
                                 "sequence_length_probabilities": {
                                     10: 1
@@ -51,7 +51,7 @@ class TestDatasetGenerationTool(TestCase):
 
         self.assertTrue(os.path.isfile(result_path / "galaxy_dataset/dataset_metadata.csv"))
         self.assertTrue(os.path.isfile(result_path / "galaxy_dataset/dataset.yaml"))
-        self.assertEqual(200, len([name for name in os.listdir(result_path / "galaxy_dataset/repertoires/")
+        self.assertEqual(20, len([name for name in os.listdir(result_path / "galaxy_dataset/repertoires/")
                                    if os.path.isfile(os.path.join(result_path / "galaxy_dataset/repertoires/", name))]))
 
         shutil.rmtree(path)

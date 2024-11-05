@@ -26,7 +26,8 @@ class GalaxyTrainGenModel(GalaxyTool):
         app = ImmuneMLApp(self.yaml_path, self.result_path)
         state = app.run()[0]
 
-        self._construct_galaxy_dataset(state)
+        dataset = state.generated_dataset if state.combined_dataset is None else state.combined_dataset
+        Util.export_galaxy_dataset(dataset, self.result_path)
 
         model_locations = list(self.result_path.glob(f"{self.instruction_name}/trained_model/*.zip"))
         model_export_path = PathBuilder.build(self.result_path / 'exported_models/')
@@ -36,12 +37,6 @@ class GalaxyTrainGenModel(GalaxyTool):
 
         logging.info(f"{GalaxyTrainGenModel.__name__}: immuneML has finished and the trained models and dataset were exported.")
 
-    def _construct_galaxy_dataset(self, state):
-        dataset = state.generated_dataset if state.combined_dataset is None else state.combined_dataset
-
-        # rename to 'dataset' because in galaxy the dataset file should always be called dataset.yaml
-        dataset.name = "dataset"
-        AIRRExporter.export(dataset, self.result_path / "galaxy_dataset/")
 
     def _prepare_specs(self):
         with self.yaml_path.open("r") as file:

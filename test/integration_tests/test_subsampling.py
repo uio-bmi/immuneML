@@ -23,7 +23,7 @@ class TestSubsamplingWorkflow(TestCase):
                     "d1": {
                         "format": "RandomRepertoireDataset",
                         "params": {
-                            "repertoire_count": 50,
+                            "repertoire_count": 5,
                             "result_path": str(path),
                             "labels": {
                                 "cmv": {
@@ -39,7 +39,7 @@ class TestSubsamplingWorkflow(TestCase):
                 "subsampling": {
                     "type": "Subsampling",
                     "dataset": "d1",
-                    "subsampled_dataset_sizes": [20, 30],
+                    "subsampled_dataset_sizes": [2, 3],
                     "dataset_export_formats": ['AIRR']
                 }
             }

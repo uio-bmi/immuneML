@@ -24,16 +24,10 @@ class ApplyGenModelTool(GalaxyTool):
         self._check_specs()
         state = ImmuneMLApp(self.yaml_path, self.result_path).run()[0]
 
-        self._construct_galaxy_dataset(state)
+        Util.export_galaxy_dataset(state.generated_dataset, self.result_path)
 
         print_log("Run the generative model, the resulting dataset is exported.")
 
-    def _construct_galaxy_dataset(self, state):
-        dataset = state.generated_dataset
-
-        # rename to 'dataset' because in galaxy the dataset file should always be called dataset.yaml
-        dataset.name = "dataset"
-        AIRRExporter.export(dataset, self.result_path / "galaxy_dataset/")
 
     def _check_specs(self):
         with open(self.yaml_path, "r") as file:
