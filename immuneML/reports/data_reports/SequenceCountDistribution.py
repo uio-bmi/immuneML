@@ -116,7 +116,7 @@ class SequenceCountDistribution(DataReport):
         chains = data.locus.tolist()
 
         if self.split_by_label:
-            label_classes = getattr(data, self.label_name)
+            label_classes = getattr(data, self.label_name).tolist()
             counter = Counter(zip(counts, chains, label_classes))
         else:
             counter = Counter(zip(counts, chains))
