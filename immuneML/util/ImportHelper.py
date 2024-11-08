@@ -38,6 +38,33 @@ class ImportHelper:
         return filename
 
     @staticmethod
+    def get_receptor_filter_sort_kwargs(df: pd.DataFrame, warning=""):
+        kwargs = {"by": ["cell_id", "locus"], "ascending": [True, True]}
+
+        # umi's in single-cells sequencing data are the most trustworthy indicator of what the 'true' sequences were
+        # duplicate count is less accurate but better than nothing
+        if "umi_count" in df.columns and len(set(df["umi_count"])) > 1:
+            warning += "Attempting to select the top chain pair based on highest umi_count"
+            kwargs["by"].append("umi_count")
+            kwargs["ascending"].append(False)
+
+            # consensus_count reflects the count per umi; only useful if there are umi count ties
+            if "consensus_count" in df.columns and len(set(df["consensus_count"])) > 1:
+                warning += " and consensus_count"
+                kwargs["by"].append("consensus_count")
+                kwargs["ascending"].append(False)
+
+        elif "duplicate_count" in df.columns and len(set(df["duplicate_count"])) > 1:
+            warning += "Since umi_count was not set, attempting to select the top chain pair based on highest duplicate_count"
+            kwargs["by"].append("duplicate_count")
+            kwargs["ascending"].append(False)
+        else:
+            warning += "Since duplicate_count or umi_count was not set, two random chains will be selected for each receptor."
+        logging.warning(warning)
+
+        return kwargs
+
+    @staticmethod
     def filter_illegal_receptors(df: pd.DataFrame) -> pd.DataFrame:
         assert "cell_id" in df.columns, "Receptor datasets cannot be constructed if cell_id field is missing."
 
@@ -46,12 +73,7 @@ class ImportHelper:
         logging.info(f"Total number of unique cell_ids (potential receptors): {len(cell_id_counts)}")
 
         if sum(cell_id_counts > 2) > 0:
-            if "duplicate_count" in df.columns:
-                logging.warning(f"Found {sum(cell_id_counts > 2)} receptors with > 2 cell_ids. Attempting to select top chains based on highest duplicate_count.")
-                kwargs = {"by": ["cell_id", "locus", "duplicate_count"], "ascending":[True, True, False]}
-            else:
-                logging.warning(f"Found {sum(cell_id_counts > 2)} receptors with > 2 cell_ids. Since duplicate_count was not set, two random chains will be selected for each receptor.")
-                kwargs = {"by": ["cell_id", "locus"], "ascending":[True, True]}
+            kwargs = ImportHelper.get_receptor_filter_sort_kwargs(df, f"Found {sum(cell_id_counts > 2)} receptors with > 2 cell_ids. ")
 
             assert "locus" in df.columns, "Receptor datasets cannot be constructed if locus field is missing."
 
