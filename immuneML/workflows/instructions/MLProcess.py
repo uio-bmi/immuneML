@@ -81,7 +81,8 @@ class MLProcess:
 
         processed_dataset = HPUtil.preprocess_dataset(self.train_dataset, self.hp_setting.preproc_sequence,
                                                       self.path / "preprocessed_train_dataset",
-                                                      self.report_context)
+                                                      self.report_context,
+                                                      number_of_processes=self.number_of_processes)
 
         weighted_dataset = HPUtil.weight_examples(dataset=processed_dataset, weighting_strategy=self.example_weighting,
                                                   path=self.path / "weighted_train_datasets",
