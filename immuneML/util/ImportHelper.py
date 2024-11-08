@@ -43,13 +43,31 @@ class ImportHelper:
 
         cell_id_counts = df.groupby('cell_id').size()
 
-        if not (cell_id_counts == 2).all():
-            logging.warning("There are cells in the dataset that don't have exactly two chains. "
-                            "Those will be filtered out from the dataset.")
+        logging.info(f"Total number of unique cell_ids (potential receptors): {len(cell_id_counts)}")
 
-            return df.loc[df.cell_id.isin(cell_id_counts[cell_id_counts == 2].index)]
-        else:
-            return df
+        if sum(cell_id_counts > 2) > 0:
+            if "duplicate_count" in df.columns:
+                logging.warning(f"Found {sum(cell_id_counts > 2)} receptors with > 2 cell_ids. Attempting to select top chains based on highest duplicate_count.")
+                kwargs = {"by": ["cell_id", "locus", "duplicate_count"], "ascending":[True, True, False]}
+            else:
+                logging.warning(f"Found {sum(cell_id_counts > 2)} receptors with > 2 cell_ids. Since duplicate_count was not set, two random chains will be selected for each receptor.")
+                kwargs = {"by": ["cell_id", "locus"], "ascending":[True, True]}
+
+            assert "locus" in df.columns, "Receptor datasets cannot be constructed if locus field is missing."
+
+            df.sort_values(**kwargs, inplace=True)
+            df.drop_duplicates(subset=["cell_id", "locus"], keep="first", inplace=True)
+
+            # Must recalculate cell_id_counts in case some chain had 2 identical chains (to be filtered out in next step)
+            cell_id_counts = df.groupby('cell_id').size()
+
+        if sum(cell_id_counts == 1) > 0:
+            logging.warning(f"Found {sum(cell_id_counts == 1)} receptors with 1 cell_id, removing these receptors.")
+            df = df.loc[df.cell_id.isin(cell_id_counts[cell_id_counts >= 2].index)]
+
+        logging.info(f"Total number of unique cell_ids (receptors) left after filtering: {df['cell_id'].nunique()}")
+
+        return df
 
     @staticmethod
     def parse_sequence_dataframe(df: pd.DataFrame, params: DatasetImportParams, dataset_name: str) -> pd.DataFrame:
@@ -234,14 +252,14 @@ class ImportHelper:
     def filter_illegal_sequences(cls, df: pd.DataFrame, params: DatasetImportParams, location: str):
         try:
             if params.import_productive:
-                df = df[df.productive == 'T']
+                df = df.loc[df.productive == 'T']
         except AttributeError as e:
             logging.warning(f"An error occurred while filtering unproductive sequences while importing the "
                             f"dataset {location}. Error: {e}\n\nFiltering will be skipped.")
 
         try:
             if not params.import_out_of_frame:
-                df = df[df.vj_in_frame != 'F']
+                df = df.loc[df.vj_in_frame != 'F']
         except AttributeError as e:
             logging.warning(f"An error occurred while filtering out-of-frame sequences while importing the "
                             f"dataset {location}. Error: {e}\n\nFiltering will be skipped.")
