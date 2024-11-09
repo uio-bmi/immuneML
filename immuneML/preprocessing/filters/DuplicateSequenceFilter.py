@@ -1,20 +1,26 @@
 import copy
+import shutil
+import warnings
 from multiprocessing.pool import Pool
 from pathlib import Path
 from uuid import uuid4
 
+import bionumpy as bnp
 import pandas as pd
 
 from immuneML.data_model import bnp_util
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.SequenceParams import RegionType
-from immuneML.data_model.bnp_util import write_yaml
+from immuneML.data_model.bnp_util import write_yaml, bnp_write_to_file
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.SequenceSet import Repertoire
+from immuneML.data_model.SequenceSet import Repertoire, build_dynamic_airr_sequence_set_dataclass
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.preprocessing.filters.CountAggregationFunction import CountAggregationFunction
 from immuneML.preprocessing.filters.Filter import Filter
 from immuneML.util.ParameterValidator import ParameterValidator
+from immuneML.util.PathBuilder import PathBuilder
 from scripts.specification_util import update_docs_per_mapping
 
 
@@ -60,7 +66,6 @@ class DuplicateSequenceFilter(Filter):
                         # required parameters:
                         filter_sequence_type: AMINO_ACID
                         # optional parameters (if not specified the values bellow will be used):
-                        batch_size: 4
                         count_agg: SUM
                         region_type: IMGT_CDR3
 
@@ -69,7 +74,12 @@ class DuplicateSequenceFilter(Filter):
     @classmethod
     def build_object(cls, **kwargs):
         location = cls.__name__
-        ParameterValidator.assert_keys(kwargs.keys(), ["filter_sequence_type", "batch_size", "count_agg", "region_type"], location,
+        if "batch_size" in kwargs:
+            warnings.warn( f"Parameter 'batch_size' for {location} is deprecated and will be ignored. To adjust parallelization, "
+                           f"use parameter 'number_of_processes' in the instruction specification.")
+            kwargs.pop("batch_size")
+
+        ParameterValidator.assert_keys(kwargs.keys(), ["filter_sequence_type", "count_agg", "region_type"], location,
                                        "DuplicateSequenceFilter")
         ParameterValidator.assert_in_valid_list(kwargs["filter_sequence_type"].upper(), [item.name for item in SequenceType],
                                                 location, "filter_sequence_type")
@@ -77,30 +87,62 @@ class DuplicateSequenceFilter(Filter):
                                                 location, "region_type")
         ParameterValidator.assert_in_valid_list(kwargs["count_agg"].upper(), [item.name for item in CountAggregationFunction], location,
                                                 "count_agg")
-        ParameterValidator.assert_type_and_value(kwargs["batch_size"], int, location, "batch_size", 1)
         return DuplicateSequenceFilter(filter_sequence_type=SequenceType[kwargs["filter_sequence_type"].upper()],
                                        region_type=RegionType[kwargs['region_type'].upper()],
-                                       batch_size=kwargs["batch_size"], count_agg=CountAggregationFunction[kwargs["count_agg"].upper()])
+                                       count_agg=CountAggregationFunction[kwargs["count_agg"].upper()])
 
-    def __init__(self, filter_sequence_type: SequenceType, batch_size: int, count_agg: CountAggregationFunction,
+    def __init__(self, filter_sequence_type: SequenceType, count_agg: CountAggregationFunction,
                  result_path: Path = None, region_type: RegionType = RegionType.IMGT_CDR3):
         super().__init__(result_path)
         self.filter_sequence_type = filter_sequence_type
         self.region_type = region_type
         self.count_agg = count_agg
-        self.batch_size = batch_size
 
         self.sequence_of_interest = bnp_util.get_sequence_field_name(self.region_type, self.filter_sequence_type)
         self.sequence_to_ignore = bnp_util.get_sequence_field_name(self.region_type, [t for t in SequenceType if t != self.filter_sequence_type][0])
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1) -> RepertoireDataset:
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path,
+                        number_of_processes=1) -> Dataset:
         self.result_path = result_path if result_path is not None else self.result_path
+        PathBuilder.build(self.result_path)
 
-        self.check_dataset_type(dataset, [RepertoireDataset], "DuplicateSequenceFilter")
+        # self.check_dataset_type(dataset, [RepertoireDataset], "DuplicateSequenceFilter")
 
+        if type(dataset) == RepertoireDataset:
+            return self.process_repertoire_dataset(dataset, number_of_processes)
+        elif type(dataset) == ReceptorDataset:
+            return self.process_receptor_dataset(dataset, number_of_processes)
+        elif type(dataset) == SequenceDataset:
+            return self.process_sequence_dataset(dataset, number_of_processes)
+
+    def process_receptor_dataset(self, dataset: ReceptorDataset, number_of_processes=1):
+        pass
+
+    def process_sequence_dataset(self, dataset: SequenceDataset, number_of_processes=1):
+        no_duplicates = self._process_df(data=dataset.data.topandas(), custom_lists=[])
+
+        name = f"{dataset.name}_filtered"
+        new_filename = f"{self.result_path}/{name}.tsv"
+
+        data = AIRRSequenceSet.from_data_frame(no_duplicates)
+        bnp_write_to_file(new_filename, data)
+
+
+        new_dataset_file = self.result_path / f'{name}.yaml'
+        shutil.copyfile(dataset.dataset_file, new_dataset_file)
+
+        # todo something here is not working
+        return SequenceDataset.build(filename=new_filename, metadata_filename=new_dataset_file, name=name, labels=dataset.labels)
+
+        # return SequenceDataset(filename=new_filename, name=name, labels=copy.deepcopy(dataset.labels),
+        #                        dynamic_fields=dataset.dynamic_fields, dataset_file=new_dataset_file,
+        #                        bnp_dataclass=dataset.bnp_dataclass)
+        #
+
+    def process_repertoire_dataset(self, dataset: RepertoireDataset, number_of_processes=1) -> RepertoireDataset:
         processed_dataset = dataset.clone()
 
-        with Pool(self.batch_size) as pool:
+        with Pool(number_of_processes) as pool:
             repertoires = pool.map(self._process_repertoire, dataset.repertoires)
 
         processed_dataset.repertoires = repertoires
@@ -141,15 +183,7 @@ class DuplicateSequenceFilter(Filter):
         return agg_dict
 
     def _process_repertoire(self, repertoire: Repertoire) -> Repertoire:
-        data = repertoire.data.topandas()
-        data['duplicate_count'].replace(-1, pd.NA, inplace=True)
-        columns = data.columns
-
-        groupby_fields = self._prepare_group_by_field(columns)
-        custom_lists = list(repertoire.dynamic_fields.keys())
-        agg_dict = self._prepare_agg_dict(columns, custom_lists)
-
-        no_duplicates = data.groupby(groupby_fields, sort=False).agg(agg_dict).reset_index()
+        no_duplicates = self._process_df(data=repertoire.data.topandas(), custom_lists=list(repertoire.dynamic_fields.keys()))
 
         no_duplicates.to_csv(f"{self.result_path}/{repertoire.data_filename.stem}_filtered.tsv", sep='\t', index=False)
         write_yaml(Path(f"{self.result_path}/{repertoire.metadata_filename.stem}_filtered.yaml"), repertoire.metadata)
@@ -158,6 +192,19 @@ class DuplicateSequenceFilter(Filter):
                           metadata_filename=Path(f"{self.result_path}/{repertoire.metadata_filename.stem}_filtered.yaml"),
                           identifier=str(uuid4().hex),
                           dynamic_fields=repertoire.dynamic_fields)
+
+    def _process_df(self, data, custom_lists):
+        # presuming default duplicate count = 1 (better than presuming NA)
+        # This is important for single-cell datasets where only umi_count is set, and each entry is 1 duplicate
+        data['duplicate_count'] = data['duplicate_count'].replace(-1, 1)
+        columns = data.columns
+        groupby_fields = self._prepare_group_by_field(columns)
+
+        agg_dict = self._prepare_agg_dict(columns, custom_lists)
+        no_duplicates = data.groupby(groupby_fields, sort=False).agg(agg_dict).reset_index()
+
+        return no_duplicates
+
 
     @staticmethod
     def get_documentation():
