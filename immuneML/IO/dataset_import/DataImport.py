@@ -2,6 +2,7 @@
 
 import abc
 import logging
+import os
 from dataclasses import fields
 from multiprocessing import Pool
 from pathlib import Path
@@ -181,7 +182,10 @@ class DataImport(metaclass=abc.ABCMeta):
             return repertoire
         except Exception as e:
             raise RuntimeError(
-                f"{self.__class__.__name__}: error when importing file {metadata_row['filename']}: {e}")
+                f"{self.__class__.__name__}: error when importing file {metadata_row['filename']}: \n{e}.\n"
+                f"Current working directory: {os.getcwd()}\n"
+                f"There are {len(list(Path('.').glob('*')))} files in the current working directory, and "
+                f"{len(list(Path('.').glob('*.*sv')))} tsv/csv files.")
 
     def load_sequence_dataframe(self, filename: Path):
 
