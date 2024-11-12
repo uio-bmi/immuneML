@@ -2,7 +2,6 @@ from pathlib import Path
 
 import yaml
 
-from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
 from immuneML.api.galaxy.Util import Util
 from immuneML.app.ImmuneMLApp import ImmuneMLApp

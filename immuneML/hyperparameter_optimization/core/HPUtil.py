@@ -54,14 +54,14 @@ class HPUtil:
 
     @staticmethod
     def preprocess_dataset(dataset: Dataset, preproc_sequence: list, path: Path, context: dict = None,
-                           hp_setting: HPSetting = None) -> Dataset:
+                           hp_setting: HPSetting = None, number_of_processes: int = 1) -> Dataset:
         if dataset is not None:
             if isinstance(preproc_sequence, list) and len(preproc_sequence) > 0:
                 PathBuilder.build(path)
                 tmp_dataset = dataset.clone() if context is None or "dataset" not in context else context["dataset"]
 
                 for preprocessing in preproc_sequence:
-                    tmp_dataset = preprocessing.process_dataset(tmp_dataset, path)
+                    tmp_dataset = preprocessing.process_dataset(tmp_dataset, path, number_of_processes)
 
                 if context is not None and "dataset" in context:
                     context["preprocessed_dataset"] = {str(hp_setting): tmp_dataset}

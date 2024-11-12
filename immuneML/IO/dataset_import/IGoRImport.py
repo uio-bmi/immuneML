@@ -37,6 +37,12 @@ class IGoRImport(DataImport):
     - metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file.
       This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in
       instructions. Only the IGoR files included under the column 'filename' are imported into the RepertoireDataset.
+      For setting Sequence- or ReceptorDataset labels, metadata_file is ignored, use label_columns instead.
+
+    - label_columns (list): For Sequence- or ReceptorDataset, this parameter can be used to explicitly set the column
+      names of labels to import. These labels can be used as prediction target. When label_columns are not set, label
+      names are attempted to be discovered automatically (any column name which is not used in the column_mapping).
+      For setting RepertoireDataset labels, label_columns is ignored, use metadata_file instead.
 
     - import_with_stop_codon (bool): Whether sequences with stop codons should be included in the imported sequences.
       By default, import_with_stop_codon is False.

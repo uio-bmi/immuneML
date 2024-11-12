@@ -45,7 +45,7 @@ class MyTestCase(unittest.TestCase):
             os.chdir(path)
 
             yamlbuilder_main(["--format", "VDJdb", "--output_path", str(path), "--file_name", "sequence.yaml",
-                              "--paired", "False", "--metadata_columns", "a,b", "--is_repertoire", "False",
+                              "--paired", "False", "--metadata_columns", "Epitope,Epitope gene", "--is_repertoire", "False",
                               "--label_name", "a", "--sequence_length_report", "True",
                               "--sequence_count_report", "True", "--vj_gene_report", "True"])
 
@@ -58,7 +58,8 @@ class MyTestCase(unittest.TestCase):
                                                                                         {"path": "./", "is_repertoire": False,
                                                                                          "paired": False,
                                                                                          "region_type": RegionType.IMGT_CDR3.name,
-                                                                                         "result_path": "./"}}})
+                                                                                         "result_path": "./",
+                                                                                         "label_columns": ["Epitope", "Epitope gene"]}}})
 
                 self.assertDictEqual(loaded_specs["definitions"]["reports"], {"sequence_length_report": "SequenceLengthDistribution",
                                                                               "sequence_count_report":
@@ -98,13 +99,13 @@ class MyTestCase(unittest.TestCase):
         try:
             os.chdir(path)
 
-            yamlbuilder_main(["-r", "VDJdb", "-o", str(path), "-f", "receptor.yaml", "-p", "True", "-c", "TRA_TRB", "-a", "'c'", "-i", "False"])
+            yamlbuilder_main(["-r", "VDJdb", "-o", str(path), "-f", "receptor.yaml", "-p", "True", "-c", "TRA_TRB", "-a", "Epitope species", "-i", "False"])
 
             with open(path / "receptor.yaml", "r") as file:
                 loaded_specs = yaml.load(file, Loader=yaml.FullLoader)
 
                 self.assertDictEqual(loaded_specs["definitions"]["datasets"], {"dataset": {"format": "VDJdb", "params":
-                    {"path": "./", "is_repertoire": False, "paired": True, "receptor_chains": "TRA_TRB",
+                    {"path": "./", "is_repertoire": False, "paired": True, "receptor_chains": "TRA_TRB", "label_columns": ["Epitope species"],
                      "region_type": RegionType.IMGT_CDR3.name, "result_path": "./"}}})
 
                 self.assertDictEqual(loaded_specs["instructions"], {"my_dataset_generation_instruction":

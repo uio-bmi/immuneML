@@ -1,5 +1,4 @@
 import copy
-from dataclasses import fields as get_fields
 from multiprocessing.pool import Pool
 from pathlib import Path
 from uuid import uuid4
@@ -44,7 +43,7 @@ class DuplicateSequenceFilter(Filter):
 
     - filter_sequence_type (:py:obj:`~immuneML.environment.SequenceType.SequenceType`): Whether the sequences should be collapsed on the nucleotide or amino acid level. Valid options are defined by the SequenceType enum.
 
-    - batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed)
+    - region_type (str): which part of the sequence to examine, by default, this is IMGT_CDR3
 
     - count_agg (:py:obj:`~immuneML.preprocessing.filters.CountAggregationFunction.CountAggregationFunction`): determines how the sequence counts of duplicate sequences are aggregated. Valid options are defined by the CountAggregationFunction enum.
 

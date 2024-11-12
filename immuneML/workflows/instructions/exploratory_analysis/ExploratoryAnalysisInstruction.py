@@ -117,7 +117,7 @@ class ExploratoryAnalysisInstruction(Instruction):
         if unit.preprocessing_sequence is not None and len(unit.preprocessing_sequence) > 0:
             dataset = unit.dataset
             for preprocessing in unit.preprocessing_sequence:
-                dataset = preprocessing.process_dataset(dataset, result_path)
+                dataset = preprocessing.process_dataset(dataset, result_path, number_of_processes=unit.number_of_processes)
         else:
             dataset = unit.dataset
         return dataset

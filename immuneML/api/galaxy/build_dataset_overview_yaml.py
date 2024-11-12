@@ -22,6 +22,8 @@ def get_dataset_specs(args):
         dataset_specs["params"]["metadata_file"] = args.metadata_file
     else:
         dataset_specs["params"]["is_repertoire"] = False
+        if args.metadata_columns != "":
+            dataset_specs["params"]["label_columns"] = args.metadata_columns.split(",")
 
         paired = True if args.paired == "True" else False
 

@@ -159,7 +159,7 @@ class RandomDatasetGenerator:
 
         get_random_sequence = lambda proba, chain, id: ReceptorSequence(
             sequence_aa="".join(random.choices(alphabet, k=random.choices(list(proba.keys()), proba.values())[0])),
-            duplicate_count=1, v_call=chain + "V1-1*01", j_call=chain + "J1-1*01", locus=chain, cell_id=str(id))
+            duplicate_count=random.randint(1, 10), v_call=chain + "V1-1*01", j_call=chain + "J1-1*01", locus=chain, cell_id=str(id))
 
         receptors = []
         for i in range(receptor_count):
@@ -228,7 +228,7 @@ class RandomDatasetGenerator:
                                                              k=random.choices(list(length_probabilities.keys()),
                                                                               length_probabilities.values())[0])),
                                       locus=chain, v_call=chain + "V1-1*01", j_call=chain + "J1-1*01",
-                                      duplicate_count=1,
+                                      duplicate_count=random.randint(1, 10),
                                       metadata={
                                           **{label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]
                                              for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}})

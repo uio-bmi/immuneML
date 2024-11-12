@@ -152,6 +152,7 @@ class PWM(GenerativeModel):
         df.to_csv(str(PathBuilder.build(path) / 'synthetic_dataset.tsv'), sep='\t', index=False)
 
         write_yaml(path / 'synthetic_metadata.yaml', {
+            'dataset_type': 'SequenceDataset',
             'type_dict_dynamic_fields': {'gen_model_name': 'str'},
             'name': 'synthetic_dataset', 'labels': {'gen_model_name': [self.name]},
             'timestamp': str(datetime.now())

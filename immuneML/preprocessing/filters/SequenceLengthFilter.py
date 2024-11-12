@@ -26,6 +26,8 @@ class SequenceLengthFilter(Filter):
 
     - max_len (int): maximum length of the sequence (sequences longer than max_len will be removed); to not use max_len, set it to -1
 
+    - region_type (str): which part of the sequence to examine, by default, this is IMGT_CDR3
+
     **YAML specification:**
 
     .. indent with spaces

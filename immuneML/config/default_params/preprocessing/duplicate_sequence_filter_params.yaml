@@ -1,3 +1,3 @@
 filter_sequence_type: AMINO_ACID
-batch_size: 4 # only affects speed
 count_agg: sum
+region_type: IMGT_CDR3

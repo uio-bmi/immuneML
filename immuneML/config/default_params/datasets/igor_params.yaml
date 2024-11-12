@@ -10,3 +10,4 @@ column_mapping: # IGoR column names -> immuneML (AIRR) fields
   nt_CDR3: junction
   is_inframe: vj_in_frame
 import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+label_columns: null

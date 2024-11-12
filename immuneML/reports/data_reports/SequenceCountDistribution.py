@@ -116,7 +116,7 @@ class SequenceCountDistribution(DataReport):
         chains = data.locus.tolist()
 
         if self.split_by_label:
-            label_classes = getattr(data, self.label_name)
+            label_classes = getattr(data, self.label_name).tolist()
             counter = Counter(zip(counts, chains, label_classes))
         else:
             counter = Counter(zip(counts, chains))
@@ -138,7 +138,6 @@ class SequenceCountDistribution(DataReport):
                         labels={"n_observations": "Number of observations",
                                 "duplicate_count": "Sequence duplicate count"})
         figure.update_layout(template="plotly_white")
-        figure.update_xaxes(row=1, type="category")
         PathBuilder.build(self.result_path)
 
         file_path = self.result_path / "sequence_count_distribution.html"
