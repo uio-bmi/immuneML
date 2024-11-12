@@ -2,8 +2,8 @@ import os
 from unittest import TestCase
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.sequence_encoding.IMGTGappedKmerEncoder import IMGTGappedKmerEncoder
 from immuneML.environment.Constants import Constants
@@ -16,18 +16,20 @@ class TestIMGTGappedKmerEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode_sequence(self):
-        sequence = ReceptorSequence("AHCDE", None, None, metadata=SequenceMetadata(region_type="IMGT_CDR3"))
+        sequence = ReceptorSequence(sequence_aa="AHCDE", sequence=None, sequence_id=None)
         kmers = IMGTGappedKmerEncoder.encode_sequence(sequence, EncoderParams(model={"k_left": 1, "max_gap": 1},
                                                                               label_config=LabelConfiguration(),
-                                                                              result_path=""))
+                                                                              region_type=RegionType.IMGT_CDR3,
+                                                                              result_path=None))
 
         self.assertEqual({'AH-105', 'HC-106', 'CD-107', 'DE-116', 'A.C-105', 'H.D-106', 'C.E-107'},
                          set(kmers))
 
-        sequence = ReceptorSequence("CASSPRERATYEQCAY", None, None, metadata=SequenceMetadata(region_type="IMGT_CDR3"))
+        sequence = ReceptorSequence(sequence_aa="CASSPRERATYEQCAY", sequence=None, sequence_id=None)
         kmers = IMGTGappedKmerEncoder.encode_sequence(sequence, EncoderParams(model={"k_left": 1, "max_gap": 1},
                                                                               label_config=LabelConfiguration(),
-                                                                              result_path=""))
+                                                                              result_path="",
+                                                                              region_type=RegionType.IMGT_CDR3))
 
         self.assertEqual({'CA-105', 'AS-106', 'SS-107', 'SP-108', 'PR-109', 'RE-110', 'ER-111',
                           'RA-111.1', 'AT-112.2', 'TY-112.1', 'YE-112', 'EQ-113', 'QC-114',

@@ -3,15 +3,14 @@ path: ./
 column_mapping:
   V: v_call
   J: j_call
-  CDR3: sequence_aa
-  complex.id: sequence_id
-  Gene: chain
-metadata_column_mapping:
+  CDR3: junction_aa # VDJdb's definition of CDR3 corresponds to AIRR Schema definition of IMGT junction
+  complex.id: cell_id
+  Gene: locus
   Epitope: epitope
-  Epitope gene: epitope_gene
-  Epitope species: epitope_species
-region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing first and last amino acid as VDJdb uses IMGT junction as CDR3
+region_type: "IMGT_CDR3" # which region to use
 separator: "\t"
 import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
 import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
 import_illegal_characters: False
+columns_to_load: ['complex.id', 'Gene', 'CDR3', 'V', 'J', 'Epitope', 'Epitope gene', 'Epitope species', 'Meta', 'Score']
+label_columns: ['Epitope', 'Epitope gene', 'Epitope species']

@@ -14,7 +14,8 @@ class TestVJGeneDistribution(TestCase):
     def test_generate_sequence_dataset(self):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "overview_sequence_dataset/")
 
-        dataset = RandomDatasetGenerator.generate_sequence_dataset(100, {10: 0.5, 11:0.25, 20:0.25}, {"l1": {"a": 0.5, "b": 0.5}}, path / "dataset")
+        dataset = RandomDatasetGenerator.generate_sequence_dataset(100, {10: 0.5, 11: 0.25, 20: 0.25},
+                                                                   {"l1": {"a": 0.5, "b": 0.5}}, path / "dataset")
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "VJGeneDistribution")
         params["dataset"] = dataset
@@ -41,10 +42,12 @@ class TestVJGeneDistribution(TestCase):
     def test_generate_receptor_dataset(self):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "overview_receptor_dataset/")
 
-
-        dataset = RandomDatasetGenerator.generate_receptor_dataset(100, chain_1_length_probabilities={10: 0.5, 11:0.25, 20:0.25},
-                                                                   chain_2_length_probabilities={10: 0.5, 11: 0.25, 15: 0.25},
-                                                                   labels={"l1": {"a": 0.5, "b": 0.5}}, path=path / "dataset")
+        dataset = RandomDatasetGenerator.generate_receptor_dataset(100, chain_1_length_probabilities={10: 0.5, 11: 0.25,
+                                                                                                      20: 0.25},
+                                                                   chain_2_length_probabilities={10: 0.5, 11: 0.25,
+                                                                                                 15: 0.25},
+                                                                   labels={"l1": {"a": 0.5, "b": 0.5}},
+                                                                   path=path / "dataset")
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "VJGeneDistribution")
         params["dataset"] = dataset
@@ -70,12 +73,14 @@ class TestVJGeneDistribution(TestCase):
         shutil.rmtree(path)
 
     def test_generate_repertoire_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "overview_repertoire_dataset/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "overview_repertoire_dataset/")
 
-
-        dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=5, sequence_count_probabilities={20:0.25, 30:0.25, 40:0.25, 50:0.25},
+        dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=5,
+                                                                     sequence_count_probabilities={20: 0.25, 30: 0.25,
+                                                                                                   40: 0.25, 50: 0.25},
                                                                      sequence_length_probabilities={10: 1},
-                                                                     labels={"l1": {"a": 0.5, "b": 0.5}}, path=path / "dataset")
+                                                                     labels={"l1": {"a": 0.5, "b": 0.5}},
+                                                                     path=path / "dataset")
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "VJGeneDistribution")
         params["dataset"] = dataset
@@ -88,7 +93,6 @@ class TestVJGeneDistribution(TestCase):
         result = report._generate()
 
         self.assertIsInstance(result, ReportResult)
-
 
         self.assertTrue(os.path.isfile(path / "result/J_gene_distribution.tsv"))
         self.assertTrue(os.path.isfile(path / "result/V_gene_distribution.tsv"))

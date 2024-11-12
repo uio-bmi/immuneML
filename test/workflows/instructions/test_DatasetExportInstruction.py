@@ -18,8 +18,10 @@ class TestDatasetExportInstruction(TestCase):
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {10: 1}, {12: 1}, {}, path)
         dataset.name = "d1"
 
-        filter = CountPerSequenceFilter(low_count_limit=1, remove_without_count=True, remove_empty_repertoires=True,  batch_size=100)
-        instruction = DatasetExportInstruction(datasets=[dataset], preprocessing_sequence=[filter], exporters=[AIRRExporter], name="export_instr",
+        filter = CountPerSequenceFilter(low_count_limit=1, remove_without_count=True, remove_empty_repertoires=True,
+                                        batch_size=100)
+        instruction = DatasetExportInstruction(datasets=[dataset], preprocessing_sequence=[filter],
+                                               exporters=[AIRRExporter], name="export_instr",
                                                number_of_processes=2)
 
         result_path = path / "generated/"
@@ -35,6 +37,6 @@ class TestDatasetExportInstruction(TestCase):
         self.assertEqual(1, len(list(glob(str(state.result_path / f"{dataset.name}/*/")))))
         self.assertTrue(os.path.isdir(str(state.result_path / f"{dataset.name}/AIRR/")))
         self.assertTrue(os.path.isfile(str(state.result_path / f"{dataset.name}/AIRR/metadata.csv")))
-        self.assertEqual(10, len(list(glob(str(state.result_path / f"{dataset.name}/AIRR/repertoires/*")))))
+        self.assertEqual(20, len(list(glob(str(state.result_path / f"{dataset.name}/AIRR/repertoires/*")))))
 
         shutil.rmtree(path)

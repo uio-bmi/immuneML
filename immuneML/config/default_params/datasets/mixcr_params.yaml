@@ -8,6 +8,9 @@ column_mapping: # MiXCR column name -> immuneML repertoire field (where there is
   cloneCount: duplicate_count
   allVHitsWithScore: v_call
   allJHitsWithScore: j_call
+  aaSeqCDR3: junction_aa
+  nSeqCDR3: junction
 import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
 import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
 import_illegal_characters: False
+label_columns: null

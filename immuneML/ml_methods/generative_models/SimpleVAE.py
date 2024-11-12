@@ -11,11 +11,11 @@ from torch.nn.functional import cross_entropy, one_hot
 from torch.utils.data import DataLoader
 
 from immuneML import Constants
-from immuneML.data_model.bnp_util import write_yaml, read_yaml
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
+from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
@@ -41,7 +41,7 @@ class SimpleVAE(GenerativeModel):
 
     **Specification arguments:**
 
-    - chain (str): which chain the sequence come from, e.g., TRB
+    - locus (str): which locus the sequence come from, e.g., TRB
 
     - beta (float): VAE hyperparameter that balanced the reconstruction loss and latent dimension regularization
 
@@ -87,7 +87,7 @@ class SimpleVAE(GenerativeModel):
             ml_methods:
                 my_vae:
                     SimpleVAE:
-                        chain: beta
+                        locus: beta
                         beta: 0.75
                         latent_dim: 20
                         linear_nodes_count: 75
@@ -119,10 +119,10 @@ class SimpleVAE(GenerativeModel):
 
         return vae
 
-    def __init__(self, chain, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim, pretrains,
+    def __init__(self, locus, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim, pretrains,
                  v_gene_embed_dim, cdr3_embed_dim, warmup_epochs, patience, iter_count_prob_estimation, device,
                  vocab=None, max_cdr3_len=None, unique_v_genes=None, unique_j_genes=None, name: str = None):
-        super().__init__(chain)
+        super().__init__(locus)
         self.sequence_type = SequenceType.AMINO_ACID
         self.iter_count_prob_estimation = iter_count_prob_estimation
         self.num_epochs = num_epochs
@@ -196,7 +196,8 @@ class SimpleVAE(GenerativeModel):
             if min(losses) == loss.item():
                 store_weights(model, path / 'state_dict.yaml')
 
-            if epoch > self.patience and all(x <= y for x, y in zip(losses[-self.patience:], losses[-self.patience:][1:])):
+            if epoch > self.patience and all(
+                    x <= y for x, y in zip(losses[-self.patience:], losses[-self.patience:][1:])):
                 loss_decreasing = False
 
             epoch += 1
@@ -242,13 +243,14 @@ class SimpleVAE(GenerativeModel):
         return loss
 
     def encode_dataset(self, dataset, batch_size=None, shuffle=True):
-        data = dataset.get_attributes([self.sequence_type.value, 'v_call', 'j_call'], as_list=True)
+        seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
+        data = dataset.data.topandas()[[seq_col, 'v_call', 'j_call']]
         if self.unique_v_genes is None:
             self.unique_v_genes = sorted(list(set([el.split("*")[0] for el in data['v_call']])))
         if self.unique_j_genes is None:
             self.unique_j_genes = sorted(list(set([el.split("*")[0] for el in data['j_call']])))
         if self.max_cdr3_len is None:
-            self.max_cdr3_len = max(len(el) for el in data[self.sequence_type.value])
+            self.max_cdr3_len = max(len(el) for el in data[seq_col])
 
         encoded_v_genes = one_hot(
             torch.as_tensor([self.unique_v_genes.index(v_gene.split("*")[0]) for v_gene in data['v_call']],
@@ -261,7 +263,7 @@ class SimpleVAE(GenerativeModel):
         padded_encoded_cdr3s = one_hot(torch.as_tensor([
             [self.vocab.index(letter) for letter in
              StringHelper.pad_sequence_in_the_middle(seq, self.max_cdr3_len, Constants.GAP_LETTER)]
-            for seq in data[self.sequence_type.value]], device=self.device), num_classes=self.vocab_size)
+            for seq in data[seq_col]], device=self.device), num_classes=self.vocab_size)
 
         pytorch_dataset = PyTorchSequenceDataset({'v_gene': encoded_v_genes, 'j_gene': encoded_j_genes,
                                                   'cdr3': padded_encoded_cdr3s})
@@ -287,21 +289,29 @@ class SimpleVAE(GenerativeModel):
                                        device=self.device).float()
             sequences, v_genes, j_genes = self.model.decode(z_sample)
 
-        seq_objs = [ReceptorSequence(**{
-            self.sequence_type.value: ''.join([self.vocab[Categorical(letter).sample()] for letter in sequences[i]])
-                                     .replace(Constants.GAP_LETTER, ''),
-            'metadata': SequenceMetadata(v_call=self.unique_v_genes[Categorical(v_genes[i]).sample()],
-                                         j_call=self.unique_j_genes[Categorical(j_genes[i]).sample()], chain=self.chain,
-                                         region_type=self.region_type.name)
-        }) for i in range(count)]
+        seq_objs = []
+        for i in range(count):
+            seq_content = [self.vocab[Categorical(letter).sample()] for letter in sequences[i]]
+            sequence = ReceptorSequence(**{
+                self.sequence_type.value: ''.join(seq_content).replace(Constants.GAP_LETTER, ''),
+                'v_call': self.unique_v_genes[Categorical(v_genes[i]).sample()],
+                'j_call': self.unique_j_genes[Categorical(j_genes[i]).sample()],
+                'locus': self.locus,
+                'metadata': {'gen_model_name': self.name if self.name else "SimpleVAE"}
+            })
 
-        for obj in seq_objs:
-            log_prob = self.compute_p_gen({self.sequence_type.value: obj.get_attribute(self.sequence_type.value),
-                                           'v_call': obj.metadata.v_call, 'j_call': obj.metadata.j_call},
-                                          self.sequence_type)
-            obj.metadata.custom_params = {'log_prob': log_prob}
+            seq_objs.append(sequence)
 
-        dataset = SequenceDataset.build_from_objects(seq_objs, count, path, 'synthetic_vae')
+        # for obj in seq_objs:
+        #     log_prob = self.compute_p_gen({self.sequence_type.value: obj.get_attribute(self.sequence_type.value),
+        #                                    'v_call': obj.metadata.v_call, 'j_call': obj.metadata.j_call},
+        #                                   self.sequence_type)
+        #     obj.metadata.custom_params = {'log_prob': log_prob}
+
+        dataset = SequenceDataset.build_from_objects(seq_objs, PathBuilder.build(path),
+                                                     f'synthetic_{self.name}_dataset',
+                                                     {'gen_model_name': [self.name]},
+                                                     self.region_type)
 
         return dataset
 
@@ -359,7 +369,7 @@ class SimpleVAE(GenerativeModel):
                             'sequence_type', 'vocab_size']
         write_yaml(filename=model_path / 'model_overview.yaml',
                    yaml_dict={**{k: v for k, v in vars(self).items() if k not in skip_export_keys},
-                              **{'type': self.__class__.__name__}})
+                              **{'type': self.__class__.__name__}}) # todo add 'dataset_type': 'SequenceDataset',
 
         store_weights(self.model, model_path / 'state_dict.yaml')
 

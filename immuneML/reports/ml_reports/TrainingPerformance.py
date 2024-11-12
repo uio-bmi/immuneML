@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.hyperparameter_optimization import HPSetting
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
@@ -77,7 +77,6 @@ class TrainingPerformance(MLReport):
         predicted_proba_y = self.method.predict_proba(X, self.label)[self.label.name][self.label.positive_class]
         true_y = self.train_dataset.encoded_data.labels[self.label.name]
         classes = self.method.get_classes()
-        example_weights = self.train_dataset.get_example_weights()
 
         PathBuilder.build(self.result_path)
 
@@ -90,7 +89,7 @@ class TrainingPerformance(MLReport):
         for metric in self.metrics_set:
             _score = MetricUtil.score_for_metric(metric=ClassificationMetric.get_metric(metric),
                                                  predicted_y=predicted_y, predicted_proba_y=predicted_proba_y,
-                                                 true_y=true_y, example_weights=example_weights, classes=classes)
+                                                 true_y=true_y, classes=classes)
 
             if metric == 'CONFUSION_MATRIX':
                 self._generate_heatmap(classes, classes, _score, metric, output)

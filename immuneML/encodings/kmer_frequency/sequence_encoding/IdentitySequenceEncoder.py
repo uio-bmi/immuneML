@@ -1,4 +1,4 @@
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingStrategy import SequenceEncodingStrategy
 from immuneML.environment.Constants import Constants
@@ -20,7 +20,7 @@ class IdentitySequenceEncoder(SequenceEncodingStrategy):
         """
 
         res = []
-        sequence_type = params.model.get('sequence_type', EnvironmentSettings.sequence_type)
+        sequence_type = params.model.get('sequence_type', params.sequence_type)
         if params.model.get("sequence", True):
             res.append(sequence.get_sequence(sequence_type))
 

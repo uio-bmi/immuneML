@@ -20,11 +20,11 @@ class MetricUtil:
         return fn
 
     @staticmethod
-    def score_for_metric(metric: ClassificationMetric, predicted_y, predicted_proba_y, true_y, classes, example_weights=None):
-        '''
+    def score_for_metric(metric: ClassificationMetric, predicted_y, predicted_proba_y, true_y, classes):
+        """
         Note: when providing label classes, make sure the 'positive class' is sorted last.
         This sorting should be done automatically when accessing Label.values
-        '''
+        """
 
         fn = MetricUtil.get_metric_fn(metric)
 
@@ -42,9 +42,9 @@ class MetricUtil:
                 predictions = predicted_y
 
             if 'labels' in inspect.getfullargspec(fn).kwonlyargs or 'labels' in inspect.getfullargspec(fn).args:
-                score = fn(true_y, predictions, sample_weight=example_weights, labels=classes)
+                score = fn(true_y, predictions, labels=classes)
             else:
-                score = fn(true_y, predictions, sample_weight=example_weights)
+                score = fn(true_y, predictions)
 
         except ValueError as err:
             warnings.warn(f"MLMethodAssessment: score for metric {metric.name} could not be calculated."

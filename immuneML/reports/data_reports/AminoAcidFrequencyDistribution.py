@@ -6,16 +6,19 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model import bnp_util
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
+from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
@@ -25,6 +28,16 @@ from immuneML.util.PositionHelper import PositionHelper
 class AminoAcidFrequencyDistribution(DataReport):
     """
     Generates a barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.
+
+    Example output:
+
+    .. image:: _static/images/reports/amino_acid_frequency.png
+       :alt: Coefficients report
+       :width: 800
+
+    .. image:: _static/images/reports/amino_acid_frequency_change.png
+       :alt: Coefficients report
+       :width: 800
 
     **Specification arguments:**
 
@@ -55,6 +68,8 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     - label (str): if split_by_label is set to True, a label can be specified here.
 
+    - region_type (str): which part of the sequence to check; e.g., IMGT_CDR3
+
     **YAML specification:**
 
     .. indent with spaces
@@ -67,6 +82,7 @@ class AminoAcidFrequencyDistribution(DataReport):
                         relative_frequency: False
                         split_by_label: True
                         label: CMV
+                        region_type: IMGT_CDR3
 
     """
 
@@ -81,27 +97,25 @@ class AminoAcidFrequencyDistribution(DataReport):
         ParameterValidator.assert_in_valid_list(kwargs["alignment"].upper(), ["IMGT", "LEFT", "RIGHT", "CENTER"], location, "alignment")
         ParameterValidator.assert_type_and_value(kwargs["relative_frequency"], bool, location, "relative_frequency")
         ParameterValidator.assert_type_and_value(kwargs["split_by_label"], bool, location, "split_by_label")
+        ParameterValidator.assert_region_type(kwargs, location)
 
-        if kwargs["label"] is not None:
-            ParameterValidator.assert_type_and_value(kwargs["label"], str, location, "label")
+        ReportUtil.update_split_by_label_kwargs(kwargs, location)
 
-            if kwargs["split_by_label"] is False:
-                warnings.warn(f"{location}: label is set but split_by_label was False, setting split_by_label to True")
-                kwargs["split_by_label"] = True
-
-        return AminoAcidFrequencyDistribution(**kwargs)
+        return AminoAcidFrequencyDistribution(**{**kwargs, 'region_type': RegionType[kwargs['region_type'].upper()]})
 
     def __init__(self, dataset: Dataset = None, alignment: bool = None, relative_frequency: bool = None,
-                 split_by_label: bool = None, label: str = None,
+                 split_by_label: bool = None, label: str = None, region_type: RegionType = RegionType.IMGT_CDR3,
                  result_path: Path = None, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.alignment = alignment
         self.relative_frequency = relative_frequency
         self.split_by_label = split_by_label
         self.label_name = label
+        self.region_type = region_type
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
+        self.label_name = self._get_label_name()
 
         freq_dist = self._get_plotting_data()
 
@@ -123,7 +137,8 @@ class AminoAcidFrequencyDistribution(DataReport):
             figures.append(self._safe_plot(frequency_change=frequency_change, plot_callable="_plot_frequency_change"))
 
         return ReportResult(name=self.name,
-                            info="A barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.",
+                            info="A barplot showing the relative frequency of each amino acid at each position in "
+                                 "the sequences of a dataset.",
                             output_figures=[fig for fig in figures if fig is not None],
                             output_tables=[table for table in tables if table is not None])
 
@@ -143,7 +158,7 @@ class AminoAcidFrequencyDistribution(DataReport):
         return plotting_data
 
     def _get_sequence_dataset_plotting_data(self):
-        return self._count_dict_per_class_to_df(self._count_aa_frequencies(self._sequence_class_iterator()))
+        return self._count_dict_per_class_to_df(self._count_aa_frequencies(self.dataset.data, class_name=None))
 
     def _count_dict_per_class_to_df(self, raw_count_dict_per_class):
         result_dfs = []
@@ -155,42 +170,23 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         return pd.concat(result_dfs)
 
-    def _sequence_class_iterator(self):
-        label_name = self._get_label_name()
-
-        for sequence in self.dataset.get_data():
-            if self.split_by_label:
-                yield (sequence, sequence.get_attribute(label_name))
-            else:
-                yield (sequence, 0)
-
     def _get_receptor_dataset_plotting_data(self):
         result_dfs = []
 
-        receptors = self.dataset.get_data()
-        chains = next(receptors).get_chains()
+        data = self.dataset.data
+        chains = list(set(data.locus.tolist()))
 
         for chain in chains:
-            raw_count_dict_per_class = self._count_aa_frequencies(self._chain_class_iterator(chain))
+            mask = [el == chain for el in data.locus.tolist()]
+            raw_count_dict_per_class = self._count_aa_frequencies(data[mask])
 
             for class_name, raw_count_dict in raw_count_dict_per_class.items():
                 result_df = self._count_dict_to_df(raw_count_dict)
-                result_df["chain"] = chain
+                result_df["locus"] = chain
                 result_df["class"] = class_name
                 result_dfs.append(result_df)
 
         return pd.concat(result_dfs)
-
-    def _chain_class_iterator(self, chain):
-        label_name = self._get_label_name()
-
-        for receptor in self.dataset.get_data():
-            assert chain in receptor.get_chains(), f"{AminoAcidFrequencyDistribution.__name__}: All receptors in the dataset must contain the same chains. Expected {chain} but found {receptor.get_chains()}"
-
-            if self.split_by_label:
-                yield (receptor.get_chain(chain), receptor.get_attribute(label_name))
-            else:
-                yield (receptor.get_chain(chain), 0)
 
     def _get_repertoire_dataset_plotting_data(self):
         raw_count_dict_per_class = {}
@@ -202,33 +198,35 @@ class AminoAcidFrequencyDistribution(DataReport):
             class_names = [0] * self.dataset.get_example_count()
 
         for repertoire, class_name in zip(self.dataset.get_data(), class_names):
-            self._count_aa_frequencies(self._repertoire_class_iterator(repertoire, class_name),
-                                       raw_count_dict_per_class)
+            self._count_aa_frequencies(repertoire.data, raw_count_dict_per_class, class_name)
 
         return self._count_dict_per_class_to_df(raw_count_dict_per_class)
 
-    def _repertoire_class_iterator(self, repertoire, class_name):
-        for sequence in repertoire.get_sequence_objects():
-            yield (sequence, class_name)
-
-    def _count_aa_frequencies(self, sequence_class_iterator, raw_count_dict=None):
+    def _count_aa_frequencies(self, data: AIRRSequenceSet, raw_count_dict=None, class_name: str = None):
         raw_count_dict = {} if raw_count_dict is None else raw_count_dict
 
-        for item in sequence_class_iterator:
-            sequence, class_name = item
-            seq_str = sequence.get_sequence(sequence_type=SequenceType.AMINO_ACID)
-            seq_pos = self._get_positions(sequence)
+        for item in data.to_iter():
+            sequence = getattr(item, bnp_util.get_sequence_field_name(self.region_type, SequenceType.AMINO_ACID))
+            seq_pos = self._get_positions(len(sequence))
 
-            if class_name not in raw_count_dict:
-                raw_count_dict[class_name] = {}
+            if self.split_by_label and self.label_name is not None:
+                if class_name is None:
+                    cls_name = getattr(item, self.label_name)
+                else:
+                    cls_name = class_name
+            else:
+                cls_name = 0
 
-            for aa, pos in zip(seq_str, seq_pos):
-                if pos not in raw_count_dict[class_name]:
-                    raw_count_dict[class_name][pos] = {legal_aa: 0 for legal_aa in
+            if cls_name not in raw_count_dict:
+                raw_count_dict[cls_name] = {}
+
+            for aa, pos in zip(sequence, seq_pos):
+                if pos not in raw_count_dict[cls_name]:
+                    raw_count_dict[cls_name][pos] = {legal_aa: 0 for legal_aa in
                                                        EnvironmentSettings.get_sequence_alphabet(
                                                            SequenceType.AMINO_ACID)}
 
-                raw_count_dict[class_name][pos][aa] += 1
+                raw_count_dict[cls_name][pos][aa] += 1
 
         return raw_count_dict
 
@@ -246,17 +244,15 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         return pd.DataFrame(df_dict)
 
-    def _get_positions(self, sequence: ReceptorSequence):
-        if self.alignment == "IMGT":
-            positions = PositionHelper.gen_imgt_positions_from_length(
-                len(sequence.get_sequence(SequenceType.AMINO_ACID)),
-                sequence.get_attribute("region_type"))
-        elif self.alignment == "LEFT":
-            positions = list(range(1, len(sequence.get_sequence(SequenceType.AMINO_ACID)) + 1))
+    def _get_positions(self, sequence_length: int):
+        if self.alignment == 'IMGT':
+            positions = PositionHelper.gen_imgt_positions_from_length(sequence_length, self.region_type)
+        elif self.alignment == 'LEFT':
+            positions = list(range(1, sequence_length + 1))
         elif self.alignment == "RIGHT":
-            positions = list(range(-len(sequence.get_sequence(SequenceType.AMINO_ACID))+2, 1))
-        else: # self.alignment == "CENTER
-            positions = list(range(1, len(sequence.get_sequence(SequenceType.AMINO_ACID)) + 1))
+            positions = list(range(-sequence_length + 2, 1))
+        else:  # self.alignment == "CENTER
+            positions = list(range(1, sequence_length + 1))
             positions = [pos - round(max(positions) / 2) for pos in positions]
 
         return [str(pos) for pos in positions]
@@ -276,7 +272,7 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         figure = px.bar(freq_dist, x="position", y=y, color="amino acid", text="amino acid",
                         facet_col="class" if "class" in freq_dist.columns else None,
-                        facet_row="chain" if "chain" in freq_dist.columns else None,
+                        facet_row="locus" if "locus" in freq_dist.columns else None,
                         color_discrete_map=PlotlyUtil.get_amino_acid_color_map(),
                         category_orders=category_orders,
                         labels={"position": "IMGT position" if self.alignment=="IMGT" else "Position",
@@ -305,13 +301,15 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     def _compute_frequency_change(self, freq_dist):
         classes = sorted(set(freq_dist["class"]))
-        assert len(classes) == 2, f"{AminoAcidFrequencyDistribution.__name__}: cannot compute frequency change when the number of classes is not 2: {classes}"
+        assert len(classes) == 2, \
+            (f"{AminoAcidFrequencyDistribution.__name__}: cannot compute frequency change when the number of "
+             f"classes is not 2: {classes}")
 
         class_a_df = freq_dist[freq_dist["class"] == classes[0]]
         class_b_df = freq_dist[freq_dist["class"] == classes[1]]
 
         on = ["amino acid", "position"]
-        on = on + ["chain"] if "chain" in freq_dist.columns else on
+        on = on + ["locus"] if "locus" in freq_dist.columns else on
 
         merged_dfs = pd.merge(class_a_df, class_b_df, on=on, how="outer", suffixes=["_a", "_b"])
         merged_dfs = merged_dfs[(merged_dfs["relative frequency_a"] + merged_dfs["relative frequency_b"]) > 0]
@@ -334,7 +332,7 @@ class AminoAcidFrequencyDistribution(DataReport):
     def _plot_frequency_change(self, frequency_change):
         figure = px.bar(frequency_change, x="position", y="frequency_change", color="amino acid", text="amino acid",
                         facet_col="positive_class",
-                        facet_row="chain" if "chain" in frequency_change.columns else None,
+                        facet_row="locus" if "locus" in frequency_change.columns else None,
                         color_discrete_map=PlotlyUtil.get_amino_acid_color_map(),
                         labels={"position": "IMGT position" if self.alignment=="IMGT" else "Position",
                                 "positive_class": "Class",
@@ -364,11 +362,15 @@ class AminoAcidFrequencyDistribution(DataReport):
         if self.split_by_label:
             if self.label_name is None:
                 if len(self.dataset.get_label_names()) != 1:
-                    warnings.warn(f"{AminoAcidFrequencyDistribution.__name__}: ambiguous label: split_by_label was set to True but no label name was specified, and the number of available labels is {len(self.dataset.get_label_names())}: {self.dataset.get_label_names()}. Skipping this report...")
+                    warnings.warn(f"{AminoAcidFrequencyDistribution.__name__}: ambiguous label: split_by_label was "
+                                  f"set to True but no label name was specified, and the number of available labels "
+                                  f"is {len(self.dataset.get_label_names())}: {self.dataset.get_label_names()}. "
+                                  f"Skipping this report...")
                     return False
-            else:
-                if self.label_name not in self.dataset.get_label_names():
-                    warnings.warn(f"{AminoAcidFrequencyDistribution.__name__}: the specified label name ({self.label_name}) was not available among the dataset labels: {self.dataset.get_label_names()}. Skipping this report...")
-                    return False
+            elif self.label_name not in self.dataset.get_label_names():
+                warnings.warn(f"{AminoAcidFrequencyDistribution.__name__}: the specified label name "
+                              f"({self.label_name}) was not available among the dataset labels: "
+                              f"{self.dataset.get_label_names()}. Skipping this report...")
+                return False
 
         return True

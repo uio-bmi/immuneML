@@ -10,9 +10,9 @@ def test_fit_apply_gen_model():
     gen_models = [
         {
             "PWM": {
-                'chain': 'beta',
+                'locus': 'beta',
                 'sequence_type': 'amino_acid',
-                'region_type': 'IMGT_CDR3'
+                'region_type': 'IMGT_JUNCTION'
             }
         },
         {
@@ -22,7 +22,7 @@ def test_fit_apply_gen_model():
                 'default_model_name': 'humanTRB',
                 'deep': False,
                 'include_joint_genes': True,
-                'n_gen_seqs': 1000
+                'n_gen_seqs': 100
             }
         },
         {
@@ -35,7 +35,7 @@ def test_fit_apply_gen_model():
         },
         {
             "SimpleLSTM": {
-                'chain': 'beta',
+                'locus': 'beta',
                 'sequence_type': 'amino_acid',
                 'num_epochs': 10,
                 'hidden_size': 8,
@@ -44,7 +44,8 @@ def test_fit_apply_gen_model():
                 'embed_size': 4,
                 'temperature': 0.4,
                 'num_layers': 2,
-                'device': 'cpu'
+                'device': 'cpu',
+                'region_type': 'IMGT_CDR3'
             }
         }
     ]
@@ -69,10 +70,11 @@ def fit_and_apply_gen_model(gen_model):
                     "format": "RandomSequenceDataset",
                     "params": {
                         'length_probabilities': {
-                            3: 0.5,
-                            4: 0.5
+                            11: 0.5,
+                            10: 0.5
                         },
-                        'sequence_count': 10
+                        'sequence_count': 10,
+                        'region_type': 'IMGT_JUNCTION' if model_name not in ['SimpleVAE'] else 'IMGT_CDR3'
                     }
                 }
             },
@@ -81,7 +83,8 @@ def fit_and_apply_gen_model(gen_model):
             },
             "reports": {
                 "sld_rep": "SequenceLengthDistribution",
-                "aa_freq": "AminoAcidFrequencyDistribution"
+                "aa_freq": "AminoAcidFrequencyDistribution",
+                "kl_gen_model": "KLKmerComparison"
             }
         },
         "instructions": {
@@ -90,7 +93,8 @@ def fit_and_apply_gen_model(gen_model):
                 "gen_examples_count": 100,
                 "dataset": "d1",
                 "method": "gen_model",
-                "reports": ['sld_rep', 'aa_freq']
+                "reports": ['sld_rep', 'aa_freq', 'kl_gen_model'],
+                'export_combined_dataset': True
             }
         }
     }
@@ -101,28 +105,17 @@ def fit_and_apply_gen_model(gen_model):
 
     specs = {
         "definitions": {
-            "datasets": {
-                "d1": {
-                    "format": "RandomSequenceDataset",
-                    "params": {
-                        'length_probabilities': {
-                            3: 0.5,
-                            4: 0.5
-                        },
-                        'sequence_count': 10
-                    }
-                }
-            },
             "reports": {
                 "sld_rep": "SequenceLengthDistribution",
-                "aa_freq": "AminoAcidFrequencyDistribution"
+                "aa_freq": "AminoAcidFrequencyDistribution",
+                "kl_gen_model": "KLKmerComparison"
             }
         },
         "instructions": {
             "inst1": {
                 "type": "ApplyGenModel",
                 "gen_examples_count": 100,
-                "reports": ['sld_rep', 'aa_freq'],
+                "reports": ['sld_rep', 'aa_freq', 'kl_gen_model'],
                 "ml_config_path": str(generated_model_path / "output/inst1/trained_model/trained_model.zip"),
             }
         }

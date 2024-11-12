@@ -2,7 +2,6 @@ from pathlib import Path
 
 import yaml
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
 from immuneML.api.galaxy.Util import Util
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
@@ -15,11 +14,11 @@ from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisIns
 
 class DatasetGenerationOverviewTool(GalaxyTool):
     """
-    DatasetGenerationTool is an alternative to running ImmuneMLApp directly.
+    DatasetGenerationOverviewTool is an alternative to running ImmuneMLApp directly.
     This tool is meant to be used as an endpoint for Galaxy tool that will create a Galaxy collection out of a dataset in immuneML format.
 
     This tool accepts a path to a YAML specification which uses a single dataset, and runs the ExploratoryAnalysisInstruction with optional reports.
-    The created dataset will be located in the supplied output directory, under the 'results' folder.
+    The created dataset will be located in the supplied output directory, under the 'galaxy_dataset' folder.
     The main dataset file will have the name of the dataset given in the specification and has an extension .yaml.
     """
 
@@ -33,7 +32,7 @@ class DatasetGenerationOverviewTool(GalaxyTool):
         state = ImmuneMLApp(self.yaml_path, self.result_path).run()[0]
         dataset = list(state.exploratory_analysis_units.values())[0].dataset
 
-        ImmuneMLExporter.export(dataset, self.result_path / "result/")
+        Util.export_galaxy_dataset(dataset, self.result_path)
 
         print_log(f"Exported dataset.")
 

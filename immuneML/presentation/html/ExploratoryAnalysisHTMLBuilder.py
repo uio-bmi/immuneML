@@ -40,6 +40,7 @@ class ExploratoryAnalysisHTMLBuilder:
         html_map = {
             "css_style": Util.get_css_content(ExploratoryAnalysisHTMLBuilder.CSS_PATH),
             "full_specs": Util.get_full_specs_path(base_path),
+            "logfile": Util.get_logfile_path(base_path),
             'immuneML_version': MLUtil.get_immuneML_version(),
             "analyses": [
                 {

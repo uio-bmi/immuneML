@@ -5,7 +5,7 @@ from unittest import TestCase
 import pandas as pd
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.reports.encoding_reports.RelevantSequenceExporter import RelevantSequenceExporter
@@ -22,7 +22,7 @@ class TestRelevantSequenceExporter(TestCase):
         path = EnvironmentSettings.tmp_test_path / "relevant_sequence_exporter/"
         PathBuilder.remove_old_and_build(path)
 
-        df = pd.DataFrame({"v_call": ["TRBV1-1", "TRBV1-1"], 'j_call': ["TRBJ1-1", "TRBJ1-2"], "sequence_aa": ['ACCF', "EEFG"]})
+        df = pd.DataFrame({"v_call": ["TRBV1-1", "TRBV1-1"], 'j_call': ["TRBJ1-1", "TRBJ1-2"], "cdr3_aa": ['ACCF', "EEFG"]})
         df.to_csv(path / 'sequences.csv', index=False)
 
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(2, {2: 1}, {4: 1}, {}, path / "data")

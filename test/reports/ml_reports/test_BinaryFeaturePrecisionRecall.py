@@ -6,8 +6,8 @@ import numpy as np
 import random
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -18,7 +18,6 @@ from immuneML.reports.ml_reports.BinaryFeaturePrecisionRecall import BinaryFeatu
 from immuneML.util.PathBuilder import PathBuilder
 
 
-
 class TestBinaryFeaturePrecisionRecall(TestCase):
 
     def setUp(self) -> None:
@@ -26,17 +25,17 @@ class TestBinaryFeaturePrecisionRecall(TestCase):
 
     def _create_report(self, path, keep_all):
         enc_data_train = EncodedData(encoding=MotifEncoder.__name__,
-                               example_ids=["1", "2", "3", "4", "5", "6", "7", "8"],
-                               feature_names=["useless_rule", "rule1", "rule2", "rule3"],
-                               examples=np.array([[False, True, False, False],
-                                                  [True, True, False, False],
-                                                  [False, False, True, True],
-                                                  [True, False, True, True],
-                                                  [False, False, False, True],
-                                                  [True, False, False, True],
-                                                  [False, False, False, False],
-                                                  [True, False, False, False]]),
-                               labels={"l1": ["yes", "yes", "yes", "yes", "no", "no", "no", "no"]})
+                                     example_ids=["1", "2", "3", "4", "5", "6", "7", "8"],
+                                     feature_names=["useless_rule", "rule1", "rule2", "rule3"],
+                                     examples=np.array([[False, True, False, False],
+                                                        [True, True, False, False],
+                                                        [False, False, True, True],
+                                                        [True, False, True, True],
+                                                        [False, False, False, True],
+                                                        [True, False, False, True],
+                                                        [False, False, False, False],
+                                                        [True, False, False, False]]),
+                                     labels={"l1": ["yes", "yes", "yes", "yes", "no", "no", "no", "no"]})
 
         enc_data_test = EncodedData(encoding=MotifEncoder.__name__,
                                     example_ids=["9", "10"],
@@ -65,17 +64,16 @@ class TestBinaryFeaturePrecisionRecall(TestCase):
         report.method = motif_classifier
         report.label = label
         report.result_path = path
-        report.train_dataset = SequenceDataset(buffer_type="NA", dataset_file="", batchfiles_path="")
-        report.test_dataset = SequenceDataset(buffer_type="NA", dataset_file="", batchfiles_path="")
+        report.train_dataset = SequenceDataset()
+        report.test_dataset = SequenceDataset()
         report.train_dataset.encoded_data = enc_data_train
         report.test_dataset.encoded_data = enc_data_test
 
         return report
 
-
     def test_generate_keep_all_false(self):
-        path = EnvironmentSettings.root_path / "test/tmp/binary_feature_precision_recall"
-        PathBuilder.build(path)
+        path = EnvironmentSettings.tmp_test_path / "binary_feature_precision_recall"
+        PathBuilder.remove_old_and_build(path)
 
         report = self._create_report(path, keep_all=False)
 
@@ -95,8 +93,8 @@ class TestBinaryFeaturePrecisionRecall(TestCase):
         shutil.rmtree(path)
 
     def test_generate_keep_all_true(self):
-        path = EnvironmentSettings.root_path / "test/tmp/binary_feature_precision_recall_keep_all"
-        PathBuilder.build(path)
+        path = EnvironmentSettings.tmp_test_path / "binary_feature_precision_recall_keep_all"
+        PathBuilder.remove_old_and_build(path)
 
         report = self._create_report(path, keep_all=True)
 
@@ -112,6 +110,3 @@ class TestBinaryFeaturePrecisionRecall(TestCase):
         self.assertTrue(os.path.isfile(path / "test_precision_recall.html"))
 
         shutil.rmtree(path)
-
-
-

@@ -7,8 +7,8 @@ import pandas as pd
 import numpy as np
 
 
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil

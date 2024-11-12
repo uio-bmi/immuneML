@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
@@ -65,7 +65,14 @@ class MotifSeedRecovery(MLReport):
         Feature: xAxAAx
                   ^/^^
 
-    See :ref:`Recovering simulated immune signals` for more details and an example plot.
+    See :ref:`Recovering simulated immune signals` for more details.
+
+
+    Example output:
+
+    .. image:: _static/images/reports/motif_seed_recovery.png
+       :alt: Motif seed recovery report
+       :width: 650
 
 
     **Specification arguments:**

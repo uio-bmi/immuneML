@@ -4,9 +4,9 @@ import shutil
 import pytest
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceParams import Chain
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
@@ -21,19 +21,18 @@ def test_duplicate_seq_filter():
     os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     dataset = RepertoireDataset(
-        repertoires=[Repertoire.build(sequence_aa=["AAA", "AAA", "CCC", "AAA", "CCC", "CCC", "CCC"],
-                                      sequence=["AAAAA", "CCAAA", "AACCC", "AAAAA", "AACCC", "AACCC", "AATTT"],
+        repertoires=[Repertoire.build(cdr3_aa=["AAA", "AAA", "CCC", "AAA", "CCC", "CCC", "CCC"],
+                                      cdr3=["AAAAA", "CCAAA", "AACCC", "AAAAA", "AACCC", "AACCC", "AATTT"],
                                       v_call=["v1", "v1", "v1", "v1", "v1", "v1", "v1"],
                                       j_call=["j1", "j1", "j1", "j1", "j1", "j1", "j1"],
-                                      chain=[Chain.ALPHA, Chain.ALPHA, Chain.ALPHA, Chain.ALPHA, Chain.ALPHA,
-                                             Chain.ALPHA, Chain.BETA],
-                                      duplicate_count=[10, 20, 30, 5, 20, None, 40],
-                                      region_type=["IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3",
-                                                   "IMGT_CDR3", "IMGT_CDR3"],
+                                      locus=[Chain.ALPHA.value, Chain.ALPHA.value, Chain.ALPHA.value, Chain.ALPHA.value, Chain.ALPHA.value,
+                                             Chain.ALPHA.value, Chain.BETA.value],
+                                      duplicate_count=[10, 20, 30, 5, 20, -1, 40],
                                       custom1=["yes", "yes", "yes", "no", "no", "no", "no"],
                                       custom2=["yes", "yes", "yes", "no", "no", "no", "no"],
-                                      sequence_id=[1, 2, 3, 4, 5, 6, 7],
-                                      path=path)])
+                                      sequence_id=['1', '2', '3', '4', '5', '6', '7'],
+                                      path=path,
+                                      metadata={})])
 
     # collapse by amino acids & use sum counts
     dupfilter = DuplicateSequenceFilter(filter_sequence_type=SequenceType.AMINO_ACID,
@@ -41,15 +40,14 @@ def test_duplicate_seq_filter():
 
     reduced_repertoire = dupfilter.process_dataset(dataset=dataset, result_path=path).repertoires[0]
 
-    attr = reduced_repertoire.get_attributes(["sequence_id", "sequence_aa", "sequence", "duplicate_count", "chain"],
-                                             as_list=True)
+    attr = reduced_repertoire.data.topandas()[["sequence_id", "cdr3_aa", "cdr3", "duplicate_count", "locus"]]
 
-    assert 3 == len(reduced_repertoire.get_sequence_identifiers())
-    assert ["AAA", "CCC", "CCC"] == attr["sequence_aa"]
-    assert ["AAAAA", "AACCC", "AATTT"] == attr["sequence"]
-    assert [35, 50, 40] == attr["duplicate_count"]
-    assert ['1', '3', '7'] == attr["sequence_id"]
-    assert ['ALPHA', 'ALPHA', 'BETA'] == attr["chain"]
+    assert 3 == attr.shape[0]
+    assert all(["AAA", "CCC", "CCC"] == attr["cdr3_aa"])
+    assert all(["AAAAA", "AACCC", "AATTT"] == attr["cdr3"])
+    assert all([35, 50, 40] == attr["duplicate_count"])
+    assert all(['1', '3', '7'] == attr["sequence_id"])
+    assert all(['TRA', 'TRA', 'TRB'] == attr["locus"])
 
     # collapse by nucleotides & use min counts
     dupfilter = DuplicateSequenceFilter(filter_sequence_type=SequenceType.NUCLEOTIDE,
@@ -57,12 +55,12 @@ def test_duplicate_seq_filter():
 
     reduced_repertoire = dupfilter.process_dataset(dataset=dataset, result_path=path).repertoires[0]
 
-    attr = reduced_repertoire.get_attributes(["sequence_id", "sequence_aa", "sequence", "duplicate_count"], as_list=True)
+    attr = reduced_repertoire.data.topandas()[["sequence_id", "cdr3_aa", "cdr3", "duplicate_count"]]
 
-    assert 4 == len(reduced_repertoire.get_sequence_identifiers())
-    assert ['1', '2', '3', '7'] == attr["sequence_id"]
-    assert ["AAA", "AAA", "CCC", "CCC"] == attr["sequence_aa"]
-    assert ["AAAAA", "CCAAA", "AACCC", "AATTT"] == attr["sequence"]
-    assert [5, 20, 20, 40] == attr["duplicate_count"]
+    assert 4 == attr.shape[0]
+    assert all(['1', '2', '3', '7'] == attr["sequence_id"])
+    assert all(["AAA", "AAA", "CCC", "CCC"] == attr["cdr3_aa"])
+    assert all(["AAAAA", "CCAAA", "AACCC", "AATTT"] == attr["cdr3"])
+    assert all([5, 20, 20, 40] == attr["duplicate_count"])
 
     shutil.rmtree(path)

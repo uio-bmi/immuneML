@@ -2,6 +2,7 @@ import os
 import shutil
 
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -15,13 +16,14 @@ from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
+from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReadsType import ReadsType
 from immuneML.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
 
 
 def test_receptor_classification():
 
-    path = EnvironmentSettings.tmp_test_path / "integration_receptor_classification/"
+    path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "integration_receptor_classification/")
     dataset = RandomDatasetGenerator.generate_receptor_dataset(50, {5: 1}, {4: 1}, {"l1": {1: 0.5, 2: 0.5}}, path / 'data')
 
     os.environ["cache_type"] = "test"
@@ -44,7 +46,8 @@ def test_receptor_classification():
     instruction = TrainMLModelInstruction(dataset, GridSearch([hp_setting]), [hp_setting],
                                           SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
                                           SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
-                                          {ClassificationMetric.BALANCED_ACCURACY}, ClassificationMetric.BALANCED_ACCURACY, lc, path)
+                                          {ClassificationMetric.BALANCED_ACCURACY}, ClassificationMetric.BALANCED_ACCURACY, lc, path,
+                                          sequence_type=SequenceType.AMINO_ACID, region_type=RegionType.IMGT_CDR3)
 
     state = instruction.run(result_path=path)
     print(vars(state))

@@ -1,7 +1,6 @@
 import shutil
 from argparse import Namespace
 
-import pytest
 import yaml
 
 from immuneML.app.ImmuneMLApp import run_immuneML
@@ -38,7 +37,6 @@ def test_galaxy_sim_tool():
                             'is_noise': False,
                             'receptors_in_repertoire_count': 6,
                             'generative_model': {
-                                'chain': 'heavy',
                                 'default_model_name': 'humanIGH',
                                 'type': 'OLGA'},
                         },
@@ -49,7 +47,6 @@ def test_galaxy_sim_tool():
                             'is_noise': False,
                             'receptors_in_repertoire_count': 6,
                             'generative_model': {
-                                'chain': 'heavy',
                                 'default_model_name': 'humanIGH',
                                 'type': 'OLGA'
                             }

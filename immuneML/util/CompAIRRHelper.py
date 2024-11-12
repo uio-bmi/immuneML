@@ -5,7 +5,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.CompAIRRParams import CompAIRRParams
@@ -64,8 +65,8 @@ class CompAIRRHelper:
                indels_args + frequency_args + ignore_genes + output_args + [str(file) for file in input_file_list] + output_pairs + cdr3_indicator
 
     @staticmethod
-    def write_repertoire_file(repertoire_dataset=None, filename=None, compairr_params=None, repertoires: list = None,
-                              export_sequence_id: bool = False):
+    def write_repertoire_file(repertoire_dataset=None, filename=None, compairr_params: CompAIRRParams = None,
+                              repertoires: list = None, export_sequence_id: bool = False):
         mode = "w"
         header = True
 
@@ -74,8 +75,11 @@ class CompAIRRHelper:
         if repertoire_dataset is not None and repertoires is None:
             repertoires = repertoire_dataset.get_data()
 
+        encoder_params = EncoderParams(region_type=RegionType.IMGT_CDR3 if compairr_params.is_cdr3 else RegionType.IMGT_JUNCTION)
+
         for ind, repertoire in enumerate(repertoires):
-            repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, compairr_params, export_sequence_id)
+            repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, compairr_params, encoder_params,
+                                                                         export_sequence_id)
 
             if ind == 0:
                 columns_in_order = sorted(repertoire_contents.columns)
@@ -117,15 +121,15 @@ class CompAIRRHelper:
         df.to_csv(filename, mode="w", header=True, index=False, sep="\t")
 
     @staticmethod
-    def get_repertoire_contents(repertoire, compairr_params, export_sequence_id=False):
-        attributes = [EnvironmentSettings.get_sequence_type().value, "duplicate_count"]
+    def get_repertoire_contents(repertoire, compairr_params, encoder_params: EncoderParams, export_sequence_id=False):
+        attributes = [encoder_params.get_sequence_field_name(), "duplicate_count"]
         attributes += [] if compairr_params.ignore_genes else ["v_call", "j_call"]
-        repertoire_contents = repertoire.get_attributes(attributes)
+        repertoire_contents = repertoire.data.topandas()[attributes]
         repertoire_contents = pd.DataFrame({**repertoire_contents, "identifier": repertoire.identifier})
         if export_sequence_id:
-            repertoire_contents['sequence_id'] = repertoire.get_attribute('sequence_id')
+            repertoire_contents['sequence_id'] = repertoire.data.sequence_id.tolist()
 
-        check_na_rows = [EnvironmentSettings.get_sequence_type().value]
+        check_na_rows = [encoder_params.get_sequence_field_name()]
         check_na_rows += [] if compairr_params.ignore_counts else ["duplicate_count"]
         check_na_rows += [] if compairr_params.ignore_genes else ["v_call", "j_call"]
 
@@ -142,8 +146,7 @@ class CompAIRRHelper:
         else:
             repertoire_contents['duplicate_count'] = [count if count >= 0 else pd.NA for count in repertoire_contents['duplicate_count']]
 
-        repertoire_contents.rename(columns={EnvironmentSettings.get_sequence_type().value: "cdr3_aa" if repertoire.get_region_type() == RegionType.IMGT_CDR3 else 'junction_aa',
-                                            "identifier": "repertoire_id"},
+        repertoire_contents.rename(columns={"identifier": "repertoire_id"},
                                    inplace=True)
 
         return repertoire_contents

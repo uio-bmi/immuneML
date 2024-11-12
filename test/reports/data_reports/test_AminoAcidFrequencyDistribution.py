@@ -12,7 +12,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TestAminoAcidFrequencyDistribution(TestCase):
     def test_generate_sequence_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "amino_acid_frequency_distribution_sequences/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "amino_acid_frequency_distribution_sequences/")
 
         dataset = RandomDatasetGenerator.generate_sequence_dataset(100, {10: 0.5, 11: 0.25, 20: 0.25},
                                                                    {"l1": {"a": 0.5, "b": 0.5}}, path / "dataset")
@@ -22,6 +22,7 @@ class TestAminoAcidFrequencyDistribution(TestCase):
         params["dataset"] = dataset
         params["split_by_label"] = True
         params["result_path"] = path / "result"
+        params['label'] = 'l1'
         params["alignment"] = "IMGT"
 
         report = AminoAcidFrequencyDistribution.build_object(**params)
@@ -37,7 +38,7 @@ class TestAminoAcidFrequencyDistribution(TestCase):
         shutil.rmtree(path)
 
     def test_generate_receptor_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "amino_acid_frequency_distribution_receptor/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "amino_acid_frequency_distribution_receptor/")
 
         dataset = RandomDatasetGenerator.generate_receptor_dataset(100, chain_1_length_probabilities={10: 0.5, 11: 0.25,
                                                                                                       20: 0.25},
@@ -65,7 +66,7 @@ class TestAminoAcidFrequencyDistribution(TestCase):
         shutil.rmtree(path)
 
     def test_generate_repertoire_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "amino_acid_frequency_distribution_repertoire/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "amino_acid_frequency_distribution_repertoire/")
 
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=20,
                                                                      sequence_count_probabilities={10: 1},

@@ -1,3 +1,4 @@
+import json
 import shutil
 from pathlib import Path
 
@@ -5,12 +6,10 @@ import numpy as np
 from olga import load_model
 
 from immuneML.data_model.bnp_util import write_yaml, read_yaml
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
+from immuneML.data_model.SequenceParams import RegionType, Chain
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.ml_methods.generative_models.OLGA import OLGA
@@ -30,7 +29,7 @@ class SoNNia(GenerativeModel):
 
     **Specification arguments:**
 
-    - chain (str)
+    - locus (str)
 
     - batch_size (int)
 
@@ -72,16 +71,28 @@ class SoNNia(GenerativeModel):
 
         model_overview = read_yaml(model_overview_file)
         sonnia = SoNNia(**{k: v for k, v in model_overview.items() if k != 'type'})
-        sonnia._model = InternalSoNNia(load_dir=path)
+        with open(path / 'model.json', 'r') as json_file:
+            model_data = json.load(json_file)
+
+        sonnia._model = InternalSoNNia(custom_pgen_model=sonnia._model_path,
+                                       vj=sonnia.locus in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
+                                       include_joint_genes=sonnia.include_joint_genes,
+                                       include_indep_genes=not sonnia.include_joint_genes)
+
+        sonnia._model.model.set_weights([np.array(w) for w in model_data['model_weights']])
+
         return sonnia
 
-    def __init__(self, chain=None, batch_size: int = None, epochs: int = None, deep: bool = False, name: str = None,
+    def __init__(self, locus=None, batch_size: int = None, epochs: int = None, deep: bool = False, name: str = None,
                  default_model_name: str = None, n_gen_seqs: int = None, include_joint_genes: bool = True,
-                 custom_model_path: str = None):
-        if chain is not None:
-            super().__init__(chain)
+                 custom_model_path: str = None, region_type: RegionType = RegionType.IMGT_CDR3):
+        if region_type is not None and isinstance(region_type, str):
+            region_type = RegionType[region_type]
+
+        if locus is not None:
+            super().__init__(locus, region_type=region_type)
         elif default_model_name is not None:
-            super().__init__(chain=Chain.get_chain(default_model_name[-3:]))
+            super().__init__(locus=Chain.get_chain(default_model_name[-3:]), region_type=region_type)
         self.epochs = epochs
         self.batch_size = int(batch_size)
         self.deep = deep
@@ -101,14 +112,13 @@ class SoNNia(GenerativeModel):
 
         print_log(f"{SoNNia.__name__}: fitting a selection model...", True)
 
-        data = dataset.get_attributes(['sequence_aa', 'v_call', 'j_call'], as_list=True)
-        data_seqs = [[data['sequence_aa'][i], data['v_call'][i], data['j_call'][i]]
-                     for i in range(len(data['sequence_aa']))]
+        data = dataset.data.topandas()[['junction_aa', 'v_call', 'j_call']]
+        data_seqs = data.to_records(index=False).tolist()
 
         self._model = InternalSoNNia(data_seqs=data_seqs,
                                      gen_seqs=[],
                                      custom_pgen_model=self._model_path,
-                                     vj=self.chain in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
+                                     vj=self.locus in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
                                      include_joint_genes=self.include_joint_genes,
                                      include_indep_genes=not self.include_joint_genes)
 
@@ -127,13 +137,11 @@ class SoNNia(GenerativeModel):
         gen_model = SequenceGeneration(self._model)
         sequences = gen_model.generate_sequences_post(count)
         return SequenceDataset.build_from_objects(sequences=[ReceptorSequence(sequence_aa=seq[0], sequence=seq[3],
-                                                                              metadata=SequenceMetadata(
-                                                                                  v_call=seq[1],
-                                                                                  j_call=seq[2],
-                                                                                  region_type=RegionType.IMGT_JUNCTION.name))
+                                                                              v_call=seq[1], j_call=seq[2],
+                                                                              metadata={'gen_model_name': self.name})
                                                              for seq in sequences],
-                                                  file_size=len(sequences), path=PathBuilder.build(path),
-                                                  name='SoNNiaDataset')
+                                                  path=PathBuilder.build(path), name='SoNNiaDataset',
+                                                  labels={'gen_model_name': [self.name]})
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         raise NotImplementedError
@@ -154,9 +162,18 @@ class SoNNia(GenerativeModel):
     def save_model(self, path: Path) -> Path:
         PathBuilder.build(path / 'model')
 
-        write_yaml(path / 'model/model_overview.yaml', {'type': 'SoNNia', 'chain': self.chain.name,
+        write_yaml(path / 'model/model_overview.yaml', {'type': 'SoNNia', 'locus': self.locus.name,
+                                                        'region_type': self.region_type.name,
                                                         **{k: v for k, v in vars(self).items()
-                                                           if k not in ['_model', 'chain', '_model_path']}})
-        self._model.save_model(path / 'model')
+                                                           if
+                                                           k not in ['_model', 'locus', '_model_path', 'region_type']}}) # todo add 'dataset_type': 'SequenceDataset',
+        attributes_to_save = ['data_seqs', 'gen_seqs', 'log']
+        self._model.save_model(path / 'model', attributes_to_save)
+
+        model_json = self._model.model.to_json()
+        model_weights = [w.tolist() for w in self._model.model.get_weights()]
+        model_data = {'model_config': model_json, 'model_weights': model_weights}
+        with open(path / 'model' / 'model.json', 'w') as json_file:
+            json.dump(model_data, json_file)
 
         return Path(shutil.make_archive(str(path / 'trained_model'), "zip", str(path / 'model'))).absolute()

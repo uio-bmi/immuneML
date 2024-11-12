@@ -5,9 +5,12 @@ from typing import List
 import pandas as pd
 import plotly.express as px
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model import bnp_util
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -19,7 +22,7 @@ from immuneML.util.SignificantFeaturesHelper import SignificantFeaturesHelper
 
 class RecoveredSignificantFeatures(DataReport):
     """
-    Compares a given collection of groundtruth implanted signals (sequences or k-mers) to the significant label-associated
+    Compares a given collection of ground truth implanted signals (sequences or k-mers) to the significant label-associated
     k-mers or sequences according to Fisher's exact test.
 
     Internally uses the :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder` for calculating
@@ -42,13 +45,12 @@ class RecoveredSignificantFeatures(DataReport):
 
     **Specification arguments:**
 
-    - groundtruth_sequences_path (str): Path to a file containing the true implanted (sub)sequences, e.g., full sequences or k-mers.
+    - ground_truth_sequences_path (str): Path to a file containing the true implanted (sub)sequences, e.g., full sequences or k-mers.
       The file should contain one sequence per line, without a header, and without V or J genes.
 
-    - trim_leading_trailing (bool): Whether to trim the leading and trailing first positions from the provided groundtruth sequences,
-      e.g., the leading C and trailing Y/F amino acids.
-      This is necessary for comparing full sequences when the main dataset is imported using settings that also trim
-      the leading and trailing positions (specified by the region_type parameter). By default, trim_leading_trailing is False.
+    - sequence_type (str): either amino acid or nucleotide; which type of sequence to use for the analysis
+
+    - region_type (str): which AIRR field to use for comparison, e.g. IMGT_CDR3 or IMGT_JUNCTION
 
     - p_values (list): The p value thresholds to be used by Fisher's exact test. Each p-value specified here will become one panel in the output figure.
 
@@ -97,31 +99,32 @@ class RecoveredSignificantFeatures(DataReport):
         location = RecoveredSignificantFeatures.__name__
 
         kwargs = SignificantFeaturesHelper.parse_parameters(kwargs, location)
-        kwargs = SignificantFeaturesHelper.parse_sequences_path(kwargs, "groundtruth_sequences_path", location)
-
-        ParameterValidator.assert_keys_present(kwargs.keys(), ["trim_leading_trailing"], location, location)
-        ParameterValidator.assert_type_and_value(kwargs["trim_leading_trailing"], bool, "RecoveredSignificantFeatures", "trim_leading_trailing")
+        kwargs = SignificantFeaturesHelper.parse_sequences_path(kwargs, "ground_truth_sequences_path", location)
+        ParameterValidator.assert_region_type(kwargs, location)
+        ParameterValidator.assert_sequence_type(kwargs, location)
 
         return RecoveredSignificantFeatures(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, groundtruth_sequences_path: Path = None,
-                 trim_leading_trailing: bool = None,
+    def __init__(self, dataset: RepertoireDataset = None, ground_truth_sequences_path: Path = None,
                  p_values: List[float] = None, k_values: List[int] = None, label: dict = None,
-                 compairr_path: Path = None, result_path: Path = None, name: str = None, number_of_processes: int = 1):
+                 compairr_path: Path = None, result_path: Path = None, name: str = None, number_of_processes: int = 1,
+                 region_type: RegionType = None, sequence_type: SequenceType = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
-        self.groundtruth_sequences_path = groundtruth_sequences_path
-        self.trim_leading_trailing = trim_leading_trailing
-        self.groundtruth_sequences = SignificantFeaturesHelper.load_sequences(groundtruth_sequences_path, trim_leading_trailing)
+        self.ground_truth_sequences_path = ground_truth_sequences_path
+        self.ground_truth_sequences = SignificantFeaturesHelper.load_sequences(ground_truth_sequences_path)
         self.p_values = p_values
         self.k_values = k_values
         self.label = label
         self.compairr_path = compairr_path
+        self.region_type = RegionType[region_type.upper()] if isinstance(region_type, str) else region_type
+        self.sequence_type = SequenceType[sequence_type.upper()] if isinstance(sequence_type, str) else sequence_type
 
     def check_prerequisites(self):
         if isinstance(self.dataset, RepertoireDataset):
             return True
         else:
-            warnings.warn(f"{RecoveredSignificantFeatures.__name__}: report can be generated only from RepertoireDataset. Skipping this report...")
+            warnings.warn(f"{RecoveredSignificantFeatures.__name__}: report can be generated only from "
+                          f"RepertoireDataset. Skipping this report...")
             return False
 
     def _generate(self) -> ReportResult:
@@ -131,12 +134,16 @@ class RecoveredSignificantFeatures(DataReport):
         plotting_data = self._compute_plotting_data()
         table_result = self._write_results_table(plotting_data)
 
-        fig_significant = self._safe_plot(plotting_data=plotting_data, column_of_interest="n_significant", y_label="Percentage of significant features that match the ground truth")
-        fig_true = self._safe_plot(plotting_data=plotting_data, column_of_interest="n_true", y_label="Percentage of ground truth features that match the significant features")
+        fig_significant = self._safe_plot(plotting_data=plotting_data, column_of_interest="n_significant",
+                                          y_label="Percentage of significant features that match the ground truth")
+        fig_true = self._safe_plot(plotting_data=plotting_data, column_of_interest="n_true",
+                                   y_label="Percentage of ground truth features that match the significant features")
         output_figures = [figure for figure in [fig_significant, fig_true] if figure]
 
         return ReportResult(name=self.name,
-                            info="Compares a given collection of groundtruth implanted signals (sequences or k-mers) to the significant label-associated k-mers or sequences according to Fisher's exact test.",
+                            info="Compares a given collection of groundtruth implanted signals (sequences or k-mers) "
+                                 "to the significant label-associated k-mers or sequences according to Fisher's exact "
+                                 "test.",
                             output_figures=output_figures,
                             output_tables=[table_result])
 
@@ -199,7 +206,8 @@ class RecoveredSignificantFeatures(DataReport):
 
     def _compute_significant_features(self, k, p_value):
         encoder_result_path = self._get_encoder_result_path(k, p_value)
-        encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path)
+        encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path,
+                                                                         self.region_type, self.sequence_type)
 
         if type(k) == int:
             significant_features = self._compute_significant_kmers(k, p_value, encoder_params)
@@ -220,24 +228,24 @@ class RecoveredSignificantFeatures(DataReport):
         encoder = SignificantFeaturesHelper._build_sequence_encoder(self.dataset, p_value, encoder_params)
         sequences = pd.read_csv(encoder.relevant_sequence_path)
 
-        return list(sequences[EnvironmentSettings.get_sequence_type().value])
+        return list(sequences[encoder_params.get_sequence_field_name()])
 
     def _compute_significant_compairr_sequences(self, p_value, encoder_params):
         encoder = SignificantFeaturesHelper._build_compairr_sequence_encoder(self.dataset, p_value, encoder_params, self.compairr_path)
         sequences = pd.read_csv(encoder.relevant_sequence_path)
 
-        return list(sequences[EnvironmentSettings.get_sequence_type().value])
+        return list(sequences[bnp_util.get_sequence_field_name(self.region_type, self.sequence_type)])
 
     def _compute_true_features(self, k):
         if type(k) == int:
             return self._compute_true_kmers(k)
         else:
-            return set(self.groundtruth_sequences)
+            return set(self.ground_truth_sequences)
 
     def _compute_true_kmers(self, k):
         kmers = set()
 
-        for sequence in self.groundtruth_sequences:
+        for sequence in self.ground_truth_sequences:
             kmers = kmers.union(KmerHelper.create_kmers_from_string(sequence, k, overlap=True))
 
         return kmers

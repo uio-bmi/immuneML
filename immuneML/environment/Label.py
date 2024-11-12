@@ -21,9 +21,9 @@ class Label:
 
     @property
     def positive_class(self):
-        '''
+        """
         Ensures the same class is always returned as the 'positive class', even when it was not explicitly set.
-        '''
+        """
         if self._positive_class is not None:
             return self._positive_class
         else:
@@ -38,10 +38,10 @@ class Label:
 
     @property
     def values(self):
-        '''
-        Returns the label values and makes sure the positive class is listed last
+        """
+        Make sure the positive class is listed last
         This is needed for compatibility with `~immuneML.ml_methods.util.Util.binarize_label_classes`
-        '''
+        """
         if self._positive_class is not None:
             negative_classes = sorted(self._values)
             negative_classes.remove(self._positive_class)
@@ -50,15 +50,14 @@ class Label:
             return sorted(self._values)
 
     def get_binary_negative_class(self):
-        '''
+        """
         Ensures the correct 'negative class' is returned when using the Label for binary classification.
-        '''
+        """
         assert len(self._values) == 2, f"Label: binary negative class was requested for label {self.name} but this label contains {len(self._values)} classes: {self.values}"
         return [val for val in self._values if val != self.positive_class][0]
 
     def get_desc_for_storage(self):
-        '''
+        """
         Method to call when storing a label to YAML format
-        '''
+        """
         return {key.lstrip("_"): value for key, value in vars(self).items()}
-

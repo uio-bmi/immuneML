@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from sklearn.decomposition import PCA
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.ml_methods.generative_models.SimpleVAE import SimpleVAE
 from immuneML.reports.ReportOutput import ReportOutput
@@ -28,9 +28,11 @@ class VAESummary(GenModelReport):
 
     **Specification arguments:**
 
-    - dim_dist_cols (int): how many columns to use to plot the histograms of latent dimensions (either this or dim_dist_rows has to be set, or both)
+    - dim_dist_cols (int): how many columns to use to plot the histograms of latent dimensions (either this or
+      dim_dist_rows has to be set, or both)
 
-    - dim_dist_rows (int): how many rows to use to plot the histogram of latent dimensions (either this or dim_dist_cols has to be set, or both)
+    - dim_dist_rows (int): how many rows to use to plot the histogram of latent dimensions (either this or
+      dim_dist_cols has to be set, or both)
 
     **YAML specification:**
 
@@ -95,8 +97,8 @@ class VAESummary(GenModelReport):
         embeddings = pca.fit_transform(embeddings.numpy())
 
         df = pd.DataFrame(data=embeddings, columns=['PC1', 'PC2'])
-        df['v_gene'] = [v_call.split("*")[0] for v_call in self.dataset.get_attribute('v_call', True)]
-        df['j_gene'] = [j_call.split("*")[0] for j_call in self.dataset.get_attribute('j_call', True)]
+        df['v_gene'] = [v_call.split("*")[0] for v_call in self.dataset.data.v_call.tolist()]
+        df['j_gene'] = [j_call.split("*")[0] for j_call in self.dataset.data.j_call.tolist()]
 
         path = self.result_path / 'latent_space_2_component_PCA.csv'
 

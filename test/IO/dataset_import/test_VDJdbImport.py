@@ -4,7 +4,7 @@ from unittest import TestCase
 import pandas as pd
 
 from immuneML.IO.dataset_import.VDJdbImport import VDJdbImport
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
@@ -26,25 +26,25 @@ class TestVDJdbLoader(TestCase):
 
         default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "vdjdb")
 
-        dataset = VDJdbImport.import_dataset({"is_repertoire": False, "result_path": path, "paired": False, "path": path, "sequence_file_size": 1,
-                                              "column_mapping": default_params["column_mapping"],
-                                              "metadata_column_mapping": default_params["metadata_column_mapping"],
-                                              "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
-                                              "import_illegal_characters": False,
-                                              "separator": "\t", "region_type": "IMGT_CDR3"}, "vdjdb_seq_dataset")
+        dataset = VDJdbImport(
+            {"is_repertoire": False, "result_path": path, "paired": False, "path": path, "sequence_file_size": 1,
+             "column_mapping": default_params["column_mapping"],
+             "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
+             "import_illegal_characters": False,
+             "separator": "\t", "region_type": "IMGT_CDR3"}, "vdjdb_seq_dataset").import_dataset()
 
         self.assertEqual(5, dataset.get_example_count())
-        self.assertEqual(5, len(dataset.get_filenames()))
 
         for sequence in dataset.get_data():
-            self.assertTrue(sequence.sequence_id in ["3050_TRA", "3050_TRB", "15760_TRB", "15760_TRA1", "15760_TRA2"])
+            self.assertTrue(sequence.sequence_id in ["3050_TRA", "3050_TRB", "15760_TRB", "15760_TRA_1", "15760_TRA_2"])
             self.assertTrue(
-                sequence.sequence_aa in ["ASSPPRVYSNGAGLAGVGWRNEQF", "ASSWTWDAATLWGQGALGGANVLT", "AAIYESRGSTLGRLY", "ALRLNNQGGKLI"])
-            self.assertTrue(sequence.metadata.custom_params["epitope_species"] in ["EBV", "CMV"])
-            self.assertTrue(sequence.metadata.custom_params["epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
-            self.assertTrue(sequence.metadata.custom_params["epitope_gene"] in ["EBNA4", "IE1"])
-            self.assertTrue(sequence.metadata.v_call in ["TRBV5-4*01", "TRBV5-5*01", "TRAV13-1*01", "TRAV9-2*01"])
-            self.assertTrue(sequence.metadata.j_call in ["TRBJ2-1*01", "TRBJ2-6*01", "TRAJ18*01", "TRAJ23*01"])
+                sequence.sequence_aa in ["ASSPPRVYSNGAGLAGVGWRNEQF", "ASSWTWDAATLWGQGALGGANVLT", "AAIYESRGSTLGRLY",
+                                         "ALRLNNQGGKLI"])
+            self.assertTrue(sequence.metadata["Epitope_species"] in ["EBV", "CMV"])
+            self.assertTrue(sequence.metadata["Epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
+            self.assertTrue(sequence.metadata["Epitope_gene"] in ["EBNA4", "IE1"])
+            self.assertTrue(sequence.v_call in ["TRBV5-4*01", "TRBV5-5*01", "TRAV13-1*01", "TRAV9-2*01"])
+            self.assertTrue(sequence.j_call in ["TRBJ2-1*01", "TRBJ2-6*01", "TRAJ18*01", "TRAJ23*01"])
 
         shutil.rmtree(path)
 
@@ -65,21 +65,17 @@ class TestVDJdbLoader(TestCase):
 
         default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "vdjdb")
 
-        dataset = VDJdbImport.import_dataset({"is_repertoire": False, "result_path": path, "paired": True, "path": path, "sequence_file_size": 1,
-                                              "region_type": "IMGT_CDR3", "separator": "\t", "receptor_chains": "TRA_TRB",
-                                              "column_mapping": default_params["column_mapping"],
-                                              "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
-                                              "import_illegal_characters": False,
-                                              "metadata_column_mapping": default_params["metadata_column_mapping"]}, "vdjdb_rec_dataset")
+        params = {**default_params, **{"is_repertoire": False, "result_path": path, "paired": True, "path": path, }}
+
+        dataset = VDJdbImport(params, "vdjdb_rec_dataset").import_dataset()
 
         self.assertEqual(2, dataset.get_example_count())
-        self.assertEqual(2, len(dataset.get_filenames()))
 
         for receptor in dataset.get_data(2):
             self.assertTrue(receptor.alpha.sequence_aa in ["AAIYESRGSTLGRLY", "ALRLNNQGGKLI"])
-            self.assertTrue(receptor.metadata["epitope_species"] in ["EBV", "CMV"])
-            self.assertTrue(receptor.metadata["epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
-            self.assertTrue(receptor.metadata["epitope_gene"] in ["EBNA4", "IE1"])
+            self.assertTrue(receptor.metadata["Epitope_species"] in ["EBV", "CMV"])
+            self.assertTrue(receptor.metadata["Epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
+            self.assertTrue(receptor.metadata["Epitope_gene"] in ["EBNA4", "IE1"])
 
         shutil.rmtree(path)
 
@@ -106,21 +102,18 @@ class TestVDJdbLoader(TestCase):
         pd.DataFrame(metadata).to_csv(path / "metadata.csv")
 
         default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "vdjdb")
+        params = {**default_params, **{"is_repertoire": True, "result_path": path, "metadata_file": path / "metadata.csv", "path": path, }}
 
-        dataset = VDJdbImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path / "metadata.csv", "path": path,
-                                              "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
-                                              "import_illegal_characters": False,
-                                              "column_mapping": default_params["column_mapping"], "separator": "\t", "region_type": "IMGT_CDR3"},
-                                             "vdjdb_rep_dataset")
+        dataset = VDJdbImport(params,"vdjdb_rep_dataset").import_dataset()
 
         self.assertEqual(number_of_repertoires, dataset.get_example_count())
         self.assertEqual(number_of_repertoires, len(dataset.get_data()))
 
         for repertoire in dataset.get_data(2):
             self.assertTrue(repertoire.metadata["label1"] in {0, 1})
-            self.assertEqual(4, len(repertoire.sequences))
-            self.assertListEqual([Chain.BETA, Chain.BETA, Chain.ALPHA, Chain.ALPHA], list(repertoire.get_chains()))
-            self.assertEqual(None, repertoire.get_counts())
+            self.assertEqual(4, len(repertoire.sequences()))
+            self.assertListEqual([Chain.BETA.value, Chain.BETA.value, Chain.ALPHA.value, Chain.ALPHA.value], repertoire.data.locus.tolist())
+            self.assertListEqual([-1. for _ in range(4)], repertoire.data.duplicate_count.tolist())
 
         shutil.rmtree(path)
 
@@ -142,26 +135,21 @@ class TestVDJdbLoader(TestCase):
             file.writelines(file_content)
 
         default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "vdjdb")
+        params = {**default_params,
+                  **{"is_repertoire": False, "result_path": path, "paired": True, "path": path, "receptor_chains": "TRA_TRB"}}
 
-        dataset = VDJdbImport.import_dataset(
-            {"is_repertoire": False, "result_path": path, "paired": True, "path": path, "sequence_file_size": 1,
-             "region_type": "IMGT_CDR3", "separator": "\t", "receptor_chains": "TRA_TRB",
-             "column_mapping": default_params["column_mapping"],
-             "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
-             "import_illegal_characters": False,
-             "metadata_column_mapping": default_params["metadata_column_mapping"]}, "vdjdb_rec_dataset")
+        dataset = VDJdbImport(params, "vdjdb_rec_dataset").import_dataset()
 
         self.assertEqual(2, dataset.get_example_count())
-        self.assertEqual(2, len(dataset.get_filenames()))
 
         for receptor in dataset.get_data(2):
             self.assertTrue(receptor.alpha.sequence_aa in ["AAIYESRGSTLGRLY", "ALRLNNQGGKLI"])
-            self.assertTrue(receptor.alpha.get_attribute("v_call") in ["TRAV13-1*01", ''])
-            self.assertTrue(receptor.alpha.get_attribute("j_call") in [''])
-            self.assertTrue(receptor.beta.get_attribute("v_call") in ["TRBV5-4*01", ''])
-            self.assertTrue(receptor.beta.get_attribute("j_call") in ["TRBJ2-1*01", "TRBJ2-6*01"])
-            self.assertTrue(receptor.metadata["epitope_species"] in ["EBV", "CMV"])
-            self.assertTrue(receptor.metadata["epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
-            self.assertTrue(receptor.metadata["epitope_gene"] in ["EBNA4", "IE1"])
+            self.assertTrue(receptor.alpha.v_call in ["TRAV13-1*01", ''])
+            self.assertTrue(receptor.alpha.j_call in [''])
+            self.assertTrue(receptor.beta.v_call in ["TRBV5-4*01", ''])
+            self.assertTrue(receptor.beta.j_call in ["TRBJ2-1*01", "TRBJ2-6*01"])
+            self.assertTrue(receptor.metadata["Epitope_species"] in ["EBV", "CMV"])
+            self.assertTrue(receptor.metadata["Epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
+            self.assertTrue(receptor.metadata["Epitope_gene"] in ["EBNA4", "IE1"])
 
         shutil.rmtree(path)

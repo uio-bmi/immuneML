@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import List
 
 from immuneML.IO.dataset_export.DataExporter import DataExporter
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.util.Logger import print_log
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -76,10 +76,12 @@ class DatasetExportInstruction(Instruction):
                 exporter.export(dataset, path, number_of_processes=self.number_of_processes)
                 paths[dataset_name][export_format] = path
                 contains = str(dataset.__class__.__name__).replace("Dataset", "s").lower()
-                print_log(f"Exported dataset {dataset_name} containing {dataset.get_example_count()} {contains} in {export_format} format.", include_datetime=True)
+                print_log(f"Exported dataset {dataset_name} containing {dataset.get_example_count()} "
+                          f"{contains} in {export_format} format.", include_datetime=True)
 
         return DatasetExportState(datasets=self.datasets, formats=[exporter.__name__[:-8] for exporter in self.exporters],
-                                  preprocessing_sequence=self.preprocessing_sequence, paths=paths, result_path=self.result_path, name=self.name)
+                                  preprocessing_sequence=self.preprocessing_sequence, paths=paths,
+                                  result_path=self.result_path, name=self.name)
 
     @staticmethod
     def get_documentation():

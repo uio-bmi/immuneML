@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.express as px
 import yaml
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
@@ -34,6 +34,13 @@ class Coefficients(MLReport):
     Which coefficients should be plotted (for example: only nonzero, above a certain threshold, ...) can be specified.
     Multiple options can be specified simultaneously. By default the 25 largest coefficients are plotted.
     The full set of coefficients will also be exported as a csv file.
+
+
+    Example output:
+
+    .. image:: _static/images/reports/coefficients_logistic_regression.png
+       :alt: Coefficients report
+       :width: 650
 
 
     **Specification arguments:**

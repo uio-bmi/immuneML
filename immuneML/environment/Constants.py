@@ -1,12 +1,12 @@
 class Constants:
 
-    VERSION = "3.0.0a6"
+    VERSION = "3.0.1"
 
     # encoding constants
     FEATURE_DELIMITER = "-"
 
     # importing constants
-    UNKNOWN = None
+    UNKNOWN = ''
     ALLELE_DELIMITER = "*"
     GENE_DELIMITER = "-"
     STOP_CODON = "*"

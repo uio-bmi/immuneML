@@ -5,10 +5,9 @@ from unittest import TestCase
 import pandas as pd
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceSet import ReceptorSequence
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.reports.ReportResult import ReportResult
@@ -22,38 +21,38 @@ class TestSignificantFeatures(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def _get_example_dataset(self, path):
-        rep1 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence(sequence_aa="AAA", sequence_id="1", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
-                              ReceptorSequence(sequence_aa="III", sequence_id="2", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
-                              ReceptorSequence(sequence_aa="GGGG", sequence_id="3", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
-                              ReceptorSequence(sequence_aa="MMM", sequence_id="4", metadata=SequenceMetadata(region_type="IMGT_CDR3"))],
-            path=path, metadata={"mylabel": "+"})
-        rep2 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence(sequence_aa="IAIAA", sequence_id="1", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
-                              ReceptorSequence(sequence_aa="GGGG", sequence_id="3", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
-                              ReceptorSequence(sequence_aa="MMM", sequence_id="4", metadata=SequenceMetadata(region_type="IMGT_CDR3"))],
-            path=path, metadata={"mylabel": "+"})
-        rep21 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence(sequence_aa="IAIAA", sequence_id="1", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
-                              ReceptorSequence(sequence_aa="GGGG", sequence_id="3", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
-                              ReceptorSequence(sequence_aa="MMM", sequence_id="4", metadata=SequenceMetadata(region_type="IMGT_CDR3"))],
-            path=path, metadata={"mylabel": "+"})
-        rep22 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence(sequence_aa="IAIAA", sequence_id="1", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
-                              ReceptorSequence(sequence_aa="IIII", sequence_id="3", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
-                              ReceptorSequence(sequence_aa="IIII", sequence_id="4", metadata=SequenceMetadata(region_type="IMGT_CDR3"))],
-            path=path, metadata={"mylabel": "-"})
-        rep23 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence(sequence_aa="IAIAA", sequence_id="1", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
-                              ReceptorSequence(sequence_aa="IIII", sequence_id="3", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
-                              ReceptorSequence(sequence_aa="IIII", sequence_id="4", metadata=SequenceMetadata(region_type="IMGT_CDR3"))],
-            path=path, metadata={"mylabel": "-"})
-        rep3 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence(sequence_aa="KKKK", sequence_id="5", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
-                              ReceptorSequence(sequence_aa="HHH", sequence_id="6", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
-                              ReceptorSequence(sequence_aa="AAAA", sequence_id="7", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
-                              ReceptorSequence(sequence_aa="IIII", sequence_id="8", metadata=SequenceMetadata(region_type="IMGT_CDR3"))],
-            path=path, metadata={"mylabel": "-"})
+        rep1 = Repertoire.build_from_sequences(
+            sequences=[ReceptorSequence(sequence_aa="AAA", sequence_id="1"),
+                       ReceptorSequence(sequence_aa="III", sequence_id="2"),
+                       ReceptorSequence(sequence_aa="GGGG", sequence_id="3"),
+                       ReceptorSequence(sequence_aa="MMM", sequence_id="4")],
+            result_path=path, metadata={"mylabel": "+"})
+        rep2 = Repertoire.build_from_sequences(
+            sequences=[ReceptorSequence(sequence_aa="IAIAA", sequence_id="1"),
+                       ReceptorSequence(sequence_aa="GGGG", sequence_id="3"),
+                       ReceptorSequence(sequence_aa="MMM", sequence_id="4")],
+            result_path=path, metadata={"mylabel": "+"})
+        rep21 = Repertoire.build_from_sequences(
+            sequences=[ReceptorSequence(sequence_aa="IAIAA", sequence_id="1"),
+                       ReceptorSequence(sequence_aa="GGGG", sequence_id="3"),
+                       ReceptorSequence(sequence_aa="MMM", sequence_id="4")],
+            result_path=path, metadata={"mylabel": "+"})
+        rep22 = Repertoire.build_from_sequences(
+            sequences=[ReceptorSequence(sequence_aa="IAIAA", sequence_id="1"),
+                       ReceptorSequence(sequence_aa="IIII", sequence_id="3"),
+                       ReceptorSequence(sequence_aa="IIII", sequence_id="4")],
+            result_path=path, metadata={"mylabel": "-"})
+        rep23 = Repertoire.build_from_sequences(
+            sequences=[ReceptorSequence(sequence_aa="IAIAA", sequence_id="1"),
+                       ReceptorSequence(sequence_aa="IIII", sequence_id="3"),
+                       ReceptorSequence(sequence_aa="IIII", sequence_id="4")],
+            result_path=path, metadata={"mylabel": "-"})
+        rep3 = Repertoire.build_from_sequences(
+            sequences=[ReceptorSequence(sequence_aa="KKKK", sequence_id="5"),
+                       ReceptorSequence(sequence_aa="HHH", sequence_id="6"),
+                       ReceptorSequence(sequence_aa="AAAA", sequence_id="7"),
+                       ReceptorSequence(sequence_aa="IIII", sequence_id="8")],
+            result_path=path, metadata={"mylabel": "-"})
 
         dataset = RepertoireDataset(repertoires=[rep1, rep2, rep21, rep22, rep23, rep3],
                                     labels={"mylabel": ["+", "-"]})
@@ -72,12 +71,13 @@ class TestSignificantFeatures(TestCase):
 
     def test_generate(self, compairr_path=None):
         path_suffix = "compairr" if compairr_path else "no_compairr"
-        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / f"significant_features_{path_suffix}/")
+        path = PathBuilder.remove_old_and_build(
+            EnvironmentSettings.tmp_test_path / f"significant_features_{path_suffix}/")
 
         dataset = self._get_example_dataset(path)
 
-        report = SignificantFeatures.build_object(**{"dataset": dataset,
-                                                     "p_values": [0.5, 0.0],
+        report = SignificantFeatures.build_object(**{"dataset": dataset, "region_type": "IMGT_CDR3",
+                                                     "p_values": [0.5, 0.0], "sequence_type": "AMINO_ACID",
                                                      "k_values": ["full_sequence", 3],
                                                      "compairr_path": compairr_path,
                                                      "label": {"mylabel": {"positive_class": "+"}},

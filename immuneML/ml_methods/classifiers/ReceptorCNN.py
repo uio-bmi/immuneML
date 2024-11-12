@@ -9,7 +9,7 @@ import torch
 import yaml
 from torch import nn
 
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
 from immuneML.environment.SequenceType import SequenceType

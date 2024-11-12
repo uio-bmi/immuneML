@@ -1,6 +1,7 @@
 from collections import Counter
 
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
+from immuneML.data_model.SequenceParams import Chain
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 
@@ -24,12 +25,12 @@ class KmerFreqReceptorEncoder(KmerFrequencyEncoder):
         sequence_encoder = self._prepare_sequence_encoder()
         feature_names = sequence_encoder.get_feature_names(params)
         for receptor in dataset.get_data():
-            counts = {chain: Counter() for chain in receptor.get_chains()}
-            chains = receptor.get_chains()
-            for chain in receptor.get_chains():
-                counts[chain] = self._encode_sequence(receptor.get_chain(chain), params, sequence_encoder, counts[chain])
+            chains = [Chain.get_chain(chain).name.lower() for chain in receptor.chain_pair.value]
+            counts = {chain: Counter() for chain in chains}
+            for chain in chains:
+                counts[chain] = self._encode_sequence(getattr(receptor, chain), params, sequence_encoder, counts[chain])
             encoded_receptors_counts.append(counts)
-            receptor_ids.append(receptor.identifier)
+            receptor_ids.append(receptor.receptor_id)
 
             if params.encode_labels:
                 for label_name in label_config.get_labels_by_name():

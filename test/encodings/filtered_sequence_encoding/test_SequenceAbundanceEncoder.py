@@ -5,7 +5,7 @@ from unittest import TestCase
 import numpy as np
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from immuneML.environment.Constants import Constants
@@ -23,19 +23,16 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode(self):
-        path = EnvironmentSettings.tmp_test_path / "abundance_encoder/"
-        PathBuilder.build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "abundance_encoder/")
 
-        repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
-                                                         ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
-                                                         ["CCC", "FFF", "MMM"],
-                                                         ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]],
-                                                        labels={"l1": [True, True, False, False]}, path=path)
-
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, identifier="1")
+        dataset = RepertoireBuilder.build_dataset([["GGG", "III", "LLL", "MMM"],
+                                                   ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
+                                                   ["CCC", "FFF", "MMM"],
+                                                   ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]],
+                                                  labels={"l1": [True, True, False, False]}, path=path)
 
         encoder = SequenceAbundanceEncoder.build_object(dataset, **{
-            "comparison_attributes": ["sequence_aa"],
+            "comparison_attributes": ["cdr3_aa"],
             "p_value_threshold": 0.4, "sequence_batch_size": 4, "repertoire_batch_size": 8
         })
 
@@ -43,19 +40,20 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=label_config))
 
-        self.assertTrue(np.array_equal(np.array([[1, 4], [1, 6], [0, 3], [0, 6]]), encoded_dataset.encoded_data.examples))
+        self.assertTrue(
+            np.array_equal(np.array([[1, 4], [1, 6], [0, 3], [0, 6]]), encoded_dataset.encoded_data.examples))
 
         encoder.p_value_threshold = 0.05
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=label_config))
 
-        self.assertTrue(np.array_equal(np.array([[0, 4], [0, 6], [0, 3], [0, 6]]), encoded_dataset.encoded_data.examples))
+        self.assertTrue(
+            np.array_equal(np.array([[0, 4], [0, 6], [0, 3], [0, 6]]), encoded_dataset.encoded_data.examples))
 
         shutil.rmtree(path)
 
     def test__build_abundance_matrix(self):
-        path = EnvironmentSettings.tmp_test_path / "abundance_encoder_matrix/"
-        PathBuilder.build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "abundance_encoder_matrix/")
         expected_abundance_matrix = np.array([[1, 4], [1, 6], [1, 3], [1, 6]])
 
         comparison_data = ComparisonData(repertoire_ids=["rep_0", "rep_1", "rep_2", "rep_3"],
@@ -63,33 +61,40 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
         comparison_data.batches = [ComparisonDataBatch(matrix=np.array([[1., 0., 0., 0.],
                                                                         [1., 1., 0., 0.]]),
                                                        items=[('GGG',), ('III',)], identifier=0,
-                                                       repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}, path=path),
+                                                       repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2,
+                                                                                 'rep_3': 3}, path=path),
                                    ComparisonDataBatch(matrix=np.array([[1., 1., 0., 1.],
                                                                         [1., 1., 1., 1.]]),
                                                        items=[('LLL',), ('MMM',)], identifier=1, path=path,
-                                                       repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}),
+                                                       repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2,
+                                                                                 'rep_3': 3}),
                                    ComparisonDataBatch(matrix=np.array([[0., 1., 0., 0.],
                                                                         [0., 1., 0., 1.]]),
                                                        items=[('DDD',), ('EEE',)], identifier=2, path=path,
-                                                       repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}),
+                                                       repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2,
+                                                                                 'rep_3': 3}),
                                    ComparisonDataBatch(matrix=np.array([[0., 1., 1., 1.],
                                                                         [0., 0., 1., 1.]]),
                                                        items=[('FFF',), ('CCC',)], identifier=3, path=path,
-                                                       repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}),
+                                                       repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2,
+                                                                                 'rep_3': 3}),
                                    ComparisonDataBatch(matrix=np.array([[0., 0., 0., 1.]]),
                                                        items=[('AAA',)], identifier=4, path=path,
-                                                       repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3})]
+                                                       repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2,
+                                                                                 'rep_3': 3})]
         comparison_data.item_count = 9
 
         p_value = 0.4
-        sequence_p_value_indices = np.array([1., 0.3333333333333334, 1., 1., 1., 1., 1., 0.3333333333333334, 1.]) < p_value
+        sequence_p_value_indices = np.array(
+            [1., 0.3333333333333334, 1., 1., 1., 1., 1., 0.3333333333333334, 1.]) < p_value
 
         encoder = SequenceAbundanceEncoder.build_object(RepertoireDataset(), **{
             "comparison_attributes": ["sequence_aas"],
             "p_value_threshold": 0.4, "sequence_batch_size": 4, "repertoire_batch_size": 10
         })
 
-        abundance_matrix = encoder._build_abundance_matrix(comparison_data, ["rep_0", "rep_1", "rep_2", "rep_3"], sequence_p_value_indices)
+        abundance_matrix = encoder._build_abundance_matrix(comparison_data, ["rep_0", "rep_1", "rep_2", "rep_3"],
+                                                           sequence_p_value_indices)
 
         self.assertTrue(np.array_equal(expected_abundance_matrix, abundance_matrix))
 

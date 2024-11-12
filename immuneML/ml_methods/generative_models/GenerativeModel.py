@@ -3,27 +3,28 @@ from pathlib import Path
 
 import numpy as np
 
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.SequenceType import SequenceType
 
 
 class GenerativeModel:
-    '''
-    .. note::
-
-        This is an experimental feature
+    """
 
     Generative models are algorithms which can be trained to learn patterns in existing datasets,
     and then be used to generate new synthetic datasets.
 
     These methods can be used in the :ref:`TrainGenModel` instruction, and previously trained
     models can be used to generate data using the :ref:`ApplyGenModel` instruction.
-    '''
+    """
 
     DOCS_TITLE = "Generative models"
     OUTPUT_COLUMNS = []
 
-    def __init__(self, chain):
-        self.chain = chain
+    def __init__(self, locus, name: str = None, region_type: RegionType = None):
+        self.locus = locus
+        self.name = name
+        self.region_type = region_type
 
     @abc.abstractmethod
     def fit(self, data, path: Path = None):
@@ -34,7 +35,8 @@ class GenerativeModel:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
+    def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool) \
+            -> Dataset:
         pass
 
     @abc.abstractmethod

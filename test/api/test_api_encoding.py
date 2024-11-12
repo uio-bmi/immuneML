@@ -104,7 +104,7 @@ class TestAPI(TestCase):
                 writer.writerows(dicts)
 
     def test_encode_dataset_by_kmer_freq(self):
-        path = EnvironmentSettings.tmp_test_path / "testapi"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "testapi")
         data_path = path / "data"
         result_path = path / "result"
         repertoire_count = 10

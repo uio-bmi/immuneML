@@ -10,7 +10,7 @@ import yaml
 from functools import partial
 from multiprocessing.pool import Pool
 
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Label import Label
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.util.Util import Util

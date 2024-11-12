@@ -4,8 +4,10 @@ import shutil
 from pathlib import Path
 from typing import List
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
-from immuneML.data_model.dataset.Dataset import Dataset
+import dill
+
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.EncoderParams import EncoderParams
 
 
@@ -97,7 +99,7 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
             the loaded Encoder object
         """
         with encoder_file.open("rb") as file:
-            encoder = pickle.load(file)
+            encoder = dill.load(file)
         return encoder
 
     @staticmethod
@@ -134,7 +136,7 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
 
         """
         with encoder_file.open("wb") as file:
-            pickle.dump(encoder, file)
+            dill.dump(encoder, file)
 
         encoder_dir = encoder_file.parent
         for file in encoder.get_additional_files():
@@ -185,6 +187,6 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
 
     def store(self, encoded_dataset, params: EncoderParams):
         """
-        Stores the given encoded dataset using the ImmuneMLExporter. This method should not be overwritten.
+        Stores the given encoded dataset. This method should not be overwritten.
         """
-        ImmuneMLExporter.export(encoded_dataset, params.result_path)
+        AIRRExporter.export(encoded_dataset, params.result_path)

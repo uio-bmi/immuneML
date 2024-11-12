@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 
 
 def load_encoded_data(labels_path: str, encoding_details_path: str, design_matrix_path: str) -> EncodedData:

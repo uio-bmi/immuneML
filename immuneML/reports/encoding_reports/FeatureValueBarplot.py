@@ -4,25 +4,35 @@ from typing import List, Tuple
 import numpy as np
 import plotly.express as px
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.encoding_reports.FeatureReport import FeatureReport
 
 
 class FeatureValueBarplot(FeatureReport):
     """
-    Plots a barplot of the feature values in a given encoded data matrix, averaged across examples. Can be used in combination
-    with any encoding and dataset type. Each bar in the barplot represents the mean value of a given feature, and along
-    the x-axis are the different features. For example, when :ref:`KmerFrequency` encoder is used, the features are the
+    Encoding a dataset results in a numeric matrix, where the rows are examples (e.g., sequences, receptors, repertoires)
+    and the columns are features. For example, when :ref:`KmerFrequency` encoder is used, the features are the
     k-mers (AAA, AAC, etc..) and the feature values are the frequencies per k-mer.
 
-    Optional metadata labels can be specified to divide the barplot into groups based on color, row facets or column facets.
-    In this case, the average feature values in each group are plotted.
-    These labels are specified in the metadata file for repertoire datasets, or as metadata columns for sequence and receptor datasets.
+    This report plots the mean feature values per feature.
+    A bar plot is created where the average feature value across all examples is shown, with optional error bars.
+    The bar plots can be separated into different colors or facets using metadata labels
+    (for example: plot the average feature values of 'cohort1', 'cohort2' and 'cohort3' in different colors to spot biases).
 
-    Alternatively, when the distribution of feature values is of interest (as opposed to showing only the mean, as done here),
-    please consider using :ref:`FeatureDistribution` instead.
-    When comparing the feature values between two subsets of the data, please use :ref:`FeatureComparison`.
+    See also: :py:obj:`~immuneML.reports.encoding_reports.FeatureDistribution.FeatureDistribution` report to plot
+    the distribution of each feature across examples, rather than only showin the mean value in a bar plot.
+    Or :py:obj:`~immuneML.reports.encoding_reports.FeatureDistribution.FeatureComparison` report to compare
+    features across binary metadata labels (e.g., plot the feature value of 'sick' repertoires on the x axis,
+    and 'healthy' repertoires on the y axis.).
+
+
+    Example output:
+
+    .. image:: _static/images/reports/feature_value_barplot.png
+       :alt: Feature value barplot report example
+       :width: 750
+
 
     **Specification arguments:**
 
@@ -108,7 +118,7 @@ class FeatureValueBarplot(FeatureReport):
             plotting_data_dict[f'bottom_{self.plot_bottom_n}'] = plotting_data.iloc[np.argpartition(plotting_data['valuemean'].values, self.plot_bottom_n)[:self.plot_bottom_n]]
 
         for key, data in plotting_data_dict.items():
-            figure = px.bar(data, x=self.x, y="valuemean", color=self.color, barmode="relative",
+            figure = px.bar(data, x=self.x, y="valuemean", color=self.color, barmode="group",
                             facet_row=self.facet_row, facet_col=self.facet_column, error_y=error_y,
                             labels={
                                 "valuemean": self.y_title,

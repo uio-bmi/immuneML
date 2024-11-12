@@ -2,8 +2,7 @@ import shutil
 from unittest import TestCase
 
 from immuneML.IO.dataset_import.ImmunoSEQRearrangementImport import ImmunoSEQRearrangementImport
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
-from immuneML.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
+from immuneML.data_model.SequenceParams import Chain, RegionType
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.ImportHelper import ImportHelper
@@ -79,28 +78,26 @@ rep2.tsv,TRB,1234a,no"""
 
         dataset_name = "adaptive_dataset_reps"
 
-        dataset = ImmunoSEQRearrangementImport.import_dataset(params, dataset_name)
+        dataset = ImmunoSEQRearrangementImport(params, dataset_name).import_dataset()
 
-        self.assertEqual(dataset.repertoires[0].sequences[1].metadata.frame_type, SequenceFrameType.IN)
+        self.assertEqual(dataset.repertoires[0].sequences(RegionType.IMGT_CDR3)[1].vj_in_frame, 'T')
 
-        self.assertListEqual(list(dataset.repertoires[0].get_counts()), [10, 1772, 1763, None, 566, 506, 398, 394, 363, 363])
-        self.assertListEqual(list(dataset.repertoires[0].get_chains()), [Chain.BETA for i in range(10)])
+        self.assertListEqual(list(dataset.repertoires[0].data.duplicate_count), [10, 1772, 1763, -1, 566, 506, 398, 394, 363, 363])
+        self.assertListEqual(dataset.repertoires[0].data.locus.tolist(), [Chain.BETA.value for _ in range(10)])
 
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
             if index == 0:
                 self.assertEqual("1234", rep.metadata["subject_id"])
-                self.assertEqual(10, len(rep.sequences))
-                self.assertEqual(10, rep.sequences[0].metadata.duplicate_count)
-                self.assertEqual("TRBV29-1*01", rep.sequences[0].metadata.v_call)
+                self.assertEqual(10, len(rep.sequences()))
+                self.assertEqual(10, rep.sequences()[0].duplicate_count)
+                self.assertEqual("TRBV29-1*01", rep.sequences()[0].v_call)
             else:
                 self.assertEqual("1234a", rep.metadata["subject_id"])
-                self.assertEqual(11, len(rep.sequences))
-                self.assertEqual(2, rep.sequences[-1].metadata.duplicate_count)
+                self.assertEqual(11, len(rep.sequences()))
+                self.assertEqual(2, rep.sequences()[-1].duplicate_count)
 
-        dataset_file = path / f"{dataset_name}.{ImportHelper.DATASET_FORMAT}"
-
-        self.assertTrue(dataset_file.is_file())
+        self.assertTrue(dataset.dataset_file.is_file())
 
         shutil.rmtree(path)
 
@@ -121,20 +118,17 @@ rep2.tsv,TRB,1234a,no"""
 
         dataset_name = "adaptive_dataset_seqs"
 
-        dataset = ImmunoSEQRearrangementImport.import_dataset(params, dataset_name)
+        dataset = ImmunoSEQRearrangementImport(params, dataset_name).import_dataset()
 
         self.assertEqual(21, dataset.get_example_count())
 
         seqs = [sequence for sequence in dataset.get_data()]
         self.assertTrue(seqs[0].sequence_aa in ["ASSLPGTNTGELF", "SVEESYEQY"])  # OSX/windows
-        self.assertTrue(seqs[0].sequence in ["GCCAGCAGCTTACCGGGGACGAACACCGGGGAGCTGTTT", 'AGCGTTGAAGAATCCTACGAGCAGTAC'])  # OSX/windows
-        self.assertEqual("IN", seqs[0].metadata.frame_type.name)
-        self.assertTrue(seqs[0].metadata.v_call in ['TRBV7-9*01', 'TRBV29-1*01'])  # OSX/windows
-        self.assertTrue(seqs[0].metadata.j_call in ['TRBJ2-2*01', 'TRBJ2-7*01'])  # OSX/windows
+        self.assertEqual('T', seqs[0].vj_in_frame)
+        self.assertTrue(seqs[0].v_call in ['TRBV7-9*01', 'TRBV29-1*01'])  # OSX/windows
+        self.assertTrue(seqs[0].j_call in ['TRBJ2-2*01', 'TRBJ2-7*01'])  # OSX/windows
 
-        dataset_file = path / f"{dataset_name}.{ImportHelper.DATASET_FORMAT}"
-
-        self.assertTrue(dataset_file.is_file())
+        self.assertTrue(dataset.dataset_file.is_file())
 
         shutil.rmtree(path)
 
@@ -163,7 +157,7 @@ rep1.tsv,TRB,1234a""")
         params["metadata_file"] = path / "metadata.csv"
         params["path"] = path
 
-        dataset = ImmunoSEQRearrangementImport.import_dataset(params, "alternative")
+        dataset = ImmunoSEQRearrangementImport(params, "alternative").import_dataset()
 
         self.assertEqual(1, dataset.get_example_count())
 

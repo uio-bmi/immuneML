@@ -12,8 +12,11 @@
     <div class="container">
         <div>
             <h1>Dataset export: {{name}}</h1>
-            <div>Full specification is available <a href="{{{full_specs}}}">here</a>.</div>
-            <div class="padded-bottom padded-top">immuneML version: {{immuneML_version}}</div>
+            <p>immuneML version: {{immuneML_version}}</p>
+            <p>Full specification is available <a href="{{{full_specs}}}">here</a>.</p>
+            <p>Log file is available <a href="{{{logfile}}}">here</a>.</p>
+            <p></p>
+
             {{#datasets}}
             <div class="padded">
                 <div class="col-container">
@@ -37,6 +40,7 @@
                         </table>
                         </div>
                         <h4>Dataset labels</h4>
+                        {{#show_dataset_labels}}
                         <p>The following label(s) are available for this dataset, and may for example be used for classification:</p>
 
                         <div class="table-container">
@@ -57,6 +61,10 @@
                                 </tbody>
                             </table>
                         </div>
+                        {{/show_dataset_labels}}
+                        {{^show_dataset_labels}}
+                        <p>This dataset does not have any available labels.</p>
+                        {{/show_dataset_labels}}
 
                         {{#show_preprocessing}}
                         <h4>Preprocessings</h4>

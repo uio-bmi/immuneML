@@ -1,6 +1,6 @@
-
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
+from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
 
@@ -15,6 +15,7 @@ class OneHotSequenceEncoder(OneHotEncoder):
         - middle position (high in the middle of the sequence)
         - end position (high when close to end)
     """
+
     def _encode_new_dataset(self, dataset: SequenceDataset, params: EncoderParams):
         encoded_data = self._encode_data(dataset, params)
 
@@ -24,31 +25,23 @@ class OneHotSequenceEncoder(OneHotEncoder):
         return encoded_dataset
 
     def _encode_data(self, dataset: SequenceDataset, params: EncoderParams):
-        sequence_objs = [obj for obj in dataset.get_data()]
+        data = dataset.data
+        max_seq_len = max(getattr(data, params.get_sequence_field_name()).lengths)
+        labels = self._get_labels(data, params) if params.encode_labels else None
 
-        sequences = [obj.get_sequence(self.sequence_type) for obj in sequence_objs]
-
-        if any(seq is None for seq in sequences):
-            raise ValueError(
-                f"{OneHotEncoder.__name__}: sequence dataset {dataset.name} (id: {dataset.identifier}) contains empty sequences for the specified "
-                f"sequence type {self.sequence_type.name.lower()}. Please check that the dataset is imported correctly.")
-
-        max_seq_len = max([len(seq) for seq in sequences])
-        labels = self._get_labels(sequence_objs, params) if params.encode_labels else None
-
-        examples = self._encode_sequence_list(sequences, pad_n_sequences=len(sequence_objs), pad_sequence_len=max_seq_len)
+        examples = self._encode_sequence_list(data, pad_n_sequences=len(data),
+                                              pad_sequence_len=max_seq_len, params=params)
 
         feature_names = self._get_feature_names(max_seq_len)
 
         if self.flatten:
-            examples = examples.reshape((len(sequence_objs), max_seq_len*len(self.onehot_dimensions)))
+            examples = examples.reshape((len(data), max_seq_len * len(self.onehot_dimensions)))
             feature_names = [item for sublist in feature_names for item in sublist]
 
         encoded_data = EncodedData(examples=examples,
                                    labels=labels,
                                    example_ids=dataset.get_example_ids(),
                                    feature_names=feature_names,
-                                   example_weights=dataset.get_example_weights(),
                                    encoding=OneHotEncoder.__name__)
 
         return encoded_data
@@ -56,15 +49,8 @@ class OneHotSequenceEncoder(OneHotEncoder):
     def _get_feature_names(self, max_seq_len):
         return [[f"{pos}_{dim}" for dim in self.onehot_dimensions] for pos in range(max_seq_len)]
 
-
-    def _get_labels(self, sequence_objs, params: EncoderParams):
+    def _get_labels(self, data: AIRRSequenceSet, params: EncoderParams):
         label_names = params.label_config.get_labels_by_name()
-        labels = {name: [None] * len(sequence_objs) for name in label_names}
-
-        for idx, sequence in enumerate(sequence_objs):
-            for name in label_names:
-                labels[name][idx] = sequence.get_attribute(name)
+        labels = {name: getattr(data, name).tolist() for name in label_names}
 
         return labels
-
-

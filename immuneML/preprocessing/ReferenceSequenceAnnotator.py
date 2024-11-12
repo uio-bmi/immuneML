@@ -1,20 +1,17 @@
 import copy
 import glob
-import math
 import shutil
 import subprocess
 from pathlib import Path
 from typing import List
 
-import numpy as np
 import pandas as pd
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.SequenceSet import ReceptorSequence, Repertoire
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.reference_encoding.MatchedReferenceUtil import MatchedReferenceUtil
 from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.util.CompAIRRHelper import CompAIRRHelper
@@ -43,6 +40,8 @@ class ReferenceSequenceAnnotator(Preprocessor):
 
     - repertoire_batch_size (int): how many repertoires to process simultaneously; depending on the repertoire size, this parameter might be use to limit the memory usage
 
+    - region_type (str): which region type to check, default is IMGT_CDR3
+
 
     **YAML specification:**
 
@@ -63,16 +62,18 @@ class ReferenceSequenceAnnotator(Preprocessor):
                         output_column_name: matched
                         threads: 4
                         repertoire_batch_size: 5
+                        region_type: IMGT_CDR3
 
     """
 
     def __init__(self, reference_sequences: List[ReceptorSequence], max_edit_distance: int, compairr_path: str, ignore_genes: bool, threads: int,
-                 output_column_name: str, repertoire_batch_size: int):
+                 output_column_name: str, repertoire_batch_size: int, region_type: RegionType):
         super().__init__()
         self._reference_sequences = reference_sequences
         self._max_edit_distance = max_edit_distance
         self._output_column_name = output_column_name
         self._repertoire_batch_size = repertoire_batch_size
+        self._region_type = region_type
         self._compairr_params = CompAIRRParams(compairr_path=CompAIRRHelper.determine_compairr_path(compairr_path), keep_compairr_input=True,
                                                differences=max_edit_distance, indels=False, ignore_counts=True, ignore_genes=ignore_genes,
                                                threads=threads, output_filename="compairr_out.tsv", log_filename="compairr_log.txt",
@@ -82,19 +83,21 @@ class ReferenceSequenceAnnotator(Preprocessor):
     def build_object(cls, **kwargs):
         ParameterValidator.assert_keys(list(kwargs.keys()),
                                        ['reference_sequences', 'max_edit_distance', 'compairr_path', 'ignore_genes', 'output_column_name', 'threads',
-                                        'repertoire_batch_size'],
+                                        'repertoire_batch_size', 'region_type'],
                                        ReferenceSequenceAnnotator.__name__, ReferenceSequenceAnnotator.__name__)
+        ParameterValidator.assert_in_valid_list(kwargs['region_type'].upper(), [el.name for el in RegionType],
+                                                ReferenceSequenceAnnotator.__name__, 'region_type')
         ref_seqs = MatchedReferenceUtil.prepare_reference(reference_params=kwargs['reference_sequences'],
                                                           location=ReferenceSequenceAnnotator.__name__, paired=False)
-        return ReferenceSequenceAnnotator(**{**kwargs, 'reference_sequences': ref_seqs})
+        return ReferenceSequenceAnnotator(**{**kwargs, 'reference_sequences': ref_seqs,
+                                             'region_type': RegionType[kwargs['region_type'].upper()]})
 
     def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1) -> RepertoireDataset:
-        region_type = self._get_region_type_from_dataset(dataset)
-        self._compairr_params.is_cdr3 = region_type == RegionType.IMGT_CDR3
-        sequence_filepath = self._prepare_sequences_for_compairr(result_path / 'tmp', region_type)
+        self._compairr_params.is_cdr3 = self._region_type == RegionType.IMGT_CDR3
+        sequence_filepath = self._prepare_sequences_for_compairr(result_path / 'tmp')
         repertoires_filepaths = self._prepare_repertoires_for_compairr(dataset, result_path / 'tmp')
 
-        compairr_output_files = self._annotate_repertoires(sequence_filepath, repertoires_filepaths, result_path, region_type)
+        compairr_output_files = self._annotate_repertoires(sequence_filepath, repertoires_filepaths, result_path)
 
         processed_dataset = self._make_annotated_dataset(dataset, result_path, compairr_output_files)
 
@@ -102,13 +105,7 @@ class ReferenceSequenceAnnotator(Preprocessor):
 
         return processed_dataset
 
-    def _get_region_type_from_dataset(self, dataset: RepertoireDataset) -> RegionType:
-        region_types = [repertoire.get_region_type() for repertoire in dataset.repertoires]
-        assert all(region_types[0] == region_type for region_type in region_types), \
-            "Not all repertoires have the sequences with the same region type."
-        return region_types[0]
-
-    def _annotate_repertoires(self, sequences_filepath, repertoire_filepaths: List[Path], result_path: Path, region_type: RegionType):
+    def _annotate_repertoires(self, sequences_filepath, repertoire_filepaths: List[Path], result_path: Path):
         tmp_path = PathBuilder.build(result_path / 'tmp')
         updated_output_files = []
 
@@ -137,34 +134,33 @@ class ReferenceSequenceAnnotator(Preprocessor):
         for index, repertoire in enumerate(dataset.repertoires):
 
             compairr_out_df = pd.read_csv(compairr_output_files[index], sep='\t', comment="#")
-            sequences = self._add_params_to_sequence_objects(repertoire.sequences, compairr_out_df.iloc[:, 1])
 
-            repertoires.append(Repertoire.build_from_sequence_objects(sequences, repertoire_path, repertoire.metadata))
+            data = repertoire.data.add_fields({self._output_column_name: compairr_out_df.iloc[:, 1].values.astype(int)},
+                                              {self._output_column_name: int})
+            type_dict = type(data).get_field_type_dict(all_fields=False)
+
+            repertoires.append(Repertoire.build_from_dc_object(repertoire_path, metadata=repertoire.metadata,
+                                                               filename_base=repertoire.data_filename.name, data=data,
+                                                               type_dict=type_dict))
 
         return RepertoireDataset.build_from_objects(**{'repertoires': repertoires, 'path': result_path})
 
-    def _add_params_to_sequence_objects(self, sequence_objects: List[ReceptorSequence], matches_reference):
-        sequences = copy.deepcopy(sequence_objects)
-        for seq_index, seq in enumerate(sequences):
-            seq.metadata.custom_params[self._output_column_name] = int(matches_reference[seq_index])
-        return sequences
-
-    def _prepare_sequences_for_compairr(self, result_path: Path, region_type: RegionType) -> Path:
+    def _prepare_sequences_for_compairr(self, result_path: Path) -> Path:
         path = PathBuilder.build(result_path) / 'reference_sequences.tsv'
 
         # TODO: remove this when import is refactored, this now ensures that string matching is done on sequences as imported
         reference_sequences = []
         for seq in self._reference_sequences:
             tmp_seq = copy.deepcopy(seq)
-            tmp_seq.metadata.region_type = region_type
-            tmp_seq.metadata.duplicate_count = seq.metadata.duplicate_count if not self._compairr_params.ignore_counts else 1
+            tmp_seq.duplicate_count = seq.duplicate_count if not self._compairr_params.ignore_counts else 1
             reference_sequences.append(tmp_seq)
 
-        AIRRExporter.export(SequenceDataset.build_from_objects(reference_sequences, len(self._reference_sequences),
-                                                               PathBuilder.build(result_path / 'tmp_seq_dataset')), result_path)
+        SequenceDataset.build_from_objects(reference_sequences, PathBuilder.build(result_path),
+                                           region_type=self._region_type)
 
         result_files = glob.glob(str(result_path / "*.tsv"))
-        assert len(result_files) == 1, f"Error occurred while exporting sequences for matching using CompAIRR. Resulting files: {result_files}"
+        assert len(result_files) == 1, \
+            f"Error occurred while exporting sequences for matching using CompAIRR. Resulting files: {result_files}"
         shutil.move(result_files[0], path)
 
         return path

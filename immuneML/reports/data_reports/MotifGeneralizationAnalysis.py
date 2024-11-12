@@ -5,8 +5,8 @@ import pandas as pd
 import os
 import warnings
 
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
@@ -282,12 +282,12 @@ class MotifGeneralizationAnalysis(DataReport):
         actual_train_identifiers = []
 
         for idx, sequence in enumerate(self.dataset.get_data()):
-            if str(sequence.identifier) in input_train_identifiers:
+            if str(sequence.sequence_id) in input_train_identifiers:
                 train_indices.append(idx)
-                actual_train_identifiers.append(sequence.identifier)
+                actual_train_identifiers.append(sequence.sequence_id)
             else:
                 val_indices.append(idx)
-                val_identifiers.append(sequence.identifier)
+                val_identifiers.append(sequence.sequence_id)
 
         self._write_identifiers(self.result_path / "training_set_identifiers.txt", actual_train_identifiers, "Training")
         self._write_identifiers(self.result_path / "validation_set_identifiers.txt", val_identifiers, "Validation")

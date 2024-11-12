@@ -1,15 +1,16 @@
 import copy
-from dataclasses import fields as get_fields
 from multiprocessing.pool import Pool
 from pathlib import Path
 from uuid import uuid4
 
 import pandas as pd
 
+from immuneML.data_model import bnp_util
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.bnp_util import write_yaml
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.preprocessing.filters.CountAggregationFunction import CountAggregationFunction
 from immuneML.preprocessing.filters.Filter import Filter
@@ -42,7 +43,7 @@ class DuplicateSequenceFilter(Filter):
 
     - filter_sequence_type (:py:obj:`~immuneML.environment.SequenceType.SequenceType`): Whether the sequences should be collapsed on the nucleotide or amino acid level. Valid options are defined by the SequenceType enum.
 
-    - batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed)
+    - region_type (str): which part of the sequence to examine, by default, this is IMGT_CDR3
 
     - count_agg (:py:obj:`~immuneML.preprocessing.filters.CountAggregationFunction.CountAggregationFunction`): determines how the sequence counts of duplicate sequences are aggregated. Valid options are defined by the CountAggregationFunction enum.
 
@@ -61,40 +62,43 @@ class DuplicateSequenceFilter(Filter):
                         # optional parameters (if not specified the values bellow will be used):
                         batch_size: 4
                         count_agg: SUM
+                        region_type: IMGT_CDR3
 
     """
 
     @classmethod
     def build_object(cls, **kwargs):
         location = cls.__name__
-        ParameterValidator.assert_keys(kwargs.keys(), ["filter_sequence_type", "batch_size", "count_agg"], location,
+        ParameterValidator.assert_keys(kwargs.keys(), ["filter_sequence_type", "batch_size", "count_agg", "region_type"], location,
                                        "DuplicateSequenceFilter")
         ParameterValidator.assert_in_valid_list(kwargs["filter_sequence_type"].upper(), [item.name for item in SequenceType],
                                                 location, "filter_sequence_type")
+        ParameterValidator.assert_in_valid_list(kwargs["region_type"].upper(), [item.name for item in RegionType],
+                                                location, "region_type")
         ParameterValidator.assert_in_valid_list(kwargs["count_agg"].upper(), [item.name for item in CountAggregationFunction], location,
                                                 "count_agg")
         ParameterValidator.assert_type_and_value(kwargs["batch_size"], int, location, "batch_size", 1)
         return DuplicateSequenceFilter(filter_sequence_type=SequenceType[kwargs["filter_sequence_type"].upper()],
+                                       region_type=RegionType[kwargs['region_type'].upper()],
                                        batch_size=kwargs["batch_size"], count_agg=CountAggregationFunction[kwargs["count_agg"].upper()])
 
-    def __init__(self, filter_sequence_type: SequenceType, batch_size: int, count_agg: CountAggregationFunction, result_path: Path = None):
+    def __init__(self, filter_sequence_type: SequenceType, batch_size: int, count_agg: CountAggregationFunction,
+                 result_path: Path = None, region_type: RegionType = RegionType.IMGT_CDR3):
         super().__init__(result_path)
         self.filter_sequence_type = filter_sequence_type
+        self.region_type = region_type
         self.count_agg = count_agg
         self.batch_size = batch_size
 
-        self.sequence_of_interest = "sequence_aa" if filter_sequence_type == SequenceType.AMINO_ACID else "sequence"
-        self.sequence_to_ignore = "sequence" if self.sequence_of_interest == "sequence_aa" else "sequence_aa"
-
-        assert self.sequence_of_interest in Repertoire.FIELDS, f"{DuplicateSequenceFilter.__name__}: {self.sequence_of_interest} not in {Repertoire.FIELDS}"
-        assert self.sequence_to_ignore in Repertoire.FIELDS, f"{DuplicateSequenceFilter.__name__}: {self.sequence_of_interest} not in {Repertoire.FIELDS}"
+        self.sequence_of_interest = bnp_util.get_sequence_field_name(self.region_type, self.filter_sequence_type)
+        self.sequence_to_ignore = bnp_util.get_sequence_field_name(self.region_type, [t for t in SequenceType if t != self.filter_sequence_type][0])
 
     def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1) -> RepertoireDataset:
         self.result_path = result_path if result_path is not None else self.result_path
 
         self.check_dataset_type(dataset, [RepertoireDataset], "DuplicateSequenceFilter")
 
-        processed_dataset = copy.deepcopy(dataset)
+        processed_dataset = dataset.clone()
 
         with Pool(self.batch_size) as pool:
             repertoires = pool.map(self._process_repertoire, dataset.repertoires)
@@ -104,14 +108,15 @@ class DuplicateSequenceFilter(Filter):
         return processed_dataset
 
     def _prepare_group_by_field(self, columns):
-        groupby_fields = copy.deepcopy(list(Repertoire.FIELDS))
-        groupby_fields.remove(self.sequence_to_ignore)
+        rep_fields = list(AIRRSequenceSet.get_field_type_dict().keys())
+        groupby_fields = copy.deepcopy(rep_fields)
+        if self.sequence_to_ignore in groupby_fields:
+            groupby_fields.remove(self.sequence_to_ignore)
         groupby_fields.remove("duplicate_count")
         groupby_fields.remove("sequence_id")
         groupby_fields.remove("cell_id")
-        groupby_fields.remove("frame_type")
 
-        for field in set(Repertoire.FIELDS).difference(set(columns)):
+        for field in set(rep_fields).difference(set(columns)):
             if field in groupby_fields:
                 groupby_fields.remove(field)
 
@@ -136,28 +141,23 @@ class DuplicateSequenceFilter(Filter):
         return agg_dict
 
     def _process_repertoire(self, repertoire: Repertoire) -> Repertoire:
-        data = repertoire.load_bnp_data().topandas()
-        data['duplicate_count'] = [el if el != -1 else pd.NA for el in data['duplicate_count']]
+        data = repertoire.data.topandas()
+        data['duplicate_count'].replace(-1, pd.NA, inplace=True)
         columns = data.columns
 
         groupby_fields = self._prepare_group_by_field(columns)
-        custom_lists = list(set(columns) - set(Repertoire.FIELDS))
+        custom_lists = list(repertoire.dynamic_fields.keys())
         agg_dict = self._prepare_agg_dict(columns, custom_lists)
-
-        # Chain objects can not be aggregated, convert to strings
-        if "chain" in columns:
-            data["chain"] = data.chain.tolist()
-        else:
-            data["chain"] = None
 
         no_duplicates = data.groupby(groupby_fields, sort=False).agg(agg_dict).reset_index()
 
         no_duplicates.to_csv(f"{self.result_path}/{repertoire.data_filename.stem}_filtered.tsv", sep='\t', index=False)
         write_yaml(Path(f"{self.result_path}/{repertoire.metadata_filename.stem}_filtered.yaml"), repertoire.metadata)
 
-        return Repertoire(Path(f"{self.result_path}/{repertoire.data_filename.stem}_filtered.tsv"),
-                          Path(f"{self.result_path}/{repertoire.metadata_filename.stem}_filtered.yaml"),
-                          str(uuid4().hex))
+        return Repertoire(data_filename=Path(f"{self.result_path}/{repertoire.data_filename.stem}_filtered.tsv"),
+                          metadata_filename=Path(f"{self.result_path}/{repertoire.metadata_filename.stem}_filtered.yaml"),
+                          identifier=str(uuid4().hex),
+                          dynamic_fields=repertoire.dynamic_fields)
 
     @staticmethod
     def get_documentation():

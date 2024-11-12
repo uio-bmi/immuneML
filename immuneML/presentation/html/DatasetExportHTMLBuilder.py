@@ -38,6 +38,7 @@ class DatasetExportHTMLBuilder:
             "name": state.name,
             'immuneML_version': MLUtil.get_immuneML_version(),
             "full_specs": Util.get_full_specs_path(base_path),
+            "logfile": Util.get_logfile_path(base_path),
             "datasets": [
                 {
                     **Util.make_dataset_html_map(dataset),

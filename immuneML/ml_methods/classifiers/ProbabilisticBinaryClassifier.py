@@ -11,7 +11,7 @@ from scipy.special import betaln as beta_func_ln
 from scipy.special import digamma
 from scipy.stats import betabinom as beta_binomial
 
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Label import Label
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.util.Util import Util
@@ -54,7 +54,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
     SMALL_POSITIVE_NUMBER = 1e-15
 
-    def __init__(self, max_iterations: int = None, update_rate: float = None, likelihood_threshold: float = None):
+    def __init__(self, max_iterations: int, update_rate: float, likelihood_threshold: float):
         super().__init__()
         self.max_iterations = max_iterations
         self.update_rate = update_rate
@@ -64,14 +64,16 @@ class ProbabilisticBinaryClassifier(MLMethod):
         self.alpha_1 = None
         self.beta_0 = None
         self.beta_1 = None
-        self.likelihood_threshold = likelihood_threshold if likelihood_threshold is not None else -1e-10
+        self.likelihood_threshold = likelihood_threshold if isinstance(likelihood_threshold, float) \
+            else float(likelihood_threshold)
 
     def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
         X = encoded_data.examples
-        assert X.shape[1] == 2, "ProbabilisticBinaryClassifier: the shape of the input is not compatible with the classifier. " \
-                                "The classifier is defined when examples are encoded by two counts: the number of successful trials " \
-                                "and the total number of trials. If this is not targeted use-case and the encoding, please consider using " \
-                                "another classifier."
+        assert X.shape[1] == 2, \
+            "ProbabilisticBinaryClassifier: the shape of the input is not compatible with the classifier. " \
+            "The classifier is defined when examples are encoded by two counts: the number of successful trials " \
+            "and the total number of trials. If this is not targeted use-case and the encoding, please consider " \
+            "using another classifier."
 
         self.N_0 = int(np.sum(np.array(encoded_data.labels[self.label.name]) == self.class_mapping[0]))
         self.N_1 = int(np.sum(np.array(encoded_data.labels[self.label.name]) == self.class_mapping[1]))
@@ -82,7 +84,8 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
     def _predict(self, encoded_data: EncodedData):
         """
-        Predict the class assignment for examples in X (where X is validation or test set - examples not seen during training).
+        Predict the class assignment for examples in X (where X is validation or test set - examples not seen during
+        training).
 
         .. math::
 
@@ -357,7 +360,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
             elif value is None or isinstance(value, str) or isinstance(value, dict) or isinstance(value, list) or isinstance(value, Path):
                 result[key] = value
             elif isinstance(value, Label):
-                result[key] = value.name
+                result[key] = value.get_desc_for_storage()
             else:
                 result[key] = float(value)
 

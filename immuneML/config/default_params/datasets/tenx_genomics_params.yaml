@@ -7,12 +7,13 @@ import_illegal_characters: False
 region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing first and last amino acid as 10xGenomics uses IMGT junction as CDR3
 separator: "," # column separator
 column_mapping: # 10xGenomics column names -> immuneML repertoire fields
-  cdr3: sequence_aa
-  cdr3_nt: sequence
+  cdr3: junction_aa
+  cdr3_nt: junction
   v_gene: v_call
   j_gene: j_call
   umis: duplicate_count
   clonotype_id: cell_id
   consensus_id: sequence_id
+  chain: locus
 import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
 import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set

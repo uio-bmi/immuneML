@@ -5,7 +5,8 @@ import plotly.express as px
 import pandas as pd
 from typing import List
 
-from immuneML.data_model.dataset import SequenceDataset
+from immuneML.data_model import bnp_util
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import (
     PositionalMotifHelper,
 )
@@ -53,7 +54,8 @@ class PositionalMotifFrequencies(EncodingReport):
     @classmethod
     def build_object(cls, **kwargs):
         if "motif_color_map" in kwargs:
-            ParameterValidator.assert_type_and_value(kwargs["motif_color_map"], dict, PositionalMotifFrequencies.__name__, "motif_color_map")
+            ParameterValidator.assert_type_and_value(kwargs["motif_color_map"], dict,
+                                                     PositionalMotifFrequencies.__name__, "motif_color_map")
             kwargs["motif_color_map"] = {str(key): value for key, value in kwargs["motif_color_map"].items()}
 
         return PositionalMotifFrequencies(**kwargs)
@@ -62,10 +64,16 @@ class PositionalMotifFrequencies(EncodingReport):
                  motif_color_map: dict = None, name: str = None, number_of_processes: int = 1):
         super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
         self.motif_color_map = motif_color_map
+        self.region_type = None
+        self.sequence_type = None
 
     def get_sequence_length(self):
-        my_sequence = next(self.dataset.get_data())
-        return len(my_sequence.get_sequence())
+        if self.sequence_type is None or self.region_type is None:
+            self.sequence_type = self.dataset.encoded_data.info['sequence_type']
+            self.region_type = self.dataset.encoded_data.info['region_type']
+
+        my_sequences = getattr(self.dataset.data, bnp_util.get_sequence_field_name(self.region_type, self.sequence_type))
+        return my_sequences.lengths[0]
 
     def _generate(self):
         PathBuilder.build(self.result_path)
@@ -75,22 +83,23 @@ class PositionalMotifFrequencies(EncodingReport):
         max_gap_size_df = self._get_max_gap_sizes(motifs)
         total_gap_size_df = self._get_total_gap_sizes(motifs)
 
-
         positional_aa_counts_table = self._write_output_table(positional_aa_counts_df,
                                                               file_path=self.result_path / f"positional_aa_counts.csv",
                                                               name="Frequencies of amino acids found in the high-precision high-recall motifs")
 
         max_gap_size_table = self._write_output_table(max_gap_size_df,
-                                                  file_path=self.result_path / f"max_gap_size_table.csv",
-                                                  name="Maximum gap sizes within motifs")
+                                                      file_path=self.result_path / f"max_gap_size_table.csv",
+                                                      name="Maximum gap sizes within motifs")
 
         total_gap_size_table = self._write_output_table(total_gap_size_df,
-                                                  file_path=self.result_path / f"total_gap_size_table.csv",
-                                                  name="Total (summed) gap sizes within motifs")
+                                                        file_path=self.result_path / f"total_gap_size_table.csv",
+                                                        name="Total (summed) gap sizes within motifs")
 
-        output_figure1 = self._safe_plot(positional_aa_counts_df=positional_aa_counts_df, plot_callable="_plot_positional_aa_counts")
-        output_figure2 = self._safe_plot(gap_size_df=max_gap_size_df,  x="max_gap_size", plot_callable="_plot_gap_sizes")
-        output_figure3 = self._safe_plot(gap_size_df=total_gap_size_df,  x="total_gap_size", plot_callable="_plot_gap_sizes")
+        output_figure1 = self._safe_plot(positional_aa_counts_df=positional_aa_counts_df,
+                                         plot_callable="_plot_positional_aa_counts")
+        output_figure2 = self._safe_plot(gap_size_df=max_gap_size_df, x="max_gap_size", plot_callable="_plot_gap_sizes")
+        output_figure3 = self._safe_plot(gap_size_df=total_gap_size_df, x="total_gap_size",
+                                         plot_callable="_plot_gap_sizes")
 
         return ReportResult(
             name=self.name,
@@ -100,8 +109,8 @@ class PositionalMotifFrequencies(EncodingReport):
 
     def _get_total_gap_sizes(self, motifs):
         data = {"motif_size": [],
-              "total_gap_size": [],
-              "occurrence": []}
+                "total_gap_size": [],
+                "occurrence": []}
 
         gap_size_count = {}
 
@@ -139,7 +148,7 @@ class PositionalMotifFrequencies(EncodingReport):
             motif_size = len(indices)
 
             if motif_size > 1:
-                gap_size = max([indices[i+1]-indices[i] -1 for i in range(motif_size-1)])
+                gap_size = max([indices[i + 1] - indices[i] - 1 for i in range(motif_size - 1)])
                 gap_size_count[motif_size][gap_size] += 1
 
         motif_sizes = list()
@@ -175,11 +184,11 @@ class PositionalMotifFrequencies(EncodingReport):
 
         positional_aa_counts_df = pd.DataFrame(positional_aa_counts)
         positional_aa_counts_df = positional_aa_counts_df.loc[
-            :, (positional_aa_counts_df != 0).any(axis=0)
-        ]
+                                  :, (positional_aa_counts_df != 0).any(axis=0)
+                                  ]
 
         # start counting positions at 1
-        positional_aa_counts_df.index = [idx+1 for idx in list(positional_aa_counts_df.index)]
+        positional_aa_counts_df.index = [idx + 1 for idx in list(positional_aa_counts_df.index)]
 
         return positional_aa_counts_df
 

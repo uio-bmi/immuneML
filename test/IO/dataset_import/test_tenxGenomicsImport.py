@@ -2,7 +2,7 @@ import shutil
 from unittest import TestCase
 
 from immuneML.IO.dataset_import.TenxGenomicsImport import TenxGenomicsImport
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
@@ -46,16 +46,16 @@ rep2.tsv,2""")
         params["path"] = path
         params["metadata_file"] = path / "metadata.csv"
 
-        dataset = TenxGenomicsImport.import_dataset(params, "tenx_dataset_repertoire")
+        dataset = TenxGenomicsImport(params, "tenx_dataset_repertoire").import_dataset()
 
         self.assertEqual(2, dataset.get_example_count())
 
-        self.assertEqual(len(dataset.repertoires[0].sequences), 2)
-        self.assertEqual(len(dataset.repertoires[1].sequences), 4)
+        self.assertEqual(len(dataset.repertoires[0].sequences()), 2)
+        self.assertEqual(len(dataset.repertoires[1].sequences()), 4)
 
-        self.assertEqual(dataset.repertoires[0].sequences[0].sequence_aa, "ALSGTGGYKVV")
-        self.assertListEqual([Chain.ALPHA, Chain.BETA], list(dataset.repertoires[0].get_chains()))
-        self.assertListEqual([2, 4], list(dataset.repertoires[0].get_counts()))
+        self.assertEqual(dataset.repertoires[0].sequences()[0].sequence_aa, "ALSGTGGYKVV")
+        self.assertListEqual([Chain.ALPHA.value, Chain.BETA.value], dataset.repertoires[0].data.locus.tolist())
+        self.assertListEqual([2, 4], dataset.repertoires[0].data.duplicate_count.tolist())
 
         shutil.rmtree(path)
 
@@ -69,12 +69,10 @@ rep2.tsv,2""")
         params["paired"] = False
         params["result_path"] = path
         params["path"] = path
-        params["sequence_file_size"] = 1
 
-        dataset = TenxGenomicsImport.import_dataset(params, "tenx_dataset_sequence")
+        dataset = TenxGenomicsImport(params, "tenx_dataset_sequence").import_dataset()
 
         self.assertEqual(6, dataset.get_example_count())
-        self.assertEqual(6, len(dataset.filenames))
 
         data = dataset.get_data(1)
         for receptorseq in data:
@@ -96,10 +94,9 @@ rep2.tsv,2""")
         params["sequence_file_size"] = 1
         params["receptor_chains"] = "TRA_TRB"
 
-        dataset = TenxGenomicsImport.import_dataset(params, "tenx_dataset_receptor")
+        dataset = TenxGenomicsImport(params, "tenx_dataset_receptor").import_dataset()
 
         self.assertEqual(2, dataset.get_example_count())
-        self.assertEqual(2, len(dataset.get_filenames()))
 
         data = dataset.get_data(1)
         for receptor in data:

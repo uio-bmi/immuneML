@@ -3,13 +3,14 @@ import shutil
 from unittest import TestCase
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
@@ -24,8 +25,8 @@ class TestMatchedReceptorsEncoder(TestCase):
         labels = {"subject_id": ["subject_1", "subject_2", "subject_3"],
                   "label": ["yes", "no", "no"]}
 
-        metadata_alpha = {"v_call": "V1", "j_call": "J1", "chain": Chain.LIGHT.value}
-        metadata_beta = {"v_call": "V1", "j_call": "J1", "chain": Chain.HEAVY.value}
+        metadata_alpha = {"v_call": "V1", "j_call": "J1", "locus": Chain.LIGHT.value}
+        metadata_beta = {"v_call": "V1", "j_call": "J1", "locus": Chain.HEAVY.value}
 
         repertoires, metadata = RepertoireBuilder.build(sequences=[["FFAGQFGSSNTGKLIFF", "FFAGQFGSSNTGKLIYY", "FFSAGQGETQYFF"],
                                                                    ["ASSFRFF"],
@@ -61,7 +62,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         return dataset, label_config, filepath, labels
 
     def test_encode_no_v_all(self):
-        path = EnvironmentSettings.tmp_test_path / "regex_matches_encoder/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "regex_matches_encoder_novall/")
 
         dataset, label_config, motif_filepath, labels = self.create_dummy_data(path)
 
@@ -87,7 +88,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         shutil.rmtree(path)
 
     def test_encode_no_v_unique(self):
-        path = EnvironmentSettings.tmp_test_path / "regex_matches_encoder/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "regex_matches_encoder_vunique/")
 
         dataset, label_config, motif_filepath, labels = self.create_dummy_data(path)
 
@@ -113,7 +114,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         shutil.rmtree(path)
 
     def test_encode_with_v_all(self):
-        path = EnvironmentSettings.tmp_test_path / "regex_matches_encoder/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "regex_matches_encoder_vall/")
 
         dataset, label_config, motif_filepath, labels = self.create_dummy_data(path)
 

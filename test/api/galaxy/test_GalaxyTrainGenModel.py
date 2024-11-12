@@ -18,8 +18,14 @@ def test_train_gen_model_run():
             "datasets": {
                 "d1": {
                     "format": "RandomSequenceDataset",
-                    "params": {}
+                    "params": {
+                        'region_type': 'IMGT_JUNCTION'
+                    }
                 }
+            },
+            "reports": {
+              "seq_len": "SequenceLengthDistribution",
+              "kl_gen_model_report": "KLKmerComparison"
             },
             "ml_methods": {
                 "sonnia": {
@@ -29,7 +35,7 @@ def test_train_gen_model_run():
                         'default_model_name': 'humanTRB',
                         'deep': False,
                         'include_joint_genes': True,
-                        'n_gen_seqs': 100
+                        'n_gen_seqs': 10
                     }
                 }
             }
@@ -40,7 +46,11 @@ def test_train_gen_model_run():
                 "gen_examples_count": 100,
                 "dataset": "d1",
                 "method": "sonnia",
-                "number_of_processes": 2
+                "reports": ["seq_len", "kl_gen_model_report"],
+                "number_of_processes": 2,
+                'training_percentage': 1.,
+                "export_generated_dataset": False,
+                "export_combined_dataset": True
             }
         }
     }

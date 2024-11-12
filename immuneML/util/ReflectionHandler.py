@@ -1,3 +1,4 @@
+import logging
 from importlib import import_module, util
 from pathlib import Path
 
@@ -34,10 +35,15 @@ class ReflectionHandler:
 
     @staticmethod
     def _import_class(path: Path, class_name: str):
-        module_path = ".".join(path.parts[len(list(path.parts)) - list(path.parts)[::-1].index("immuneML") - 1:])[:-3]
-        mod = import_module(module_path)
-        cls = getattr(mod, class_name)
-        return cls
+        try:
+            module_path = ".".join(path.parts[len(list(path.parts)) - list(path.parts)[::-1].index("immuneML") - 1:])[:-3]
+            mod = import_module(module_path)
+            cls = getattr(mod, class_name)
+            return cls
+        except ImportError as e:
+            logging.warning(f"Class {class_name} could not be imported as the dependency {e.name} is not installed.")
+
+        return None
 
     @staticmethod
     def get_class_by_name(class_name: str, subdirectory: str = ""):
@@ -97,6 +103,7 @@ class ReflectionHandler:
     def get_classes_by_partial_name(class_name_ending: str, subdirectory: str = ""):
         filenames = ReflectionHandler._get_filenames(class_name_ending, subdirectory, partial=True)
         classes = [ReflectionHandler._import_class(filename, filename.stem) for filename in filenames]
+        classes = [cls for cls in classes if cls is not None]
         return classes
 
     @staticmethod

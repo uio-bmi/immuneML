@@ -1,10 +1,12 @@
+from pathlib import Path
+
 import pandas as pd
 
 from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.util.AdaptiveImportHelper import AdaptiveImportHelper
 from immuneML.util.ImportHelper import ImportHelper
 from scripts.specification_util import update_docs_per_mapping
@@ -30,7 +32,9 @@ class ImmunoSEQSampleImport(DataImport):
 
     - is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset. By default, is_repertoire is set to True.
 
-    - metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. Only the files included under the column 'filename' are imported into the RepertoireDataset. For setting SequenceDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
+    - metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. Only the files included under the column 'filename' are imported into the RepertoireDataset. For setting Sequence- or ReceptorDataset labels, metadata_file is ignored, use label_columns instead.
+
+    - label_columns (list): For Sequence- or ReceptorDataset, this parameter can be used to explicitly set the column names of labels to import. These labels can be used as prediction target. When label_columns are not set, label names are attempted to be discovered automatically (any column name which is not used in the column_mapping). For setting RepertoireDataset labels, label_columns is ignored, use metadata_file instead.
 
     - import_productive (bool): Whether productive sequences (with value 'In' in column frame_type) should be included in the imported sequences. By default, import_productive is True.
 
@@ -51,15 +55,8 @@ class ImmunoSEQSampleImport(DataImport):
         .. indent with spaces
         .. code-block:: yaml
 
-            nucleotide: sequence
-            aminoAcid: sequence_aa
-            vGeneName: v_call
-            jGeneName: j_call
-            sequenceStatus: frame_type
-            vFamilyName: v_family
-            jFamilyName: j_family
-            vGeneAllele: v_allele
-            jGeneAllele: j_allele
+            nucleotide: cdr3
+            aminoAcid: cdr3_aa
             count (templates/reads): duplicate_count
 
     - column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For immunoSEQ sample .tsv files, there is no default column_mapping_synonyms.
@@ -109,7 +106,7 @@ class ImmunoSEQSampleImport(DataImport):
                         region_type: IMGT_CDR3 # what part of the sequence to import
                         column_mapping: # column mapping immunoSEQ: immuneML
                             nucleotide: sequence
-                            aminoAcid: sequence_aa
+                            aminoAcid: junction_aa
                             vGeneName: v_call
                             jGeneName: j_call
                             sequenceStatus: frame_type
@@ -121,25 +118,17 @@ class ImmunoSEQSampleImport(DataImport):
 
     """
 
-    @staticmethod
-    def import_dataset(params: dict, dataset_name: str) -> Dataset:
-        return ImportHelper.import_dataset(ImmunoSEQSampleImport, params, dataset_name)
-
-    @staticmethod
-    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        return AdaptiveImportHelper.preprocess_dataframe(df, params)
+    def preprocess_file(self, df: pd.DataFrame) -> pd.DataFrame:
+        return AdaptiveImportHelper.preprocess_dataframe(df, self.params)
 
     @staticmethod
     def get_documentation():
         doc = str(ImmunoSEQSampleImport.__doc__)
 
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
-        repertoire_fields = list(Repertoire.FIELDS)
-        repertoire_fields.remove("region_type")
 
         mapping = {
             "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
-            "Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS": f"Valid immuneML fields that can be specified here are {repertoire_fields}."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

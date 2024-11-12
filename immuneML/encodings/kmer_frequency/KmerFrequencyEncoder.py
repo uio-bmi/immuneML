@@ -8,8 +8,8 @@ from sklearn.preprocessing import StandardScaler
 
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.data_model.receptor.receptor_sequence import ReceptorSequence
+from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
@@ -239,8 +239,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
                                    feature_names=feature_names,
                                    example_ids=example_ids,
                                    feature_annotations=feature_annotations,
-                                   example_weights=EncoderHelper.get_example_weights_by_identifiers(dataset, example_ids),
-                                   encoding=KmerFrequencyEncoder.__name__)
+                                   encoding=KmerFrequencyEncoder.__name__,
+                                   info={"sequence_type": self.sequence_type, 'region_type': params.region_type})
 
         return encoded_data
 
@@ -297,7 +297,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
                 if self.reads == ReadsType.UNIQUE:
                     counts[i] += 1
                 elif self.reads == ReadsType.ALL:
-                    counts[i] += sequence.metadata.duplicate_count
+                    counts[i] += sequence.duplicate_count
         return counts
 
     def get_additional_files(self) -> List[str]:

@@ -79,7 +79,7 @@ class Decoder(nn.Module):
         # decoding
         cdr3_post_dense_flat = self.cdr3_post_linear_flat(decoder_linear_2)
         cdr3_output = softmax(self.cdr3_output(cdr3_post_dense_flat).view(-1, self.max_cdr3_len, self.vocab_size),
-                              dim=1)
+                              dim=1, dtype=torch.double)
         v_gene_output = softmax(self.v_gene_output(decoder_linear_2), dim=1)
         j_gene_output = softmax(self.j_gene_output(decoder_linear_2), dim=1)
 

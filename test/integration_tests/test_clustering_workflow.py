@@ -49,19 +49,23 @@ def test_clustering_workflow():
             },
             'reports': {
                 'rep1': 'DimensionalityReduction',
-                # 'rep2': 'ClusteringSummary'
             }
         },
         'instructions': {
             'clustering': {
                 'type': 'Clustering',
                 'dataset': 'd1',
-                'metrics': ['adjusted_rand_score', 'adjusted_mutual_info_score'],
+                'metrics': ['adjusted_rand_score', 'adjusted_mutual_info_score', 'silhouette_score',
+                            'calinski_harabasz_score'],
                 'labels': ['epitope'],
                 'clustering_settings': [
-                    {'encoding': 'kmer', 'dim_reduction': 'pca', 'method': 'kmeans2'},
+                    {'encoding': 'kmer', 'method': 'kmeans2'},
                     {'encoding': 'kmer', 'dim_reduction': 'pca', 'method': 'kmeans3'}
                 ],
+                'split_config': {
+                    'split_strategy': 'random',
+                    'training_percentage': 0.5
+                },
                 'reports': ['rep1'],
                 'number_of_processes': 4
             }

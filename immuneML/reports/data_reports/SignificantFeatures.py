@@ -7,11 +7,13 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.encodings.abundance_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
 from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
 from immuneML.encodings.abundance_encoding.KmerAbundanceEncoder import KmerAbundanceEncoder
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -92,7 +94,8 @@ class SignificantFeatures(DataReport):
 
     def __init__(self, dataset: RepertoireDataset = None, p_values: List[float] = None, k_values: List[int] = None,
                  label: dict = None, compairr_path: Path = None, log_scale: bool = False, result_path: Path = None,
-                 name: str = None, number_of_processes: int = 1):
+                 name: str = None, number_of_processes: int = 1, region_type: RegionType = None,
+                 sequence_type: SequenceType = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.p_values = p_values
         self.k_values = k_values
@@ -100,16 +103,21 @@ class SignificantFeatures(DataReport):
         self.label_config = None
         self.compairr_path = compairr_path
         self.log_scale = log_scale
+        self.region_type = region_type
+        self.sequence_type = sequence_type
 
     def check_prerequisites(self):
         if isinstance(self.dataset, RepertoireDataset):
             return True
         else:
-            warnings.warn(f"{SignificantFeatures.__name__}: report can be generated only from RepertoireDataset. Skipping this report...")
+            warnings.warn(f"{SignificantFeatures.__name__}: report can be generated only from RepertoireDataset. "
+                          f"Skipping this report...")
             return False
 
     def _generate(self) -> ReportResult:
-        self.label_config = LabelHelper.create_label_config([self.label], self.dataset, SignificantFeatures.__name__, f"{SignificantFeatures.__name__}/label")
+        self.label_config = LabelHelper.create_label_config([self.label], self.dataset,
+                                                            SignificantFeatures.__name__,
+                                                            f"{SignificantFeatures.__name__}/label")
 
         plotting_data = self._compute_plotting_data()
         table_result = self._write_results_table(plotting_data)
@@ -118,7 +126,9 @@ class SignificantFeatures(DataReport):
         output_figures = None if report_output_fig is None else [report_output_fig]
 
         return ReportResult(name=self.name,
-                            info="The number of significant features (label-associated k-mers or sequences) per Repertoire according to Fisher's exact test, across different classes for the given label.",
+                            info="The number of significant features (label-associated k-mers or sequences) per "
+                                 "Repertoire according to Fisher's exact test, across different classes for the "
+                                 "given label.",
                             output_figures=output_figures,
                             output_tables=[table_result])
 
@@ -180,7 +190,8 @@ class SignificantFeatures(DataReport):
 
     def _compute_significant_feature_counts(self, k, p_value):
         encoder_result_path = self._get_encoder_result_path(k, p_value)
-        encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path)
+        encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path,
+                                                                         self.region_type, self.sequence_type)
 
         if type(k) == int:
             pos_class_feature_counts, neg_class_feature_counts = self._compute_significant_kmer_counts(k, p_value, encoder_params)
@@ -209,7 +220,7 @@ class SignificantFeatures(DataReport):
 
         relevant_feature_presence = self._sum_sequence_vectors_iterable(relevant_indices, encoder.comparison_data.get_item_vectors())
 
-        return self._get_positive_negative_class(relevant_feature_presence, self.dataset.get_repertoire_ids())
+        return self._get_positive_negative_class(relevant_feature_presence, self.dataset.get_example_ids())
 
     def _compute_significant_compairr_sequence_counts(self, p_value, encoder_params):
         encoder = SignificantFeaturesHelper._build_compairr_sequence_encoder(self.dataset, p_value, encoder_params, self.compairr_path)
@@ -219,7 +230,7 @@ class SignificantFeatures(DataReport):
 
         relevant_feature_presence = self._sum_sequence_vectors_iterable(relevant_indices, encoder.compairr_sequence_presence)
 
-        return self._get_positive_negative_class(relevant_feature_presence, self.dataset.get_repertoire_ids())
+        return self._get_positive_negative_class(relevant_feature_presence, self.dataset.get_example_ids())
 
     def _sum_sequence_vectors_iterable(self, relevant_indices, sequence_vector_iterable):
         relevant_feature_presence = np.zeros(shape=(6,))

@@ -2,8 +2,8 @@ import logging
 from pathlib import Path
 from typing import List, Tuple
 
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.classifiers.TCRdistClassifier import TCRdistClassifier
@@ -31,6 +31,18 @@ class TCRdistMotifDiscovery(MLReport):
     Mayer-Blackwell K, Schattgen S, Cohen-Lavi L, et al. TCR meta-clonotypes for biomarker discovery with tcrdist3: quantification of public,
     HLA-restricted TCR biomarkers of SARS-CoV-2 infection. bioRxiv. Published online December 26, 2020:2020.12.24.424260.
     `doi:10.1101/2020.12.24.424260 <https://www.biorxiv.org/content/10.1101/2020.12.24.424260v1>`_
+
+
+    Example output:
+
+    .. image:: _static/images/reports/tcrdist_motif_a.svg
+       :alt: TCRdist alpha chain logo plot
+       :width: 300px
+
+
+    .. image:: _static/images/reports/tcrdist_motif_b.svg
+       :alt: TCRdist beta chain logo plot
+       :width: 300px
 
 
     **Specification arguments:**

@@ -14,6 +14,9 @@ from immuneML.util.PathBuilder import PathBuilder
 class TestDatasetGenerationOverviewTool(TestCase):
 
     def create_dummy_dataset_from_files(self, path):
+
+        PathBuilder.build(path)
+
         file1_content = """rearrangement_id	rearrangement_set_id	sequence_id	sequence	rev_comp	productive	stop_codon	sequence_alignment	germline_alignment	v_call	d_call	j_call	c_call	junction	junction_length	junction_aa	v_score	d_score	j_score	c_score	v_cigar	d_cigar	j_cigar	c_cigar	v_identity	v_evalue	d_identity	d_evalue	j_identity	j_evalue	v_sequence_start	v_sequence_end	v_germline_start	v_germline_end	d_sequence_start	d_sequence_end	d_germline_start	d_germline_end	j_sequence_start	j_sequence_end	j_germline_start	j_germline_end	np1_length	np2_length	duplicate_count	vj_in_frame
 IVKNQEJ01BVGQ6	1	IVKNQEJ01BVGQ6	GGCCCAGGACTGGTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACTGTCTCTGGTGGCTCCATCAGCAGTGGTGGTTACTACTGGAGCTGGATCCGCCAGCACCCAGGGAAGGGCCTGGAGTGGATTGGGTACATCTATTACAGTGGGAGCACCTACTACAACCCGTCCCTCAAGAGTCGAGTTACCATATCAGTAGACACGTCTAAGAACCAGTTCTCCCTGAAGCTGAGCTCTGTGACTGCCGCGGACACGGCCGTGTATTACTGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTGGGGCCAGGGAACCCTGGTCACTGTCTCCTCA	T	T	F			IGHV4-31*03	IGHD1-7*01,IGHD6-19*01	IGHJ4*02		TGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTGG	36	CASGVAGTFDYW	430	16.4	75.8		22N1S275=	11N280S8=	6N292S32=1X9=		1	1E-122	1	2.7	0.9762	6E-18	0	275	0	317	279	287	10	18	291	333	5	47	4	4	1247	T
 IVKNQEJ01AQVWS	1	IVKNQEJ01AQVWS	GGCCCAGGACTGGTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACTGTCTCTGGTGGCTCCATCAGCAGTGGTGGTTACTACTGGAGCTGGATCCGCCAGCACCCAGGGAAGGGCCTGGAGTGGATTGGGTACATCTATTACAGTGGGAGCACCAACTACAACCCCTCCCTCAAGAGTCGAGTCACCATATCAGTAGACACGTCTAAGAACCAGTTCTCCCTGAAGCTGAGCTCTGTGACTGCCGCGGACACGGCCGTGTATTACTGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTGGGGCCAGGGAACCCTGGTCACCGTCTCCTCA	T	T	F			IGHV4-31*03	IGHD1-7*01,IGHD6-19*01	IGHJ4*02		TGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTGG	36	CASGVAGTFDYW	420	16.4	83.8		22N1S156=1X10=1X17=1X89=	11N280S8=	6N292S42=		0.9891	8E-120	1	2.7	1	2E-20	0	275	0	317	279	287	10	18	291	333	5	47	4	4	4	T
@@ -39,8 +42,9 @@ rep1.tsv,1
 rep2.tsv,2""")
 
     def generate_random_dummy_dataset(self, path):
-        RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=2, sequence_count_probabilities={10:1},
-                                                           sequence_length_probabilities={10:1}, labels=dict(), path=path, name="dataset")
+        RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=2, sequence_count_probabilities={10: 1},
+                                                           sequence_length_probabilities={10: 1}, labels=dict(),
+                                                           path=path, name="dataset")
 
     def prepare_specs(self, path, dataset_type="files"):
         specs = {
@@ -70,7 +74,6 @@ rep2.tsv,2""")
             }
         }
 
-
         if dataset_type == "files":
             self.create_dummy_dataset_from_files(path)
             specs["definitions"]["datasets"]["dataset"] = {"format": "AIRR",
@@ -81,8 +84,9 @@ rep2.tsv,2""")
                                                                "result_path": "./"}}
         elif dataset_type == "already_imported":
             self.generate_random_dummy_dataset(path)
-            specs["definitions"]["datasets"]["dataset"] = {"format": "ImmuneML", "params": {"path": f"dataset.yaml",
-                                                                                            "result_path": "./"}}
+            specs["definitions"]["datasets"]["dataset"] = {"format": "AIRR",
+                                                           "params": {"dataset_file": f"dataset.yaml",
+                                                                      "result_path": "./"}}
 
         yaml_path = path / "specs.yaml"
         with open(yaml_path, "w") as file:
@@ -95,19 +99,23 @@ rep2.tsv,2""")
         PathBuilder.remove_old_and_build(path)
 
         old_wd = os.getcwd()
-        os.chdir(path)
 
-        for dataset_type in ("files", "already_imported"):
-            result_path = path / f"tool_results_path_{dataset_type}/"
+        try:
+            for dataset_type in ("files", "already_imported"):
+                result_path = PathBuilder.build(path / f"tool_results_path_{dataset_type}/")
+                os.chdir(result_path)
 
-            yaml_path = self.prepare_specs(path, dataset_type=dataset_type)
+                yaml_path = self.prepare_specs(result_path, dataset_type=dataset_type)
 
-            run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path, 'tool': "DatasetGenerationOverviewTool"}))
+                run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path / 'output',
+                                          'tool': "DatasetGenerationOverviewTool"}))
 
-            self.assertTrue(os.path.isfile(result_path / "result/dataset_metadata.csv"))
-            self.assertTrue(os.path.isfile(result_path / "result/dataset.yaml"))
-            self.assertEqual(4, len([name for name in os.listdir(result_path / "result/repertoires/")
-                                     if os.path.isfile(os.path.join(result_path / "result/repertoires/", name))]))
+                self.assertTrue(os.path.isfile(result_path / "output/galaxy_dataset/dataset_metadata.csv"))
+                self.assertTrue(os.path.isfile(result_path / "output/galaxy_dataset/dataset.yaml"))
+                self.assertEqual(4, len([name for name in os.listdir(result_path / "output/galaxy_dataset/repertoires/")
+                                         if os.path.isfile(
+                        os.path.join(result_path / "output/galaxy_dataset/repertoires/", name))]))
+        finally:
+            os.chdir(old_wd)
 
-        os.chdir(old_wd)
         shutil.rmtree(path)

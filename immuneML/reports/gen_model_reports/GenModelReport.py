@@ -1,19 +1,15 @@
 from abc import ABC
 from pathlib import Path
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.reports.Report import Report
 
 
 class GenModelReport(Report, ABC):
-    '''
-    .. note::
-
-        This is an experimental feature
-
+    """
     Generative model reports show some type of features or statistics about a generative model.
-    '''
+    """
 
     DOCS_TITLE = "Generative model reports"
 

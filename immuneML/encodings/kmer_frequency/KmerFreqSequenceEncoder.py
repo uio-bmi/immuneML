@@ -1,6 +1,5 @@
 from collections import Counter
 
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 
@@ -32,7 +31,7 @@ class KmerFreqSequenceEncoder(KmerFrequencyEncoder):
 
             if params.encode_labels:
                 for label_name in label_config.get_labels_by_name():
-                    label = sequence.metadata.custom_params[label_name]
+                    label = sequence.metadata[label_name]
                     labels[label_name].append(label)
 
         return encoded_sequences, sequence_ids, labels, feature_names

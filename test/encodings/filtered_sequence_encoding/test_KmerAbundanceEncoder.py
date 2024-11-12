@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.abundance_encoding.KmerAbundanceEncoder import KmerAbundanceEncoder
 from immuneML.environment.Constants import Constants
@@ -25,16 +25,15 @@ class TestKmerAbundanceEncoder(TestCase):
         path = EnvironmentSettings.tmp_test_path / "abundance_encoder/"
         PathBuilder.build(path)
 
-        repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
+        dataset = RepertoireBuilder.build_dataset([["GGG", "III", "LLL", "MMM"],
                                                          ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
                                                          ["CCC", "FFF", "MMM"],
                                                          ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]],
                                                         labels={"l1": [True, True, False, False]}, path=path)
 
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, identifier="1")
-
         encoder = KmerAbundanceEncoder.build_object(dataset, **{
-            "p_value_threshold": 0.4, "sequence_encoding": "continuous_kmer", "k":3, "k_left": 0, "k_right": 0, "min_gap": 0, "max_gap": 0
+            "p_value_threshold": 0.4, "sequence_encoding": "continuous_kmer", "k":3, "k_left": 0, "k_right": 0,
+            "min_gap": 0, "max_gap": 0
         })
 
         label_config = LabelConfiguration([Label("l1", [True, False], positive_class=True)])

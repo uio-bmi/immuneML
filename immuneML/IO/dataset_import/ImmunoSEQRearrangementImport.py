@@ -1,10 +1,12 @@
+from pathlib import Path
+
 import pandas as pd
 
 from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from immuneML.data_model.dataset import Dataset
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.util.AdaptiveImportHelper import AdaptiveImportHelper
 from immuneML.util.ImportHelper import ImportHelper
 from scripts.specification_util import update_docs_per_mapping
@@ -31,7 +33,9 @@ class ImmunoSEQRearrangementImport(DataImport):
 
     - is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset. By default, is_repertoire is set to True.
 
-    - metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. Only the files included under the column 'filename' are imported into the RepertoireDataset. For setting SequenceDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
+    - metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. Only the files included under the column 'filename' are imported into the RepertoireDataset. For setting Sequence- or ReceptorDataset labels, metadata_file is ignored, use label_columns instead.
+
+    - label_columns (list): For Sequence- or ReceptorDataset, this parameter can be used to explicitly set the column names of labels to import. These labels can be used as prediction target. When label_columns are not set, label names are attempted to be discovered automatically (any column name which is not used in the column_mapping). For setting RepertoireDataset labels, label_columns is ignored, use metadata_file instead.
 
     - import_productive (bool): Whether productive sequences (with value 'In' in column frame_type) should be included in the imported sequences. By default, import_productive is True.
 
@@ -45,7 +49,7 @@ class ImmunoSEQRearrangementImport(DataImport):
 
     - import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
 
-    - region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as immunoSEQ files use the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
+    - region_type (str): Which part of the sequence to check when importing. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as immunoSEQ files use the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
     - column_mapping (dict): A mapping from immunoSEQ column names to immuneML's internal data representation. For immunoSEQ rearrangement-level files, this is by default set the values shown below in YAML format.         A custom column mapping can be specified here if necessary (for example: adding additional data fields if they are present in the file, or using alternative column names). Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS.
 
@@ -53,23 +57,12 @@ class ImmunoSEQRearrangementImport(DataImport):
         .. code-block:: yaml
 
             rearrangement: sequence
-            amino_acid: sequence_aa
+            amino_acid: junction_aa
             v_resolved: v_call
             j_resolved: j_call
             templates: duplicate_count
-            locus: chain
-
-    - column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For immunoSEQ rearrangement-level files, this is by default set to:
-
-        .. indent with spaces
-        .. code-block:: yaml
-
-                v_resolved: v_alleles
-                j_resolved: j_alleles
 
     - columns_to_load (list): Specifies which subset of columns must be loaded from the file. By default, this is: [rearrangement, v_family, v_gene, v_allele, j_family, j_gene, j_allele, amino_acid, templates, frame_type, locus]
-
-    - metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDatasets. This should specify a mapping similar to column_mapping where keys are immunoSEQ column names and values are the names that are internally used in immuneML as metadata fields. These metadata fields can be used as prediction labels for Sequence- and ReceptorDatasets. This parameter can also be used to specify sequence-level metadata columns for RepertoireDatasets, which can be used by reports. To set prediction label metadata for RepertoireDatasets, see metadata_file instead. For immunoSEQ rearrangement .tsv files, there is no default metadata_column_mapping.
 
     - separator (str): Column separator, for ImmunoSEQ files this is by default "\\t".
 
@@ -116,34 +109,25 @@ class ImmunoSEQRearrangementImport(DataImport):
                         - locus
                         region_type: IMGT_CDR3 # what part of the sequence to import
                         column_mapping: # column mapping immunoSEQ: immuneML
-                            rearrangement: sequence
-                            amino_acid: sequence_aa
+                            rearrangement: cdr3
+                            amino_acid: cdr3_aa
                             v_resolved: v_call
                             j_resolved: j_call
                             templates: duplicate_count
-                            locus: chain
 
     """
 
-    @staticmethod
-    def import_dataset(params: dict, dataset_name: str) -> Dataset:
-        return ImportHelper.import_dataset(ImmunoSEQRearrangementImport, params, dataset_name)
-
-    @staticmethod
-    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        return AdaptiveImportHelper.preprocess_dataframe(df, params)
+    def preprocess_file(self, df: pd.DataFrame) -> pd.DataFrame:
+        return AdaptiveImportHelper.preprocess_dataframe(df, self.params)
 
     @staticmethod
     def get_documentation():
         doc = str(ImmunoSEQRearrangementImport.__doc__)
 
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
-        repertoire_fields = list(Repertoire.FIELDS)
-        repertoire_fields.remove("region_type")
 
         mapping = {
             "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
-            "Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS": f"Valid immuneML fields that can be specified here are {repertoire_fields}."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

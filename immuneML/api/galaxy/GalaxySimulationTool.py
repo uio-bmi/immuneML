@@ -1,12 +1,13 @@
 import logging
-import shutil
 from pathlib import Path
 
 import yaml
 
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
 from immuneML.api.galaxy.Util import Util
-from immuneML.workflows.instructions.ligo_simulation.LigoSimInstruction import LigoSimInstruction
+from immuneML.app.ImmuneMLApp import ImmuneMLApp
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class GalaxySimulationTool(GalaxyTool):
@@ -86,18 +87,23 @@ class GalaxySimulationTool(GalaxyTool):
         super().__init__(specification_path, result_path, **kwargs)
 
     def _run(self):
-        self.prepare_specs()
+        PathBuilder.build(self.result_path)
+        specs = self._prepare_specs()
 
-        Util.run_tool(self.yaml_path, self.result_path)
+        Util.check_instruction_type(specs, 'GalaxySimulationTool', "LigoSim")
 
-        dataset_location = list(self.result_path.glob("*/exported_dataset/*/"))[0]
-        shutil.copytree(dataset_location, self.result_path / 'result/')
+        app = ImmuneMLApp(self.yaml_path, self.result_path)
+        state = app.run()[0]
+
+        dataset = state.resulting_dataset
+        Util.export_galaxy_dataset(dataset, self.result_path)
 
         logging.info(f"{GalaxySimulationTool.__name__}: the simulation is finished.")
 
-    def prepare_specs(self):
+    def _prepare_specs(self) -> dict:
         with self.yaml_path.open("r") as file:
             specs = yaml.safe_load(file)
 
         Util.check_paths(specs, "GalaxySimulationTool")
         Util.update_result_paths(specs, self.result_path, self.yaml_path)
+        return specs

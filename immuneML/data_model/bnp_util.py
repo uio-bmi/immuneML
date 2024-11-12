@@ -1,18 +1,21 @@
 import dataclasses
+import logging
 from dataclasses import fields as get_fields
 from enum import Enum
 from itertools import chain
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Tuple, List
 
 import bionumpy as bnp
 import numpy as np
+import pandas as pd
 import yaml
-from bionumpy import EncodedArray
 from bionumpy.bnpdataclass import bnpdataclass
+from bionumpy.encoded_array import EncodedArray
 
-from immuneML.data_model.SequenceSet import SequenceSet
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
+from immuneML.data_model.SequenceParams import Chain, RegionType
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
@@ -32,7 +35,7 @@ def bnp_read_from_file(filename: Path, buffer_type: bnp.io.delimited_buffers.Del
 
 def write_yaml(filename: Path, yaml_dict):
     with filename.open('w') as file:
-        yaml.dump(yaml_dict, file)
+        yaml.dump({k: str(v) if isinstance(v, Path) else v for k, v in yaml_dict.items()}, file)
 
 
 def read_yaml(filename: Path) -> dict:
@@ -41,16 +44,22 @@ def read_yaml(filename: Path) -> dict:
     return load_type_dict(content)
 
 
+def get_sequence_field_name(region_type: RegionType = RegionType.IMGT_CDR3,
+                            sequence_type: SequenceType = SequenceType.AMINO_ACID):
+    suffix = "_aa" if sequence_type == SequenceType.AMINO_ACID else ""
+    return region_type.value + suffix
+
+
 def load_type_dict(full_dict: dict) -> dict:
     if 'type_dict' in full_dict:
-        full_dict['type_dict'] = {key: SequenceSet.STR_TO_TYPE[val] for key, val in full_dict['type_dict'].items()}
+        full_dict['type_dict'] = {key: AIRRSequenceSet.STR_TO_TYPE[val] for key, val in full_dict['type_dict'].items()}
     return full_dict
 
 
 def build_dynamic_bnp_dataclass(all_fields_dict: Dict[str, Any]):
-    sequence_field_names = {**{field.name: field.type for field in dataclasses.fields(SequenceSet)},
-                            **SequenceSet.additional_fields_with_types()}
+    sequence_field_names = {field.name: field.type for field in dataclasses.fields(AIRRSequenceSet)}
     types = {}
+
     for key, value in all_fields_dict.items():
         if key in sequence_field_names:
             field_type = sequence_field_names[key]
@@ -58,7 +67,8 @@ def build_dynamic_bnp_dataclass(all_fields_dict: Dict[str, Any]):
             field_type = get_field_type_from_values(value)
         types[key] = field_type
 
-    dc = make_dynamic_seq_set_dataclass(type_dict=types)
+    dc = AIRRSequenceSet.extend(tuple((name, t, AIRRSequenceSet.get_neutral_value(t)) for name, t in types.items()
+                                      if name not in list(AIRRSequenceSet.get_field_type_dict().keys())))
     return dc, types
 
 
@@ -66,6 +76,7 @@ def build_dynamic_bnp_dataclass_obj(all_fields_dict: Dict[str, Any]):
     dc, types = build_dynamic_bnp_dataclass(all_fields_dict)
     all_fields_dict = add_neutral_values(all_fields_dict, types)
     all_fields_dict = convert_to_expected_types(all_fields_dict, types)
+    all_fields_dict = make_full_airr_seq_set_df(pd.DataFrame(all_fields_dict)).to_dict(orient='list')
     return dc(**all_fields_dict), types
 
 
@@ -84,7 +95,7 @@ def prepare_values_for_bnp(field_values: dict, types: dict) -> dict:
 
 def add_neutral_values(field_values: dict, types: dict) -> dict:
     return {
-        field: [val if val is not None else SequenceSet.get_neutral_value(types[field]) for val in values]
+        field: [val if val is not None else AIRRSequenceSet.get_neutral_value(types[field]) for val in values]
         for field, values in field_values.items()
     }
 
@@ -96,52 +107,21 @@ def convert_enums_to_str(field_values: dict) -> dict:
     }
 
 
-def make_dynamic_seq_set_dataclass(type_dict: Dict[str, Any]):
-    bnp_dc = bnpdataclass(dataclasses.make_dataclass('DynamicSequenceSet', fields=type_dict.items()))
+def extend_dataclass_with_dynamic_fields(cls, fields: List[Tuple[str, type]], cls_name: str = None):
+    cls_name = cls_name if cls_name is not None else "Dynamic" + cls.__name__
+    new_cls = bnpdataclass(dataclasses.make_dataclass(cls_name,
+                                                      fields=[(name, field_type, dataclasses.field(default=None)) for
+                                                              name, field_type in fields], bases=(cls,)))
 
-    methods = {'get_row_by_index': lambda self, index: get_row_by_index(self, index),
-               'get_single_row_value': lambda self, attr_name: get_single_row_value(self, attr_name),
-               'to_dict': lambda self: {field: getattr(self, field).tolist() for field in type_dict.keys()},
-               'get_rows_by_indices': lambda self, index1, index2: get_rows_by_indices(self, index1, index2)
-               }
+    def dynamic_fields(cls):
+        return [el[0] for el in fields]
 
-    for method_name, method in methods.items():
-        setattr(bnp_dc, method_name, method)
+    new_cls.dynamic_fields = classmethod(dynamic_fields)
 
-    return bnp_dc
-
-
-def get_receptor_attributes_for_bnp(receptors, receptor_dc, types) -> dict:
-    field_vals = {}
-    for field_obj in dataclasses.fields(receptor_dc):
-        if receptors[0].metadata and field_obj.name in receptors[0].metadata:
-            field_vals[field_obj.name] = list(chain.from_iterable((receptor.get_attribute(field_obj.name), receptor.get_attribute(field_obj.name)) for receptor in receptors))
-        elif field_obj.name == 'identifier':
-            field_vals[field_obj.name] = list(chain.from_iterable((receptor.identifier, receptor.identifier) for receptor in receptors))
-        else:
-            field_vals[field_obj.name] = list(chain.from_iterable([receptor.get_chain(ch).get_attribute(field_obj.name)
-                                                                   for ch in receptor.get_chains()]
-                                                                  for receptor in receptors))
-        field_vals[field_obj.name] = [el.to_string() if hasattr(el, 'to_string') else el
-                                      for el in field_vals[field_obj.name]]
-    return add_neutral_values(field_vals, types)
-
-
-def make_dynamic_seq_set_from_objs(objs: list):
-    fields = list(set(chain.from_iterable(obj.get_all_attribute_names() for obj in objs)))
-    all_fields_dict = {}
-
-    for field in fields:
-        vals = [obj.get_attribute(field) for obj in objs]
-        if any(isinstance(el, list) for el in vals):
-            vals = list(chain.from_iterable(vals))
-        all_fields_dict[field] = vals
-
-    return build_dynamic_bnp_dataclass(all_fields_dict)
+    return new_cls
 
 
 def get_field_type_from_values(values):
-    t = None
     if isinstance(values, np.ndarray):
         t = type(values[0].item())
     elif len(values) == 0:
@@ -185,8 +165,8 @@ def get_rows_by_indices(self, index1, index2) -> dict:
     assert row1['cell_id'] == row2['cell_id'], (row1['cell_id'], row2['cell_id'])
 
     return {
-        **{f'{Chain.get_chain(row1["chain"]).name.lower()}_{key}': val for key, val in row1.items()},
-        **{f'{Chain.get_chain(row2["chain"]).name.lower()}_{key}': val for key, val in row2.items()},
+        **{f'{Chain.get_chain(row1["locus"]).name.lower()}_{key}': val for key, val in row1.items()},
+        **{f'{Chain.get_chain(row2["locus"]).name.lower()}_{key}': val for key, val in row2.items()},
     }
 
 
@@ -216,21 +196,47 @@ def make_buffer_type_from_dataset_file(dataset_file: Path):
         with dataset_file.open('r') as file:
             metadata = yaml.safe_load(file)
 
-        type_dict = {key: SequenceSet.STR_TO_TYPE[val] for key, val in metadata["type_dict"].items()}
-        dataclass = make_dynamic_seq_set_dataclass(type_dict)
+        type_dict = {key: AIRRSequenceSet.STR_TO_TYPE[val] for key, val in metadata["type_dict"].items()}
+        dataclass = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(type_dict.items()))
         return bnp.io.delimited_buffers.get_bufferclass_for_datatype(dataclass, delimiter='\t', has_header=True)
     else:
         raise RuntimeError(f"Dataset file {dataset_file} doesn't exist, cannot load the dataset.")
 
 
-def merge_dataclass_objects(objects: list):
-    field_names = sorted(
-        list(set(chain.from_iterable([field.name for field in get_fields(obj)] for obj in objects))))
+def merge_dataclass_objects(objects: list, fill_unmatched: bool = False):
+    fields = {k: v for d in [{field.name: field.type for field in get_fields(obj)} for obj in objects] for k, v in
+              d.items()}
+    fields = {k: fields[k] for k in sorted(list(fields.keys()))}
+
+    tmp_objs = []
 
     for obj in objects:
-        assert all(hasattr(obj, field) for field in field_names), (obj, field_names)
+        missing_fields = [field for field in fields.keys() if not hasattr(obj, field)]
 
-    cls = type(objects[0])
+        if not fill_unmatched or len(missing_fields) == 0:
+            assert all(hasattr(obj, field) for field in fields.keys()), (obj, list(fields.keys()))
+            tmp_objs.append(obj)
+        else:
+            logging.info(f"Filling in missing fields when merging dataclass objects: {missing_fields}\nObject:\n{obj}")
+            tmp_objs.append(
+                obj.add_fields({field_name: [AIRRSequenceSet.get_neutral_value(fields[field_name])] * len(obj)
+                                for field_name in missing_fields},
+                               {field_name: field_type for field_name, field_type in fields.items() if
+                                field_name in missing_fields}))
+
+    cls = type(tmp_objs[0])
     return cls(
-        **{field_name: list(chain.from_iterable([getattr(obj, field_name) for obj in objects])) for field_name in
-           field_names})
+        **{field_name: list(chain.from_iterable([getattr(obj, field_name) for obj in tmp_objs])) for field_name in
+           fields.keys()})
+
+
+def get_type_dict_from_bnp_object(bnp_object) -> dict:
+    return {field.name: field.type for field in get_fields(bnp_object)}
+
+
+def make_full_airr_seq_set_df(df):
+    field_type_dict = AIRRSequenceSet.get_field_type_dict()
+    default_fields = pd.DataFrame({
+        f_name: [AIRRSequenceSet.get_neutral_value(f_type) for _ in range(df.shape[0])]
+        for f_name, f_type in field_type_dict.items() if f_name not in df.columns})
+    return pd.concat([df, default_fields], axis=1)

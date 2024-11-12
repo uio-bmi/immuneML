@@ -3,9 +3,8 @@ import itertools
 import logging
 import warnings
 
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.SequenceSet import ReceptorSequence, Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.PositionHelper import PositionHelper
 
@@ -24,8 +23,8 @@ class KmerHelper:
         return kmers
 
     @staticmethod
-    def create_IMGT_kmers_from_sequence(sequence: ReceptorSequence, k: int, sequence_type: SequenceType):
-        return KmerHelper.create_IMGT_kmers_from_string(sequence.get_sequence(sequence_type), k, sequence.get_attribute("region_type"))
+    def create_IMGT_kmers_from_sequence(sequence: ReceptorSequence, k: int, sequence_type: SequenceType, region_type: RegionType = RegionType.IMGT_CDR3):
+        return KmerHelper.create_IMGT_kmers_from_string(sequence.get_sequence(sequence_type), k, region_type)
 
     @staticmethod
     def create_IMGT_kmers_from_string(sequence: str, k: int, region_type: RegionType):
@@ -41,8 +40,10 @@ class KmerHelper:
             return []
 
     @staticmethod
-    def create_IMGT_gapped_kmers_from_sequence(sequence: ReceptorSequence, sequence_type: SequenceType, k_left: int, max_gap: int, k_right: int = None, min_gap: int = 0):
-        positions = PositionHelper.gen_imgt_positions_from_sequence(sequence, sequence_type)
+    def create_IMGT_gapped_kmers_from_sequence(sequence: ReceptorSequence, sequence_type: SequenceType, k_left: int,
+                                               max_gap: int, k_right: int = None, min_gap: int = 0,
+                                               region_type: RegionType = RegionType.IMGT_CDR3):
+        positions = PositionHelper.gen_imgt_positions_from_sequence(sequence, sequence_type, region_type)
 
         sequence_w_pos = list(zip(list(sequence.get_sequence(sequence_type)), positions))
         kmers = KmerHelper.create_gapped_kmers_from_string(sequence_w_pos, k_left=k_left, max_gap=max_gap,
@@ -89,9 +90,9 @@ class KmerHelper:
         return kmers
 
     @staticmethod
-    def create_sentences_from_repertoire(repertoire: Repertoire, k: int, sequence_type: SequenceType, overlap: bool = True):
+    def create_sentences_from_repertoire(repertoire: Repertoire, k: int, sequence_type: SequenceType, overlap: bool = True, region_type: RegionType = RegionType.IMGT_CDR3):
         sentences = []
-        for sequence in repertoire.sequences:
+        for sequence in repertoire.sequences(region_type):
             sentences.append(KmerHelper.create_kmers_from_sequence(sequence=sequence, k=k, overlap=overlap, sequence_type=sequence_type))
         return sentences
 

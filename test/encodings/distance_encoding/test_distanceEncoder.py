@@ -6,7 +6,7 @@ from unittest import TestCase
 import numpy as np
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.distance_encoding.DistanceEncoder import DistanceEncoder
 from immuneML.encodings.distance_encoding.DistanceMetricType import DistanceMetricType
@@ -37,7 +37,7 @@ class TestDistanceEncoder(TestCase):
         dataset = self.create_dataset(path)
 
         enc = DistanceEncoder.build_object(dataset, **{"distance_metric": DistanceMetricType.JACCARD.name,
-                                                       "attributes_to_match": ["sequence_aa"],
+                                                       "attributes_to_match": ["cdr3_aa"],
                                                        "sequence_batch_size": 20})
 
         enc.set_context({"dataset": dataset})

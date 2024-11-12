@@ -2,7 +2,7 @@ import logging
 
 from sklearn.manifold import TSNE as SklearnTSNE
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 
 

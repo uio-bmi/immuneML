@@ -1,5 +1,5 @@
 # main packages
-numpy<=1.23.5
+numpy<2.0.0
 pytest>=4
 pandas
 PyYAML>=5.3
@@ -20,9 +20,8 @@ matplotlib-venn>=0.11
 scipy
 umap-learn
 bionumpy>=0.2.31
+npstructures
 fisher>=0.1.9
 olga>=1.2.4
-npstructures>=0.2.0
-
-# stitchr
-# IMGTgeneDL
+stitchr
+IMGTgeneDL

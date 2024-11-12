@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
@@ -25,7 +25,7 @@ class DesignMatrixExporter(EncodingReport):
     **Specification arguments:**
 
     - file_format (str): the format and extension of the file to store the design matrix. The supported formats are:
-      npy, csv, hdf5, npy.zip, csv.zip or hdf5.zip.
+      npy, csv, pt, hdf5, npy.zip, csv.zip or hdf5.zip.
 
     Note: when using hdf5 or hdf5.zip output formats, make sure the 'hdf5' dependency is installed.
 
@@ -49,7 +49,9 @@ class DesignMatrixExporter(EncodingReport):
     @classmethod
     def build_object(cls, **kwargs):
         ParameterValidator.assert_keys_present(list(kwargs.keys()), ['file_format', 'name'], DesignMatrixExporter.__name__, DesignMatrixExporter.__name__)
-        ParameterValidator.assert_in_valid_list(kwargs['file_format'], ['npy', 'csv', 'npy.zip', 'csv.zip', 'hdf5.zip'], DesignMatrixExporter.__name__, 'file_format')
+        ParameterValidator.assert_in_valid_list(kwargs['file_format'],
+                                                ['npy', 'csv', 'npy.zip', 'csv.zip', 'hdf5.zip', 'pt'],
+                                                DesignMatrixExporter.__name__, 'file_format')
 
         return DesignMatrixExporter(**kwargs)
 
@@ -84,6 +86,9 @@ class DesignMatrixExporter(EncodingReport):
             header = ",".join(str(name) for name in feature_names) if feature_names is not None else ""
             np.savetxt(fname=str(file_path), X=data, delimiter=",", comments='',
                        header=header)
+        elif ext == 'pt':
+            import torch
+            torch.save(torch.from_numpy(data), str(file_path))
         else:
             if ext != "npy":
                 logging.info('The selected Report format is not compatible, .npy is used instead')

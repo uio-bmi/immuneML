@@ -2,11 +2,9 @@ import pandas as pd
 
 from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.receptor.ChainPair import ChainPair
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.SequenceParams import ChainPair, RegionType
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.util.ImportHelper import ImportHelper
 from scripts.specification_util import update_docs_per_mapping
 
@@ -32,7 +30,9 @@ class TenxGenomicsImport(DataImport):
 
     - is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or ReceptorDataset. By default, is_repertoire is set to True.
 
-    - metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. For setting Sequence- or ReceptorDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
+    - metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions.For setting Sequence- or ReceptorDataset labels, metadata_file is ignored, use label_columns instead.
+
+    - label_columns (list): For Sequence- or ReceptorDataset, this parameter can be used to explicitly set the column names of labels to import. These labels can be used as prediction target. When label_columns are not set, label names are attempted to be discovered automatically (any column name which is not used in the column_mapping). For setting RepertoireDataset labels, label_columns is ignored, use metadata_file instead.
 
     - paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a SequenceDataset (paired = False) or a ReceptorDataset (paired = True). In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together based on the identifier given in the 10xGenomics column named 'clonotype_id'.
 
@@ -57,8 +57,8 @@ class TenxGenomicsImport(DataImport):
         .. indent with spaces
         .. code-block:: yaml
 
-                cdr3: sequence_aa
-                cdr3_nt: sequence
+                cdr3: junction
+                cdr3_nt: junction_aa
                 v_gene: v_call
                 j_gene: j_call
                 umis: duplicate_count
@@ -66,8 +66,6 @@ class TenxGenomicsImport(DataImport):
                 consensus_id: sequence_id
 
     - column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For 10xGenomics format, there is no default column_mapping_synonyms.
-
-    - metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDatasets. This should specify a mapping similar to column_mapping where keys are 10xGenomics column names and values are the names that are internally used in immuneML as metadata fields. These metadata fields can be used as prediction labels for Sequence- and ReceptorDatasets. This parameter can also be used to specify sequence-level metadata columns for RepertoireDatasets, which can be used by reports. To set prediction label metadata for RepertoireDatasets, see metadata_file instead. For 10xGenomics format, there is no default metadata_column_mapping.
 
     - separator (str): Column separator, for 10xGenomics this is by default ",".
 
@@ -87,18 +85,15 @@ class TenxGenomicsImport(DataImport):
                         metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
                         paired: False # whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False
                         receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
-                        metadata_column_mapping: # metadata column mapping 10xGenomics: immuneML for SequenceDataset
-                            tenx_column_name1: metadata_label1
-                            tenx_column_name2: metadata_label2
                         import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
                         import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                        import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+                        import_empty_aa_sequences: False # filter out sequences if they don't have amino acid sequence set
                         # Optional fields with 10xGenomics-specific defaults, only change when different behavior is required:
                         separator: "," # column separator
                         region_type: IMGT_CDR3 # what part of the sequence to import
                         column_mapping: # column mapping 10xGenomics: immuneML
-                            cdr3: sequence_aa
-                            cdr3_nt: sequence
+                            cdr3: junction_aa
+                            cdr3_nt: junction
                             v_gene: v_call
                             j_gene: j_call
                             umis: duplicate_count
@@ -107,40 +102,18 @@ class TenxGenomicsImport(DataImport):
 
     """
 
-    @staticmethod
-    def import_dataset(params: dict, dataset_name: str) -> Dataset:
-        return ImportHelper.import_dataset(TenxGenomicsImport, params, dataset_name)
+    def preprocess_file(self, df: pd.DataFrame) -> pd.DataFrame:
 
-    @staticmethod
-    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        df["frame_type"] = SequenceFrameType.UNDEFINED.value
-        df.loc[df['productive']=="True", "frame_type"] = SequenceFrameType.IN.value
-        df.loc[df['productive']=="False", "frame_type"] = SequenceFrameType.OUT.value
+        additional_str_columns = [col for col in ['d_gene', 'c_gene'] if col in df.columns]
+        df.loc[:, additional_str_columns] = df.loc[:, additional_str_columns].astype(str).replace("None", "").replace("-1.0", "")
 
-        allowed_productive_values = []
-        if params.import_productive:
-            allowed_productive_values.append('True')
-        if params.import_unproductive:
-            allowed_productive_values.append('False')
-        if params.import_unknown_productivity:
-            allowed_productive_values.append('')
-            allowed_productive_values.append('NA')
+        additional_int_columns = [col for col in ['full_length', 'reads'] if col in df.columns]
+        df.loc[:, additional_int_columns] = df.loc[:, additional_int_columns].astype(int)
 
-        df = df[df.productive.isin(allowed_productive_values)]
-        df.drop(columns=["productive"], inplace=True)
-
-        ImportHelper.junction_to_cdr3(df, params.region_type)
-        df.loc[:, "region_type"] = params.region_type.name
-        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
-        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters, params.import_with_stop_codon)
-        ImportHelper.load_chains(df)
+        bool_str_columns = [col for col in ['productive', 'vj_in_frame', 'stop_codon'] if col in df.columns]
+        df.loc[:, bool_str_columns] = df.loc[:, bool_str_columns].astype(str).replace("True", "T").replace("False", "F").replace("None", "")
 
         return df
-
-    @staticmethod
-    def import_receptors(df, params):
-        df["receptor_id"] = df["cell_id"]
-        return ImportHelper.import_receptors(df, params)
 
     @staticmethod
     def get_documentation():

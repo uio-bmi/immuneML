@@ -45,7 +45,7 @@ class TestTCRdistEncoder(TestCase):
         params["receptor_chains"] = "TRA_TRB"
         params['organism'] = 'human'
 
-        dataset = VDJdbImport.import_dataset(params, "vdjdb_dataset")
+        dataset = VDJdbImport(params, "vdjdb_dataset").import_dataset()
 
         encoder = TCRdistEncoder.build_object(dataset, **{"cores": 2})
         encoded_dataset = encoder.encode(dataset, EncoderParams(path / "result/", LabelConfiguration([Label("epitope", None)])))

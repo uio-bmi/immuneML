@@ -1,12 +1,10 @@
 import copy
 import pickle
-import warnings
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.ElementDataset import ElementDataset
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import ElementDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
@@ -32,7 +30,8 @@ class EncoderHelper:
 
     @staticmethod
     def get_current_dataset(dataset, context):
-        '''Retrieves the full dataset (training+validation+test) if present in context, otherwise return the given dataset'''
+        """Retrieves the full dataset (training+validation+test) if present in context, otherwise return the given
+        dataset"""
         return dataset if context is None or "dataset" not in context else context["dataset"]
 
     @staticmethod
@@ -66,17 +65,18 @@ class EncoderHelper:
     @staticmethod
     def check_dataset_type_available_in_mapping(dataset, class_name):
         if dataset.__class__.__name__ not in class_name.dataset_mapping.keys():
-            raise ValueError(f"{class_name.__name__}: this encoder is not defined for dataset of type {dataset.__class__.__name__}. "
-                             f"Valid dataset types for this encoder are: {', '.join(list(class_name.dataset_mapping.keys()))}")
+            raise ValueError(
+                f"{class_name.__name__}: this encoder is not defined for dataset of type {dataset.__class__.__name__}. "
+                f"Valid dataset types for this encoder are: {', '.join(list(class_name.dataset_mapping.keys()))}")
 
     @staticmethod
     def encode_element_dataset_labels(dataset: ElementDataset, label_config: LabelConfiguration):
-        '''Automatically generates the encoded labels for an ElementDataset (= SequenceDataset or ReceptorDataset)'''
+        """Automatically generates the encoded labels for an ElementDataset (= SequenceDataset or ReceptorDataset)"""
         labels = {name: [] for name in label_config.get_labels_by_name()}
 
         for sequence in dataset.get_data():
             for label_name in label_config.get_labels_by_name():
-                label = sequence.get_attribute(label_name)
+                label = sequence.metadata[label_name]
                 labels[label_name].append(label)
 
         return labels
@@ -102,13 +102,14 @@ class EncoderHelper:
 
     @staticmethod
     def check_positive_class_labels(label_config: LabelConfiguration, location: str):
-        '''
+        """
         Performs checks for Encoders that explicitly predict a positive class. These Encoders can only be trained for a
         single binary label at a time.
-        '''
+        """
 
         labels = label_config.get_label_objects()
-        assert len(labels) == 1, f"{location}: this encoding works only for single label."
+        assert len(labels) == 1, (f"{location}: this encoding works only for single label, there are now "
+                                  f"{len(labels)} labels specified.")
 
         label = labels[0]
 
@@ -118,22 +119,22 @@ class EncoderHelper:
             f"To use this encoder, in the label definition in the specification of the instruction, define " \
             f"the positive class for the label. See documentation for this encoder for more details."
 
-        assert len(label.values) == 2, f"{location}: only binary classification (2 classes) is possible when extracting " \
-                                       f"relevant sequences for the label, but got these classes for label {label.name} instead: {label.values}."
+        assert len(
+            label.values) == 2, f"{location}: only binary classification (2 classes) is possible when extracting " \
+                                f"relevant sequences for the label, but got these classes for label {label.name} instead: {label.values}."
 
     @staticmethod
     def get_example_weights_by_identifiers(dataset, example_identifiers):
-        weights = dataset.get_example_weights()
+        weights = None
 
         if weights is not None:
             weights_dict = dict(zip(dataset.get_example_ids(), weights))
 
             return [weights_dict[identifier] for identifier in example_identifiers]
+
     @staticmethod
     def get_single_label_name_from_config(label_config: LabelConfiguration, location="EncoderHelper"):
         assert label_config.get_label_count() != 0, f"{location}: the dataset does not contain labels, please specify a label under 'instructions'."
         assert label_config.get_label_count() == 1, f"{location}: multiple labels were found: {', '.join(label_config.get_labels_by_name())}, expected a single label."
 
         return label_config.get_labels_by_name()[0]
-
-

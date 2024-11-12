@@ -2,7 +2,7 @@ import abc
 from pathlib import Path
 import logging
 
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment import Label
 from immuneML.ml_methods.util.Util import Util
 
@@ -64,12 +64,14 @@ class MLMethod(metaclass=abc.ABCMeta):
         This method should not be overwritten.
         """
         self.label = label
-        self.class_mapping = Util.make_class_mapping(encoded_data.labels[label.name], label.positive_class)
+        self.class_mapping = Util.make_class_mapping(encoded_data.labels[label.name], label)
         self.optimization_metric = optimization_metric
         self.feature_names = encoded_data.feature_names
 
         if encoded_data.example_weights is not None and not self.can_fit_with_example_weights():
-            logging.warning(f"{self.__class__.__name__}: cannot fit this classifier with example weights, fitting without example weights instead... Example weights will still be applied when computing evaluation metrics after fitting.")
+            logging.warning(f"{self.__class__.__name__}: cannot fit this classifier with example weights,"
+                            f" fitting without example weights instead... Example weights will still be applied when "
+                            f"computing evaluation metrics after fitting.")
 
     @abc.abstractmethod
     def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
@@ -94,7 +96,8 @@ class MLMethod(metaclass=abc.ABCMeta):
         """
         pass
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label, optimization_metric, number_of_splits: int = 5, cores_for_training: int = 2):
+    def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label, optimization_metric,
+                                number_of_splits: int = 5, cores_for_training: int = 2):
         """
         See also: _fit_by_cross_validation.
 

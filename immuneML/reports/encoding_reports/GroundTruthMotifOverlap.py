@@ -2,10 +2,9 @@ from pathlib import Path
 
 import logging
 import plotly.express as px
-import numpy as np
 import pandas as pd
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
 
 from immuneML.reports.ReportOutput import ReportOutput

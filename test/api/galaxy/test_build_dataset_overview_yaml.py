@@ -6,7 +6,7 @@ import pandas as pd
 import yaml
 
 from immuneML.api.galaxy.build_dataset_overview_yaml import main as yamlbuilder_main
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
@@ -41,42 +41,50 @@ class MyTestCase(unittest.TestCase):
 
         old_wd = os.getcwd()
 
-        os.chdir(path)
+        try:
+            os.chdir(path)
 
-        yamlbuilder_main(["--format", "VDJdb", "--output_path", str(path), "--file_name", "sequence.yaml",
-                          "--paired", "False", "--metadata_columns", "a,b", "--is_repertoire", "False",
-                          "--label_name", "a", "--sequence_length_report", "True", "--vj_gene_report", "True"])
+            yamlbuilder_main(["--format", "VDJdb", "--output_path", str(path), "--file_name", "sequence.yaml",
+                              "--paired", "False", "--metadata_columns", "Epitope,Epitope gene", "--is_repertoire", "False",
+                              "--label_name", "a", "--sequence_length_report", "True",
+                              "--sequence_count_report", "True", "--vj_gene_report", "True"])
 
-        with open(path / "sequence.yaml", "r") as file:
-            loaded_specs = yaml.load(file, Loader=yaml.FullLoader)
+            with open(path / "sequence.yaml", "r") as file:
+                loaded_specs = yaml.load(file, Loader=yaml.FullLoader)
 
-            self.assertDictEqual(loaded_specs["definitions"]["datasets"], {"dataset":
-                                                                               {"format": "VDJdb",
-                                                                                "params":
-                                                                                    {"path": "./", "is_repertoire": False,
-                                                                                     "paired": False,
-                                                                                     "metadata_column_mapping": {"a": "a", "b": "b"},
-                                                                                     "region_type": RegionType.IMGT_CDR3.name,
-                                                                                     "result_path": "./"}}})
+                self.assertDictEqual(loaded_specs["definitions"]["datasets"], {"dataset":
+                                                                                   {"format": "VDJdb",
+                                                                                    "params":
+                                                                                        {"path": "./", "is_repertoire": False,
+                                                                                         "paired": False,
+                                                                                         "region_type": RegionType.IMGT_CDR3.name,
+                                                                                         "result_path": "./",
+                                                                                         "label_columns": ["Epitope", "Epitope gene"]}}})
 
-            self.assertDictEqual(loaded_specs["definitions"]["reports"], {"sequence_length_report": "SequenceLengthDistribution",
-                                                                          "vj_gene_report":
-                                                                              {"VJGeneDistribution":
-                                                                                   {"label": "a"}}})
+                self.assertDictEqual(loaded_specs["definitions"]["reports"], {"sequence_length_report": "SequenceLengthDistribution",
+                                                                              "sequence_count_report":
+                                                                                  {"SequenceCountDistribution":
+                                                                                       {"label": "a"}},
+                                                                              "vj_gene_report":
+                                                                                  {"VJGeneDistribution":
+                                                                                       {"label": "a"}}})
 
-            self.assertDictEqual(loaded_specs["instructions"], {"my_dataset_generation_instruction": {
-                                                                     "type":"ExploratoryAnalysis",
-                                                                     "analyses":{
-                                                                         "sequence_length_analysis":
-                                                                              {"dataset": "dataset",
-                                                                               "report": "sequence_length_report"},
-                                                                          "vj_gene_analysis":
-                                                                              {"dataset": "dataset",
-                                                                               "report": "vj_gene_report"}}}})
+                self.assertDictEqual(loaded_specs["instructions"], {"my_dataset_generation_instruction": {
+                                                                         "type":"ExploratoryAnalysis",
+                                                                         "analyses":{
+                                                                             "sequence_length_analysis":
+                                                                                  {"dataset": "dataset",
+                                                                                   "report": "sequence_length_report"},
+                                                                             "sequence_count_analysis":
+                                                                                  {"dataset": "dataset",
+                                                                                   "report": "sequence_count_report"},
+                                                                              "vj_gene_analysis":
+                                                                                  {"dataset": "dataset",
+                                                                                   "report": "vj_gene_report"}}}})
 
-        ImmuneMLParser.parse_yaml_file(path / "sequence.yaml")
-
-        os.chdir(old_wd)
+            ImmuneMLParser.parse_yaml_file(path / "sequence.yaml")
+        finally:
+            os.chdir(old_wd)
 
         shutil.rmtree(path)
 
@@ -88,28 +96,30 @@ class MyTestCase(unittest.TestCase):
 
         old_wd = os.getcwd()
 
-        os.chdir(path)
+        try:
+            os.chdir(path)
 
-        yamlbuilder_main(["-r", "VDJdb", "-o", str(path), "-f", "receptor.yaml", "-p", "True", "-c", "TRA_TRB", "-a", "'c'", "-i", "False"])
+            yamlbuilder_main(["-r", "VDJdb", "-o", str(path), "-f", "receptor.yaml", "-p", "True", "-c", "TRA_TRB", "-a", "Epitope species", "-i", "False"])
 
-        with open(path / "receptor.yaml", "r") as file:
-            loaded_specs = yaml.load(file, Loader=yaml.FullLoader)
+            with open(path / "receptor.yaml", "r") as file:
+                loaded_specs = yaml.load(file, Loader=yaml.FullLoader)
 
-            self.assertDictEqual(loaded_specs["definitions"]["datasets"], {"dataset": {"format": "VDJdb", "params":
-                {"path": "./", "is_repertoire": False, "paired": True, "receptor_chains": "TRA_TRB", "metadata_column_mapping": {"c": "c"},
-                 "region_type": RegionType.IMGT_CDR3.name, "result_path": "./"}}})
+                self.assertDictEqual(loaded_specs["definitions"]["datasets"], {"dataset": {"format": "VDJdb", "params":
+                    {"path": "./", "is_repertoire": False, "paired": True, "receptor_chains": "TRA_TRB", "label_columns": ["Epitope species"],
+                     "region_type": RegionType.IMGT_CDR3.name, "result_path": "./"}}})
 
-            self.assertDictEqual(loaded_specs["instructions"], {"my_dataset_generation_instruction":
-                                                                    {"type":"ExploratoryAnalysis",
-                                                                     "analyses":
-                                                                         {"dataset_overview":
-                                                                              {"dataset": "dataset",
-                                                                               "report": None}}}})
+                self.assertDictEqual(loaded_specs["instructions"], {"my_dataset_generation_instruction":
+                                                                        {"type":"ExploratoryAnalysis",
+                                                                         "analyses":
+                                                                             {"dataset_overview":
+                                                                                  {"dataset": "dataset",
+                                                                                   "report": None}}}})
 
 
-        ImmuneMLParser.parse_yaml_file(path / "receptor.yaml")
+            ImmuneMLParser.parse_yaml_file(path / "receptor.yaml")
 
-        os.chdir(old_wd)
+        finally:
+            os.chdir(old_wd)
 
         shutil.rmtree(path)
 
@@ -121,29 +131,40 @@ class MyTestCase(unittest.TestCase):
 
         old_wd = os.getcwd()
 
-        os.chdir(path)
+        try:
+            os.chdir(path)
 
-        yamlbuilder_main(["-r", "VDJdb", "-o", str(path), "-f", "repertoire.yaml", "-m", "metadata.csv", "-i", "True", "-q", "True"])
+            yamlbuilder_main(["-r", "VDJdb", "-o", str(path), "-f", "repertoire.yaml", "-m", "metadata.csv", "-i", "True", "-q", "True",
+                              "-u", "True"])
 
-        with open(path / "repertoire.yaml", "r") as file:
-            loaded_specs = yaml.load(file, Loader=yaml.FullLoader)
+            with open(path / "repertoire.yaml", "r") as file:
+                loaded_specs = yaml.load(file, Loader=yaml.FullLoader)
 
-            self.assertDictEqual(loaded_specs["definitions"]["datasets"], {"dataset": {"format": "VDJdb", "params":
-                {"path": "./", "metadata_file": "metadata.csv", "is_repertoire": True, "region_type": RegionType.IMGT_CDR3.name,
-                 "result_path": "./"}}})
+                self.assertDictEqual(loaded_specs["definitions"]["datasets"], {"dataset": {"format": "VDJdb", "params":
+                    {"path": "./", "metadata_file": "metadata.csv", "is_repertoire": True, "region_type": RegionType.IMGT_CDR3.name,
+                     "result_path": "./"}}})
 
-            self.assertDictEqual(loaded_specs["definitions"]["reports"], {"amino_acid_report": "AminoAcidFrequencyDistribution"})
+                self.assertDictEqual(loaded_specs["definitions"]["reports"], {"amino_acid_report": "AminoAcidFrequencyDistribution",
+                                                                              "sequence_count_report": "SequenceCountDistribution",
+                                                                              "repertoire_clone_count_report": "RepertoireClonotypeSummary"})
 
-            self.assertDictEqual(loaded_specs["instructions"], {"my_dataset_generation_instruction":
-                                                                    {"type": "ExploratoryAnalysis",
-                                                                     "analyses":
-                                                                         {"amino_acid_analysis":
-                                                                              {"dataset": "dataset",
-                                                                               "report": "amino_acid_report"}}}})
+                self.assertDictEqual(loaded_specs["instructions"], {"my_dataset_generation_instruction":
+                                                                        {"type": "ExploratoryAnalysis",
+                                                                         "analyses":
+                                                                             {"amino_acid_analysis":
+                                                                                  {"dataset": "dataset",
+                                                                                   "report": "amino_acid_report"},
+                                                                              "sequence_count_analysis":
+                                                                                  {"dataset": "dataset",
+                                                                                   "report": "sequence_count_report"},
+                                                                              "repertoire_clone_count_analysis":
+                                                                                  {"dataset": "dataset",
+                                                                                   "report": "repertoire_clone_count_report"}}}})
 
-        ImmuneMLParser.parse_yaml_file(path / "repertoire.yaml")
+            ImmuneMLParser.parse_yaml_file(path / "repertoire.yaml")
 
-        os.chdir(old_wd)
+        finally:
+            os.chdir(old_wd)
 
         shutil.rmtree(path)
 

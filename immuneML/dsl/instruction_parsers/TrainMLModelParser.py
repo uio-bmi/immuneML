@@ -3,13 +3,15 @@ from inspect import signature
 from pathlib import Path
 from typing import Tuple
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.definition_parsers.PreprocessingParser import PreprocessingParser
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeightingStrategy
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.config.LeaveOneOutConfig import LeaveOneOutConfig
@@ -28,7 +30,8 @@ class TrainMLModelParser:
 
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> TrainMLModelInstruction:
 
-        valid_keys = ["assessment", "selection", "dataset", "strategy", "labels", "metrics", "settings", "number_of_processes", "type", "reports",
+        valid_keys = ["assessment", "selection", "dataset", "strategy", "labels", "metrics", "settings",
+                      "number_of_processes", "type", "reports", "sequence_type", "region_type",
                       "optimization_metric", "refit_optimal_model", "example_weighting", "export_all_ml_settings"]
         ParameterValidator.assert_type_and_value(instruction['settings'], list, TrainMLModelParser.__name__, 'settings')
         ParameterValidator.assert_keys(list(instruction.keys()), valid_keys, TrainMLModelParser.__name__, "TrainMLModel")
@@ -43,6 +46,9 @@ class TrainMLModelParser:
 
         if instruction["example_weighting"] is not None:
             ParameterValidator.assert_type_and_value(instruction['example_weighting'], str, TrainMLModelParser.__name__, 'example_weighting')
+
+        ParameterValidator.assert_sequence_type(instruction, TrainMLModelParser.__name__)
+        ParameterValidator.assert_region_type(instruction, TrainMLModelParser.__name__)
 
         settings = self._parse_settings(instruction, symbol_table)
         dataset = symbol_table.get(instruction["dataset"])
@@ -65,7 +71,9 @@ class TrainMLModelParser:
                                                  label_configuration=label_config, path=path, context=context,
                                                  number_of_processes=instruction["number_of_processes"], reports=reports,
                                                  example_weighting=example_weighting, export_all_ml_settings=instruction['export_all_ml_settings'],
-                                                 name=key)
+                                                 name=key,
+                                                 sequence_type=SequenceType[instruction['sequence_type'].upper()],
+                                                 region_type=RegionType[instruction['region_type'].upper()])
 
         return hp_instruction
 

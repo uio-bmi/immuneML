@@ -1,10 +1,10 @@
 import shutil
 from unittest import TestCase
 
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from immuneML.data_model.SequenceParams import ChainPair
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
+from immuneML.data_model.SequenceSet import Receptor
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.hyperparameter_optimization.config.LeaveOneOutConfig import LeaveOneOutConfig
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
@@ -19,11 +19,11 @@ class TestLeaveOneOutSplitter(TestCase):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "leave_one_out_splitter/")
         receptors = []
         for i in range(10):
-            receptors.append(TCABReceptor(ReceptorSequence(metadata=SequenceMetadata(chain='alpha')),
-                                          ReceptorSequence(metadata=SequenceMetadata(chain='beta')),
-                                          {"subject": i % 3}))
+            receptors.append(Receptor(chain_1=ReceptorSequence(locus='alpha'),
+                                          chain_2=ReceptorSequence(locus='beta'), chain_pair=ChainPair.TRA_TRB,
+                                          metadata={"subject": i % 3}, receptor_id=str(i), cell_id=str(i)))
 
-        dataset = ReceptorDataset.build_from_objects(receptors, 100, path, 'd1')
+        dataset = ReceptorDataset.build_from_objects(receptors, path, 'd1')
 
         params = DataSplitterParams(dataset, SplitType.LEAVE_ONE_OUT_STRATIFICATION, 3, paths=[path / f"result_{i}/" for i in range(1, 4)],
                                     split_config=SplitConfig(SplitType.LEAVE_ONE_OUT_STRATIFICATION, split_count=3,

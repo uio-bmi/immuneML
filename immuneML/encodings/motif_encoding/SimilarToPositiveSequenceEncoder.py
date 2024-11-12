@@ -5,9 +5,9 @@ import numpy as np
 
 
 from immuneML.analysis.SequenceMatcher import SequenceMatcher
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.LabelConfiguration import LabelConfiguration
@@ -142,8 +142,8 @@ class SimilarToPositiveSequenceEncoder(DatasetEncoder):
                                                    feature_annotations=None,
                                                    example_ids=dataset.get_example_ids(),
                                                    encoding=SimilarToPositiveSequenceEncoder.__name__,
-                                                   example_weights=dataset.get_example_weights(),
-                                                   info={})
+                                                   info={'sequence_type': params.sequence_type,
+                                                         'region_type': params.region_type})
 
         return encoded_dataset
 

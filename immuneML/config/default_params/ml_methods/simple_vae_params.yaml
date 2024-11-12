@@ -1,5 +1,5 @@
 # parameters set here are default parameters from the Davidsen et al. 2019 implementation for the basic model
-chain: beta
+locus: beta
 beta: 0.75
 latent_dim: 20
 linear_nodes_count: 75

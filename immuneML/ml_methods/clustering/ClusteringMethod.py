@@ -1,20 +1,17 @@
 import abc
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 
 
 class ClusteringMethod:
-    '''
-    .. note::
-
-        This is an experimental feature
+    """
 
     Clustering methods are algorithms which can be used to cluster repertoires, receptors or
     sequences without using external label information (such as disease or antigen binding state)
 
     These methods can be used in the :ref:`Clustering` instruction.
 
-    '''
+    """
     DOCS_TITLE = "Clustering methods"
 
     def __init__(self, name: str = None):

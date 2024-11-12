@@ -4,8 +4,10 @@ from pathlib import Path
 
 import yaml
 
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
 from immuneML.api.galaxy.Util import Util
+from immuneML.app.ImmuneMLApp import ImmuneMLApp
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.workflows.instructions.dataset_generation.DatasetExportInstruction import DatasetExportInstruction
 
@@ -22,10 +24,12 @@ class DataSimulationTool(GalaxyTool):
 
     def _run(self):
         self.prepare_specs()
-        Util.run_tool(self.yaml_path, self.result_path)
+        # Util.run_tool(self.yaml_path, self.result_path)
 
-        dataset_location = self.result_path / f"{self.instruction_name}/{self.dataset_name}/{self.export_format}/"
-        shutil.copytree(dataset_location, self.result_path / 'result/')
+        state = ImmuneMLApp(self.yaml_path, self.result_path).run()[0]
+        dataset = state.datasets[0]
+
+        Util.export_galaxy_dataset(dataset, self.result_path)
 
         logging.info(f"{DataSimulationTool.__name__}: immuneML has finished and the dataset was created.")
 

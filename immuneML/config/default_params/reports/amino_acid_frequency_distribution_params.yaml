@@ -2,3 +2,4 @@ alignment: CENTER
 relative_frequency: False
 split_by_label: False
 label: null
+region_type: IMGT_CDR3

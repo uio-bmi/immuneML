@@ -2,13 +2,16 @@ import hashlib
 from multiprocessing.pool import Pool
 
 import math
+from typing import Union
+
+import dill
 import numpy as np
 
 from immuneML.analysis.entropy_calculations.EntropyCalculator import EntropyCalculator
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.caching.CacheObjectType import CacheObjectType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
+from immuneML.data_model.SequenceSet import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
 from immuneML.util.Logger import log
@@ -29,7 +32,7 @@ class EvennessProfileRepertoireEncoder(EvennessProfileEncoder):
     @log
     def _encode_examples(self, dataset, params: EncoderParams):
 
-        arguments = [(repertoire, params) for repertoire in dataset.repertoires]
+        arguments = [(repertoire.identifier, dill.dumps(repertoire), params) for repertoire in dataset.repertoires]
 
         with Pool(params.pool_size) as pool:
             chunksize = math.floor(dataset.get_example_count()/params.pool_size) + 1
@@ -41,22 +44,25 @@ class EvennessProfileRepertoireEncoder(EvennessProfileEncoder):
 
         return list(encoded_repertoire_list), list(repertoire_names), encoded_labels
 
-    def get_encoded_repertoire(self, repertoire, params: EncoderParams):
+    def get_encoded_repertoire(self, repertoire_id: str, repertoire: Union[bytes, Repertoire], params: EncoderParams):
 
         params.model = vars(self)
+        serialized_repertoire = dill.dumps(repertoire) if isinstance(repertoire, Repertoire) else repertoire
 
         return CacheHandler.memo_by_params((("encoding_model", params.model),
                                             ("labels", params.label_config.get_labels_by_name()),
-                                            ("repertoire_id", repertoire.identifier),
-                                            ("repertoire_data",  hashlib.sha256(np.ascontiguousarray(repertoire.get_sequence_aas().tolist())).hexdigest())),
-                                           lambda: self.encode_repertoire(repertoire, params), CacheObjectType.ENCODING_STEP)
+                                            ("repertoire_id", repertoire_id)),
+                                           lambda: self.encode_repertoire(serialized_repertoire, params),
+                                           CacheObjectType.ENCODING_STEP)
 
     def encode_repertoire(self, repertoire, params: EncoderParams):
+        if isinstance(repertoire, bytes):
+            repertoire = dill.loads(repertoire)
 
         alphas = np.linspace(start=params.model["min_alpha"], stop=params.model["max_alpha"], num=params.model["dimension"])
 
-        data = repertoire.get_attributes(['duplicate_count', 'frame_type'])
-        counts = data['duplicate_count'][[el == 'IN' for el in data['frame_type'].tolist()]]
+        data = repertoire.data
+        counts = data.duplicate_count[np.array(data.vj_in_frame == 'T').flatten()]
 
         freqs = counts[np.nonzero(counts)]
 

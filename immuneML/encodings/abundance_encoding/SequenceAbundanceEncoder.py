@@ -6,15 +6,13 @@ import pandas as pd
 
 from immuneML.IO.ml_method.UtilIO import UtilIO
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.abundance_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
 from immuneML.pairwise_repertoire_comparison.ComparisonData import ComparisonData
 from immuneML.util.EncoderHelper import EncoderHelper
-from scripts.specification_util import update_docs_per_mapping
 
 
 class SequenceAbundanceEncoder(DatasetEncoder):
@@ -46,7 +44,8 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     **Specification arguments:**
 
     - comparison_attributes (list): The attributes to be considered to group receptors into clonotypes. Only the fields specified in
-      comparison_attributes will be considered, all other fields are ignored. Valid comparison value can be any repertoire field name.
+      comparison_attributes will be considered, all other fields are ignored. Valid comparison value can be any
+      repertoire field name (e.g., as specified in the AIRR rearrangement schema).
 
     - p_value_threshold (float): The p value threshold to be used by the statistical test.
 
@@ -67,11 +66,9 @@ class SequenceAbundanceEncoder(DatasetEncoder):
                 my_sa_encoding:
                     SequenceAbundance:
                         comparison_attributes:
-                            - sequence_aa
+                            - cdr3_aa
                             - v_call
                             - j_call
-                            - chain
-                            - region_type
                         p_value_threshold: 0.05
                         sequence_batch_size: 100000
                         repertoire_batch_size: 32
@@ -97,7 +94,8 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
     @staticmethod
     def build_object(dataset, **params):
-        assert isinstance(dataset, RepertoireDataset), "SequenceAbundanceEncoder: this encoding only works on repertoire datasets."
+        assert isinstance(dataset, RepertoireDataset), \
+            "SequenceAbundanceEncoder: this encoding only works on repertoire datasets."
         return SequenceAbundanceEncoder(**params)
 
     def encode(self, dataset, params: EncoderParams):
@@ -125,7 +123,6 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
         encoded_data = EncodedData(examples, dataset.get_metadata([label_name]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [SequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE, SequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
-                                   example_weights=dataset.get_example_weights(),
                                    encoding=SequenceAbundanceEncoder.__name__, info={'relevant_sequence_path': self.relevant_sequence_path,
                                                                                      "contingency_table_path": self.contingency_table_path,
                                                                                      "p_values_path": self.p_values_path})
@@ -158,7 +155,10 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
         all_sequences = comparison_data.get_item_names()
         relevant_sequences = all_sequences[relevant_sequence_indices]
-        df = pd.DataFrame(relevant_sequences, columns=self.comparison_attributes)
+        if relevant_sequences is not None and sum(relevant_sequence_indices) > 0:
+            df = pd.DataFrame({attr: relevant_sequences[:, i] for i, attr in enumerate(self.comparison_attributes)})
+        else:
+            df = pd.DataFrame(columns=self.comparison_attributes)
         sequence_csv_path = result_path / 'relevant_sequences.csv'
         df.to_csv(sequence_csv_path, sep=',', index=False)
 
@@ -196,14 +196,3 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         encoder.relevant_indices_path = DatasetEncoder.load_attribute(encoder, encoder_file, "relevant_indices_path")
         encoder.comparison_data = UtilIO.import_comparison_data(encoder_file.parent)
         return encoder
-
-    @staticmethod
-    def get_documentation():
-        doc = str(SequenceAbundanceEncoder.__doc__)
-
-        valid_field_values = str(Repertoire.FIELDS)[1:-1].replace("'", "`")
-        mapping = {
-            "Valid comparison value can be any repertoire field name.": f"Valid values are {valid_field_values}."
-        }
-        doc = update_docs_per_mapping(doc, mapping)
-        return doc

@@ -4,9 +4,9 @@ import os
 import numpy as np
 import pandas as pd
 
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.ElementDataset import ElementDataset
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import ElementDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
 from immuneML.workflows.steps.data_splitter.Util import Util

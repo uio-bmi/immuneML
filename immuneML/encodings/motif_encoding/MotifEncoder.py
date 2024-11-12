@@ -9,15 +9,14 @@ import numpy as np
 from sklearn.metrics import precision_score, recall_score, confusion_matrix
 
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.motif_encoding.PositionalMotifParams import PositionalMotifParams
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
-
 
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
 from immuneML.util.PathBuilder import PathBuilder
@@ -127,23 +126,28 @@ class MotifEncoder(DatasetEncoder):
         ParameterValidator.assert_type_and_value(no_gaps, bool, location, "no_gaps")
         assert max_positions >= min_positions, f"{location}: max_positions ({max_positions}) must be greater than or equal to min_positions ({min_positions})"
 
-        ParameterValidator.assert_type_and_value(min_precision, (int, float), location, "min_precision", min_inclusive=0, max_inclusive=1)
-        ParameterValidator.assert_type_and_value(min_true_positives, int, location, "min_true_positives", min_inclusive=1)
+        ParameterValidator.assert_type_and_value(min_precision, (int, float), location, "min_precision",
+                                                 min_inclusive=0, max_inclusive=1)
+        ParameterValidator.assert_type_and_value(min_true_positives, int, location, "min_true_positives",
+                                                 min_inclusive=1)
 
         if isinstance(min_recall, dict):
-            assert set(min_recall.keys()) == set(range(min_positions, max_positions+1)), f"{location}: {min_recall} is not a valid value for parameter min_recall. " \
-                                                                             f"When setting separate recall cutoffs for each motif size, the keys of the dictionary " \
-                                                                             f"must equal to {list(range(min_positions, max_positions+1))}."
+            assert set(min_recall.keys()) == set(range(min_positions,
+                                                       max_positions + 1)), f"{location}: {min_recall} is not a valid value for parameter min_recall. " \
+                                                                            f"When setting separate recall cutoffs for each motif size, the keys of the dictionary " \
+                                                                            f"must equal to {list(range(min_positions, max_positions + 1))}."
             for recall_cutoff in min_recall.values():
-                assert isinstance(recall_cutoff, (int, float)) or recall_cutoff is None, f"{location}: {min_recall} is not a valid value for parameter min_recall. " \
-                                                                                        f"When setting separate recall cutoffs for each motif size, the values of the dictionary " \
-                                                                                        f"must be numeric or None."
+                assert isinstance(recall_cutoff, (int,
+                                                  float)) or recall_cutoff is None, f"{location}: {min_recall} is not a valid value for parameter min_recall. " \
+                                                                                    f"When setting separate recall cutoffs for each motif size, the values of the dictionary " \
+                                                                                    f"must be numeric or None."
 
             min_recall = {key: value if isinstance(value, (int, float)) else 1 for key, value in min_recall.items()}
 
         else:
-            ParameterValidator.assert_type_and_value(min_recall, (int, float), location, "min_recall", min_inclusive=0, max_inclusive=1)
-            min_recall = {motif_size: min_recall for motif_size in range(min_positions, max_positions+1)}
+            ParameterValidator.assert_type_and_value(min_recall, (int, float), location, "min_recall", min_inclusive=0,
+                                                     max_inclusive=1)
+            min_recall = {motif_size: min_recall for motif_size in range(min_positions, max_positions + 1)}
 
         if candidate_motif_filepath is not None:
             PositionalMotifHelper.check_motif_filepath(candidate_motif_filepath, location, "candidate_motif_filepath")
@@ -212,7 +216,8 @@ class MotifEncoder(DatasetEncoder):
             data["min_recall"] = [self.min_recall.get(motif_size, 1) for motif_size in range(self.min_positions, self.max_positions + 1)]
 
             all_motif_sizes = [len(motif[0]) for motif in learned_motifs]
-            data["n_motifs"] = [all_motif_sizes.count(motif_size) for motif_size in range(self.min_positions, self.max_positions + 1)]
+            data["n_motifs"] = [all_motif_sizes.count(motif_size) for motif_size in
+                                range(self.min_positions, self.max_positions + 1)]
 
             df = pd.DataFrame(data)
             df.to_csv(motif_stats_filepath, index=False, sep="\t")
@@ -224,7 +229,8 @@ class MotifEncoder(DatasetEncoder):
         labels = EncoderHelper.encode_element_dataset_labels(dataset, params.label_config)
 
         examples, feature_names, feature_annotations = self._construct_encoded_data_matrix(dataset, motifs,
-                                                                                           params.label_config, params.pool_size)
+                                                                                           params.label_config,
+                                                                                           params.pool_size)
 
         self._export_confusion_matrix(params.result_path, feature_annotations)
 
@@ -235,10 +241,12 @@ class MotifEncoder(DatasetEncoder):
                                                    feature_annotations=feature_annotations,
                                                    example_ids=dataset.get_example_ids(),
                                                    encoding=MotifEncoder.__name__,
-                                                   example_weights=dataset.get_example_weights(),
                                                    info={"candidate_motif_filepath": self.candidate_motif_filepath,
                                                          "learned_motif_filepath": self.learned_motif_filepath,
-                                                         "positive_class": self._get_positive_class(params.label_config)})
+                                                         "positive_class": self._get_positive_class(
+                                                             params.label_config),
+                                                         "sequence_type": params.sequence_type,
+                                                         'region_type': params.region_type})
 
         return encoded_dataset
 
@@ -272,10 +280,9 @@ class MotifEncoder(DatasetEncoder):
     def _build_candidate_motifs_params(self, dataset: SequenceDataset):
         return (("dataset_identifier", dataset.identifier),
                 ("sequence_ids", tuple(dataset.get_example_ids()),
-                ("example_weights", type(dataset.get_example_weights())),
-                ("max_positions", self.max_positions),
-                ("min_positions", self.min_positions),
-                ("min_true_positives", self.min_true_positives)))
+                 ("max_positions", self.max_positions),
+                 ("min_positions", self.min_positions),
+                 ("min_true_positives", self.min_true_positives)))
 
     def _compute_candidate_motifs(self, full_dataset, pool_size=4):
         np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(full_dataset)
@@ -323,10 +330,11 @@ class MotifEncoder(DatasetEncoder):
     def _filter_motifs(self, candidate_motifs, dataset, y_true, pool_size, generalized=False):
         motif_type = "generalized motifs" if generalized else "motifs"
 
-        logging.info(f"{MotifEncoder.__name__}: filtering {len(candidate_motifs)} {motif_type} with precision >= {self.min_precision} and recall >= {self._get_recall_repr()}")
+        logging.info(
+            f"{MotifEncoder.__name__}: filtering {len(candidate_motifs)} {motif_type} with precision >= {self.min_precision} and recall >= {self._get_recall_repr()}")
 
         np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(dataset)
-        weights = dataset.get_example_weights()
+        weights = None
 
         with Pool(pool_size) as pool:
             partial_func = partial(PositionalMotifHelper.check_motif, np_sequences=np_sequences, y_true=y_true, weights=weights,
@@ -345,7 +353,7 @@ class MotifEncoder(DatasetEncoder):
         feature_names = [PositionalMotifHelper.motif_to_string(indices, amino_acids, motif_sep="-", newline=False)
                          for indices, amino_acids in motifs]
 
-        weights = dataset.get_example_weights()
+        weights = None # TODO: have a better way to handle weights
         y_true = self._get_y_true(dataset, label_config)
         np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(dataset)
 
@@ -405,4 +413,3 @@ class MotifEncoder(DatasetEncoder):
     def set_context(self, context: dict):
         self.context = context
         return self
-

@@ -1,14 +1,12 @@
 import logging
-from datetime import datetime
 
 import random
 import numpy as np
-import pkg_resources
-import torch
 from sklearn.preprocessing import label_binarize
 
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
+from immuneML.environment.Label import Label
 
 
 class Util:
@@ -22,8 +20,9 @@ class Util:
                 mapped_y[i] = class_mapping[y[i]]
             return mapped_y.astype(old_class_type)
         except Exception as e:
-            logging.exception("MLMethod util: error occurred when predicting the class assignment due to mismatch of class types.\n"
-                              f"Classes: {y}\nMapping:{class_mapping}")
+            logging.exception(
+                "MLMethod util: error occurred when predicting the class assignment due to mismatch of class types.\n"
+                f"Classes: {y}\nMapping:{class_mapping}")
             raise e
 
     @staticmethod
@@ -41,40 +40,45 @@ class Util:
             raise e
 
     @staticmethod
-    def make_class_mapping(y, positive_class=None) -> dict:
-        """Creates a class mapping from a list of classes which can be strings, numbers of booleans; maps to same name in multi-class settings"""
-        classes = np.unique(y)
-        if classes.shape[0] == 2:
-            return Util.make_binary_class_mapping(y, positive_class)
+    def make_class_mapping(y, label: Label) -> dict:
+        """Creates a class mapping from a list of classes which can be strings, numbers of booleans; maps to same
+        name in multi-class settings"""
+        classes = label.values
+        if len(classes) == 2:
+            return Util.make_binary_class_mapping(y, label)
         else:
             return {cls: cls for cls in classes}
 
     @staticmethod
-    def make_binary_class_mapping(y, positive_class=None) -> dict:
+    def make_binary_class_mapping(y, label: Label) -> dict:
         """
         Creates binary class mapping from a list of classes which can be strings, numbers or boolean values
 
         Arguments:
 
-            y: list of classes per example, as supplied to fit() method of the classifier; it should include all classes that will appear in the data
+            y: list of classes per example, as supplied to fit() method of the classifier; it should include all
+            classes that will appear in the data
+
+            label: label object along with information on the positive label
 
         Returns:
-             mapping dictionary where 0 and 1 are always the keys and the values are original class names which were mapped for these values
+             mapping dictionary where 0 and 1 are always the keys and the values are original class names which were
+             mapped for these values
 
         """
-        unique_values = sorted(set(y))
+        unique_values = sorted(set(label.values))
         assert len(unique_values) == 2, f"MLMethod: there has two be exactly two classes to use this classifier," \
                                         f" instead got {str(unique_values)[1:-1]}. For multi-class classification, " \
                                         f"consider some of the other classifiers."
 
-        if positive_class is None:
+        if label.positive_class is None:
             return {0: unique_values[0], 1: unique_values[1]}
         else:
-            assert positive_class in unique_values, f"MLMethod: the specified positive class '{positive_class}' does not occur " \
-                                                    f"in the list of available classes: {str(unique_values)[1:-1]}."
-            unique_values.remove(positive_class)
-            return {0: unique_values[0], 1: positive_class}
-
+            assert label.positive_class in unique_values, \
+                (f"MLMethod: the specified positive class '{label.positive_class}' does not occur in the list of "
+                 f"available classes: {str(unique_values)[1:-1]}.")
+            unique_values.remove(label.positive_class)
+            return {0: unique_values[0], 1: label.positive_class}
 
     @staticmethod
     def binarize_label_classes(true_y, predicted_y, classes):
@@ -92,6 +96,7 @@ class Util:
 
     @staticmethod
     def setup_pytorch(number_of_threads, random_seed, pytorch_device_name=None):
+        import torch
         torch.set_num_threads(number_of_threads)
         torch.manual_seed(random_seed)
         if pytorch_device_name is not None:
@@ -99,13 +104,7 @@ class Util:
 
     @staticmethod
     def get_immuneML_version():
-        try:
-            return 'immuneML ' + pkg_resources.get_distribution('immuneML').version
-        except pkg_resources.DistributionNotFound as err:
-            try:
-                return 'immuneML ' + Constants.VERSION
-            except Exception as e:
-                return f'immuneML-dev-{datetime.now()}'
+        return 'immuneML ' + Constants.VERSION
 
     @staticmethod
     def get_train_val_indices(n_examples, training_percentage, random_seed=None):
@@ -127,7 +126,8 @@ class Util:
                            labels={label_name: [encoded_data.labels[label_name][i] for i in indices]
                                    for label_name in encoded_data.labels.keys()},
                            example_ids=[encoded_data.example_ids[i] for i in indices],
-                           example_weights=[encoded_data.example_weights[i] for i in indices] if encoded_data.example_weights is not None else None,
+                           example_weights=[encoded_data.example_weights[i] for i in
+                                            indices] if encoded_data.example_weights is not None else None,
                            feature_names=encoded_data.feature_names,
                            feature_annotations=encoded_data.feature_annotations,
                            encoding=encoded_data.encoding,

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List
 
 from immuneML.IO.dataset_export.DataExporter import DataExporter
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from immuneML.workflows.instructions.Instruction import Instruction

@@ -4,8 +4,10 @@ from typing import List
 
 import pandas as pd
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -75,13 +77,16 @@ class SequencesWithSignificantKmers(DataReport):
 
     def __init__(self, dataset: RepertoireDataset = None, reference_sequences_path: Path = None,
                  p_values: List[float] = None, k_values: List[int] = None, label: dict = None,
-                 result_path: Path = None, name: str = None, number_of_processes: int = 1):
+                 result_path: Path = None, name: str = None, number_of_processes: int = 1,
+                 sequence_type: SequenceType = None, region_type: RegionType = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.reference_sequences_path = reference_sequences_path
         self.reference_sequences = SignificantFeaturesHelper.load_sequences(reference_sequences_path)
         self.p_values = p_values
         self.k_values = k_values
         self.label = label
+        self.sequence_type = sequence_type
+        self.region_type = region_type
 
     def check_prerequisites(self):
         if isinstance(self.dataset, RepertoireDataset):
@@ -97,7 +102,8 @@ class SequencesWithSignificantKmers(DataReport):
         report_outputs = self._write_output_files()
 
         return ReportResult(name=self.name,
-                            info="Given a list of reference sequences, this report writes out the subsets of reference sequences containing significant k-mers.",
+                            info="Given a list of reference sequences, this report writes out the subsets of reference "
+                                 "sequences containing significant k-mers.",
                             output_tables=report_outputs)
 
     def _write_output_files(self):
@@ -134,7 +140,8 @@ class SequencesWithSignificantKmers(DataReport):
 
     def _compute_significant_kmers(self, k, p_value):
         encoder_result_path = self._get_encoder_result_path(k, p_value)
-        encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path)
+        encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path,
+                                                                         self.region_type, self.sequence_type)
         encoder = SignificantFeaturesHelper._build_kmer_encoder(self.dataset, k, p_value, encoder_params)
         sequences = pd.read_csv(encoder.relevant_sequence_path)
 

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.util.Logger import print_log
@@ -37,7 +37,7 @@ class ExploratoryAnalysisInstruction(Instruction):
 
       - labels: if encoding is specified, the relevant labels should be specified here.
 
-      - dim_reduction: which dimensionality reduction to apply; this is an experimental feature
+      - dim_reduction: which dimensionality reduction to apply;
 
       - report: which report to run on the dataset. Reports specified here may be of the category :ref:`Data reports` or :ref:`Encoding reports`, depending on whether 'encoding' was specified.
 
@@ -117,7 +117,7 @@ class ExploratoryAnalysisInstruction(Instruction):
         if unit.preprocessing_sequence is not None and len(unit.preprocessing_sequence) > 0:
             dataset = unit.dataset
             for preprocessing in unit.preprocessing_sequence:
-                dataset = preprocessing.process_dataset(dataset, result_path)
+                dataset = preprocessing.process_dataset(dataset, result_path, number_of_processes=unit.number_of_processes)
         else:
             dataset = unit.dataset
         return dataset

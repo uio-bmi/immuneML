@@ -1,16 +1,18 @@
 import shutil
+from datetime import datetime
 from pathlib import Path
+from typing import List
 
 import numpy as np
 import pandas as pd
 
-from immuneML.data_model.bnp_util import write_yaml, read_yaml
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
+from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name, make_full_airr_seq_set_df
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.SequenceParams import Chain
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
@@ -19,9 +21,6 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class PWM(GenerativeModel):
     """
-    .. note::
-
-        This is an experimental feature
 
     This is a baseline implementation of a positional weight matrix. It is estimated from a set of sequences for each
     of the different lengths that appear in the dataset.
@@ -29,7 +28,7 @@ class PWM(GenerativeModel):
 
     **Specification arguments:**
 
-    - chain (str): which chain is generated (for now, it is only assigned to the generated sequences)
+    - locus (str): which chain is generated (for now, it is only assigned to the generated sequences)
 
     - sequence_type (str): amino_acid or nucleotide
 
@@ -45,7 +44,7 @@ class PWM(GenerativeModel):
             ml_methods:
                 my_pwm:
                     PWM:
-                        chain: beta
+                        locus: beta
                         sequence_type: amino_acid
                         region_type: IMGT_CDR3
 
@@ -66,14 +65,15 @@ class PWM(GenerativeModel):
         model_overview = read_yaml(model_overview_file)
         pwm_matrix = {}
 
-        pwm = PWM(chain=model_overview['chain'], sequence_type=model_overview['sequence_type'],
+        pwm = PWM(locus=model_overview['locus'], sequence_type=model_overview['sequence_type'],
                   region_type=model_overview['region_type'])
 
         for file, length in [(path / f'pwm_len_{length}.csv', length) for length in length_probs.keys()]:
             assert file.exists(), f"{cls.__name__}: {file} is not a file."
             pwm_matrix[length] = pd.read_csv(str(file))
 
-            assert pwm_matrix[length].iloc[:, 0].tolist() == EnvironmentSettings.get_sequence_alphabet(pwm.sequence_type), \
+            assert pwm_matrix[length].iloc[:, 0].tolist() == EnvironmentSettings.get_sequence_alphabet(
+                pwm.sequence_type), \
                 (f"{cls.__name__}: the row names in the PWM for length {length} don't match the expected row names.\n"
                  f"Obtained:\n{pwm_matrix[length].index.tolist()}\nExpected:"
                  f"\n{EnvironmentSettings.get_sequence_alphabet(pwm.sequence_type)}")
@@ -89,15 +89,15 @@ class PWM(GenerativeModel):
         pwm.pwm_matrix = pwm_matrix
         return pwm
 
-    def __init__(self, chain, sequence_type: str, region_type: str):
-        super().__init__(Chain.get_chain(chain))
+    def __init__(self, locus, sequence_type: str, region_type: str, name: str = None):
+        super().__init__(Chain.get_chain(locus), name=name)
         self.sequence_type = SequenceType[sequence_type.upper()]
         self.region_type = RegionType[region_type.upper()]
         self.pwm_matrix = None
         self.length_probs = None
 
-    def fit(self, data: Dataset, path: Path = None):
-        sequences = data.get_attribute(self.sequence_type.value)
+    def fit(self, data: SequenceDataset, path: Path = None):
+        sequences = data.get_attribute(get_sequence_field_name(self.region_type, self.sequence_type))
         lengths, counts = np.unique(sequences.lengths, return_counts=True)
 
         self.length_probs = dict(zip(lengths, counts))
@@ -134,13 +134,29 @@ class PWM(GenerativeModel):
 
             sequences.append(sequence)
 
-        dataset = SequenceDataset.build_from_objects(
-            [ReceptorSequence(sequence_aa=seq,
-                              metadata=SequenceMetadata(chain=self.chain, region_type=self.region_type.name))
-             for seq in sequences],
-            count, path, 'synthetic_dataset')
+        dataset = self._export_gen_dataset(sequences, path)
 
         return dataset
+
+    def _export_gen_dataset(self, sequences: List[str], path: Path) -> SequenceDataset:
+        count = len(sequences)
+        df = pd.DataFrame({get_sequence_field_name(self.region_type, self.sequence_type): sequences,
+                           'locus': [self.locus for _ in range(count)],
+                           'gen_model_name': [self.name for _ in range(count)]})
+
+        df = make_full_airr_seq_set_df(df)
+
+        df.to_csv(str(PathBuilder.build(path) / 'synthetic_dataset.tsv'), sep='\t', index=False)
+
+        write_yaml(path / 'synthetic_metadata.yaml', {
+            'dataset_type': 'SequenceDataset',
+            'type_dict_dynamic_fields': {'gen_model_name': 'str'},
+            'name': 'synthetic_dataset', 'labels': {'gen_model_name': [self.name]},
+            'timestamp': str(datetime.now())
+        })
+
+        return SequenceDataset.build(path / 'synthetic_dataset.tsv', path / 'synthetic_metadata.yaml',
+                                     'synthetic_dataset')
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         raise NotImplementedError
@@ -167,7 +183,7 @@ class PWM(GenerativeModel):
              .to_csv(model_path / f'pwm_len_{length}.csv'))
 
         write_yaml(filename=model_path / 'model_overview.yaml',
-                   yaml_dict={'type': 'PWM', 'chain': self.chain.name, 'sequence_type': self.sequence_type.name,
+                   yaml_dict={'type': 'PWM', 'locus': self.locus.name, 'sequence_type': self.sequence_type.name,
                               'region_type': self.region_type.name})
 
         return Path(shutil.make_archive(str(path / 'trained_model'), "zip", str(path / 'model'))).absolute()

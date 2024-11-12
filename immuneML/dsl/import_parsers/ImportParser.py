@@ -3,8 +3,8 @@ from typing import Tuple
 
 from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.IO.dataset_import.IReceptorImport import IReceptorImport
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.receptor.ChainPair import ChainPair
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.SequenceParams import ChainPair
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
@@ -45,8 +45,12 @@ class ImportParser:
 
             if params["is_repertoire"]:
                 if import_cls != IReceptorImport:
-                    assert "metadata_file" in params, f"{location}: Missing parameter: metadata_file under {key}/params/"
-                    ParameterValidator.assert_type_and_value(params["metadata_file"], Path, location, "metadata_file")
+                    assert "metadata_file" in params or "dataset_file" in params, \
+                        f"{location}: Missing parameter: metadata_file and dataset_file under {key}/params/"
+                    if 'metadata_file' in params:
+                        ParameterValidator.assert_type_and_value(params["metadata_file"], Path, location, "metadata_file")
+                    else:
+                        ParameterValidator.assert_type_and_value(params["dataset_file"], Path, location, "dataset_file")
             else:
                 assert "paired" in params, f"{location}: Missing parameter: paired under {key}/params/"
                 ParameterValidator.assert_type_and_value(params["paired"], bool, location, "paired")
@@ -56,8 +60,7 @@ class ImportParser:
                     ParameterValidator.assert_in_valid_list(params["receptor_chains"], ["_".join(cp.value) for cp in ChainPair], location, "receptor_chains")
 
         try:
-            dataset = import_cls.import_dataset(params, key)
-            dataset.name = key
+            dataset = import_cls(params, key).import_dataset()
             ImportParser.log_dataset_info(dataset)
         except KeyError as key_error:
             raise KeyError(f"{key_error}\n\nAn error occurred during parsing of dataset {key}. "
@@ -83,6 +86,8 @@ class ImportParser:
             params["path"] = Path(params["path"])
         if "metadata_file" in params:
             params["metadata_file"] = Path(params["metadata_file"])
+        if "dataset_file" in params:
+            params['dataset_file'] = Path(params['dataset_file'])
         dataset_specs["params"] = params
         return params
 

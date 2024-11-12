@@ -1,7 +1,7 @@
 import shutil
 from unittest import TestCase
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
@@ -11,7 +11,7 @@ class TestRepertoireDataset(TestCase):
     def test_get_metadata_fields(self):
 
         path = EnvironmentSettings.tmp_test_path / "repertoire_dataset/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         repertoires, metadata = RepertoireBuilder.build([["AA"], ["CC"]], path, {"l1": [1, 2], "hla": ["A", "B"]}, subject_ids=["d1", "d2"])
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)

@@ -2,7 +2,7 @@ import os
 import shutil
 from unittest import TestCase
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.reference_encoding.MatchedSequencesEncoder import MatchedSequencesEncoder
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings

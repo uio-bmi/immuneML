@@ -1,7 +1,9 @@
+import copy
+
 import pandas as pd
 from scipy.sparse import issparse
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 
 
 class DataReshaper:
@@ -22,8 +24,11 @@ class DataReshaper:
 
         row_annotations["example_id"] = dataset.encoded_data.example_ids
 
-        column_annotations = dataset.encoded_data.feature_annotations
-        column_annotations["feature"] = dataset.encoded_data.feature_names
+        if dataset.encoded_data.feature_annotations is not None:
+            column_annotations = copy.deepcopy(dataset.encoded_data.feature_annotations)
+            column_annotations["feature"] = dataset.encoded_data.feature_names
+        else:
+            column_annotations = pd.DataFrame({'feature': dataset.encoded_data.feature_names})
 
         matrix = dataset.encoded_data.examples
         matrix_1d = matrix.A.ravel() if issparse(matrix) else matrix.ravel()

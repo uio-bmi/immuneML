@@ -1,26 +1,30 @@
 import copy
+import itertools
+import math
 import os
 import random
 from dataclasses import fields, field
 from itertools import chain
 from multiprocessing import Pool
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Union
 
-import math
-
+import bionumpy as bnp
 import dill
 import numpy as np
+import pandas as pd
+from bionumpy import as_encoded_array
 from bionumpy.bnpdataclass import BNPDataClass
+from bionumpy.encoded_array import BaseEncoding
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.app.LigoApp import SimError
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.receptor.Receptor import Receptor
-from immuneML.data_model.receptor.ReceptorBuilder import ReceptorBuilder
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
+from immuneML.data_model.SequenceSet import Repertoire
+from immuneML.data_model.bnp_util import bnp_write_to_file, write_yaml
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.LigoSimState import LigoSimState
@@ -29,12 +33,12 @@ from immuneML.simulation.SimConfigItem import SimConfigItem
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.simulation_strategy.ImplantingStrategy import ImplantingStrategy
 from immuneML.simulation.util.bnp_util import merge_dataclass_objects
-from immuneML.simulation.util.util import get_bnp_data, make_receptor_sequence_objects, make_annotated_dataclass, \
+from immuneML.simulation.util.util import get_bnp_data, make_annotated_dataclass, \
     get_sequence_per_signal_count, \
     update_seqs_without_signal, update_seqs_with_signal, check_iteration_progress, make_sequence_paths, \
-    make_signal_metadata, needs_seqs_with_signal, \
+    needs_seqs_with_signal, \
     check_sequence_count, make_repertoire_from_sequences, get_no_signal_sequences, get_signal_sequences, \
-    annotate_sequences, get_signal_sequence_count, filter_sequences_by_length
+    annotate_sequences, get_signal_sequence_count, filter_sequences_by_length, prepare_data_for_airr_seq_set
 from immuneML.util.ExporterHelper import ExporterHelper
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
@@ -97,18 +101,19 @@ class LigoSimInstruction(Instruction):
                               self.state.signals] if self._export_observed_signals else []
 
         if isinstance(self.state.simulation.simulation_strategy, ImplantingStrategy):
-            field_seq, field_p_gen = field(default='', metadata=None), field(default=-1., metadata=None)
-            implanting_fields = [('original_sequence', str, dill.dumps(field_seq)),
-                                 ('original_p_gen', float, dill.dumps(field_p_gen))]
+            implanting_fields = [('original_sequence', str, ''),
+                                 ('original_p_gen', float, -1.)]
         else:
             implanting_fields = []
 
         self._annotation_fields = sorted(
-            [(signal.id, int) for signal in self.state.signals] + [('signals_aggregated', str)] +
-            [(f"{signal.id}_positions", str) for signal in self.state.signals] + self._noise_fields,
+            [(signal.id, int, 0) for signal in self.state.signals] + [('signals_aggregated', str, '')] +
+            [(f"{signal.id}_positions", str, '') for signal in self.state.signals] + self._noise_fields,
             key=lambda x: x[0]) + implanting_fields
 
-        self._custom_fields = self._annotation_fields + [('p_gen', float), ('from_default_model', int)]
+        self._custom_fields = dill.dumps(self._annotation_fields + [('p_gen', float, -1.), ('from_default_model', int, 1)])
+        self._annotation_fields = dill.dumps(self._annotation_fields)
+
         self._background_fields = [(f.name, f.type) for f in fields(BackgroundSequences)]
 
     @property
@@ -116,8 +121,16 @@ class LigoSimInstruction(Instruction):
         return self.state.simulation.sequence_type
 
     @property
+    def custom_fields(self):
+        return dill.loads(self._custom_fields)
+
+    @property
+    def annotation_fields(self):
+        return dill.loads(self._annotation_fields)
+
+    @property
     def _annotated_dataclass(self):
-        return make_annotated_dataclass(self._annotation_fields, self.state.signals)
+        return make_annotated_dataclass(self.annotation_fields, self.state.signals)
 
     MIN_RANGE_PROBABILITY = 1e-5
 
@@ -139,45 +152,74 @@ class LigoSimInstruction(Instruction):
 
     def _simulate_dataset(self):
 
-        examples = self._create_examples_wrapper()
-        random.shuffle(examples)
-
         labels = {**{signal.id: [True, False] for signal in self.state.signals},
                   **{'species': self.state.simulation.species}}
 
         if self.state.simulation.is_repertoire:
-            self.state.resulting_dataset = RepertoireDataset.build_from_objects(labels=labels, repertoires=examples,
-                                                                                name='simulated_dataset',
-                                                                                metadata_path=self.state.result_path / 'metadata.csv',
-                                                                                path=self.state.result_path)
-        elif self.state.simulation.paired:
-            self.state.resulting_dataset = ReceptorDataset.build_from_objects(examples, path=self.state.result_path,
-                                                                              name='simulated_dataset',
-                                                                              file_size=SequenceDataset.DEFAULT_FILE_SIZE,
-                                                                              labels=labels)
+            self._simulate_repertoire_dataset(labels)
         else:
-            self.state.resulting_dataset = SequenceDataset.build_from_objects(examples, path=self.state.result_path,
-                                                                              name='simulated_dataset',
-                                                                              file_size=SequenceDataset.DEFAULT_FILE_SIZE,
-                                                                              labels=labels)
+            self._simulate_receptor_dataset(labels)
 
-    def _create_examples_wrapper(self) -> list:
+    def _simulate_repertoire_dataset(self, labels: dict):
+
+        repertoires = self._parallel_create_seq_sets()
+        repertoires = list(itertools.chain.from_iterable(repertoires.values()))
+
+        self.state.resulting_dataset = RepertoireDataset.build_from_objects(labels=labels, repertoires=repertoires,
+                                                                            name='simulated_dataset',
+                                                                            metadata_path=self.state.result_path / 'simulated_dataset_metadata.csv',
+                                                                            path=self.state.result_path)
+
+    def _simulate_receptor_dataset(self, labels: dict):
+
+        receptor_files = self._parallel_create_seq_sets()
+
+        data_filename = self.state.result_path / 'simulated_dataset.tsv'
+        metadata_filename = self.state.result_path / 'simulated_dataset.yaml'
+
+        for file in receptor_files.values():
+            df = pd.read_csv(str(file), sep='\t')
+            df = prepare_data_for_airr_seq_set(df)
+            df = df[sorted(df.columns)]
+            if data_filename.exists():
+                df.to_csv(str(data_filename), sep='\t', index=False, mode='a', header=False)
+            else:
+                df.to_csv(str(data_filename), sep='\t', index=False, mode='w', header=True)
+
+        type_dict = {k: v for k, v, default_value in self.custom_fields}
+
+        write_yaml(metadata_filename, {
+            'labels': labels,
+            'type_dict_dynamic_fields': {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()},
+            'filename': data_filename
+        })
+
+        dataset_cls = ReceptorDataset if self.state.simulation.paired else SequenceDataset
+
+        self.state.resulting_dataset = dataset_cls.build(data_filename, metadata_filename=metadata_filename,
+                                                         name='simulated_dataset', labels=labels)
+
+    def _parse_example_output(self, result) -> dict:
+        if self.state.simulation.is_repertoire:
+            examples = {k: [dill.loads(el) for el in v] for d in result for k, v in d.items()}
+        else:
+            examples = {k: v for d in result for k, v in d.items()}
+        return examples
+
+    def _parallel_create_seq_sets(self) -> dict:
         if self._number_of_processes > 1:
             chunk_size = math.ceil(len(self.state.simulation.sim_items) / self._number_of_processes)
 
             with Pool(processes=max(self._number_of_processes, len(self.state.simulation.sim_items))) as pool:
-                result = pool.map(self._create_examples, [dill.dumps(item) for item in self.state.simulation.sim_items],
+                result = pool.map(self._create_sequence_sets,
+                                  [dill.dumps(item) for item in self.state.simulation.sim_items],
                                   chunksize=chunk_size)
-                examples = {k: v for d in result for k, v in d.items()}
+                examples = self._parse_example_output(result)
         else:
             examples = {}
             for item in self.state.simulation.sim_items:
-                examples = {**examples, **self._create_examples(item)}
-
-        if self.state.simulation.paired:
-            examples = self._pair_examples(examples, self.state.result_path / 'paired')
-        else:
-            examples = list(chain.from_iterable(examples.values()))
+                res = self._create_sequence_sets(item)
+                examples = {**examples, **{k: [dill.loads(el) for el in v] for k, v in res.items()}}
 
         return examples
 
@@ -189,8 +231,9 @@ class LigoSimInstruction(Instruction):
         return paired_examples
 
     def _pair_repertoires(self, repertoires1: list, repertoires2: list, path: Path) -> List[Repertoire]:
-        assert len(repertoires1) == len(
-            repertoires2), f"{LigoSimInstruction.__name__}: cannot create paired repertoires, number of repertoires per chain don't match: {len(repertoires1)} and {len(repertoires2)}."
+        assert len(repertoires1) == len(repertoires2), \
+            (f"{LigoSimInstruction.__name__}: cannot create paired repertoires, number of repertoires per "
+             f"chain don't match: {len(repertoires1)} and {len(repertoires2)}.")
         PathBuilder.build(path)
         paired_repertoires = []
         for i in range(len(repertoires1)):
@@ -199,30 +242,33 @@ class LigoSimInstruction(Instruction):
         return paired_repertoires
 
     def _pair_two_repertories(self, repertoire1: Repertoire, repertoire2: Repertoire, path: Path) -> Repertoire:
-        assert repertoire1.get_element_count() == repertoire2.get_element_count(), f"{LigoSimInstruction.__name__}: cannot pair repertoires {repertoire1.identifier} and {repertoire2.identifier}, they have different number of sequences: {repertoire1.get_element_count()} and {repertoire2.get_element_count()}."
+        assert repertoire1.get_element_count() == repertoire2.get_element_count(), \
+            (f"{LigoSimInstruction.__name__}: cannot pair repertoires {repertoire1.identifier} and "
+             f"{repertoire2.identifier}, they have different number of sequences: {repertoire1.get_element_count()} "
+             f"and {repertoire2.get_element_count()}.")
 
-        sequences = []
-        sequences1, sequences2 = repertoire1.sequences, repertoire2.sequences
-        for index, seq1, seq2 in zip(list(range(len(sequences1))), sequences1, sequences2):
-            seq1.metadata.cell_id = index
-            seq2.metadata.cell_id = index
-            seq1.sequence_id = f"{seq1.sequence_id}_{seq1.metadata.chain.value}"
-            seq2.sequence_id = f"{seq2.sequence_id}_{seq2.metadata.chain.value}"
-            sequences.extend([seq1, seq2])
+        data = []
+        for sequences in [repertoire1.data, repertoire2.data]:
+            sequences.sequence_id = bnp.as_encoded_array(
+                [f"{sid}_{locus}" for sid, locus in zip(sequences.sequence_id.tolist(), sequences.locus.tolist())])
+            sequences.cell_id = bnp.as_encoded_array([f"cell_{index}" for index in range(len(sequences))])
+            data.append(sequences)
 
-        return Repertoire.build_from_sequence_objects(sequences, path,
-                                                      metadata={**repertoire1.metadata, **repertoire2.metadata})
+        return Repertoire.build_from_dc_object(path, {**repertoire1.metadata, **repertoire2.metadata}, None, None,
+                                               merge_dataclass_objects(data))
 
-    def _pair_sequences(self, sequences1: list, sequences2: list, path: Path = None) -> List[Receptor]:
+    def _pair_sequences(self, sequences1, sequences2, path: Path = None) -> BNPDataClass:
         assert len(sequences1) == len(sequences2), (f"{LigoSimInstruction.__name__}: could not create paired dataset, "
                                                     f"the number of sequences in two simulation items did not match.")
 
-        random.shuffle(sequences1)
-        random.shuffle(sequences2)
+        cell_ids = [f'cell_{i}' for i in range(len(sequences1))]
+        sequences1.cell_id = as_encoded_array(cell_ids, BaseEncoding)
+        random.shuffle(cell_ids)
+        sequences2.cell_id = as_encoded_array(cell_ids, BaseEncoding)
 
-        return ReceptorBuilder.build_objects_from_pairs(sequences1, sequences2)
+        return merge_dataclass_objects([sequences1, sequences2])
 
-    def _create_examples(self, item_in) -> Dict[str, list]:
+    def _create_sequence_sets(self, item_in) -> Dict[str, Union[List[Repertoire], Path]]:
 
         item = dill.loads(item_in) if isinstance(item_in, bytes) else item_in
 
@@ -233,7 +279,7 @@ class LigoSimInstruction(Instruction):
 
         return {item.name: res}
 
-    def _create_receptors(self, sim_item: SimConfigItem) -> list:
+    def _create_receptors(self, sim_item: SimConfigItem) -> Path:
 
         assert len(sim_item.signals) in [0,
                                          1], f"{LigoSimInstruction.__name__}: for sequence datasets, only 0 or 1 signal or a signal pair per " \
@@ -252,13 +298,9 @@ class LigoSimInstruction(Instruction):
 
         sequences = self._compute_p_gens_for_export(sequences, sim_item)
 
-        sequences = make_receptor_sequence_objects(sequences,
-                                                   metadata=make_signal_metadata(sim_item, self.state.signals),
-                                                   immune_events=sim_item.immune_events,
-                                                   custom_params=self._custom_fields,
-                                                   chain=sim_item.generative_model.chain)
+        bnp_write_to_file(self.state.result_path / f"tmp_{sim_item.name}.tsv", sequences)
 
-        return sequences
+        return self.state.result_path / f"tmp_{sim_item.name}.tsv"
 
     def _compute_p_gens_for_export(self, sequences, sim_item: SimConfigItem):
         if self._export_p_gens:
@@ -295,9 +337,8 @@ class LigoSimInstruction(Instruction):
 
             sequences = self._compute_p_gens_for_export(sequences, item)
 
-            repertoire = make_repertoire_from_sequences(sequences, repertoires_path, item, self.state.signals,
-                                                        self._custom_fields)
-            repertoires.append(repertoire)
+            repertoire = make_repertoire_from_sequences(sequences, repertoires_path, item, self.state.signals)
+            repertoires.append(dill.dumps(repertoire))
 
         return repertoires
 
@@ -324,12 +365,12 @@ class LigoSimInstruction(Instruction):
             sequences = filter_sequences_by_length(sequences, sim_item, self.sequence_type)
 
             sequences = annotate_sequences(sequences, self.sequence_type == SequenceType.AMINO_ACID, self.state.signals,
-                                           self._annotated_dataclass, sim_item.name)
+                                           self._annotated_dataclass, sim_item.name, sim_item.generative_model.region_type)
 
             sequences = self.state.simulation.simulation_strategy.process_sequences(sequences, copy.deepcopy(
-                seqs_per_signal_count), self._use_p_gens,  self.sequence_type, sim_item, self.state.signals,
-                self.state.simulation.remove_seqs_with_signals,
-                implanting_scaling_factor=self.state.simulation.implanting_scaling_factor)
+                seqs_per_signal_count), self._use_p_gens, self.sequence_type, sim_item, self.state.signals,
+                                                                                    self.state.simulation.remove_seqs_with_signals,
+                                                                                    implanting_scaling_factor=self.state.simulation.implanting_scaling_factor)
 
             if sequences is not None and len(sequences) > 0:
 
@@ -417,12 +458,14 @@ class LigoSimInstruction(Instruction):
         if np.any(getattr(sequences, p_gen_field) == -1):
             missing_p_gens = getattr(sequences, p_gen_field) == -1
             p_gens = getattr(sequences, p_gen_field)
-            p_gens[missing_p_gens] = sim_item.generative_model.compute_p_gens(sequences[missing_p_gens], self.state.simulation.sequence_type, sequence_field)
+            p_gens[missing_p_gens] = sim_item.generative_model.compute_p_gens(sequences[missing_p_gens],
+                                                                              self.state.simulation.sequence_type,
+                                                                              sequence_field)
             setattr(sequences, p_gen_field, p_gens)
         return sequences
 
-    def _filter_using_p_gens(self, sequences: BackgroundSequences, sim_item: SimConfigItem) -> Tuple[
-        BNPDataClass, dict]:
+    def _filter_using_p_gens(self, sequences: BackgroundSequences, sim_item: SimConfigItem) \
+            -> Tuple[BNPDataClass, dict]:
         sequences = self._update_sequences_with_missing_p_gens(sequences, sim_item)
         with np.errstate(divide='ignore'):
             p_gens = np.log10(sequences.p_gen)

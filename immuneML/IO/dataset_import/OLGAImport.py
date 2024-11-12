@@ -1,9 +1,11 @@
+from pathlib import Path
+
 import pandas as pd
 
 from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from immuneML.data_model.dataset import Dataset
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.util.ImportHelper import ImportHelper
 from scripts.specification_util import update_docs_per_mapping
 
@@ -53,46 +55,28 @@ class OLGAImport(DataImport):
                         metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
                         import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
                         import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                        import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+                        import_empty_aa_sequences: False # filter out sequences if they don't have amino acid sequence set
                         # Optional fields with OLGA-specific defaults, only change when different behavior is required:
                         separator: "\\t" # column separator
-                        region_type: IMGT_CDR3 # what part of the sequence to import
                         columns_to_load: [0, 1, 2, 3]
                         column_mapping:
-                            0: sequence
-                            1: sequence_aa
+                            0: junction
+                            1: junction_aa
                             2: v_call
                             3: j_call
 
     """
 
-    @staticmethod
-    def import_dataset(params: dict, dataset_name: str) -> Dataset:
+    def load_file(self, filename: Path) -> pd.DataFrame:
+        df = pd.read_csv(str(filename), sep=self.params.separator, iterator=False, dtype=str, header=None,
+                         usecols=list(self.params.column_mapping.keys()),
+                         names=list(self.params.column_mapping.values()))
 
-        assert sorted(params["columns_to_load"]) == sorted(list(params["column_mapping"].keys()))
+        if sorted(list(self.params.column_mapping.values())) == ['j_call', 'junction', 'junction_aa', 'v_call']\
+                and not any(col in df.columns for col in ['cdr3', 'cdr3_aa']):
 
-        return ImportHelper.import_dataset(OLGAImport, params, dataset_name)
-
-    @staticmethod
-    def alternative_load_func(filepath, params):
-        return pd.read_csv(filepath, sep=params.separator, iterator=False, dtype=str, header=None, usecols=list(params.column_mapping.keys()),
-                           names=list(params.column_mapping.values()))
-
-    @staticmethod
-    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        if "sequence" not in df.columns and "sequence_aa" not in df.columns:
-            raise IOError("OLGAImport: Columns should contain at least 'sequence' or 'sequence_aa'.")
-
-        if "duplicate_count" not in df.columns:
-            df["duplicate_count"] = 1
-
-        df["sequence_id"] = None
-
-        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
-        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters, params.import_with_stop_codon)
-        ImportHelper.junction_to_cdr3(df, params.region_type)
-        df.loc[:, "region_type"] = params.region_type.name
-        ImportHelper.load_chains(df)
+            df['cdr3'] = df['junction'].str[3:-3]
+            df['cdr3_aa'] = df['junction_aa'].str[1:-1]
 
         return df
 

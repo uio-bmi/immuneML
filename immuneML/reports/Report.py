@@ -105,10 +105,15 @@ class Report(metaclass=abc.ABCMeta):
         try:
             if self.check_prerequisites():
                 return self._generate()
+            else:
+                return ReportResult(name=f"{self.name} (failed)",
+                                info="This report failed while checking the prerequisites. "
+                                     "This usually means the wrong dataset type was used or wrong input parameters were specified. "
+                                     "See the log file for more information")
         except Exception as e:
             logging.exception(f"An exception occurred while generating report {self.name}. See the details below:")
             logging.warning(f"Report {self.name} encountered an error and could not be generated: {e}.")
-            return ReportResult(name=f"{self.name} (failed)", info="This report failed, see the log file for more information")
+            return ReportResult(name=f"{self.name} (failed)", info="This report failed during execution, see the log file for more information")
 
     def _safe_plot(self, output_written=True, plot_callable="_plot", **kwargs):
         """

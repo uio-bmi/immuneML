@@ -21,10 +21,10 @@ class W2VRepertoireEncoder(Word2VecEncoder):
 
         return np.array([labels[name] for name in labels.keys()])
 
-    def _encode_item(self, item, vectors, sequence_type: SequenceType):
+    def _encode_item(self, item, vectors, params: EncoderParams):
         repertoire_vector = np.zeros(vectors.vector_size)
-        for (index2, sequence) in enumerate(item.sequences):
-            kmers = KmerHelper.create_kmers_from_sequence(sequence=sequence, k=self.k, sequence_type=sequence_type)
+        for (index2, sequence) in enumerate(item.sequences(params.region_type)):
+            kmers = KmerHelper.create_kmers_from_sequence(sequence=sequence, k=self.k, sequence_type=params.sequence_type)
             sequence_vector = np.zeros(vectors.vector_size)
             for kmer in kmers:
                 try:

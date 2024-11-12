@@ -11,9 +11,6 @@ class ApplyGenModelState(GenModelState):
 
 class ApplyGenModelInstruction(GenModelInstruction):
     """
-    .. note::
-
-        This is an experimental feature
 
     ApplyGenModel instruction implements applying generative AIRR models on the sequence level.
 
@@ -30,7 +27,7 @@ class ApplyGenModelInstruction(GenModelInstruction):
       gen_examples_count examples; these can be data reports (to be run on generated examples), ML reports (to be run
       on the fitted model)
 
-    - config_path (str): path to the trained model in zip format (as provided by TrainGenModel instruction)
+    - ml_config_path (str): path to the trained model in zip format (as provided by TrainGenModel instruction)
 
     **YAML specification:**
 
@@ -52,6 +49,11 @@ class ApplyGenModelInstruction(GenModelInstruction):
     def run(self, result_path: Path) -> GenModelState:
         self._set_path(result_path)
         self._gen_data()
+        self._export_generated_dataset()
         self._run_reports()
 
         return self.state
+
+    def _run_reports(self):
+        super()._run_reports()
+        super()._print_report_summary_log()

@@ -4,10 +4,10 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.SequenceParams import Chain
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
 from immuneML.util.Logger import print_log
@@ -25,12 +25,13 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(
             examples=encoded_repertoires,
-            example_ids=dataset.get_example_ids(), #list(dataset.get_metadata(["subject_id"]).values())[0],
-            example_weights=dataset.get_example_weights(),
-            feature_names=list(feature_annotations["chain_id"]),
+            example_ids=dataset.get_example_ids(),
+            feature_names=list(feature_annotations["locus_id"]),
             feature_annotations=feature_annotations,
             labels=labels,
-            encoding=MatchedRegexEncoder.__name__
+            encoding=MatchedRegexEncoder.__name__,
+            info={'sequence_type': params.sequence_type,
+                  'region_type': params.region_type}
         )
 
         return encoded_dataset
@@ -43,10 +44,10 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
          - v_gene (if match_v_genes == True)
         only for the motifs for which a regex was specified
         """
-        features = {"receptor_id": [], "chain_id": [], "chain": [], "regex": []}
+        features = {"receptor_id": [], "locus_id": [], "locus": [], "regex": []}
 
         if self.match_v_genes:
-            features["v_gene"] = []
+            features["v_call"] = []
 
         for index, row in self.regex_df.iterrows():
             for chain_type in self.chains:
@@ -54,13 +55,13 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
 
                 if regex is not None:
                     features["receptor_id"].append(f"{row['id']}")
-                    features["chain_id"].append(f"{row['id']}_{chain_type}")
-                    features["chain"].append(Chain.get_chain(chain_type).name.lower())
+                    features["locus_id"].append(f"{row['id']}_{chain_type}")
+                    features["locus"].append(Chain.get_chain(chain_type).name.lower())
                     features["regex"].append(regex)
 
                     if self.match_v_genes:
                         v_gene = row[f"{chain_type}V"] if f"{chain_type}V" in row else None
-                        features["v_gene"].append(v_gene)
+                        features["v_call"].append(v_gene)
 
         return pd.DataFrame(features)
 
@@ -73,7 +74,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
 
         for i, repertoire in enumerate(dataset.get_data()):
             print_log(f"Encoding repertoire {i+1}/{n_repertoires}", include_datetime=True)
-            encoded_repertoires[i] = self._match_repertoire_to_regexes(repertoire)
+            encoded_repertoires[i] = self._match_repertoire_to_regexes(repertoire, params)
 
             if labels is not None:
                 for label_name in params.label_config.get_labels_by_name():
@@ -81,9 +82,9 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
 
         return encoded_repertoires, labels
 
-    def _match_repertoire_to_regexes(self, repertoire: Repertoire):
+    def _match_repertoire_to_regexes(self, repertoire: Repertoire, params: EncoderParams):
         matches = np.zeros(self.feature_count, dtype=int)
-        rep_seqs = repertoire.sequences
+        rep_seqs = repertoire.sequences(params.region_type)
 
         match_idx = 0
 
@@ -95,10 +96,10 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
                     v_gene = row[f"{chain_type}V"] if f"{chain_type}V" in row else None
 
                     for rep_seq in rep_seqs:
-                        if rep_seq.metadata.chain is not None:
-                            if rep_seq.metadata.chain.value == chain_type:
+                        if rep_seq.locus is not None:
+                            if rep_seq.locus == chain_type:
                                 if self._matches(rep_seq, regex, v_gene):
-                                    n_matches = 1 if self.reads == ReadsType.UNIQUE else rep_seq.metadata.duplicate_count
+                                    n_matches = 1 if self.reads == ReadsType.UNIQUE else rep_seq.duplicate_count
                                     if n_matches is None:
                                         warnings.warn(f"MatchedRegexRepertoireEncoder: count not defined for sequence with id {rep_seq.sequence_id} in repertoire {repertoire.identifier}, ignoring sequence...")
                                         n_matches = 0
@@ -110,7 +111,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
         return matches
 
     def _matches(self, receptor_sequence, regex, v_gene=None):
-        if v_gene is not None and receptor_sequence.metadata.v_gene != v_gene:
+        if v_gene is not None and receptor_sequence.v_call != v_gene:
             matches = False
         else:
             matches = bool(re.search(regex, receptor_sequence.sequence_aa))

@@ -2,7 +2,7 @@ import shutil
 from unittest import TestCase
 
 from immuneML.IO.dataset_import.GenericImport import GenericImport
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -40,27 +40,28 @@ rep1.tsv,TRA,1234e,no"""
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "generic_rep")
         self.make_dummy_dataset(path, True)
 
-        dataset = GenericImport.import_dataset({"is_repertoire": True, "result_path": path, "path": path,
-                                                "region_type": "IMGT_CDR3", "separator": "\t",
-                                                "import_empty_aa_sequences": False, "import_empty_nt_sequences": True,
-                                                "column_mapping": {"CDR3B AA Sequence": "sequence_aa",
-                                                                   "import_illegal_characters": False,
-                                                                   "TRBV Gene": "v_call", "TRBJ Gene": "j_call",
-                                                                   "Counts": "duplicate_count"},
-                                                "metadata_file": path / "metadata.csv", "number_of_processes": 4},
-                                               "generic_dataset")
+        dataset = GenericImport({"is_repertoire": True, "result_path": path, "path": path,
+                                 "region_type": "IMGT_CDR3", "separator": "\t",
+                                 "import_empty_aa_sequences": False, "import_empty_nt_sequences": True,
+                                 "column_mapping": {"CDR3B AA Sequence": "junction_aa",
+                                                    "import_illegal_characters": False,
+                                                    "TRBV Gene": "v_call", "TRBJ Gene": "j_call",
+                                                    "Counts": "duplicate_count"},
+                                 "metadata_file": path / "metadata.csv", "number_of_processes": 4},
+                                "generic_dataset").import_dataset()
 
         self.assertEqual(1, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
             self.assertEqual("1234e", rep.metadata["subject_id"])
-            self.assertEqual(15, len(rep.sequences))
+            self.assertEqual(15, len(rep.sequences()))
 
         repertoire = dataset.get_data()[0]
-        self.assertEqual('ASSLWEKLAKNIQY', repertoire.sequences[0].sequence_aa)
-        self.assertEqual('ASSLVGGPSSEAF', repertoire.sequences[1].sequence_aa)
-        self.assertEqual('ASSSFWGSDTGELF', repertoire.sequences[2].sequence_aa)
-        self.assertListEqual([1, 3, 7, 2, 10, None, 1, 3, None, 2, 1, 1, 1, 1, 1], list(repertoire.get_counts()))
-        self.assertListEqual([Chain.BETA for i in range(15)], list(repertoire.get_chains()))
+        sequences = repertoire.sequences()
+        self.assertEqual('ASSLWEKLAKNIQY', sequences[0].sequence_aa)
+        self.assertEqual('ASSLVGGPSSEAF', sequences[1].sequence_aa)
+        self.assertEqual('ASSSFWGSDTGELF', sequences[2].sequence_aa)
+        self.assertListEqual([1, 3, 7, 2, 10, -1, 1, 3, -1, 2, 1, 1, 1, 1, 1], repertoire.data.duplicate_count.tolist())
+        self.assertListEqual([Chain.BETA.value for _ in range(15)], repertoire.data.locus.tolist())
 
         shutil.rmtree(path)
 
@@ -68,12 +69,13 @@ rep1.tsv,TRA,1234e,no"""
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "generic_seq")
         self.make_dummy_dataset(path, False)
 
-        dataset = GenericImport.import_dataset({"is_repertoire": False, "paired": False,
-                                                "result_path": path, "path": path, "import_illegal_characters": False,
-                                                "region_type": "IMGT_CDR3", "separator": "\t", "import_empty_nt_sequences": True,
-                                                "column_mapping": {"CDR3B AA Sequence": "sequence_aa",
-                                                                   "TRBV Gene": "v_call", "TRBJ Gene": "j_call"},
-                                                "metadata_file": path / "metadata.csv", "number_of_processes": 4}, "generic_dataset")
+        dataset = GenericImport({"is_repertoire": False, "paired": False,
+                                 "result_path": path, "path": path, "import_illegal_characters": False,
+                                 "region_type": "IMGT_CDR3", "separator": "\t", "import_empty_nt_sequences": True,
+                                 "column_mapping": {"CDR3B AA Sequence": "junction_aa",
+                                                    "TRBV Gene": "v_call", "TRBJ Gene": "j_call"},
+                                 "metadata_file": path / "metadata.csv", "number_of_processes": 4},
+                                "generic_dataset").import_dataset()
 
         self.assertEqual(15, dataset.get_example_count())
 

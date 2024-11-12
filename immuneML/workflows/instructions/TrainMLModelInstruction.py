@@ -5,8 +5,10 @@ import logging
 import pandas as pd
 
 from immuneML.IO.ml_method.MLExporter import MLExporter
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeightingStrategy
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
@@ -76,6 +78,10 @@ class TrainMLModelInstruction(Instruction):
     - export_all_models (bool): if set to True, all trained models in the assessment split are exported as .zip files.
       If False, only the optimal model is exported. By default, export_all_models is False.
 
+    - sequence_type (str): whether to perform the analysis on amino acid or nucleotide sequences
+
+    - region_type (str): which part of the sequence to analyze, e.g., IMGT_CDR3
+
 
     **YAML specification:**
 
@@ -128,17 +134,22 @@ class TrainMLModelInstruction(Instruction):
                 optimization_metric: balanced_accuracy # the metric to use for choosing the optimal model and during training
                 refit_optimal_model: False # use trained model, do not refit on the full dataset
                 export_all_ml_settings: False # only export the optimal setting
+                region_type: IMGT_CDR3
+                sequence_type: AMINO_ACID
 
     """
 
-    def __init__(self, dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list, assessment: SplitConfig, selection: SplitConfig,
-                 metrics: set, optimization_metric: ClassificationMetric, label_configuration: LabelConfiguration, path: Path = None, context: dict = None,
-                 number_of_processes: int = 1, reports: dict = None, name: str = None, refit_optimal_model: bool = False,
+    def __init__(self, dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list, assessment: SplitConfig,
+                 selection: SplitConfig, metrics: set, optimization_metric: ClassificationMetric,
+                 label_configuration: LabelConfiguration, path: Path = None, context: dict = None,
+                 number_of_processes: int = 1, reports: dict = None, name: str = None,
+                 refit_optimal_model: bool = False, sequence_type: SequenceType = None, region_type: RegionType = None,
                  export_all_ml_settings: bool = False, example_weighting: ExampleWeightingStrategy = None):
         self.state = TrainMLModelState(dataset, hp_strategy, hp_settings, assessment, selection, metrics,
                                        optimization_metric, label_configuration, path, context, number_of_processes,
                                        reports if reports is not None else {}, name, refit_optimal_model,
-                                       export_all_ml_settings, example_weighting)
+                                       export_all_ml_settings, example_weighting, sequence_type=sequence_type,
+                                       region_type=region_type)
 
     def run(self, result_path: Path):
         self.state.path = result_path

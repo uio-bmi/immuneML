@@ -4,14 +4,13 @@ from itertools import chain
 from typing import Tuple
 
 from immuneML import Constants
-from immuneML.data_model.receptor.ChainPair import ChainPair
+from immuneML.data_model.SequenceParams import ChainPair
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.definition_parsers.SignalParser import check_clonal_frequency
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
-from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.simulation.SimConfig import SimConfig
 from immuneML.simulation.SimConfigItem import SimConfigItem
 from immuneML.simulation.implants.Signal import SignalPair
@@ -105,7 +104,7 @@ def _check_paired_specs(sim_obj: SimConfig):
             assert sim_item1.number_of_examples == sim_item2.number_of_examples
             assert sim_item1.receptors_in_repertoire_count == sim_item2.receptors_in_repertoire_count
 
-            ChainPair.get_chain_pair([sim_item1.generative_model.chain, sim_item2.generative_model.chain])
+            ChainPair.get_chain_pair([sim_item1.generative_model.locus, sim_item2.generative_model.locus])
 
         assert len(list(set(chain.from_iterable(sim_obj.paired)))) == 2 * len(sim_obj.paired)
         assert all(item.name in list(chain.from_iterable(sim_obj.paired)) for item in sim_obj.sim_items)

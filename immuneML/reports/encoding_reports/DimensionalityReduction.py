@@ -1,12 +1,11 @@
 import logging
-import warnings
 from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
 
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
@@ -19,7 +18,7 @@ class DimensionalityReduction(EncodingReport):
 
     **Specification arguments:**
 
-    - label (str): name of the label to use for highlighting data points
+    - label (str): name of the label to use for highlighting data points; or None
 
 
     **YAML specification:**
@@ -43,6 +42,7 @@ class DimensionalityReduction(EncodingReport):
                  name: str = None, label: str = None):
         super().__init__(dataset=dataset, result_path=result_path, name=name)
         self._label = label
+        self.info = "This report visualizes the encoded data after applying dimensionality reduction."
 
     def check_prerequisites(self):
         return (isinstance(self.dataset.encoded_data, EncodedData) and
@@ -61,13 +61,16 @@ class DimensionalityReduction(EncodingReport):
 
         PathBuilder.build(self.result_path)
 
-        df = pd.DataFrame({"x": dim_reduced_data[:, 0], 'y': dim_reduced_data[:, 1], self._label: data_labels})
+        df = pd.DataFrame({'example_id': self.dataset.get_example_ids(),
+                           "x": dim_reduced_data[:, 0], 'y': dim_reduced_data[:, 1]})
+        if self._label:
+            df[self._label] = data_labels
         df.to_csv(self.result_path / 'dimensionality_reduced_data.csv', index=False)
 
         report_output_fig = self._safe_plot(df=df, output_written=True)
         output_figures = None if report_output_fig is None else [report_output_fig]
 
-        return ReportResult(name=self.name,
+        return ReportResult(name=self.name, info=self.info,
                             output_figures=output_figures,
                             output_tables=[ReportOutput(self.result_path / 'dimensionality_reduced_data.csv',
                                                         'data after dimensionality reduction')])

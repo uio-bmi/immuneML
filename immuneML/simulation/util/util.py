@@ -1,6 +1,4 @@
-import dataclasses
 import logging
-import uuid
 from dataclasses import make_dataclass, fields as get_fields
 from itertools import chain
 from pathlib import Path
@@ -9,7 +7,8 @@ from typing import List, Dict, Union
 import bionumpy as bnp
 import dill
 import numpy as np
-from bionumpy import AminoAcidEncoding, DNAEncoding, EncodedRaggedArray, get_motif_scores
+import pandas as pd
+from bionumpy import AminoAcidEncoding, DNAEncoding, get_motif_scores
 from bionumpy.bnpdataclass import bnpdataclass, BNPDataClass
 from bionumpy.encodings import BaseEncoding
 from bionumpy.io import delimited_buffers
@@ -18,18 +17,16 @@ from npstructures import RaggedArray
 from scipy.stats import zipf
 
 from immuneML import Constants
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.SequenceParams import RegionType, Chain
+from immuneML.data_model.SequenceSet import Repertoire
+from immuneML.data_model.bnp_util import make_full_airr_seq_set_df
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences
 from immuneML.simulation.SimConfigItem import SimConfigItem
 from immuneML.simulation.implants.LigoPWM import LigoPWM
 from immuneML.simulation.implants.MotifInstance import MotifInstance, MotifInstanceGroup
 from immuneML.simulation.implants.Signal import Signal, SignalPair
-from immuneML.simulation.util.bnp_util import merge_dataclass_objects
+from immuneML.simulation.util.bnp_util import merge_dataclass_objects, pad_ragged_array
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.PositionHelper import PositionHelper
 
@@ -66,15 +63,8 @@ def get_bnp_data(sequence_path, bnp_data_class):
         return data
 
 
-def make_receptor_sequence_objects(sequences: BackgroundSequences, metadata, immune_events: dict, custom_params: list,
-                                   chain) -> List[ReceptorSequence]:
-    return [ReceptorSequence(seq.sequence_aa.to_string(), seq.sequence.to_string(), sequence_id=uuid.uuid4().hex,
-                             metadata=construct_sequence_metadata_object(seq, metadata, custom_params, immune_events,
-                                                                         chain)) for seq in sequences]
-
-
-def construct_sequence_metadata_object(sequence, metadata: dict, custom_params, immune_events: dict, chain: Chain) \
-        -> SequenceMetadata:
+def construct_sequence_metadata_object(sequence, metadata: dict, custom_params, immune_events: dict, locus: Chain) \
+        -> dict:
     custom = {}
 
     for param in custom_params:
@@ -84,9 +74,7 @@ def construct_sequence_metadata_object(sequence, metadata: dict, custom_params, 
         else:
             custom[key] = getattr(sequence, key).item()
 
-    return SequenceMetadata(custom_params={**metadata, **custom, **immune_events}, chain=chain,
-                            v_call=sequence.v_call.to_string(), j_call=sequence.j_call.to_string(),
-                            region_type=sequence.region_type.to_string())
+    return {**metadata, **custom, **immune_events}
 
 
 def write_bnp_data(path: Path, data, append_if_exists: bool = True):
@@ -132,7 +120,8 @@ def get_region_type(sequences) -> RegionType:
         raise RuntimeError(f"The region types could not be obtained.")
 
 
-def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annotated_dc, sim_item_name: str = None):
+def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annotated_dc, sim_item_name: str = None,
+                       region_type: RegionType = RegionType.IMGT_CDR3):
     encoding = AminoAcidEncoding if is_amino_acid else DNAEncoding
     sequence_array = sequences.sequence_aa if is_amino_acid else sequences.sequence
 
@@ -141,7 +130,7 @@ def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annota
 
     for index, signal in enumerate(all_signals):
         _annotate_with_signal(sequences, sequence_array, is_amino_acid, encoding, signal_matrix, signal, index,
-                              signal_positions, sim_item_name)
+                              signal_positions, sim_item_name, region_type)
 
     signal_matrix = make_bnp_annotated_sequences(sequences, annotated_dc, all_signals, signal_matrix, signal_positions)
 
@@ -151,30 +140,31 @@ def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annota
 
 
 def _annotate_with_signal(sequences, sequence_array, is_amino_acid, encoding, signal_matrix, signal, signal_index,
-                          signal_positions, sim_item_name: str = None):
+                          signal_positions, sim_item_name: str = None, region_type: RegionType = RegionType.IMGT_CDR3):
     if signal.motifs is not None:
         return _annotate_with_signal_motifs(sequences, sequence_array, is_amino_acid, encoding, signal_matrix, signal,
-                                            signal_index, signal_positions, sim_item_name)
+                                            signal_index, signal_positions, sim_item_name, region_type)
     else:
         return _annotate_with_signal_func(sequences, sequence_array, is_amino_acid, encoding, signal_matrix, signal,
-                                          signal_index, signal_positions)
+                                          signal_index, signal_positions, region_type)
 
 
 def _annotate_with_signal_func(sequences, sequence_array, is_amino_acid, encoding, signal_matrix, signal, signal_index,
-                               signal_positions):
-
+                               signal_positions, region_type: RegionType):
     signal_matrix[:, signal_index] = [signal.is_present_custom_func(seq.sequence_aa.to_string(),
                                                                     seq.sequence.to_string(),
                                                                     seq.v_call.to_string(),
-                                                                    seq.j_call.to_string())
+                                                                    seq.j_call.to_string(),
+                                                                    region_type.name)
                                       for seq in sequences]
     signal_positions[f'{signal.id}_positions'] = ["" for _ in range(len(sequences))]
 
 
 def _annotate_with_signal_motifs(sequences, sequence_array, is_amino_acid, encoding, signal_matrix, signal,
-                                 signal_index, signal_positions, sim_item_name = None):
+                                 signal_index, signal_positions, sim_item_name: str = None,
+                                 region_type: RegionType = RegionType.IMGT_CDR3):
     signal_pos_col = None
-    allowed_positions = get_allowed_positions(signal, sequence_array, get_region_type(sequences))
+    allowed_positions = get_allowed_positions(signal, sequence_array, region_type)
     matches_gene = match_genes(signal.v_call, sequences.v_call, signal.j_call, sequences.j_call)
 
     for motifs in signal.get_all_motif_instances(SequenceType.AMINO_ACID if is_amino_acid else SequenceType.NUCLEOTIDE):
@@ -251,6 +241,7 @@ def match_motif(motif: Union[str, LigoPWM], encoding, sequence_array):
         matches = matcher.rolling_window(sequence_array, mode='same')
     else:
         matches = get_motif_scores(sequence_array, motif.pwm_matrix) > motif.threshold
+        matches = pad_ragged_array(matches, sequence_array.shape, False)
     return matches
 
 
@@ -289,11 +280,29 @@ def make_signal_metadata(sim_item, signals) -> Dict[str, bool]:
 
 
 def make_repertoire_from_sequences(sequences: BNPDataClass, repertoires_path, sim_item: SimConfigItem,
-                                   signals: List[Signal], custom_fields: list) \
-        -> Repertoire:
+                                   signals: List[Signal]) -> Repertoire:
     metadata = {**make_signal_metadata(sim_item, signals), **sim_item.immune_events, 'sim_item': sim_item.name}
-    rep_data = prepare_data_for_repertoire_obj(sequences, custom_fields)
-    return Repertoire.build(**rep_data, path=repertoires_path, metadata=metadata)
+    rep_data = prepare_data_for_repertoire_obj(sequences)
+    return Repertoire.build(path=repertoires_path, metadata=metadata, **rep_data)
+
+
+def prepare_data_for_repertoire_obj(sequences):
+    df = sequences.topandas()
+    df = prepare_data_for_airr_seq_set(df)
+
+    return df.to_dict(orient='list')
+
+
+def prepare_data_for_airr_seq_set(in_df: pd.DataFrame) -> pd.DataFrame:
+    region_type = RegionType[in_df.region_type.unique()[0]].value
+
+    df = in_df.rename(columns={
+        'sequence_aa': region_type + "_aa",
+        'sequence': region_type
+    }).drop(columns=['frame_type', 'region_type'])
+
+    df = make_full_airr_seq_set_df(df)
+    return df
 
 
 def make_bnp_annotated_sequences(sequences: BackgroundSequences, bnp_data_class, all_signals: list,
@@ -313,7 +322,7 @@ def make_bnp_annotated_sequences(sequences: BackgroundSequences, bnp_data_class,
     kwargs['signals_aggregated'] = [s if s != "" else "no_signal" for s in
                                     ["_".join(
                                         s for index, s in enumerate([sig.id for sig in all_signals]) if el[index] == 1)
-                                     for el in signal_matrix]]
+                                        for el in signal_matrix]]
 
     for field in dc_fields:
         if field.name not in kwargs:
@@ -328,7 +337,7 @@ def make_annotated_dataclass(annotation_fields: list, signals: list):
             [getattr(self, signal.id) for signal in signals]).T if signals and len(signals) > 0 else None,
         "get_signal_names": lambda self: [signal.id for signal in signals]}
 
-    fields = [f if len(f) != 3 else (f[0], f[1], dill.loads(f[2])) for f in annotation_fields]
+    fields = [f if len(f) != 3 else (f[0], f[1], f[2]) for f in annotation_fields]
 
     return bnpdataclass(
         make_dataclass("AnnotatedGenData", namespace=functions, bases=tuple([BackgroundSequences]), fields=fields))
@@ -364,25 +373,6 @@ def check_sequence_count(sim_item, sequences: BackgroundSequences):
     assert len(sequences) == sim_item.receptors_in_repertoire_count, \
         f"Error when simulating repertoire, needed {sim_item.receptors_in_repertoire_count} sequences, " \
         f"but got {len(sequences)}."
-
-
-def prepare_data_for_repertoire_obj(sequences: BNPDataClass, custom_fields: list) -> dict:
-    custom_lists = {}
-    for field in custom_fields:
-        if field[1] is int or field[1] is float:
-            custom_lists[field[0]] = getattr(sequences, field[0])
-        else:
-            custom_lists[field[0]] = [el.to_string() for el in getattr(sequences, field[0])]
-
-    default_lists = {}
-    for field in dataclasses.fields(sequences):
-        if field.name not in custom_lists:
-            if isinstance(getattr(sequences, field.name), EncodedRaggedArray):
-                default_lists[field.name] = [el.to_string() for el in getattr(sequences, field.name)]
-            else:
-                default_lists[field.name] = getattr(sequences, field.name)
-
-    return {**default_lists, **custom_lists}
 
 
 def update_seqs_without_signal(max_count, annotated_sequences, seqs_no_signal_path: Path):
@@ -510,7 +500,6 @@ def get_min_seq_length(sim_item: SimConfigItem, sequence_type: SequenceType, reg
 
 
 def get_max_seq_length(sim_item: SimConfigItem, sequence_type: SequenceType, region_type: RegionType) -> int:
-
     conversion_constant = 1 if sequence_type == SequenceType.AMINO_ACID else 3
 
     if region_type == RegionType.IMGT_JUNCTION:
