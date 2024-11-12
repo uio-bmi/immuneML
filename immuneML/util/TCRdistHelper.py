@@ -74,6 +74,8 @@ class TCRdistHelper:
 
         df = dataset.data.topandas()
 
+        epitope_name = 'epitope' if 'epitope' in df.columns else 'Epitope' if 'Epitope' in df.columns else ''
+
         if "subject" not in df:
             df['subject'] = "sub" + df['receptor_id']
 
@@ -83,7 +85,7 @@ class TCRdistHelper:
                                                              df.loc[df['j_call'].str.contains("\*"), 'j_call']]
 
         df['clone_id'] = df['receptor_id']
-        cols_to_keep = ['cdr3', 'cdr3_aa', 'v_call', 'j_call', 'duplicate_count', 'subject', 'epitope', 'clone_id']
+        cols_to_keep = ['cdr3', 'cdr3_aa', 'v_call', 'j_call', 'duplicate_count', 'subject', epitope_name, 'clone_id']
 
         df_alpha = (df[df.locus == 'TRA'][cols_to_keep]
                     .rename(columns={"cdr3_aa": "cdr3_a_aa", "cdr3": "cdr3_a_nucseq", "v_call": "v_a_gene",
@@ -95,6 +97,6 @@ class TCRdistHelper:
                      'j_call': "j_b_gene", "duplicate_count": "count"}))
         df_beta.loc[:, 'count'] = [1 if el in [-1, None] else el for el in df_beta['count']]
 
-        df = df_alpha.merge(df_beta, on=['clone_id', 'epitope', 'subject', 'count'])
+        df = df_alpha.merge(df_beta, on=['clone_id', epitope_name, 'subject', 'count'])
 
         return df

@@ -21,9 +21,6 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class PWM(GenerativeModel):
     """
-    .. note::
-
-        This is an experimental feature
 
     This is a baseline implementation of a positional weight matrix. It is estimated from a set of sequences for each
     of the different lengths that appear in the dataset.

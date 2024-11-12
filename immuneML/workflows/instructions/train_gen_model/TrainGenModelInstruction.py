@@ -43,9 +43,6 @@ class TrainGenModelState:
 
 class TrainGenModelInstruction(GenModelInstruction):
     """
-    .. note::
-
-        This is an experimental feature
 
     TrainGenModel instruction implements training generative AIRR models on receptor level. Models that can be trained
     for sequence generation are listed under Generative Models section.
