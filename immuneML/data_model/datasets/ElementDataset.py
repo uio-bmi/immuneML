@@ -160,10 +160,12 @@ class ReceptorDataset(ElementDataset):
     """A dataset class for receptor datasets (paired chain)."""
 
     @classmethod
-    def build(cls, filename: Path, metadata_filename: Path, name: str = None, labels: dict = None):
+    def build(cls, filename: Path, metadata_filename: Path, name: str = None, bnp_dc=None, labels: dict = None):
         metadata = read_yaml(metadata_filename)
         dynamic_fields = {k: AIRRSequenceSet.STR_TO_TYPE[v] for k, v in metadata['type_dict_dynamic_fields'].items()}
-        bnp_dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(dynamic_fields.items()))
+
+        if bnp_dc is None:
+            bnp_dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(dynamic_fields.items()))
 
         if labels is None and 'labels' in metadata:
             labels = metadata['labels']
