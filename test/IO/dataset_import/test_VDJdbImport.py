@@ -41,7 +41,7 @@ class TestVDJdbLoader(TestCase):
                 sequence.sequence_aa in ["ASSPPRVYSNGAGLAGVGWRNEQF", "ASSWTWDAATLWGQGALGGANVLT", "AAIYESRGSTLGRLY",
                                          "ALRLNNQGGKLI"])
             self.assertTrue(sequence.metadata["Epitope_species"] in ["EBV", "CMV"])
-            self.assertTrue(sequence.metadata["Epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
+            self.assertTrue(sequence.metadata["epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
             self.assertTrue(sequence.metadata["Epitope_gene"] in ["EBNA4", "IE1"])
             self.assertTrue(sequence.v_call in ["TRBV5-4*01", "TRBV5-5*01", "TRAV13-1*01", "TRAV9-2*01"])
             self.assertTrue(sequence.j_call in ["TRBJ2-1*01", "TRBJ2-6*01", "TRAJ18*01", "TRAJ23*01"])
@@ -74,7 +74,7 @@ class TestVDJdbLoader(TestCase):
         for receptor in dataset.get_data(2):
             self.assertTrue(receptor.alpha.sequence_aa in ["AAIYESRGSTLGRLY", "ALRLNNQGGKLI"])
             self.assertTrue(receptor.metadata["Epitope_species"] in ["EBV", "CMV"])
-            self.assertTrue(receptor.metadata["Epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
+            self.assertTrue(receptor.metadata["epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
             self.assertTrue(receptor.metadata["Epitope_gene"] in ["EBNA4", "IE1"])
 
         shutil.rmtree(path)
@@ -149,7 +149,7 @@ class TestVDJdbLoader(TestCase):
             self.assertTrue(receptor.beta.v_call in ["TRBV5-4*01", ''])
             self.assertTrue(receptor.beta.j_call in ["TRBJ2-1*01", "TRBJ2-6*01"])
             self.assertTrue(receptor.metadata["Epitope_species"] in ["EBV", "CMV"])
-            self.assertTrue(receptor.metadata["Epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
+            self.assertTrue(receptor.metadata["epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
             self.assertTrue(receptor.metadata["Epitope_gene"] in ["EBNA4", "IE1"])
 
         shutil.rmtree(path)

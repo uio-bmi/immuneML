@@ -12,7 +12,7 @@ import pandas as pd
 from bionumpy import AminoAcidEncoding, DNAEncoding
 
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet, AminoAcidXEncoding
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet, AminoAcidXEncoding, DNANEncoding
 from immuneML.data_model.SequenceSet import Repertoire, build_dynamic_airr_sequence_set_dataclass
 from immuneML.data_model.bnp_util import bnp_write_to_file, write_yaml, read_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
@@ -244,11 +244,16 @@ class DataImport(metaclass=abc.ABCMeta):
 
     def _convert_types(self, df: pd.DataFrame) -> pd.DataFrame:
         str_cols = [f.name for f in fields(AIRRSequenceSet)
-                    if f.type in [str, AminoAcidEncoding, AminoAcidXEncoding, DNAEncoding] and f.name in df.columns]
+                    if f.type in [str, AminoAcidEncoding, AminoAcidXEncoding, DNANEncoding] and f.name in df.columns]
 
         df.loc[:, str_cols] = df.loc[:, str_cols].astype(str).replace('nan', '').replace('-1.0', '')
 
-        invalid_cols = df.columns[~df.map(type).nunique().eq(1)]
+        encoded_cols = [f for f, t in AIRRSequenceSet.get_field_type_dict().items()
+                        if t in [AminoAcidXEncoding, AminoAcidEncoding, DNANEncoding] and f in df.columns]
+
+        df.loc[:, encoded_cols] = df.loc[:, encoded_cols].apply(lambda x: x.str.upper())
+
+        invalid_cols = df.columns[~df.applymap(type).nunique().eq(1)]
         df[invalid_cols] = df[invalid_cols].astype(str)
 
         int_cols = [f.name for f in fields(AIRRSequenceSet) if f.type == int and f.name in df.columns]

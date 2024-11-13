@@ -1,2 +1,1 @@
 tcrdist3>=0.1.6
-pandas<2.0

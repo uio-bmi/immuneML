@@ -67,7 +67,7 @@ class TestMultiDatasetBenchmarkTool(TestCase):
                 "ml_methods": {
                     "ml1": {
                         "ProbabilisticBinaryClassifier": {
-                            "max_iterations": 200,
+                            "max_iterations": 20,
                             "update_rate": 0.01
                         }
                     }
