@@ -40,14 +40,7 @@ class TestGalaxyTrainMLModel(TestCase):
                             "model_type": "sequence",
                             "vector_size": 8,
                         }
-                    },
-                    "e2": {
-                        "Word2Vec": {
-                            "k": 3,
-                            "model_type": "sequence",
-                            "vector_size": 10,
-                        }
-                    },
+                    }
                 },
                 "ml_methods": {
                     "simpleLR": {
@@ -66,10 +59,6 @@ class TestGalaxyTrainMLModel(TestCase):
                         {
                             "encoding": "e1",
                             "ml_method": "simpleLR"
-                        },
-                        {
-                            "encoding": "e2",
-                            "ml_method": "simpleLR"
                         }
                     ],
                     "assessment": {
@@ -87,7 +76,7 @@ class TestGalaxyTrainMLModel(TestCase):
                     "strategy": "GridSearch",
                     "metrics": ["accuracy", "auc"],
                     "reports": [],
-                    "number_of_processes": 10,
+                    "number_of_processes": 1,
                     "optimization_metric": "accuracy",
                     'refit_optimal_model': False,
                 }

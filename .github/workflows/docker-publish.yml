@@ -5,6 +5,7 @@ on:
    branches:
      - master
    paths: ['**.py', '**.yaml']
+ workflow_dispatch:
 
 jobs:
 

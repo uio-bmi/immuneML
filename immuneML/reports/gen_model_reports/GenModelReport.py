@@ -7,13 +7,9 @@ from immuneML.reports.Report import Report
 
 
 class GenModelReport(Report, ABC):
-    '''
-    .. note::
-
-        This is an experimental feature
-
+    """
     Generative model reports show some type of features or statistics about a generative model.
-    '''
+    """
 
     DOCS_TITLE = "Generative model reports"
 

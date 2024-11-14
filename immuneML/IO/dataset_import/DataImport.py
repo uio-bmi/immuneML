@@ -8,14 +8,14 @@ from pathlib import Path
 from typing import List, Tuple, Type
 
 import pandas as pd
-from bionumpy import AminoAcidEncoding, DNAEncoding
+from bionumpy import AminoAcidEncoding
 
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet, AminoAcidXEncoding
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet, AminoAcidXEncoding, DNANEncoding
 from immuneML.data_model.SequenceSet import Repertoire, build_dynamic_airr_sequence_set_dataclass
 from immuneML.data_model.bnp_util import bnp_write_to_file, write_yaml, read_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
-from immuneML.data_model.datasets.ElementDataset import SequenceDataset, ReceptorDataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset, ReceptorDataset, ElementDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.util.ImportHelper import ImportHelper
 from immuneML.util.ParameterValidator import ParameterValidator
@@ -30,7 +30,8 @@ class DataImport(metaclass=abc.ABCMeta):
 
     def import_dataset(self) -> Dataset:
 
-        if self.params.dataset_file is not None and self.params.dataset_file.is_file():
+        if self.params.dataset_file is not None:
+            assert self.params.dataset_file.is_file(), f"DataImport: dataset_file was specified but not found: {self.params.dataset_file}"
             dataset = self.import_dataset_from_yaml()
         else:
             if self.params.is_repertoire is None and self.params.metadata_file is not None:
@@ -97,31 +98,32 @@ class DataImport(metaclass=abc.ABCMeta):
                                  dataset_file=dataset_filename)
 
     def import_element_dataset(self, dataset_class: Type, filter_func=None):
-        filenames = ImportHelper.get_sequence_filenames(self.params.path, self.dataset_name)
-        final_df = None
+        if self.params.dataset_file is not None and self.params.dataset_file.is_file():
+            filenames = [Path(read_yaml(self.params.dataset_file)["filename"])]
+            assert filenames[0].is_file(), f"DataImport: filename {filenames[0]} specified in dataset file was not found."
+        else:
+            filenames = ImportHelper.get_sequence_filenames(self.params.path, self.dataset_name)
 
-        for filename in filenames:
-            df = self.load_sequence_dataframe(filename)
-            if filter_func:
-                df = filter_func(df)
-            final_df = pd.concat([final_df, df])
+        final_data_dict = self._construct_element_dataset_data_dict(filenames, filter_func)
 
-        final_data_dict = final_df.to_dict(orient='list')
+        bnp_dc, type_dict = build_dynamic_airr_sequence_set_dataclass(final_data_dict)
+        filename = self._write_element_dataset_tsv_file(final_data_dict, bnp_dc)
 
-        dc, types = build_dynamic_airr_sequence_set_dataclass(final_data_dict)
-        filename, dataset_file, metadata = self._prepare_values_for_element_dataset(final_data_dict, dc, types)
+        possible_labels = {key: list(set(final_data_dict[key])) for key in type_dict.keys()}
+        logging.info(f"All possible labels for dataset '{self.dataset_name}' are: {list(possible_labels.keys())}")
 
-        potential_labels = {key: list(set(final_data_dict[key])) for key in types.keys()}
         if self.params.label_columns:
             label_variants = self.params.label_columns + [ImportHelper.get_standardized_name(label_name) for label_name
                                                           in self.params.label_columns]
-            potential_labels = {key: value for key, value in potential_labels.items() if key in label_variants}
+            possible_labels = {key: value for key, value in possible_labels.items() if key in label_variants}
 
-        labels = {**metadata['labels'], **potential_labels} \
-            if 'labels' in metadata and isinstance(metadata['labels'], dict) else potential_labels
+        dataset_filename = self._write_element_dataset_metadata_file(dataset_class, filename, type_dict, possible_labels)
+        metadata = read_yaml(dataset_filename)
 
-        return dataset_class(name=self.dataset_name, bnp_dataclass=dc, dataset_file=dataset_file,
-                             dynamic_fields=types, filename=filename, labels=labels)
+        logging.info(f"Displayed labels for dataset '{self.dataset_name}' are: {list(metadata['labels'].keys())}")
+
+        return dataset_class(name=self.dataset_name, bnp_dataclass=bnp_dc, dataset_file=dataset_filename,
+                             dynamic_fields=type_dict, filename=filename, labels=metadata['labels'])
 
     def import_sequence_dataset(self) -> SequenceDataset:
         return self.import_element_dataset(SequenceDataset)
@@ -157,20 +159,39 @@ class DataImport(metaclass=abc.ABCMeta):
 
         return dataset_filename, metadata
 
-    def _prepare_values_for_element_dataset(self, final_data_dict, dc, types) -> Tuple[Path, Path, dict]:
+    def _construct_element_dataset_data_dict(self, filenames, filter_func) -> dict:
+        final_df = None
+
+        for filename in filenames:
+            df = self.load_sequence_dataframe(filename)
+            if filter_func:
+                df = filter_func(df)
+            final_df = pd.concat([final_df, df])
+
+        return final_df.to_dict(orient='list')
+
+    def _write_element_dataset_tsv_file(self, final_data_dict, bnp_dc) -> Path:
         PathBuilder.build(self.params.result_path)
 
-        data = dc(**final_data_dict)
-        bnp_write_to_file(self.params.result_path / f'{self.dataset_name}.tsv', data)
+        data = bnp_dc(**final_data_dict)
+        data_filename = self.params.result_path / f'{self.dataset_name}.tsv'
+        bnp_write_to_file(data_filename, data)
 
+        return data_filename
+
+    def _write_element_dataset_metadata_file(self, dataset_class, filename, type_dict, possible_labels):
         dataset_filename = self.params.result_path / f"{self.dataset_name}.yaml"
-        metadata = {'type_dict_dynamic_fields': {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in types.items()}}
-        if self.params.dataset_file:
-            dataset_file_content = read_yaml(self.params.dataset_file)
-            metadata = {**dataset_file_content, **metadata}
-        write_yaml(dataset_filename, metadata)
 
-        return self.params.result_path / f'{self.dataset_name}.tsv', dataset_filename, metadata
+        if self.params.dataset_file:
+            metadata = read_yaml(self.params.dataset_file)
+        else:
+            metadata = ElementDataset.create_metadata_dict(dataset_class=dataset_class.__name__,
+                                                           filename=filename,
+                                                           type_dict=type_dict,
+                                                           name=self.dataset_name,
+                                                           labels=possible_labels)
+        write_yaml(dataset_filename, metadata)
+        return dataset_filename
 
     def load_repertoire_object(self, metadata_row: pd.Series) -> Repertoire:
         try:
@@ -186,7 +207,8 @@ class DataImport(metaclass=abc.ABCMeta):
             return repertoire
         except Exception as e:
             raise RuntimeError(
-                f"{self.__class__.__name__}: error when importing file {metadata_row['filename']}: {e}")
+                f"{self.__class__.__name__}: error when importing file {Path(metadata_row['filename']).absolute()}: "
+                f"\n{e}.\n")
 
     def load_sequence_dataframe(self, filename: Path):
 
@@ -240,9 +262,15 @@ class DataImport(metaclass=abc.ABCMeta):
 
     def _convert_types(self, df: pd.DataFrame) -> pd.DataFrame:
         str_cols = [f.name for f in fields(AIRRSequenceSet)
-                    if f.type in [str, AminoAcidEncoding, AminoAcidXEncoding, DNAEncoding] and f.name in df.columns]
+                    if f.type in [str, AminoAcidEncoding, AminoAcidXEncoding, DNANEncoding] and f.name in df.columns]
 
-        df.loc[:, str_cols] = df.loc[:, str_cols].astype(str).replace('nan', '').replace('-1.0', '')
+        df = df.astype({col: str for col in str_cols})
+        df.loc[:, str_cols] = df.loc[:, str_cols].replace('nan', '').replace('-1.0', '')
+
+        encoded_cols = [f for f, t in AIRRSequenceSet.get_field_type_dict().items()
+                        if t in [AminoAcidXEncoding, AminoAcidEncoding, DNANEncoding] and f in df.columns]
+
+        df.loc[:, encoded_cols] = df.loc[:, encoded_cols].apply(lambda x: x.str.upper())
 
         invalid_cols = df.columns[~df.map(type).nunique().eq(1)]
         df[invalid_cols] = df[invalid_cols].astype(str)

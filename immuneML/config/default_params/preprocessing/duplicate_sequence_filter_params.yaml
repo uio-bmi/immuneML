@@ -1,2 +1,4 @@
+#filter_sequence_type: AMINO_ACID
 groupby_fields: [cdr3_aa, junction_aa, sequence_aa, locus, v_call, j_call]
 count_agg: sum
+region_type: IMGT_CDR3

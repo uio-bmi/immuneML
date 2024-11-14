@@ -43,9 +43,6 @@ class TrainGenModelState:
 
 class TrainGenModelInstruction(GenModelInstruction):
     """
-    .. note::
-
-        This is an experimental feature
 
     TrainGenModel instruction implements training generative AIRR models on receptor level. Models that can be trained
     for sequence generation are listed under Generative Models section.
@@ -164,7 +161,6 @@ class TrainGenModelInstruction(GenModelInstruction):
         metadata_yaml = SequenceDataset.create_metadata_dict(dataset_class=SequenceDataset.__name__,
                                              filename=f'combined_{self.state.name}_dataset.tsv',
                                              type_dict=type(combined_data).get_field_type_dict(all_fields=False),
-                                             identifier=uuid4().hex,
                                              name=f'combined_{self.state.name}_dataset',
                                              labels={'gen_model_name': [self.method.name, ''], "from_gen_model": [True, False]})
 
@@ -177,8 +173,9 @@ class TrainGenModelInstruction(GenModelInstruction):
     def _get_dataclass_object_from_dataset(self, dataset: Dataset, from_gen_model_vals: np.ndarray,
                                            used_for_training_vals: np.ndarray):
         return dataset.data.add_fields(
-            {'from_gen_model': from_gen_model_vals, 'used_for_training': used_for_training_vals},
-            {'from_gen_model': bool, 'used_for_training': bool})
+            {'from_gen_model': np.where(from_gen_model_vals, 'T', 'F'),
+             'used_for_training': np.where(used_for_training_vals, 'T', 'F')},
+            {'from_gen_model': str, 'used_for_training': str})
 
     def _make_and_export_combined_dataset(self):
         if self.export_combined_dataset and isinstance(self.dataset, SequenceDataset):

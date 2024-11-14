@@ -11,9 +11,6 @@ class ApplyGenModelState(GenModelState):
 
 class ApplyGenModelInstruction(GenModelInstruction):
     """
-    .. note::
-
-        This is an experimental feature
 
     ApplyGenModel instruction implements applying generative AIRR models on the sequence level.
 

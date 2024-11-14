@@ -17,11 +17,12 @@ dill>=0.3
 plotly>=4
 logomaker>=0.8
 matplotlib-venn>=0.11
-scipy
+scipy<1.13
 umap-learn
 bionumpy>=0.2.31
 npstructures
 fisher>=0.1.9
+fishersapi
 olga>=1.2.4
 stitchr
 IMGTgeneDL

@@ -3,7 +3,6 @@ import shutil
 from pathlib import Path
 from unittest import TestCase
 
-
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.SequenceSet import ReceptorSequence
@@ -35,7 +34,6 @@ class TestSimilarToPositiveSequenceEncoder(TestCase):
                      ReceptorSequence(sequence_aa="EEEE", sequence_id="6",
                                       metadata={"l1": "no"})]
 
-
         PathBuilder.build(path)
         dataset = SequenceDataset.build_from_objects(sequences, PathBuilder.build(path / 'data'), 'd2')
 
@@ -45,7 +43,7 @@ class TestSimilarToPositiveSequenceEncoder(TestCase):
         return dataset, lc
 
     def _get_encoder_params(self, path, lc):
-        return  EncoderParams(
+        return EncoderParams(
             result_path=path / "encoder_result/",
             label_config=lc,
             pool_size=4,
@@ -58,7 +56,8 @@ class TestSimilarToPositiveSequenceEncoder(TestCase):
         path = EnvironmentSettings.tmp_test_path / f"significant_motif_sequence_encoder_test_{path_suffix}/"
         dataset, lc = self._prepare_dataset(path)
 
-        default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "encodings/", "similar_to_positive_sequence")
+        default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "encodings/",
+                                                  "similar_to_positive_sequence")
 
         encoder = SimilarToPositiveSequenceEncoder.build_object(dataset, **{**default_params, **{"hamming_distance": 1,
                                                                                                  "compairr_path": compairr_path,
@@ -77,8 +76,13 @@ class TestSimilarToPositiveSequenceEncoder(TestCase):
         shutil.rmtree(path)
 
     def test_generate_with_compairr(self):
-        compairr_paths = [Path("/usr/local/bin/compairr"), Path("./compairr/src/compairr")]
+        compairr_paths = EnvironmentSettings.compairr_paths
+        compairr_runs = 0
 
         for compairr_path in compairr_paths:
             if compairr_path.exists():
                 self.test_generate(str(compairr_path))
+                compairr_runs += 1
+                break
+
+        assert compairr_runs > 0

@@ -122,8 +122,10 @@ class OneHotEncoder(DatasetEncoder):
         if self.sequence_type == SequenceType.NUCLEOTIDE and self.distance_to_seq_middle is not None:  # todo check this / explain in docs
             self.distance_to_seq_middle = self.distance_to_seq_middle * 3
 
-        self.onehot_dimensions = self.alphabet + ["start", "mid",
-                                                  "end"] if self.use_positional_info else self.alphabet  # todo test this
+        if self.use_positional_info:
+            self.onehot_dimensions = self.alphabet + ["start", "mid", "end"]
+        else:
+            self.onehot_dimensions = self.alphabet
 
     @staticmethod
     def _prepare_parameters(use_positional_info: bool, distance_to_seq_middle: int, flatten: bool, sequence_type: str,
@@ -183,9 +185,7 @@ class OneHotEncoder(DatasetEncoder):
         # Extract sequences from AIRRSequenceSet
         sequence_array = getattr(sequences, sequence_field)
 
-        sequence_alphabet = "".join(AIRRSequenceSet.get_field_type_dict()[sequence_field].get_alphabet()).replace("*",
-                                                                                                                  "").replace(
-            "X", "")
+        sequence_alphabet = "".join(EnvironmentSettings.get_sequence_alphabet(params.sequence_type))
 
         # noinspection PyTypeChecker
         encoded_sequences = np.array([

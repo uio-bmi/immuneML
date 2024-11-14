@@ -6,6 +6,7 @@ column_mapping:
   CDR3: junction_aa # VDJdb's definition of CDR3 corresponds to AIRR Schema definition of IMGT junction
   complex.id: cell_id
   Gene: locus
+  Epitope: epitope
 region_type: "IMGT_CDR3" # which region to use
 separator: "\t"
 import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty

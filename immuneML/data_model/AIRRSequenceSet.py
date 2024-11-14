@@ -2,25 +2,26 @@ from dataclasses import fields
 from typing import Dict
 
 import bionumpy as bnp
-from bionumpy import DNAEncoding, AminoAcidEncoding
+from bionumpy import AminoAcidEncoding
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.encodings import AlphabetEncoding
 from numpy._typing import ArrayLike
 
 AminoAcidXEncoding = AlphabetEncoding('ACDEFGHIKLMNPQRSTVWXY*')
+DNANEncoding = AlphabetEncoding("ACGTN")
 
 
 @bnpdataclass
 class AIRRSequenceSet:
     sequence_id: str = ''
-    sequence: DNAEncoding = ''
+    sequence: DNANEncoding = ''
     quality: str = ''
     sequence_aa: AminoAcidXEncoding = ''
-    rev_comp: str = 'False'
-    productive: str = 'False'
-    vj_in_frame: str = 'False'
-    stop_codon: str = 'False'
-    complete_vdj: str = 'False'
+    rev_comp: str = ''
+    productive: str = ''
+    vj_in_frame: str = ''
+    stop_codon: str = ''
+    complete_vdj: str = ''
     locus: str = ''
     locus_species: str = ''
     v_call: str = ''
@@ -33,27 +34,27 @@ class AIRRSequenceSet:
     sequence_alignment_aa: str = ''
     germline_alignment: str = ''
     germline_alignment_aa: str = ''
-    junction: DNAEncoding = None
+    junction: DNANEncoding = None
     junction_aa: AminoAcidXEncoding = None
-    np1: DNAEncoding = None
+    np1: DNANEncoding = None
     np1_aa: AminoAcidEncoding = None
-    np2: DNAEncoding = None
+    np2: DNANEncoding = None
     np2_aa: AminoAcidEncoding = None
-    np3: DNAEncoding = None
+    np3: DNANEncoding = None
     np3_aa: AminoAcidEncoding = None
-    cdr1: DNAEncoding = None
+    cdr1: DNANEncoding = None
     cdr1_aa: AminoAcidEncoding = None
-    cdr2: DNAEncoding = None
+    cdr2: DNANEncoding = None
     cdr2_aa: AminoAcidEncoding = None
-    cdr3: DNAEncoding = None
+    cdr3: DNANEncoding = None
     cdr3_aa: AminoAcidXEncoding = None
-    fwr1: DNAEncoding = None
+    fwr1: DNANEncoding = None
     fwr1_aa: AminoAcidEncoding = None
-    fwr2: DNAEncoding = None
+    fwr2: DNANEncoding = None
     fwr2_aa: AminoAcidEncoding = None
-    fwr3: DNAEncoding = None
+    fwr3: DNANEncoding = None
     fwr3_aa: AminoAcidEncoding = None
-    fwr4: DNAEncoding = None
+    fwr4: DNANEncoding = None
     fwr4_aa: AminoAcidEncoding = None
     v_score: float = None
     v_identity: float = None
@@ -153,8 +154,8 @@ class AIRRSequenceSet:
     p5d2_length: int = None
     p3d2_length: int = None
     p5j_length: int = None
-    v_frameshift: str = 'False'
-    j_frameshift: str = 'False'
+    v_frameshift: str = ''
+    j_frameshift: str = ''
     d_frame: int = None
     d2_frame: int = None
     consensus_count: int = None
@@ -172,16 +173,16 @@ class AIRRSequenceSet:
     STR_TO_TYPE = {'str': str, 'int': int, 'float': float, 'bool': bool,
                    'AminoAcidEncoding': bnp.encodings.AminoAcidEncoding,
                    'AminoAcidXEncoding': AminoAcidXEncoding,
-                   'DNAEncoding': bnp.encodings.DNAEncoding}
+                   'DNANEncoding': DNANEncoding}
 
     TYPE_TO_STR = {**{val: key for key, val in STR_TO_TYPE.items()},
                    **{AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY*'): 'AminoAcidEncoding',
-                      AlphabetEncoding('ACGT'): 'DNAEncoding',
+                      AlphabetEncoding('ACGTN'): 'DNANEncoding',
                       AlphabetEncoding('ACDEFGHIKLMNPQRSTVWXY*'): 'AminoAcidXEncoding'}}
 
     @classmethod
     def get_neutral_value(cls, field_type):
-        neutral_values = {str: '', int: -1, DNAEncoding: '', AminoAcidEncoding: '', AminoAcidXEncoding: '', float: -1.,
+        neutral_values = {str: '', int: -1, DNANEncoding: '', AminoAcidEncoding: '', AminoAcidXEncoding: '', float: -1.,
                           bool: False}
         return neutral_values[field_type]
 

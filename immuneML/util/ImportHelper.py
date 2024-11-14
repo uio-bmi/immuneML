@@ -55,11 +55,13 @@ class ImportHelper:
                 kwargs["ascending"].append(False)
 
         elif "duplicate_count" in df.columns and len(set(df["duplicate_count"])) > 1:
-            warning += "Since umi_count was not set, attempting to select the top chain pair based on highest duplicate_count"
+            warning += ("Since umi_count was not set, attempting to select the top chain pair based on highest "
+                        "duplicate_count")
             kwargs["by"].append("duplicate_count")
             kwargs["ascending"].append(False)
         else:
-            warning += "Since duplicate_count or umi_count was not set, two random chains will be selected for each receptor."
+            warning += ("Since duplicate_count or umi_count was not set, two random chains will be selected for "
+                        "each receptor.")
         logging.warning(warning)
 
         return kwargs
@@ -73,14 +75,14 @@ class ImportHelper:
         logging.info(f"Total number of unique cell_ids (potential receptors): {len(cell_id_counts)}")
 
         if sum(cell_id_counts > 2) > 0:
-            kwargs = ImportHelper.get_receptor_filter_sort_kwargs(df, f"Found {sum(cell_id_counts > 2)} receptors with > 2 cell_ids. ")
+            kwargs = ImportHelper.get_receptor_filter_sort_kwargs(df, f"Found {sum(cell_id_counts > 2)} "
+                                                                      f"receptors with > 2 cell_ids. ")
 
             assert "locus" in df.columns, "Receptor datasets cannot be constructed if locus field is missing."
 
             df.sort_values(**kwargs, inplace=True)
             df.drop_duplicates(subset=["cell_id", "locus"], keep="first", inplace=True)
 
-            # Must recalculate cell_id_counts in case some chain had 2 identical chains (to be filtered out in next step)
             cell_id_counts = df.groupby('cell_id').size()
 
         if sum(cell_id_counts == 1) > 0:
@@ -274,14 +276,29 @@ class ImportHelper:
     def filter_illegal_sequences(cls, df: pd.DataFrame, params: DatasetImportParams, location: str):
         try:
             if params.import_productive:
-                df = df.loc[df.productive == 'T']
+                if set(df.productive).issubset({'T', 'F'}):
+                    logging.info(f"ImportHelper: filtering {len(df)} sequences to only keep productive == 'T'...")
+                    df = df.loc[df.productive == 'T']
+                    logging.info(f"ImportHelper: ... {len(df)} sequences left after filtering")
+                else:
+                    logging.warning(f"ImportHelper: import_productive was set to True, but unexpected values were "
+                                    f"found in the 'productive' column: {set(df.productive)} (expected 'T', 'F'). "
+                                    f"This filtering has been skipped.")
+
         except AttributeError as e:
             logging.warning(f"An error occurred while filtering unproductive sequences while importing the "
                             f"dataset {location}. Error: {e}\n\nFiltering will be skipped.")
 
         try:
             if not params.import_out_of_frame:
-                df = df.loc[df.vj_in_frame != 'F']
+                if set(df.vj_in_frame).issubset({'T', 'F'}):
+                    logging.info(f"ImportHelper: import_out_of_frame is set to False. Filtering {len(df)} sequences "
+                                 f"to only keep vj_in_frame != 'F'...")
+                    df = df.loc[df.vj_in_frame != 'F']
+                else:
+                    logging.warning(f"ImportHelper: import_out_of_frame was set to False, but unexpected values were "
+                                    f"found in the 'vj_in_frame' column: {set(df.vj_in_frame)} (expected 'T', 'F'). "
+                                    f"This filtering has been skipped.")
         except AttributeError as e:
             logging.warning(f"An error occurred while filtering out-of-frame sequences while importing the "
                             f"dataset {location}. Error: {e}\n\nFiltering will be skipped.")
