@@ -181,7 +181,7 @@ class DuplicateSequenceFilter(Filter):
     def _prepare_groupby_field(self, columns, groupby_fields):
         for field in groupby_fields:
             if field not in columns:
-                warnings.warn(f"DuplicateSequenceFilter: groupby field {field} was specified but not found in data (columns: {columns})")
+                warnings.warn(f"DuplicateSequenceFilter: groupby field {field} was specified but not found in data (columns: {list(columns)}). Omitting this field...")
 
         return [field for field in groupby_fields if field in columns]
 
@@ -247,12 +247,14 @@ class DuplicateSequenceFilter(Filter):
         return no_duplicates
 
     def _process_receptor_df(self, data):
-        loci = list(set(data["locus"]))
+        loci = sorted(set(data["locus"]))
         assert len(loci) == 2, f"DuplicateSequenceFilter: Expected 2 loci, found the following: {loci}"
 
         data = data.pivot(index='cell_id', columns='locus')
         data.columns = [f"{col[0]}#{col[1]}" for col in data.columns]
         data.reset_index(inplace=True)
+        data[f"locus#{loci[0]}"] = loci[0]
+        data[f"locus#{loci[1]}"] = loci[1]
 
         self._process_df_counts(data, "#" + loci[0])
         self._process_df_counts(data, "#" + loci[1])
@@ -272,9 +274,6 @@ class DuplicateSequenceFilter(Filter):
 
         locus0_df.columns = [col.replace(f"#{loci[0]}", "") for col in locus0_df.columns]
         locus1_df.columns = [col.replace(f"#{loci[1]}", "") for col in locus1_df.columns]
-
-        locus0_df["locus"] = loci[0]
-        locus1_df["locus"] = loci[1]
 
         assert all(locus0_df.columns == locus1_df.columns)
 
