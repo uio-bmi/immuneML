@@ -33,7 +33,7 @@ sections:
 
 TrainMLModel
 ---------------------------
-.. include:: ../../specs/instructions/hp.rst
+.. include:: ../../specs/instructions/TrainMLModel.rst
 
 MLApplication
 ---------------------------

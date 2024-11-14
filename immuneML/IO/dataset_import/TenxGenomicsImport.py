@@ -121,13 +121,14 @@ class TenxGenomicsImport(DataImport):
 
         chain_pair_values = str([chain_pair.name for chain_pair in ChainPair])[1:-1].replace("'", "`")
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
-        repertoire_fields = list(Repertoire.FIELDS)
-        repertoire_fields.remove("region_type")
 
         mapping = {
-            "Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum.": f"Valid values are {chain_pair_values}.",
-            "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
-            "Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS": f"Valid immuneML fields that can be specified here are {repertoire_fields}."
+            "Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair."
+            "ChainPair` enum.": f"Valid values are {chain_pair_values}.",
+            "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType."
+            "RegionType` enum.": f"Valid values are {region_type_values}.",
+            "Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS":
+                f"Valid immuneML fields that can be specified here are defined by the AIRR schema."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc
