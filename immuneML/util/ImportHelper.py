@@ -272,17 +272,29 @@ class ImportHelper:
 
     @classmethod
     def filter_illegal_sequences(cls, df: pd.DataFrame, params: DatasetImportParams, location: str):
+        # 'productive' and 'vj_in_frame' are nullable (may contain '')
+        # For robustness, only apply filtering when these columns are correctly specified and all values are T/F
+
         try:
-            # todo this removes all sequences, because in re-imported data, productive is not 'T' and 'F' (string) but bool
             if params.import_productive:
-                df = df.loc[df.productive == 'T']
+                if set(df.productive).issubset({'T', 'F'}):
+                    logging.info(f"ImportHelper: filtering {len(df)} sequences to only keep productive == 'T'...")
+                    df = df.loc[df.productive == 'T']
+                    logging.info(f"ImportHelper: ... {len(df)} sequences left after filtering")
+                else:
+                    logging.warning(f"ImportHelper: import_productive was set to True, but unexpected values were found in the 'productive' column: {set(df.productive)} (expected 'T', 'F'). This filtering has been skipped.")
+
         except AttributeError as e:
             logging.warning(f"An error occurred while filtering unproductive sequences while importing the "
                             f"dataset {location}. Error: {e}\n\nFiltering will be skipped.")
 
         try:
             if not params.import_out_of_frame:
-                df = df.loc[df.vj_in_frame != 'F']
+                if set(df.productive).issubset({'T', 'F'}):
+                    logging.info(f"ImportHelper: import_out_of_frame is set to False. Filtering {len(df)} sequences to only keep vj_in_frame != 'F'...")
+                    df = df.loc[df.vj_in_frame != 'F']
+                else:
+                    logging.warning(f"ImportHelper: import_out_of_frame was set to False, but unexpected values were found in the 'vj_in_frame' column: {set(df.vj_in_frame)} (expected 'T', 'F'). This filtering has been skipped.")
         except AttributeError as e:
             logging.warning(f"An error occurred while filtering out-of-frame sequences while importing the "
                             f"dataset {location}. Error: {e}\n\nFiltering will be skipped.")
