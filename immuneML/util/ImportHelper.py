@@ -290,7 +290,7 @@ class ImportHelper:
 
         try:
             if not params.import_out_of_frame:
-                if set(df.productive).issubset({'T', 'F'}):
+                if set(df.vj_in_frame).issubset({'T', 'F'}):
                     logging.info(f"ImportHelper: import_out_of_frame is set to False. Filtering {len(df)} sequences to only keep vj_in_frame != 'F'...")
                     df = df.loc[df.vj_in_frame != 'F']
                 else:
