@@ -42,10 +42,10 @@ class ElementDataset(Dataset, ABC):
             self.identifier = uuid4().hex
 
     @classmethod
-    def create_metadata_dict(cls, dataset_class, filename, type_dict, identifier, name, labels):
+    def create_metadata_dict(cls, dataset_class, filename, type_dict, name, labels, identifier=None):
          return {"type_dict_dynamic_fields": {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()},
-                 "identifier": identifier,
-                 "dataset_type": dataset_class,
+                 "identifier": identifier if identifier is not None else uuid4().hex,
+                 "dataset_type": dataset_class if type(dataset_class) == str else dataset_class.__name__,
                  "filename": filename,
                  "name": name,
                  "labels": labels,
@@ -108,7 +108,6 @@ class SequenceDataset(ElementDataset):
         dataset_metadata = cls.create_metadata_dict(dataset_class=cls.__name__,
                                                     filename=filename,
                                                     type_dict=type_dict,
-                                                    identifier=uuid4().hex,
                                                     name=name,
                                                     labels=labels)
 
@@ -160,10 +159,12 @@ class ReceptorDataset(ElementDataset):
     """A dataset class for receptor datasets (paired chain)."""
 
     @classmethod
-    def build(cls, filename: Path, metadata_filename: Path, name: str = None, labels: dict = None):
+    def build(cls, filename: Path, metadata_filename: Path, name: str = None, bnp_dc=None, labels: dict = None):
         metadata = read_yaml(metadata_filename)
         dynamic_fields = {k: AIRRSequenceSet.STR_TO_TYPE[v] for k, v in metadata['type_dict_dynamic_fields'].items()}
-        bnp_dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(dynamic_fields.items()))
+
+        if bnp_dc is None:
+            bnp_dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(dynamic_fields.items()))
 
         if labels is None and 'labels' in metadata:
             labels = metadata['labels']
@@ -186,7 +187,6 @@ class ReceptorDataset(ElementDataset):
         dataset_metadata = cls.create_metadata_dict(dataset_class=cls.__name__,
                                                     filename=filename,
                                                     type_dict=type_dict,
-                                                    identifier=uuid4().hex,
                                                     name=name,
                                                     labels=labels)
 

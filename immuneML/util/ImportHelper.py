@@ -273,6 +273,7 @@ class ImportHelper:
     @classmethod
     def filter_illegal_sequences(cls, df: pd.DataFrame, params: DatasetImportParams, location: str):
         try:
+            # todo this removes all sequences, because in re-imported data, productive is not 'T' and 'F' (string) but bool
             if params.import_productive:
                 df = df.loc[df.productive == 'T']
         except AttributeError as e:

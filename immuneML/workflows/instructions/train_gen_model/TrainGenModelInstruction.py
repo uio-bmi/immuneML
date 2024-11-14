@@ -161,7 +161,6 @@ class TrainGenModelInstruction(GenModelInstruction):
         metadata_yaml = SequenceDataset.create_metadata_dict(dataset_class=SequenceDataset.__name__,
                                              filename=f'combined_{self.state.name}_dataset.tsv',
                                              type_dict=type(combined_data).get_field_type_dict(all_fields=False),
-                                             identifier=uuid4().hex,
                                              name=f'combined_{self.state.name}_dataset',
                                              labels={'gen_model_name': [self.method.name, ''], "from_gen_model": [True, False]})
 
