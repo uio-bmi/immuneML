@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import List, Tuple, Type
 
 import pandas as pd
-from bionumpy import AminoAcidEncoding, DNAEncoding
+from bionumpy import AminoAcidEncoding
 
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet, AminoAcidXEncoding, DNANEncoding
@@ -207,10 +207,8 @@ class DataImport(metaclass=abc.ABCMeta):
             return repertoire
         except Exception as e:
             raise RuntimeError(
-                f"{self.__class__.__name__}: error when importing file {metadata_row['filename']}: \n{e}.\n"
-                f"Current working directory: {os.getcwd()}\n"
-                f"There are {len(list(Path('.').glob('*')))} files in the current working directory, and "
-                f"{len(list(Path('.').glob('*.*sv')))} tsv/csv files.")
+                f"{self.__class__.__name__}: error when importing file {Path(metadata_row['filename']).absolute()}: "
+                f"\n{e}.\n")
 
     def load_sequence_dataframe(self, filename: Path):
 
@@ -266,8 +264,8 @@ class DataImport(metaclass=abc.ABCMeta):
         str_cols = [f.name for f in fields(AIRRSequenceSet)
                     if f.type in [str, AminoAcidEncoding, AminoAcidXEncoding, DNANEncoding] and f.name in df.columns]
 
-        # todo: this line throws pandas warning: 2024-11-13 17:53:10,121 WARNING: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value '['' '' '' ... '' '' '']' has dtype incompatible with float64, please explicitly cast to a compatible dtype first.
-        df.loc[:, str_cols] = df.loc[:, str_cols].astype(str).replace('nan', '').replace('-1.0', '')
+        df = df.astype({col: str for col in str_cols})
+        df.loc[:, str_cols] = df.loc[:, str_cols].replace('nan', '').replace('-1.0', '')
 
         encoded_cols = [f for f, t in AIRRSequenceSet.get_field_type_dict().items()
                         if t in [AminoAcidXEncoding, AminoAcidEncoding, DNANEncoding] and f in df.columns]

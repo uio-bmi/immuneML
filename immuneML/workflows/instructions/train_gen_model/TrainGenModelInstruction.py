@@ -173,8 +173,9 @@ class TrainGenModelInstruction(GenModelInstruction):
     def _get_dataclass_object_from_dataset(self, dataset: Dataset, from_gen_model_vals: np.ndarray,
                                            used_for_training_vals: np.ndarray):
         return dataset.data.add_fields(
-            {'from_gen_model': from_gen_model_vals, 'used_for_training': used_for_training_vals},
-            {'from_gen_model': bool, 'used_for_training': bool})
+            {'from_gen_model': np.where(from_gen_model_vals, 'T', 'F'),
+             'used_for_training': np.where(used_for_training_vals, 'T', 'F')},
+            {'from_gen_model': str, 'used_for_training': str})
 
     def _make_and_export_combined_dataset(self):
         if self.export_combined_dataset and isinstance(self.dataset, SequenceDataset):

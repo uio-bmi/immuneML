@@ -37,19 +37,20 @@ class ElementDataset(Dataset, ABC):
             self.dynamic_fields = {key: AIRRSequenceSet.STR_TO_TYPE[val]
                                    for key, val in metadata['type_dict_dynamic_fields'].items()}
         if self.bnp_dataclass is None and self.dynamic_fields is not None:
-            self.bnp_dataclass = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(self.dynamic_fields.items()))
+            self.bnp_dataclass = extend_dataclass_with_dynamic_fields(AIRRSequenceSet,
+                                                                      list(self.dynamic_fields.items()))
         if self.identifier is None:
             self.identifier = uuid4().hex
 
     @classmethod
     def create_metadata_dict(cls, dataset_class, filename, type_dict, name, labels, identifier=None):
-         return {"type_dict_dynamic_fields": {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()},
-                 "identifier": identifier if identifier is not None else uuid4().hex,
-                 "dataset_type": dataset_class if type(dataset_class) == str else dataset_class.__name__,
-                 "filename": filename,
-                 "name": name,
-                 "labels": labels,
-                 "timestamp": str(datetime.now())}
+        return {"type_dict_dynamic_fields": {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()},
+                "identifier": identifier if identifier is not None else uuid4().hex,
+                "dataset_type": dataset_class if isinstance(dataset_class, str) else dataset_class.__name__,
+                "filename": filename,
+                "name": name,
+                "labels": labels,
+                "timestamp": str(datetime.now())}
 
     @property
     def buffer_type(self):
@@ -115,7 +116,8 @@ class SequenceDataset(ElementDataset):
         write_yaml(metadata_filename, dataset_metadata)
 
         return SequenceDataset(filename=filename, name=name, labels=labels, dynamic_fields=type_dict,
-                               dataset_file=metadata_filename, bnp_dataclass=bnp_dc, identifier=dataset_metadata["identifier"])
+                               dataset_file=metadata_filename, bnp_dataclass=bnp_dc,
+                               identifier=dataset_metadata["identifier"])
 
     def get_metadata(self, field_names: list, return_df: bool = False):
         """Returns a dict or an equivalent pandas DataFrame with metadata information from Receptor objects for

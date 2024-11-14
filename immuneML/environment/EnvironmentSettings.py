@@ -79,6 +79,6 @@ class EnvironmentSettings:
             alphabet = list("ACGT")
             alphabet.sort()
         else:
-            raise RuntimeError("EnvironmentSettings: the sequence alphabet cannot be obtained if sequence_type was not set properly. "
-                               f"Expected AMINO_ACID or NUCLEOTIDE, but got {seq_type} instead.")
+            raise RuntimeError("EnvironmentSettings: the sequence alphabet cannot be obtained if sequence_type was "
+                               "not set properly. Expected AMINO_ACID or NUCLEOTIDE, but got {seq_type} instead.")
         return alphabet
