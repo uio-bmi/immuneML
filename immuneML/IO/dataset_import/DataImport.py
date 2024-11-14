@@ -274,7 +274,7 @@ class DataImport(metaclass=abc.ABCMeta):
 
         df.loc[:, encoded_cols] = df.loc[:, encoded_cols].apply(lambda x: x.str.upper())
 
-        invalid_cols = df.columns[~df.applymap(type).nunique().eq(1)]
+        invalid_cols = df.columns[~df.map(type).nunique().eq(1)]
         df[invalid_cols] = df[invalid_cols].astype(str)
 
         int_cols = [f.name for f in fields(AIRRSequenceSet) if f.type == int and f.name in df.columns]
