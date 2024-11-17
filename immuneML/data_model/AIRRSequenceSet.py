@@ -17,11 +17,11 @@ class AIRRSequenceSet:
     sequence: DNANEncoding = ''
     quality: str = ''
     sequence_aa: AminoAcidXEncoding = ''
-    rev_comp: str = 'False'
-    productive: str = 'False'
-    vj_in_frame: str = 'False'
-    stop_codon: str = 'False'
-    complete_vdj: str = 'False'
+    rev_comp: str = ''
+    productive: str = ''
+    vj_in_frame: str = ''
+    stop_codon: str = ''
+    complete_vdj: str = ''
     locus: str = ''
     locus_species: str = ''
     v_call: str = ''
@@ -154,8 +154,8 @@ class AIRRSequenceSet:
     p5d2_length: int = None
     p3d2_length: int = None
     p5j_length: int = None
-    v_frameshift: str = 'False'
-    j_frameshift: str = 'False'
+    v_frameshift: str = ''
+    j_frameshift: str = ''
     d_frame: int = None
     d2_frame: int = None
     consensus_count: int = None

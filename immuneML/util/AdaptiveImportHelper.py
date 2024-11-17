@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from immuneML import Constants
@@ -59,7 +60,7 @@ class AdaptiveImportHelper:
                 dataframe[f"{gene}_call"].replace(germline_value_replacement, regex=True, inplace=True)
 
                 if f"{gene}_allele" in dataframe.columns:
-                    rows_to_add_allele = ~dataframe[f'{gene}_call'].str.contains("\*") & dataframe[
+                    rows_to_add_allele = ~dataframe[f'{gene}_call'].str.contains("\\*") & dataframe[
                         f"{gene}_allele"].astype(
                         str).str.contains("[0-9]{2}")
                     dataframe.loc[rows_to_add_allele, f"{gene}_call"] = \
@@ -88,14 +89,19 @@ def set_locus_column(df: pd.DataFrame):
 
 
 def make_gene_call_from_gene_and_allele(df: pd.DataFrame, gene: str):
+    gene_ids = df[f"{gene}_gene"] != ''
+    non_allele_ids = df[f"{gene}_allele"] == ''
     df[f"{gene}_call"] = df[[f"{gene}_gene", f"{gene}_allele"]].agg('*0'.join, axis=1)
+    df.loc[~gene_ids, f'{gene}_call'] = ''
+    gene_set_allele_not = np.logical_and(gene_ids, non_allele_ids)
+    df.loc[gene_set_allele_not, f"{gene}_call"] = df.loc[gene_set_allele_not, f"{gene}_gene"]
     return df
 
 
 def parse_allele(df: pd.DataFrame, gene: str):
     if f"{gene}_allele" in df.columns:
         df[f"{gene}_allele"] = df[f"{gene}_allele"].astype(str)
-        allele_set = df[f"{gene}_allele"] != 'nan'
+        allele_set = np.logical_and(df[f"{gene}_allele"] != 'nan', df[f"{gene}_allele"] != '-1.0')
         df.loc[allele_set, f"{gene}_allele"] = df.loc[allele_set, f"{gene}_allele"].str[:-2]
         df.loc[~allele_set, f"{gene}_allele"] = ''
     return df

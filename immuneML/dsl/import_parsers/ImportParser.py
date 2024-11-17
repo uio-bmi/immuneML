@@ -61,6 +61,7 @@ class ImportParser:
 
         try:
             dataset = import_cls(params, key).import_dataset()
+            assert dataset.get_example_count() > 0, "ImportParser: something went wrong when importing the data, final example count is 0"
             ImportParser.log_dataset_info(dataset)
         except KeyError as key_error:
             raise KeyError(f"{key_error}\n\nAn error occurred during parsing of dataset {key}. "

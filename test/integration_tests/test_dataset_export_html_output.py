@@ -116,7 +116,8 @@ class TestDatasetExportHTMLOutput(TestCase):
                     }
                 }
             },
-            "instructions": {"instr1": {"type": "DatasetExport", "export_formats": ["AIRR"], "datasets": ["sequencedataset"]}},
+            "instructions": {"instr1": {"type": "DatasetExport", "export_formats": ["AIRR"],
+                                        "datasets": ["sequencedataset"]}},
             "output": {"format": "HTML"}
         }
 

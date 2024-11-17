@@ -235,8 +235,7 @@ class RandomDatasetGenerator:
                      for i in range(sequence_count)]
 
         processed_labels, dataset_params = RandomDatasetGenerator._make_labels(labels, sequence_count)
-        dataset = SequenceDataset.build_from_objects(sequences, path, name=name,
-                                                     labels=dataset_params)
+        dataset = SequenceDataset.build_from_objects(sequences, path, name=name, labels=dataset_params)
 
         AIRRExporter.export(dataset, path)
 

@@ -105,16 +105,18 @@ class CompAIRRHelper:
         for sequence in sequence_dataset.get_data():
             compairr_data["junction_aa"].append(sequence.get_sequence(sequence_type=SequenceType.AMINO_ACID))
 
-            assert sequence.identifier is not None, f"{CompAIRRHelper.__name__}: sequence identifiers must be set when exporting a sequence dataset for CompAIRR"
-            compairr_data["sequence_id"].append(sequence.identifier)
+            assert sequence.sequence_id is not None, \
+                (f"{CompAIRRHelper.__name__}: sequence identifiers must be set when exporting a sequence "
+                 f"dataset for CompAIRR.")
+            compairr_data["sequence_id"].append(sequence.sequence_id)
             compairr_data["repertoire_id"].append(repertoire_id)
 
             if not compairr_params.ignore_genes:
-                compairr_data["v_call"].append(sequence.get_attribute("v_gene"))
-                compairr_data["j_call"].append(sequence.get_attribute("j_gene"))
+                compairr_data["v_call"].append(sequence.v_call)
+                compairr_data["j_call"].append(sequence.j_call)
 
             if not compairr_params.ignore_counts:
-                compairr_data["duplicate_count"].append(sequence.get_attribute("count"))
+                compairr_data["duplicate_count"].append(sequence.duplicate_count)
 
         df = pd.DataFrame(compairr_data)
 
