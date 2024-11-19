@@ -19,14 +19,14 @@ class SequenceCountDistribution(DataReport):
     Generates a histogram of the duplicate counts of the sequences in a dataset.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a single label, or alternatively the label of interest can be specified under 'label'. By default, split_by_label is False.
 
     - label (str): Optional label for separating the results by color/creating separate plots. Note that this should the name of a valid dataset label.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

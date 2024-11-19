@@ -22,9 +22,9 @@ class PWMSummary(GenModelReport):
     - probabilities of generated sequences having different lengths
     - PWMs for each length with positive probability
 
-    Specification arguments: this report takes no input arguments.
+    This report takes no input arguments.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
