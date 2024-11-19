@@ -67,7 +67,9 @@ class DatasetExportInstruction(Instruction):
                 for index, preprocessing in enumerate(self.preprocessing_sequence):
                     print_log(f"For dataset {dataset_name}, started preprocessing step {index+1}/{len(self.preprocessing_sequence)} with {preprocessing.__class__.__name__}", include_datetime=True)
                     dataset = preprocessing.process_dataset(dataset, self.result_path / f"step_{index+1}")
-                    print_log(f"Preprocessed dataset {dataset_name} with {preprocessing.__class__.__name__}", include_datetime=True)
+                    print_log(f"Preprocessed {dataset.__class__.__name__.split('Dataset')[0].lower()} dataset {dataset.name} with {preprocessing.__class__.__name__}:\n"
+                        f"- Example count: {dataset.get_example_count()}\n"
+                        f"- Labels: {dataset.get_label_names()}", True)
 
             paths[dataset_name] = {}
             for exporter in self.exporters:
