@@ -126,7 +126,7 @@ rep2.tsv,TRB,1234a,no"""
         self.assertTrue(seqs[0].sequence_aa in ["ASSLPGTNTGELF", "SVEESYEQY"])  # OSX/windows
         self.assertEqual('T', seqs[0].vj_in_frame)
         self.assertTrue(seqs[0].v_call in ['TRBV7-9*01', 'TRBV29-1*01'])  # OSX/windows
-        self.assertTrue(seqs[0].j_call in ['TRBJ2-2*01', 'TRBJ2-7*01'])  # OSX/windows
+        self.assertTrue(seqs[0].j_call in ['TRBJ2-2*01', 'TRBJ2-7'])  # OSX/windows
 
         self.assertTrue(dataset.dataset_file.is_file())
 

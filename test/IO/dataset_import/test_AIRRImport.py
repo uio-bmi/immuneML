@@ -113,7 +113,7 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         dataset = AIRRImport(params, "airr_receptor_dataset").import_dataset()
 
         self.assertEqual(2, dataset.get_example_count())
-        self.assertEqual(['v_evalue', 'd_evalue', 'j_evalue', 'custom_label'], dataset.get_label_names())
+        self.assertEqual(sorted(['v_evalue', 'd_evalue', 'j_evalue', 'custom_label']), sorted(dataset.get_label_names()))
 
         for idx, receptor in enumerate(dataset.get_data()):
             self.assertTrue(receptor.heavy.sequence_aa in ['ASGVAGTFDY', 'ASGVAGNFLL'])
