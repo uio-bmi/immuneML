@@ -18,6 +18,7 @@ from immuneML.data_model.SequenceSet import Repertoire, build_dynamic_airr_seque
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.preprocessing.filters.CountAggregationFunction import CountAggregationFunction
 from immuneML.preprocessing.filters.Filter import Filter
+from immuneML.util.Logger import print_log
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 from scripts.specification_util import update_docs_per_mapping
@@ -130,11 +131,17 @@ class DuplicateSequenceFilter(Filter):
         # self.check_dataset_type(dataset, [RepertoireDataset], "DuplicateSequenceFilter")
 
         if type(dataset) == RepertoireDataset:
-            return self.process_repertoire_dataset(dataset, number_of_processes)
+            preprocessed_dataset = self.process_repertoire_dataset(dataset, number_of_processes)
         elif type(dataset) == ReceptorDataset:
-            return self.process_receptor_dataset(dataset, number_of_processes)
+            preprocessed_dataset = self.process_receptor_dataset(dataset, number_of_processes)
         elif type(dataset) == SequenceDataset:
-            return self.process_sequence_dataset(dataset, number_of_processes)
+            preprocessed_dataset = self.process_sequence_dataset(dataset, number_of_processes)
+
+        print_log(f"Preprocessed {dataset.__class__.__name__.split('Dataset')[0].lower()} dataset {dataset.name}:\n"
+                  f"- Example count: {dataset.get_example_count()}\n"
+                  f"- Labels: {dataset.get_label_names()}", True)
+
+        return preprocessed_dataset
 
     def make_new_element_dataset(self, orig_dataset, filtered_df):
         name = f"{orig_dataset.name}_filtered"
@@ -152,7 +159,7 @@ class DuplicateSequenceFilter(Filter):
                                      metadata_filename=self.result_path / f'{name}.yaml',
                                      name=name, bnp_dc=bnp_dc, labels=orig_dataset.labels)
 
-    def process_sequence_dataset(self, dataset: SequenceDataset, number_of_processes=1):
+    def process_sequence_dataset(self, dataset: SequenceDataset, number_of_processes=1) -> SequenceDataset:
         metadata = read_yaml(dataset.dataset_file)
         custom_labels = list(metadata["type_dict_dynamic_fields"].keys()) # todo deal with custom labels? checking/warning?
 
@@ -160,7 +167,7 @@ class DuplicateSequenceFilter(Filter):
 
         return self.make_new_element_dataset(dataset, filtered_df)
 
-    def process_receptor_dataset(self, dataset: ReceptorDataset, number_of_processes=1):
+    def process_receptor_dataset(self, dataset: ReceptorDataset, number_of_processes=1) -> ReceptorDataset:
         metadata = read_yaml(dataset.dataset_file)
         custom_labels = list(metadata["type_dict_dynamic_fields"].keys())
 
