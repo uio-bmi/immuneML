@@ -118,6 +118,9 @@ class ExploratoryAnalysisInstruction(Instruction):
             dataset = unit.dataset
             for preprocessing in unit.preprocessing_sequence:
                 dataset = preprocessing.process_dataset(dataset, result_path, number_of_processes=unit.number_of_processes)
+                print_log(f"Preprocessed {dataset.__class__.__name__.split('Dataset')[0].lower()} dataset {dataset.name} with {preprocessing.__class__.__name__}:\n"
+                    f"- Example count: {dataset.get_example_count()}\n"
+                    f"- Labels: {dataset.get_label_names()}", True)
         else:
             dataset = unit.dataset
         return dataset

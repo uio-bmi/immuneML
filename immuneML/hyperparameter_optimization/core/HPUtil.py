@@ -17,6 +17,7 @@ from immuneML.hyperparameter_optimization.states.HPSelectionState import HPSelec
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ReportUtil import ReportUtil
+from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.steps.DataWeighter import DataWeighter
 from immuneML.workflows.steps.DataEncoder import DataEncoder
@@ -62,6 +63,9 @@ class HPUtil:
 
                 for preprocessing in preproc_sequence:
                     tmp_dataset = preprocessing.process_dataset(tmp_dataset, path, number_of_processes)
+                    print_log(f"Preprocessed {tmp_dataset.__class__.__name__.split('Dataset')[0].lower()} dataset {tmp_dataset.name} with {preprocessing.__class__.__name__}:\n"
+                        f"- Example count: {tmp_dataset.get_example_count()}\n"
+                        f"- Labels: {tmp_dataset.get_label_names()}", True)
 
                 if context is not None and "dataset" in context:
                     context["preprocessed_dataset"] = {str(hp_setting): tmp_dataset}
