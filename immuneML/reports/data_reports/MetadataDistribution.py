@@ -48,7 +48,7 @@ class MetadataDistribution(DataReport):
     def build_object(cls, **kwargs):
         location = MetadataDistribution.__name__
 
-        ParameterValidator.assert_type_and_value(kwargs["labels"], list, location, "labels")
+        ParameterValidator.assert_type_and_value(kwargs["fields"], list, location, "fields")
 
         return MetadataDistribution(**kwargs)
 
