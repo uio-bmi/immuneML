@@ -137,9 +137,7 @@ class DuplicateSequenceFilter(Filter):
         elif type(dataset) == SequenceDataset:
             preprocessed_dataset = self.process_sequence_dataset(dataset, number_of_processes)
 
-        print_log(f"Preprocessed {dataset.__class__.__name__.split('Dataset')[0].lower()} dataset {dataset.name}:\n"
-                  f"- Example count: {dataset.get_example_count()}\n"
-                  f"- Labels: {dataset.get_label_names()}", True)
+
 
         return preprocessed_dataset
 
@@ -156,8 +154,8 @@ class DuplicateSequenceFilter(Filter):
         data_cls = orig_dataset.__class__
 
         return data_cls.build(filename=self.result_path / f"{name}.tsv",
-                                     metadata_filename=self.result_path / f'{name}.yaml',
-                                     name=name, bnp_dc=bnp_dc, labels=orig_dataset.labels)
+                              metadata_filename=self.result_path / f'{name}.yaml',
+                              name=name, bnp_dc=bnp_dc, labels=orig_dataset.labels)
 
     def process_sequence_dataset(self, dataset: SequenceDataset, number_of_processes=1) -> SequenceDataset:
         metadata = read_yaml(dataset.dataset_file)
