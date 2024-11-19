@@ -287,7 +287,7 @@ class ImportHelper:
 
         except AttributeError as e:
             logging.warning(f"An error occurred while filtering unproductive sequences while importing the "
-                            f"dataset {location}. Error: {e}\n\nFiltering will be skipped.")
+                            f"dataset {location}. Error: {e}. Filtering will be skipped.")
 
         try:
             if not params.import_out_of_frame:
@@ -301,6 +301,6 @@ class ImportHelper:
                                     f"This filtering has been skipped.")
         except AttributeError as e:
             logging.warning(f"An error occurred while filtering out-of-frame sequences while importing the "
-                            f"dataset {location}. Error: {e}\n\nFiltering will be skipped.")
+                            f"dataset {location}. Error: {e}. Filtering will be skipped.")
 
         return df
