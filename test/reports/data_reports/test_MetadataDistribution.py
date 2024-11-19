@@ -5,13 +5,13 @@ from unittest import TestCase
 from immuneML.caching.CacheType import CacheType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.reports.data_reports.LabelBalance import LabelBalance
+from immuneML.reports.data_reports.MetadataDistribution import MetadataDistribution
 from immuneML.reports.data_reports.SequenceCountDistribution import SequenceCountDistribution
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class TestLabelBalance(TestCase):
+class TestMetadataDistribution(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -22,7 +22,7 @@ class TestLabelBalance(TestCase):
         dataset = RandomDatasetGenerator.generate_sequence_dataset(50, {4: 0.33, 5: 0.33, 7: 0.33},
                                                                    {"l1": {"a": 0.5, "b": 0.5}}, path / 'dataset')
 
-        lb = LabelBalance(dataset, path, 1, labels=[])
+        lb = MetadataDistribution(dataset, path, 1, fields=["l1", "locus"])
 
         result = lb._generate()
         self.assertTrue(os.path.isfile(result.output_figures[0].path))
@@ -38,7 +38,7 @@ class TestLabelBalance(TestCase):
                                                                    labels={"l1": {"a": 0.5, "b": 0.5}},
                                                                    path=path / 'dataset')
 
-        lb = LabelBalance(dataset, path, 1, labels=[])
+        lb = MetadataDistribution(dataset, path, 1, fields=["locus"])
 
         result = lb.generate_report()
         self.assertTrue(os.path.isfile(result.output_figures[0].path))
@@ -54,7 +54,7 @@ class TestLabelBalance(TestCase):
                                                                      labels={"l1": {"a": 0.5, "b": 0.5}},
                                                                      path=path / 'dataset')
 
-        lb = LabelBalance(dataset, path, 1, labels=[])
+        lb = MetadataDistribution(dataset, path, 1, fields=[])
 
         result = lb._generate()
         self.assertTrue(os.path.isfile(result.output_figures[0].path))
