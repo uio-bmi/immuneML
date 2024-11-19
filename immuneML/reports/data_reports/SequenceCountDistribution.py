@@ -133,7 +133,7 @@ class SequenceCountDistribution(DataReport):
     def _plot(self, df: pd.DataFrame) -> ReportOutput:
         figure = px.bar(df, x="duplicate_count", y="n_observations", barmode="group",
                         color=self.label_name if self.split_by_label else None,
-                        facet_col="locus" if isinstance(self.dataset, ReceptorDataset) else None,
+                        facet_col="locus" if "locus" in df.columns and len(set(df["locus"])) > 1 else None,
                         color_discrete_sequence=px.colors.diverging.Tealrose,
                         labels={"n_observations": "Number of observations",
                                 "duplicate_count": "Sequence duplicate count"})
