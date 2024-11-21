@@ -94,21 +94,6 @@ class ImportHelper:
         return df
 
     @staticmethod
-    def parse_sequence_dataframe(df: pd.DataFrame, params: DatasetImportParams, dataset_name: str) -> pd.DataFrame:
-
-        df = ImportHelper.standardize_column_names(df)
-        df = ImportHelper.standardize_none_values(df)
-        df = ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences,
-                                               params.region_type)
-        df = ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters,
-                                                           params.import_with_stop_codon, params.region_type)
-        df = ImportHelper.filter_illegal_sequences(df, params, dataset_name)
-
-        df = ImportHelper.add_default_fields_for_airr_seq_set(df)
-
-        return df
-
-    @staticmethod
     def add_default_fields_for_airr_seq_set(df: pd.DataFrame):
         default_fields = {f.name: f.type for f in fields(AIRRSequenceSet) if f.name not in df.columns}
         fields_dict = {}
@@ -155,6 +140,10 @@ class ImportHelper:
         return (dataframe.replace(
             {key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown", 'nan']})
                 .replace(np.nan, AIRRSequenceSet.get_neutral_value(float)))
+
+    @staticmethod
+    def standardize_bool_values(dataframe: pd.DataFrame):
+        return dataframe.replace({True: 'T', False: 'F'})
 
     @staticmethod
     def add_cdr3_from_junction(df: pd.DataFrame):
@@ -275,7 +264,7 @@ class ImportHelper:
     @classmethod
     def filter_illegal_sequences(cls, df: pd.DataFrame, params: DatasetImportParams, location: str):
         try:
-            if params.import_productive:
+            if params.import_productive and hasattr(df, "productive"):
                 if set(df.productive).issubset({'T', 'F'}):
                     logging.info(f"ImportHelper: filtering {len(df)} sequences to only keep productive == 'T'...")
                     df = df.loc[df.productive == 'T']
@@ -290,7 +279,8 @@ class ImportHelper:
                             f"dataset {location}. Error: {e}. Filtering will be skipped.")
 
         try:
-            if not params.import_out_of_frame:
+            if not params.import_out_of_frame and hasattr(df, "vj_in_frame"):
+
                 if set(df.vj_in_frame).issubset({'T', 'F'}):
                     logging.info(f"ImportHelper: import_out_of_frame is set to False. Filtering {len(df)} sequences "
                                  f"to only keep vj_in_frame != 'F'...")

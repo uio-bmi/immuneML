@@ -204,6 +204,8 @@ class DataImport(metaclass=abc.ABCMeta):
                                     "filename_base": filename.stem}, **dataframe.to_dict(orient='list')}
             repertoire = Repertoire.build(**repertoire_inputs)
 
+            # assert repertoire.get_element_count() > 0, "resulting repertoire contains 0 sequences, please remove this repertoire from the dataset."
+
             return repertoire
         except Exception as e:
             raise RuntimeError(
@@ -255,7 +257,9 @@ class DataImport(metaclass=abc.ABCMeta):
         if hasattr(self.params, "column_mapping") and self.params.column_mapping is not None:
             df.rename(columns=self.params.column_mapping, inplace=True)
 
+        df = ImportHelper.standardize_bool_values(df)
         df = ImportHelper.standardize_none_values(df)
+
         df = self._convert_types(df)
 
         return df

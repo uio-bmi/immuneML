@@ -183,7 +183,7 @@ class AIRRSequenceSet:
     @classmethod
     def get_neutral_value(cls, field_type):
         neutral_values = {str: '', int: -1, DNANEncoding: '', AminoAcidEncoding: '', AminoAcidXEncoding: '', float: -1.,
-                          bool: False}
+                          bool: ''}
         return neutral_values[field_type]
 
     @classmethod
