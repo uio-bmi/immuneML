@@ -25,7 +25,7 @@ class MetadataDistribution(DataReport):
 
     **Specification arguments:**
 
-        fields (list): metadat fields to apply the report to. If no fields are specified, all *labels* associated with the class are used.
+        fields (list): metadata fields to apply the report to. If no fields are specified, all *labels* associated with the class are used.
 
 
     **YAML specification:**
