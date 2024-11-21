@@ -38,6 +38,10 @@ class VJGeneDistribution(DataReport):
 
     - label (str): Optional label for separating the results by color/creating separate plots. Note that this should the name of a valid dataset label.
 
+    - is_sequence_label (bool): for RepertoireDatasets, indicates if the label applies to the sequence level
+      (e.g., antigen binding versus non-binding across repertoires) or repertoire level (e.g., diseased repertoires versus healthy repertoires).
+      By default, is_sequence_label is False. For Sequence- and ReceptorDatasets, this parameter is ignored.
+
 
     **YAML specification:**
 
@@ -61,11 +65,11 @@ class VJGeneDistribution(DataReport):
         return VJGeneDistribution(**kwargs)
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, number_of_processes: int = 1,
-                 name: str = None,
-                 split_by_label: bool = None, label: str = None):
+                 name: str = None, split_by_label: bool = None, label: str = None, is_sequence_label: bool = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.split_by_label = split_by_label
         self.label_name = label
+        self.is_sequence_label = is_sequence_label
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
@@ -288,9 +292,12 @@ class VJGeneDistribution(DataReport):
                                      "j_call": data.j_call.tolist(),
                                      "locus": data.locus.tolist()}
 
-            v_rep_df = self._get_gene_count_df(repertoire_attributes, "v_call", include_label=False)
-            j_rep_df = self._get_gene_count_df(repertoire_attributes, "j_call", include_label=False)
-            vj_rep_df = self._get_vj_combo_count_df(repertoire_attributes, include_label=False)
+            if self.is_sequence_label:
+                repertoire_attributes[self.label_name] = getattr(data, self.label_name).tolist()
+
+            v_rep_df = self._get_gene_count_df(repertoire_attributes, "v_call", include_label=self.is_sequence_label)
+            j_rep_df = self._get_gene_count_df(repertoire_attributes, "j_call", include_label=self.is_sequence_label)
+            vj_rep_df = self._get_vj_combo_count_df(repertoire_attributes, include_label=self.is_sequence_label)
 
             self._supplement_repertoire_df(v_rep_df, repertoire)
             self._supplement_repertoire_df(j_rep_df, repertoire)
@@ -310,23 +317,24 @@ class VJGeneDistribution(DataReport):
         rep_df["repertoire_size"] = repertoire.get_element_count()
         rep_df["norm_counts"] = rep_df["counts"] / rep_df["repertoire_size"]
 
-        if self.label_name is not None:
+        if not self.is_sequence_label and self.label_name is not None:
             rep_df[self.label_name] = repertoire.metadata[self.label_name]
 
     def _write_repertoire_tables(self, v_df, j_df, vj_df):
         tables = []
 
-        tables.append(self._write_output_table(v_df,
-                                               file_path=self.result_path / f"V_gene_distribution.tsv",
-                                               name=f"V gene distribution per repertoire"))
+        for chain in set(v_df["locus"]):
+            tables.append(self._write_output_table(v_df[v_df['locus'] == chain],
+                                                   file_path=self.result_path / f"{chain}V_gene_distribution.tsv",
+                                                   name=f"{chain}V gene distribution per repertoire"))
 
-        tables.append(self._write_output_table(j_df,
-                                               file_path=self.result_path / f"J_gene_distribution.tsv",
-                                               name=f"J gene distribution per repertoire"))
+            tables.append(self._write_output_table(j_df[j_df['locus'] == chain],
+                                                   file_path=self.result_path / f"{chain}J_gene_distribution.tsv",
+                                                   name=f"{chain}J gene distribution per repertoire"))
 
-        tables.append(self._write_output_table(vj_df,
-                                               file_path=self.result_path / f"VJ_gene_distribution.tsv",
-                                               name=f"Combined V+J gene distribution"))
+            tables.append(self._write_output_table(vj_df[vj_df['locus'] == chain],
+                                                   file_path=self.result_path / f"{chain}VJ_gene_distribution.tsv",
+                                                   name=f"Combined {chain}V+J gene distribution"))
 
         return tables
 
@@ -348,9 +356,8 @@ class VJGeneDistribution(DataReport):
                         f"{VJGeneDistribution.__name__}: ambiguous label: split_by_label was set to True but no label name was specified, and the number of available labels is {len(self.dataset.get_label_names())}: {self.dataset.get_label_names()}. Skipping this report...")
                     return False
             else:
-                if self.label_name not in self.dataset.get_label_names():
-                    warnings.warn(
-                        f"{VJGeneDistribution.__name__}: the specified label name ({self.label_name}) was not available among the dataset labels: {self.dataset.get_label_names()}. Skipping this report...")
+                if not self.is_sequence_label and self.label_name not in self.dataset.get_label_names():
+                    warnings.warn(f"{VJGeneDistribution.__name__}: the specified label name ({self.label_name}) was not available among the dataset labels: {self.dataset.get_label_names()}. If this is a sequence label, please set is_sequence_label to True. Skipping this report...")
                     return False
 
         if isinstance(self.dataset, ReceptorDataset) or isinstance(self.dataset, SequenceDataset):
