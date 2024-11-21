@@ -1,12 +1,6 @@
 import pandas as pd
 
 from immuneML.IO.dataset_import.DataImport import DataImport
-from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from immuneML.data_model.datasets.Dataset import Dataset
-from immuneML.data_model.SequenceParams import RegionType
-from immuneML.data_model.SequenceSet import Repertoire
-from immuneML.util.ImportHelper import ImportHelper
-from immuneML.util.ParameterValidator import ParameterValidator
 from scripts.specification_util import update_docs_per_mapping
 
 

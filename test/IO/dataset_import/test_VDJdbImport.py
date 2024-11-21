@@ -73,6 +73,7 @@ class TestVDJdbLoader(TestCase):
 
         for receptor in dataset.get_data(2):
             self.assertTrue(receptor.alpha.sequence_aa in ["AAIYESRGSTLGRLY", "ALRLNNQGGKLI"])
+            self.assertTrue(receptor.cell_id in ["3050", "15760"])
             self.assertTrue(receptor.metadata["Epitope_species"] in ["EBV", "CMV"])
             self.assertTrue(receptor.metadata["epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
             self.assertTrue(receptor.metadata["Epitope_gene"] in ["EBNA4", "IE1"])
