@@ -90,24 +90,7 @@ class VDJdbImport(DataImport):
     }
 
     def preprocess_file(self, df: pd.DataFrame) -> pd.DataFrame:
-        df["vj_in_frame"] = 'T'
-        df['productive'] = 'T'
-        df['cdr3_aa'] = df['junction_aa'].str[1:-1]
-        df['cell_id'] = df['cell_id'].astype(str) if df['cell_id'].dtype != float else df.cell_id.astype(int).astype(str)
-
-        if not self.params.is_repertoire and self.params.paired:
-            n_single_chains = sum(df["cell_id"] == "0")
-            if n_single_chains > 0:
-                df.drop(df.loc[df["cell_id"] == "0"].index, inplace=True)
-                logging.warning(
-                    f"VDJdbImport: {n_single_chains} single chains were removed when trying to create a "
-                    f"ReceptorDataset.\nTo import all chains as a SequenceDataset, use paired = False")
-        else:
-            df.loc[df["cell_id"] == "0", "cell_id"] = ''
-
-        df["receptor_id"] = df["cell_id"]
         df["sequence_id"] = VDJdbImport.get_sequence_identifiers(df["cell_id"], df["locus"])
-
         df = self.extract_dict_columns(df)
 
         return df

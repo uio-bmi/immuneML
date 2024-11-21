@@ -8,20 +8,34 @@ from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 
 
+
+#     def create_dumy_dataset(self, path, add_metadata):
+#         file1_content = """clonotype_id,consensus_id,length,chain,v_gene,d_gene,j_gene,c_gene,full_length,productive,cdr3,cdr3_nt,reads,umis
+# clonotype100,clonotype100_consensus_1,843,TRA,TRAV9-2,,TRAJ52,TRAC,True,False,CVLVTGANTGKLTF,TGTGTTTTGGTCACTGGAGCTAACACTGGAAAGCTCACGTTT,8566,4
+# clonotype100,clonotype100_consensus_2,685,TRB,TRBV20,,TRBJ2-7,TRBC1,True,False,CGARGQNYEQYF,TGTGGTGCTCGGGGACAAAACTATGAACAGTACTTC,74572,29
+# clonotype101,clonotype101_consensus_1,620,TRA,TRAV12D-3,,TRAJ12,TRAC,True,True,CALSGTGGYKVVF,TGTGCTCTGAGTGGGACTGGAGGCTATAAAGTGGTCTTT,3396,2
+# clonotype101,clonotype101_consensus_2,759,TRB,TRBV3,TRBD1,TRBJ1-1,TRBC1,True,True,CASSLYGGPEVFF,TGTGCCAGCAGCTTATATGGGGGCCCAGAAGTCTTCTTT,18133,4"""
+#
+#         file2_content = """clonotype_id,consensus_id,length,chain,v_gene,d_gene,j_gene,c_gene,full_length,productive,cdr3,cdr3_nt,reads,umis
+# clonotype102,clonotype102_consensus_1,675,TRA,TRAV14N-1,None,TRAJ5,TRAC,True,True,CAAKGTQVVGQLTF,TGTGCAGCAAAGGGGACACAGGTTGTGGGGCAGCTCACTTTC,23380,4
+# clonotype103,clonotype103_consensus_1,572,TRA,TRAV13D-2,None,TRAJ37,TRAC,True,True,CAIVGNTGKLIF,TGTGCTATAGTAGGCAATACCGGAAAACTCATCTTT,23899,13
+# clonotype103,clonotype103_consensus_2,753,TRB,TRBV3,None,TRBJ1-2,TRBC1,True,True,CASSFATNSDYTF,TGTGCCAGCAGCTTCGCAACAAACTCCGACTACACCTTC,52713,28
+# clonotype104,clonotype104_consensus_1,680,TRA,TRAV3D-3,None,TRAJ31,TRAC,True,True,CAVSANSNNRIFF,TGCGCAGTCAGTGCGAATAGCAATAACAGAATCTTCTTT,31289,6"""
+
 class TestTenxGenomicsImport(TestCase):
 
     def create_dumy_dataset(self, path, add_metadata):
-        file1_content = """clonotype_id,consensus_id,length,chain,v_gene,d_gene,j_gene,c_gene,full_length,productive,cdr3,cdr3_nt,reads,umis
-clonotype100,clonotype100_consensus_1,843,TRA,TRAV9-2,None,TRAJ52,TRAC,True,False,CVLVTGANTGKLTF,TGTGTTTTGGTCACTGGAGCTAACACTGGAAAGCTCACGTTT,8566,4
-clonotype100,clonotype100_consensus_2,685,TRB,TRBV20,None,TRBJ2-7,TRBC1,True,False,CGARGQNYEQYF,TGTGGTGCTCGGGGACAAAACTATGAACAGTACTTC,74572,29
-clonotype101,clonotype101_consensus_1,620,TRA,TRAV12D-3,None,TRAJ12,TRAC,True,True,CALSGTGGYKVVF,TGTGCTCTGAGTGGGACTGGAGGCTATAAAGTGGTCTTT,3396,2
-clonotype101,clonotype101_consensus_2,759,TRB,TRBV3,TRBD1,TRBJ1-1,TRBC1,True,True,CASSLYGGPEVFF,TGTGCCAGCAGCTTATATGGGGGCCCAGAAGTCTTCTTT,18133,4"""
+        file1_content = """barcode,is_cell,contig_id,high_confidence,length,chain,v_gene,d_gene,j_gene,c_gene,full_length,productive,cdr3,cdr3_nt,reads,umis,raw_clonotype_id,raw_consensus_id
+AAACCTGAGAATGTGT-1,true,AAACCTGAGAATGTGT-1_contig_1,true,511,TRA,TRAV9-2,,TRAJ52,TRAC,true,false,CVLVTGANTGKLTF,TGTGTTTTGGTCACTGGAGCTAACACTGGAAAGCTCACGTTT,6096,4,clonotype100,clonotype100_consensus_1
+AAACCTGAGAATGTGT-1,true,AAACCTGAGAATGTGT-1_contig_2,true,529,TRB,TRBV20,,TRBJ2-7,TRBC1,true,false,CGARGQNYEQYF,TGTGGTGCTCGGGGACAAAACTATGAACAGTACTTC,17762,10,clonotype100,clonotype100_consensus_2
+AAACCTGAGGTGTGGT-1,true,AAACCTGAGGTGTGGT-1_contig_1,true,565,TRA,TRAV12D-3,,TRAJ12,TRAC,true,true,CALSGTGGYKVVF,TGTGCTCTGAGTGGGACTGGAGGCTATAAAGTGGTCTTT,13626,12,clonotype101,clonotype101_consensus_1
+AAACCTGAGGTGTGGT-1,true,AAACCTGAGGTGTGGT-1_contig_2,true,489,TRB,TRBV3,TRBD1,TRBJ1-1,TRBC1,true,true,CASSLYGGPEVFF,TGTGCCAGCAGCTTATATGGGGGCCCAGAAGTCTTCTTT,16974,13,clonotype101,clonotype101_consensus_2"""
 
-        file2_content = """clonotype_id,consensus_id,length,chain,v_gene,d_gene,j_gene,c_gene,full_length,productive,cdr3,cdr3_nt,reads,umis
-clonotype102,clonotype102_consensus_1,675,TRA,TRAV14N-1,None,TRAJ5,TRAC,True,True,CAAKGTQVVGQLTF,TGTGCAGCAAAGGGGACACAGGTTGTGGGGCAGCTCACTTTC,23380,4
-clonotype103,clonotype103_consensus_1,572,TRA,TRAV13D-2,None,TRAJ37,TRAC,True,True,CAIVGNTGKLIF,TGTGCTATAGTAGGCAATACCGGAAAACTCATCTTT,23899,13
-clonotype103,clonotype103_consensus_2,753,TRB,TRBV3,None,TRBJ1-2,TRBC1,True,True,CASSFATNSDYTF,TGTGCCAGCAGCTTCGCAACAAACTCCGACTACACCTTC,52713,28
-clonotype104,clonotype104_consensus_1,680,TRA,TRAV3D-3,None,TRAJ31,TRAC,True,True,CAVSANSNNRIFF,TGCGCAGTCAGTGCGAATAGCAATAACAGAATCTTCTTT,31289,6"""
+        file2_content = """barcode,is_cell,contig_id,high_confidence,length,chain,v_gene,d_gene,j_gene,c_gene,full_length,productive,cdr3,cdr3_nt,reads,umis,raw_clonotype_id,raw_consensus_id
+AAACCTGAGGTGTGGT-1,true,AAACCTGAGGTGTGGT-1_contig_1,true,464,TRA,TRAV14N-1,,TRAJ5,TRAC,true,true,CAAKGTQVVGQLTF,TGTGCAGCAAAGGGGACACAGGTTGTGGGGCAGCTCACTTTC,16482,14,clonotype102,clonotype102_consensus_1
+AAACCTGAGTACGTAA-1,true,AAACCTGAGTACGTAA-1_contig_1,true,487,TRA,TRAV13D-2,,TRAJ37,TRAC,true,true,CAIVGNTGKLIF,TGTGCTATAGTAGGCAATACCGGAAAACTCATCTTT,10862,7,clonotype103,clonotype103_consensus_1
+AAACCTGAGTACGTAA-1,true,AAACCTGAGTACGTAA-1_contig_2,true,515,TRB,TRBV3,,TRBJ1-2,TRBC1,true,true,CASSFATNSDYTF,TGTGCCAGCAGCTTCGCAACAAACTCCGACTACACCTTC,10234,8,clonotype103,clonotype103_consensus_2
+AAACCTGCAATGTAAG-1,true,AAACCTGCAATGTAAG-1_contig_1,true,544,TRA,TRAV3D-3,,TRAJ31,TRAC,true,true,CAVSANSNNRIFF,TGCGCAGTCAGTGCGAATAGCAATAACAGAATCTTCTTT,2900,2,clonotype104,clonotype104_consensus_1"""
 
         with open(path / "rep1.tsv", "w") as file:
             file.writelines(file1_content)
@@ -55,7 +69,7 @@ rep2.tsv,2""")
 
         self.assertEqual(dataset.repertoires[0].sequences()[0].sequence_aa, "ALSGTGGYKVV")
         self.assertListEqual([Chain.ALPHA.value, Chain.BETA.value], dataset.repertoires[0].data.locus.tolist())
-        self.assertListEqual([2, 4], dataset.repertoires[0].data.duplicate_count.tolist())
+        self.assertListEqual([12, 13], dataset.repertoires[0].data.umi_count.tolist())
 
         shutil.rmtree(path)
 

@@ -61,7 +61,7 @@ class ImportHelper:
             kwargs["ascending"].append(False)
         else:
             warning += ("Since duplicate_count or umi_count was not set, two random chains will be selected for "
-                        "each receptor.")
+                        "each receptor if more than 2 chains are present.")
         logging.warning(warning)
 
         return kwargs
@@ -143,7 +143,8 @@ class ImportHelper:
 
     @staticmethod
     def standardize_bool_values(dataframe: pd.DataFrame):
-        return dataframe.replace({True: 'T', False: 'F'})
+        return dataframe.replace({True: 'T', False: 'F', 'TRUE': 'T', 'FALSE': 'F',
+                                  'True': 'T', 'False': 'F', 'true': 'T', 'false': 'F'})
 
     @staticmethod
     def add_cdr3_from_junction(df: pd.DataFrame):
