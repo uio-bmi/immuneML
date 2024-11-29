@@ -59,6 +59,8 @@ rep2.tsv,2""")
         params["result_path"] = path
         params["path"] = path
         params["metadata_file"] = path / "metadata.csv"
+        params["separator"] = "," # new true separator is \t but tests still based on old ,
+
 
         dataset = TenxGenomicsImport(params, "tenx_dataset_repertoire").import_dataset()
 
@@ -83,6 +85,8 @@ rep2.tsv,2""")
         params["paired"] = False
         params["result_path"] = path
         params["path"] = path
+        params["separator"] = "," # new true separator is \t but tests still based on old ,
+
 
         dataset = TenxGenomicsImport(params, "tenx_dataset_sequence").import_dataset()
 
@@ -107,6 +111,8 @@ rep2.tsv,2""")
         params["path"] = path
         params["sequence_file_size"] = 1
         params["receptor_chains"] = "TRA_TRB"
+        params["separator"] = "," # new true separator is \t but tests still based on old ,
+
 
         dataset = TenxGenomicsImport(params, "tenx_dataset_receptor").import_dataset()
 
