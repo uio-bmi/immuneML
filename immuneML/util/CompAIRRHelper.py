@@ -140,7 +140,7 @@ class CompAIRRHelper:
         repertoire_contents.dropna(inplace=True, subset=check_na_rows)
 
         if n_rows_before > len(repertoire_contents):
-            warnings.warn(
+            logging.warning(
                 f"CompAIRRHelper: removed {n_rows_before - len(repertoire_contents)} entries from repertoire {repertoire.identifier} due to missing values.")
 
         if compairr_params.ignore_counts:

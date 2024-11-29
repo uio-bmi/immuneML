@@ -13,7 +13,7 @@ class PathBuilder:
     def build(path, warn_if_exists=False):
         path = Path(path)
         if warn_if_exists and path.is_dir():
-            warnings.warn(f"PathBuilder: directory {path} already exists. Writing in the existing directory...", RuntimeWarning)
+            logging.warning(f"PathBuilder: directory {path} already exists. Writing in the existing directory...")
         else:
             try:
                 os.makedirs(path)

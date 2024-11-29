@@ -1,4 +1,4 @@
-import warnings
+import logging
 from pathlib import Path
 from typing import Tuple, List
 
@@ -61,13 +61,13 @@ class CVFeaturePerformance(TrainMLModelReport):
         self._extract_label()
 
         if self.label is None:
-            warnings.warn("CVFeaturePerformance: the label was not set for this report and it could not be inferred from the instruction "
+            logging.warning("CVFeaturePerformance: the label was not set for this report and it could not be inferred from the instruction "
                           "as there might be multiple labels there. Skipping the report.", RuntimeWarning)
             return False
 
         self._extract_hp_settings()
         if self.feature_count != len(self.relevant_hp_settings):
-            warnings.warn(f"CVFeaturePerformance: there are multiple hyperparameter settings with the same value of the "
+            logging.warning(f"CVFeaturePerformance: there are multiple hyperparameter settings with the same value of the "
                           f"feature {self.feature}. Skipping the report...", RuntimeWarning)
             return False
 

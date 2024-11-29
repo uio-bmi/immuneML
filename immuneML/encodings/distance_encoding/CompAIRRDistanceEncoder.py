@@ -1,5 +1,5 @@
 import subprocess
-import warnings
+import logging
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
@@ -181,12 +181,12 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
         mh_distance = 1 - mh_similarity
 
         if mh_distance < -0.3 and self.compairr_params.differences == 0:
-            warnings.warn(
+            logging.warning(
                 f"CompAIRRDistanceEncoder: Morisita-Horn similarity can only be in the range [0, 1], found {mh_similarity} "
                 f"when comparing repertoires {rowIndex} and {columnIndex}.")
 
         if mh_distance < 0:
-            warnings.warn(
+            logging.warning(
                 f"CompAIRRDistanceEncoder: found negative distance {mh_distance} when comparing repertoires {rowIndex} and {columnIndex}, "
                 f"distance will be set to 0.")
             mh_distance = 0

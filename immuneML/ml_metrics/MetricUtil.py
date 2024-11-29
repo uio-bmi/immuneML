@@ -1,4 +1,4 @@
-import warnings
+import logging
 import inspect
 
 from immuneML.ml_metrics import ml_metrics
@@ -34,7 +34,7 @@ class MetricUtil:
             if metric in ClassificationMetric.get_probability_based_metric_types():
                 predictions = predicted_proba_y
                 if predicted_proba_y is None:
-                    warnings.warn(
+                    logging.warning(
                         f"MLMethodAssessment: metric {metric} is specified, but the chosen ML method does not output "
                         f"class probabilities. Using predicted classes instead...")
                     predictions = predicted_y
@@ -47,9 +47,8 @@ class MetricUtil:
                 score = fn(true_y, predictions)
 
         except ValueError as err:
-            warnings.warn(f"MLMethodAssessment: score for metric {metric.name} could not be calculated."
-                          f"\nPredicted values: {predicted_y}\nTrue values: {true_y}.\nMore details: {err}",
-                          RuntimeWarning)
+            logging.warning(f"MLMethodAssessment: score for metric {metric.name} could not be calculated."
+                          f"\nPredicted values: {predicted_y}\nTrue values: {true_y}.\nMore details: {err}")
             score = Constants.NOT_COMPUTED
 
         return score

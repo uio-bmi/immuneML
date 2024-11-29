@@ -1,5 +1,5 @@
 import copy
-import warnings
+import logging
 from pathlib import Path
 from typing import List
 
@@ -65,5 +65,5 @@ class ReportUtil:
             ParameterValidator.assert_type_and_value(kwargs["label"], str, location, "label")
 
             if kwargs["split_by_label"] is False:
-                warnings.warn(f"{location}: label is set but split_by_label was False, setting split_by_label to True")
+                logging.warning(f"{location}: label is set but split_by_label was False, setting split_by_label to True")
                 kwargs["split_by_label"] = True

@@ -5,7 +5,7 @@ import_unproductive: False # whether to only import unproductive sequences
 import_unknown_productivity: True # whether to import sequences with unknown productivity (missing/NA)
 import_illegal_characters: False
 region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing first and last amino acid as 10xGenomics uses IMGT junction as CDR3
-separator: "," # column separator
+separator: "\t" # column separator
 column_mapping: # 10xGenomics column names -> immuneML repertoire fields
   cdr3: junction_aa
   cdr3_nt: junction

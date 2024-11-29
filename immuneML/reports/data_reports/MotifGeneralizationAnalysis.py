@@ -3,7 +3,6 @@ from pathlib import Path
 import logging
 import pandas as pd
 import os
-import warnings
 
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
@@ -362,7 +361,7 @@ class MotifGeneralizationAnalysis(DataReport):
             return min(all_above_threshold["training_TP"])
         except ValueError:
             motif_size_warning = f" for motif size = {motif_size}" if motif_size is not None else ""
-            warnings.warn(f"{MotifGeneralizationAnalysis.__name__}: could not automatically determine optimal TP threshold{motif_size_warning} with precison differenc  based on {col}")
+            logging.warning(f"{MotifGeneralizationAnalysis.__name__}: could not automatically determine optimal TP threshold{motif_size_warning} with precison differenc  based on {col}")
             return None
 
     def _plot_precision_per_tp(self, file_path, plotting_data, combined_precision, dataset_type, tp_cutoff, motifs_name="motifs"):

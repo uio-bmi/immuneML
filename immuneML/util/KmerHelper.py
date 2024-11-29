@@ -1,7 +1,6 @@
 # quality: peripheral
 import itertools
 import logging
-import warnings
 
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.SequenceSet import ReceptorSequence, Repertoire
@@ -102,7 +101,7 @@ class KmerHelper:
         assert distance < len(kmer)
 
         if distance > 1:
-            warnings.warn("In create_kmers_within_HD distance larger than 1 is not yet implemented. "
+            logging.warning("In create_kmers_within_HD distance larger than 1 is not yet implemented. "
                           "Using default value 1...", Warning)
 
         pairs = []
