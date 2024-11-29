@@ -1,4 +1,4 @@
-import warnings
+import logging
 from pathlib import Path
 from typing import List
 
@@ -94,7 +94,7 @@ class SignificantKmerPositions(DataReport):
         if isinstance(self.dataset, RepertoireDataset):
             return True
         else:
-            warnings.warn(f"{SignificantKmerPositions.__name__}: report can be generated only from RepertoireDataset. "
+            logging.warning(f"{SignificantKmerPositions.__name__}: report can be generated only from RepertoireDataset. "
                           f"Skipping this report...")
             return False
 

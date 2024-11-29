@@ -1,6 +1,5 @@
 import logging
 import shutil
-import warnings
 from pathlib import Path
 from typing import Type
 
@@ -127,12 +126,12 @@ class MotifTestSetPerformance(EncodingReport):
         test_dataset_import_params = DatasetImportParams.build_object(**params_dict)
 
         if test_dataset_import_params.is_repertoire:
-            warnings.warn(f"{location}: This report only allows the reference dataset to be of type SequenceDataset. "
+            logging.warning(f"{location}: This report only allows the reference dataset to be of type SequenceDataset. "
                           "Setting 'test_dataset/params/is_repertoire' to False...")
             test_dataset_import_params.is_repertoire = False
 
         if test_dataset_import_params.paired:
-            warnings.warn(f"{location}: This report only allows the reference dataset to be of type SequenceDataset. "
+            logging.warning(f"{location}: This report only allows the reference dataset to be of type SequenceDataset. "
                           "Setting 'test_dataset/params/paired' to False...")
             test_dataset_import_params.paired = False
 

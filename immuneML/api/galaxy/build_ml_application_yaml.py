@@ -2,7 +2,7 @@ import argparse
 import sys
 from pathlib import Path
 import os.path
-import warnings
+import logging
 
 from immuneML.api.galaxy.Util import Util
 from immuneML.data_model.bnp_util import write_yaml
@@ -49,7 +49,7 @@ def main(args):
     specs = build_specs(parsed_args)
 
     if not os.path.isfile(parsed_args.trained_model):
-        warnings.warn(f"Could not locate trained ML model: {parsed_args.trained_model}")
+        logging.warning(f"Could not locate trained ML model: {parsed_args.trained_model}")
 
     PathBuilder.build(parsed_args.output_path)
     output_location = Path(parsed_args.output_path) / parsed_args.file_name

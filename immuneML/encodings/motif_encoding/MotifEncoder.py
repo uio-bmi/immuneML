@@ -1,5 +1,4 @@
 import logging
-import warnings
 from functools import partial
 from multiprocessing.pool import Pool
 from pathlib import Path
@@ -222,7 +221,7 @@ class MotifEncoder(DatasetEncoder):
             df = pd.DataFrame(data)
             df.to_csv(motif_stats_filepath, index=False, sep="\t")
         except Exception as e:
-            warnings.warn(f"{MotifEncoder.__name__}: could not write motif stats. Exception was: {e},"
+            logging.warning(f"{MotifEncoder.__name__}: could not write motif stats. Exception was: {e},"
                           f"{data}")
 
     def get_encoded_dataset_from_motifs(self, dataset, motifs, params):
