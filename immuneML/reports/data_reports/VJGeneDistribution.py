@@ -112,15 +112,18 @@ class VJGeneDistribution(DataReport):
         plots = []
 
         counts_df = self._get_gene_count_df(dataset_attributes, call_type)
-        tables.append(self._write_output_table(counts_df,
-                                               file_path=self.result_path / f"{vj}_gene_distribution.tsv",
-                                               name=f"{vj} gene distribution"))
 
         for chain in set(dataset_attributes["locus"]):
+            chain_df = counts_df[counts_df["locus"] == chain]
+
+            tables.append(self._write_output_table(chain_df,
+                                                   file_path=self.result_path / f"{chain}{vj}_gene_distribution.tsv",
+                                                   name=f"{vj} gene distribution"))
+
             plots.append(self._safe_plot(plot_callable="_plot_gene_distribution",
-                                         df=counts_df[counts_df["locus"] == chain],
+                                         df=chain_df,
                                          title=f"{chain} {vj} gene distribution",
-                                         filename=f"{chain}_{vj}_gene_distribution.html"))
+                                         filename=f"{chain}{vj}_gene_distribution.html"))
 
         return tables, plots
 
@@ -177,18 +180,21 @@ class VJGeneDistribution(DataReport):
         plots = []
 
         vj_combo_count_df = self._get_vj_combo_count_df(dataset_attributes)
-        tables.append(self._write_output_table(vj_combo_count_df,
-                                               file_path=self.result_path / f"VJ_gene_distribution.tsv",
-                                               name=f"Combined V+J gene distribution"))
+
 
         for chain in set(dataset_attributes["locus"]):
             chain_df = vj_combo_count_df[vj_combo_count_df["locus"] == chain]
+
+            tables.append(self._write_output_table(chain_df,
+                                                   file_path=self.result_path / f"{chain}VJ_gene_distribution.tsv",
+                                                   name=f"Combined {chain} V+J gene distribution"))
+
 
             if not self.split_by_label:
                 plots.append(self._safe_plot(plot_callable="_plot_gene_combo_heatmap",
                                              chain_df=chain_df,
                                              title=f"Combined {chain} V+J gene distribution",
-                                             filename=f"{chain}_VJ_gene_distribution.html"))
+                                             filename=f"{chain}VJ_gene_distribution.html"))
             else:
                 # ensure the same color scale is used for each heatmap
                 zmax = max(chain_df["counts"])
@@ -199,7 +205,7 @@ class VJGeneDistribution(DataReport):
                     plots.append(self._safe_plot(plot_callable="_plot_gene_combo_heatmap",
                                                  chain_df=label_chain_df,
                                                  title=f"Combined {chain} V+J gene distribution for {self.label_name}={label_class}",
-                                                 filename=f"{chain}_VJ_gene_distribution_{self.label_name}={label_class}.html",
+                                                 filename=f"{chain}VJ_gene_distribution_{self.label_name}={label_class}.html",
                                                  zmax=zmax))
 
         return tables, plots
@@ -230,18 +236,18 @@ class VJGeneDistribution(DataReport):
             plots.append(self._safe_plot(plot_callable="_plot_gene_distribution_across_repertoires",
                                          chain_df=v_df[v_df["locus"] == chain],
                                          title=f"{chain} V gene distribution per repertoire",
-                                         filename=f"{chain}_V_gene_distribution.html"))
+                                         filename=f"{chain}V_gene_distribution.html"))
 
             plots.append(self._safe_plot(plot_callable="_plot_gene_distribution_across_repertoires",
                                          chain_df=j_df[j_df["locus"] == chain],
                                          title=f"{chain} J gene distribution per repertoire",
-                                         filename=f"{chain}_J_gene_distribution.html"))
+                                         filename=f"{chain}J_gene_distribution.html"))
 
             mean_chain_vj_df = self._average_norm_counts_per_repertoire(chain_vj_df=vj_df[vj_df["locus"] == chain])
 
             tables.append(self._write_output_table(mean_chain_vj_df,
-                                                   file_path=self.result_path / f"VJ_gene_distribution_averaged_across_repertoires.tsv",
-                                                   name=f"Combined V+J gene distribution averaged across repertoires"))
+                                                   file_path=self.result_path / f"{chain}VJ_gene_distribution_averaged_across_repertoires.tsv",
+                                                   name=f"Combined {chain} V+J gene distribution averaged across repertoires"))
 
             plots.extend(self._get_repertoire_heatmaps(mean_chain_vj_df, chain))
 
@@ -256,7 +262,7 @@ class VJGeneDistribution(DataReport):
             plots.append(self._safe_plot(plot_callable="_plot_gene_combo_heatmap",
                                          chain_df=mean_chain_vj_df,
                                          title=f"Combined {chain} V+J gene distribution averaged across repertoires",
-                                         filename=f"{chain}_VJ_gene_distribution_averaged_across_repertoires.html",
+                                         filename=f"{chain}VJ_gene_distribution_averaged_across_repertoires.html",
                                          value_to_plot="mean_norm_counts",
                                          color_name="Average observed frequency<br>across repertoires<br>normalised by repertoire size"))
         else:
@@ -265,7 +271,7 @@ class VJGeneDistribution(DataReport):
                                              chain_df=mean_chain_vj_df[
                                                  mean_chain_vj_df[self.label_name] == label_class],
                                              title=f"Combined {chain} V+J gene distribution for {self.label_name}={label_class} averaged across repertoires",
-                                             filename=f"{chain}_VJ_gene_distribution_{self.label_name}={label_class}_averaged_across_repertoires.html",
+                                             filename=f"{chain}VJ_gene_distribution_{self.label_name}={label_class}_averaged_across_repertoires.html",
                                              zmax=max(mean_chain_vj_df["mean_norm_counts"]),
                                              value_to_plot="mean_norm_counts",
                                              color_name="Average observed frequency<br>across repertoires<br>normalised by repertoire size"))
@@ -288,6 +294,11 @@ class VJGeneDistribution(DataReport):
 
         for repertoire in self.dataset.repertoires:
             data = repertoire.data
+            if hasattr(data, "locus"):
+                assert len(set(data.locus.tolist())) == 1, (f"{VJGeneDistribution.__name__}: Repertoire {repertoire.name} of dataset {self.dataset.name} contained multiple loci: {set(repertoire.data.locus)}. "
+                                                              f"This report can only be created for 1 locus per repertoire.")
+
+
             repertoire_attributes = {"v_call": data.v_call.tolist(),
                                      "j_call": data.j_call.tolist(),
                                      "locus": data.locus.tolist()}
