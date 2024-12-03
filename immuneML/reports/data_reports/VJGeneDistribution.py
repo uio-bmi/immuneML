@@ -352,6 +352,8 @@ class VJGeneDistribution(DataReport):
     def _plot_gene_distribution_across_repertoires(self, chain_df, title, filename):
         figure = px.box(chain_df, x="genes", y="norm_counts", color=self.label_name,
                         hover_data=["repertoire_id", "subject_id"],
+                        labels={"genes": "Gene names",
+                                "norm_counts": "Fraction of the repertoire"},
                         color_discrete_sequence=px.colors.diverging.Tealrose)
         figure.update_layout(template="plotly_white")
 
