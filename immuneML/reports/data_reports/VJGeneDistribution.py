@@ -295,7 +295,7 @@ class VJGeneDistribution(DataReport):
         for repertoire in self.dataset.repertoires:
             data = repertoire.data
             if hasattr(data, "locus"):
-                assert len(set(data.locus.tolist())) == 1, (f"{VJGeneDistribution.__name__}: Repertoire {repertoire.name} of dataset {self.dataset.name} contained multiple loci: {set(repertoire.data.locus)}. "
+                assert len(set(data.locus.tolist())) == 1, (f"{VJGeneDistribution.__name__}: Repertoire {repertoire.identifier} of dataset {self.dataset.name} contained multiple loci: {set(data.locus.tolist())}. "
                                                               f"This report can only be created for 1 locus per repertoire.")
 
 
