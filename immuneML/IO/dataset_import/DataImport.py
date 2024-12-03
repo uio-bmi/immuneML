@@ -68,6 +68,11 @@ class DataImport(metaclass=abc.ABCMeta):
 
         try:
             metadata = pd.read_csv(self.params.metadata_file, sep=",")
+            if "identifier" in metadata.columns:
+                assert len(list(metadata["identifier"])) == len(set(list(metadata["identifier"]))), \
+                    (f"DataImport: if the field 'identifier' is supplied, each repertoire must have "
+                     f"a unique identifier (found {len(set(list(metadata['identifier'])))} unique "
+                     f"identifiers for {len(list(metadata['identifier']))} repertoires).")
         except Exception as e:
             raise Exception(f"{e}\nAn error occurred while reading in the metadata file {self.params.metadata_file}. "
                             f"Please see the error log above for more details on this error and the documentation "
@@ -202,9 +207,14 @@ class DataImport(metaclass=abc.ABCMeta):
             repertoire_inputs = {**{"metadata": metadata_row.to_dict(),
                                     "path": self.params.result_path / "repertoires/",
                                     "filename_base": filename.stem}, **dataframe.to_dict(orient='list')}
+
+            if "identifier" in metadata_row:
+                repertoire_inputs["identifier"] = metadata_row["identifier"]
+
             repertoire = Repertoire.build(**repertoire_inputs)
 
-            # assert repertoire.get_element_count() > 0, "resulting repertoire contains 0 sequences, please remove this repertoire from the dataset."
+            if repertoire.get_element_count() == 0:
+                logging.warning(f"Repertoire {repertoire.identifier} contains 0 sequences. It is recommended to remove this repertoire from the dataset. ")
 
             return repertoire
         except Exception as e:
