@@ -1,5 +1,5 @@
 import re
-import warnings
+import logging
 
 import numpy as np
 import pandas as pd
@@ -101,11 +101,11 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
                                 if self._matches(rep_seq, regex, v_gene):
                                     n_matches = 1 if self.reads == ReadsType.UNIQUE else rep_seq.duplicate_count
                                     if n_matches is None:
-                                        warnings.warn(f"MatchedRegexRepertoireEncoder: count not defined for sequence with id {rep_seq.sequence_id} in repertoire {repertoire.identifier}, ignoring sequence...")
+                                        logging.warning(f"MatchedRegexRepertoireEncoder: count not defined for sequence with id {rep_seq.sequence_id} in repertoire {repertoire.identifier}, ignoring sequence...")
                                         n_matches = 0
                                     matches[match_idx] += n_matches
                         else:
-                            warnings.warn(f"{MatchedRegexRepertoireEncoder.__class__.__name__}: chain was not set for sequence {rep_seq.sequence_id}, skipping the sequence for matching...")
+                            logging.warning(f"{MatchedRegexRepertoireEncoder.__class__.__name__}: chain was not set for sequence {rep_seq.sequence_id}, skipping the sequence for matching...")
                     match_idx += 1
 
         return matches

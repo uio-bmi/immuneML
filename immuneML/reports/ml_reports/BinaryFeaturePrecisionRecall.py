@@ -1,5 +1,4 @@
 import logging
-import warnings
 from pathlib import Path
 
 import numpy as np
@@ -147,11 +146,11 @@ class BinaryFeaturePrecisionRecall(MLReport):
             run_report = False
 
         if self.train_dataset.encoded_data is None or self.train_dataset.encoded_data.examples is None or self.train_dataset.encoded_data.feature_names is None or self.train_dataset.encoded_data.encoding != MotifEncoder.__name__:
-            warnings.warn(
+            logging.warning(
                 f"{location}: this report can only be created for a dataset encoded with the {MotifEncoder.__name__}. Report {self.name} will not be created.")
             run_report = False
 
         if hasattr(self.method, "keep_all") and self.method.keep_all:
-            warnings.warn(f"{location}: keep_all was set to True for ML method {self.method.name}, only one data point will be plotted. ")
+            logging.warning(f"{location}: keep_all was set to True for ML method {self.method.name}, only one data point will be plotted. ")
 
         return run_report

@@ -1,12 +1,7 @@
-from pathlib import Path
-
 import pandas as pd
 
 from immuneML.IO.dataset_import.DataImport import DataImport
-from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.data_model.SequenceParams import RegionType
-from immuneML.data_model.datasets.Dataset import Dataset
-from immuneML.util.ImportHelper import ImportHelper
 from scripts.specification_util import update_docs_per_mapping
 
 

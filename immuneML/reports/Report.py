@@ -4,6 +4,7 @@ from pathlib import Path
 
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
+from immuneML.util.Logger import print_log
 
 
 class Report(metaclass=abc.ABCMeta):
@@ -106,14 +107,15 @@ class Report(metaclass=abc.ABCMeta):
             if self.check_prerequisites():
                 return self._generate()
             else:
+                print_log(f"Report {self.name} failed while checking the prerequisites and was not generated, see the log file for more information.", include_datetime=True)
                 return ReportResult(name=f"{self.name} (failed)",
                                 info="This report failed while checking the prerequisites. "
                                      "This usually means the wrong dataset type was used or wrong input parameters were specified. "
                                      "See the log file for more information")
         except Exception as e:
             logging.exception(f"An exception occurred while generating report {self.name}. See the details below:")
-            logging.warning(f"Report {self.name} encountered an error and could not be generated: {e}.")
-            return ReportResult(name=f"{self.name} (failed)", info="This report failed during execution, see the log file for more information")
+            print_log(f"Report {self.name} encountered an error and could not be generated (error: {e}). See the log file for more info.", include_datetime=True)
+            return ReportResult(name=f"{self.name} (failed)", info="This report failed during execution, see the log file for more information.")
 
     def _safe_plot(self, output_written=True, plot_callable="_plot", **kwargs):
         """
@@ -143,7 +145,7 @@ class Report(metaclass=abc.ABCMeta):
                 return plot(**kwargs)
         except Exception as e:
             logging.exception(f"An exception occurred while plotting the data in report {self.name}. See the details below:")
-            logging.warning(warning_mssg)
+            print_log(warning_mssg, include_datetime=True)
 
     def _write_output_table(self, table, file_path, name=None):
         sep = "," if file_path.suffix == ".csv" else "\t"

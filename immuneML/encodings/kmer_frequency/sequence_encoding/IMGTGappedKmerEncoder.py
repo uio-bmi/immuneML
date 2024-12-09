@@ -1,4 +1,4 @@
-import warnings
+import logging
 
 from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.encodings.EncoderParams import EncoderParams
@@ -29,7 +29,7 @@ class IMGTGappedKmerEncoder(SequenceEncodingStrategy):
         length = len(getattr(sequence, params.get_seq_name_for_seq_object()))
 
         if length < k_left + k_right + max_gap:
-            warnings.warn('Sequence length is less than k_left + k_right + max_gap. Ignoring sequence')
+            logging.warning('Sequence length is less than k_left + k_right + max_gap. Ignoring sequence')
             return None
 
         gapped_kmers = KmerHelper.create_IMGT_gapped_kmers_from_sequence(sequence, k_left=k_left, max_gap=max_gap,

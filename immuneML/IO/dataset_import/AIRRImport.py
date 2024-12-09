@@ -1,13 +1,5 @@
-from dataclasses import fields
-
-import pandas as pd
-from bionumpy import AminoAcidEncoding, DNAEncoding
-
 from immuneML.IO.dataset_import.DataImport import DataImport
-from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet, AminoAcidXEncoding
 from immuneML.data_model.SequenceParams import ChainPair, RegionType
-from immuneML.data_model.SequenceSet import Repertoire
-from immuneML.data_model.bnp_util import read_yaml
 from scripts.specification_util import update_docs_per_mapping
 
 
