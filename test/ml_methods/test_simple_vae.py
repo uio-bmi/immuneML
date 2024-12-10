@@ -12,7 +12,7 @@ from immuneML.util.PathBuilder import PathBuilder
 def test_simple_vae():
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'simple_vae')
 
-    dataset = RandomDatasetGenerator.generate_sequence_dataset(10, {10: 1.},
+    dataset = RandomDatasetGenerator.generate_sequence_dataset(20, {10: 1.},
                                                                {}, path / 'dataset')
 
     vae = SimpleVAE('beta', 0.75, 20, 75, 50, 10, 2,

@@ -11,11 +11,10 @@ from torch.nn.functional import cross_entropy, one_hot
 from torch.utils.data import DataLoader
 
 from immuneML import Constants
-from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
-from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
-from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.SequenceSet import ReceptorSequence
+from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
