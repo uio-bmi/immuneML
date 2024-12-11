@@ -77,14 +77,14 @@ class TCRdistHelper:
         epitope_name = 'epitope' if 'epitope' in df.columns else 'Epitope' if 'Epitope' in df.columns else ''
 
         if "subject" not in df:
-            df['subject'] = "sub" + df['receptor_id']
+            df['subject'] = "sub" + df['cell_id']
 
         df.loc[df['v_call'].str.contains("\*"), 'v_call'] = [TCRdistHelper.add_default_allele_to_v_gene(el) for el in
                                                              df.loc[df['v_call'].str.contains("\*"), 'v_call']]
         df.loc[df['j_call'].str.contains("\*"), 'j_call'] = [TCRdistHelper.add_default_allele_to_v_gene(el) for el in
                                                              df.loc[df['j_call'].str.contains("\*"), 'j_call']]
 
-        df['clone_id'] = df['receptor_id']
+        df['clone_id'] = df['cell_id']
         cols_to_keep = ['cdr3', 'cdr3_aa', 'v_call', 'j_call', 'duplicate_count', 'subject', epitope_name, 'clone_id']
 
         df_alpha = (df[df.locus == 'TRA'][cols_to_keep]
