@@ -30,7 +30,7 @@ class SimpleVAE(GenerativeModel):
     """
     SimpleVAE is a generative model on sequence level that relies on variational autoencoder. This type of model was
     proposed by Davidsen et al. 2019, and this implementation is inspired by their original implementation available
-    at https://github.com/matsengrp/vampire.
+    at https://github.com/matsengrp/vampire. It uses the sequences as given in "junction_aa" field in the input dataset.
 
     References:
 
@@ -126,7 +126,7 @@ class SimpleVAE(GenerativeModel):
         self.iter_count_prob_estimation = iter_count_prob_estimation
         self.num_epochs = num_epochs
         self.pretrains = pretrains
-        self.region_type = RegionType.IMGT_CDR3  # TODO: check if they use cdr3 or junction in the original paper
+        self.region_type = RegionType.IMGT_JUNCTION
         self.vocab = vocab if vocab is not None else (
             sorted((EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + [Constants.GAP_LETTER])))
         self.vocab_size = len(self.vocab)
