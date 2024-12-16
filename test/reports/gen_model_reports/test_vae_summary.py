@@ -1,5 +1,6 @@
 import shutil
 
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.generative_models.SimpleVAE import SimpleVAE
 from immuneML.reports.gen_model_reports.VAESummary import VAESummary
@@ -10,7 +11,8 @@ from immuneML.util.PathBuilder import PathBuilder
 def test_vae_summary():
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'simple_vae_summary')
 
-    dataset = RandomDatasetGenerator.generate_sequence_dataset(100, {10: 1.}, {}, path / 'dataset')
+    dataset = RandomDatasetGenerator.generate_sequence_dataset(sequence_count=100, length_probabilities={10: 1.}, labels={}, path=path / 'dataset',
+                                                               region_type=RegionType.IMGT_JUNCTION.name)
 
     vae = SimpleVAE('beta', 0.75, 8, 4, 10, 100, 2,
                     1, 1, 21, 2, 5, 10, 'cpu')
@@ -26,4 +28,4 @@ def test_vae_summary():
 
         assert file.is_file(), file
 
-    shutil.rmtree(path)
+    # shutil.rmtree(path)

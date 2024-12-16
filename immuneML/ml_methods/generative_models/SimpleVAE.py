@@ -244,6 +244,8 @@ class SimpleVAE(GenerativeModel):
     def encode_dataset(self, dataset, batch_size=None, shuffle=True):
         seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
         data = dataset.data.topandas()[[seq_col, 'v_call', 'j_call']]
+        assert set(data[seq_col]) != {""}, f"{SimpleVAE.__name__}: sequence column {seq_col} contained only empty sequences. This indicates something may have gone wrong with data import."
+
         if self.unique_v_genes is None:
             self.unique_v_genes = sorted(list(set([el.split("*")[0] for el in data['v_call']])))
         if self.unique_j_genes is None:
