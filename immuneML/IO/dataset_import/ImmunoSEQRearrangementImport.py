@@ -45,16 +45,16 @@ class ImmunoSEQRearrangementImport(DataImport):
 
     - region_type (str): Which part of the sequence to check when importing. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as immunoSEQ files use the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
-    - column_mapping (dict): A mapping from immunoSEQ column names to immuneML's internal data representation. For immunoSEQ rearrangement-level files, this is by default set the values shown below in YAML format.         A custom column mapping can be specified here if necessary (for example: adding additional data fields if they are present in the file, or using alternative column names). Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS.
+    - column_mapping (dict): A mapping from immunoSEQ column names to immuneML's internal data representation. For immunoSEQ rearrangement-level files, this is by default set the values shown below in YAML format.         A custom column mapping can be specified here if necessary (for example: adding additional data fields if they are present in the file, or using alternative column names). Valid immuneML fields that can be specified here are defined by the AIRR standard (AIRRSequenceSet). For ImmunoSEQ rearrangement import, this is by default set to:
 
         .. indent with spaces
         .. code-block:: yaml
 
-            rearrangement: sequence
-            amino_acid: junction_aa
-            v_resolved: v_call
-            j_resolved: j_call
-            templates: duplicate_count
+              rearrangement: sequence
+              amino_acid: junction_aa
+              v_resolved: v_call
+              j_resolved: j_call
+              templates: duplicate_count
 
     - columns_to_load (list): Specifies which subset of columns must be loaded from the file. By default, this is: [rearrangement, v_family, v_gene, v_allele, j_family, j_gene, j_allele, amino_acid, templates, frame_type, locus]
 
@@ -122,6 +122,7 @@ class ImmunoSEQRearrangementImport(DataImport):
 
         mapping = {
             "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
+            "Valid immuneML fields that can be specified here are defined by the AIRR standard (AIRRSequenceSet)": f"Valid immuneML fields that can be specified here by `the AIRR Rearrangement Schema <https://docs.airr-community.org/en/latest/datarep/rearrangements.html>`_."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

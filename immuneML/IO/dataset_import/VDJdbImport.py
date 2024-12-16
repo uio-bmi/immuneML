@@ -38,7 +38,7 @@ class VDJdbImport(DataImport):
 
     - region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as VDJdb uses IMGT junction as CDR3. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
-    - column_mapping (dict): A mapping from VDJdb column names to immuneML's internal data representation. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the VDJdb file, or using alternative column names). Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS. For VDJdb, this is by default set to:
+    - column_mapping (dict): A mapping from VDJdb column names to immuneML's internal data representation. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the VDJdb file, or using alternative column names). Valid immuneML fields that can be specified here are defined by the AIRR standard (AIRRSequenceSet). For VDJdb, this is by default set to:
 
         .. indent with spaces
         .. code-block:: yaml
@@ -168,6 +168,7 @@ class VDJdbImport(DataImport):
         mapping = {
             "Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum.": f"Valid values are {chain_pair_values}.",
             "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
+            "Valid immuneML fields that can be specified here are defined by the AIRR standard (AIRRSequenceSet)": f"Valid immuneML fields that can be specified here by `the AIRR Rearrangement Schema <https://docs.airr-community.org/en/latest/datarep/rearrangements.html>`_."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

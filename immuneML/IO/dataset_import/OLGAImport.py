@@ -34,7 +34,15 @@ class OLGAImport(DataImport):
 
     - separator (str): Column separator, for OLGA this is by default "\\t".
 
-    - column_mapping (dict): defines which columns to import from olga format: keys are the number of the columns and values are the names of the columns to be mapped to
+    - column_mapping (dict): defines which columns to import from olga format: keys are the number of the columns and values are the names of the AIRR fields to be mapped to. For OLGA, this is by default set to:
+
+        .. indent with spaces
+        .. code-block:: yaml
+
+            0: junction
+            1: junction_aa
+            2: v_call
+            3: j_call
 
 
     **YAML specification:**
