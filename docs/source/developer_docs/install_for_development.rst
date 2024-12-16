@@ -16,7 +16,7 @@ Prerequisites
 
 - System requirements: at least 4GB of RAM memory and 15GB of disk space.
 
-- A Python virtual environment using at least Python version 3.8 (newest version of Python is usually recommended). This can be created through `Python venv <https://docs.python.org/3/library/venv.html>`_ or `conda venv <https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html>`_.
+- A Python virtual environment using **at least Python version 3.9** (newest version of Python is usually recommended). This can be created through `Python venv <https://docs.python.org/3/library/venv.html>`_ or `conda venv <https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html>`_.
 
 - Under Windows, the Microsoft Visual C++ 14.0 or greater is required to install from requirements.txt.
 
