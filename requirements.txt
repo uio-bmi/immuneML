@@ -1,5 +1,5 @@
 # main packages
-numpy<2.0.0
+numpy<=1.26.4
 pytest>=4
 pandas>=2.1.0
 PyYAML>=5.3
@@ -16,7 +16,7 @@ dill>=0.3
 plotly>=4
 logomaker>=0.8
 matplotlib-venn>=0.11
-scipy<1.13
+scipy<=1.12.0
 umap-learn
 bionumpy==1.0.12
 npstructures
