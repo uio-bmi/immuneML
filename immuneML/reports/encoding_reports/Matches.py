@@ -131,8 +131,8 @@ class Matches(EncodingReport):
 
         annotation_df = self.dataset.encoded_data.feature_annotations
 
-        for receptor_id in sorted(set(annotation_df["receptor_id"])):
-            chain_ids = list(annotation_df.loc[annotation_df["receptor_id"] == receptor_id]["locus_id"])
+        for cell_id in sorted(set(annotation_df["regex_id"])):
+            chain_ids = list(annotation_df.loc[annotation_df["regex_id"] == cell_id]["locus_id"])
 
             if len(chain_ids) == 2:
                 first_match_idx = self.dataset.encoded_data.feature_names.index(chain_ids[0])
@@ -187,7 +187,7 @@ class Matches(EncodingReport):
         first_chains.drop(columns=["locus"], inplace=True)
         second_chains.drop(columns=["locus"], inplace=True)
 
-        on_cols = ["receptor_id"]
+        on_cols = ["cell_id"]
         if "clonotype_id" in second_chains.columns and first_chains.columns:
             on_cols += ["clonotype_id"]
 

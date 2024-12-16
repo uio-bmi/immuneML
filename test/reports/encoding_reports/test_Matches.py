@@ -101,11 +101,11 @@ class TestMatches(unittest.TestCase):
         self.assertListEqual(list(matches["100.TRA"]), [10, 0])
         self.assertListEqual(list(matches["100.TRB"]), [10, 5])
 
-        self.assertListEqual(list(chains["receptor_id"]), [100, 100])
-        self.assertListEqual(list(receptors["receptor_id"]), [100])
-        self.assertListEqual(list(unique_alpha_chains["receptor_id"]), [100])
-        self.assertListEqual(list(unique_beta_chains["receptor_id"]), [100])
-        self.assertListEqual(list(unique_receptors["receptor_id"]), [100])
+        self.assertListEqual(list(chains["cell_id"]), [100, 100])
+        self.assertListEqual(list(receptors["cell_id"]), [100])
+        self.assertListEqual(list(unique_alpha_chains["cell_id"]), [100])
+        self.assertListEqual(list(unique_beta_chains["cell_id"]), [100])
+        self.assertListEqual(list(unique_receptors["cell_id"]), [100])
 
         self.assertListEqual(list(unique_receptors["sequence_TRA"]), list(unique_alpha_chains["sequence"]))
         self.assertListEqual(list(unique_receptors["sequence_TRB"]), list(unique_beta_chains["sequence"]))
