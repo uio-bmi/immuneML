@@ -28,4 +28,4 @@ def test_vae_summary():
 
         assert file.is_file(), file
 
-    # shutil.rmtree(path)
+    shutil.rmtree(path)
