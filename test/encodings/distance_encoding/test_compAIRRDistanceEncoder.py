@@ -49,7 +49,7 @@ class TestCompAIRRDistanceEncoder(TestCase):
                                                                "keep_compairr_input": True,
                                                                "differences": 0,
                                                                "indels": False,
-                                                               "ignore_counts": False,
+                                                               "ignore_counts": True,
                                                                "threads": 8,
                                                                "ignore_genes": False})
 
@@ -69,4 +69,4 @@ class TestCompAIRRDistanceEncoder(TestCase):
         self.assertTrue(np.array_equal([1, 0, 1, 0, 1, 0, 1, 0], encoded.encoded_data.labels["l1"]))
         self.assertTrue(np.array_equal([2, 3, 2, 3, 2, 3, 3, 3], encoded.encoded_data.labels["l2"]))
 
-        shutil.rmtree(path)
+        # shutil.rmtree(path)
