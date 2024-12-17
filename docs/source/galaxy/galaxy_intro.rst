@@ -170,6 +170,9 @@ This report allows you to directly access the error that was encountered, and th
    :alt: bug report
    :width: 70%
 
+
+Sending a bug report
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 If a tool run fails and you suspect this might be due to a bug, it is possible to send an automatic bug report.
 Open the failed history item by clicking on it, and then click 'View or report this error' (bug icon). This will show you the error that
 made the run fail. Typically, the last few lines show a message printed directly by immuneML explaining the error

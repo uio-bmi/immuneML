@@ -1,4 +1,4 @@
-How to train immune repertoire classifiers using the simplified Galaxy interface
+ML basics: Training classifiers with the simplified Galaxy interface
 ==================================================================================
 
 .. meta::
@@ -11,22 +11,28 @@ How to train immune repertoire classifiers using the simplified Galaxy interface
 
 
 
-This page provides the documentation for the Galaxy tool `Train immune repertoire classifiers (simplified interface) <https://galaxy.immuneml.uiocloud.no/root?tool_id=novice_immuneml_interface>`_.
-The purpose of this tool is to train machine learning (ML) models to predict a characteristic per immune repertoire, such as
-a disease status. One or more ML models are trained to classify repertoires based on the information within the sets of CDR3 sequences. Finally, the performance
-of the different methods is compared.
-Alternatively, if you want to predict a property per immune receptor, such as antigen specificity, check out the
-`Train immune receptor classifiers (simplified interface) <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_train_classifiers>`_ tool instead.
 
-An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uiocloud.no/u/immuneml/h/repertoire-classification-simplified-interface>`_.
+
+This page provides the documentation for the Galaxy tools `Train Receptor Classifier (Simplified Interface) <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_train_receptor_classifier>`_
+and `Train Repertoire Classifier (Simplified Interface)  <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_train_repertoire_classifier>`_,
+and serves as an introduction to immuneML users without extensive machine learning (ML) knowledge.
+
+
+The purpose of this tool is to train ML models to predict a characteristic per immune repertoire, such as
+a disease status; or an immune receptor, such as antigen binding.
+One or more ML models are trained to classify repertoires based on the information within the sets of CDR3 sequences. Finally, the performance
+of the different methods is compared.
 
 
 Basic terminology
 -----------------
 
 In the context of ML, the characteristics to predict per repertoire are called **labels** and the values that these labels can take on are **classes**.
-One could thus have a label named ‘CMV_status’ with possible classes ‘positive’ and ‘negative’. The labels and classes must be present in the metadata
-file, in columns where the header and values correspond to the label and classes respectively.
+One could thus have a label named ‘CMV_status’ with possible classes ‘positive’ and ‘negative’ for repertoires, or
+‘epitope’ with possible classes ‘binding_CMV’ and ‘not_binding_CMV’ for receptors.
+
+For repertoire datasets, the labels and classes must be present in the metadata file, in columns where the header and
+values correspond to the label and classes respectively. For receptor datasets, the labels are present as additional columns in the input file.
 
 .. figure:: ../_static/images/metadata_repertoire_classification.png
   :width: 70%
@@ -39,17 +45,41 @@ groups of similar receptors or short CDR3 subsequences in an immune repertoire. 
 should represent our data to the ML model. This representation is called **encoding**. In this tool, the encoding is automatically chosen based on
 the user's assumptions about the dataset.
 
+Receptor classification overview
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. figure:: ../_static/images/receptor_classification_overview.png
+  :width: 70%
+
+  An overview of the components of the immuneML receptor classification tool.
+
+ImmuneML reads in receptor data with labels (+ and -), encodes the data, trains user-specified ML models and summarizes
+the performance statistics per ML method.
+**Encoding:** position dependent and invariant encoding are shown. The specificity-associated subsequences are highlighted
+with color. The different colors represent independent elements of the antigen specificity signal. Each color represents
+one subsequence, and position dependent subsequences can only have the same color when they occur in the same position,
+although different colors (i.e., nucleotide or amino acid sequences) may occur in the same position.
+**Training:** the training and validation data is used to train ML models and find the optimal hyperparameters through
+5-fold cross-validation. The test set is left out and is used to obtain a fair estimate of the model performance.
+
+
+Repertoire classification overview
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. figure:: ../_static/images/repertoire_classification_overview.png
   :width: 70%
 
-  An overview of the components of the immuneML repertoire classification tool. immuneML reads in repertoire data with labels (+ and -), encodes the
-  data, trains user-specified ML models and summarizes the performance statistics per ML method.
-  Encoding: different forms of encoding are shown; full sequence encoding and position dependent and invariant subsequence encoding.
-  The disease-associated sequences or sub-sequences are highlighted with color. The different colors represent independent elements of the disease signal.
-  Each color represents one (sub)sequence, and position dependent subsequences can only have the same color when they occur in the same position,
-  although different colors (i.e., nucleotide or amino acid sequences) may occur in the same position.
-  Training: the training and validation data is used to train ML models and find the optimal hyperparameters through 5-fold cross-validation.
-  The test set is left out and is used to obtain a fair estimate of the model performance.
+  An overview of the components of the immuneML repertoire classification tool.
+
+immuneML reads in repertoire data with labels (+ and -), encodes the
+data, trains user-specified ML models and summarizes the performance statistics per ML method.
+**Encoding:** different forms of encoding are shown; full sequence encoding and position dependent and invariant subsequence encoding.
+The disease-associated sequences or sub-sequences are highlighted with color. The different colors represent independent elements of the disease signal.
+Each color represents one (sub)sequence, and position dependent subsequences can only have the same color when they occur in the same position,
+although different colors (i.e., nucleotide or amino acid sequences) may occur in the same position.
+**Training:** the training and validation data is used to train ML models and find the optimal hyperparameters through 5-fold cross-validation.
+The test set is left out and is used to obtain a fair estimate of the model performance.
+
 
 Encoding
 ---------
@@ -57,11 +87,14 @@ Encoding
 The simplest encoding represents an immune repertoire based on the full CDR3 sequences that it contains. This means the ML models will learn to look
 at which CDR3 sequences are more often present in the ‘positive’ or ‘negative’ classes. It also means that two similar (non-identical) CDR3 sequences
 are treated as independent pieces of information; if a particular sequence often occurs in diseased repertoires, then finding a similar sequence in a
-new repertoire is no evidence for this repertoire also being diseased.
+new repertoire is no evidence for this repertoire also being diseased. Note that this type of encoding does not make sense for immune
+receptor datasets, as it would mean the ML model can only learn that receptors are binders or non-binders if these exact same receptors were observed in the
+training dataset.
 
 Other encoding variants are based on shorter subsequences (e.g., 3 – 5 amino acids long, also referred to as k-mers) in the CDR3 regions of an immune repertoire. With this
 encoding, the CDR3 regions are divided into overlapping subsequences and the (disease) signal may be characterized by the presence or absence of
 certain sequence motifs in the CDR3 regions. Here, two similar CDR3 sequences are no longer independent, because they contain many identical subsequences.
+This type of encoding can be used both for repertoires and receptors.
 A graphical representation of how a CDR3 sequence can be divided into k-mers, and how these k-mers can relate to specific positions in a 3D immune receptor
 (here: antibody) is shown in this figure:
 
@@ -101,30 +134,6 @@ Finally, the whole process is repeated one or more times with different randomly
 of the ML methods is. The number of times to repeat this splitting into training + validation and test sets is determined in the last question.
 
 
-Tool output
----------------------------------------------
-This Galaxy tool will produce the following history elements:
 
-- Summary: repertoire classification: a HTML page that allows you to browse through all results, including prediction accuracies on
-  the various data splits and plots showing the performance of classifiers and learned parameters.
-
-- Archive: repertoire classification : a .zip file containing the complete output folder as it was produced by immuneML. This folder
-  contains the output of the TrainMLModel instruction including all trained models and their predictions, and report results.
-  Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
-
-- optimal_ml_settings.zip: a .zip file containing the raw files for the optimal trained ML settings (ML model, encoding).
-  This .zip file can subsequently be used as an input when applying previously trained ML models to a new dataset.
-  Currently, this can only be done locally using the command-line interface.
-
-- repertoire_classification.yaml: the YAML specification file that was used by immuneML internally to run the analysis. This file can be
-  downloaded, altered, and run again by immuneML using the :ref:`YAML-based Galaxy tool <How to train ML models in Galaxy>`.
-
-More analysis options
-----------------------
-
-A limited selection of immuneML options is available through this tool. If you wish to have full control of the analysis, consider using the tool described under
-:ref:`How to train ML models in Galaxy`. This tool provides other encodings and machine learning methods to choose from, as well as
-data preprocessing and settings for hyperparameter optimization. The interface of the YAML-based tool expects more independence and knowledge about
-machine learning from the user. See also :ref:`How to specify an analysis with YAML`.
 
 
