@@ -9,10 +9,11 @@ from immuneML.simulation.dataset_generation.RandomDatasetGenerator import Random
 from immuneML.util.PathBuilder import PathBuilder
 
 
-
 class MyTestCase(unittest.TestCase):
     def create_dummy_dataset(self, path):
-        dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {5: 1}, {4: 1}, {"label1": {True: 0.4, False: 0.6}}, path, name="dataset")
+        dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {5: 1}, {4: 1},
+                                                                     {"label1": {True: 0.4, False: 0.6}}, path,
+                                                                     name="dataset")
 
         return f"{dataset.name}.yaml"
 
@@ -25,13 +26,14 @@ class MyTestCase(unittest.TestCase):
         output_dir = path / "output_dir"
         output_filename = "yaml_out.yaml"
 
-
         old_wd = os.getcwd()
 
         try:
             os.chdir(data_path)
 
-            yamlbuilder_main(["-o", str(output_dir), "-f", output_filename, "-k", "3", "-n", "2", "-d", "PCA", "-l", "label1", "-e", "silhouette_score", "mutual_info_score", "-t", "70"])
+            yamlbuilder_main(
+                ["-o", str(output_dir), "-f", output_filename, "-k", "3", "-n", "2", "-d", "PCA", "-l", "label1", "-e",
+                 "silhouette_score", "mutual_info_score", "-t", "70"])
 
             # Use ImmuneML parser to test whether the yaml file created here is still valid
             ImmuneMLParser.parse_yaml_file(output_dir / output_filename, path / "result_path")
