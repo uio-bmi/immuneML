@@ -78,7 +78,7 @@ class TestVJGeneDistribution(TestCase):
     def test_generate_repertoire_dataset(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "overview_repertoire_dataset/")
 
-        dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=5,
+        dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=10,
                                                                      sequence_count_probabilities={20: 0.25, 30: 0.25,
                                                                                                    40: 0.25, 50: 0.25},
                                                                      sequence_length_probabilities={10: 1},

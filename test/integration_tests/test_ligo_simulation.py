@@ -202,4 +202,4 @@ def test_simulation():
             assert df.shape[0] == 20
             assert all(df.junction_aa.str.len() > 0)
 
-        # shutil.rmtree(path)
+        shutil.rmtree(path)

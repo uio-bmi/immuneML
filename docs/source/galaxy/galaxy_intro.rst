@@ -162,6 +162,14 @@ To create a Galaxy collection, follow these steps:
 
 Viewing errors and reporting bugs in Galaxy
 --------------------------------------------
+If a tool run fails due to encountering an error in immuneML, a summary HTML report will still be returned
+(for tools which create datasets, this will be in the place of a dataset output history element).
+This report allows you to directly access the error that was encountered, and the log file.
+
+.. image:: ../_static/images/galaxy/galaxy_failed_html.png
+   :alt: bug report
+   :width: 70%
+
 If a tool run fails and you suspect this might be due to a bug, it is possible to send an automatic bug report.
 Open the failed history item by clicking on it, and then click 'View or report this error' (bug icon). This will show you the error that
 made the run fail. Typically, the last few lines show a message printed directly by immuneML explaining the error
