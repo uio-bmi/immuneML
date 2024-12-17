@@ -30,12 +30,11 @@ Useful links:
 
 
 We recommend installing immuneML inside a virtual environment.
-immuneML uses Python 3.8 or later. If using immuneML simulation, Python 3.11 or later is recommended.
-
+immuneML uses **Python 3.9 or later**. If using immuneML simulation, Python 3.11 or later is recommended.
 immuneML can be [installed directly using a package manager](<https://docs.immuneml.uio.no/latest/installation/install_with_package_manager.html#>) such as pip or conda,
 or [set up via docker](<https://docs.immuneml.uio.no/latest/installation/installation_docker.html>).
 
-Quick installation:
+#### Quick installation (immuneML essentials):
 
 ```bash
 python3 -m venv ./immuneml_venv/
@@ -47,10 +46,12 @@ pip install immune-ml
 or
 
 ```bash
-conda create --prefix immuneml_env/ python=3.8
+conda create --prefix immuneml_env/ python=3.11
 conda activate immuneml_env/
 conda install -c bioconda immuneml
 ```
+
+#### Detailed installation (immuneML extras):
 
 Please check the documentation for more detailed instructions or [how to install optional dependencies](<https://docs.immuneml.uio.no/latest/installation/install_with_package_manager.html#installing-optional-dependencies>).
 
