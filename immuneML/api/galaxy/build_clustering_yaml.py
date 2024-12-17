@@ -88,10 +88,14 @@ def build_specs(parsed_args):
 
     if parsed_args.labels != "":
         specs["instructions"]["clustering"]["labels"] = build_labels(parsed_args.labels)
+        specs['definitions']['reports']['dim_reduction']["DimensionalityReduction"]['label'] = (
+            specs)["instructions"]["clustering"]["labels"][0]
 
     if parsed_args.dim_red_method in ["PCA", "TSNE", "UMAP"]:
         specs["definitions"]["ml_methods"][parsed_args.dim_red_method.lower()] = {
             parsed_args.dim_red_method: {"n_components": 2}}
+        if parsed_args.dim_red_method == 'TSNE':
+            specs["definitions"]["ml_methods"][parsed_args.dim_red_method.lower()][parsed_args.dim_red_method]['init'] = "random"
         specs["definitions"]["reports"]["dim_reduction"]["DimensionalityReduction"]["dim_red_method"] = {
             parsed_args.dim_red_method.upper(): {"n_components": 2}
         }

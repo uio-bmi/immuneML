@@ -58,7 +58,7 @@ class DimensionalityReduction(EncodingReport):
         self._label = label
         self._dim_red_method = dim_red_method
         self.info = (f"This report visualizes the encoded data after applying dimensionality reduction "
-                     f"({self._dim_red_method.__class__}).")
+                     f"({self._dim_red_method.__class__.__name__}).")
 
     def check_prerequisites(self):
         return (isinstance(self.dataset.encoded_data, EncodedData) and
