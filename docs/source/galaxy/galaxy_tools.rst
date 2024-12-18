@@ -25,37 +25,37 @@ Alternatively, a YAML file may be used as input, which is identical to the YAML 
    * - Galaxy tool
      - immuneML instruction
      - Interface type
-   * - `Create Dataset with Reports <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_dataset>`_
+   * - `Create Dataset with Reports <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_dataset>`_
      - Creates dataset and runs optional reports with :ref:`ExploratoryAnalysis` instruction
      - Button or YAML-based
-   * - `Simulate a Random Dummy Dataset <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_simulate_random_dummy_dataset>`_
+   * - `Simulate a Random Dummy Dataset <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_simulate_random_dummy_dataset>`_
      - Creates dataset with :ref:`random dataset import <How to generate a dataset with random sequences>`
      - Button or YAML-based
-   * - `Simulate Immune Events with LIgO <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_simulate_ligo_events>`_
+   * - `Simulate Immune Events with LIgO <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_simulate_ligo_events>`_
      - Modifies dataset with :ref:`LigoSim` instruction
      - Button or YAML-based
-   * - `Train ML Classifiers <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_train_ml_model>`_
+   * - `Train ML Classifiers <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_train_ml_model>`_
      - YAML-based interface for training a classifier with :ref:`TrainMLModel` instruction
      - YAML-based
-   * - `Train Receptor Classifier (Simplified Interface) <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_train_receptor_classifier>`_
+   * - `Train Receptor Classifier (Simplified Interface) <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_train_receptor_classifier>`_
      - Simplified interface for training a classifier with :ref:`TrainMLModel` instruction with sequence/receptor dataset
      - Button-based
-   * - `Train Repertoire Classifier (Simplified Interface)  <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_train_repertoire_classifier>`_
+   * - `Train Repertoire Classifier (Simplified Interface)  <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_train_repertoire_classifier>`_
      - Simplified interface for training a classifier with :ref:`TrainMLModel` instruction with repertoire dataset
      - Button-based
-   * - `Apply ML Classifier <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_apply_ml_model>`_
+   * - `Apply ML Classifier <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_apply_ml_model>`_
      - Applies an ML classifier with :ref:`MLApplication` instruction
      - Button-based
-   * - `Train Generative Model <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_train_gen_model>`_
+   * - `Train Generative Model <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_train_gen_model>`_
      - Trains a generative model with :ref:`TrainGenModel` instruction
      - Button or YAML-based
-   * - `Apply Generative Model <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_apply_gen_model>`_
+   * - `Apply Generative Model <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_apply_gen_model>`_
      - Creates dataset with :ref:`ApplyGenModel` by applying a trained generative model
      - Button-based
-   * - `Clustering <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_clustering>`_
+   * - `Clustering <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_clustering>`_
      - Clusters a dataset with :ref:`Clustering` instruction
      - Button or YAML-based
-   * - `Run immuneML with any YAML specification <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_yaml>`_
+   * - `Run immuneML with any YAML specification <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_yaml>`_
      - Runs any instruction (recommended for e.g., advanced :ref:`ExploratoryAnalysis`, or instructions not covered by other tools)
      - YAML-based
 
@@ -64,13 +64,13 @@ immuneML datasets in Galaxy
 ---------------------------------------------
 
 In Galaxy, an immuneML dataset is a special type of history element, which internally contains an immuneML dataset stored in AIRR format.
-Datasets can be imported from files using the `Create Dataset with Reports <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_dataset>`_ tool.
+Datasets can be imported from files using the `Create Dataset with Reports <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_dataset>`_ tool.
 Some other tools also produce (synthetic) immuneML datasets.
 
 Tips for importing data:
 
 - If your dataset contains many files, you may want to consider using a Galaxy collection as input :ref:`using a Galaxy collection as input <Using a Galaxy collection as input>`.
-- For quick testing of Galaxy, a dataset of random sequences can quickly be generated using the `Simulate a Random Dummy Dataset <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_simulate_random_dummy_dataset>`_ tool.
+- For quick testing of Galaxy, a dataset of random sequences can quickly be generated using the `Simulate a Random Dummy Dataset <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_simulate_random_dummy_dataset>`_ tool.
 - See :ref:`How to import data into immuneML` for general information about datasets in immuneML.
 
 When running a YAML-based tool, the tool will ask you to select a dataset from the Galaxy history, and the YAML should

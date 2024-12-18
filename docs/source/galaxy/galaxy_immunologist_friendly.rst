@@ -13,8 +13,8 @@ ML basics: Training classifiers with the simplified Galaxy interface
 
 
 
-This page provides the documentation for the Galaxy tools `Train Receptor Classifier (Simplified Interface) <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_train_receptor_classifier>`_
-and `Train Repertoire Classifier (Simplified Interface)  <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_train_repertoire_classifier>`_,
+This page provides the documentation for the Galaxy tools `Train Receptor Classifier (Simplified Interface) <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_train_receptor_classifier>`_
+and `Train Repertoire Classifier (Simplified Interface)  <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_train_repertoire_classifier>`_,
 and serves as an introduction to immuneML users without extensive machine learning (ML) knowledge.
 
 

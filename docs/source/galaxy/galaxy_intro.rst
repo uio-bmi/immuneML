@@ -11,7 +11,7 @@ Introduction to Galaxy
 
 
 Galaxy is an open, web-based platform allowing accessible, reproducible and transparent research.
-The immuneML Galaxy instance can be found at https://galaxy.immuneml.uiocloud.no.
+The immuneML Galaxy instance can be found at https://avant.immuneml.uiocloud.no.
 This introduction covers all essential information needed for users of the immuneML Galaxy instance.
 If you want to learn even more about Galaxy, see the official `Galaxy introduction page <https://galaxyproject.org/learn/>`_.
 
@@ -107,7 +107,7 @@ Some options that you might be likely to use are:
 Importing or sharing histories
 -------------------------------
 Galaxy histories can be made public, or shared with individual other users.
-Publicly shared immuneML Galaxy histories can be found on this page: https://galaxy.immuneml.uiocloud.no/histories/list_published.
+Publicly shared immuneML Galaxy histories can be found on this page: https://avant.immuneml.uiocloud.no/histories/list_published.
 These histories can be opened by clicking their name, and individual history elements can be viewed.
 To import a history, open it, then click 'Import history' (+ icon) in the right upper corner, give it a suitable name and click 'Import'.
 The history will now open as your own.
@@ -142,7 +142,7 @@ item will be generated containing the edited file.
 Creating a Galaxy collection of files
 -------------------------------------
 When working with many files in Galaxy, it can be inconvenient to have to click on all the files that you want to use
-as input to a tool (for example, when using the `Create dataset <https://galaxy.immuneml.uiocloud.no/root?tool_id=immune_ml_dataset>`_ tool).
+as input to a tool (for example, when using the `Create Dataset with Reports <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_dataset>`_ tool).
 A solution to this is `Galaxy collections <https://training.galaxyproject.org/archive/2019-12-01/topics/galaxy-data-manipulation/tutorials/collections/tutorial.html>`_,
 which are containers for multiple data files.
 

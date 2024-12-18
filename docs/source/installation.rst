@@ -13,7 +13,7 @@ Installing immuneML
 
 To get started with immuneML, there are four options:
 
-1. Using `immuneML through Galaxy <https://galaxy.immuneml.uiocloud.no>`_ (no installation or programming experience required, see :ref:`immuneML & Galaxy`).
+1. Using `immuneML through Galaxy <https://avant.immuneml.uiocloud.no>`_ (no installation or programming experience required, see :ref:`immuneML & Galaxy`).
 
 2. Installing immuneML with a package manager and using it locally (:ref:`Install immuneML with a package manager`),
 

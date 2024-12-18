@@ -10,7 +10,7 @@ immuneML & Galaxy
    :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
 
 
-All of immuneMLs functionalities are also available through `a Galaxy web interface <https://galaxy.immuneml.uiocloud.no>`_ as a collection of Galaxy tools.
+All of immuneMLs functionalities are also available through `a Galaxy web interface <https://avant.immuneml.uiocloud.no>`_ as a collection of Galaxy tools.
 The immuneML Galaxy tools provide simplified, button-based interfaces to get started running different types of immuneML analyses,
 or can alternatively be run with a YAML input file to specify all parameters.
 

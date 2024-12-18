@@ -20,7 +20,7 @@ Using immuneML, we will encode the data as 3-mer frequencies and train a logisti
 Getting started through Galaxy
 -------------------------------------------------
 
-The Galaxy web interface is available at https://galaxy.immuneml.uiocloud.no/.
+The Galaxy web interface is available at https://avant.immuneml.uiocloud.no/.
 You may choose to register a user account or perform the analysis as an anonymous user.
 If you are an anonymous user, the data will disappear once your browser session expires.
 
@@ -35,7 +35,7 @@ Step 1: importing the dataset to a Galaxy history
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Every immuneML analysis takes a dataset as input. For the Quickstart tutorial, an example dataset has been prepared and is
-available through `this Galaxy history <https://galaxy.immuneml.uiocloud.no/u/immuneml/h/quickstart-data>`_ (under 'Shared data' > 'Histories' > 'Quickstart data').
+available through `this Galaxy history <https://avant.immuneml.uiocloud.no/u/immuneml/h/quickstart-data>`_ (under 'Shared data' > 'Histories' > 'Quickstart data').
 Alternatively, the tutorial :ref:`How to make an immuneML dataset in Galaxy` describes in detail
 how to make an immuneML dataset using your own data.
 
@@ -48,7 +48,7 @@ To import the complete history, click the + icon in the right upper corner.
 
 This Quickstart dataset Galaxy history contains the following items:
 
-- 100 repertoire .tsv files in AIRR format. For details about the AIRR format, see the `AIRR documentation <https://docs.airr-community.org/en/stable/datarep/format.html>`_ and `this example file <https://galaxy.immuneml.uiocloud.no/datasets/2a4bf9d66c01414a/display/?preview=True>`_.
+- 100 repertoire .tsv files in AIRR format. For details about the AIRR format, see the `AIRR documentation <https://docs.airr-community.org/en/stable/datarep/format.html>`_
 
 - A Collection of repertoires. This history element collects the 100 above-mentioned repertoire files in a Galaxy collection.
   This Galaxy collection makes it easier to select the repertoires as an input to Galaxy tools (instead of selecting all 100 files manually, you can select the collection).
@@ -56,12 +56,11 @@ This Quickstart dataset Galaxy history contains the following items:
 
 - A metadata.csv file. The metadata file describes which of the 100 repertoires are diseased and healthy, under the
   column named 'signal_disease' which contains the values True and False.
-  For details about the metadata file, see :ref:`What should the metadata file look like?` and `this example file <https://galaxy.immuneml.uiocloud.no/datasets/dfa1565938e7b4c3/display/?preview=True>`_.
-
+  For details about the metadata file, see :ref:`What should the metadata file look like?`
 
 Step 2: creating an immuneML Galaxy dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Use the `Create dataset <https://galaxy.immuneml.uiocloud.no/root?tool_id=immune_ml_dataset>`_  Galaxy tool (under 'immuneML tools') to import the dataset
+Use the `Create Dataset with Reports <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_dataset>`_ Galaxy tool (under 'immuneML tools') to import the dataset
 and create an *immuneML dataset* history item, which can subsequently be used as input for other Galaxy tools.
 
 Select 'Simplified interface', then 'repertoire dataset' as dataset type and 'AIRR' data format, and select the metadata.csv file as metadata file.
@@ -143,7 +142,7 @@ The file will appear as a new history element
 Step 4: running the analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Next, the `Train machine learning models <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_train_ml_model>`_ Galaxy tool (under 'immuneML tools') should be used.
+Next, the `Train ML Classifiers <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_train_ml_model>`_ Galaxy tool (under 'immuneML tools') should be used.
 Select the YAML specification and previously created dataset from the history, and no additional files.
 
 .. image:: ../_static/images/galaxy/galaxy_train_ml_model.png
