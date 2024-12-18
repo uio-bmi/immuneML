@@ -19,7 +19,7 @@ class KLKmerComparison(TrainGenModelReport):
     Estimates the KL divergence between the kmer-distributions of the original and generated dataset, and makes a plots
     that shows which sequences (and which kmers) contribute the most to the divergence.
 
-    Specification arguments:
+    **Specification arguments:**
 
     - k (int): The kmer length to use for the KL divergence estimation. By default, k is set to 3.
 
@@ -27,7 +27,7 @@ class KLKmerComparison(TrainGenModelReport):
       KL divergence). By default, n_sequences is set to 50.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml

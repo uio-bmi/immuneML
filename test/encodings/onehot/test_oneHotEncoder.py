@@ -53,7 +53,8 @@ class TestOneHotEncoder(unittest.TestCase):
         dataset, lc = self._construct_test_repertoiredataset(path, positional=False)
 
         encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False, 'sequence_type': 'amino_acid',
-                                                         "distance_to_seq_middle": 6, "flatten": False})
+                                                         "distance_to_seq_middle": 6, "flatten": False,
+                                                         'region_type': 'imgt_cdr3'})
 
         encoded_data = encoder.encode(dataset, EncoderParams(
             result_path=path,
@@ -96,7 +97,8 @@ class TestOneHotEncoder(unittest.TestCase):
         dataset, lc = self._construct_test_repertoiredataset(path, positional=True)
 
         encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": True, 'sequence_type': 'amino_acid',
-                                                         "distance_to_seq_middle": 6, "flatten": False})
+                                                         "distance_to_seq_middle": 6, "flatten": False,
+                                                         'region_type': 'imgt_cdr3'})
 
         encoded_data = encoder.encode(dataset, EncoderParams(
             result_path=path,
@@ -156,7 +158,7 @@ class TestOneHotEncoder(unittest.TestCase):
 
         encoder = OneHotEncoder.build_object(RepertoireDataset(), **{"use_positional_info": True, 'sequence_type': 'amino_acid',
                                                                      "distance_to_seq_middle": 4,
-                                                                     "flatten": False})
+                                                                     "flatten": False, 'region_type': 'imgt_cdr3'})
 
         # testing positional information for 'middle' (idx = 0) section
         self.assertListEqual(list(encoder._get_imgt_position_weights(9)[1]), [0, 1 / 4, 2 / 4, 3 / 4, 1, 3 / 4, 2 / 4, 1 / 4, 0])
@@ -180,7 +182,8 @@ class TestOneHotEncoder(unittest.TestCase):
         dataset, lc = self._construct_test_repertoiredataset(path, positional=False)
 
         encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False, "distance_to_seq_middle": None,
-                                                         "flatten": False, 'sequence_type': 'nucleotide'})
+                                                         "flatten": False, 'sequence_type': 'nucleotide',
+                                                         'region_type': 'imgt_cdr3'})
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=lc, pool_size=1,
                                                                 learn_model=True, model={},
@@ -206,7 +209,8 @@ class TestOneHotEncoder(unittest.TestCase):
         dataset, lc = self._construct_test_repertoiredataset(path, positional=False)
 
         encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False, "distance_to_seq_middle": None,
-                                                         "flatten": True, 'sequence_type': 'amino_acid'})
+                                                         "flatten": True, 'sequence_type': 'amino_acid',
+                                                         'region_type': 'imgt_cdr3'})
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(
             result_path=path,

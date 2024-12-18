@@ -19,14 +19,14 @@ class SequenceCountDistribution(DataReport):
     Generates a histogram of the duplicate counts of the sequences in a dataset.
 
 
-    Specification arguments:
+    **Specification arguments:**
 
     - split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a single label, or alternatively the label of interest can be specified under 'label'. By default, split_by_label is False.
 
     - label (str): Optional label for separating the results by color/creating separate plots. Note that this should the name of a valid dataset label.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
@@ -133,7 +133,7 @@ class SequenceCountDistribution(DataReport):
     def _plot(self, df: pd.DataFrame) -> ReportOutput:
         figure = px.bar(df, x="duplicate_count", y="n_observations", barmode="group",
                         color=self.label_name if self.split_by_label else None,
-                        facet_col="locus" if isinstance(self.dataset, ReceptorDataset) else None,
+                        facet_col="locus" if "locus" in df.columns and len(set(df["locus"])) > 1 else None,
                         color_discrete_sequence=px.colors.diverging.Tealrose,
                         labels={"n_observations": "Number of observations",
                                 "duplicate_count": "Sequence duplicate count"})

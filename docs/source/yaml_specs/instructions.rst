@@ -1,5 +1,5 @@
-Instructions
-============
+Instruction parameters
+=======================
 
 The different workflows that can be executed by immuneML are called :code:`instructions`.
 Different intructions may require different analysis components (defined under :code:`definitions`).

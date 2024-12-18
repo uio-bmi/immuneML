@@ -34,7 +34,9 @@ class OneHotReceptorEncoder(OneHotEncoder):
         first_chain_seqs = data[np.array(data.locus.tolist()) == chains[0]]
         second_chain_seqs = data[np.array(data.locus.tolist()) == chains[1]]
 
-        max_seq_len = max(getattr(data, params.get_sequence_field_name()).lengths)
+        sequence_field = self._get_seq_field_name(params)
+
+        max_seq_len = max(getattr(data, sequence_field).lengths)
 
         labels = self._get_labels(data, params) if params.encode_labels else None
 

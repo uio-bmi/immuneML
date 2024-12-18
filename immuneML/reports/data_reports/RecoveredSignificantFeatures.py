@@ -1,4 +1,4 @@
-import warnings
+import logging
 from pathlib import Path
 from typing import List
 
@@ -123,7 +123,7 @@ class RecoveredSignificantFeatures(DataReport):
         if isinstance(self.dataset, RepertoireDataset):
             return True
         else:
-            warnings.warn(f"{RecoveredSignificantFeatures.__name__}: report can be generated only from "
+            logging.warning(f"{RecoveredSignificantFeatures.__name__}: report can be generated only from "
                           f"RepertoireDataset. Skipping this report...")
             return False
 

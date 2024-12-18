@@ -15,13 +15,13 @@ This manual shows how to install immuneML using either conda or pip.
 Install immuneML with pip
 ------------------------------
 
-0. To install immuneML with pip, make sure to have Python version 3.7 or later installed.
+0. To install immuneML with pip, make sure to have Python version **3.9 or later** installed.
 
 1. Create a virtual environment where immuneML will be installed. It is possible to install immuneML as a global
-package, but it is not recommended as there might be conflicting versions of different packages. For more details,
-see `the official documentation on creating virtual environments with Python <https://docs.python.org/3/library/venv.html>`_.
-To create an environment, run the following in the terminal (for Windows-specific commands, see the virtual
-environment documentation linked above):
+   package, but it is not recommended as there might be conflicting versions of different packages. For more details,
+   see `the official documentation on creating virtual environments with Python <https://docs.python.org/3/library/venv.html>`_.
+   To create an environment, run the following in the terminal (for Windows-specific commands, see the virtual
+   environment documentation linked above):
 
 .. code-block:: console
 
@@ -34,7 +34,7 @@ environment documentation linked above):
   source ./immuneml_venv/bin/activate
 
 Note: when creating a python virtual environment, it will automatically use the same Python version as the environment
-it was created in. To ensure that the preferred Python version (3.8) is used, it is possible to instead make a conda
+it was created in. To ensure that the preferred Python version (3.9 or later) is used, it is possible to instead make a conda
 environment (see :ref:`Install immuneML with conda` steps 0-3) and proceed to install immuneML with pip inside the
 conda environment.
 
@@ -66,7 +66,7 @@ Install immuneML with conda
   mkdir immuneML/
   cd immuneML/
 
-2. Create a virtual environment using conda. immuneML has been tested extensively with Python version 3.11.
+2. Create a virtual environment using conda. immuneML should work with Python version 3.9 or later, and has been tested extensively with Python version 3.11.
    To create a conda virtual environment with Python version 3.11, use:
 
 .. code-block:: console

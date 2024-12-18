@@ -1,12 +1,7 @@
-from pathlib import Path
-
 import pandas as pd
 
 from immuneML.IO.dataset_import.DataImport import DataImport
-from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.data_model.SequenceParams import RegionType
-from immuneML.data_model.datasets.Dataset import Dataset
-from immuneML.util.ImportHelper import ImportHelper
 from scripts.specification_util import update_docs_per_mapping
 
 
@@ -64,7 +59,7 @@ class IGoRImport(DataImport):
       Specifying any other value will result in importing the sequences as they are. Valid values for region_type are
       the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
-    - column_mapping (dict): A mapping from IGoR column names to immuneML's internal data representation. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the IGoR file, or using alternative column names). Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS. For IGoR, this is by default set to:
+    - column_mapping (dict): A mapping from IGoR column names to immuneML's internal data representation. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the IGoR file, or using alternative column names). Valid immuneML fields that can be specified here are defined by the AIRR standard (AIRRSequenceSet). For IGoR, this is by default set to:
 
         .. indent with spaces
         .. code-block:: yaml
@@ -161,6 +156,7 @@ class IGoRImport(DataImport):
 
         mapping = {
             "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
+            "Valid immuneML fields that can be specified here are defined by the AIRR standard (AIRRSequenceSet)": f"Valid immuneML fields that can be specified here by `the AIRR Rearrangement Schema <https://docs.airr-community.org/en/latest/datarep/rearrangements.html>`_."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

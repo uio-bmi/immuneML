@@ -6,6 +6,7 @@ import numpy as np
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model import bnp_util
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -75,6 +76,8 @@ class OneHotEncoder(DatasetEncoder):
 
     - sequence_type: whether to use nucleotide or amino acid sequence for encoding. Valid values are 'nucleotide' and 'amino_acid'.
 
+    - region_type: which part of the sequence to encode; e.g., imgt_cdr3, imgt_junction
+
 
     **YAML specification:**
 
@@ -88,6 +91,7 @@ class OneHotEncoder(DatasetEncoder):
                         use_positional_info: False
                         flatten: False
                         sequence_type: amino_acid
+                        region_type: imgt_cdr3
 
                 one_hot_positional:
                     OneHot:
@@ -105,12 +109,13 @@ class OneHotEncoder(DatasetEncoder):
     }
 
     def __init__(self, use_positional_info: bool, distance_to_seq_middle: int, flatten: bool, name: str = None,
-                 sequence_type: SequenceType = None):
+                 sequence_type: SequenceType = None, region_type: RegionType = None):
         super().__init__(name=name)
         self.use_positional_info = use_positional_info
         self.distance_to_seq_middle = distance_to_seq_middle
         self.flatten = flatten
         self.sequence_type = sequence_type
+        self.region_type = region_type
         self.alphabet = EnvironmentSettings.get_sequence_alphabet(self.sequence_type)
 
         if distance_to_seq_middle:
@@ -129,7 +134,7 @@ class OneHotEncoder(DatasetEncoder):
 
     @staticmethod
     def _prepare_parameters(use_positional_info: bool, distance_to_seq_middle: int, flatten: bool, sequence_type: str,
-                            name: str = None):
+                            name: str = None, region_type: str = None):
 
         location = OneHotEncoder.__name__
 
@@ -144,8 +149,9 @@ class OneHotEncoder(DatasetEncoder):
         ParameterValidator.assert_type_and_value(sequence_type, str, location, 'sequence_type')
         ParameterValidator.assert_in_valid_list(sequence_type.upper(), [item.name for item in SequenceType], location,
                                                 'sequence_type')
+        ParameterValidator.assert_region_type({'region_type': region_type}, location)
 
-        return {"use_positional_info": use_positional_info,
+        return {"use_positional_info": use_positional_info, "region_type": RegionType[region_type.upper()],
                 "distance_to_seq_middle": distance_to_seq_middle,
                 "flatten": flatten, "sequence_type": SequenceType[sequence_type.upper()],
                 "name": name}
@@ -177,10 +183,15 @@ class OneHotEncoder(DatasetEncoder):
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         pass
 
+    def _get_seq_field_name(self, params: EncoderParams) -> str:
+        region_type = self.region_type if self.region_type else params.region_type
+        sequence_type = self.sequence_type if self.sequence_type else params.sequence_type
+        return bnp_util.get_sequence_field_name(region_type, sequence_type)
+
     def _encode_sequence_list(self, sequences: AIRRSequenceSet, params: EncoderParams, pad_n_sequences: int = None,
                               pad_sequence_len: int = None):
         # Get sequence field based on sequence_type
-        sequence_field = bnp_util.get_sequence_field_name(params.region_type, params.sequence_type)
+        sequence_field = self._get_seq_field_name(params)
 
         # Extract sequences from AIRRSequenceSet
         sequence_array = getattr(sequences, sequence_field)

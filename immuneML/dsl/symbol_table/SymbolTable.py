@@ -1,11 +1,10 @@
-import warnings
+import logging
 
 from immuneML.dsl.symbol_table.SymbolTableEntry import SymbolTableEntry
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 
 
 class SymbolTable:
-
     """
     Symbol table contains all objects parsed from the specification in the following format:
 
@@ -35,8 +34,9 @@ class SymbolTable:
 
     def add(self, symbol: str, symbol_type: SymbolType, item, config: dict = None):
         if symbol in self._items.keys() and self._items[symbol] is not None:
-            warnings.warn("An item with the key {} was already set in the SymbolTable during parsing. If overwriting "
-                          "it was the intended behavior, please ignore this warning.".format(symbol), Warning)
+            logging.warning(
+                f"An item with the key {symbol} was already set in the SymbolTable during parsing. If overwriting "
+                "it was the intended behavior, please ignore this warning.")
 
         self._items[symbol] = SymbolTableEntry(symbol=symbol, symbol_type=symbol_type, item=item, config=config)
 
@@ -45,9 +45,10 @@ class SymbolTable:
             if self.contains(symbol):
                 return self._items[symbol].item
             else:
-                raise KeyError(f"SymbolTable: item with key {symbol} was not defined previously so it could not be retrieved during "
-                               f"parsing. Please check if an item with key {symbol} was defined in the specification. "
-                               f"If it was present, check if its parent keys were correctly defined. ")
+                raise KeyError(
+                    f"SymbolTable: item with key {symbol} was not defined previously so it could not be retrieved during "
+                    f"parsing. Please check if an item with key {symbol} was defined in the specification. "
+                    f"If it was present, check if its parent keys were correctly defined. ")
         else:
             return None
 

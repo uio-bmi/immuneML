@@ -1,5 +1,4 @@
 import logging
-import warnings
 from pathlib import Path
 
 import pandas as pd
@@ -32,7 +31,7 @@ class FeatureComparison(FeatureReport):
 
     Example output:
 
-    .. image:: _static/images/reports/feature_comparison_zoom.png
+    .. image:: ../_static/images/reports/feature_comparison_zoom.png
        :alt: Feature comparison zoomed in plot with VLEQ highlighted
        :width: 650
 
@@ -175,22 +174,22 @@ class FeatureComparison(FeatureReport):
         run_report = True
 
         if self.dataset.encoded_data is None or self.dataset.encoded_data.examples is None:
-            warnings.warn(
+            logging.warning(
                 f"{location}: this report can only be created for an encoded dataset. {location} report will not be created.")
             run_report = False
         elif len(self.dataset.encoded_data.examples.shape) != 2:
-            warnings.warn(
+            logging.warning(
                 f"{location}: this report can only be created for a 2-dimensional encoded dataset. {location} report will not be created.")
             run_report = False
         else:
             legal_labels = list(self.dataset.get_label_names())
 
             if self.comparison_label not in legal_labels:
-                warnings.warn(
+                logging.warning(
                     f"{location}: comparison_label was not defined. {location} report will not be created.")
                 run_report = False
             elif len(set(self.dataset.get_metadata([self.comparison_label])[self.comparison_label])) != 2:
-                warnings.warn(
+                logging.warning(
                     f"{location}: comparison label {self.comparison_label} does not have 2 values: {set(self.dataset.get_metadata([self.comparison_label])[self.comparison_label])}. {location} report will not be created.")
                 run_report = False
             else:
@@ -199,11 +198,11 @@ class FeatureComparison(FeatureReport):
                 for label_param in [self.color, self.facet_row, self.facet_column]:
                     if label_param is not None:
                         if label_param == self.comparison_label:
-                            warnings.warn(
+                            logging.warning(
                                 f"{location}: comparison label '{self.comparison_label}' can not be used in other fields. {location} report will not be created.")
                             run_report = False
                         if label_param not in legal_labels:
-                            warnings.warn(
+                            logging.warning(
                                 f"{location}: undefined label '{label_param}'. Legal options are: {legal_labels}. {location} report will not be created.")
                             run_report = False
 

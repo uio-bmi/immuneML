@@ -1,4 +1,4 @@
-import warnings
+import logging
 from pathlib import Path
 from typing import List
 
@@ -92,7 +92,7 @@ class SequencesWithSignificantKmers(DataReport):
         if isinstance(self.dataset, RepertoireDataset):
             return True
         else:
-            warnings.warn(f"{SequencesWithSignificantKmers.__name__}: report can be generated only from RepertoireDataset. Skipping this report...")
+            logging.warning(f"{SequencesWithSignificantKmers.__name__}: report can be generated only from RepertoireDataset. Skipping this report...")
             return False
 
     def _generate(self) -> ReportResult:

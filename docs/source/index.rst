@@ -48,7 +48,7 @@ If you want to **use immuneML locally**, see :ref:`Installing immuneML`.
 
 To become familiar with the **YAML specification**, you can find a concrete example in our :ref:`Quickstart` guide, or read about the overall YAML structure and options in :ref:`How to specify an analysis with YAML`.
 
-Alternatively, to **run immuneML in a web browser**, go to our `Galaxy Portal <https://galaxy.immuneml.uiocloud.no/>`_.
+Alternatively, to **run immuneML in a web browser**, go to our `Galaxy Portal <https://avant.immuneml.uiocloud.no/>`_.
 Here, we offer the same functionalities as in the command-line interface (using YAML specifications), and in addition simplified button-based interfaces for training classifiers.
 See the :ref:`immuneML & Galaxy` tutorials for more information.
 

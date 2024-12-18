@@ -1,4 +1,4 @@
-import warnings
+import logging
 from pathlib import Path
 
 import numpy as np
@@ -166,18 +166,18 @@ class TrainingPerformance(MLReport):
 
     def check_prerequisites(self) -> bool:
         if not hasattr(self, "result_path") or self.result_path is None:
-            warnings.warn(f"{self.__class__.__name__} requires an output 'path' to be set. {self.__class__.__name__}"
+            logging.warning(f"{self.__class__.__name__} requires an output 'path' to be set. {self.__class__.__name__}"
                           f" report will not be created.")
             return False
 
         if self.train_dataset is None or self.train_dataset.encoded_data is None:
-            warnings.warn(
+            logging.warning(
                 f"{self.__class__.__name__}: train dataset is not encoded and can not be run."
                 f"{self.__class__.__name__} report will not be created.")
             return False
 
         if self.method is None:
-            warnings.warn(
+            logging.warning(
                 f"{self.__class__.__name__}: method is not defined and can not be run."
                 f"{self.__class__.__name__} report will not be created.")
             return False

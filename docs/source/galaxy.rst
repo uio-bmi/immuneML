@@ -10,37 +10,18 @@ immuneML & Galaxy
    :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
 
 
-All of immuneMLs functionalities are also available through `a Galaxy web interface <https://galaxy.immuneml.uiocloud.no>`_ as a collection of Galaxy tools. We provide a YAML-based Galaxy
-tool that is equivalent to the CLI (command-line interface), as well as repertoire and receptor-level classification tools with an intuitive
-graphical user interface aimed at immunology experts without a machine learning background.
-
+All of immuneMLs functionalities are also available through `a Galaxy web interface <https://avant.immuneml.uiocloud.no>`_ as a collection of Galaxy tools.
+The immuneML Galaxy tools provide simplified, button-based interfaces to get started running different types of immuneML analyses,
+or can alternatively be run with a YAML input file to specify all parameters.
 
 .. toctree::
   :maxdepth: 1
-  :caption: Galaxy tutorial
+  :caption: Galaxy tutorials
 
   galaxy/galaxy_intro
+  galaxy/galaxy_tools
+  galaxy/galaxy_immunologist_friendly
 
-.. toctree::
-  :maxdepth: 1
-  :caption: Galaxy dataset tutorials:
-
-  galaxy/galaxy_dataset
-  galaxy/galaxy_import_remote_data
-  galaxy/galaxy_simulate_dataset
-  galaxy/galaxy_simulate_signals
-
-.. toctree::
-  :maxdepth: 1
-  :caption: Galaxy simple analysis tutorials:
-
-  galaxy/galaxy_simple_receptors
-  galaxy/galaxy_simple_repertoires
-
-.. toctree::
-  :maxdepth: 1
-  :caption: Galaxy advanced analysis tutorials:
-
-  galaxy/galaxy_train_ml_models
-  galaxy/galaxy_general_yaml
+..
+   _Note: galaxy_import_remote_data is currently not linked in the docs, should be linked once those tools are made available on new galaxy server
 

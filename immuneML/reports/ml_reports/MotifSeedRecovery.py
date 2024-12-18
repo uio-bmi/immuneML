@@ -70,7 +70,7 @@ class MotifSeedRecovery(MLReport):
 
     Example output:
 
-    .. image:: _static/images/reports/motif_seed_recovery.png
+    .. image:: ../_static/images/reports/motif_seed_recovery.png
        :alt: Motif seed recovery report
        :width: 650
 
@@ -297,18 +297,18 @@ class MotifSeedRecovery(MLReport):
             run_report = False
 
         if self.label.name not in self.implanted_motifs_per_label.keys():
-            warnings.warn(
+            logging.warning(
                 f"{location}: no implanted motifs were specified for the label '{self.label}'. "
                 f"These motifs should be specified under 'implanted_motifs_per_label'. Report {self.name} will not be created.")
             run_report = False
 
         if self.train_dataset.encoded_data is None or self.train_dataset.encoded_data.examples is None or self.train_dataset.encoded_data.feature_names is None:
-            warnings.warn(
+            logging.warning(
                 f"{location}: this report can only be created for an encoded dataset with specified feature names. Report {self.name} will not be created.")
             run_report = False
 
         if self.train_dataset.encoded_data.encoding != "KmerFrequencyEncoder":
-            warnings.warn(
+            logging.warning(
                 f"{location}: this report can only be created for a dataset encoded with the KmerFrequencyEncoder. Report {self.name} will not be created.")
             run_report = False
 

@@ -17,6 +17,12 @@ Installation issues
 -------------------
 
 
+
+immuneML no longer supports Python version 3.8
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+From immuneML version 3, Python 3.8 and lower are no longer supported. Please use Python version 3.9 or higher.
+immuneML has been tested extensively with Python version 3.11.
+
 During installation of the dependency pystache, I get an error: use_2to3 is invalid.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -37,29 +43,13 @@ When installing all requirements from requirements.txt, there is afterward an er
 
 This issue might be helpful: https://github.com/yaml/pyyaml/issues/291. Try installing yaml manually with a specific version.
 
-I get an error when installing PyTorch (could not find a version that satisfies the requirement torch)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Depending on the Python version and virtual environment, users may experience errors when installing PyTorch via pip.
-The most common reason for this problem is that the Python version is too new to be compatible with the torch package.
-Currently, the `torch package on pypi <https://pypi.org/project/torch/>`_ is only supported up to Python version 3.7.
-We recommend trying to use Python version 3.7 or version 3.8 in a conda virtual environment.
-
-If this does not resolve the problem, try installing PyTorch manually.
-
-On Windows for instance, you can try the following to install PyTorch 1.7.1 for CPU only using pip:
-
-.. code-block:: console
-
-  pip install torch==1.7.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
-
-For more information on PyTorch installation for different operating systems, please see `the PyTorch documentation <https://pytorch.org/get-started/previous-versions/>`_,
-and afterwards try to install immuneML again.
-
-Please note that when using DeepRC from immuneML, a PyTorch distribution that supports GPUs is required.
-
 Runtime issues
 --------------
+
+When running immuneML, I get the error "AttributeError: 'DataFrame' object has no attribute 'map'"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Pandas dataframe 'map' is a feature that was introduced in pandas 2.1. Please make sure your pandas version is at least 2.1.
+Note that this pandas version requires at least Python version 3.9.
 
 When running immuneML, I get the error "cannot import name 'triu' from 'scipy.linalg'"
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

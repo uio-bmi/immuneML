@@ -1,4 +1,4 @@
-import warnings
+import logging
 from pathlib import Path
 
 import pandas as pd
@@ -160,11 +160,11 @@ class MLSettingsPerformance(TrainMLModelReport):
         run_report = True
 
         if self.state is None:
-            warnings.warn(f"{self.__class__.__name__} can only be executed as a hyperparameter report. MLSettingsPerformance report will not be created.")
+            logging.warning(f"{self.__class__.__name__} can only be executed as a hyperparameter report. MLSettingsPerformance report will not be created.")
             run_report = False
 
         if self.result_path is None:
-            warnings.warn(f"{self.__class__.__name__} requires an output 'path' to be set. MLSettingsPerformance report will not be created.")
+            logging.warning(f"{self.__class__.__name__} requires an output 'path' to be set. MLSettingsPerformance report will not be created.")
             run_report = False
 
         return run_report

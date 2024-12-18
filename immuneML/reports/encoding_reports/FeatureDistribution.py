@@ -27,7 +27,7 @@ class FeatureDistribution(FeatureReport):
 
     Example output:
 
-    .. image:: _static/images/reports/feature_distribution.png
+    .. image:: ../_static/images/reports/feature_distribution.png
        :alt: Feature distribution report example
        :width: 750
 

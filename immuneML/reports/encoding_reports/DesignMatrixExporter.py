@@ -1,6 +1,5 @@
 import logging
 import os
-import warnings
 import zipfile
 from pathlib import Path
 
@@ -127,7 +126,7 @@ class DesignMatrixExporter(EncodingReport):
 
     def check_prerequisites(self):
         if self.dataset.encoded_data is None or self.dataset.encoded_data.examples is None:
-            warnings.warn("DesignMatrixExporter: the dataset is not encoded, skipping this report...")
+            logging.warning("DesignMatrixExporter: the dataset is not encoded, skipping this report...")
             return False
         else:
             return True

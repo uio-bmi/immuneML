@@ -8,5 +8,5 @@ class TestSymbolTable(TestCase):
     def test_add(self):
         symbol_table = SymbolTable()
         symbol_table.add("svm1", SymbolType.ML_METHOD, {})
-        with self.assertWarns(Warning):
+        with self.assertLogs():
             symbol_table.add("svm1", SymbolType.ML_METHOD, {})

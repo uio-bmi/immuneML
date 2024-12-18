@@ -1,12 +1,6 @@
-import pandas as pd
-
 from immuneML.IO.dataset_import.DataImport import DataImport
-from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.SequenceParams import ChainPair
 from immuneML.data_model.SequenceParams import RegionType
-from immuneML.data_model.SequenceSet import Repertoire
-from immuneML.util.ImportHelper import ImportHelper
 from scripts.specification_util import update_docs_per_mapping
 
 
@@ -47,7 +41,7 @@ class GenericImport(DataImport):
 
     - region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means immuneML assumes the IMGT junction (including leading C and trailing Y/F amino acids) is used in the input file, and the first and last amino acids will be removed from the sequences to retrieve the IMGT CDR3 sequence. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
-    - column_mapping (dict): Required for all datasets. A mapping where the keys are the column names in the input file, and the values correspond to the names in the AIRR format. A column mapping can look for example like this:
+    - column_mapping (dict): Required for all datasets. A mapping where the keys are the column names in the input file, and the values correspond to the names in the AIRR format. Valid immuneML fields that can be specified here are defined by the AIRR standard (AIRRSequenceSet). A column mapping can look for example like this:
 
         .. indent with spaces
         .. code-block:: yaml
@@ -109,6 +103,7 @@ class GenericImport(DataImport):
         mapping = {
             "Valid values for receptor_chains are the names of the ChainPair enum.": f"Valid values are {chain_pair_values}.",
             "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
+            "Valid immuneML fields that can be specified here are defined by the AIRR standard (AIRRSequenceSet)": f"Valid immuneML fields that can be specified here by `the AIRR Rearrangement Schema <https://docs.airr-community.org/en/latest/datarep/rearrangements.html>`_."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

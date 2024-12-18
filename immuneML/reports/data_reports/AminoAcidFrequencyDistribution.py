@@ -1,10 +1,8 @@
-import warnings
-from collections import Counter
+import logging
 from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
-import numpy as np
 
 from immuneML.data_model import bnp_util
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
@@ -31,11 +29,11 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     Example output:
 
-    .. image:: _static/images/reports/amino_acid_frequency.png
+    .. image:: ../_static/images/reports/amino_acid_frequency.png
        :alt: Coefficients report
        :width: 800
 
-    .. image:: _static/images/reports/amino_acid_frequency_change.png
+    .. image:: ../_static/images/reports/amino_acid_frequency_change.png
        :alt: Coefficients report
        :width: 800
 
@@ -362,13 +360,13 @@ class AminoAcidFrequencyDistribution(DataReport):
         if self.split_by_label:
             if self.label_name is None:
                 if len(self.dataset.get_label_names()) != 1:
-                    warnings.warn(f"{AminoAcidFrequencyDistribution.__name__}: ambiguous label: split_by_label was "
+                    logging.warning(f"{AminoAcidFrequencyDistribution.__name__}: ambiguous label: split_by_label was "
                                   f"set to True but no label name was specified, and the number of available labels "
                                   f"is {len(self.dataset.get_label_names())}: {self.dataset.get_label_names()}. "
                                   f"Skipping this report...")
                     return False
             elif self.label_name not in self.dataset.get_label_names():
-                warnings.warn(f"{AminoAcidFrequencyDistribution.__name__}: the specified label name "
+                logging.warning(f"{AminoAcidFrequencyDistribution.__name__}: the specified label name "
                               f"({self.label_name}) was not available among the dataset labels: "
                               f"{self.dataset.get_label_names()}. Skipping this report...")
                 return False
