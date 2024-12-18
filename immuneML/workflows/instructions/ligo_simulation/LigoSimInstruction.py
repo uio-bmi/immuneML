@@ -178,7 +178,8 @@ class LigoSimInstruction(Instruction):
         metadata_filename = self.state.result_path / 'simulated_dataset.yaml'
 
         for file in receptor_files.values():
-            df = pd.read_csv(str(file), sep='\t')
+            df = pd.read_csv(str(file), sep='\t', dtype={'junction': str, 'junction_aa': str, 'cdr3': str, 'cdr3_aa': str},
+                             keep_default_na=False)
             df = prepare_data_for_airr_seq_set(df)
             df = df[sorted(df.columns)]
             if data_filename.exists():
