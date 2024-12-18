@@ -102,10 +102,12 @@ class MarkovModel(GenerativeModel):
 
         df = make_full_airr_seq_set_df(df)
 
-        df.to_csv(str(PathBuilder.build(path) / 'synthetic_dataset.tsv'), sep='\t', index=False)
+        filename = str(PathBuilder.build(path) / 'synthetic_dataset.tsv')
+        df.to_csv(filename, sep='\t', index=False)
 
         write_yaml(path / 'synthetic_metadata.yaml', {
             'dataset_type': 'SequenceDataset',
+            'filename': filename,
             'type_dict_dynamic_fields': {'gen_model_name': 'str'},
             'name': 'synthetic_dataset', 'labels': {'gen_model_name': [self.name]},
             'timestamp': str(datetime.now())
