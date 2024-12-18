@@ -1,14 +1,8 @@
-from pathlib import Path
-
 import pandas as pd
 
 from immuneML.IO.dataset_import.DataImport import DataImport
-from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.SequenceParams import RegionType
-from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.util.AdaptiveImportHelper import AdaptiveImportHelper
-from immuneML.util.ImportHelper import ImportHelper
 from scripts.specification_util import update_docs_per_mapping
 
 
@@ -50,14 +44,17 @@ class ImmunoSEQSampleImport(DataImport):
 
     - region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as immunoSEQ files use the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
-    - column_mapping (dict): A mapping from immunoSEQ column names to immuneML's internal data representation. For immunoSEQ sample-level files, this is by default set to the values shown bellow in YAML format.         A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the file, or using alternative column names). Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS.
+    - column_mapping (dict): A mapping from immunoSEQ column names to immuneML's internal data representation. For immunoSEQ sample-level files, this is by default set to the values shown bellow in YAML format.         A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the file, or using alternative column names). Valid immuneML fields that can be specified here are defined by the AIRR standard (AIRRSequenceSet). For ImmunoSEQ sample import, this is by default set to:
 
         .. indent with spaces
         .. code-block:: yaml
 
-            nucleotide: cdr3
-            aminoAcid: cdr3_aa
-            count (templates/reads): duplicate_count
+              nucleotide: sequence
+              aminoAcid: junction_aa
+              vGeneName: v_call
+              jGeneName: j_call
+              sequenceStatus: frame_type
+              count (templates/reads): duplicate_count
 
     - column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For immunoSEQ sample .tsv files, there is no default column_mapping_synonyms.
 
@@ -129,6 +126,7 @@ class ImmunoSEQSampleImport(DataImport):
 
         mapping = {
             "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
+            "Valid immuneML fields that can be specified here are defined by the AIRR standard (AIRRSequenceSet)": f"Valid immuneML fields that can be specified here by `the AIRR Rearrangement Schema <https://docs.airr-community.org/en/latest/datarep/rearrangements.html>`_."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

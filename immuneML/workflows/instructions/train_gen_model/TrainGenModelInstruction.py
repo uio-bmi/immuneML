@@ -77,7 +77,7 @@ class TrainGenModelInstruction(GenModelInstruction):
             my_train_gen_model_inst: # user-defined instruction name
                 type: TrainGenModel
                 dataset: d1 # defined previously under definitions/datasets
-                model: model1 # defined previously under definitions/ml_methods
+                method: model1 # defined previously under definitions/ml_methods
                 gen_examples_count: 100
                 number_of_processes: 4
                 training_percentage: 0.7

@@ -49,7 +49,7 @@ class TestCompAIRRDistanceEncoder(TestCase):
                                                                "keep_compairr_input": True,
                                                                "differences": 0,
                                                                "indels": False,
-                                                               "ignore_counts": False,
+                                                               "ignore_counts": True,
                                                                "threads": 8,
                                                                "ignore_genes": False})
 

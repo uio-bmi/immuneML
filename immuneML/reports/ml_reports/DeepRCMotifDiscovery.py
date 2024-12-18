@@ -1,4 +1,4 @@
-import warnings
+import logging
 from pathlib import Path
 
 import numpy as np
@@ -40,12 +40,12 @@ class DeepRCMotifDiscovery(MLReport):
 
     Example output:
 
-    .. image:: _static/images/reports/deeprc_ig_inputs.png
+    .. image:: ../_static/images/reports/deeprc_ig_inputs.png
        :alt: DeepRC IG over inputs
        :height: 150px
 
 
-    .. image:: _static/images/reports/deeprc_ig_kernels.png
+    .. image:: ../_static/images/reports/deeprc_ig_kernels.png
        :alt: DeepRC IG over kernels
        :height: 150px
 
@@ -306,16 +306,16 @@ class DeepRCMotifDiscovery(MLReport):
         run_report = True
 
         if not hasattr(self, "result_path") or self.result_path is None:
-            warnings.warn(f"{self.__class__.__name__} requires an output 'path' to be set. {self.__class__.__name__} report will not be created.")
+            logging.warning(f"{self.__class__.__name__} requires an output 'path' to be set. {self.__class__.__name__} report will not be created.")
             run_report = False
 
         if not isinstance(self.method, DeepRC):
-            warnings.warn(
+            logging.warning(
                 f"{self.__class__.__name__} can only be used in combination with the DeepRC ML method. {self.__class__.__name__} report will not be created.")
             run_report = False
 
         if self.test_dataset.encoded_data is None:
-            warnings.warn(
+            logging.warning(
                 f"{self.__class__.__name__}: test dataset is not encoded and can not be run. "
                 f"{self.__class__.__name__} report will not be created.")
             run_report = False

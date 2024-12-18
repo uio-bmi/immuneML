@@ -1,5 +1,5 @@
 import itertools
-import warnings
+import logging
 from pathlib import Path
 from typing import List
 
@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.SequenceParams import Chain
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
@@ -132,8 +131,8 @@ class Matches(EncodingReport):
 
         annotation_df = self.dataset.encoded_data.feature_annotations
 
-        for receptor_id in sorted(set(annotation_df["receptor_id"])):
-            chain_ids = list(annotation_df.loc[annotation_df["receptor_id"] == receptor_id]["locus_id"])
+        for cell_id in sorted(set(annotation_df["regex_id"])):
+            chain_ids = list(annotation_df.loc[annotation_df["regex_id"] == cell_id]["locus_id"])
 
             if len(chain_ids) == 2:
                 first_match_idx = self.dataset.encoded_data.feature_names.index(chain_ids[0])
@@ -188,7 +187,7 @@ class Matches(EncodingReport):
         first_chains.drop(columns=["locus"], inplace=True)
         second_chains.drop(columns=["locus"], inplace=True)
 
-        on_cols = ["receptor_id"]
+        on_cols = ["cell_id"]
         if "clonotype_id" in second_chains.columns and first_chains.columns:
             on_cols += ["clonotype_id"]
 
@@ -233,11 +232,11 @@ class Matches(EncodingReport):
 
     def check_prerequisites(self):
         if self.dataset.encoded_data is None or self.dataset.encoded_data.examples is None:
-            warnings.warn(f"No encoding was specified for dataset {self.dataset.identifier}. Please use one of the following encodings: MatchedReceptorsEncoder, MatchedSequencesEncoder, MatchedRegexEncoder. Matches report will not be created.")
+            logging.warning(f"No encoding was specified for dataset {self.dataset.identifier}. Please use one of the following encodings: MatchedReceptorsEncoder, MatchedSequencesEncoder, MatchedRegexEncoder. Matches report will not be created.")
             return False
 
         if self.dataset.encoded_data.encoding not in ("MatchedReceptorsEncoder", "MatchedSequencesEncoder", "MatchedRegexEncoder"):
-            warnings.warn(f"Encoding {self.dataset.encoded_data.encoding} is not compatible with this report type. Matches report will not be created.")
+            logging.warning(f"Encoding {self.dataset.encoded_data.encoding} is not compatible with this report type. Matches report will not be created.")
             return False
         else:
             return True

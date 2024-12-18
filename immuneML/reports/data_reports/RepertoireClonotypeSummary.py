@@ -1,5 +1,4 @@
 import logging
-import warnings
 from pathlib import Path
 from typing import Tuple
 
@@ -92,5 +91,5 @@ class RepertoireClonotypeSummary(DataReport):
         if isinstance(self.dataset, RepertoireDataset):
             return True
         else:
-            warnings.warn(f"{RepertoireClonotypeSummary.__name__}: report can be generated only from RepertoireDataset. Skipping this report...")
+            logging.warning(f"{RepertoireClonotypeSummary.__name__}: report can be generated only from RepertoireDataset. Skipping this report...")
             return False

@@ -1,5 +1,5 @@
 import re
-import warnings
+import logging
 
 import numpy as np
 import pandas as pd
@@ -44,7 +44,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
          - v_gene (if match_v_genes == True)
         only for the motifs for which a regex was specified
         """
-        features = {"receptor_id": [], "locus_id": [], "locus": [], "regex": []}
+        features = {"regex_id": [], "locus_id": [], "locus": [], "regex": []}
 
         if self.match_v_genes:
             features["v_call"] = []
@@ -54,7 +54,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
                 regex = row[f"{chain_type}_regex"]
 
                 if regex is not None:
-                    features["receptor_id"].append(f"{row['id']}")
+                    features["regex_id"].append(f"{row['id']}")
                     features["locus_id"].append(f"{row['id']}_{chain_type}")
                     features["locus"].append(Chain.get_chain(chain_type).name.lower())
                     features["regex"].append(regex)
@@ -101,11 +101,11 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
                                 if self._matches(rep_seq, regex, v_gene):
                                     n_matches = 1 if self.reads == ReadsType.UNIQUE else rep_seq.duplicate_count
                                     if n_matches is None:
-                                        warnings.warn(f"MatchedRegexRepertoireEncoder: count not defined for sequence with id {rep_seq.sequence_id} in repertoire {repertoire.identifier}, ignoring sequence...")
+                                        logging.warning(f"MatchedRegexRepertoireEncoder: count not defined for sequence with id {rep_seq.sequence_id} in repertoire {repertoire.identifier}, ignoring sequence...")
                                         n_matches = 0
                                     matches[match_idx] += n_matches
                         else:
-                            warnings.warn(f"{MatchedRegexRepertoireEncoder.__class__.__name__}: chain was not set for sequence {rep_seq.sequence_id}, skipping the sequence for matching...")
+                            logging.warning(f"{MatchedRegexRepertoireEncoder.__class__.__name__}: chain was not set for sequence {rep_seq.sequence_id}, skipping the sequence for matching...")
                     match_idx += 1
 
         return matches

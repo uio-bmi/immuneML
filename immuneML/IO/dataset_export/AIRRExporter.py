@@ -8,9 +8,11 @@ from pathlib import Path
 from typing import List
 
 import airr
+import bionumpy
 import pandas as pd
 
 from immuneML.IO.dataset_export.DataExporter import DataExporter
+from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import ElementDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
@@ -42,7 +44,8 @@ class AIRRExporter(DataExporter):
                 repertoire_path = PathBuilder.build(path / repertoire_folder)
 
                 for repertoire in dataset.repertoires:
-                    shutil.copyfile(repertoire.data_filename, repertoire_path / repertoire.data_filename.name)
+                    AIRRExporter.process_and_store_data_file(repertoire.data_filename,
+                                                             repertoire_path / repertoire.data_filename.name)
                     shutil.copyfile(repertoire.metadata_filename, repertoire_path / repertoire.metadata_filename.name)
 
                 shutil.copyfile(dataset.metadata_file, path / dataset.metadata_file.name)
@@ -50,10 +53,28 @@ class AIRRExporter(DataExporter):
                     shutil.copyfile(dataset.dataset_file, path / dataset.dataset_file.name)
 
             elif isinstance(dataset, ElementDataset):
-                shutil.copyfile(dataset.filename, path / dataset.filename.name)
+                AIRRExporter.process_and_store_data_file(dataset.filename, path / dataset.filename.name)
                 shutil.copyfile(dataset.dataset_file, path / dataset.dataset_file.name)
 
         except shutil.SameFileError as e:
             logging.warning(f"AIRRExporter: target and input path are the same. Skipping the copy operation...")
 
         # TODO: add here export of full sequence if possible
+
+    @staticmethod
+    def process_and_store_data_file(input_filename, output_filename):
+        df = pd.read_csv(input_filename, sep='\t', keep_default_na=False,
+                         dtype={key: key_type if not isinstance(key_type, bionumpy.encodings.Encoding) else str
+                                for key, key_type in AIRRSequenceSet.get_field_type_dict().items()})
+        df = AIRRExporter.add_cdr3_from_junction(df)
+        df.to_csv(output_filename, sep='\t', index=False)
+
+    @staticmethod
+    def add_cdr3_from_junction(df: pd.DataFrame) -> pd.DataFrame:
+        if 'junction' in df.columns and 'cdr3' in df.columns and any(df.cdr3.eq('')):
+            missing_cdr3 = df.cdr3.eq('')
+            df.loc[missing_cdr3, 'cdr3'] = df.loc[missing_cdr3, 'junction'].str[3:-3]
+        if 'junction_aa' in df.columns and 'cdr3_aa' in df.columns and any(df.cdr3_aa.eq('')):
+            missing_cdr3_aa = df.cdr3_aa.eq('')
+            df.loc[missing_cdr3_aa, 'cdr3_aa'] = df.loc[missing_cdr3_aa, 'junction_aa'].str[1:-1]
+        return df

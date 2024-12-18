@@ -1,7 +1,6 @@
 import sys
 import copy
 import logging
-import warnings
 from pathlib import Path
 
 import numpy as np
@@ -101,7 +100,7 @@ class BinaryFeatureClassifier(MLMethod):
         return {self.label.name: self._get_rule_tree_predictions_class(encoded_data, self.rule_tree_indices)}
 
     def _predict_proba(self, encoded_data: EncodedData):
-        warnings.warn(f"{BinaryFeatureClassifier.__name__}: cannot predict probabilities.")
+        logging.warning(f"{BinaryFeatureClassifier.__name__}: cannot predict probabilities.")
         return None
 
     def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):

@@ -283,6 +283,12 @@ def make_all_fields_dict_from_sequences(sequences: List[ReceptorSequence],
         all_fields[region_type.value].append(sequence.sequence)
         all_fields[region_type.value + "_aa"].append(sequence.sequence_aa)
 
+    all_fields = fill_in_neutral_vals(all_fields, airr_fields, sequences)
+
+    return {**all_fields, **dynamic_fields}
+
+
+def fill_in_neutral_vals(all_fields, airr_fields, sequences):
     for f in airr_fields:
         neutral_val = AIRRSequenceSet.get_neutral_value(f.type)
         if len(all_fields[f.name]) == 0:
@@ -290,4 +296,4 @@ def make_all_fields_dict_from_sequences(sequences: List[ReceptorSequence],
         elif any(val is None for val in all_fields[f.name]):
             all_fields[f.name] = [val if val is not None else neutral_val for val in all_fields[f.name]]
 
-    return {**all_fields, **dynamic_fields}
+    return all_fields

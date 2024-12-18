@@ -172,7 +172,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
             feature_names = [f"sum_of_{self.reads.value}_reads_{chains[0]}",
                              f"sum_of_{self.reads.value}_reads_{chains[1]}"]
         else:
-            feature_names = [f"{row['receptor_id']}.{row['locus']}" for index, row in feature_annotations.iterrows()]
+            feature_names = [f"{row['cell_id']}.{row['locus']}" for index, row in feature_annotations.iterrows()]
 
         encoded_repertoires, labels, example_ids = self._encode_repertoires(dataset, params)
         encoded_repertoires = self._normalize(dataset, encoded_repertoires) if self.normalize else encoded_repertoires
@@ -208,6 +208,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
          - amino acid sequence
          - v gene
          - j gene
+         - cell id
         """
 
         features = [[] for i in range(0, self.feature_count)]
@@ -217,6 +218,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
             chain_names = receptor.chain_pair.value
             first_chain = receptor.chain_1
             second_chain = receptor.chain_2
+            cell_id = receptor.cell_id
 
             clonotype_id = receptor.metadata["clonotype_id"] if "clonotype_id" in receptor.metadata else None
 
@@ -232,16 +234,16 @@ class MatchedReceptorsEncoder(DatasetEncoder):
                                first_dual_chain_id,
                                first_chain.sequence_aa,
                                first_chain.v_call,
-                               first_chain.j_call]
+                               first_chain.j_call, cell_id]
             features[i * 2 + 1] = [id, clonotype_id, chain_names[1],
                                    second_dual_chain_id,
                                    second_chain.sequence_aa,
                                    second_chain.v_call,
-                                   second_chain.j_call]
+                                   second_chain.j_call, cell_id]
 
         features = pd.DataFrame(features,
                                 columns=["receptor_id", "clonotype_id", "locus", "dual_chain_id", "sequence",
-                                         "v_call", "j_call"])
+                                         "v_call", "j_call", 'cell_id'])
 
         features.dropna(axis="columns", how="all", inplace=True)
 

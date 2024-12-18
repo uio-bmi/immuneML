@@ -38,8 +38,10 @@ class OneHotRepertoireEncoder(OneHotEncoder):
         max_rep_len = 0
         max_seq_len = 0
 
+        sequence_field = self._get_seq_field_name(params)
+
         for repertoire in dataset.repertoires:
-            sequence_lengths = getattr(repertoire.data, params.get_sequence_field_name()).lengths
+            sequence_lengths = getattr(repertoire.data, sequence_field).lengths
 
             max_rep_len = max(sequence_lengths.shape[0], max_rep_len)
             max_seq_len = max(max(sequence_lengths), max_seq_len)

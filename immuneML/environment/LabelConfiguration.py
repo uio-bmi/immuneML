@@ -1,6 +1,5 @@
 # quality: gold
 import logging
-import warnings
 from typing import List
 
 from immuneML.environment.Label import Label
@@ -25,7 +24,7 @@ class LabelConfiguration:
         vals = list(values) if values else None
 
         if label_name in self._labels and self._labels[label_name] is not None and len(self._labels[label_name]) > 0:
-            warnings.warn("Label " + label_name + " has already been set. Overriding existing values...", Warning)
+            logging.warning("Label " + label_name + " has already been set. Overriding existing values...")
 
         if positive_class is not None:
             if all(isinstance(val, str) for val in vals) and not isinstance(positive_class, str):

@@ -100,7 +100,7 @@ class TestMatchedReceptorsEncoder(TestCase):
                 self.assertListEqual(encoded.encoded_data.feature_names,
                                      ["100.TRA", "100.TRB", "200.TRA", "200.TRB"])
 
-                self.assertListEqual(list(encoded.encoded_data.feature_annotations.receptor_id),
+                self.assertListEqual(list(encoded.encoded_data.feature_annotations.cell_id),
                                      ["100", "100", "200", "200"])
                 self.assertListEqual(list(encoded.encoded_data.feature_annotations.locus),
                                      ["TRA", "TRB", "TRA", "TRB"])

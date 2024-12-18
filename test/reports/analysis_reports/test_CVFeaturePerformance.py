@@ -42,8 +42,6 @@ class TestCVFeaturePerformance(TestCase):
                                                ], dataset=None, hp_strategy=None, metrics=None)
 
         report = CVFeaturePerformance("p_value_threshold", state, path, is_feature_axis_categorical=True, name="report1")
-        with self.assertWarns(RuntimeWarning):
-            report.generate_report()
 
         state.hp_settings = state.hp_settings[:2]
 

@@ -11,11 +11,10 @@ from torch.nn.functional import cross_entropy, one_hot
 from torch.utils.data import DataLoader
 
 from immuneML import Constants
-from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
-from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
-from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.SequenceSet import ReceptorSequence
+from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
@@ -31,7 +30,7 @@ class SimpleVAE(GenerativeModel):
     """
     SimpleVAE is a generative model on sequence level that relies on variational autoencoder. This type of model was
     proposed by Davidsen et al. 2019, and this implementation is inspired by their original implementation available
-    at https://github.com/matsengrp/vampire.
+    at https://github.com/matsengrp/vampire. It uses the sequences as given in "junction_aa" field in the input dataset.
 
     References:
 
@@ -127,7 +126,7 @@ class SimpleVAE(GenerativeModel):
         self.iter_count_prob_estimation = iter_count_prob_estimation
         self.num_epochs = num_epochs
         self.pretrains = pretrains
-        self.region_type = RegionType.IMGT_CDR3  # TODO: check if they use cdr3 or junction in the original paper
+        self.region_type = RegionType.IMGT_JUNCTION
         self.vocab = vocab if vocab is not None else (
             sorted((EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + [Constants.GAP_LETTER])))
         self.vocab_size = len(self.vocab)
@@ -245,6 +244,8 @@ class SimpleVAE(GenerativeModel):
     def encode_dataset(self, dataset, batch_size=None, shuffle=True):
         seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
         data = dataset.data.topandas()[[seq_col, 'v_call', 'j_call']]
+        assert set(data[seq_col]) != {""}, f"{SimpleVAE.__name__}: sequence column {seq_col} contained only empty sequences. This indicates something may have gone wrong with data import."
+
         if self.unique_v_genes is None:
             self.unique_v_genes = sorted(list(set([el.split("*")[0] for el in data['v_call']])))
         if self.unique_j_genes is None:

@@ -1,11 +1,8 @@
 import pandas as pd
 
 from immuneML.IO.dataset_import.DataImport import DataImport
-from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.SequenceParams import ChainPair, RegionType
 from immuneML.data_model.SequenceSet import Repertoire
-from immuneML.util.ImportHelper import ImportHelper
 from scripts.specification_util import update_docs_per_mapping
 
 
@@ -16,12 +13,20 @@ class TenxGenomicsImport(DataImport):
     SequenceDatasets or ReceptorDatasets should be used when predicting values for unpaired (single-chain) and paired
     immune receptors respectively, like antigen specificity.
 
-    The files that should be used as input are named 'Clonotype consensus annotations (CSV)',
-    as described here: https://support.10xgenomics.com/single-cell-vdj/software/pipelines/latest/output/annotation#consensus
+    .. note::
 
-    Note: by default the 10xGenomics field 'umis' is used to define the immuneML field counts. If you want to use the 10x Genomics
-    field reads instead, this can be changed in the column_mapping (set reads: counts).
-    Furthermore, the 10xGenomics field clonotype_id is used for the immuneML field cell_id.
+        The 10xGenomics Cell Ranger VDJ pipeline also directly exports data in AIRR format ('airr_rearrangement.tsv',
+        see https://www.10xgenomics.com/support/software/cell-ranger/latest/analysis/outputs/cr-5p-outputs-overview-vdj).
+        If possible, we highly recommend directly using the AIRR formatted files as input for immuneML.
+
+
+    If AIRR files are not available, this importer may be used to import data from Contig annotation CSV files
+    ('all_contig_annotations.csv' or 'filtered_contig_annotations.csv') as described here: https://www.10xgenomics.com/support/software/cell-ranger/latest/analysis/outputs/cr-5p-outputs-annotations-vdj#contig-annotation-csv
+
+    It is recommended to run :py:obj:`~immuneML.preprocessing.filters.DuplicateSequenceFilter.DuplicateSequenceFilter` to
+    collapse together clonotypes when importing as a RepertoireDataset, and in some cases for Sequence- and ReceptorDatasets.
+
+    Note that for pairing together Receptor chains, the column named 'barcode' is used.
 
 
     **Specification arguments:**
@@ -52,7 +57,7 @@ class TenxGenomicsImport(DataImport):
 
     - region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as 10xGenomics uses IMGT junction as CDR3. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
-    - column_mapping (dict): A mapping from 10xGenomics column names to immuneML's internal data representation. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the 10xGenomics file, or using alternative column names). Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS. For 10xGenomics, this is by default set to:
+    - column_mapping (dict): A mapping from 10xGenomics column names to immuneML's internal data representation. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the 10xGenomics file, or using alternative column names). Valid immuneML fields that can be specified here are defined by the AIRR standard (AIRRSequenceSet). For 10xGenomics, this is by default set to:
 
         .. indent with spaces
         .. code-block:: yaml
@@ -102,32 +107,17 @@ class TenxGenomicsImport(DataImport):
 
     """
 
-    def preprocess_file(self, df: pd.DataFrame) -> pd.DataFrame:
-
-        additional_str_columns = [col for col in ['d_gene', 'c_gene'] if col in df.columns]
-        df.loc[:, additional_str_columns] = df.loc[:, additional_str_columns].astype(str).replace("None", "").replace("-1.0", "")
-
-        additional_int_columns = [col for col in ['full_length', 'reads'] if col in df.columns]
-        df.loc[:, additional_int_columns] = df.loc[:, additional_int_columns].astype(int)
-
-        bool_str_columns = [col for col in ['productive', 'vj_in_frame', 'stop_codon'] if col in df.columns]
-        df.loc[:, bool_str_columns] = df.loc[:, bool_str_columns].astype(str).replace("True", "T").replace("False", "F").replace("None", "")
-
-        return df
-
     @staticmethod
     def get_documentation():
         doc = str(TenxGenomicsImport.__doc__)
 
         chain_pair_values = str([chain_pair.name for chain_pair in ChainPair])[1:-1].replace("'", "`")
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
-        repertoire_fields = list(Repertoire.FIELDS)
-        repertoire_fields.remove("region_type")
 
         mapping = {
             "Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum.": f"Valid values are {chain_pair_values}.",
             "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
-            "Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS": f"Valid immuneML fields that can be specified here are {repertoire_fields}."
+            "Valid immuneML fields that can be specified here are defined by the AIRR standard (AIRRSequenceSet)": f"Valid immuneML fields that can be specified here by `the AIRR Rearrangement Schema <https://docs.airr-community.org/en/latest/datarep/rearrangements.html>`_."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

@@ -26,7 +26,10 @@ class OneHotSequenceEncoder(OneHotEncoder):
 
     def _encode_data(self, dataset: SequenceDataset, params: EncoderParams):
         data = dataset.data
-        max_seq_len = max(getattr(data, params.get_sequence_field_name()).lengths)
+
+        sequence_field = self._get_seq_field_name(params)
+
+        max_seq_len = max(getattr(data, sequence_field).lengths)
         labels = self._get_labels(data, params) if params.encode_labels else None
 
         examples = self._encode_sequence_list(data, pad_n_sequences=len(data),

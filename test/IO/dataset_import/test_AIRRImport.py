@@ -41,12 +41,8 @@ IVKNQEJ01AJ44V	1	IVKNQEJ01AJ44V	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCT
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "ioairr_repertoire/")
         self.create_dummy_dataset(path, True)
 
-        params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path / "metadata.csv",
-                  "import_out_of_frame": False, "import_with_stop_codon": False, "import_illegal_characters": False,
-                  "import_productive": True, "import_unknown_productivity": True,
-                  "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
-                  "column_mapping": {},
-                  "separator": "\t"}
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "AIRR")
+        params = {**params, **{"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path / "metadata.csv"}}
 
         dataset = AIRRImport(params, "airr_repertoire_dataset").import_dataset()
 

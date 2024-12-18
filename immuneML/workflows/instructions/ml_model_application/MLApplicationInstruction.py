@@ -1,4 +1,4 @@
-import warnings
+import logging
 
 from pathlib import Path
 from typing import List
@@ -167,11 +167,11 @@ class MLApplicationInstruction(Instruction):
                 if all([dataset_class in self.state.hp_setting.ml_method.get_classes() for dataset_class in dataset.labels[label.name]]):
                     return self._apply_metrics(label, predictions_df)
                 else:
-                    warnings.warn(f"MLApplicationInstruction: tried to apply metrics for label {label.name}. "
+                    logging.warning(f"MLApplicationInstruction: tried to apply metrics for label {label.name}. "
                                   f"Found class values {dataset.labels[label.name]} in the provided dataset, "
                                   f"but expected classes {self.state.hp_setting.ml_method.get_classes()}.")
             else:
-                warnings.warn(f"MLApplicationInstruction: tried to apply metrics for label {label.name}, "
+                logging.warning(f"MLApplicationInstruction: tried to apply metrics for label {label.name}, "
                               f"but the provided dataset only contains information for the following "
                               f"labels: {dataset.get_label_names()}.")
 
