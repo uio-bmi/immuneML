@@ -29,11 +29,11 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     Example output:
 
-    .. image:: _static/images/reports/amino_acid_frequency.png
+    .. image:: ../_static/images/reports/amino_acid_frequency.png
        :alt: Coefficients report
        :width: 800
 
-    .. image:: _static/images/reports/amino_acid_frequency_change.png
+    .. image:: ../_static/images/reports/amino_acid_frequency_change.png
        :alt: Coefficients report
        :width: 800
 

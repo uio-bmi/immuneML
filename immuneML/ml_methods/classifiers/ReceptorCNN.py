@@ -24,7 +24,7 @@ class ReceptorCNN(MLMethod):
     A CNN which separately detects motifs using CNN kernels in each chain of paired receptor data, combines the kernel activations into a unique
     representation of the receptor and uses this representation to predict the antigen binding.
 
-    .. figure:: _static/images/receptor_cnn_immuneML.png
+    .. figure:: ../_static/images/receptor_cnn_immuneML.png
         :width: 70%
 
         The architecture of the CNN for paired-chain receptor data
