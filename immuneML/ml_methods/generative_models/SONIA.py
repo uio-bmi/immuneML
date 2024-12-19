@@ -17,15 +17,15 @@ from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class SoNNia(GenerativeModel):
+class SONIA(GenerativeModel):
     """
-    SoNNia models the selection process of T and B cell receptor repertoires. It is based on the SoNNia Python package.
-    It supports SequenceDataset as input, but not RepertoireDataset.
+    Sonia models the selection process of T and B cell receptor repertoires. It is based on the Sonia Python package
+    and uses the Left+Right model. It supports SequenceDataset as input, but not RepertoireDataset.
 
     Original publication:
-    Isacchini, G., Walczak, A. M., Mora, T., & Nourmohammad, A. (2021). Deep generative selection models of T and B
-    cell receptor repertoires with soNNia. Proceedings of the National Academy of Sciences, 118(14), e2023141118.
-    https://doi.org/10.1073/pnas.2023141118
+    Sethna Z, Isacchini G, Dupic T, Mora T, Walczak AM, et al. (2020) Population variability in the generation and
+    selection of T-cell repertoires. PLOS Computational Biology 16(12): e1008394.
+    https://doi.org/10.1371/journal.pcbi.1008394
 
     **Specification arguments:**
 
@@ -34,8 +34,6 @@ class SoNNia(GenerativeModel):
     - batch_size (int)
 
     - epochs (int)
-
-    - deep (bool)
 
     - include_joint_genes (bool)
 
@@ -52,15 +50,15 @@ class SoNNia(GenerativeModel):
 
         definitions:
             ml_methods:
-                my_sonnia_model:
-                    SoNNia:
+                my_sonia_model:
+                    SONIA:
                         ...
 
     """
 
     @classmethod
     def load_model(cls, path: Path):
-        from sonnia.sonnia import SoNNia as InternalSoNNia
+        from sonia.sonia_leftpos_rightpos import SoniaLeftposRightpos as InternalSONIA
 
         assert path.exists(), f"{cls.__name__}: {path} does not exist."
 
@@ -70,20 +68,20 @@ class SoNNia(GenerativeModel):
             assert file.exists(), f"{cls.__name__}: {file} is not a file."
 
         model_overview = read_yaml(model_overview_file)
-        sonnia = SoNNia(**{k: v for k, v in model_overview.items() if k != 'type'})
+        sonia = SONIA(**{k: v for k, v in model_overview.items() if k != 'type'})
         with open(path / 'model.json', 'r') as json_file:
             model_data = json.load(json_file)
 
-        sonnia._model = InternalSoNNia(custom_pgen_model=sonnia._model_path,
-                                       vj=sonnia.locus in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
-                                       include_joint_genes=sonnia.include_joint_genes,
-                                       include_indep_genes=not sonnia.include_joint_genes)
+        sonia._model = InternalSONIA(custom_pgen_model=sonia._model_path,
+                                     vj=sonia.locus in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
+                                     include_joint_genes=sonia.include_joint_genes,
+                                     include_indep_genes=not sonia.include_joint_genes)
 
-        sonnia._model.model.set_weights([np.array(w) for w in model_data['model_weights']])
+        sonia._model.model.set_weights([np.array(w) for w in model_data['model_weights']])
 
-        return sonnia
+        return sonia
 
-    def __init__(self, locus=None, batch_size: int = None, epochs: int = None, deep: bool = False, name: str = None,
+    def __init__(self, locus=None, batch_size: int = None, epochs: int = None, name: str = None,
                  default_model_name: str = None, n_gen_seqs: int = None, include_joint_genes: bool = True,
                  custom_model_path: str = None):
 
@@ -93,7 +91,6 @@ class SoNNia(GenerativeModel):
             super().__init__(locus=Chain.get_chain(default_model_name[-3:]), region_type=RegionType.IMGT_JUNCTION)
         self.epochs = epochs
         self.batch_size = int(batch_size)
-        self.deep = deep
         self.include_joint_genes = include_joint_genes
         self.n_gen_seqs = n_gen_seqs
         self._model = None
@@ -106,28 +103,27 @@ class SoNNia(GenerativeModel):
             self._model_path = custom_model_path
 
     def fit(self, dataset: Dataset, path: Path = None):
-        from sonnia.sonnia import SoNNia as InternalSoNNia
+        from sonia.sonia_leftpos_rightpos import SoniaLeftposRightpos as InternalSONIA
 
-        print_log(f"{SoNNia.__name__}: fitting a selection model...", True)
+        print_log(f"{SONIA.__name__}: fitting a selection model...", True)
 
         data = dataset.data.topandas()[['junction_aa', 'v_call', 'j_call']]
         data_seqs = data.to_records(index=False).tolist()
 
-        self._model = InternalSoNNia(data_seqs=data_seqs,
-                                     gen_seqs=[],
-                                     custom_pgen_model=self._model_path,
-                                     vj=self.locus in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
-                                     include_joint_genes=self.include_joint_genes,
-                                     include_indep_genes=not self.include_joint_genes)
+        self._model = InternalSONIA(data_seqs=data_seqs,
+                                    gen_seqs=[],
+                                    chain_type=self.default_model_name,
+                                    custom_pgen_model=self._model_path,
+                                    vj=self.locus in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
+                                    include_joint_genes=self.include_joint_genes,
+                                    include_indep_genes=not self.include_joint_genes
+                                    )
 
         self._model.add_generated_seqs(num_gen_seqs=self.n_gen_seqs, custom_model_folder=self._model_path)
 
         self._model.infer_selection(epochs=self.epochs, batch_size=self.batch_size, verbose=1)
 
-        print_log(f"{SoNNia.__name__}: selection model fitted.", True)
-
-    def is_same(self, model) -> bool:
-        raise NotImplementedError
+        print_log(f"{SONIA.__name__}: selection model fitted.", True)
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
         from sonia.sequence_generation import SequenceGeneration
@@ -137,17 +133,11 @@ class SoNNia(GenerativeModel):
 
         return SequenceDataset.build_from_objects(sequences=[ReceptorSequence(sequence_aa=seq[0], sequence=seq[3],
                                                                               v_call=seq[1], j_call=seq[2],
-                                                                              metadata={'gen_model_name': self.name if self.name else "SoNNia"})
-                                                             for seq in sequences],
+                                                                              metadata={'gen_model_name': self.name if self.name else "Sonia"})
+                                                                                for seq in sequences],
                                                   region_type=RegionType.IMGT_JUNCTION,
-                                                  path=PathBuilder.build(path), name='SoNNiaDataset',
+                                                  path=PathBuilder.build(path), name='SoniaDataset',
                                                   labels={'gen_model_name': [self.name]})
-
-    def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
-        raise NotImplementedError
-
-    def compute_p_gen(self, sequence: dict, sequence_type: SequenceType) -> float:
-        raise NotImplementedError
 
     def can_compute_p_gens(self) -> bool:
         return False
@@ -155,14 +145,10 @@ class SoNNia(GenerativeModel):
     def can_generate_from_skewed_gene_models(self) -> bool:
         return False
 
-    def generate_from_skewed_gene_models(self, v_genes: list, j_genes: list, seed: int, path: Path,
-                                         sequence_type: SequenceType, batch_size: int, compute_p_gen: bool):
-        raise NotImplementedError
-
     def save_model(self, path: Path) -> Path:
         PathBuilder.build(path / 'model')
 
-        write_yaml(path / 'model/model_overview.yaml', {'type': 'SoNNia', 'locus': self.locus.name,
+        write_yaml(path / 'model/model_overview.yaml', {'type': 'SONIA', 'locus': self.locus.name,
                                                         **{k: v for k, v in vars(self).items()
                                                            if
                                                            k not in ['_model', 'locus', '_model_path', 'region_type']}})
