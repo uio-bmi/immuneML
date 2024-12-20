@@ -8,7 +8,8 @@ import pandas as pd
 
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.SequenceSet import ReceptorSequence, Repertoire
-from immuneML.data_model.bnp_util import write_yaml, build_dynamic_bnp_dataclass_obj, make_full_airr_seq_set_df
+from immuneML.data_model.bnp_util import build_dynamic_bnp_dataclass_obj, make_full_airr_seq_set_df, \
+    write_dataset_yaml, write_yaml
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -94,19 +95,18 @@ class RepertoireBuilder:
                       subject_ids: list = None, name: str = "d1"):
         reps, metadata_file = RepertoireBuilder.build(sequences, path, labels, seq_metadata, subject_ids, name)
 
-        type_dict = {k: v for tmp_dict in [rep.metadata['type_dict_dynamic_fields'] for rep in reps]
-                     for k, v in tmp_dict.items()}
+        # type_dict = {k: v for tmp_dict in [rep.metadata['type_dict_dynamic_fields'] for rep in reps]
+        #              for k, v in tmp_dict.items()}
 
         labels_unique = {k: list(set(v)) for k, v in labels.items()} if isinstance(labels, dict) else {}
         identifier = uuid.uuid4().hex
 
-        metadata_yaml = RepertoireDataset.create_metadata_dict(type_dict=type_dict,
-                                                               labels=labels_unique,
+        metadata_yaml = RepertoireDataset.create_metadata_dict(labels=labels_unique,
                                                                identifier=identifier,
                                                                metadata_file=str(metadata_file.name),
                                                                name=name)
 
-        write_yaml(path / f'{name}.yaml', metadata_yaml)
+        write_dataset_yaml(path / f'{name}.yaml', metadata_yaml)
 
         return RepertoireDataset(repertoires=reps, metadata_file=metadata_file, name=name, labels=labels_unique,
                                  dataset_file=path / f'{name}.yaml', identifier=identifier)

@@ -3,14 +3,11 @@ import logging
 from dataclasses import field, dataclass
 from pathlib import Path
 from typing import Dict, List
-from uuid import uuid4
 
 import numpy as np
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
-from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
-from immuneML.data_model.bnp_util import merge_dataclass_objects, bnp_write_to_file, get_type_dict_from_bnp_object, \
-    write_yaml
+from immuneML.data_model.bnp_util import merge_dataclass_objects, bnp_write_to_file, write_dataset_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
@@ -164,7 +161,7 @@ class TrainGenModelInstruction(GenModelInstruction):
                                              name=f'combined_{self.state.name}_dataset',
                                              labels={'gen_model_name': [self.method.name, ''], "from_gen_model": [True, False]})
 
-        write_yaml(path / f'combined_{self.state.name}_dataset.yaml', metadata_yaml)
+        write_dataset_yaml(path / f'combined_{self.state.name}_dataset.yaml', metadata_yaml)
 
         self.state.combined_dataset = SequenceDataset.build(
             metadata_filename=path / f'combined_{self.state.name}_dataset.yaml',

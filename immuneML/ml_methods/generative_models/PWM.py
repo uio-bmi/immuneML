@@ -2,12 +2,14 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 from typing import List
+from uuid import uuid4
 
 import numpy as np
 import pandas as pd
 
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
-from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name, make_full_airr_seq_set_df
+from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name, make_full_airr_seq_set_df, \
+    write_dataset_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.SequenceParams import RegionType
@@ -148,11 +150,12 @@ class PWM(GenerativeModel):
 
         df.to_csv(str(PathBuilder.build(path) / 'synthetic_dataset.tsv'), sep='\t', index=False)
 
-        write_yaml(path / 'synthetic_metadata.yaml', {
+        write_dataset_yaml(path / 'synthetic_metadata.yaml', {
             'dataset_type': 'SequenceDataset',
             'type_dict_dynamic_fields': {'gen_model_name': 'str'},
             'name': 'synthetic_dataset', 'labels': {'gen_model_name': [self.name]},
-            'timestamp': str(datetime.now())
+            'timestamp': str(datetime.now()),
+            "identifier": uuid4().hex
         })
 
         return SequenceDataset.build(path / 'synthetic_dataset.tsv', path / 'synthetic_metadata.yaml',
