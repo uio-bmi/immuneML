@@ -16,8 +16,8 @@ from bionumpy import get_bufferclass_for_datatype
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.SequenceSet import Receptor, ReceptorSequence, AIRRSequenceSet, \
     build_dynamic_airr_sequence_set_dataclass, make_receptors_from_data, make_sequences_from_data
-from immuneML.data_model.bnp_util import write_yaml, bnp_write_to_file, bnp_read_from_file, read_yaml, \
-    extend_dataclass_with_dynamic_fields
+from immuneML.data_model.bnp_util import bnp_write_to_file, bnp_read_from_file, read_yaml, \
+    extend_dataclass_with_dynamic_fields, write_dataset_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 
 
@@ -49,7 +49,7 @@ class ElementDataset(Dataset, ABC):
                 "dataset_type": dataset_class if isinstance(dataset_class, str) else dataset_class.__name__,
                 "filename": filename,
                 "name": name,
-                "labels": labels,
+                "labels": {} if labels is None else labels,
                 "timestamp": str(datetime.now())}
 
     @property
@@ -113,7 +113,7 @@ class SequenceDataset(ElementDataset):
                                                     labels=labels)
 
         metadata_filename = path / f'{name}.yaml'
-        write_yaml(metadata_filename, dataset_metadata)
+        write_dataset_yaml(metadata_filename, dataset_metadata)
 
         return SequenceDataset(filename=filename, name=name, labels=labels, dynamic_fields=type_dict,
                                dataset_file=metadata_filename, bnp_dataclass=bnp_dc,
@@ -192,7 +192,7 @@ class ReceptorDataset(ElementDataset):
                                                     name=name,
                                                     labels=labels)
 
-        write_yaml(metadata_filename, dataset_metadata)
+        write_dataset_yaml(metadata_filename, dataset_metadata)
 
         return ReceptorDataset(filename=filename, name=name, labels=labels, dynamic_fields=type_dict,
                                dataset_file=metadata_filename, bnp_dataclass=bnp_dc,
@@ -220,7 +220,7 @@ class ReceptorDataset(ElementDataset):
 
         metadata_filename = path / f'{name}.yaml'
         metadata = read_yaml(self.dataset_file)
-        write_yaml(metadata_filename, {
+        write_dataset_yaml(metadata_filename, {
             **metadata, **{'filename': f"{name}.tsv", 'name': name}
         })
 

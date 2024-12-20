@@ -31,3 +31,4 @@ def test_simple_lstm():
     assert all(sequence_df['cdr3_aa'].str.len() >= 1)
 
     shutil.rmtree(path)
+    

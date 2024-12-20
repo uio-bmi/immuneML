@@ -141,6 +141,15 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
             self.assertListEqual([getattr(sequence, attribute) for sequence in dataset1.repertoires[0].sequences()],
                                  [getattr(sequence, attribute) for sequence in dataset2.repertoires[0].sequences()])
 
+        d3_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "AIRR")
+        d3_params["dataset_file"] = path / "imported" / "airr_repertoire_dataset1.yaml"
+        d3_params["result_path"] = path / "imported_from_dataset_file"
+        dataset3 = AIRRImport(d3_params, "airr_repertoire_dataset3").import_dataset()
+
+        for attribute in ["sequence_aa", "sequence", "v_call", "j_call", "locus", "metadata", "vj_in_frame"]:
+            self.assertListEqual([getattr(sequence, attribute) for sequence in dataset1.repertoires[0].sequences()],
+                                 [getattr(sequence, attribute) for sequence in dataset3.repertoires[0].sequences()])
+
         shutil.rmtree(path)
 
     def test_minimal_dataset(self):

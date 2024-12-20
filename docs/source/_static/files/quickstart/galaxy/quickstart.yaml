@@ -1,9 +1,9 @@
 definitions:
   datasets:
     my_dataset: # user-defined dataset name
-      format: Pickle
+      format: AIRR
       params:
-        path: dataset.yaml # 'dataset' is the default name given by the Create dataset tool
+        dataset_file: dataset.yaml # 'dataset' is the default name given by the Create dataset tool
 
   encodings:
     my_kmer_frequency: # user-defined encoding name
@@ -14,7 +14,8 @@ definitions:
     my_logistic_regression: LogisticRegression # user-defined ML model name: ML model type (no user-specified parameters)
 
   reports:
-    my_coefficients: Coefficients # user-defined report name: report type (no user-specified parameters)
+    my_benchmark: MLSettingsPerformance # user-defined report name: report type (no user-specified parameters)
+    my_coefficients: Coefficients
 
 instructions:
   my_training_instruction: # user-defined instruction name
@@ -41,10 +42,13 @@ instructions:
       split_count: 1
       training_percentage: 1 # use all data for training
 
+    reports:
+    - my_benchmark
+
     optimization_metric: balanced_accuracy # the metric to optimize during nested cross-validation when comparing multiple models
     metrics: # other metrics to compute for reference
     - auc
     - precision
     - recall
 
-    number_of_processes: 4     # processes for parallelization
+    number_of_processes: 8     # processes for parallelization

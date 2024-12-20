@@ -19,9 +19,8 @@ from bionumpy.encoded_array import BaseEncoding
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.app.LigoApp import SimError
-from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.SequenceSet import Repertoire
-from immuneML.data_model.bnp_util import bnp_write_to_file, write_yaml
+from immuneML.data_model.bnp_util import bnp_write_to_file, write_dataset_yaml
 from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
@@ -189,16 +188,21 @@ class LigoSimInstruction(Instruction):
 
         type_dict = {k: v for k, v, default_value in self.custom_fields}
 
-        write_yaml(metadata_filename, {
-            'labels': labels,
-            'type_dict_dynamic_fields': {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()},
-            'filename': data_filename
-        })
+        dataset_name = 'simulated_dataset'
 
         dataset_cls = ReceptorDataset if self.state.simulation.paired else SequenceDataset
 
-        self.state.resulting_dataset = dataset_cls.build(data_filename, metadata_filename=metadata_filename,
-                                                         name='simulated_dataset', labels=labels)
+        metadata_yaml = dataset_cls.create_metadata_dict(dataset_class=dataset_cls,
+                                                         filename=data_filename,
+                                                         type_dict=type_dict,
+                                                         name=dataset_name,
+                                                         labels=labels) # todo: identifier not explicitly passed on to dataset
+
+        write_dataset_yaml(metadata_filename, metadata_yaml)
+
+        self.state.resulting_dataset = dataset_cls.build(data_filename,
+                                                         metadata_filename=metadata_filename,
+                                                         name=dataset_name, labels=labels)
 
     def _parse_example_output(self, result) -> dict:
         if self.state.simulation.is_repertoire:
