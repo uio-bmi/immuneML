@@ -1,13 +1,7 @@
 import logging
-import math
 import shutil
-from dataclasses import fields
-from enum import Enum
-from multiprocessing import Pool
 from pathlib import Path
-from typing import List
 
-import airr
 import bionumpy
 import pandas as pd
 
@@ -16,8 +10,6 @@ from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import ElementDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
-from immuneML.environment.Constants import Constants
-from immuneML.util.NumpyHelper import NumpyHelper
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -26,10 +18,11 @@ class AIRRExporter(DataExporter):
     Exports a RepertoireDataset of Repertoires in AIRR format.
 
     Things to note:
-        - one filename_prefix is given, which is combined with the Repertoire identifiers
-        for the filenames, to create one file per Repertoire
-        - 'counts' is written into the field 'duplicate_counts'
-        - 'sequence_identifiers' is written both into the fields 'sequence_id' and 'rearrangement_id'
+
+    - one filename_prefix is given, which is combined with the Repertoire identifiers for the filenames, to create one file per Repertoire
+    - 'counts' is written into the field 'duplicate_counts'
+    - 'sequence_identifiers' is written both into the fields 'sequence_id' and 'rearrangement_id'
+
 
     """
 
