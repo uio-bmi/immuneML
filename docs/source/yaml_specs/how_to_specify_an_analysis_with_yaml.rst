@@ -56,7 +56,7 @@ Under :code:`definitions`, the following analysis components may be defined:
 
 - :code:`reports`: specific plots or statistics to apply to the raw or encoded data, ML methods or results.
 
-Simulation-specific components (only relevant when running the :ref:`LigoSim instruction<Dataset simulation with LIgO`) are:
+Simulation-specific components (only relevant when running the :ref:`Dataset simulation with LIgO`) are:
 
 - :code:`motifs`: parts of the simulation definition defined by a seed and a way to create specific motif instances from the seed,
 
@@ -123,11 +123,11 @@ The following instruction types may be used:
 
 - :ref:`ExploratoryAnalysis`
 
-- :ref:`Simulation`
+- :ref:`LIgO Simulation <LigoSim>`
 
 - :ref:`MLApplication`
 
-- and few others; :ref:`Instructions` for the complete list.
+- and few others; :ref:`Instructions <Instruction parameters>` for the complete list.
 
 The components defined under definitions can be referenced inside the instruction, but any result from the
 instructions is not available to other instructions. If the output of one instruction needs to be used in another

@@ -7,7 +7,7 @@ from scripts.specification_util import update_docs_per_mapping
 class SVM(SklearnMethod):
     """
     This is a wrapper of scikit-learn’s SVC class. Please see the
-    `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html>`_
+    `SVC scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html>`_
     of SVC for the parameters.
 
     Note: if you are interested in plotting the coefficients of the SVM model,

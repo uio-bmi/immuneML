@@ -267,7 +267,7 @@ class TrainMLModelInstruction(Instruction):
             "a metric to use for optimization": f"a metric to use for optimization (one of {valid_values})",
             "Valid values are objects of any class inheriting :py:obj:`~immuneML.hyperparameter_optimization.strategy."
             "HPOptimizationStrategy.HPOptimizationStrategy`.": f"Valid values are: {valid_strategies}.",
-            "the reports to be specified here have to be :py:obj:`~immuneML.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport` reports.": f"the reports that can be provided here are :ref:`{TrainMLModelReport.DOCS_TITLE}`."
+            "the reports to be specified here have to be :py:obj:`~immuneML.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport` reports.": f"the reports that can be provided here are :ref:`**{TrainMLModelReport.DOCS_TITLE}**`."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

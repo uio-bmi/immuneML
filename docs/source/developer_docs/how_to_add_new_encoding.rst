@@ -151,7 +151,7 @@ Encoding should be implemented separately for each dataset type. This can be sol
 
 - Have a single Encoder class containing separate methods for encoding different dataset types.
   During encoding, the dataset type is checked, and the corresponding methods are called.
-  An example of this is given in the SillyEncoder :ref:`Example Encoder and automatic testing`.
+  An example of this is given in the SillyEncoder.
 
 - Have an abstract base Encoder class for the general encoding type, with subclasses for each dataset type.
   The base Encoder contains all shared functionalities, and the subclasses contain dataset-specific functionalities,
