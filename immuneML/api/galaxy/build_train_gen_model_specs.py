@@ -48,16 +48,18 @@ def build_specs(parsed_args):
     if parsed_args.kl_gen_model_report == "True":
         reports['kl_kmer_comparison'] = "KLKmerComparison"
 
+    gen_model_args = {"locus": parsed_args.chain_type}
+
     if parsed_args.generative_method == "SimpleVAE":
         reports['generative_model_overview'] = "VAESummary"
+        gen_model_args['region_type'] = 'imgt_cdr3'
     elif parsed_args.generative_method == "PWM":
         reports['generative_model_overview'] = "PWMSummary"
-
-    gen_model_args = {"locus": parsed_args.chain_type}
+    elif parsed_args.generative_method == "SimpleLSTM":
+        gen_model_args['region_type'] = 'imgt_cdr3'
 
     if parsed_args.generative_method == "SoNNia":
         gen_model_args["default_model_name"] = f"human{parsed_args.chain_type}"
-
 
     specs = {
         "definitions": {

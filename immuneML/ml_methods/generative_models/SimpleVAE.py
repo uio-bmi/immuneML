@@ -120,13 +120,14 @@ class SimpleVAE(GenerativeModel):
 
     def __init__(self, locus, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim, pretrains,
                  v_gene_embed_dim, cdr3_embed_dim, warmup_epochs, patience, iter_count_prob_estimation, device,
-                 vocab=None, max_cdr3_len=None, unique_v_genes=None, unique_j_genes=None, name: str = None):
+                 vocab=None, max_cdr3_len=None, unique_v_genes=None, unique_j_genes=None, name: str = None,
+                 region_type: str = RegionType.IMGT_JUNCTION.name):
         super().__init__(locus)
         self.sequence_type = SequenceType.AMINO_ACID
         self.iter_count_prob_estimation = iter_count_prob_estimation
         self.num_epochs = num_epochs
         self.pretrains = pretrains
-        self.region_type = RegionType.IMGT_JUNCTION
+        self.region_type = RegionType.get_object(region_type)
         self.vocab = vocab if vocab is not None else (
             sorted((EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + [Constants.GAP_LETTER])))
         self.vocab_size = len(self.vocab)
@@ -244,7 +245,10 @@ class SimpleVAE(GenerativeModel):
     def encode_dataset(self, dataset, batch_size=None, shuffle=True):
         seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
         data = dataset.data.topandas()[[seq_col, 'v_call', 'j_call']]
-        assert set(data[seq_col]) != {""}, f"{SimpleVAE.__name__}: sequence column {seq_col} contained only empty sequences. This indicates something may have gone wrong with data import."
+        assert set(data[seq_col]) != {""}, (f"{SimpleVAE.__name__}: sequence column {seq_col} contained only "
+                                            f"empty sequences; region and sequence type were set to "
+                                            f"{self.region_type.to_string()} and {self.sequence_type.value}. "
+                                            f"This indicates something may have gone wrong with data import.")
 
         if self.unique_v_genes is None:
             self.unique_v_genes = sorted(list(set([el.split("*")[0] for el in data['v_call']])))

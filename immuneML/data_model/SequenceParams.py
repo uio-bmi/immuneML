@@ -87,3 +87,12 @@ class RegionType(Enum):
     def to_string(self):
         return self.value.lower()
 
+    @classmethod
+    def get_object(cls, rt):
+        if isinstance(rt, RegionType):
+            return rt
+        elif isinstance(rt, str):
+            return RegionType[rt.upper()]
+        else:
+            raise RuntimeError(f"RegionType could not be created from {rt}.")
+
