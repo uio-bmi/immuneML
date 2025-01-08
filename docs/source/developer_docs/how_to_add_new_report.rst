@@ -207,8 +207,6 @@ during execution, as this might cause lost results. Situations to consider are:
   - When implementing an EncodingReport, use this function to check that the data has been encoded and that the correct encoder has been used.
   - Similarly, when creating an MLReport or TrainMLModelReport, check that the appropriate ML methods have been used.
 
-.. include:: ./dev_docs_util.rst
-
 .. note::
 
   Please see the :py:obj:`~immuneML.reports.Report.Report` class for the detailed description of the methods to be implemented.
@@ -220,8 +218,8 @@ Custom reports may be defined in the YAML specification under the key ‘definit
 `Data reports <https://docs.immuneml.uio.no/specification.html#data-reports>`_ and `Encoding reports <https://docs.immuneml.uio.no/specification.html#encoding-reports>`_ is through the :ref:`ExploratoryAnalysis` instruction. They may also be specified in the :ref:`TrainMLModel`
 instruction in the :code:`selection` and :code:`assessment` loop under :code:`reports:data_splits` and :code:`reports:encoding` respectively.
 
-`ML model reports <https://docs.immuneml.uio.no/specification.html#ml-model-reports>`_ and `Train ML model reports <https://docs.immuneml.uio.no/specification.html#train-ml-model-reports>`_ can only be run through the :ref:`TrainMLModel` instruction. :ref:`ML reports` can be specified inside both the
-:code:`selection` and :code:`assessment` loop under :code:`reports:models`. :ref:`Train ML model reports` must be specified under :code:`reports`.
+`ML model reports <https://docs.immuneml.uio.no/specification.html#ml-model-reports>`_ and `Train ML model reports <https://docs.immuneml.uio.no/specification.html#train-ml-model-reports>`_ can only be run through the :ref:`TrainMLModel` instruction. :ref:`**ML model reports**` can be specified inside both the
+:code:`selection` and :code:`assessment` loop under :code:`reports:models`. :ref:`**Train ML model reports**` must be specified under :code:`reports`.
 
 Finally, :ref:`Multi dataset reports` can be specified under :code:`benchmark_reports` when running the :code:`MultiDatasetBenchmarkTool`.
 

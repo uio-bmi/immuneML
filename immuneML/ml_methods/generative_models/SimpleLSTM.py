@@ -89,12 +89,12 @@ class SimpleLSTM(GenerativeModel):
 
     def __init__(self, locus: str, sequence_type: str, hidden_size: int, learning_rate: float, num_epochs: int,
                  batch_size: int, num_layers: int, embed_size: int, temperature, device: str, name=None,
-                 region_type: str = RegionType.IMGT_CDR3):
+                 region_type: str = RegionType.IMGT_CDR3.name):
 
         super().__init__(Chain.get_chain(locus))
         self._model = None
-        self.region_type = RegionType[region_type.upper()] if region_type else None
-        self.sequence_type = SequenceType[sequence_type.upper()]
+        self.region_type = RegionType.get_object(region_type)
+        self.sequence_type = SequenceType[sequence_type.upper()] if sequence_type else SequenceType.AMINO_ACID
         self.hidden_size = hidden_size
         self.learning_rate = learning_rate
         self.num_layers = num_layers

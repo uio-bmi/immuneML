@@ -7,7 +7,7 @@ from scripts.specification_util import update_docs_per_mapping
 class LogisticRegression(SklearnMethod):
     """
     This is a wrapper of scikit-learn’s LogisticRegression class. Please see the
-    `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html>`_
+    `LogisticRegression scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html>`_
     of LogisticRegression for the parameters.
 
     Note: if you are interested in plotting the coefficients of the logistic regression model,

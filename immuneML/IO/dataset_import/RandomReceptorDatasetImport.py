@@ -19,8 +19,8 @@ class RandomReceptorDatasetImport(DataImport):
         .. indent with spaces
         .. code-block:: yaml
 
-                10: 0.4
-                12: 0.6
+            10: 0.4
+            12: 0.6
 
     - chain_2_length_probabilities (dict): Same as chain_1_length_probabilities, but for chain 2.
 
@@ -29,9 +29,9 @@ class RandomReceptorDatasetImport(DataImport):
         .. indent with spaces
         .. code-block:: yaml
 
-                cmv_epitope:
-                    binding: 0.7
-                    not_binding: 0.3
+            cmv_epitope:
+                binding: 0.7
+                not_binding: 0.3
 
 
     **YAML specification:**

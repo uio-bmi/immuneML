@@ -39,7 +39,8 @@ class ExploratoryAnalysisInstruction(Instruction):
 
       - dim_reduction: which dimensionality reduction to apply;
 
-      - report: which report to run on the dataset. Reports specified here may be of the category :ref:`Data reports` or :ref:`Encoding reports`, depending on whether 'encoding' was specified.
+      - report: which report to run on the dataset. Reports specified here may be of the category :ref:`**Data reports**`
+        or :ref:`**Encoding reports**`, depending on whether 'encoding' was specified.
 
     - number_of_processes: (int): how many processes should be created at once to speed up the analysis. For personal
       machines, 4 or 8 is usually a good choice.
@@ -127,6 +128,7 @@ class ExploratoryAnalysisInstruction(Instruction):
 
     def weight_examples(self, unit: ExploratoryAnalysisUnit, result_path: Path):
         if unit.example_weighting is not None:
+            from immuneML.example_weighting.ExampleWeightingParams import ExampleWeightingParams
             weighted_dataset = DataWeighter.run(DataWeighterParams(dataset=unit.dataset, weighting_strategy=unit.example_weighting,
                                                                    weighting_params=ExampleWeightingParams(result_path=result_path,
                                                                                                            pool_size=unit.number_of_processes,

@@ -10,7 +10,7 @@ class KNN(SklearnMethod):
     This ML method creates a distance matrix using the given encoded data. If the encoded data is already a distance
     matrix (for example, when using the :ref:`Distance` or :ref:`CompAIRRDistance` encoders), please use :ref:`PrecomputedKNN` instead.
 
-    Please see the `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html>`_
+    Please see the `KNeighborsClassifier scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html>`_
     of KNeighborsClassifier for the parameters.
 
     For usage instructions, check :py:obj:`~immuneML.ml_methods.classifiers.SklearnMethod.SklearnMethod`.

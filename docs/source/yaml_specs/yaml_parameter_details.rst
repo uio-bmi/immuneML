@@ -18,5 +18,10 @@ The following pages document all possible parameters of each of the definitions 
   :maxdepth: 1
   :caption: Parameter details
 
-  definitions
+  datasets
+  encodings
+  ml_methods
+  reports
+  preprocessings
+  simulation
   instructions

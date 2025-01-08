@@ -7,7 +7,7 @@ from scripts.specification_util import update_docs_per_mapping
 class RandomForestClassifier(SklearnMethod):
     """
     This is a wrapper of scikit-learn’s RandomForestClassifier class. Please see the
-    `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html>`_
+    `RandomForestClassifier scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html>`_
     of RandomForestClassifier for the parameters.
 
     Note: if you are interested in plotting the coefficients of the random forest classifier model,

@@ -1,12 +1,11 @@
 import numpy as np
 
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset, ReceptorDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 
