@@ -275,7 +275,7 @@ Alternatively, create an ImmuneMLApp object in a Python script and pass it the p
 .. highlight:: python
 .. code-block:: python
 
-  from source.app.ImmuneMLApp import ImmuneMLApp
+  from immuneml.app.ImmuneMLApp import ImmuneMLApp
 
   app = ImmuneMLApp(specification_path="path/to/specification.yaml", result_path="result/folder/path/")
   app.run()
