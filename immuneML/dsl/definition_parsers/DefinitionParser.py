@@ -22,6 +22,7 @@ from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeMode
 from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
+from immuneML.reports.gen_model_reports.GenModelReport import GenModelReport
 from immuneML.reports.ml_reports.MLReport import MLReport
 from immuneML.reports.multi_dataset_reports.MultiDatasetReport import MultiDatasetReport
 from immuneML.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
@@ -103,7 +104,7 @@ class DefinitionParser:
         filename = "reports.rst"
         file_path = path / filename
 
-        for report_type_class in [DataReport, EncodingReport, MLReport, TrainMLModelReport, MultiDatasetReport]:
+        for report_type_class in [DataReport, EncodingReport, MLReport, TrainMLModelReport, MultiDatasetReport, GenModelReport]:
             with file_path.open("a") as file:
                 doc_format = DocumentationFormat(cls=report_type_class,
                                                  cls_name=f"**{report_type_class.DOCS_TITLE}**",

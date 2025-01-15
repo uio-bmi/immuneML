@@ -11,4 +11,4 @@ From version 3, immuneML includes different types of ML methods:
 - :ref:`**Dimensionality reduction methods**` to reduce the dimensionality of the data before analysing it.
 
 
-.. include:: ../../specs/definitions/ml_methods.rst
+.. include:: ../../specs/definitions/specs_ml_methods.rst

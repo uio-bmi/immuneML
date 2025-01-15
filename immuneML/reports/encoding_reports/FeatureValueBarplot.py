@@ -29,7 +29,7 @@ class FeatureValueBarplot(FeatureReport):
 
     Example output:
 
-    .. image:: ../_static/images/reports/feature_value_barplot.png
+    .. image:: ../../_static/images/reports/feature_value_barplot.png
        :alt: Feature value barplot report example
        :width: 750
 

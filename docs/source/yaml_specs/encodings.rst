@@ -6,4 +6,4 @@ Under the :code:`definitions/encodings` component, the user can specify how to e
 An encoding is a numerical data representation, which may be used as input for a machine learning algorithm.
 
 
-.. include:: ../../specs/definitions/encodings.rst
+.. include:: ../../specs/definitions/specs_encodings.rst

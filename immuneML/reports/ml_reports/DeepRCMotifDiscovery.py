@@ -40,12 +40,12 @@ class DeepRCMotifDiscovery(MLReport):
 
     Example output:
 
-    .. image:: ../_static/images/reports/deeprc_ig_inputs.png
+    .. image:: ../../_static/images/reports/deeprc_ig_inputs.png
        :alt: DeepRC IG over inputs
        :height: 150px
 
 
-    .. image:: ../_static/images/reports/deeprc_ig_kernels.png
+    .. image:: ../../_static/images/reports/deeprc_ig_kernels.png
        :alt: DeepRC IG over kernels
        :height: 150px
 

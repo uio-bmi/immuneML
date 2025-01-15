@@ -70,7 +70,7 @@ class MotifSeedRecovery(MLReport):
 
     Example output:
 
-    .. image:: ../_static/images/reports/motif_seed_recovery.png
+    .. image:: ../../_static/images/reports/motif_seed_recovery.png
        :alt: Motif seed recovery report
        :width: 650
 

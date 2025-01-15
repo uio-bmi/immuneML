@@ -13,4 +13,4 @@ Reports have been divided into different types. Different types of reports can b
 - :ref:`**Multi dataset reports**` are special reports that can be specified when running immuneML with the :code:`MultiDatasetBenchmarkTool`. See Manuscript use case 1: :ref:`Robustness assessment` for an example.
 
 
-.. include:: ../../specs/definitions/reports.rst
+.. include:: ../../specs/definitions/specs_reports.rst

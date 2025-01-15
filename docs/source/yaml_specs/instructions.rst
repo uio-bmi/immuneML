@@ -15,13 +15,13 @@ sections:
 
 - :ref:`TrainMLModel`
 - :ref:`MLApplication`
+- :ref:`TrainGenModel`
+- :ref:`ApplyGenModel`
 
 **Data simulation:**
 
 - :ref:`LigoSim`
 - :ref:`FeasibilitySummary`
-- :ref:`TrainGenModel`
-- :ref:`ApplyGenModel`
 
 **Data analysis, exploration and manipulation:**
 
@@ -39,6 +39,14 @@ MLApplication
 ---------------------------
 .. include:: ../../specs/instructions/MLApplication.rst
 
+TrainGenModel
+---------------------------
+.. include:: ../../specs/instructions/TrainGenModel.rst
+
+ApplyGenModel
+---------------------------
+.. include:: ../../specs/instructions/ApplyGenModel.rst
+
 ExploratoryAnalysis
 ---------------------------
 .. include:: ../../specs/instructions/ExploratoryAnalysis.rst
@@ -50,14 +58,6 @@ LigoSim
 FeasibilitySummary
 ---------------------------
 .. include:: ../../specs/instructions/FeasibilitySummary.rst
-
-TrainGenModel
----------------------------
-.. include:: ../../specs/instructions/TrainGenModel.rst
-
-ApplyGenModel
----------------------------
-.. include:: ../../specs/instructions/ApplyGenModel.rst
 
 Clustering
 ---------------------------

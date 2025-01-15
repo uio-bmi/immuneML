@@ -31,7 +31,7 @@ class FeatureComparison(FeatureReport):
 
     Example output:
 
-    .. image:: ../_static/images/reports/feature_comparison_zoom.png
+    .. image:: ../../_static/images/reports/feature_comparison_zoom.png
        :alt: Feature comparison zoomed in plot with VLEQ highlighted
        :width: 650
 

@@ -35,12 +35,12 @@ class TCRdistMotifDiscovery(MLReport):
 
     Example output:
 
-    .. image:: ../_static/images/reports/tcrdist_motif_a.svg
+    .. image:: ../../_static/images/reports/tcrdist_motif_a.svg
        :alt: TCRdist alpha chain logo plot
        :width: 300px
 
 
-    .. image:: ../_static/images/reports/tcrdist_motif_b.svg
+    .. image:: ../../_static/images/reports/tcrdist_motif_b.svg
        :alt: TCRdist beta chain logo plot
        :width: 300px
 

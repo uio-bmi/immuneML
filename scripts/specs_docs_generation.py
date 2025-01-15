@@ -1,13 +1,13 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(os.getcwd()))
-
 from immuneML.dsl.InstructionParser import InstructionParser
 from immuneML.dsl.OutputParser import OutputParser
 from immuneML.dsl.definition_parsers.DefinitionParser import DefinitionParser
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
+
+sys.path.insert(0, os.path.abspath(os.getcwd()))
 
 
 def generate_docs(docs_path: str):

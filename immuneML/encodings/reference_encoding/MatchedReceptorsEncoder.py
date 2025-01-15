@@ -72,12 +72,12 @@ class MatchedReceptorsEncoder(DatasetEncoder):
                 my_mr_encoding:
                     MatchedReceptors:
                         reference:
-                            format: VDJDB
+                            format: VDJdb
                             params:
                                 path: path/to/file.txt
                         max_edit_distances:
-                            alpha: 1
-                            beta: 0
+                            TRA: 1
+                            TRB: 0
     """
 
     dataset_mapping = {
