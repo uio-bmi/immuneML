@@ -3,7 +3,6 @@ import shutil
 from unittest import TestCase
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.SequenceParams import Chain, RegionType
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.reference_encoding.MatchedSequencesEncoder import MatchedSequencesEncoder
@@ -67,7 +66,8 @@ class TestMatchedSequencesEncoder(TestCase):
                     "max_edit_distance": 0,
                     "reads": reads,
                     "sum_matches": False,
-                    "normalize": normalize
+                    "normalize": normalize,
+                    "output_count_as_feature": False
                 })
 
                 encoded = encoder.encode(dataset, EncoderParams(

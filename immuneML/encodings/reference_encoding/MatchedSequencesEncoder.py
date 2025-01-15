@@ -56,6 +56,9 @@ class MatchedSequencesEncoder(DatasetEncoder):
     - normalize (bool): If True, the sequence matches are divided by the total number of unique sequences in the
       repertoire (when reads = unique) or the total number of reads in the repertoire (when reads = all).
 
+    - output_count_as_feature: if True, the encoded repertoire is represented by the matches, and by the total number
+      of sequences (or reads) in the repertoire, as defined by reads parameter above; by default this is False
+
 
     **YAML specification:**
 
@@ -73,25 +76,32 @@ class MatchedSequencesEncoder(DatasetEncoder):
                         max_edit_distance: 1
     """
 
-    def __init__(self, max_edit_distance: int, reference: List[ReceptorSequence], reads: ReadsType, sum_matches: bool, normalize: bool,
-                 name: str = None):
+    def __init__(self, max_edit_distance: int, reference: List[ReceptorSequence], reads: ReadsType, sum_matches: bool,
+                 normalize: bool, output_count_as_feature: bool = False, name: str = None):
         super().__init__(name=name)
         self.max_edit_distance = max_edit_distance
         self.reference_sequences = reference
         self.reads = reads
         self.sum_matches = sum_matches
         self.normalize = normalize
-        self.feature_count = 1 if self.sum_matches else len(self.reference_sequences)
+        self.output_count_as_feature = output_count_as_feature
+        self.feature_count = (1 if self.sum_matches else len(self.reference_sequences)) + int(output_count_as_feature)
 
     @staticmethod
     def _prepare_parameters(max_edit_distance: int, reference: dict, reads: str, sum_matches: bool, normalize: bool,
-                            name: str = None):
+                            output_count_as_feature: bool = False, name: str = None):
         location = "MatchedSequencesEncoder"
 
         ParameterValidator.assert_type_and_value(max_edit_distance, int, location, "max_edit_distance", min_inclusive=0)
         ParameterValidator.assert_type_and_value(sum_matches, bool, location, "sum_matches")
-        ParameterValidator.assert_type_and_value(normalize, bool, location, "normalize")
+        ParameterValidator.assert_type_and_value(output_count_as_feature, bool, location, "normalize")
+        ParameterValidator.assert_type_and_value(normalize, bool, location, "output_count_as_feature")
         ParameterValidator.assert_in_valid_list(reads.upper(), [item.name for item in ReadsType], location, "reads")
+
+        if output_count_as_feature and normalize:
+            raise RuntimeError(f"{MatchedSequencesEncoder.__name__}: normalize and output_count_as_feature cannot \n"
+                               f"be both set to True at the same time. The sequence count (or reads count) can either \n"
+                               f"be used for normalization or included as a separate output.")
 
         reference_sequences = MatchedReferenceUtil.prepare_reference(reference_params=reference, location=location, paired=False)
 
@@ -101,6 +111,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
             "reads": ReadsType[reads.upper()],
             "sum_matches": sum_matches,
             "normalize": normalize,
+            "output_count_as_feature": output_count_as_feature,
             "name": name
         }
 
@@ -127,7 +138,8 @@ class MatchedSequencesEncoder(DatasetEncoder):
                                                                for seq in self.reference_sequences]),
                                 "reads": self.reads.name,
                                 "sum_matches": self.sum_matches,
-                                "normalize": self.normalize}
+                                "normalize": self.normalize,
+                                "output_count_as_feature": self.output_count_as_feature}
 
         return (("dataset_identifiers", tuple(dataset.get_example_ids())),
                 ("dataset_metadata", dataset.metadata_file),
@@ -143,7 +155,12 @@ class MatchedSequencesEncoder(DatasetEncoder):
         encoded_repertoires = self._normalize(dataset, encoded_repertoires) if self.normalize else encoded_repertoires
 
         feature_annotations = None if self.sum_matches else self._get_feature_info()
-        feature_names = [f"sum_of_{self.reads.value}_reads"] if self.sum_matches else list(feature_annotations["sequence_desc"])
+        if self.sum_matches:
+            feature_names = [f"sum_of_{self.reads.value}_reads"]
+            if self.output_count_as_feature:
+                feature_names += ['sequence_count_in_repertoire']
+        else:
+            feature_names = list(feature_annotations["sequence_desc"])
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(
@@ -177,7 +194,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
          - j call
         """
 
-        features = [[] for i in range(0, self.feature_count)]
+        features = [[] for i in range(0, len(self.reference_sequences))]
 
         for i, sequence in enumerate(self.reference_sequences):
             features[i] = [sequence.sequence_id,
@@ -186,6 +203,9 @@ class MatchedSequencesEncoder(DatasetEncoder):
                            sequence.v_call,
                            sequence.j_call,
                            self._get_sequence_desc(sequence)]
+
+        if self.output_count_as_feature:
+            features += [['', '', '', '', '', 'sequence_count_in_repertoire']]
 
         features = pd.DataFrame(features, columns=["sequence_id", "locus", "sequence", "v_call", "j_call", "sequence_desc"])
         if features['sequence_desc'].unique().shape[0] < features.shape[0]:
@@ -245,5 +265,9 @@ class MatchedSequencesEncoder(DatasetEncoder):
                     matches_idx = 0 if self.sum_matches else i
                     match_count = 1 if self.reads == ReadsType.UNIQUE else repertoire_seq.duplicate_count
                     matches[matches_idx] += match_count
+
+        if self.output_count_as_feature:
+            duplicate_counts = repertoire.data.duplicate_count
+            matches[-1] = sum(duplicate_counts) if self.reads == ReadsType.ALL else len(duplicate_counts)
 
         return matches
