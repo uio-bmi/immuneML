@@ -1,8 +1,8 @@
 # immuneML
 
-![Python application](https://github.com/uio-bmi/immuneML/workflows/python-app.yml/badge.svg?branch=master)
-![Docker](https://github.com/uio-bmi/immuneML/workflows/docker-publish.yml/badge.svg?branch=master)
-![PyPI](https://github.com/uio-bmi/immuneML/workflows/publish-to-pypi.yml/badge.svg?branch=master)
+![Python application](https://github.com/uio-bmi/immuneML/actions/workflows/python-app.yml/badge.svg?branch=master)
+![Docker](https://github.com/uio-bmi/immuneML/actions/workflows/docker-publish.yml/badge.svg?branch=master)
+![PyPI](https://github.com/uio-bmi/immuneML/actions/workflows/publish-to-pypi.yml/badge.svg?branch=master)
 [![](https://img.shields.io/static/v1?label=AIRR-C%20sw-tools%20v1&message=compliant&color=008AFF&labelColor=000000&style=plastic)](https://docs.airr-community.org/en/stable/swtools/airr_swtools_standard.html)
 
 immuneML is a platform for machine learning-based analysis and 
