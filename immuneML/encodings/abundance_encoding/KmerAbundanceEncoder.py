@@ -7,6 +7,7 @@ import pandas as pd
 
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheHandler import CacheHandler
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
@@ -16,6 +17,7 @@ from immuneML.encodings.kmer_frequency.KmerFreqRepertoireEncoder import KmerFreq
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReadsType import ReadsType
@@ -80,14 +82,16 @@ class KmerAbundanceEncoder(DatasetEncoder):
     TOTAL_SEQUENCE_ABUNDANCE = "total_sequence_abundance"
 
     def __init__(self, p_value_threshold: float, sequence_encoding: SequenceEncodingType, k: int,
-                 k_left: int, k_right: int, min_gap: int, max_gap: int, name: str = None):
+                 k_left: int, k_right: int, min_gap: int, max_gap: int, name: str = None,
+                 sequence_type: SequenceType = SequenceType.AMINO_ACID, region_type: RegionType = RegionType.IMGT_CDR3):
         super().__init__(name=name)
         self.p_value_threshold = p_value_threshold
 
         self.kmer_frequency_params = {"normalization_type": NormalizationType.BINARY, "reads": ReadsType.UNIQUE,
                                       "sequence_encoding": sequence_encoding, "k": k, "k_left": k_left, "k_right": k_right,
                                       "min_gap": min_gap, "max_gap": max_gap, "scale_to_unit_variance": False,
-                                      "scale_to_zero_mean": False, "sequence_type": EnvironmentSettings.get_sequence_type()}
+                                      "region_type": region_type, "sequence_type": sequence_type,
+                                      "scale_to_zero_mean": False}
 
         self.relevant_indices_path = None
         self.relevant_sequence_path = None
@@ -101,7 +105,9 @@ class KmerAbundanceEncoder(DatasetEncoder):
 
     @staticmethod
     def _prepare_parameters(p_value_threshold: float, sequence_encoding: str, k: int,
-                            k_left: int, k_right: int, min_gap: int, max_gap: int, name: str = None):
+                            k_left: int, k_right: int, min_gap: int, max_gap: int, name: str = None,
+                            region_type: str = RegionType.IMGT_CDR3.name,
+                            sequence_type: str = SequenceType.AMINO_ACID.name):
         ParameterValidator.assert_type_and_value(p_value_threshold, float, "KmerAbundanceEncoder", "p_value_threshold", min_inclusive=0,
                                                  max_inclusive=1)
 
@@ -110,7 +116,8 @@ class KmerAbundanceEncoder(DatasetEncoder):
         kmerfreq_params = KmerFrequencyEncoder._prepare_parameters(normalization_type="binary", reads="unique",
                                                                    sequence_encoding=sequence_encoding,
                                                                    k=k, k_left=k_left, k_right=k_right, min_gap=min_gap,
-                                                                   max_gap=max_gap, sequence_type=EnvironmentSettings.get_sequence_type().name)
+                                                                   max_gap=max_gap,
+                                                                   sequence_type=sequence_type, region_type=region_type)
 
         return {
             "p_value_threshold": p_value_threshold,
@@ -120,7 +127,9 @@ class KmerAbundanceEncoder(DatasetEncoder):
             "k_right": kmerfreq_params["k_right"],
             "min_gap": kmerfreq_params["min_gap"],
             "max_gap": kmerfreq_params["max_gap"],
-            "name": name
+            "name": name,
+            "region_type": kmerfreq_params['region_type'],
+            "sequence_type": kmerfreq_params['sequence_type']
         }
 
     @staticmethod

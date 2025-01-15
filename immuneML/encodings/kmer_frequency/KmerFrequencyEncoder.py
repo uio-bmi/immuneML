@@ -135,7 +135,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
     def __init__(self, normalization_type: NormalizationType, reads: ReadsType, sequence_encoding: SequenceEncodingType, k: int = 0,
                  k_left: int = 0, k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None,
                  name: str = None, scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False, sequence_type: SequenceType = None,
-                 region_type: RegionType = None):
+                 region_type: RegionType = RegionType.IMGT_CDR3):
         super().__init__(name=name)
         self.normalization_type = normalization_type
         self.reads = reads
@@ -156,8 +156,9 @@ class KmerFrequencyEncoder(DatasetEncoder):
     @staticmethod
     def _prepare_parameters(normalization_type: str, reads: str, sequence_encoding: str, k: int = 0, k_left: int = 0,
                             k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None, name: str = None,
-                            scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False, sequence_type: str = None,
-                            region_type: str = None):
+                            scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False,
+                            sequence_type: str = SequenceType.AMINO_ACID.name,
+                            region_type: str = RegionType.IMGT_CDR3.name):
 
         location = KmerFrequencyEncoder.__name__
 
@@ -245,7 +246,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
                                    example_ids=example_ids,
                                    feature_annotations=feature_annotations,
                                    encoding=KmerFrequencyEncoder.__name__,
-                                   info={"sequence_type": self.sequence_type, 'region_type': params.region_type})
+                                   info={"sequence_type": self.sequence_type, 'region_type': self.region_type})
 
         return encoded_data
 
