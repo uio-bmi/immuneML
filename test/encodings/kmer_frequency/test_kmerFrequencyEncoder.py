@@ -6,6 +6,7 @@ import numpy as np
 
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.data_model.SequenceSet import Repertoire
@@ -51,6 +52,7 @@ class TestKmerFrequencyEncoder(TestCase):
             "reads": ReadsType.UNIQUE.name,
             "sequence_encoding": SequenceEncodingType.IDENTITY.name,
             "sequence_type": SequenceType.AMINO_ACID.name,
+            "region_type": RegionType.IMGT_CDR3.name,
             "k": 3
         })
 
@@ -66,6 +68,7 @@ class TestKmerFrequencyEncoder(TestCase):
             "reads": ReadsType.UNIQUE.name,
             "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
             "sequence_type": SequenceType.AMINO_ACID.name,
+            "region_type": RegionType.IMGT_CDR3.name,
             "k": 3
         })
 
@@ -82,6 +85,7 @@ class TestKmerFrequencyEncoder(TestCase):
             "reads": ReadsType.UNIQUE.name,
             "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
             "sequence_type": SequenceType.NUCLEOTIDE.name,
+            "region_type": RegionType.IMGT_CDR3.name,
             "k": 3
         })
 

@@ -9,6 +9,7 @@ from sklearn.preprocessing import StandardScaler
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
@@ -133,12 +134,14 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     def __init__(self, normalization_type: NormalizationType, reads: ReadsType, sequence_encoding: SequenceEncodingType, k: int = 0,
                  k_left: int = 0, k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None,
-                 name: str = None, scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False, sequence_type: SequenceType = None):
+                 name: str = None, scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False, sequence_type: SequenceType = None,
+                 region_type: RegionType = None):
         super().__init__(name=name)
         self.normalization_type = normalization_type
         self.reads = reads
         self.sequence_encoding = sequence_encoding
         self.sequence_type = sequence_type
+        self.region_type = region_type
         self.k = k
         self.k_left = k_left
         self.k_right = k_right
@@ -153,7 +156,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
     @staticmethod
     def _prepare_parameters(normalization_type: str, reads: str, sequence_encoding: str, k: int = 0, k_left: int = 0,
                             k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None, name: str = None,
-                            scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False, sequence_type: str = None):
+                            scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False, sequence_type: str = None,
+                            region_type: str = None):
 
         location = KmerFrequencyEncoder.__name__
 
@@ -185,6 +189,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
             "name": name,
             "scale_to_zero_mean": scale_to_zero_mean, "scale_to_unit_variance": scale_to_unit_variance,
             'sequence_type': SequenceType[sequence_type.upper()],
+            'region_type': RegionType[region_type.upper()],
             **vars_to_check
         }
 

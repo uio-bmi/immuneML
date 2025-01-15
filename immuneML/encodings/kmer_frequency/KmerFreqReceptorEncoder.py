@@ -22,6 +22,8 @@ class KmerFreqReceptorEncoder(KmerFrequencyEncoder):
         labels = {label: [] for label in label_config.get_labels_by_name()} if params.encode_labels else None
         chains = []
 
+        params.region_type = self.region_type
+
         sequence_encoder = self._prepare_sequence_encoder()
         feature_names = sequence_encoder.get_feature_names(params)
         for receptor in dataset.get_data():
