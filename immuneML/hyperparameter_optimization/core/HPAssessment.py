@@ -142,10 +142,12 @@ class HPAssessment:
                                   for hp_item in hp_items}
                 updated_hp_setting.ml_params[updated_hp_setting.ml_method.__class__.__name__] = optimal_params[
                     comp_func(optimal_params.keys())]
+                updated_hp_setting.ml_method = updated_hp_setting.ml_method.__class__(parameters=updated_hp_setting.ml_params[updated_hp_setting.ml_method.__class__.__name__])
 
             elif len(hp_items) == 1:
                 updated_hp_setting.ml_params[updated_hp_setting.ml_method.__class__.__name__] = hp_items[
                     0].method.model.get_params()
+                updated_hp_setting.ml_method = updated_hp_setting.ml_method.__class__(parameters=updated_hp_setting.ml_params[updated_hp_setting.ml_method.__class__.__name__])
 
             return updated_hp_setting
 

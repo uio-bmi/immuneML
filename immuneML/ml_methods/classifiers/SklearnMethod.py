@@ -131,12 +131,12 @@ class SklearnMethod(MLMethod):
         return self.model
 
     def apply_with_weights(self, method, weights, **kwargs):
-        '''
+        """
         Can be used to run self.model.fit, self.model.predict or self.model.predict_proba with sample weights if supported
 
         :param method: self.model.fit, self.model.predict or self.model.predict_proba
         :return: the result of the supplied method
-        '''
+        """
         if weights is not None and self._check_method_supports_example_weight(method):
             return method(**kwargs, sample_weight=weights)
         else:
@@ -176,7 +176,7 @@ class SklearnMethod(MLMethod):
         self.model = RandomizedSearchCV(model, param_distributions=self._parameter_grid, cv=number_of_splits, n_jobs=cores_for_training,
                                         scoring=scoring, refit=True)
 
-        self.apply_with_weights(self.model.fit, w, X=X, y=y)
+        self.model = self.apply_with_weights(self.model.fit, w, X=X, y=y)
 
         if not self.show_warnings:
             del os.environ["PYTHONWARNINGS"]
