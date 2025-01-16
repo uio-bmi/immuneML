@@ -1,5 +1,6 @@
 from collections import Counter
 
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 
@@ -15,7 +16,7 @@ class KmerFreqSequenceEncoder(KmerFrequencyEncoder):
 
         return encoded_dataset
 
-    def _encode_examples(self, dataset, params: EncoderParams):
+    def _encode_examples(self, dataset: SequenceDataset, params: EncoderParams):
 
         encoded_sequences = []
         sequence_ids = []
@@ -24,7 +25,8 @@ class KmerFreqSequenceEncoder(KmerFrequencyEncoder):
 
         sequence_encoder = self._prepare_sequence_encoder()
         feature_names = sequence_encoder.get_feature_names(params)
-        for sequence in dataset.get_data():
+        params.region_type = self.region_type
+        for sequence in dataset.get_data(region_type=self.region_type):
             counts = self._encode_sequence(sequence, params, sequence_encoder, Counter())
             encoded_sequences.append(counts)
             sequence_ids.append(sequence.sequence_id)

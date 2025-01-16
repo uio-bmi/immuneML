@@ -10,6 +10,7 @@ from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeightingStrategy
+from immuneML.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.hyperparameter_optimization.core.HPAssessment import HPAssessment
@@ -51,9 +52,9 @@ class TrainMLModelInstruction(Instruction):
 
     - hp_settings (list): a list of combinations of `preprocessing_sequence`, `encoding` and `ml_method`. `preprocessing_sequence` is optional, while `encoding` and `ml_method` are mandatory. These three options (and their parameters) can be optimized over, choosing the highest performing combination.
 
-    - assessment (SplitConfig): description of the outer loop (for assessment) of nested cross-validation. It describes how to split the data, how many splits to make, what percentage to use for training and what reports to execute on those splits. See :ref:`SplitConfig`.
+    - assessment (SplitConfig): description of the outer loop (for assessment) of nested cross-validation. It describes how to split the data, how many splits to make, what percentage to use for training and what reports to execute on those splits. See plitConfig below.
 
-    - selection (SplitConfig): description of the inner loop (for selection) of nested cross-validation. The same as assessment argument, just to be executed in the inner loop. See :ref:`SplitConfig`.
+    - selection (SplitConfig): description of the inner loop (for selection) of nested cross-validation. The same as assessment argument, just to be executed in the inner loop. See plitConfig below.
 
     - metrics (list): a list of metrics to compute for all splits and settings created during the nested cross-validation. These metrics will be computed only for reporting purposes. For choosing the optimal setting, `optimization_metric` will be used.
 
@@ -136,6 +137,10 @@ class TrainMLModelInstruction(Instruction):
                 export_all_ml_settings: False # only export the optimal setting
                 region_type: IMGT_CDR3
                 sequence_type: AMINO_ACID
+
+    SPLITCONFIG
+
+    REPORTCONFIG
 
     """
 
@@ -267,7 +272,9 @@ class TrainMLModelInstruction(Instruction):
             "a metric to use for optimization": f"a metric to use for optimization (one of {valid_values})",
             "Valid values are objects of any class inheriting :py:obj:`~immuneML.hyperparameter_optimization.strategy."
             "HPOptimizationStrategy.HPOptimizationStrategy`.": f"Valid values are: {valid_strategies}.",
-            "the reports to be specified here have to be :py:obj:`~immuneML.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport` reports.": f"the reports that can be provided here are :ref:`**{TrainMLModelReport.DOCS_TITLE}**`."
+            "the reports to be specified here have to be :py:obj:`~immuneML.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport` reports.": f"the reports that can be provided here are :ref:`**{TrainMLModelReport.DOCS_TITLE}**`.",
+            "SPLITCONFIG": SplitConfig.get_documentation(),
+            "REPORTCONFIG": ReportConfig.get_documentation()
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

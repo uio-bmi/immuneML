@@ -9,6 +9,7 @@ from sklearn.preprocessing import StandardScaler
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
@@ -42,7 +43,10 @@ class KmerFrequencyEncoder(DatasetEncoder):
     - sequence_encoding (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType`): The type
       of k-mers that are used. The simplest sequence_encoding is
       :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.CONTINUOUS_KMER`, which uses
-      contiguous subsequences of length k to represent the k-mers. When gapped k-mers are used
+      contiguous subsequences of length k to represent the k-mers. Alternatively, these subsequences could be represented
+      together with the v gene of the sequence they belong to using
+      :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.V_GENE_CONT_KMER`.When gapped
+      k-mers are used
       (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`,
       :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`),
       the k-mers may contain gaps with a size between min_gap and max_gap, and the k-mer length is defined as a
@@ -133,12 +137,14 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     def __init__(self, normalization_type: NormalizationType, reads: ReadsType, sequence_encoding: SequenceEncodingType, k: int = 0,
                  k_left: int = 0, k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None,
-                 name: str = None, scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False, sequence_type: SequenceType = None):
+                 name: str = None, scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False, sequence_type: SequenceType = None,
+                 region_type: RegionType = RegionType.IMGT_CDR3):
         super().__init__(name=name)
         self.normalization_type = normalization_type
         self.reads = reads
         self.sequence_encoding = sequence_encoding
         self.sequence_type = sequence_type
+        self.region_type = region_type
         self.k = k
         self.k_left = k_left
         self.k_right = k_right
@@ -153,7 +159,9 @@ class KmerFrequencyEncoder(DatasetEncoder):
     @staticmethod
     def _prepare_parameters(normalization_type: str, reads: str, sequence_encoding: str, k: int = 0, k_left: int = 0,
                             k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None, name: str = None,
-                            scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False, sequence_type: str = None):
+                            scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False,
+                            sequence_type: str = SequenceType.AMINO_ACID.name,
+                            region_type: str = RegionType.IMGT_CDR3.name):
 
         location = KmerFrequencyEncoder.__name__
 
@@ -185,6 +193,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
             "name": name,
             "scale_to_zero_mean": scale_to_zero_mean, "scale_to_unit_variance": scale_to_unit_variance,
             'sequence_type': SequenceType[sequence_type.upper()],
+            'region_type': RegionType[region_type.upper()],
             **vars_to_check
         }
 
@@ -240,7 +249,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
                                    example_ids=example_ids,
                                    feature_annotations=feature_annotations,
                                    encoding=KmerFrequencyEncoder.__name__,
-                                   info={"sequence_type": self.sequence_type, 'region_type': params.region_type})
+                                   info={"sequence_type": self.sequence_type, 'region_type': self.region_type})
 
         return encoded_data
 

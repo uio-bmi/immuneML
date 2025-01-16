@@ -58,6 +58,7 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
         counts = Counter()
         sequence_encoder = self._prepare_sequence_encoder()
         feature_names = sequence_encoder.get_feature_names(params)
+        params.region_type = self.region_type
         for sequence in repertoire.sequences(params.region_type):
             counts = self._encode_sequence(sequence, params, sequence_encoder, counts)
 

@@ -25,9 +25,10 @@ class SklearnMethod(MLMethod):
     """
     Base class for ML methods imported from scikit-learn. The classes inheriting SklearnMethod acting as wrappers around imported
     ML methods from scikit-learn have to implement:
-        - the __init__() method,
-        - get_params(label) and
-        - _get_ml_model()
+    - the __init__() method,
+    - get_params(label) and
+    - _get_ml_model()
+
     Other methods can also be overwritten if needed.
     The arguments and specification described bellow applied for all classes inheriting SklearnMethod.
 

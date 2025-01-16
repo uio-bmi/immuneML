@@ -84,7 +84,7 @@ class DefinitionParser:
                                DocumentationFormat(SimConfig, "Simulation config", DocumentationFormat.LEVELS[1]),
                                DocumentationFormat(SimConfigItem, "Simulation config item", DocumentationFormat.LEVELS[2])]
 
-        file_path = path / "simulation.rst"
+        file_path = path / "specs_simulation.rst"
         with file_path.open("w") as file:
             for doc_format in classes_to_document:
                 write_class_docs(doc_format, file)
@@ -92,24 +92,26 @@ class DefinitionParser:
     @staticmethod
     def make_dataset_docs(path: Path):
         import_classes = ReflectionHandler.all_nonabstract_subclasses(DataImport, "Import", "dataset_import/")
-        make_docs(path, import_classes, "datasets.rst", "Import")
+        make_docs(path, import_classes, "specs_datasets.rst", "Import")
 
     @staticmethod
     def make_encodings_docs(path: Path):
         enc_classes = ReflectionHandler.all_direct_subclasses(DatasetEncoder, "Encoder", "encodings/")
-        make_docs(path, enc_classes, "encodings.rst", "Encoder")
+        make_docs(path, enc_classes, "specs_encodings.rst", "Encoder")
 
     @staticmethod
     def make_reports_docs(path: Path):
-        filename = "reports.rst"
+        filename = "specs_reports.rst"
         file_path = path / filename
+        mode = "w"
 
         for report_type_class in [DataReport, EncodingReport, MLReport, TrainMLModelReport, MultiDatasetReport, GenModelReport]:
-            with file_path.open("a") as file:
+            with file_path.open(mode) as file:
                 doc_format = DocumentationFormat(cls=report_type_class,
                                                  cls_name=f"**{report_type_class.DOCS_TITLE}**",
                                                  level_heading=DocumentationFormat.LEVELS[1])
                 write_class_docs(doc_format, file)
+                mode = "a"
 
             subdir = DefaultParamsLoader.convert_to_snake_case(report_type_class.__name__) + "s"
 
@@ -118,8 +120,9 @@ class DefinitionParser:
 
     @staticmethod
     def make_ml_methods_docs(path: Path):
-        filename = 'ml_methods.rst'
+        filename = 'specs_ml_methods.rst'
         file_path = path / filename
+        mode = "w"
 
         method_mapping = [{'method_type': MLMethod, 'subdir': 'classifiers', 'title': MLMethod.DOCS_TITLE},
                           {'method_type': ClusteringMethod, 'subdir': 'clustering', 'title': ClusteringMethod.DOCS_TITLE},
@@ -127,11 +130,12 @@ class DefinitionParser:
                           {'method_type': DimRedMethod, 'subdir': 'dim_reduction', 'title': DimRedMethod.DOCS_TITLE}]
 
         for method in method_mapping:
-            with file_path.open('a') as file:
+            with file_path.open(mode) as file:
                 doc_format = DocumentationFormat(cls=method['method_type'],
                                                  cls_name=f"**{method['title']}**",
                                                  level_heading=DocumentationFormat.LEVELS[1])
                 write_class_docs(doc_format, file)
+                mode = "a"
 
             classes = ReflectionHandler.all_nonabstract_subclasses(method['method_type'], "",
                                                                    f"ml_methods/{method['subdir']}/")
@@ -140,4 +144,4 @@ class DefinitionParser:
     @staticmethod
     def make_preprocessing_docs(path: Path):
         classes = ReflectionHandler.all_nonabstract_subclasses(Preprocessor, "", "preprocessing/")
-        make_docs(path, classes, "preprocessings.rst", "")
+        make_docs(path, classes, "specs_preprocessings.rst", "")

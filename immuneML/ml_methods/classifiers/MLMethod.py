@@ -20,6 +20,7 @@ class MLMethod(metaclass=abc.ABCMeta):
     .. csv-table:: ML methods properties
        :file: ../../source/_static/files/ml_methods_properties.csv
        :header-rows: 1
+
     """
     DOCS_TITLE = "Classifiers"
 

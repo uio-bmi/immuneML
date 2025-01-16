@@ -35,7 +35,7 @@ class TestConfounderAnalysis(TestCase):
 
     def _make_dataset(self, path, size) -> RepertoireDataset:
 
-        random_dataset = RDG.generate_repertoire_dataset(repertoire_count=size, sequence_count_probabilities={100: 1.},
+        random_dataset = RDG.generate_repertoire_dataset(repertoire_count=size, sequence_count_probabilities={10: 1.},
                                                          sequence_length_probabilities={5: 1.},
                                                          labels={'disease': {True: 0.5, False: 0.5},
                                                                  'HLA': {True: 0.5, False: 0.5},
@@ -67,8 +67,8 @@ class TestConfounderAnalysis(TestCase):
             "k": 3,
             'sequence_type': SequenceType.AMINO_ACID.name
         })
-        report.train_dataset = self._encode_dataset(encoder, self._make_dataset(path / "train", size=100), path)
-        report.test_dataset = self._encode_dataset(encoder, self._make_dataset(path / "test", size=40), path, learn_model=False)
+        report.train_dataset = self._encode_dataset(encoder, self._make_dataset(path / "train", size=10), path)
+        report.test_dataset = self._encode_dataset(encoder, self._make_dataset(path / "test", size=4), path, learn_model=False)
         report.method = self._create_dummy_lr_model(path, report.train_dataset.encoded_data, Label("disease", [True, False]))
 
         return report

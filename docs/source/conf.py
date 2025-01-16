@@ -17,15 +17,16 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('../..'))
-
 from immuneML.environment import Constants
 
+print(os.getcwd())
+os.chdir(os.path.join(os.getcwd(), "../../"))
+print(f"new working dir: {os.getcwd()}")
 
 # -- Project information -----------------------------------------------------
 
 project = 'immuneML'
-copyright = '2021-2023, Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve'
+copyright = '2021-2025, Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve'
 author = 'Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve'
 
 # The short X.Y version
@@ -51,7 +52,6 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx_toolbox.collapse',
-#    'sphinx_rtd_theme',
     'sphinx.ext.napoleon',
     'sphinx.ext.autosectionlabel',
     'sphinx_sitemap'
@@ -73,7 +73,7 @@ napoleon_include_init_with_doc = True
 
 # autodoc
 
-autodoc_mock_imports = ["pandas", "sklearn", "numpy", "pystache"]
+autodoc_mock_imports = ["pandas", "sklearn", "numpy", "pystache", "torch"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
