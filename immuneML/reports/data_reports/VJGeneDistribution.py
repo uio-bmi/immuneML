@@ -23,13 +23,13 @@ class VJGeneDistribution(DataReport):
     associated receptors.
 
     - Individual V and J gene distributions: for sequence and receptor datasets, a bar plot is created showing how often
-    each V or J gene occurs in the dataset. For repertoire datasets, boxplots are used to represent how often each V or J
-    gene is used across all repertoires. Since repertoires may differ in size, these counts are normalised by the repertoire
-    size (original count values are additionaly exported in tsv files).
+      each V or J gene occurs in the dataset. For repertoire datasets, boxplots are used to represent how often each V or J
+      gene is used across all repertoires. Since repertoires may differ in size, these counts are normalised by the repertoire
+      size (original count values are additionaly exported in tsv files).
 
     - Combined V and J gene distributions: for sequence and receptor datasets, a heatmap is created showing how often each
-    combination of V and J genes occurs in the dataset. A similar plot is created for repertoire datasets, except in this
-    case only the average value for the normalised gene usage frequencies are shown (original count values are additionaly exported in tsv files).
+      combination of V and J genes occurs in the dataset. A similar plot is created for repertoire datasets, except in this
+      case only the average value for the normalised gene usage frequencies are shown (original count values are additionaly exported in tsv files).
 
 
     **Specification arguments:**

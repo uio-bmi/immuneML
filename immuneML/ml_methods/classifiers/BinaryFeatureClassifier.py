@@ -32,13 +32,13 @@ class BinaryFeatureClassifier(MLMethod):
     Currently, this classifier can be used in combination with two encoders:
 
     - The classifier can be used in combination with the :py:obj:`~immuneML.encodings.motif_encoding.MotifEncoder.MotifEncoder`,
-    such that sequences containing any of the positive class-associated motifs are classified as positive.
-    A reduced subset of binding-associated motifs can be learned (when keep_all is false).
-    This results in a set of complementary motifs, minimizing the redundant predictions made by different motifs.
+      such that sequences containing any of the positive class-associated motifs are classified as positive.
+      A reduced subset of binding-associated motifs can be learned (when keep_all is false).
+      This results in a set of complementary motifs, minimizing the redundant predictions made by different motifs.
 
     - Alternatively, this classifier can be combined with the :py:obj:`~immuneML.encodings.motif_encoding.SimilarToPositiveSequenceEncoder.SimilarToPositiveSequenceEncoder`
-    such that any sequence that falls within a given hamming distance from any of the positive class sequences in the training set
-    are classified as positive. Parameter keep_all should be set to true, since this encoder creates only 1 feature.
+      such that any sequence that falls within a given hamming distance from any of the positive class sequences in the training set
+      are classified as positive. Parameter keep_all should be set to true, since this encoder creates only 1 feature.
 
 
     **Specification arguments:**

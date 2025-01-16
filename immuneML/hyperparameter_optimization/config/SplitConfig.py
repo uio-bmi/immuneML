@@ -7,6 +7,9 @@ from scripts.specification_util import update_docs_per_mapping
 
 class SplitConfig:
     """
+
+    **SplitConfig**
+
     SplitConfig describes how to split the data for cross-validation. It allows for the following combinations:
 
     - loocv (leave-one-out cross-validation)
@@ -29,7 +32,7 @@ class SplitConfig:
 
     - training_percentage: if split_strategy is RANDOM, this defines which portion of the original dataset to use for creating the training dataset; for other values of split_strategy, this parameter is not used.
 
-    - reports (ReportConfig): defines which reports to execute on which datasets or settings. See :ref:`ReportConfig` for more details.
+    - reports (ReportConfig): defines which reports to execute on which datasets or settings. See ReportConfig for more details.
 
     - manual_config (:py:obj:`~immuneML.hyperparameter_optimization.config.ManualSplitConfig.ManualSplitConfig`): if split strategy is `MANUAL`,
       here the paths to metadata files should be given (fields `train_metadata_path` and `test_metadata_path`). The matching of examples is done
