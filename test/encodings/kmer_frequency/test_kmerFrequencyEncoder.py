@@ -31,14 +31,14 @@ class TestKmerFrequencyEncoder(TestCase):
 
         PathBuilder.remove_old_and_build(path)
 
-        rep1 = Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="AAA", sequence="AAA", sequence_id="1"),
-                                                ReceptorSequence(sequence_aa="ATA", sequence="ATA", sequence_id="2"),
-                                                ReceptorSequence(sequence_aa="ATA", sequence="ATA", sequence_id='3')],
+        rep1 = Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="AAA", sequence="AAA", sequence_id="1", v_call="TRBV1"),
+                                                ReceptorSequence(sequence_aa="ATA", sequence="ATA", sequence_id="2", v_call="TRBV1"),
+                                                ReceptorSequence(sequence_aa="ATA", sequence="ATA", sequence_id='3', v_call="TRBV1")],
                                                metadata={"l1": 1, "l2": 2, "subject_id": "1"}, result_path=path)
 
-        rep2 = Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="ATA", sequence="ATA", sequence_id="1"),
-                                                ReceptorSequence(sequence_aa="TAA", sequence="TAA", sequence_id="2"),
-                                                ReceptorSequence(sequence_aa="AAC", sequence="AAC", sequence_id="3")],
+        rep2 = Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="ATA", sequence="ATA", sequence_id="1", v_call="TRBV1"),
+                                                ReceptorSequence(sequence_aa="TAA", sequence="TAA", sequence_id="2", v_call="TRBV1"),
+                                                ReceptorSequence(sequence_aa="AAC", sequence="AAC", sequence_id="3", v_call="TRBV2")],
                                                metadata={"l1": 0, "l2": 3, "subject_id": "2"}, result_path=path)
 
         lc = LabelConfiguration()
@@ -50,7 +50,7 @@ class TestKmerFrequencyEncoder(TestCase):
         encoder = KmerFrequencyEncoder.build_object(dataset, **{
             "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
             "reads": ReadsType.UNIQUE.name,
-            "sequence_encoding": SequenceEncodingType.IDENTITY.name,
+            "sequence_encoding": SequenceEncodingType.V_GENE_CONT_KMER.name,
             "sequence_type": SequenceType.AMINO_ACID.name,
             "region_type": RegionType.IMGT_CDR3.name,
             "k": 3

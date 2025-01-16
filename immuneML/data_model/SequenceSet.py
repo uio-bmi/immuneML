@@ -34,6 +34,13 @@ class ReceptorSequence:
     duplicate_count: int = -1
     cell_id: str = ''
 
+    @property
+    def v_gene(self):
+        if self.v_call and len(self.v_call) > 0:
+            return self.v_call.split("*")[0]
+        else:
+            return ""
+
     def get_sequence(self, sequence_type: SequenceType = SequenceType.AMINO_ACID):
         return self.sequence_aa if sequence_type == SequenceType.AMINO_ACID else self.sequence
 

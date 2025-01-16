@@ -43,7 +43,10 @@ class KmerFrequencyEncoder(DatasetEncoder):
     - sequence_encoding (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType`): The type
       of k-mers that are used. The simplest sequence_encoding is
       :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.CONTINUOUS_KMER`, which uses
-      contiguous subsequences of length k to represent the k-mers. When gapped k-mers are used
+      contiguous subsequences of length k to represent the k-mers. Alternatively, these subsequences could be represented
+      together with the v gene of the sequence they belong to using
+      :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.V_GENE_CONT_KMER`.When gapped
+      k-mers are used
       (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`,
       :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`),
       the k-mers may contain gaps with a size between min_gap and max_gap, and the k-mer length is defined as a
