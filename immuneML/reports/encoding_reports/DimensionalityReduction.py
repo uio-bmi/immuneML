@@ -45,7 +45,7 @@ class DimensionalityReduction(EncodingReport):
 
     @classmethod
     def build_object(cls, **kwargs):
-        if "dim_red_method" in kwargs:
+        if "dim_red_method" in kwargs and kwargs["dim_red_method"] and isinstance(kwargs["dim_red_method"], dict):
             cls_name = list(kwargs['dim_red_method'].keys())[0]
             method = MLParser.parse_any_model("dim_red_method", kwargs['dim_red_method'], cls_name)[0]
         else:
