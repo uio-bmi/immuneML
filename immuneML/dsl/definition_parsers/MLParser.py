@@ -26,7 +26,6 @@ class MLParser:
         return symbol_table, specification
 
     @staticmethod
-    @log
     def _parse_ml_method(ml_method_id: str, ml_specification) -> tuple:
 
         valid_class_values = {'classifiers': ReflectionHandler.all_nonabstract_subclass_basic_names(MLMethod, "",
