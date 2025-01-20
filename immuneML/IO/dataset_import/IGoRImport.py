@@ -1,11 +1,7 @@
 import pandas as pd
 
 from immuneML.IO.dataset_import.DataImport import DataImport
-from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from immuneML.data_model.dataset import Dataset
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.repertoire.Repertoire import Repertoire
-from immuneML.util.ImportHelper import ImportHelper
+from immuneML.data_model.SequenceParams import RegionType
 from scripts.specification_util import update_docs_per_mapping
 
 
@@ -24,63 +20,81 @@ class IGoRImport(DataImport):
     ‘High-throughput immune repertoire analysis with IGoR’. Nature Communications, (2018)
     `doi.org/10.1038/s41467-018-02832-w <https://doi.org/10.1038/s41467-018-02832-w>`_.
 
-    Arguments:
+    **Specification arguments:**
 
-        path (str): For RepertoireDatasets, this is the path to a directory with IGoR files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
+    - path (str): For RepertoireDatasets, this is the path to a directory with IGoR files to import. For Sequence- or
+      ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one
+      or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
-        is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset. By default, is_repertoire is set to True.
+    - is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset.
+      By default, is_repertoire is set to True.
 
-        metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. Only the IGoR files included under the column 'filename' are imported into the RepertoireDataset. For setting SequenceDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
+    - metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file.
+      This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in
+      instructions. Only the IGoR files included under the column 'filename' are imported into the RepertoireDataset.
+      For setting Sequence- or ReceptorDataset labels, metadata_file is ignored, use label_columns instead.
 
-        import_with_stop_codon (bool): Whether sequences with stop codons should be included in the imported sequences. By default, import_with_stop_codon is False.
+    - label_columns (list): For Sequence- or ReceptorDataset, this parameter can be used to explicitly set the column
+      names of labels to import. These labels can be used as prediction target. When label_columns are not set, label
+      names are attempted to be discovered automatically (any column name which is not used in the column_mapping).
+      For setting RepertoireDataset labels, label_columns is ignored, use metadata_file instead.
 
-        import_out_of_frame (bool): Whether out of frame sequences (with value '0' in column is_inframe) should be included in the imported sequences. By default, import_out_of_frame is False.
+    - import_with_stop_codon (bool): Whether sequences with stop codons should be included in the imported sequences.
+      By default, import_with_stop_codon is False.
 
-        import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.
+    - import_out_of_frame (bool): Whether out of frame sequences (with value '0' in column is_inframe) should be
+      included in the imported sequences. By default, import_out_of_frame is False.
 
-        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.
+    - import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters
+      that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to
+      false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only
+      entries with illegal characters in the amino acid sequence are removed). By default, import_illegal_characters
+      is False.
 
-        region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as IGoR uses the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
+    - import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True
+      or False. By default, import_empty_nt_sequences is set to True.
 
-        column_mapping (dict): A mapping from IGoR column names to immuneML's internal data representation. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the IGoR file, or using alternative column names). Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS. For IGoR, this is by default set to:
+    - region_type (str): Which part of the sequence to check when importing. By default, this value is set to IMGT_CDR3.
+      This means the first and last amino acids are removed from the CDR3 sequence, as IGoR uses the IMGT junction.
+      Specifying any other value will result in importing the sequences as they are. Valid values for region_type are
+      the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
-            .. indent with spaces
-            .. code-block:: yaml
+    - column_mapping (dict): A mapping from IGoR column names to immuneML's internal data representation. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the IGoR file, or using alternative column names). Valid immuneML fields that can be specified here are defined by the AIRR standard (AIRRSequenceSet). For IGoR, this is by default set to:
 
-                nt_CDR3: sequences
-                seq_index: sequence_identifiers
+        .. indent with spaces
+        .. code-block:: yaml
 
-        column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For IGoR format, there is no default column_mapping_synonyms.
+            nt_CDR3: cdr3
+            seq_index: sequence_id
 
-        metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDatasets. This should specify a mapping similar to column_mapping where keys are IGoR column names and values are the names that are internally used in immuneML as metadata fields. These metadata fields can be used as prediction labels for Sequence- and ReceptorDatasets. This parameter can also be used to specify sequence-level metadata columns for RepertoireDatasets, which can be used by reports. To set prediction label metadata for RepertoireDatasets, see metadata_file instead. For IGoR format, there is no default metadata_column_mapping.
-
-        separator (str): Column separator, for IGoR this is by default ",".
+    - separator (str): Column separator, for IGoR this is by default ",".
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_igor_dataset:
-            format: IGoR
-            params:
-                path: path/to/files/
-                is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
-                metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                metadata_column_mapping: # metadata column mapping IGoR: immuneML for SequenceDataset
-                    igor_column_name1: metadata_label1
-                    igor_column_name2: metadata_label2
-                import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
-                import_out_of_frame: False # whether to include out of frame sequences in the dataset
-                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
-                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                # Optional fields with IGoR-specific defaults, only change when different behavior is required:
-                separator: "," # column separator
-                region_type: IMGT_CDR3 # what part of the sequence to import
-                column_mapping: # column mapping IGoR: immuneML
-                    nt_CDR3: sequences
-                    seq_index: sequence_identifiers
+        definitions:
+            datasets:
+                my_igor_dataset:
+                    format: IGoR
+                    params:
+                        path: path/to/files/
+                        is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
+                        metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                        import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
+                        import_out_of_frame: False # whether to include out of frame sequences in the dataset
+                        import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
+                        import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                        # Optional fields with IGoR-specific defaults, only change when different behavior is required:
+                        separator: "," # column separator
+                        region_type: IMGT_CDR3 # what part of the sequence to import
+                        column_mapping: # column mapping IGoR: immuneML
+                            nt_CDR3: cdr3
+                            seq_index: sequence_id
+                            igor_column_name1: metadata_label1
+                            igor_column_name2: metadata_label2
 
     """
     CODON_TABLE = {
@@ -102,33 +116,19 @@ class IGoRImport(DataImport):
         'TGC': 'C', 'TGT': 'C', 'TGA': '*', 'TGG': 'W',
     }
 
-    @staticmethod
-    def import_dataset(params: dict, dataset_name: str) -> Dataset:
-        return ImportHelper.import_dataset(IGoRImport, params, dataset_name)
+    def preprocess_file(self, df: pd.DataFrame) -> pd.DataFrame:
 
-    @staticmethod
-    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        if "counts" not in df.columns:
-            df["counts"] = 1
+        if 'junction' in df.columns and ('junction_aa' not in df.columns or all(df.junction_aa == "")):
+            df['junction_aa'] = df['junction'].apply(IGoRImport.translate_sequence)
 
-        df = df[df.anchors_found == "1"]
+        if "cdr3" in df.columns and "cdr3_aa" not in df.columns:
+            df["cdr3_aa"] = df["cdr3"].apply(IGoRImport.translate_sequence)
 
-        if not params.import_out_of_frame:
-            df = df[df.is_inframe == "1"]
+        if 'vj_in_frame' in df.columns:
+            df['vj_in_frame'] = df['vj_in_frame'].astype(str).replace('1', 'T').replace('0', 'F')
 
-        df["sequence_aas"] = df["sequences"].apply(IGoRImport.translate_sequence)
-
-        if not params.import_with_stop_codon:
-            no_stop_codon = ["*" not in seq for seq in df.sequence_aas]
-            df = df[no_stop_codon]
-
-        ImportHelper.junction_to_cdr3(df, params.region_type)
-        df.loc[:, "region_types"] = params.region_type.name
-        # note: import_empty_aa_sequences is set to true here; since IGoR doesnt output aa, this parameter is insensible
-        ImportHelper.drop_empty_sequences(df, True, params.import_empty_nt_sequences)
-        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters, params.import_with_stop_codon)
-
-        # chain or at least receptorsequence?
+        if 'anchors_found' in df.columns:
+            df = df[df.anchors_found == 1]
 
         return df
 
@@ -153,12 +153,10 @@ class IGoRImport(DataImport):
         doc = str(IGoRImport.__doc__)
 
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
-        repertoire_fields = list(Repertoire.FIELDS)
-        repertoire_fields.remove("region_types")
 
         mapping = {
             "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
-            "Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS": f"Valid immuneML fields that can be specified here are {repertoire_fields}."
+            "Valid immuneML fields that can be specified here are defined by the AIRR standard (AIRRSequenceSet)": f"Valid immuneML fields that can be specified here by `the AIRR Rearrangement Schema <https://docs.airr-community.org/en/latest/datarep/rearrangements.html>`_."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

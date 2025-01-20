@@ -6,8 +6,8 @@ from zipfile import ZipFile
 import pandas as pd
 
 from immuneML.IO.dataset_import.IReceptorImport import IReceptorImport
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -439,9 +439,9 @@ class TestIReceptorImport(TestCase):
         return zip_path
 
     def test_import_repertoire_dataset(self):
-        base_path = EnvironmentSettings.root_path / "test/tmp/ireceptorimport/"
+        base_path = EnvironmentSettings.tmp_test_path / "ireceptorimport/"
         path = base_path / "repertoiredataset/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         ireceptor_zip1_path = self.create_dummy_dataset(path, zip_name="first_zip", disease_name="first_disease")
         ireceptor_zip2_path = self.create_dummy_dataset(path, zip_name="second_zip", disease_name="second_disease")
 
@@ -449,7 +449,7 @@ class TestIReceptorImport(TestCase):
         params["result_path"] = path / "result"
         params["path"] = path
 
-        dataset = IReceptorImport.import_dataset(params, "ireceptor_repertoiredataset")
+        dataset = IReceptorImport(params, "ireceptor_repertoiredataset").import_dataset()
 
         self.assertEqual(6, dataset.get_example_count())
         self.assertEqual(RepertoireDataset, type(dataset))
@@ -483,9 +483,9 @@ person2	second_zip_rep2	samp2	5faf101103b9977a150a9eaa	PRJCA002413	Homo sapiens	
         shutil.rmtree(base_path)
 
     def test_import_sequence_dataset(self):
-        base_path = EnvironmentSettings.root_path / "test/tmp/ireceptorimport/"
+        base_path = EnvironmentSettings.tmp_test_path / "ireceptorimport_seq/"
         path = base_path / "sequencedataset/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         ireceptor_zip1_path = self.create_dummy_dataset(path, zip_name="first_zip", disease_name="first_disease")
         ireceptor_zip2_path = self.create_dummy_dataset(path, zip_name="second_zip", disease_name="second_disease")
 
@@ -495,7 +495,7 @@ person2	second_zip_rep2	samp2	5faf101103b9977a150a9eaa	PRJCA002413	Homo sapiens	
         params["is_repertoire"] = False
         params["paired"] = False
 
-        dataset = IReceptorImport.import_dataset(params, "ireceptor_sequencedataset")
+        dataset = IReceptorImport(params, "ireceptor_sequencedataset").import_dataset()
 
         self.assertEqual(26, dataset.get_example_count())
         self.assertEqual(SequenceDataset, type(dataset))

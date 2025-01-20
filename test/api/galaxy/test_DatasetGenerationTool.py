@@ -18,9 +18,9 @@ class TestDatasetGenerationTool(TestCase):
                         "d1": {
                             "format": "RandomRepertoireDataset",
                             "params": {
-                                "repertoire_count": 100,
+                                "repertoire_count": 10,
                                 "sequence_count_probabilities": {
-                                    100: 1
+                                    1: 1
                                 },
                                 "sequence_length_probabilities": {
                                     10: 1
@@ -31,7 +31,7 @@ class TestDatasetGenerationTool(TestCase):
                     }
             },
             "instructions": {
-                "inst1": {"type": "DatasetExport", "export_formats": ["ImmuneML"], "datasets": ["d1"]}
+                "inst1": {"type": "DatasetExport", "export_formats": ["AIRR"], "datasets": ["d1"]}
             }
         }
 
@@ -40,18 +40,18 @@ class TestDatasetGenerationTool(TestCase):
 
     def test_run(self):
         path = EnvironmentSettings.tmp_test_path / "galaxy_api_dataset_generation/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         yaml_path = path / "specs.yaml"
         result_path = path / "results/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
         self.prepare_specs(yaml_path)
 
         run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path, 'tool': "DatasetGenerationTool"}))
 
-        self.assertTrue(os.path.isfile(result_path / "result/dataset_metadata.csv"))
-        self.assertTrue(os.path.isfile(result_path / "result/dataset.iml_dataset"))
-        self.assertEqual(200, len([name for name in os.listdir(result_path / "result/repertoires/")
-                                   if os.path.isfile(os.path.join(result_path / "result/repertoires/", name))]))
+        self.assertTrue(os.path.isfile(result_path / "galaxy_dataset/dataset_metadata.csv"))
+        self.assertTrue(os.path.isfile(result_path / "galaxy_dataset/dataset.yaml"))
+        self.assertEqual(20, len([name for name in os.listdir(result_path / "galaxy_dataset/repertoires/")
+                                   if os.path.isfile(os.path.join(result_path / "galaxy_dataset/repertoires/", name))]))
 
         shutil.rmtree(path)

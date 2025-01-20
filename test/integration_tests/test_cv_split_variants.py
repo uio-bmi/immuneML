@@ -94,7 +94,7 @@ class TestCVSplitVariants(TestCase):
 
     def test_dataset_generation(self):
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "cv_split_variant/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "cv_split_variant/")
         repertoire_specs = self.build_specs(path)
 
         specs_filename = path / "specs.yaml"

@@ -1,9 +1,9 @@
 import abc
-import warnings
+import logging
 from pathlib import Path
 
 from immuneML.analysis.data_manipulation.DataReshaper import DataReshaper
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
@@ -56,11 +56,11 @@ class FeatureReport(EncodingReport):
         run_report = True
 
         if self.dataset.encoded_data is None or self.dataset.encoded_data.examples is None:
-            warnings.warn(
+            logging.warning(
                 f"{location}: this report can only be created for an encoded dataset. {location} report will not be created.")
             run_report = False
         elif len(self.dataset.encoded_data.examples.shape) != 2:
-            warnings.warn(
+            logging.warning(
                 f"{location}: this report can only be created for a 2-dimensional encoded dataset. {location} report will not be created.")
             run_report = False
         else:
@@ -71,7 +71,7 @@ class FeatureReport(EncodingReport):
             for label_param in labels:
                 if label_param is not None:
                     if label_param not in legal_labels:
-                        warnings.warn(
+                        logging.warning(
                             f"{location}: undefined label '{label_param}'. Legal options are: {legal_labels}. {location} report will not be created.")
                         run_report = False
 

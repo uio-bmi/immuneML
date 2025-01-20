@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
 from immuneML.environment.Constants import Constants
@@ -23,14 +23,17 @@ class TestCompAIRRSequenceAbundanceEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode(self):
-        compairr_paths = [Path("/usr/local/bin/compairr"), Path("./compairr/src/compairr")]
+        compairr_runs = 0
 
-        for compairr_path in compairr_paths:
+        for compairr_path in EnvironmentSettings.compairr_paths:
             if compairr_path.exists():
                 self._test_encode(compairr_path)
+                compairr_runs += 1
                 break
             else:
                 print(f"test ignored for compairr path: {compairr_path}")
+
+        assert compairr_runs > 0
 
     def _build_test_dataset(self, path):
         repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
@@ -74,7 +77,7 @@ class TestCompAIRRSequenceAbundanceEncoder(TestCase):
             self.assertListEqual(sorted(list(contingency["negative_absent"])), sorted([1, 0, 2, 1, 0, 2, 2, 1, 0]))
 
             self.assertListEqual(sorted([round(val, 1) for val in p_values["p_values"]]), sorted([2.0, 1.0, 2.0, 0.8, 1.0, 2.0, 0.2, 0.5, 1.0]))
-            self.assertListEqual(list(relevant_sequences["sequence_aas"]), ["III"])
+            self.assertListEqual(list(relevant_sequences["cdr3_aa"]), ["III"])
 
             encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=result_path, label_config=label_config))
 

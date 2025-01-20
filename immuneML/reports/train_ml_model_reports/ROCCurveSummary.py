@@ -22,15 +22,15 @@ class ROCCurveSummary(TrainMLModelReport):
     defined only for binary classification. If there are multiple labels defined in the instruction, each label has to have two classes to be included
     in this report.
 
-    Arguments: there are no arguments for this report.
 
-    YAML specification:
+    **YAML specification:**
 
-        .. indent with spaces
-        .. code-block:: yaml
+    .. indent with spaces
+    .. code-block:: yaml
 
-        reports:
-            my_roc_summary_report: ROCCurveSummary
+        definitions:
+            reports:
+                my_roc_summary_report: ROCCurveSummary
 
     """
 

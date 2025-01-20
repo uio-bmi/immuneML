@@ -2,13 +2,14 @@ import shutil
 from unittest import TestCase
 
 from immuneML.IO.dataset_import.MiXCRImport import MiXCRImport
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestMiXCRLoader(TestCase):
+
     def create_dummy_dataset(self, path, add_metadata):
         file1_content = """cloneId	cloneCount	cloneFraction	targetSequences	targetQualities	allVHitsWithScore	allDHitsWithScore	allJHitsWithScore	allCHitsWithScore	allVAlignments	allDAlignments	allJAlignments	allCAlignments	nSeqFR1	minQualFR1	nSeqCDR1	minQualCDR1	nSeqFR2	minQualFR2	nSeqCDR2	minQualCDR2	nSeqFR3	minQualFR3	nSeqCDR3	minQualCDR3	nSeqFR4	minQualFR4	aaSeqFR1	aaSeqCDR1	aaSeqFR2	aaSeqCDR2	aaSeqFR3	aaSeqCDR3	aaSeqFR4	refPoints
 0	956023.0	0.17165008499706622	TGTGCTCTAGTAACTGACAGCTGGGGGAAATTGCAGTTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV6*00(716)		TRAJ24*00(291.3)	TRAC*00(75.5)	615|625|648|0|10||50.0		24|52|83|11|39||140.0												TGTGCTCTAGTAACTGACAGCTGGGGGAAATTGCAGTTT	41								CALVTDSWGKLQF		:::::::::0:-3:10:::::11:-4:39:::
@@ -43,8 +44,7 @@ rep1.tsv,1
 rep2.tsv,2""")
 
     def test_load_repertoire_dataset(self):
-        path = EnvironmentSettings.root_path / "test/tmp/mixcr/"
-        PathBuilder.build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "mixcr_rep")
         self.create_dummy_dataset(path, add_metadata=True)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "mixcr")
@@ -53,29 +53,31 @@ rep2.tsv,2""")
         params["path"] = path
         params["metadata_file"] = path / "metadata.csv"
 
-        dataset = MiXCRImport.import_dataset(params, "mixcr_repertoire_dataset")
+        dataset = MiXCRImport(params, "mixcr_repertoire_dataset").import_dataset()
 
         self.assertEqual(2, dataset.get_example_count())
         for index, repertoire in enumerate(dataset.get_data()):
-            self.assertTrue(all(sequence.metadata.chain == Chain.ALPHA for sequence in repertoire.sequences))
+            self.assertTrue(all(sequence.locus == Chain.ALPHA.value for sequence in repertoire.sequences()))
             if index == 0:
-                self.assertEqual(9, len(repertoire.sequences))
-                self.assertTrue(repertoire.sequences[0].amino_acid_sequence in ["ALVTDSWGKLQ", "AVLETSGSRLT"])  # OSX/windows
-                self.assertTrue(repertoire.sequences[0].metadata.v_gene in ["TRAV6", "TRAV21"])  # OSX/windows
+                seqs = repertoire.sequences()
+                self.assertEqual(9, len(seqs))
+                self.assertTrue(seqs[0].sequence_aa in ["ALVTDSWGKLQ", "AVLETSGSRLT"])  # OSX/windows
+                self.assertTrue(seqs[0].v_call in ["TRAV6", "TRAV21"])  # OSX/windows
 
-                self.assertListEqual([Chain.ALPHA for i in range(9)], list(repertoire.get_chains()))
-                self.assertListEqual(sorted([956023, 90101, 69706, 56658, 55692, 43466, 42172, 41647, 19133]), sorted(list(repertoire.get_counts())))
+                self.assertListEqual([Chain.ALPHA.value for i in range(9)], repertoire.data.locus.tolist())
+                self.assertListEqual(sorted([956023, 90101, 69706, 56658, 55692, 43466, 42172, 41647, 19133]),
+                                     sorted(repertoire.data.duplicate_count.tolist()))
 
             elif index == 1:
-                self.assertEqual(5, len(repertoire.sequences))
-                self.assertTrue(repertoire.sequences[0].nucleotide_sequence in ["GCTGTGCTGGAAACCAGTGGCTCTAGGTTGACC",
-                                                                                "GCTCTAGTAACTGACAGCTGGGGGAAATTGCAG"])  # OSX/windows
+                self.assertEqual(5, len(repertoire.sequences()))
+                self.assertTrue(repertoire.sequences()[0].sequence in ["GCTGTGCTGGAAACCAGTGGCTCTAGGTTGACC",
+                                                                       "GCTCTAGTAACTGACAGCTGGGGGAAATTGCAG"])  # OSX/windows
 
         shutil.rmtree(path)
 
     def test_load_sequence_dataset(self):
-        path = EnvironmentSettings.root_path / "test/tmp/mixcr/"
-        PathBuilder.build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "mixcr_seq/")
+
         self.create_dummy_dataset(path, add_metadata=False)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "mixcr")
@@ -83,12 +85,13 @@ rep2.tsv,2""")
         params["paired"] = False
         params["result_path"] = path
         params["path"] = path
+        params["columns_to_load"] = None
 
-        dataset = MiXCRImport.import_dataset(params, "mixcr_repertoire_dataset")
+        dataset = MiXCRImport(params, "mixcr_repertoire_dataset").import_dataset()
 
         seqs = [sequence for sequence in dataset.get_data()]
 
-        self.assertTrue(seqs[0].amino_acid_sequence in ["AVLETSGSRLT", "ALVTDSWGKLQ"])  # OSX/windows
-        self.assertTrue(seqs[0].metadata.v_gene in ["TRAV21", "TRAV6"])  # OSX/windows
+        self.assertTrue(seqs[0].sequence_aa in ["AVLETSGSRLT", "ALVTDSWGKLQ"])  # OSX/windows
+        self.assertTrue(seqs[0].v_call in ["TRAV21", "TRAV6"])  # OSX/windows
 
         shutil.rmtree(path)

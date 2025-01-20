@@ -12,14 +12,14 @@ def write_class_docs(doc_format: DocumentationFormat, file):
     title = f"\n{doc_format.cls_name}\n{doc_format.level_heading}\n\n" if doc_format.cls_name != "" else "\n\n"
     file.writelines(title)
     if hasattr(doc_format.cls, "get_documentation"):
-        file.writelines(doc_format.cls.get_documentation())
+        file.writelines("\n".join([el.replace('    ', '', 1) if el.startswith('    ') else el for el in doc_format.cls.get_documentation().split("\n")]))
     elif doc_format.cls.__doc__ is not None:
-        file.writelines(doc_format.cls.__doc__)
+        file.writelines("\n".join([el.replace('    ', '', 1) if el.startswith('    ') else el for el in doc_format.cls.__doc__.split("\n")]))
 
 
-def make_docs(path: Path, classes, filename, drop_name_part, file_open_mode="w"):
+def make_docs(path: Path, classes, filename, drop_name_part, file_open_mode="w", format_level=DocumentationFormat.LEVELS[1]):
     classes.sort(key=lambda cls: cls.__name__)
-    classes_to_document = [DocumentationFormat(cls, cls.__name__.replace(drop_name_part, ""), DocumentationFormat.LEVELS[1])
+    classes_to_document = [DocumentationFormat(cls, cls.__name__.replace(drop_name_part, ""), format_level)
                            for cls in classes]
 
     file_path = path / filename

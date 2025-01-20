@@ -5,7 +5,7 @@ import pandas as pd
 from scipy import sparse
 
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.util.EncoderHelper import EncoderHelper
@@ -27,26 +27,32 @@ class EvennessProfileEncoder(DatasetEncoder):
     Reference: Greiff et al. (2015). A bioinformatic framework for immune repertoire diversity profiling enables detection of immunological
     status. Genome Medicine, 7(1), 49. `doi.org/10.1186/s13073-015-0169-8 <https://doi.org/10.1186/s13073-015-0169-8>`_
 
+    **Dataset type:**
 
-    Arguments:
+    - RepertoireDatasets
 
-        min_alpha (float): minimum alpha value to use
 
-        max_alpha (float): maximum alpha value to use
+    **Specification arguments:**
 
-        dimension (int): dimension of output evenness profile vector, or the number of alpha values to linearly space
-        between min_alpha and max_alpha
+    - min_alpha (float): minimum alpha value to use
 
-    YAML specification:
+    - max_alpha (float): maximum alpha value to use
+
+    - dimension (int): dimension of output evenness profile vector, or the number of alpha values to linearly space
+      between min_alpha and max_alpha
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-            my_evenness_profile:
-                EvennessProfile:
-                    min_alpha: 0
-                    max_alpha: 10
-                    dimension: 51
+        definitions:
+            encodings:
+                my_evenness_profile:
+                    EvennessProfile:
+                        min_alpha: 0
+                        max_alpha: 10
+                        dimension: 51
 
 
     """
@@ -59,10 +65,10 @@ class EvennessProfileEncoder(DatasetEncoder):
     }
 
     def __init__(self, min_alpha: float, max_alpha: float, dimension: int, name: str = None):
+        super().__init__(name=name)
         self.min_alpha = min_alpha
         self.max_alpha = max_alpha
         self.dimension = dimension
-        self.name = name
 
     @staticmethod
     def _prepare_parameters(min_alpha: float, max_alpha: float, dimension: int, name: str = None):

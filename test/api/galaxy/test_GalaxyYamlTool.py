@@ -5,7 +5,7 @@ from unittest import TestCase
 
 import yaml
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.app.ImmuneMLApp import run_immuneML
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
@@ -15,20 +15,20 @@ from immuneML.util.PathBuilder import PathBuilder
 class TestGalaxyYamlTool(TestCase):
     def test_run1(self):
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "api_galaxy_yaml_tool1/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "api_galaxy_yaml_tool1/")
         result_path = path / "result/"
 
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {10: 1}, {12: 1}, {}, result_path)
         dataset.name = "d1"
-        ImmuneMLExporter.export(dataset, result_path)
+        AIRRExporter.export(dataset, result_path)
 
         specs = {
             "definitions": {
                 "datasets": {
                     "new_d1": {
-                        "format": "ImmuneML",
+                        "format": "AIRR",
                         "params": {
-                            "metadata_file": str(result_path / "d1_metadata.csv")
+                            "metadata_file": str(dataset.metadata_file)
                         }
                     }
                 },
@@ -54,7 +54,7 @@ class TestGalaxyYamlTool(TestCase):
 
     def test_run2(self):
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "api_galaxy_yaml_tool2/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "api_galaxy_yaml_tool2/")
         result_path = path / "result/"
 
         specs = {
@@ -63,7 +63,7 @@ class TestGalaxyYamlTool(TestCase):
                     "d2": {
                         "format": "RandomRepertoireDataset",
                         "params": {
-                            "repertoire_count": 50,
+                            "repertoire_count": 20,
                             "sequence_length_probabilities": {10: 1},
                             'sequence_count_probabilities': {10: 1},
                             'labels': {
@@ -121,7 +121,7 @@ class TestGalaxyYamlTool(TestCase):
                     },
                     "selection": {
                         "split_strategy": "random",
-                        "split_count": 2,
+                        "split_count": 1,
                         "training_percentage": 0.7
                     },
                     "labels": ["CD"],

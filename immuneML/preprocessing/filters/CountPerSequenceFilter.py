@@ -2,10 +2,11 @@ import logging
 from multiprocessing.pool import Pool
 from pathlib import Path
 
+import dill
 import numpy as np
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.preprocessing.filters.Filter import Filter
 
 
@@ -14,20 +15,20 @@ class CountPerSequenceFilter(Filter):
     Removes all sequences from a Repertoire when they have a count below low_count_limit, or sequences with no count
     value if remove_without_counts is True. This filter can be applied to Repertoires and RepertoireDatasets.
 
-    Arguments:
+    **Specification arguments:**
 
-        low_count_limit (int): The inclusive minimal count value in order to retain a given sequence.
+    - low_count_limit (int): The inclusive minimal count value in order to retain a given sequence.
 
-        remove_without_count (bool): Whether the sequences without a reported count value should be removed.
+    - remove_without_count (bool): Whether the sequences without a reported count value should be removed.
 
-        remove_empty_repertoires (bool): Whether repertoires without sequences should be removed.
-        Only has an effect when remove_without_count is also set to True. If this is true, this preprocessing cannot be used with :ref:`TrainMLModel`
-        instruction, but only with :ref:`DatasetExport` instruction instead.
+    - remove_empty_repertoires (bool): Whether repertoires without sequences should be removed.
+      Only has an effect when remove_without_count is also set to True. If this is true, this preprocessing cannot be used with :ref:`TrainMLModel`
+      instruction, but only with :ref:`DatasetExport` instruction instead.
 
-        batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed when applying this filter on a RepertoireDataset)
+    - batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed when applying this filter on a RepertoireDataset)
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
@@ -58,7 +59,7 @@ class CountPerSequenceFilter(Filter):
         self.result_path = result_path if result_path is not None else self.result_path
 
         with Pool(self.batch_size) as pool:
-            repertoires = pool.map(self._process_repertoire, dataset.repertoires)
+            repertoires = pool.map(self._process_repertoire, [dill.dumps(rep) for rep in dataset.repertoires])
 
         if self.remove_empty_repertoires:
             repertoires = self._remove_empty_repertoires(repertoires)
@@ -71,9 +72,11 @@ class CountPerSequenceFilter(Filter):
 
     def _process_repertoire(self, repertoire: Repertoire) -> Repertoire:
 
-        counts = repertoire.get_counts()
-        counts = counts if counts is not None else np.full(repertoire.get_element_count(), None)
-        not_none_indices = counts != None
+        if isinstance(repertoire, bytes):
+            repertoire = dill.loads(repertoire)
+
+        counts = repertoire.data.duplicate_count
+        not_none_indices = counts != -1
         counts[not_none_indices] = counts[not_none_indices].astype(int)
         indices_to_keep = np.full(repertoire.get_element_count(), False)
         if self.remove_without_count and self.low_count_limit is not None:

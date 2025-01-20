@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.preprocessing.filters.Filter import Filter
 
 
@@ -14,12 +14,12 @@ class ChainRepertoireFilter(Filter):
     Since the filter removes repertoires from the dataset (examples in machine learning setting), it cannot be used with :ref:`TrainMLModel`
     instruction. If you want to filter out repertoires including a given chain, see :ref:`DatasetExport` instruction with preprocessing.
 
-    Arguments:
+    **Specification arguments:**
 
-        keep_chain (:py:obj:`~immuneML.environment.SequenceType.SequenceType`): Which chain should be kept.
+    - keep_chain (str): Which chain should be kept, valid values are "TRA", "TRB", "IGH", "IGL", "IGK"
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
@@ -44,7 +44,7 @@ class ChainRepertoireFilter(Filter):
         repertoires = []
         indices = []
         for index, repertoire in enumerate(dataset.get_data()):
-            if all(sequence.metadata.chain == self.keep_chain for sequence in repertoire.sequences):
+            if all([el == self.keep_chain.name or el == self.keep_chain.value for el in repertoire.data.locus.tolist()]):
                 repertoires.append(repertoire)
                 indices.append(index)
 

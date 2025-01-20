@@ -1,13 +1,14 @@
-import warnings
+import logging
 from pathlib import Path
 from typing import List
 
 import pandas as pd
 import plotly.express as px
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -24,39 +25,44 @@ class SignificantKmerPositions(DataReport):
     This report creates a stacked bar chart, where each bar represents an IMGT position, and each segment of the stack represents the observed frequency
     of one 'significant' k-mer at that position.
 
-    Arguments:
+    **Specification arguments:**
 
-        reference_sequences_path (str): Path to a file containing the reference sequences,
-        The file should contain one sequence per line, without a header, and without V or J genes.
+    - reference_sequences_path (str): Path to a file containing the reference sequences,
+      The file should contain one sequence per line, without a header, and without V or J genes.
 
-        p_values (list): The p value thresholds to be used by Fisher's exact test. Each p-value specified here will become one panel in the output figure.
+    - p_values (list): The p value thresholds to be used by Fisher's exact test. Each p-value specified here will become one panel in the output figure.
 
-        k_values (list): Length of the k-mers (number of amino acids) created by the :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder`.
-        Each k-mer length will become one panel in the output figure.
+    - k_values (list): Length of the k-mers (number of amino acids) created by the :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder`.
+      Each k-mer length will become one panel in the output figure.
 
-        label (dict): A label configuration. One label should be specified, and the positive_class for this label should be defined. See the YAML specification below for an example.
+    - label (dict): A label configuration. One label should be specified, and the positive_class for this label should be defined. See the YAML specification below for an example.
 
+    - sequence_type (str): nucleotide or amino_acid
 
-    YAML specification:
+    - region_type (str): which AIRR field to consider, e.g., IMGT_CDR3 or IMGT_JUNCTION
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_significant_kmer_positions_report:
-            SignificantKmerPositions:
-                reference_sequences_path: path/to/reference/sequences.txt
-                p_values:
-                    - 0.1
-                    - 0.01
-                    - 0.001
-                    - 0.0001
-                k_values:
-                    - 3
-                    - 4
-                    - 5
-                label: # Define a label, and the positive class for that given label
-                    CMV:
-                        positive_class: +
+        definitions:
+            reports:
+                my_significant_kmer_positions_report:
+                    SignificantKmerPositions:
+                        reference_sequences_path: path/to/reference/sequences.txt
+                        p_values:
+                            - 0.1
+                            - 0.01
+                            - 0.001
+                            - 0.0001
+                        k_values:
+                            - 3
+                            - 4
+                            - 5
+                        label: # Define a label, and the positive class for that given label
+                            CMV:
+                                positive_class: +
     """
 
     @classmethod
@@ -72,7 +78,7 @@ class SignificantKmerPositions(DataReport):
     def __init__(self, dataset: RepertoireDataset = None, reference_sequences_path: Path = None,
                  p_values: List[float] = None, k_values: List[int] = None, label: dict = None,
                  compairr_path: Path = None, result_path: Path = None, name: str = None,
-                 number_of_processes: int = 1):
+                 number_of_processes: int = 1, region_type: RegionType = None, sequence_type: SequenceType = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.reference_sequences_path = reference_sequences_path
         self.reference_sequences = SignificantFeaturesHelper.load_sequences(reference_sequences_path)
@@ -80,16 +86,21 @@ class SignificantKmerPositions(DataReport):
         self.k_values = k_values
         self.label = label
         self.compairr_path = compairr_path
+        self.label_config = None
+        self.region_type = RegionType[region_type.upper()] if isinstance(region_type, str) else region_type
+        self.sequence_type = SequenceType[sequence_type.upper()] if isinstance(sequence_type, str) else sequence_type
 
     def check_prerequisites(self):
         if isinstance(self.dataset, RepertoireDataset):
             return True
         else:
-            warnings.warn(f"{SignificantKmerPositions.__name__}: report can be generated only from RepertoireDataset. Skipping this report...")
+            logging.warning(f"{SignificantKmerPositions.__name__}: report can be generated only from RepertoireDataset. "
+                          f"Skipping this report...")
             return False
 
     def _generate(self) -> ReportResult:
-        self.label_config = LabelHelper.create_label_config([self.label], self.dataset, SignificantKmerPositions.__name__,
+        self.label_config = LabelHelper.create_label_config([self.label], self.dataset,
+                                                            SignificantKmerPositions.__name__,
                                                             f"{SignificantKmerPositions.__name__}/label")
 
         plotting_data = self._compute_plotting_data()
@@ -99,7 +110,8 @@ class SignificantKmerPositions(DataReport):
         output_figures = None if report_output_fig is None else [report_output_fig]
 
         return ReportResult(name=self.name,
-                            info="The number of significant k-mers observed at each IMGT position of a given list of reference sequences.",
+                            info="The number of significant k-mers observed at each IMGT position of a given list "
+                                 "of reference sequences.",
                             output_figures=output_figures,
                             output_tables=[table_result])
 
@@ -125,14 +137,15 @@ class SignificantKmerPositions(DataReport):
         return pd.DataFrame(result).astype({'imgt_position': str})
 
     def _get_encoder_result_path(self, k, p_value):
-        result_path =  self.result_path / f"{k}-mer_{p_value}"
+        result_path = self.result_path / f"{k}-mer_{p_value}"
         PathBuilder.build(result_path)
         return result_path
 
     def _write_results_table(self, data) -> ReportOutput:
         table_path = self.result_path / f"significant_kmer_positions_report.csv"
         data.to_csv(table_path, index=False)
-        return ReportOutput(table_path, "Number of significant k-mers found at each position in a set of reference sequences")
+        return ReportOutput(table_path,
+                            "Number of significant k-mers found at each position in a set of reference sequences")
 
     def _plot(self, plotting_data):
         figure = px.bar(plotting_data, x="imgt_position", y="count", color="k-mer",
@@ -156,7 +169,8 @@ class SignificantKmerPositions(DataReport):
 
     def _get_imgt_position_order(self, imgt_positions):
         sorted_positions = sorted([float(pos) for pos in imgt_positions])
-        return [str(pos_float) if int(pos_float) != pos_float else str(int(pos_float)) for pos_float in sorted_positions]
+        return [str(pos_float) if int(pos_float) != pos_float else str(int(pos_float)) for pos_float in
+                sorted_positions]
 
     def _compute_significant_kmer_positions(self, k, p_value):
         significant_kmers = self._compute_significant_kmers(k, p_value)
@@ -164,7 +178,8 @@ class SignificantKmerPositions(DataReport):
         results = {}
 
         for sequence in self.reference_sequences:
-            reference_imgt_kmers = KmerHelper.create_IMGT_kmers_from_string(sequence, k, region_type=RegionType.IMGT_CDR3)
+            reference_imgt_kmers = KmerHelper.create_IMGT_kmers_from_string(sequence, k,
+                                                                            region_type=RegionType.IMGT_CDR3)
 
             for kmer, imgt_pos in reference_imgt_kmers:
                 if imgt_pos not in results:
@@ -180,7 +195,8 @@ class SignificantKmerPositions(DataReport):
 
     def _compute_significant_kmers(self, k, p_value):
         encoder_result_path = self._get_encoder_result_path(k, p_value)
-        encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path)
+        encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path,
+                                                                         self.region_type, self.sequence_type)
         encoder = SignificantFeaturesHelper._build_kmer_encoder(self.dataset, k, p_value, encoder_params)
         sequences = pd.read_csv(encoder.relevant_sequence_path)
 

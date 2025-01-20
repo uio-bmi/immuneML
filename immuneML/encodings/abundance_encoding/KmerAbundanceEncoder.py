@@ -7,8 +7,9 @@ import pandas as pd
 
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.abundance_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
@@ -16,6 +17,7 @@ from immuneML.encodings.kmer_frequency.KmerFreqRepertoireEncoder import KmerFreq
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReadsType import ReadsType
@@ -40,32 +42,39 @@ class KmerAbundanceEncoder(DatasetEncoder):
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
     See :ref:`Reproduction of the CMV status predictions study` for an example using :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
 
-    Arguments:
+    **Dataset type:**
 
-        p_value_threshold (float): The p value threshold to be used by the statistical test.
-
-        sequence_encoding (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType`): The type of k-mers that are used. The simplest (default) sequence_encoding is :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.CONTINUOUS_KMER`, which uses contiguous subsequences of length k to represent the k-mers. When gapped k-mers are used (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`, :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`), the k-mers may contain gaps with a size between min_gap and max_gap, and the k-mer length is defined as a combination of k_left and k_right. When IMGT k-mers are used (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_CONTINUOUS_KMER`, :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_GAPPED_KMER`), IMGT positional information is taken into account (i.e. the same sequence in a different position is considered to be a different k-mer).
-
-        k (int): Length of the k-mer (number of amino acids) when ungapped k-mers are used. The default value for k is 3.
-
-        k_left (int): When gapped k-mers are used, k_left indicates the length of the k-mer left of the gap. The default value for k_left is 1.
-
-        k_right (int): Same as k_left, but k_right determines the length of the k-mer right of the gap. The default value for k_right is 1.
-
-        min_gap (int): Minimum gap size when gapped k-mers are used. The default value for min_gap is 0.
-
-        max_gap: (int): Maximum gap size when gapped k-mers are used. The default value for max_gap is 0.
+    - RepertoireDatasets
 
 
-    YAML specification:
+    **Specification arguments:**
+
+    - p_value_threshold (float): The p value threshold to be used by the statistical test.
+
+    - sequence_encoding (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType`): The type of k-mers that are used. The simplest (default) sequence_encoding is :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.CONTINUOUS_KMER`, which uses contiguous subsequences of length k to represent the k-mers. When gapped k-mers are used (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`, :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`), the k-mers may contain gaps with a size between min_gap and max_gap, and the k-mer length is defined as a combination of k_left and k_right. When IMGT k-mers are used (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_CONTINUOUS_KMER`, :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_GAPPED_KMER`), IMGT positional information is taken into account (i.e. the same sequence in a different position is considered to be a different k-mer).
+
+    - k (int): Length of the k-mer (number of amino acids) when ungapped k-mers are used. The default value for k is 3.
+
+    - k_left (int): When gapped k-mers are used, k_left indicates the length of the k-mer left of the gap. The default value for k_left is 1.
+
+    - k_right (int): Same as k_left, but k_right determines the length of the k-mer right of the gap. The default value for k_right is 1.
+
+    - min_gap (int): Minimum gap size when gapped k-mers are used. The default value for min_gap is 0.
+
+    - max_gap: (int): Maximum gap size when gapped k-mers are used. The default value for max_gap is 0.
+
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_sa_encoding:
-            KmerAbundance:
-                p_value_threshold: 0.05
-                threads: 8
+        definitions:
+            encodings:
+                my_ka_encoding:
+                    KmerAbundance:
+                        p_value_threshold: 0.05
+                        threads: 8
 
     """
 
@@ -73,14 +82,16 @@ class KmerAbundanceEncoder(DatasetEncoder):
     TOTAL_SEQUENCE_ABUNDANCE = "total_sequence_abundance"
 
     def __init__(self, p_value_threshold: float, sequence_encoding: SequenceEncodingType, k: int,
-                 k_left: int, k_right: int, min_gap: int, max_gap: int, name: str = None):
-        self.name = name
+                 k_left: int, k_right: int, min_gap: int, max_gap: int, name: str = None,
+                 sequence_type: SequenceType = SequenceType.AMINO_ACID, region_type: RegionType = RegionType.IMGT_CDR3):
+        super().__init__(name=name)
         self.p_value_threshold = p_value_threshold
 
         self.kmer_frequency_params = {"normalization_type": NormalizationType.BINARY, "reads": ReadsType.UNIQUE,
                                       "sequence_encoding": sequence_encoding, "k": k, "k_left": k_left, "k_right": k_right,
                                       "min_gap": min_gap, "max_gap": max_gap, "scale_to_unit_variance": False,
-                                      "scale_to_zero_mean": False, "sequence_type": EnvironmentSettings.get_sequence_type()}
+                                      "region_type": region_type, "sequence_type": sequence_type,
+                                      "scale_to_zero_mean": False}
 
         self.relevant_indices_path = None
         self.relevant_sequence_path = None
@@ -94,7 +105,9 @@ class KmerAbundanceEncoder(DatasetEncoder):
 
     @staticmethod
     def _prepare_parameters(p_value_threshold: float, sequence_encoding: str, k: int,
-                            k_left: int, k_right: int, min_gap: int, max_gap: int, name: str = None):
+                            k_left: int, k_right: int, min_gap: int, max_gap: int, name: str = None,
+                            region_type: str = RegionType.IMGT_CDR3.name,
+                            sequence_type: str = SequenceType.AMINO_ACID.name):
         ParameterValidator.assert_type_and_value(p_value_threshold, float, "KmerAbundanceEncoder", "p_value_threshold", min_inclusive=0,
                                                  max_inclusive=1)
 
@@ -103,7 +116,8 @@ class KmerAbundanceEncoder(DatasetEncoder):
         kmerfreq_params = KmerFrequencyEncoder._prepare_parameters(normalization_type="binary", reads="unique",
                                                                    sequence_encoding=sequence_encoding,
                                                                    k=k, k_left=k_left, k_right=k_right, min_gap=min_gap,
-                                                                   max_gap=max_gap, sequence_type=EnvironmentSettings.get_sequence_type().name)
+                                                                   max_gap=max_gap,
+                                                                   sequence_type=sequence_type, region_type=region_type)
 
         return {
             "p_value_threshold": p_value_threshold,
@@ -113,7 +127,9 @@ class KmerAbundanceEncoder(DatasetEncoder):
             "k_right": kmerfreq_params["k_right"],
             "min_gap": kmerfreq_params["min_gap"],
             "max_gap": kmerfreq_params["max_gap"],
-            "name": name
+            "name": name,
+            "region_type": kmerfreq_params['region_type'],
+            "sequence_type": kmerfreq_params['sequence_type']
         }
 
     @staticmethod
@@ -123,7 +139,7 @@ class KmerAbundanceEncoder(DatasetEncoder):
         return KmerAbundanceEncoder(**prepared_params)
 
     def encode(self, dataset, params: EncoderParams):
-        AbundanceEncoderHelper.check_labels(params.label_config, KmerAbundanceEncoder.__name__)
+        EncoderHelper.check_positive_class_labels(params.label_config, KmerAbundanceEncoder.__name__)
 
         self._prepare_kmer_presence_data(dataset, params)
         return self._encode_data(dataset, params)
@@ -176,7 +192,8 @@ class KmerAbundanceEncoder(DatasetEncoder):
                                          "contingency_table_path": self.contingency_table_path,
                                          "p_values_path": self.p_values_path})
 
-        encoded_dataset = RepertoireDataset(labels=dataset.labels, encoded_data=encoded_data, repertoires=dataset.repertoires)
+        encoded_dataset = dataset.clone()
+        encoded_dataset.encoded_data = encoded_data
 
         return encoded_dataset
 
@@ -218,14 +235,6 @@ class KmerAbundanceEncoder(DatasetEncoder):
     def set_context(self, context: dict):
         self.context = context
         return self
-
-    def store(self, encoded_dataset, params: EncoderParams):
-        EncoderHelper.store(encoded_dataset, params)
-
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> Path:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file
 
     def get_additional_files(self) -> List[Path]:
         return [file for file in [self.relevant_indices_path, self.relevant_sequence_path, self.contingency_table_path, self.p_values_path] if file]

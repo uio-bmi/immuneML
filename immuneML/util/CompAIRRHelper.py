@@ -5,8 +5,10 @@ from pathlib import Path
 
 import pandas as pd
 
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.CompAIRRParams import CompAIRRParams
 
 
@@ -45,7 +47,7 @@ class CompAIRRHelper:
         except Exception as e:
             raise Exception(f"CompAIRRHelper: failed to call CompAIRR: {e}\n"
                             f"Please ensure the correct version of CompAIRR has been installed (version {required_major}.{required_minor}.{required_patch} or later), "
-                            f"or provide the path to the CompAIRR executable.")
+                            f"or provide the path to the CompAIRR executable.").with_traceback(e.__traceback__)
 
         return compairr_path
 
@@ -60,11 +62,11 @@ class CompAIRRHelper:
         command = '-m' if compairr_params.do_repertoire_overlap and not compairr_params.do_sequence_matching else '-x'
 
         return [str(compairr_params.compairr_path), command, "-d", str(compairr_params.differences), "-t", str(compairr_params.threads)] + \
-                indels_args + frequency_args + ignore_genes + output_args + input_file_list + output_pairs + cdr3_indicator
+               indels_args + frequency_args + ignore_genes + output_args + [str(file) for file in input_file_list] + output_pairs + cdr3_indicator
 
     @staticmethod
-    def write_repertoire_file(repertoire_dataset=None, filename=None, compairr_params=None, repertoires: list = None,
-                              export_sequence_id: bool = False):
+    def write_repertoire_file(repertoire_dataset=None, filename=None, compairr_params: CompAIRRParams = None,
+                              repertoires: list = None, export_sequence_id: bool = False):
         mode = "w"
         header = True
 
@@ -73,8 +75,11 @@ class CompAIRRHelper:
         if repertoire_dataset is not None and repertoires is None:
             repertoires = repertoire_dataset.get_data()
 
+        encoder_params = EncoderParams(region_type=RegionType.IMGT_CDR3 if compairr_params.is_cdr3 else RegionType.IMGT_JUNCTION)
+
         for ind, repertoire in enumerate(repertoires):
-            repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, compairr_params, export_sequence_id)
+            repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, compairr_params, encoder_params,
+                                                                         export_sequence_id)
 
             if ind == 0:
                 columns_in_order = sorted(repertoire_contents.columns)
@@ -85,32 +90,65 @@ class CompAIRRHelper:
             header = False
 
     @staticmethod
-    def get_repertoire_contents(repertoire, compairr_params, export_sequence_id=False):
-        attributes = [EnvironmentSettings.get_sequence_type().value, "counts"]
-        attributes += [] if compairr_params.ignore_genes else ["v_genes", "j_genes"]
-        repertoire_contents = repertoire.get_attributes(attributes)
+    def write_sequences_file(sequence_dataset, filename, compairr_params, repertoire_id="sequence_dataset"):
+        compairr_data = {"junction_aa": [],
+                         "repertoire_id": [],
+                         "sequence_id": []}
+
+        if not compairr_params.ignore_genes:
+            compairr_data["v_call"] = []
+            compairr_data["j_call"] = []
+
+        if not compairr_params.ignore_counts:
+            compairr_data["duplicate_count"] = []
+
+        for sequence in sequence_dataset.get_data():
+            compairr_data["junction_aa"].append(sequence.get_sequence(sequence_type=SequenceType.AMINO_ACID))
+
+            assert sequence.sequence_id is not None, \
+                (f"{CompAIRRHelper.__name__}: sequence identifiers must be set when exporting a sequence "
+                 f"dataset for CompAIRR.")
+            compairr_data["sequence_id"].append(sequence.sequence_id)
+            compairr_data["repertoire_id"].append(repertoire_id)
+
+            if not compairr_params.ignore_genes:
+                compairr_data["v_call"].append(sequence.v_call)
+                compairr_data["j_call"].append(sequence.j_call)
+
+            if not compairr_params.ignore_counts:
+                compairr_data["duplicate_count"].append(sequence.duplicate_count)
+
+        df = pd.DataFrame(compairr_data)
+
+        df.to_csv(filename, mode="w", header=True, index=False, sep="\t")
+
+    @staticmethod
+    def get_repertoire_contents(repertoire, compairr_params, encoder_params: EncoderParams, export_sequence_id=False):
+        attributes = [encoder_params.get_sequence_field_name(), "duplicate_count"]
+        attributes += [] if compairr_params.ignore_genes else ["v_call", "j_call"]
+        repertoire_contents = repertoire.data.topandas()[attributes]
         repertoire_contents = pd.DataFrame({**repertoire_contents, "identifier": repertoire.identifier})
         if export_sequence_id:
-            repertoire_contents['sequence_id'] = repertoire.get_attribute('sequence_identifiers')
+            repertoire_contents['sequence_id'] = repertoire.data.sequence_id.tolist()
 
-        check_na_rows = [EnvironmentSettings.get_sequence_type().value]
-        check_na_rows += [] if compairr_params.ignore_counts else ["counts"]
-        check_na_rows += [] if compairr_params.ignore_genes else ["v_genes", "j_genes"]
+        check_na_rows = [encoder_params.get_sequence_field_name()]
+        check_na_rows += [] if compairr_params.ignore_counts else ["duplicate_count"]
+        check_na_rows += [] if compairr_params.ignore_genes else ["v_call", "j_call"]
 
         n_rows_before = len(repertoire_contents)
 
         repertoire_contents.dropna(inplace=True, subset=check_na_rows)
 
         if n_rows_before > len(repertoire_contents):
-            warnings.warn(
+            logging.warning(
                 f"CompAIRRHelper: removed {n_rows_before - len(repertoire_contents)} entries from repertoire {repertoire.identifier} due to missing values.")
 
         if compairr_params.ignore_counts:
-            repertoire_contents["counts"] = 1
+            repertoire_contents["duplicate_count"] = 1
+        else:
+            repertoire_contents['duplicate_count'] = [count if count >= 0 else pd.NA for count in repertoire_contents['duplicate_count']]
 
-        repertoire_contents.rename(columns={EnvironmentSettings.get_sequence_type().value: "cdr3_aa" if repertoire.get_region_type() == RegionType.IMGT_CDR3 else 'junction_aa',
-                                            "v_genes": "v_call", "j_genes": "j_call",
-                                            "counts": "duplicate_count", "identifier": "repertoire_id"},
+        repertoire_contents.rename(columns={"identifier": "repertoire_id"},
                                    inplace=True)
 
         return repertoire_contents

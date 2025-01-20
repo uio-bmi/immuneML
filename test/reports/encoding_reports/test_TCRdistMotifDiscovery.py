@@ -1,9 +1,11 @@
 import os
 import shutil
-from unittest import TestCase
 
-from immuneML.IO.dataset_import.SingleLineReceptorImport import SingleLineReceptorImport
 from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.SequenceParams import ChainPair
+from immuneML.data_model.SequenceSet import Receptor
+from immuneML.data_model.SequenceSet import ReceptorSequence
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
 from immuneML.environment.Constants import Constants
@@ -14,13 +16,8 @@ from immuneML.reports.ml_reports.TCRdistMotifDiscovery import TCRdistMotifDiscov
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class TestTCRdistMotifDiscovery(TestCase):
-
-    def setUp(self) -> None:
-        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
-
-    def _create_dataset(self, path):
-        data = """subject,epitope,count,v_a_gene,j_a_gene,cdr3_a_aa,cdr3_a_nucseq,v_b_gene,j_b_gene,cdr3_b_aa,cdr3_b_nucseq,clone_id
+def _create_dataset(path):
+    data = """subject,epitope,count,v_a_gene,j_a_gene,cdr3_a_aa,cdr3_a_nucseq,v_b_gene,j_b_gene,cdr3_b_aa,cdr3_b_nucseq,clone_id
 mouse_subject0050,PA,2,TRAV7-3*01,TRAJ33*01,CAVSLDSNYQLIW,tgtgcagtgagcctcgatagcaactatcagttgatctgg,TRBV13-1*01,TRBJ2-3*01,CASSDFDWGGDAETLYF,tgtgccagcagtgatttcgactggggaggggatgcagaaacgctgtatttt,mouse_tcr0072.clone
 mouse_subject0050,PA,6,TRAV6D-6*01,TRAJ56*01,CALGDRATGGNNKLTF,tgtgctctgggtgacagggctactggaggcaataataagctgactttt,TRBV29*01,TRBJ1-1*01,CASSPDRGEVFF,tgtgctagcagtccggacaggggtgaagtcttcttt,mouse_tcr0096.clone
 mouse_subject0050,PA,1,TRAV6D-6*01,TRAJ49*01,CALGSNTGYQNFYF,tgtgctctgggctcgaacacgggttaccagaacttctatttt,TRBV29*01,TRBJ1-5*01,CASTGGGAPLF,tgtgctagcacagggggaggggctccgcttttt,mouse_tcr0276.clone
@@ -40,46 +37,35 @@ mouse_subject0007,PA,3,TRAV4D-3*03,TRAJ33*01,CAAEAGSNYQLIW,tgtgctgctgaggcgggtagc
 mouse_subject0007,PA,1,TRAV12N-3*01,TRAJ34*02,CALSKTNTNKVVF,tgtgctctgagtaagaccaataccaacaaagtcgtcttt,TRBV29*01,TRBJ2-7*01,CASSWGGEQYF,tgtgctagcagttgggggggcgaacagtacttc,mouse_tcr0423.clone
 mouse_subject0007,PA,3,TRAV21/DV12*01,TRAJ56*01,CILRVGATGGNNKLTF,tgtatcctgagagtaggggctactggaggcaataataagctgactttt,TRBV29*01,TRBJ1-1*01,CASSLDRGEVFF,tgtgctagcagcctggacaggggagaagtcttcttt,mouse_tcr0411.clone
 mouse_subject0007,PA,1,TRAV6D-6*01,TRAJ33*01,CALGAGSNYQLIW,tgtgctctgggggccggtagcaactatcagttgatctgg,TRBV29*01,TRBJ1-1*01,CASSSGQEVFF,tgtgctagcagttcgggacaggaagtcttcttt,mouse_tcr0449.clone
-mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagcaattacaaactgacattt,TRBV29*01,TRBJ2-7*01,CASSGGGEQYF,tgtgctagcagtggggggggcgaacagtacttc,mouse_tcr0110.clone
-"""
-        filename = path / 'data.csv'
+mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagcaattacaaactgacattt,TRBV29*01,TRBJ2-7*01,CASSGGGEQYF,tgtgctagcagtggggggggcgaacagtacttc,mouse_tcr0110.clone"""
 
-        with open(filename, "w") as file:
-            file.writelines(data)
+    receptors = []
+    for line in data.split("\n"):
+        if not line.startswith('subject,epitope'):
+            receptor_info = line.split(",")
+            receptor = Receptor(chain_1=ReceptorSequence(sequence_aa=receptor_info[5], sequence=receptor_info[6],
+                                                         v_call=receptor_info[3], locus='TRA', j_call=receptor_info[4]),
+                                chain_2=ReceptorSequence(sequence_aa=receptor_info[9], sequence=receptor_info[10],
+                                                         v_call=receptor_info[7], locus='TRB', j_call=receptor_info[9]),
+                                metadata={'epitope': receptor_info[1]}, chain_pair=ChainPair.TRA_TRB,
+                                cell_id=receptor_info[-1], receptor_id=receptor_info[-1])
+            receptors.append(receptor)
 
-        return filename
+    return ReceptorDataset.build_from_objects(receptors, path, labels={'epitope': ['PA'], 'organism': 'mouse'})
 
-    def test_generate(self):
-        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "tcrdist_motif_discovery/")
-        dataset_path = self._create_dataset(path)
 
-        dataset = SingleLineReceptorImport.import_dataset({"path": dataset_path,
-                                                           "result_path": path / "dataset/",
-                                                           "separator": ",",
-                                                           "columns_to_load": ["subject", "epitope", "count", "v_a_gene", "j_a_gene", "cdr3_a_aa",
-                                                                               "v_b_gene", "j_b_gene", "cdr3_b_aa", "clone_id", "cdr3_a_nucseq",
-                                                                               "cdr3_b_nucseq"],
-                                                           "column_mapping": {
-                                                               "cdr3_a_aa": "alpha_amino_acid_sequence",
-                                                               "cdr3_b_aa": "beta_amino_acid_sequence",
-                                                               "cdr3_a_nucseq": "alpha_nucleotide_sequence",
-                                                               "cdr3_b_nucseq": "beta_nucleotide_sequence",
-                                                               "v_a_gene": "alpha_v_gene",
-                                                               "v_b_gene": "beta_v_gene",
-                                                               "j_a_gene": "alpha_j_gene",
-                                                               "j_b_gene": "beta_j_gene",
-                                                               "clone_id": "identifier"
-                                                           },
-                                                           "receptor_chains": "TRA_TRB",
-                                                           "region_type": "IMGT_CDR3",
-                                                           "sequence_file_size": 50000,
-                                                           "organism": "mouse"}, 'd1')
+def test_generate():
+    os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-        dataset = TCRdistEncoder(8).encode(dataset, EncoderParams(path / "result", LabelConfiguration([Label("epitope", None)])))
+    path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "tcrdist_motif_discovery/")
+    dataset = _create_dataset(PathBuilder.build(path / 'dataset'))
 
-        report = TCRdistMotifDiscovery(train_dataset=dataset, test_dataset=dataset, result_path=path / "report", name="report name", cores=8,
-                                       positive_class_name="PA", min_cluster_size=3)
-        report.label = Label("epitope", None)
-        report._generate()
+    dataset = TCRdistEncoder(8).encode(dataset,
+                                       EncoderParams(path / "result", LabelConfiguration([Label("epitope", None)])))
 
-        shutil.rmtree(path)
+    report = TCRdistMotifDiscovery(train_dataset=dataset, test_dataset=dataset, result_path=path / "report",
+                                   name="report name", cores=8, positive_class_name="PA", min_cluster_size=3)
+    report.label = Label("epitope", None)
+    report._generate()
+
+    shutil.rmtree(path)

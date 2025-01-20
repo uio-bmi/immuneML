@@ -8,11 +8,11 @@ from scipy import sparse
 from sklearn.neighbors import KNeighborsClassifier
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.KNN import KNN
+from immuneML.ml_methods.classifiers.KNN import KNN
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -47,7 +47,7 @@ class TestKNN(TestCase):
             labels={"test1": [1, 0, 2, 0, 1, 0, 2, 0], "test2": [1, 0, 2, 0, 1, 0, 2, 0]})
 
         knn = KNN(parameters={"n_neighbors": 2})
-        knn.fit_by_cross_validation(x, number_of_splits=2, label=Label("test1", [1, 0, 2]))
+        knn.fit_by_cross_validation(x, number_of_splits=2, label=Label("test1", [1, 0, 2]), optimization_metric="balanced_accuracy")
 
     def test_store(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
@@ -58,7 +58,7 @@ class TestKNN(TestCase):
 
         path = EnvironmentSettings.root_path / "test/tmp/knn/"
 
-        knn.store(path, ["f1", "f2", "f3"])
+        knn.store(path)
         pickle_file_path = path / "knn.pickle"
         self.assertTrue(os.path.isfile(str(pickle_file_path)))
 

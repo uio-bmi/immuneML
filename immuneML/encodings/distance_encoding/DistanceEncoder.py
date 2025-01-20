@@ -1,11 +1,12 @@
+import warnings
 from pathlib import Path
 
 import pandas as pd
 
 from immuneML.IO.ml_method.UtilIO import UtilIO
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.distance_encoding.DistanceMetricType import DistanceMetricType
@@ -25,45 +26,45 @@ class DistanceEncoder(DatasetEncoder):
     if they contain the same set of sequence_aas, and the distance is minimal if none of the sequence_aas are shared between
     two repertoires.
 
-    Arguments:
+    **Specification arguments:**
 
-        distance_metric (:py:mod:`~immuneML.encodings.distance_encoding.DistanceMetricType`): The metric used to calculate the
-        distance between two repertoires. Names of different distance metric types are allowed values in the specification.
-        The default distance metric is JACCARD (inverse Jaccard).
+    - distance_metric (:py:mod:`~immuneML.encodings.distance_encoding.DistanceMetricType`): The metric used to calculate the
+      distance between two repertoires. Names of different distance metric types are allowed values in the specification.
+      The default distance metric is JACCARD (inverse Jaccard).
 
-        sequence_batch_size (int): The number of sequences to be processed at once. Increasing this number increases the memory use.
-        The default value is 1000.
+    - sequence_batch_size (int): The number of sequences to be processed at once. Increasing this number increases the memory use.
+      The default value is 1000.
 
-        attributes_to_match (list): The attributes to consider when determining whether a sequence is present in both repertoires.
-        Only the fields defined under attributes_to_match will be considered, all other fields are ignored.
-        Valid values include any repertoire attribute (sequence, amino acid sequence, V gene etc). The default value is ['sequence_aas']
+    - attributes_to_match (list): The attributes to consider when determining whether a sequence is present in both repertoires.
+      Only the fields defined under attributes_to_match will be considered, all other fields are ignored.
+      Valid values include any repertoire attribute as defined in AIRR rearrangement schema (cdr3_aa, v_call, j_call, etc).
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_distance_encoder:
-            Distance:
-                distance_metric: JACCARD
-                sequence_batch_size: 1000
-                attributes_to_match:
-                    - sequence_aas
-                    - v_genes
-                    - j_genes
-                    - chains
-                    - region_types
+        definitions:
+            encodings:
+                my_distance_encoder:
+                    Distance:
+                        distance_metric: JACCARD
+                        sequence_batch_size: 1000
+                        attributes_to_match:
+                            - cdr3_aa
+                            - v_call
+                            - j_call
 
     """
 
     def __init__(self, distance_metric: DistanceMetricType, attributes_to_match: list, sequence_batch_size: int, context: dict = None,
                  name: str = None):
+        super().__init__(name=name)
         self.distance_metric = distance_metric
         self.distance_fn = ReflectionHandler.import_function(self.distance_metric.value, DistanceMetrics)
         self.attributes_to_match = attributes_to_match
         self.sequence_batch_size = sequence_batch_size
         self.context = context
-        self.name = name
         self.comparison = None
 
     def set_context(self, context: dict):
@@ -118,7 +119,6 @@ class DistanceEncoder(DatasetEncoder):
         return tmp_labels
 
     def encode(self, dataset, params: EncoderParams) -> RepertoireDataset:
-
         train_repertoire_ids = EncoderHelper.prepare_training_ids(dataset, params)
         distance_matrix = self.build_distance_matrix(dataset, params, train_repertoire_ids)
         labels = self.build_labels(dataset, params) if params.encode_labels else None
@@ -129,10 +129,6 @@ class DistanceEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> Path:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file
 
     @staticmethod
     def load_encoder(encoder_file: Path):
@@ -146,11 +142,8 @@ class DistanceEncoder(DatasetEncoder):
 
         valid_values = [metric.name for metric in DistanceMetricType]
         valid_values = str(valid_values)[1:-1].replace("'", "`")
-        valid_field_values = str(Repertoire.FIELDS)[1:-1].replace("'", "`")
         mapping = {
             "Names of different distance metric types are allowed values in the specification.": f"Valid values are: {valid_values}.",
-            "Valid values include any repertoire attribute (sequence, amino acid sequence, V gene etc).":
-                f"Valid values are {valid_field_values}."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

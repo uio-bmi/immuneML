@@ -4,10 +4,9 @@ from unittest import TestCase
 
 from immuneML.analysis.SequenceMatcher import SequenceMatcher
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.SequenceSet import Repertoire, ReceptorSequence
 from immuneML.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -20,19 +19,23 @@ class TestSequenceMatcher(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_match(self):
-        path = EnvironmentSettings.root_path / "test/tmp/seqmatch/"
-        PathBuilder.build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "seqmatch/")
 
-        repertoire = Repertoire.build_from_sequence_objects(sequence_objects=[
-            ReceptorSequence(amino_acid_sequence="AAAAAA", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2"), identifier="3"),
-            ReceptorSequence(amino_acid_sequence="CCCCCC", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2"), identifier="4"),
-            ReceptorSequence(amino_acid_sequence="AAAACC", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2"), identifier="5"),
-            ReceptorSequence(amino_acid_sequence="TADQVF", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J3"), identifier="6")],
-            metadata={"CD": True}, path=path)
+        repertoire = Repertoire.build_from_sequences(sequences=[
+            ReceptorSequence(sequence_aa="AAAAAA", locus="A", v_call="V1", j_call="J2",
+                             sequence_id="3"),
+            ReceptorSequence(sequence_aa="CCCCCC", locus="A", v_call="V1", j_call="J2",
+                             sequence_id="4"),
+            ReceptorSequence(sequence_aa="AAAACC", locus="A", v_call="V1", j_call="J2",
+                             sequence_id="5"),
+            ReceptorSequence(sequence_aa="TADQVF", locus="A", v_call="V1", j_call="J3",
+                             sequence_id="6")],
+            metadata={"CD": True}, result_path=path)
 
         dataset = RepertoireDataset(repertoires=[repertoire])
-        sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2"), identifier="1"),
-                     ReceptorSequence("TADQV", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J3"), identifier="2")]
+        sequences = [ReceptorSequence(sequence_aa="AAAACA", locus="A", v_call="V1", j_call="J2",
+                                      sequence_id="1"),
+                     ReceptorSequence(sequence_aa="TADQV", locus="A", v_call="V1", j_call="J3", sequence_id="2")]
 
         matcher = SequenceMatcher()
         result = matcher.match(dataset, sequences, 2, SequenceMatchingSummaryType.PERCENTAGE)
@@ -45,23 +48,18 @@ class TestSequenceMatcher(TestCase):
         shutil.rmtree(path)
 
     def test_match_repertoire(self):
+        path = EnvironmentSettings.tmp_test_path / "seqmatchrep/"
+        PathBuilder.remove_old_and_build(path)
 
-        path = EnvironmentSettings.root_path / "test/tmp/seqmatchrep/"
-        PathBuilder.build(path)
+        seq_objs = [ReceptorSequence(sequence_aa="AAAAAA", sequence_id="1", locus="A", duplicate_count=3),
+                    ReceptorSequence(sequence_aa="CCCCCC", sequence_id="2", locus="A", duplicate_count=2),
+                    ReceptorSequence(sequence_aa="AAAACC", sequence_id="3", locus="A", duplicate_count=1),
+                    ReceptorSequence(sequence_aa="TADQVF", sequence_id="4", locus="A", duplicate_count=4)]
 
-        repertoire = Repertoire.build_from_sequence_objects(sequence_objects=
-                                                                    [ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="1",
-                                                                                      metadata=SequenceMetadata(chain="A", count=3)),
-                                                                     ReceptorSequence(amino_acid_sequence="CCCCCC", identifier="2",
-                                                                                      metadata=SequenceMetadata(chain="A", count=2)),
-                                                                     ReceptorSequence(amino_acid_sequence="AAAACC", identifier="3",
-                                                                                      metadata=SequenceMetadata(chain="A", count=1)),
-                                                                     ReceptorSequence(amino_acid_sequence="TADQVF", identifier="4",
-                                                                                      metadata=SequenceMetadata(chain="A", count=4))],
-                                                            metadata={"CD": True}, path=path)
+        repertoire = Repertoire.build_from_sequences(sequences=seq_objs, metadata={"CD": True}, result_path=path)
 
-        sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(chain="A")),
-                     ReceptorSequence("TADQV", metadata=SequenceMetadata(chain="A"))]
+        sequences = [ReceptorSequence(sequence_aa="AAAACA", locus="A"),
+                     ReceptorSequence(sequence_aa="TADQV", locus="A")]
 
         matcher = SequenceMatcher()
         result = matcher.match_repertoire(repertoire, 0, sequences, 2, SequenceMatchingSummaryType.COUNT)

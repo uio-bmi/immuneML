@@ -1,4 +1,4 @@
-How to generate a random sequence, receptor or repertoire dataset
+How to generate a dataset with random sequences
 =================================================================
 
 .. meta::
@@ -6,7 +6,7 @@ How to generate a random sequence, receptor or repertoire dataset
    :twitter:card: summary
    :twitter:site: @immuneml
    :twitter:title: immuneML: generate a random dataset
-   :twitter:description: See tutorials on how to generate a random sequence, receptor or repertoire dataset
+   :twitter:description: See tutorials on how to generate a dataset with random sequences
    :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
 
 
@@ -17,7 +17,7 @@ chosen from a uniform distribution. The dataset size, sequence lengths and optio
 
 The generated dataset can then be used to train a classifier (see :ref:`How to train and assess a receptor or repertoire-level ML classifier`),
 apply a classifier (see :ref:`How to apply previously trained ML models to a new dataset`), or simulate immune events (see
-:ref:`How to simulate antigen or disease-associated signals in AIRR datasets`).
+:ref:`Dataset simulation with LIgO`).
 
 YAML specification of a random repertoire dataset
 -------------------------------------------------

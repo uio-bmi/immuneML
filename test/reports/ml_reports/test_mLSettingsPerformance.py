@@ -5,19 +5,21 @@ from unittest import TestCase
 import pandas as pd
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from immuneML.encodings.word2vec.model_creator.ModelType import ModelType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.train_ml_model_reports.MLSettingsPerformance import MLSettingsPerformance
 from immuneML.util.PathBuilder import PathBuilder
@@ -68,21 +70,23 @@ class TestMLSettingsPerformance(TestCase):
         process = TrainMLModelInstruction(dataset, GridSearch(hp_settings), hp_settings,
                                           SplitConfig(SplitType.RANDOM, 1, 0.7),
                                           SplitConfig(SplitType.RANDOM, 1, 0.7),
-                                          {Metric.BALANCED_ACCURACY}, Metric.BALANCED_ACCURACY, label_config, path)
+                                          {ClassificationMetric.BALANCED_ACCURACY}, ClassificationMetric.BALANCED_ACCURACY, label_config, path,
+                                          sequence_type=SequenceType.AMINO_ACID, region_type=RegionType.IMGT_CDR3)
 
         state = process.run(result_path=path)
 
         return state
 
     def test_generate(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "mlsettingsperformance/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "mlsettingsperformance/")
 
         report = MLSettingsPerformance(**{"single_axis_labels": False, "x_label_position": None, "y_label_position": None})
 
         report.result_path = path
         report.state = self._create_state_object(path / "input_data/")
 
-        result = report.generate_report()
+        self.assertTrue(report.check_prerequisites())
+        result = report._generate()
 
         self.assertTrue(os.path.isfile(path / "performance.csv"))
         self.assertTrue(os.path.isfile(path / "performance.html"))
@@ -99,7 +103,7 @@ class TestMLSettingsPerformance(TestCase):
     def test_plot(self):
         # Does not assert anything, but can be used to manually check if the plot looks like it should
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "mlsettingsperformance/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "mlsettingsperformance/")
 
         report = MLSettingsPerformance(**{"single_axis_labels": True, "x_label_position": -0.12, "y_label_position": -0.08})
 

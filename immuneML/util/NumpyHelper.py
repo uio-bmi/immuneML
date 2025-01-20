@@ -3,7 +3,6 @@ from enum import Enum
 
 import numpy as np
 
-
 class NumpyHelper:
 
     SIMPLE_TYPES = [str, int, float, bool, np.str_, np.int_, np.float_, np.bool_]

@@ -1,4 +1,4 @@
-import warnings
+import logging
 from pathlib import Path
 
 import pandas as pd
@@ -26,21 +26,23 @@ class MLSettingsPerformance(TrainMLModelReport):
     This report can be used only with TrainMLModel instruction under 'reports'.
 
 
-    Arguments:
+    **Specification arguments:**
 
-        single_axis_labels (bool): whether to use single axis labels. Note that using single axis labels makes the figure unsuited for rescaling, as the label position is given in a fixed distance from the axis. By default, single_axis_labels is False, resulting in standard plotly axis labels.
+    - single_axis_labels (bool): whether to use single axis labels. Note that using single axis labels makes the figure unsuited for rescaling, as the label position is given in a fixed distance from the axis. By default, single_axis_labels is False, resulting in standard plotly axis labels.
 
-        x_label_position (float): if single_axis_labels is True, this should be an integer specifying the x axis label position relative to the x axis. The default value for label_position is -0.1.
+    - x_label_position (float): if single_axis_labels is True, this should be an integer specifying the x axis label position relative to the x axis. The default value for label_position is -0.1.
 
-        y_label_position (float): same as x_label_position, but for the y axis.
+    - y_label_position (float): same as x_label_position, but for the y-axis.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_hp_report: MLSettingsPerformance
+        definitions:
+            reports:
+                my_hp_report: MLSettingsPerformance
 
     """
 
@@ -158,11 +160,11 @@ class MLSettingsPerformance(TrainMLModelReport):
         run_report = True
 
         if self.state is None:
-            warnings.warn(f"{self.__class__.__name__} can only be executed as a hyperparameter report. MLSettingsPerformance report will not be created.")
+            logging.warning(f"{self.__class__.__name__} can only be executed as a hyperparameter report. MLSettingsPerformance report will not be created.")
             run_report = False
 
         if self.result_path is None:
-            warnings.warn(f"{self.__class__.__name__} requires an output 'path' to be set. MLSettingsPerformance report will not be created.")
+            logging.warning(f"{self.__class__.__name__} requires an output 'path' to be set. MLSettingsPerformance report will not be created.")
             run_report = False
 
         return run_report

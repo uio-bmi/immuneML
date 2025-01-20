@@ -3,22 +3,24 @@ import shutil
 from unittest import TestCase
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from immuneML.encodings.word2vec.model_creator.ModelType import ModelType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
-from immuneML.ml_methods.SVM import SVM
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.SVM import SVM
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.preprocessing.filters.ClonesPerRepertoireFilter import ClonesPerRepertoireFilter
 from immuneML.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
 from immuneML.util.PathBuilder import PathBuilder
@@ -74,7 +76,9 @@ class TestTrainMLModelInstruction(TestCase):
         process = TrainMLModelInstruction(dataset, GridSearch(hp_settings), hp_settings,
                                           SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig(data_splits={"seqlen": report})),
                                           SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig(data_splits={"seqlen": report})),
-                                          {Metric.BALANCED_ACCURACY}, Metric.BALANCED_ACCURACY, label_config, path)
+                                          {ClassificationMetric.BALANCED_ACCURACY}, ClassificationMetric.BALANCED_ACCURACY, label_config, path,
+                                          export_all_ml_settings=True, sequence_type=SequenceType.AMINO_ACID,
+                                          region_type=RegionType.IMGT_CDR3)
 
         state = process.run(result_path=path)
 

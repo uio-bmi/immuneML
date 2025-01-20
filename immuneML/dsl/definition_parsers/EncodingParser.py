@@ -11,6 +11,8 @@ from immuneML.util.ReflectionHandler import ReflectionHandler
 
 class EncodingParser:
 
+    keyword = "encodings"
+
     @staticmethod
     def parse(encodings: dict, symbol_table: SymbolTable):
         for key in encodings.keys():
@@ -32,12 +34,5 @@ class EncodingParser:
         ParameterValidator.assert_all_in_valid_list(params.keys(), required_params, "EncoderParser", f"{key}/{encoder.__name__.replace('Encoder', '')}")
 
         return encoder, params
-
-    @staticmethod
-    def parse_encoder_internal(short_class_name: str, encoder_params: dict):
-        encoder_class = ReflectionHandler.get_class_by_name(f"{short_class_name}Encoder", "encodings")
-        params = ObjectParser.get_all_params({short_class_name: encoder_params}, "encodings", short_class_name)
-        return encoder_class, params, params
-
 
 

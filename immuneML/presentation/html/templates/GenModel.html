@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>immuneML: Train generative model overview</title>
+    <style>
+        {{{css_style}}}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div class="container">
+    <div>
+        <h1>{{ function }} generative model: {{name}}</h1>
+        <p>immuneML version: {{immuneML_version}}</p>
+        <p>Full specification is available <a href="{{{full_specs}}}">here</a>.</p>
+        <p>Log file is available <a href="{{{logfile}}}">here</a>.</p>
+        <p></p>
+    </div>
+    <h2>Dataset</h2>
+    {{#show_generated_dataset}}
+    <div class="col">
+        <h3>Dataset information: generated dataset</h3>
+        <h4>General information</h4>
+        <div class="table-container">
+            <table>
+                <tr>
+                    <td><b>Name</b></td>
+                    <td>{{generated_dataset_name}}</td>
+                </tr>
+                <tr>
+                    <td><b>Type</b></td>
+                    <td>{{generated_dataset_type}}</td>
+                </tr>
+                <tr>
+                    <td><b>Dataset size</b></td>
+                    <td>{{generated_dataset_size}}</td>
+                </tr>
+            </table>
+        </div>
+
+
+        <h4>Dataset labels</h4>
+
+        {{#show_generated_dataset_labels}}
+        <p>The following label(s) are available for this dataset, and may for example be used for classification:</p>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th><b>Label name</b></th>
+                    <th><b>Label classes</b></th>
+                </tr>
+                </thead>
+                <tbody>
+                {{#generated_dataset_labels}}
+                <tr>
+                    <td>{{generated_dataset_label_name}}</td>
+                    <td>{{generated_dataset_label_classes}}</td>
+                </tr>
+                {{/generated_dataset_labels}}
+                </tbody>
+            </table>
+        </div>
+        {{/show_generated_dataset_labels}}
+        {{^show_generated_dataset_labels}}
+        <p>This dataset does not have any available labels.</p>
+        {{/show_generated_dataset_labels}}
+
+    </div>
+    {{/show_generated_dataset}}
+
+    {{#show_combined_dataset}}
+    <div class="col">
+        <h3>Dataset information: combined original + generated dataset</h3>
+        <h4>General information</h4>
+        <div class="table-container">
+            <table>
+                <tr>
+                    <td><b>Name</b></td>
+                    <td>{{combined_dataset_name}}</td>
+                </tr>
+                <tr>
+                    <td><b>Type</b></td>
+                    <td>{{combined_dataset_type}}</td>
+                </tr>
+                <tr>
+                    <td><b>Dataset size</b></td>
+                    <td>{{combined_dataset_size}}</td>
+                </tr>
+            </table>
+        </div>
+
+        <h4>Dataset labels</h4>
+
+        {{#show_generated_dataset_labels}}
+        <p>The following label(s) are available for this dataset, and may for example be used for classification:</p>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th><b>Label name</b></th>
+                    <th><b>Label classes</b></th>
+                </tr>
+                </thead>
+                <tbody>
+                {{#combined_dataset_labels}}
+                <tr>
+                    <td>{{combined_dataset_label_name}}</td>
+                    <td>{{combined_dataset_label_classes}}</td>
+                </tr>
+                {{/combined_dataset_labels}}
+                </tbody>
+            </table>
+        </div>
+        {{/show_generated_dataset_labels}}
+        {{^show_generated_dataset_labels}}
+        <p>This dataset does not have any available labels.</p>
+        {{/show_generated_dataset_labels}}
+
+    </div>
+    {{/show_combined_dataset}}
+
+
+    {{#show_exported_datasets}}
+    <div>
+        <h3>Exported datasets in AIRR format:</h3>
+        <ul>
+            {{#exported_datasets}}
+            <li><a href="{{path}}" download>{{name}}</a></li>
+            {{/exported_datasets}}
+        </ul>
+    </div>
+    {{/show_exported_datasets}}
+    {{#show_reports}}
+    <div>
+        <h2>Reports</h2>
+        {{#reports}}
+
+        <h4>Report {{name}}</h4>
+        <p>{{info}}</p>
+        <div class="grid-container">
+            {{#output_figures}}
+            {{#is_embed}}
+            <div class="grid-item-full-width"><embed src="{{path}}">{{#name}}<p>{{name}}</p>{{/name}}</div>
+            {{/is_embed}}
+            {{^is_embed}}
+            <div><img src="{{path}}">{{#name}}<p>{{name}}</p>{{/name}}</div>
+            {{/is_embed}}
+            {{/output_figures}}
+        </div>
+        <ul>
+            {{#output_tables}}
+            <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
+            {{/output_tables}}
+            {{#output_text}}
+            <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
+            {{/output_text}}
+        </ul>
+
+        {{/reports}}
+    </div>
+    {{/show_reports}}
+</div>
+</body>
+</html>

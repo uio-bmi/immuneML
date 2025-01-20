@@ -1,12 +1,12 @@
 class Constants:
 
-    VERSION = "2.2.6"
+    VERSION = "3.0.9"
 
     # encoding constants
     FEATURE_DELIMITER = "-"
 
     # importing constants
-    UNKNOWN = None
+    UNKNOWN = ''
     ALLELE_DELIMITER = "*"
     GENE_DELIMITER = "-"
     STOP_CODON = "*"
@@ -14,6 +14,8 @@ class Constants:
     CACHE_PATH = 'cache_path'
     COMMENT_SIGN = "#"
     NOT_COMPUTED = "not computed"
+    SIGNAL_DELIMITER = "__"
+    GAP_LETTER = "-"
 
     # plotting constants
     PLOTLY_BLACK = "#2A3F5E"

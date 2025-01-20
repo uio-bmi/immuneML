@@ -7,11 +7,11 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression as SklearnLogisticRegression
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -56,7 +56,7 @@ class TestLogisticRegression(TestCase):
             {"test1": [1, 0, 2, 0, 1, 0, 2, 0], "test2": [1, 0, 2, 0, 1, 0, 2, 0]})
 
         lr = LogisticRegression()
-        lr.fit_by_cross_validation(x, number_of_splits=2, label=Label("test2", values=[0, 1, 2]))
+        lr.fit_by_cross_validation(x, number_of_splits=2, label=Label("test2", values=[0, 1, 2]), optimization_metric="balanced_accuracy")
 
     def test_store(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
@@ -67,7 +67,7 @@ class TestLogisticRegression(TestCase):
 
         path = EnvironmentSettings.root_path / "test/tmp/lr/"
 
-        lr.store(path, ["f1", "f2", "f3"])
+        lr.store(path)
         self.assertTrue(os.path.isfile(path / "logistic_regression.pickle"))
 
         with open(path / "logistic_regression.pickle", "rb") as file:

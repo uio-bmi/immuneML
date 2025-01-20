@@ -5,11 +5,11 @@ from unittest import TestCase
 import numpy as np
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
+from immuneML.ml_methods.classifiers.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -19,7 +19,7 @@ class TestProbabilisticBinaryClassifier(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def train_classifier(self):
-        classifier = ProbabilisticBinaryClassifier(100, 0.1)
+        classifier = ProbabilisticBinaryClassifier(100, 0.1, -1e-10)
 
         X = np.array([[3, 4], [1, 7], [5, 7], [3, 8]])
         y = {"cmv": [True, False, True, False]}
@@ -49,7 +49,7 @@ class TestProbabilisticBinaryClassifier(TestCase):
         path = EnvironmentSettings.tmp_test_path / "probabilistic_binary_classifier/"
         PathBuilder.build(path)
 
-        classifier.store(path=path, feature_names=["k_i", "n_i"])
+        classifier.store(path=path)
 
         self.assertTrue(os.path.isfile(path / "probabilistic_binary_classifier.pickle"))
         self.assertTrue(os.path.isfile(path / "probabilistic_binary_classifier.yaml"))

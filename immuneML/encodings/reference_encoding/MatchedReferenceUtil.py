@@ -38,19 +38,20 @@ class MatchedReferenceUtil:
         format_str = reference_params["format"]
 
         import_class = ReflectionHandler.get_class_by_name(f"{format_str}Import")
+        assert import_class is not None, (f"{MatchedReferenceUtil.__name__}: {format_str} could not be imported. "
+                                          f"Check if the format name has been written correctly.")
         default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets",
                                                   DefaultParamsLoader.convert_to_snake_case(format_str))
 
         params = {**default_params, **seq_import_params}
 
-        processed_params = DatasetImportParams.build_object(**params)
         path = Path(reference_params['params']['path'])
-        processed_params.result_path = PathBuilder.build(path.parent / 'iml_imported' if path.is_file() else path / 'iml_imported')
+        params['result_path'] = PathBuilder.build(path.parent / 'iml_imported' if path.is_file() else path / 'iml_imported')
 
         if format_str == "SingleLineReceptor":
-            receptors = list(import_class.import_dataset(processed_params, 'tmp_receptor_dataset').get_data())
+            receptors = list(import_class(params, 'tmp_receptor_dataset').import_dataset().get_data())
         else:
-            receptors = ImportHelper.import_items(import_class, reference_params["params"]["path"], processed_params)
+            receptors = list(import_class(params=params, dataset_name="tmp_dataset").import_dataset().get_data())
 
         assert len(receptors) > 0, f"MatchedReferenceUtil: The total number of imported reference {'receptors' if paired else 'sequences'} is 0, please ensure that reference import is specified correctly."
         logging.info(f"MatchedReferenceUtil: successfully imported {len(receptors)} reference {'receptors' if paired else 'sequences'}.")

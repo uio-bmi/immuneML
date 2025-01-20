@@ -3,20 +3,23 @@ from inspect import signature
 from pathlib import Path
 from typing import Tuple
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.definition_parsers.PreprocessingParser import PreprocessingParser
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.SequenceType import SequenceType
+from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeightingStrategy
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.config.LeaveOneOutConfig import LeaveOneOutConfig
 from immuneML.hyperparameter_optimization.config.ManualSplitConfig import ManualSplitConfig
 from immuneML.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -27,17 +30,25 @@ class TrainMLModelParser:
 
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> TrainMLModelInstruction:
 
-        valid_keys = ["assessment", "selection", "dataset", "strategy", "labels", "metrics", "settings", "number_of_processes", "type", "reports",
-                      "optimization_metric", 'refit_optimal_model']
+        valid_keys = ["assessment", "selection", "dataset", "strategy", "labels", "metrics", "settings",
+                      "number_of_processes", "type", "reports", "sequence_type", "region_type",
+                      "optimization_metric", "refit_optimal_model", "example_weighting", "export_all_ml_settings"]
         ParameterValidator.assert_type_and_value(instruction['settings'], list, TrainMLModelParser.__name__, 'settings')
         ParameterValidator.assert_keys(list(instruction.keys()), valid_keys, TrainMLModelParser.__name__, "TrainMLModel")
         ParameterValidator.assert_type_and_value(instruction['refit_optimal_model'], bool, TrainMLModelParser.__name__, 'refit_optimal_model')
+        ParameterValidator.assert_type_and_value(instruction['export_all_ml_settings'], bool, TrainMLModelParser.__name__, 'export_all_ml_settings')
         ParameterValidator.assert_type_and_value(instruction['metrics'], list, TrainMLModelParser.__name__, 'metrics')
         ParameterValidator.assert_type_and_value(instruction['optimization_metric'], str, TrainMLModelParser.__name__, 'optimization_metric')
         ParameterValidator.assert_type_and_value(instruction['number_of_processes'], int, TrainMLModelParser.__name__, 'number_of_processes')
         ParameterValidator.assert_type_and_value(instruction['strategy'], str, TrainMLModelParser.__name__, 'strategy')
         if instruction["reports"] is not None:
             ParameterValidator.assert_type_and_value(instruction['reports'], list, TrainMLModelParser.__name__, 'reports')
+
+        if instruction["example_weighting"] is not None:
+            ParameterValidator.assert_type_and_value(instruction['example_weighting'], str, TrainMLModelParser.__name__, 'example_weighting')
+
+        ParameterValidator.assert_sequence_type(instruction, TrainMLModelParser.__name__)
+        ParameterValidator.assert_region_type(instruction, TrainMLModelParser.__name__)
 
         settings = self._parse_settings(instruction, symbol_table)
         dataset = symbol_table.get(instruction["dataset"])
@@ -46,18 +57,23 @@ class TrainMLModelParser:
         selection = self._parse_split_config(key, instruction, "selection", symbol_table, len(settings), label_config)
         assessment, selection = self._update_split_configs(assessment, selection, dataset)
         strategy = ReflectionHandler.get_class_by_name(instruction["strategy"], "hyperparameter_optimization/")
-        metrics = {Metric.get_metric(metric) for metric in instruction["metrics"]}
-        optimization_metric = Metric.get_metric(instruction["optimization_metric"].upper())
-        metric_search_criterion = Metric.get_search_criterion(optimization_metric)
+        metrics = {ClassificationMetric.get_metric(metric) for metric in instruction["metrics"]}
+        optimization_metric = ClassificationMetric.get_metric(instruction["optimization_metric"].upper())
+        metric_search_criterion = ClassificationMetric.get_search_criterion(optimization_metric)
         path = self._prepare_path(instruction)
         context = self._prepare_context(instruction, symbol_table)
         reports = self._prepare_reports(instruction["reports"], symbol_table)
+        example_weighting = self._prepare_example_weighting(instruction, symbol_table)
 
         hp_instruction = TrainMLModelInstruction(dataset=dataset, hp_strategy=strategy(settings, metric_search_criterion),
                                                  hp_settings=settings, assessment=assessment, selection=selection, metrics=metrics,
                                                  optimization_metric=optimization_metric, refit_optimal_model=instruction['refit_optimal_model'],
                                                  label_configuration=label_config, path=path, context=context,
-                                                 number_of_processes=instruction["number_of_processes"], reports=reports, name=key)
+                                                 number_of_processes=instruction["number_of_processes"], reports=reports,
+                                                 example_weighting=example_weighting, export_all_ml_settings=instruction['export_all_ml_settings'],
+                                                 name=key,
+                                                 sequence_type=SequenceType[instruction['sequence_type'].upper()],
+                                                 region_type=RegionType[instruction['region_type'].upper()])
 
         return hp_instruction
 
@@ -131,7 +147,7 @@ class TrainMLModelParser:
                 settings.append(s)
             return settings
         except KeyError as key_error:
-            raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under settings in TrainMLModel instruction.")
+            raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under settings in TrainMLModel instruction.") from key_error
 
     def _prepare_path(self, instruction: dict) -> Path:
         if "path" in instruction:
@@ -162,6 +178,19 @@ class TrainMLModelParser:
                 raise ValueError(f"{TrainMLModelParser.__name__}: Stratified k-fold cross-validation cannot be used when "
                                  f"{len(label_config.get_labels_by_name())} labels are specified. It support only one label (and multiple classes).")
 
+            if split_strategy == SplitType.MANUAL:
+                ParameterValidator.assert_keys(keys=instruction[split_key]["manual_config"].keys(),
+                                               valid_keys=["train_metadata_path", "test_metadata_path"],
+                                               location=TrainMLModelParser.__name__, parameter_name="manual_config", exclusive=True)
+
+                ParameterValidator.assert_valid_tabular_file(instruction[split_key]["manual_config"]["train_metadata_path"],
+                                                             location=TrainMLModelParser.__name__,
+                                                             parameter_name="train_metadata_path")
+
+                ParameterValidator.assert_valid_tabular_file(instruction[split_key]["manual_config"]["test_metadata_path"],
+                                                             location=TrainMLModelParser.__name__,
+                                                             parameter_name="test_metadata_path")
+
             return SplitConfig(split_strategy=split_strategy,
                                split_count=int(instruction[split_key]["split_count"]),
                                training_percentage=training_percentage,
@@ -171,7 +200,7 @@ class TrainMLModelParser:
                                if "leave_one_out_config" in instruction[split_key] else None)
 
         except KeyError as key_error:
-            raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under {split_key}.")
+            raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under {split_key}.") from key_error
 
     def _prepare_report_config(self, instruction_key, instruction, split_key, symbol_table):
         if "reports" in instruction[split_key] and len(instruction[split_key]["reports"]) > 0:
@@ -190,3 +219,20 @@ class TrainMLModelParser:
             report_config_input = {}
 
         return report_config_input
+
+
+    def _prepare_example_weighting(self, instruction: dict, symbol_table: SymbolTable) -> ExampleWeightingStrategy:
+        example_weighting = instruction["example_weighting"]
+
+        if example_weighting is not None:
+            weighting_strategy_cls = symbol_table.get(example_weighting)
+
+            weighting_strategy_object = weighting_strategy_cls.build_object(symbol_table.get(instruction["dataset"]),
+                                                                            **symbol_table.get_config(example_weighting)[
+                                                                             "example_weighting_params"]).set_context({"dataset": symbol_table.get(instruction['dataset'])})
+
+
+            ParameterValidator.assert_type_and_value(weighting_strategy_object, ExampleWeightingStrategy,  TrainMLModelParser.__name__, "example_weighting")
+            return weighting_strategy_object
+        else:
+            return None

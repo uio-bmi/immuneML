@@ -33,6 +33,11 @@ Lastly, this quickstart tutorial can be used when you have immuneML :ref:`instal
 
 - :ref:`Quickstart: command-line interface with YAML`
 
+For simulation purposes, you can try LIgO quickstart:
+
+- :ref:`LIgO simulation quickstart`
+
+
 
 .. toctree::
   :maxdepth: 1
@@ -42,6 +47,7 @@ Lastly, this quickstart tutorial can be used when you have immuneML :ref:`instal
   quickstart/galaxy_simple
   quickstart/galaxy_yaml
   quickstart/cli_yaml
+  quickstart/simulation_quickstart
 
 
 

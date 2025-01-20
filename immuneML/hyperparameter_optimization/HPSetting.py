@@ -1,5 +1,5 @@
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
-from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 
 
 class HPSetting:

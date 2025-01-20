@@ -11,7 +11,7 @@ from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
-from immuneML.ml_methods.AtchleyKmerMILClassifier import AtchleyKmerMILClassifier
+from immuneML.ml_methods.classifiers.AtchleyKmerMILClassifier import AtchleyKmerMILClassifier
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -47,7 +47,7 @@ class TestAtchleyKmerMILClassifier(TestCase):
         self.assertListEqual(list(predictions_proba["l1"][True] > 0.5), [pred == True for pred in list(predictions["l1"])])
 
 
-        cls.store(path / "model_storage", feature_names=enc_dataset.encoded_data.feature_names)
+        cls.store(path / "model_storage")
 
         cls2 = AtchleyKmerMILClassifier(iteration_count=10, threshold=-0.0001, evaluate_at=2, use_early_stopping=False, random_seed=1, learning_rate=0.01,
                                         zero_abundance_weight_init=True, number_of_threads=8, initialization_count=1)

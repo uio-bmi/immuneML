@@ -19,7 +19,7 @@ Using immuneML, we will encode the data as 3-mer frequencies and train a logisti
 Getting started through Galaxy
 -------------------------------------------------
 
-The Galaxy web interface is available at https://galaxy.immuneml.uiocloud.no/.
+The Galaxy web interface is available at https://avant.immuneml.uiocloud.no/.
 You may choose to register a user account or perform the analysis as an anonymous user.
 
 Different functionalities are available as Galaxy tools (left menu), and the analysis results appear in the Galaxy history (right list).
@@ -33,13 +33,13 @@ Step 1: importing the dataset to a Galaxy history
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Every immuneML analysis takes a dataset as input. For the Quickstart tutorial, an example dataset has been prepared and is
-available through `this Galaxy history <https://galaxy.immuneml.uiocloud.no/u/immuneml/h/quickstart-data>`_ (under 'Shared data' > 'Histories' > 'Quickstart data').
+available through `this Galaxy history <https://avant.immuneml.uiocloud.no/u/immuneml/h/quickstart-data>`_ (under 'Shared data' > 'Histories' > 'Quickstart data').
 Alternatively, the tutorial :ref:`How to make an immuneML dataset in Galaxy` describes in detail
 how to make an immuneML dataset using your own data.
 
 This Quickstart dataset Galaxy history contains the following items:
 
-- 100 repertoire .tsv files in AIRR format. For details about the AIRR format, see the `AIRR documentation <https://docs.airr-community.org/en/stable/datarep/format.html>`_ and `this example file <https://galaxy.immuneml.uiocloud.no/datasets/2a4bf9d66c01414a/display/?preview=True>`_.
+- 100 repertoire .tsv files in AIRR format. For details about the AIRR format, see the `AIRR documentation <https://docs.airr-community.org/en/stable/datarep/format.html>`_
 
 - A Collection of repertoires. This history element collects the 100 above-mentioned repertoire files in a Galaxy collection.
   This Galaxy collection makes it easier to select the repertoires as an input to Galaxy tools (instead of selecting all 100 files manually, you can select the collection).
@@ -47,7 +47,7 @@ This Quickstart dataset Galaxy history contains the following items:
 
 - A metadata.csv file. The metadata file describes which of the 100 repertoires are diseased and healthy, under the
   column named 'signal_disease' which contains the values True and False.
-  For details about the metadata file, see :ref:`What should the metadata file look like?` and `this example file <https://galaxy.immuneml.uiocloud.no/datasets/dfa1565938e7b4c3/display/?preview=True>`_.
+  For details about the metadata file, see :ref:`What should the metadata file look like?`
 
 Individual files can be inspected by clicking the eyeball icons.
 To import the complete history, click the + icon in the right upper corner.
@@ -58,7 +58,7 @@ To import the complete history, click the + icon in the right upper corner.
 
 Step 2: creating an immuneML Galaxy dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Use the `Create dataset <https://galaxy.immuneml.uiocloud.no/root?tool_id=immune_ml_dataset>`_  Galaxy tool (under 'immuneML tools') to import the dataset
+Use the `Create Dataset with Reports <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_dataset>`_ Galaxy tool (under 'immuneML tools') to import the dataset
 and create an *immuneML dataset* history item, which can subsequently be used as input for other Galaxy tools.
 
 Select 'Simplified interface', then 'repertoire dataset' as dataset type and 'AIRR' data format, and select the metadata.csv file as metadata file.
@@ -94,7 +94,7 @@ Step 3: running the analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The immuneML Galaxy instance has two tools that provide a simplified interface for training immune receptor and immune
-repertoire classifiers. Here, we will use the Galaxy tool `Train immune repertoire classifiers (simplified interface) <https://galaxy.immuneml.uiocloud.no/root?tool_id=novice_immuneml_interface>`_ (under 'immuneML tools').
+repertoire classifiers. Here, we will use the Galaxy tool `Train Repertoire Classifier (Simplified Interface)  <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_train_repertoire_classifier>`_ (under 'immuneML tools').
 
 Select the *immuneML dataset* as input dataset, and write the name of the label that you want to predict.
 In this case, the label is 'signal_disease', because it is defined in the metadata.csv file.
@@ -161,9 +161,9 @@ If you haven't done it already, it is highly recommended to follow the :ref:`Int
 If you want to try running immuneML on your own dataset, be sure to check out :ref:`How to make an immuneML dataset in Galaxy`.
 
 While in this tutorial we trained an ML model for making a prediction per repertoire, immuneML also provides
-a button-based interface for training ML models to make predictions per sequence, such as antigen binding: `Train immune receptor classifiers (simplified interface) <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_train_classifiers>`_.
+a button-based interface for training ML models to make predictions per sequence, such as antigen binding: `Train Receptor Classifier (Simplified Interface) <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_train_receptor_classifier>`_
 
-immuneML provides many more options for customizing your machine learning analysis when using the YAML-based specification.
+immuneML provides many more options for customizing your machine learning analysis when using the YAML specification.
 To get started with this, you can try out :ref:`Quickstart: Galaxy with YAML-based tools`, for example using
 the YAML specification that was produced in the Galaxy history ('repertoire_classification.yaml') with some minor modifications.
 See also the tutorial :ref:`How to specify an analysis with YAML` to understand how the YAML specification can be altered.

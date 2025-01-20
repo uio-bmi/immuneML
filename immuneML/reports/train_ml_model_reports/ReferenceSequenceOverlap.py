@@ -29,35 +29,37 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
 
     The report compares the sequences by their sequence content and the additional comparison_attributes (such as V or J gene), as specified by the user.
 
-    Arguments:
+    **Specification arguments:**
 
-        reference_path (str): path to the reference file in csv format which contains one entry per row and has columns that correspond to the attributes
-        listed under comparison_attributes argument
+    - reference_path (str): path to the reference file in csv format which contains one entry per row and has columns that correspond to the attributes
+      listed under comparison_attributes argument
 
-        comparison_attributes (list): list of attributes to use for comparison; all of them have to be present in the reference file where they should
-        be the names of the columns
+    - comparison_attributes (list): list of attributes to use for comparison; all of them have to be present in the reference file where they should
+      be the names of the columns
 
-        label (str): name of the label for which the reference sequences/k-mers should be compared to the model; if none, it takes the one label from the
-        instruction; if it is none and multiple labels were specified for the instruction, the report will not be generated
+    - label (str): name of the label for which the reference sequences/k-mers should be compared to the model; if none, it takes the one label from the
+      instruction; if it is none and multiple labels were specified for the instruction, the report will not be generated
 
-    YAML specification:
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        reports: # the report is defined with all other reports under definitions/reports
-            my_reference_overlap_report:
-                ReferenceSequenceOverlap:
-                    reference_path: reference_sequences.csv  # example usage with SequenceAbundanceEncoder or CompAIRRSequenceAbundanceEncoder
-                    comparison_attributes:
-                        - sequence_aas
-                        - v_genes
-                        - j_genes
-            my_reference_overlap_report_with_kmers:
-                ReferenceSequenceOverlap:
-                    reference_path: reference_kmers.csv  # example usage with KmerAbundanceEncoder
-                    comparison_attributes:
-                        - k-mer
+        definitions:
+            reports:
+                my_reference_overlap_report:
+                    ReferenceSequenceOverlap:
+                        reference_path: reference_sequences.csv  # example usage with SequenceAbundanceEncoder or CompAIRRSequenceAbundanceEncoder
+                        comparison_attributes:
+                            - sequence_aa
+                            - v_call
+                            - j_call
+                my_reference_overlap_report_with_kmers:
+                    ReferenceSequenceOverlap:
+                        reference_path: reference_kmers.csv  # example usage with KmerAbundanceEncoder
+                        comparison_attributes:
+                            - k-mer
 
     """
 

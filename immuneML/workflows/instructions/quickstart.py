@@ -1,5 +1,6 @@
 import logging
 import os
+import pathlib
 import shutil
 import sys
 import warnings
@@ -8,7 +9,6 @@ from pathlib import Path
 import yaml
 
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
-from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -22,8 +22,12 @@ class Quickstart:
                     "d1": {
                         "format": "AIRR",
                         "params": {
-                            "path": str(path.parent / "synthetic_dataset/result/simulation_instruction/exported_dataset/airr/"),
-                            "metadata_file": str(path.parent / "synthetic_dataset/result/simulation_instruction/exported_dataset/airr/metadata.csv")
+                            'path': f"{path}/../synthetic_dataset/result/simulation_instruction/exported_dataset/airr",
+                            "dataset_file": f"{path}/../synthetic_dataset/result/simulation_instruction/exported_dataset/airr/dataset.yaml",
+                            'metadata_file': f"{path}/../synthetic_dataset/result/simulation_instruction/exported_dataset/airr/metadata.csv",
+                            "import_illegal_characters": True,
+                            'import_productive': False,
+                            'import_out_of_frame': True
                         }
                     }
                 },
@@ -50,12 +54,14 @@ class Quickstart:
                 "reports": {
                     "rep1": {
                         "SequenceLengthDistribution": {
-                            "batch_size": 3
+                            "batch_size": 3,
+                            "region_type": "IMGT_CDR3",
+                            "sequence_type": "amino_acid"
                         }
                     },
                     "hprep": "MLSettingsPerformance",
                     "coef": "Coefficients"
-                }
+                },
             },
             "instructions": {
                 "machine_learning_instruction": {
@@ -95,7 +101,9 @@ class Quickstart:
                     "reports": ["hprep"],
                     "number_of_processes": 3,
                     "optimization_metric": "balanced_accuracy",
-                    "refit_optimal_model": False
+                    "refit_optimal_model": False,
+                    'region_type': 'IMGT_CDR3',
+                    'sequence_type': "amino_acid"
                 }
             }
         }
@@ -108,7 +116,7 @@ class Quickstart:
 
     def build_path(self, path: str = None):
         if path is None:
-            path = EnvironmentSettings.root_path / "quickstart/"
+            path = pathlib.Path.cwd() / "quickstart/"
             if os.path.isdir(path):
                 shutil.rmtree(path)
             PathBuilder.build(path)
@@ -124,16 +132,46 @@ class Quickstart:
 
         specs = {
             "definitions": {
-                "datasets": {
-                    "my_synthetic_dataset": {"format": "RandomRepertoireDataset", "params": {"labels": {}}}
-                },
-                "motifs": {"my_motif": {"seed": "AA", "instantiation": "GappedKmer"}},
-                "signals": {"my_signal": {"motifs": ["my_motif"], "implanting": "HealthySequence"}},
-                "simulations": {"my_simulation": {"my_implantng": {"signals": ["my_signal"], "dataset_implanting_rate": 0.5,
-                                                                   "repertoire_implanting_rate": 0.1}}}
+                "motifs": {"my_motif": {"seed": "AAA"}},
+                "signals": {"my_signal": {"motifs": ["my_motif"]}},
+                "simulations": {
+                    "quickstart_simulation": {
+                        'is_repertoire': True,
+                        'paired': False,
+                        'sequence_type': 'amino_acid',
+                        'simulation_strategy': 'Implanting',
+                        'remove_seqs_with_signals': False,
+                        'sim_items': {
+                            "pos_reps": {
+                                "signals": {"my_signal": 0.2},
+                                "number_of_examples": 50,
+                                "receptors_in_repertoire_count": 10,
+                                "generative_model": {
+                                    "default_model_name": "humanTRB",
+                                    "type": "OLGA"
+                                }
+                            },
+                            "neg_reps": {
+                                "signals": {},
+                                "number_of_examples": 50,
+                                "receptors_in_repertoire_count": 10,
+                                "generative_model": {
+                                    "default_model_name": "humanTRB",
+                                    "type": "OLGA"
+                                }
+                            }
+                        }
+                    }
+                }
             },
-            "instructions": {"simulation_instruction": {"type": "Simulation", "dataset": "my_synthetic_dataset", "simulation": "my_simulation",
-                                                        "export_formats": ["AIRR"]}}
+            "instructions": {
+                "simulation_instruction": {
+                    "type": "LigoSim",
+                    "export_p_gens": False,
+                    "max_iterations": 100,
+                    "sequence_batch_size": 2000,
+                    "simulation": "quickstart_simulation"
+                }}
         }
 
         specs_file = path / "simulation_specs.yaml"

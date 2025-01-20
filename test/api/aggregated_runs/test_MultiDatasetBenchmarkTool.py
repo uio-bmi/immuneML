@@ -11,7 +11,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TestMultiDatasetBenchmarkTool(TestCase):
     def test_run(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "multi_dataset_benchmark/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "multi_dataset_benchmark/")
         specs_file = self._prepare_specs(path)
 
         tool = MultiDatasetBenchmarkTool(specs_file, path/"result/")
@@ -26,9 +26,9 @@ class TestMultiDatasetBenchmarkTool(TestCase):
                     "d1": {
                         "format": "RandomRepertoireDataset",
                         "params": {
-                            "repertoire_count": 100,
-                            "sequence_count_probabilities": {50: 1},
-                            "sequence_length_probabilities": {2: 1},
+                            "repertoire_count": 20,
+                            "sequence_count_probabilities": {10: 1},
+                            "sequence_length_probabilities": {10: 1},
                             "result_path": str(path / "d1"),
                             "labels": {
                                 "cmv": {
@@ -41,9 +41,9 @@ class TestMultiDatasetBenchmarkTool(TestCase):
                     "d2": {
                         "format": "RandomRepertoireDataset",
                         "params": {
-                            "repertoire_count": 100,
-                            "sequence_count_probabilities": {50: 1},
-                            "sequence_length_probabilities": {2: 1},
+                            "repertoire_count": 20,
+                            "sequence_count_probabilities": {10: 1},
+                            "sequence_length_probabilities": {10: 1},
                             "result_path": str(path / "d2"),
                             "labels": {
                                 "cmv": {
@@ -58,7 +58,7 @@ class TestMultiDatasetBenchmarkTool(TestCase):
                     "e1": "SequenceAbundance",
                     "e2": {
                         "SequenceAbundance": {
-                            "comparison_attributes": ["sequence_aas"],
+                            "comparison_attributes": ["cdr3_aa"],
                             "p_value_threshold": 0.25,
                             "sequence_batch_size": 500
                         }
@@ -67,7 +67,7 @@ class TestMultiDatasetBenchmarkTool(TestCase):
                 "ml_methods": {
                     "ml1": {
                         "ProbabilisticBinaryClassifier": {
-                            "max_iterations": 200,
+                            "max_iterations": 20,
                             "update_rate": 0.01
                         }
                     }

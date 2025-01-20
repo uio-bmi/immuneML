@@ -11,10 +11,10 @@ from immuneML.util.PathBuilder import PathBuilder
 class TestReceptorDataset(TestCase):
     def test_get_metadata(self):
 
-        path = EnvironmentSettings.tmp_test_path / "sequence_dataset/"
-        PathBuilder.build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "receptor_dataset/")
 
-        dataset = RandomDatasetGenerator.generate_receptor_dataset(2, {2: 1.}, {2: 1.}, {"l1": {"True": 1.}, "l2": {"2": 1.}}, path)
+        dataset = RandomDatasetGenerator.generate_receptor_dataset(2, {2: 1.}, {2: 1.},
+                                                                   {"l1": {"True": 1.}, "l2": {"2": 1.}}, path)
 
         self.assertTrue("l1" in dataset.get_label_names())
         self.assertTrue("l2" in dataset.get_label_names())

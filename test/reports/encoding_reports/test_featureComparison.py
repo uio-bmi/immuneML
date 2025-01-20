@@ -9,8 +9,8 @@ import pandas as pd
 from scipy import sparse
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.reports.ReportResult import ReportResult
@@ -54,7 +54,7 @@ class TestFeatureComparison(TestCase):
 
     def test_generate(self):
         path = EnvironmentSettings.tmp_test_path / "feature_comparison/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset = self._create_dummy_encoded_data(path)
 
@@ -63,7 +63,8 @@ class TestFeatureComparison(TestCase):
 
         self.assertTrue(report.check_prerequisites())
 
-        result = report.generate_report()
+        self.assertTrue(report.check_prerequisites())
+        result = report._generate()
 
         self.assertIsInstance(result, ReportResult)
 

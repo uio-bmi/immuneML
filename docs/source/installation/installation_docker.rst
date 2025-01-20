@@ -40,9 +40,15 @@ To exit the Docker container, use the following command:
 
   exit
 
+.. note:: Available data
+
+  Please note that the Docker container only has access to the data that was explicitly mounted to the container. This
+  means that if you followed the example above, immuneML running the Docker container will only have access to files in
+  and under the current working directory and will see it under /data path.
+
 Using the Docker container for longer immuneML runs
 ----------------------------------------------------
-
+Ï
 If you expect the analysis to take more time, you can start the container as a background process. The command to run in that case would be the following:
 
 .. code-block:: console

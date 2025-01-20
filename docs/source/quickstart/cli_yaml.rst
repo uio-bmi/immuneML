@@ -43,11 +43,10 @@ Step 1: downloading the dataset
 An archive containing the dataset used in this tutorial can be downloaded here: :download:`quickstart_data.zip <../_static/files/quickstart_data.zip>`.
 It contains the following files:
 
-- The 100 repertoire_<somenumber>.tsv, which are immune repertoire files in AIRR format. For details about the AIRR format, see the `AIRR documentation <https://docs.airr-community.org/en/stable/datarep/format.html>`_ and `this example file <https://galaxy.immuneml.uiocloud.no/datasets/2a4bf9d66c01414a/display/?preview=True>`_.
-
+- The 100 repertoire_<somenumber>.tsv, which are immune repertoire files in AIRR format. For details about the AIRR format, see the `AIRR documentation <https://docs.airr-community.org/en/stable/datarep/format.html>`_.
 - A metadata.csv file. The metadata file describes which of the 100 repertoires are diseased and healthy, under the
   column named 'signal_disease' which contains the values True and False.
-  For details about the metadata file, see :ref:`What should the metadata file look like?` and `this example file <https://galaxy.immuneml.uiocloud.no/datasets/dfa1565938e7b4c3/display/?preview=True>`_.
+  For details about the metadata file, see :ref:`What should the metadata file look like?`
 
 Step 2: writing the YAML specification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -83,65 +82,10 @@ The YAML specification consists of:
 The complete YAML specification for this analysis is shown below and can be downloaded here: :download:`quickstart.yaml <../_static/files/quickstart/cli/quickstart.yaml>`.
 Make sure to change :code:`path/to/repertoires/` and :code:`path/to/metadata.csv` to the actual paths to the data on your local machine.
 
-.. highlight:: yaml
-.. code-block:: yaml
+    .. collapse:: quickstart.yaml
 
-    definitions:
-      datasets:
-        my_dataset: # user-defined dataset name
-          format: AIRR
-          params:
-            is_repertoire: true # we are importing a repertoire dataset
-            path: path/to/repertoires/          # path to the folder containing the repertoire .tsv files
-            metadata_file: path/to/metadata.csv
-
-      encodings:
-        my_kmer_frequency: # user-defined encoding name
-          KmerFrequency:   # encoding type
-            k: 3           # encoding parameters
-
-      ml_methods:
-        my_logistic_regression: LogisticRegression # user-defined ML model name: ML model type (no user-specified parameters)
-
-      reports:
-        my_coefficients: Coefficients # user-defined report name: report type (no user-specified parameters)
-
-    instructions:
-      my_training_instruction: # user-defined instruction name
-        type: TrainMLModel
-
-        dataset: my_dataset # use the same dataset name as in definitions
-        labels:
-        - signal_disease    # use a label available in the metadata.csv file
-
-        settings: # which combinations of ML settings to run
-        - encoding: my_kmer_frequency
-          ml_method: my_logistic_regression
-
-        assessment: # parameters in the assessment (outer) cross-validation loop
-          reports:  # plot the coefficients for the trained model
-            models:
-            - my_coefficients
-          split_strategy: random   # how to split the data - here: split randomly
-          split_count: 1           # how many times (here once - just to train and test)
-          training_percentage: 0.7 # use 70% of the data for training
-
-        selection: # parameters in the selection (inner) cross-validation loop
-          split_strategy: random
-          split_count: 1
-          training_percentage: 1 # use all data for training
-
-        optimization_metric: balanced_accuracy # the metric to optimize during nested cross-validation when comparing multiple models
-        metrics: # other metrics to compute for reference
-        - auc
-        - precision
-        - recall
-
-        strategy: GridSearch # strategy for hyperparameter optimization, GridSearch is currently the only available option
-
-        reports: []                # optional train ML model reports to run
-        number_of_processes: 4     # processes for parallelization
-        refit_optimal_model: false # whether to retrain the model on the whole dataset after optimizing hyperparameters
+        .. literalinclude:: ../_static/files/quickstart/cli/quickstart.yaml
+           :language: yaml
 
 
 Step 3: running the analysis

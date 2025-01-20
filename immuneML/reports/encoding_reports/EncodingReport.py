@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.reports.Report import Report
 
 
 class EncodingReport(Report):
-    '''
+    """
     Encoding reports show some type of features or statistics about an encoded dataset, or may in some cases
     export relevant sequences or tables.
 
@@ -43,10 +43,11 @@ class EncodingReport(Report):
                     # other parameters...
             # other parameters...
 
-    '''
+    """
+    DOCS_TITLE = "Encoding reports"
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, name: str = None, number_of_processes: int = 1):
-        '''
+        """
         The arguments defined below are set at runtime by the instruction.
         Concrete classes inheriting EncodingReport may include additional parameters that will be set by the user in the form of input arguments.
 
@@ -54,11 +55,6 @@ class EncodingReport(Report):
         result_path (Path): path where the results will be stored (plots, tables, etc.)
         name (str): user-defined name of the report that will be shown in the HTML overview later
         number_of_processes (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
-        '''
-        super().__init__(name, number_of_processes)
+        """
+        super().__init__(name=name, result_path=result_path, number_of_processes=number_of_processes)
         self.dataset = dataset
-        self.result_path = result_path
-
-    @staticmethod
-    def get_title():
-        return "Encoding reports"

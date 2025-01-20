@@ -1,9 +1,8 @@
 from pathlib import Path
 
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -14,13 +13,14 @@ class SimpleDatasetOverview(DataReport):
     """
     Generates a simple text-based overview of the properties of any dataset, including the dataset name, size, and metadata labels.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        reports:
-            my_overview: SimpleDatasetOverview
+        definitions:
+            reports:
+                my_overview: SimpleDatasetOverview
 
     """
     UNKNOWN_CHAIN = "unknown"
@@ -51,7 +51,7 @@ class SimpleDatasetOverview(DataReport):
         text_path.write_text(output_text)
 
         return ReportResult(name=self.name,
-                            info="A simple text-based overview of the properties of any dataset, including the dataset name, size, and metadata labels.",
+                            info=f"A simple overview of the properties of dataset {self.dataset.name}",
                             output_text=[ReportOutput(text_path, f"Description of dataset {dataset_name}")])
 
     def _get_generic_dataset_text(self):
@@ -79,7 +79,7 @@ class SimpleDatasetOverview(DataReport):
             output_text += f"- Name: {repertoire.data_filename.name}\n"
             output_text += f"  Number of sequences: {repertoire.get_element_count()}\n"
 
-            chains = [chain.value if chain else SimpleDatasetOverview.UNKNOWN_CHAIN for chain in set(repertoire.get_chains())]
+            chains = list(set(repertoire.data.locus.tolist()))
             if len(chains) == 1:
                 output_text += f"  Chain type: {chains[0]}\n"
             else:
@@ -88,7 +88,7 @@ class SimpleDatasetOverview(DataReport):
         return output_text
 
     def _get_receptor_dataset_text(self):
-        receptor_types = list(set([type(receptor).__name__ for receptor in self.dataset.get_data()]))
+        receptor_types = list(set([receptor.chain_pair.name for receptor in self.dataset.get_data()]))
 
         if len(receptor_types) > 1:
             output_text = "\nReceptor types: " + ",".join(receptor_types)
@@ -98,8 +98,7 @@ class SimpleDatasetOverview(DataReport):
         return output_text
 
     def _get_sequence_dataset_text(self):
-        chains = list(set([sequence.get_attribute("chain") for sequence in self.dataset.get_data()]))
-        chains = [chain.value if chain else SimpleDatasetOverview.UNKNOWN_CHAIN for chain in chains]
+        chains = list(set(self.dataset.data.locus.tolist()))
 
         if len(chains) > 1:
             output_text = "\nChain types: " + ",".join(chains)

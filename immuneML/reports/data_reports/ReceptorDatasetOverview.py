@@ -5,7 +5,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
+from immuneML.data_model.SequenceParams import Chain
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -16,17 +17,18 @@ class ReceptorDatasetOverview(DataReport):
     """
     This report plots the length distribution per chain for a receptor (paired-chain) dataset.
 
-    Arguments:
+    **Specification arguments:**
 
-        batch_size (int): how many receptors to load at once; 50 000 by default
+    - batch_size (int): how many receptors to load at once; 50 000 by default
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        reports:
-            my_receptor_overview_report: ReceptorDatasetOverview
+        definitions:
+            reports:
+                my_receptor_overview_report: ReceptorDatasetOverview
 
     """
 
@@ -48,9 +50,9 @@ class ReceptorDatasetOverview(DataReport):
     def _prepare_data_for_length_distribution(self):
         receptors = {}
         for receptor in self.dataset.get_data(self.batch_size):
-            for chain in receptor.get_chains():
+            for chain in receptor.chain_pair.value:
                 receptor_dict = {
-                    "length": len(receptor.get_chain(chain).get_sequence()),
+                    "length": len(getattr(receptor, Chain.get_chain(chain).name.lower()).sequence_aa),
                     "chain": chain
                 }
                 if chain in receptors:

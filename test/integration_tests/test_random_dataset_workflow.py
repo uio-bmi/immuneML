@@ -92,7 +92,7 @@ class TestRandomDatasetWorkflow(TestCase):
                         "format": "RandomReceptorDataset",
                         "params": {
                             "result_path": str(path),
-                            "receptor_count": 500,
+                            "receptor_count": 100,
                             "chain_1_length_probabilities": {
                                 5: 1.
                             },
@@ -154,7 +154,7 @@ class TestRandomDatasetWorkflow(TestCase):
                     "number_of_processes": 4,
                     "reports": None,
                     "optimization_metric": "balanced_accuracy",
-                    "refit_optimal_model": True,
+                    "refit_optimal_model": False
                 }
             }
         }
@@ -163,15 +163,17 @@ class TestRandomDatasetWorkflow(TestCase):
 
         path = EnvironmentSettings.tmp_test_path / "random_dataset_workflow/"
 
-        repertoire_specs = self.build_repertoire_specs(path)
-        self.run_example(repertoire_specs, path)
+        repertoire_specs = self.build_repertoire_specs(path / 'repertoire')
+        self.run_example(repertoire_specs, path / 'repertoire')
 
-        # receptor_specs = self.build_receptor_specs(path)
-        # self.run_example(receptor_specs, path)
+        receptor_specs = self.build_receptor_specs(path / 'receptor')
+        self.run_example(receptor_specs, path / 'receptor')
+
+        shutil.rmtree(path)
 
     def run_example(self, specs: dict, path: Path):
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         specs_filename = path / "specs.yaml"
         with specs_filename.open("w") as file:
@@ -179,5 +181,3 @@ class TestRandomDatasetWorkflow(TestCase):
 
         app = ImmuneMLApp(specs_filename, path / "result/")
         app.run()
-
-        shutil.rmtree(path)

@@ -1,14 +1,14 @@
-import warnings
+import logging
 from pathlib import Path
 
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
-from immuneML.ml_methods.DeepRC import DeepRC
-from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.DeepRC import DeepRC
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
@@ -30,29 +30,44 @@ class DeepRCMotifDiscovery(MLReport):
     For kernels only: contributions to positional encoding are indicated by < (beginning of sequence),
     ∧ (center of sequence), and > (end of sequence).
 
-    See :ref:`DeepRCMotifDiscovery for repertoire classification` for a usage example.
+    See :ref:`DeepRCMotifDiscovery for repertoire classification` for a more detailed example.
 
     Reference:
-    Michael Widrich, Bernhard Schäfl, Milena Pavlović, Geir Kjetil Sandve, Sepp Hochreiter, Victor Greiff, Günter Klambauer
-    ‘DeepRC: Immune repertoire classification with attention-based deep massive multiple instance learning’.
-    bioRxiv preprint doi: `https://doi.org/10.1101/2020.04.12.03815 <https://doi.org/10.1101/2020.04.12.038158>`_
+
+    Widrich, M., et al. (2020). Modern Hopfield Networks and Attention for Immune Repertoire Classification. Advances in
+    Neural Information Processing Systems, 33. https://proceedings.neurips.cc//paper/2020/hash/da4902cb0bc38210839714ebdcf0efc3-Abstract.html
 
 
-    Arguments:
+    Example output:
 
-        n_steps (int): Number of IG steps (more steps -> better path integral -> finer contribution values). 50 is usually good enough.
+    .. image:: ../../_static/images/reports/deeprc_ig_inputs.png
+       :alt: DeepRC IG over inputs
+       :height: 150px
 
-        threshold (float): Only applies to the plotting of kernels. Contributions are normalized to range [0, 1], and only kernels with normalized contributions above threshold are plotted.
 
-    YAML specification:
+    .. image:: ../../_static/images/reports/deeprc_ig_kernels.png
+       :alt: DeepRC IG over kernels
+       :height: 150px
+
+
+    **Specification arguments:**
+
+    - n_steps (int): Number of IG steps (more steps -> better path integral -> finer contribution values). 50 is usually good enough.
+
+    - threshold (float): Only applies to the plotting of kernels. Contributions are normalized to range [0, 1], and only kernels with normalized contributions above threshold are plotted.
+
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_deeprc_report:
-            DeepRCMotifDiscovery:
-                threshold: 0.5
-                n_steps: 50
+        definitions:
+            reports:
+                my_deeprc_report:
+                    DeepRCMotifDiscovery:
+                        threshold: 0.5
+                        n_steps: 50
 
     """
 
@@ -291,16 +306,16 @@ class DeepRCMotifDiscovery(MLReport):
         run_report = True
 
         if not hasattr(self, "result_path") or self.result_path is None:
-            warnings.warn(f"{self.__class__.__name__} requires an output 'path' to be set. {self.__class__.__name__} report will not be created.")
+            logging.warning(f"{self.__class__.__name__} requires an output 'path' to be set. {self.__class__.__name__} report will not be created.")
             run_report = False
 
         if not isinstance(self.method, DeepRC):
-            warnings.warn(
+            logging.warning(
                 f"{self.__class__.__name__} can only be used in combination with the DeepRC ML method. {self.__class__.__name__} report will not be created.")
             run_report = False
 
         if self.test_dataset.encoded_data is None:
-            warnings.warn(
+            logging.warning(
                 f"{self.__class__.__name__}: test dataset is not encoded and can not be run. "
                 f"{self.__class__.__name__} report will not be created.")
             run_report = False

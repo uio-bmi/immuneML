@@ -16,7 +16,7 @@ class TestDefaultParamsLoader(TestCase):
         }
 
         path = EnvironmentSettings.tmp_test_path / "defaultparamsloader/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         with open(path / "mixcr_params.yaml", "w") as file:
             yaml.dump(params, file)

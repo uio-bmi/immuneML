@@ -6,12 +6,11 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-from gensim.models import Word2Vec
 from sklearn.preprocessing import StandardScaler
 
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
@@ -29,47 +28,55 @@ from scripts.specification_util import update_docs_per_mapping
 class Word2VecEncoder(DatasetEncoder):
     """
 
-    Word2VecEncoder learns the vector representations of k-mers based on the context (receptor sequence). It works for
-    sequence and repertoire datasets. Similar idea was discussed in: Ostrovsky-Berman, M., Frankel, B., Polak, P. & Yaari, G.
+    Word2VecEncoder learns the vector representations of k-mers based on the context (receptor sequence).
+    Similar idea was discussed in: Ostrovsky-Berman, M., Frankel, B., Polak, P. & Yaari, G.
     Immune2vec: Embedding B/T Cell Receptor Sequences in ℝN Using Natural Language Processing. Frontiers in Immunology 12, (2021).
 
     This encoder relies on gensim's implementation of Word2Vec and KmerHelper for k-mer extraction. Currently it works on amino acid level.
 
+    **Dataset type:**
 
-    Arguments:
+    - SequenceDatasets
 
-        vector_size (int): The size of the vector to be learnt.
-
-        model_type (:py:obj:`~immuneML.encodings.word2vec.model_creator.ModelType.ModelType`):  The context which will be
-        used to infer the representation of the sequence.
-        If :py:obj:`~immuneML.encodings.word2vec.model_creator.ModelType.ModelType.SEQUENCE` is used, the context of
-        a k-mer is defined by the sequence it occurs in (e.g. if the sequence is CASTTY and k-mer is AST,
-        then its context consists of k-mers CAS, STT, TTY)
-        If :py:obj:`~immuneML.encodings.word2vec.model_creator.ModelType.ModelType.KMER_PAIR` is used, the context for
-        the k-mer is defined as all the k-mers that within one edit distance (e.g. for k-mer CAS, the context
-        includes CAA, CAC, CAD etc.).
-        Valid values for this parameter are names of the ModelType enum.
-
-        k (int): The length of the k-mers used for the encoding.
-
-        epochs (int): for how many epochs to train the word2vec model for a given set of sentences (corresponding to epochs parameter in gensim package)
-
-        window (int): max distance between two k-mers in a sequence (same as window parameter in gensim's word2vec)
+    - RepertoireDatasets
 
 
-    YAML specification:
+    **Specification arguments:**
+
+    - vector_size (int): The size of the vector to be learnt.
+
+    - model_type (:py:obj:`~immuneML.encodings.word2vec.model_creator.ModelType.ModelType`):  The context which will be
+      used to infer the representation of the sequence.
+      If :py:obj:`~immuneML.encodings.word2vec.model_creator.ModelType.ModelType.SEQUENCE` is used, the context of
+      a k-mer is defined by the sequence it occurs in (e.g. if the sequence is CASTTY and k-mer is AST,
+      then its context consists of k-mers CAS, STT, TTY)
+      If :py:obj:`~immuneML.encodings.word2vec.model_creator.ModelType.ModelType.KMER_PAIR` is used, the context for
+      the k-mer is defined as all the k-mers that within one edit distance (e.g. for k-mer CAS, the context
+      includes CAA, CAC, CAD etc.).
+      Valid values for this parameter are names of the ModelType enum.
+
+    - k (int): The length of the k-mers used for the encoding.
+
+    - epochs (int): for how many epochs to train the word2vec model for a given set of sentences (corresponding to epochs parameter in gensim package)
+
+    - window (int): max distance between two k-mers in a sequence (same as window parameter in gensim's word2vec)
+
+
+    **YAML pecification:**
 
     .. highlight:: yaml
     .. code-block:: yaml
 
-        encodings:
-            my_w2v:
-                Word2Vec:
-                    vector_size: 16
-                    k: 3
-                    model_type: SEQUENCE
-                    epochs: 100
-                    window: 8
+        definitions:
+            encodings:
+                encodings:
+                    my_w2v:
+                        Word2Vec:
+                            vector_size: 16
+                            k: 3
+                            model_type: SEQUENCE
+                            epochs: 100
+                            window: 8
 
     """
 
@@ -178,24 +185,29 @@ class Word2VecEncoder(DatasetEncoder):
         feature_annotations = pd.DataFrame({"feature": feature_names})
 
         encoded_dataset.encoded_data = EncodedData(examples=scaled_examples,
-                                   labels={label: labels[i] for i, label in enumerate(label_names)} if labels is not None else None,
-                                   example_ids=[example.identifier for example in encoded_dataset.get_data()],
-                                   feature_names=feature_names,
-                                   feature_annotations=feature_annotations,
-                                   encoding=Word2VecEncoder.__name__)
+                                                   labels={label: labels[i] for i, label in
+                                                           enumerate(label_names)} if labels is not None else None,
+                                                   example_ids=dataset.get_example_ids(),
+                                                   feature_names=feature_names,
+                                                   feature_annotations=feature_annotations,
+                                                   encoding=Word2VecEncoder.__name__,
+                                                   info={'sequence_type': params.sequence_type,
+                                                         'region_type': params.region_type})
         return encoded_dataset
 
     def _encode_examples(self, encoded_dataset, vectors, params):
         examples = np.zeros(shape=[encoded_dataset.get_example_count(), vectors.vector_size])
         for (index, example) in enumerate(encoded_dataset.get_data()):
-            examples[index] = self._encode_item(example, vectors, params.model.get('sequence_type', EnvironmentSettings.sequence_type))
+            examples[index] = self._encode_item(example, vectors, params)
         return examples
 
     @abc.abstractmethod
-    def _encode_item(self, example, vectors, sequence_type):
+    def _encode_item(self, example, vectors, params: EncoderParams):
         pass
 
     def _load_model(self, params):
+        from gensim.models import Word2Vec
+
         self.model_path = self._create_model_path(params) if self.model_path is None else self.model_path
         model = Word2Vec.load(str(self.model_path))
         return model
@@ -231,11 +243,6 @@ class Word2VecEncoder(DatasetEncoder):
 
     def get_additional_files(self) -> List[str]:
         return [self.model_path]
-
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> str:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file
 
     @staticmethod
     def load_encoder(encoder_file: Path):

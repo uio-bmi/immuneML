@@ -1,5 +1,5 @@
 comparison_attributes:
-    - sequence_aas
+    - cdr3_aa
 p_value_threshold: 0.05
 sequence_batch_size: 100000
 repertoire_batch_size: 16

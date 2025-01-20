@@ -6,18 +6,19 @@ import numpy as np
 
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceSet import ReceptorSequence
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
-from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.ReadsType import ReadsType
 
 
 class TestKmerFrequencyEncoder(TestCase):
@@ -26,19 +27,19 @@ class TestKmerFrequencyEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode(self):
-        path = EnvironmentSettings.root_path / "test/tmp/kmerfreqenc/"
+        path = EnvironmentSettings.tmp_test_path / "kmerfreqenc/"
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
-        rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", nucleotide_sequence="AAA", identifier="1"),
-                                                       ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier="2"),
-                                                       ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier='3')],
-                                                      metadata={"l1": 1, "l2": 2, "subject_id": "1"}, path=path)
+        rep1 = Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="AAA", sequence="AAA", sequence_id="1", v_call="TRBV1"),
+                                                ReceptorSequence(sequence_aa="ATA", sequence="ATA", sequence_id="2", v_call="TRBV1"),
+                                                ReceptorSequence(sequence_aa="ATA", sequence="ATA", sequence_id='3', v_call="TRBV1")],
+                                               metadata={"l1": 1, "l2": 2, "subject_id": "1"}, result_path=path)
 
-        rep2 = Repertoire.build_from_sequence_objects([ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier="1"),
-                                                       ReceptorSequence("TAA", nucleotide_sequence="TAA", identifier="2"),
-                                                       ReceptorSequence("AAC", nucleotide_sequence="AAC", identifier="3")],
-                                                      metadata={"l1": 0, "l2": 3, "subject_id": "2"}, path=path)
+        rep2 = Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="ATA", sequence="ATA", sequence_id="1", v_call="TRBV1"),
+                                                ReceptorSequence(sequence_aa="TAA", sequence="TAA", sequence_id="2", v_call="TRBV1"),
+                                                ReceptorSequence(sequence_aa="AAC", sequence="AAC", sequence_id="3", v_call="TRBV2")],
+                                               metadata={"l1": 0, "l2": 3, "subject_id": "2"}, result_path=path)
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
@@ -47,28 +48,29 @@ class TestKmerFrequencyEncoder(TestCase):
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
 
         encoder = KmerFrequencyEncoder.build_object(dataset, **{
-                "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
-                "reads": ReadsType.UNIQUE.name,
-                "sequence_encoding": SequenceEncodingType.IDENTITY.name,
-                "sequence_type": SequenceType.AMINO_ACID.name,
-                "k": 3
-            })
+            "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
+            "reads": ReadsType.UNIQUE.name,
+            "sequence_encoding": SequenceEncodingType.V_GENE_CONT_KMER.name,
+            "sequence_type": SequenceType.AMINO_ACID.name,
+            "region_type": RegionType.IMGT_CDR3.name,
+            "k": 3
+        })
 
         d1 = encoder.encode(dataset, EncoderParams(
             result_path=path / "1/",
             label_config=lc,
             learn_model=True,
             model={},
-            filename="dataset.pkl"
         ))
 
         encoder = KmerFrequencyEncoder.build_object(dataset, **{
-                "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
-                "reads": ReadsType.UNIQUE.name,
-                "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
-                "sequence_type": SequenceType.AMINO_ACID.name,
-                "k": 3
-            })
+            "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
+            "reads": ReadsType.UNIQUE.name,
+            "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
+            "sequence_type": SequenceType.AMINO_ACID.name,
+            "region_type": RegionType.IMGT_CDR3.name,
+            "k": 3
+        })
 
         d2 = encoder.encode(dataset, EncoderParams(
             result_path=path / "2/",
@@ -76,7 +78,6 @@ class TestKmerFrequencyEncoder(TestCase):
             pool_size=2,
             learn_model=True,
             model={},
-            filename="dataset.csv"
         ))
 
         encoder3 = KmerFrequencyEncoder.build_object(dataset, **{
@@ -84,6 +85,7 @@ class TestKmerFrequencyEncoder(TestCase):
             "reads": ReadsType.UNIQUE.name,
             "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
             "sequence_type": SequenceType.NUCLEOTIDE.name,
+            "region_type": RegionType.IMGT_CDR3.name,
             "k": 3
         })
 
@@ -92,7 +94,6 @@ class TestKmerFrequencyEncoder(TestCase):
             label_config=lc,
             learn_model=True,
             model={},
-            filename="dataset.pkl"
         ))
 
         shutil.rmtree(path)

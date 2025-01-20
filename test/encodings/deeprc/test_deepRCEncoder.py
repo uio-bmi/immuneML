@@ -6,7 +6,7 @@ from unittest import TestCase
 import pandas as pd
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.deeprc.DeepRCEncoder import DeepRCEncoder
 from immuneML.environment.Constants import Constants
@@ -23,15 +23,15 @@ class TestDeepRCEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_datasets(self, path: Path):
-        repertoires, metadata = RepertoireBuilder.build([["A", "B"], ["B", "C"], ["D"], ["E", "F"]], path,
-                                                      {"l1": [1, 0, 1, 0], "l2": [2, 3, 2, 3]})
 
-        main_dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
+        main_dataset = RepertoireBuilder.build_dataset([["A", "C"], ["C", "D"], ["E"], ["F", "G"]], path,
+                                                      {"l1": [1, 0, 1, 0], "l2": [2, 3, 2, 3]})
         sub_dataset = main_dataset.make_subset([0, 1], path=path, dataset_type="subset")
         return main_dataset, sub_dataset
 
     def test_encode(self):
         path = EnvironmentSettings.tmp_test_path / "deeprc_encoder/"
+        PathBuilder.remove_old_and_build(path)
         PathBuilder.build(path / "encoded_data/")
 
         main_dataset, sub_dataset = self.create_datasets(path)
@@ -54,6 +54,6 @@ class TestDeepRCEncoder(TestCase):
             rep_path = path / f"encoded_data/encoding/{repertoire.identifier}.tsv"
             self.assertTrue(os.path.isfile(rep_path))
             repertoire_tsv = pd.read_csv(rep_path, sep="\t")
-            self.assertListEqual(list(repertoire_tsv["amino_acid"]), list(repertoire.get_sequence_aas()))
+            self.assertListEqual(list(repertoire_tsv["amino_acid"]), repertoire.data.cdr3_aa.tolist())
 
         shutil.rmtree(path)

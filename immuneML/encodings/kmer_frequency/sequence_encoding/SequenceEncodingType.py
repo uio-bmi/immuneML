@@ -7,3 +7,4 @@ class SequenceEncodingType(Enum):
     CONTINUOUS_KMER = "KmerSequenceEncoder"
     IDENTITY = "IdentitySequenceEncoder"
     IMGT_GAPPED_KMER = "IMGTGappedKmerEncoder"
+    V_GENE_CONT_KMER = "VGeneContKmerEncoder"

@@ -2,7 +2,11 @@ import logging
 from pathlib import Path
 
 import yaml
+import os
+import glob
+import pandas as pd
 
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
@@ -54,11 +58,12 @@ class Util:
 
     @staticmethod
     def update_result_paths(specs: dict, result_path: Path, yaml_path: Path):
-        for key, item in specs["definitions"]["datasets"].items():
-            if isinstance(item, dict) and 'params' in item.keys() and isinstance(item["params"], dict):
-                item['params']["result_path"] = str(result_path / key)
-                if item['format'] not in ['ImmuneML', 'RandomRepertoireDataset', 'RandomReceptorDataset']:
-                    item['params']['path'] = str(yaml_path.parent)
+        if 'datasets' in specs['definitions']:
+            for key, item in specs["definitions"]["datasets"].items():
+                if isinstance(item, dict) and 'params' in item.keys() and isinstance(item["params"], dict):
+                    item['params']["result_path"] = str(result_path / key)
+                    if item['format'] not in ['RandomRepertoireDataset', 'RandomReceptorDataset', 'RandomSequenceDataset']:
+                        item['params']['path'] = str(yaml_path.parent)
 
         with yaml_path.open("w") as file:
             yaml.dump(specs, file)
@@ -94,3 +99,58 @@ class Util:
         PathBuilder.build(result_path)
         app = ImmuneMLApp(yaml_path, result_path)
         app.run()
+
+    @staticmethod
+    def discover_dataset_path(dataset_name="dataset"):
+        if os.path.exists(f"{dataset_name}.yaml"):
+            dataset_path = f"{dataset_name}.yaml"
+        else:
+            discovered = glob.glob(f"*{dataset_name}*.yaml")
+
+            if len(discovered) == 1:
+                dataset_path = discovered[0]
+            else:
+                raise FileNotFoundError(f"Unable to locate '{dataset_name}.yaml'")
+
+        return dataset_path
+
+
+    @staticmethod
+    def remove_path_from_filename(file_path):
+        return str(Path(file_path).name)
+
+    @staticmethod
+    def reformat_galaxy_dataset(galaxy_dataset_path):
+        dataset_yaml_file = galaxy_dataset_path / "dataset.yaml"
+        assert dataset_yaml_file.is_file(), "Error: generated dataset.yaml not found"
+
+        metadata_file = None
+
+        with (dataset_yaml_file.open("r") as file):
+            dataset_params = yaml.load(file, Loader=yaml.SafeLoader)
+
+            if "metadata_file" in dataset_params:
+                dataset_params["metadata_file"] = Util.remove_path_from_filename(dataset_params["metadata_file"])
+                metadata_file = galaxy_dataset_path / dataset_params["metadata_file"]
+
+            if "filename" in dataset_params:
+                dataset_params["filename"] = str(Path(dataset_params["filename"]).name)
+
+        with dataset_yaml_file.open("w") as file:
+            yaml.dump(dataset_params, file)
+
+        if metadata_file is not None:
+            metadata_content = pd.read_csv(metadata_file, sep=",")
+            metadata_content["filename"] = [Util.remove_path_from_filename(filename) for filename in metadata_content["filename"]]
+            metadata_content.to_csv(metadata_file, index=None)
+
+    @staticmethod
+    def export_galaxy_dataset(dataset, result_path):
+        try:
+            PathBuilder.build(result_path / 'galaxy_dataset')
+            AIRRExporter.export(dataset, result_path / "galaxy_dataset/")
+            dataset_file = list(glob.glob(str(result_path / "galaxy_dataset/*.yaml")))[0]
+            os.rename(dataset_file, result_path / "galaxy_dataset/dataset.yaml")
+            Util.reformat_galaxy_dataset(result_path / "galaxy_dataset/")
+        except Exception as e:
+            raise RuntimeError(f"Error when exporting Galaxy dataset: {e}.")

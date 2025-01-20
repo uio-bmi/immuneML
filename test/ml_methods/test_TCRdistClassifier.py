@@ -8,11 +8,11 @@ import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.TCRdistClassifier import TCRdistClassifier
+from immuneML.ml_methods.classifiers.TCRdistClassifier import TCRdistClassifier
 from immuneML.util.PathBuilder import PathBuilder
 
 

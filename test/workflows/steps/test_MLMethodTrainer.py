@@ -5,12 +5,12 @@ from unittest import TestCase
 import numpy as np
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 from immuneML.workflows.steps.MLMethodTrainer import MLMethodTrainer
 from immuneML.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
 
@@ -43,12 +43,10 @@ class TestMLMethodTrainer(TestCase):
             model_selection_cv=True,
             cores_for_training=1,
             train_predictions_path=path / "predictions.csv",
-            ml_details_path=path / "details.yaml",
             optimization_metric="balanced_accuracy"
         ))
 
         method.predict(EncodedData(np.array([1, 2, 3]).reshape(1, -1)), Label("l1", [0, 1]))
         self.assertTrue(os.path.isfile(path / "predictions.csv"))
-        self.assertTrue(os.path.isfile(path / "details.yaml"))
 
         shutil.rmtree(path)

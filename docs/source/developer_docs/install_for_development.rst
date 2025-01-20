@@ -9,17 +9,36 @@ Set up immuneML for development
    :twitter:description: See how to set up immuneML for development.
    :twitter:image: https://docs.immuneml.uio.no/_images/extending_immuneML.png
 
-Prerequisites:
 
-- Create and activate a Python virtual environment with Python 3.8 (`set up a Python virtual environment <https://docs.python.org/3/library/venv.html>`_) or use conda instead with Python 3.8 (`set up conda virtual environment <https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html>`_).
 
-- Under Windows, the Microsoft Visual C++ 14.0 or greater is required to install from requirements.txt.
+Prerequisites
+---------------
 
 - System requirements: at least 4GB of RAM memory and 15GB of disk space.
 
-For development purposes, it is most convenient to clone the codebase using PyCharm. To set up the project in PyCharm, see
+- A Python virtual environment using **at least Python version 3.9** (newest version of Python is usually recommended). This can be created through `Python venv <https://docs.python.org/3/library/venv.html>`_ or `conda venv <https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html>`_.
+
+- Under Windows, the Microsoft Visual C++ 14.0 or greater is required to install from requirements.txt.
+
+
+
+Development setup
+-------------------------------
+
+For development purposes, it is most convenient to clone the codebase using PyCharm.
+Alternatively, immuneML can be installed manually to be used with a different editor.
+When running into problems during installation, please check the :ref:`Installation issues` troubleshooting page.
+
+
+Development setup with PyCharm
+**************************
+
+To set up the project in PyCharm, see
 `the official JetBrains tutorial for creating a PyCharm project from an existing GitHub repository <https://www.jetbrains.com/help/pycharm/manage-projects-hosted-on-github.html>`_.
-`PyCharm fails to create virtual environments with Python version 3.9 <https://github.com/coursera-dl/coursera-dl/issues/778>`_, using version 3.8 works.
+
+
+Manual development setup without PyCharm
+**********************************************
 
 Alternatively to using PyCharm, the following steps describe how to perform the process manually:
 
@@ -39,18 +58,14 @@ from GitHub), install the requirements from the requirements.txt file (this file
     pip install -r requirements.txt
     pip install -e .
 
-  See also these troubleshooting issues:
 
-  - :ref:`When installing all requirements from requirements.txt, there is afterward an error with yaml package (No module named yaml)`
-
-  - :ref:`I get an error when installing PyTorch (could not find a version that satisfies the requirement torch)`
-
-  If you want to install optional requirements (DeepRC or TCRdist), install the corresponding requirements files (some or all of them):
+If you want to install optional requirements (DeepRC, TCRdist, KerasSequenceCNN), install the relevant requirements file(s):
 
   .. code-block:: console
 
     pip install -r requirements_DeepRC.txt
     pip install -r requirements_TCRdist.txt
+    pip install -r requirements_KerasSequenceCNN.txt
 
 4. If not setting up the project in PyCharm, it might be necessary to manually add the root project folder to PYTHONPATH.
 The syntax for Unix-based systems is the following:
@@ -59,13 +74,40 @@ The syntax for Unix-based systems is the following:
 
     export PYTHONPATH=$PYTHONPATH:$(pwd)
 
-To run a sample analysis, run from the terminal:
 
-.. code-block:: console
+Testing the development installation
+------------------------------------
 
-  immune-ml-quickstart ./output_dir/
 
-This will generate a synthetic dataset and run a simple machine machine learning analysis on the generated data.
-The results folder will contain two sub-folders: one for the generated dataset (:code:`synthetic_dataset`) and one for the results of the machine
-learning analysis (:code:`machine_learning_analysis`). The files named specs.yaml are the input files for immuneML that describe how to generate the dataset
-and how to do the machine learning analysis. The index.html files can be used to navigate through all the results that were produced.
+Running Quickstart
+**********************************************
+
+.. include:: ../installation/run_quickstart.rst
+
+
+Running unit tests
+**********************************************
+
+For a thorough testing of the immuneML codebase, you can run the unit tests. Make sure the package :code:`unittest` is installed:
+
+  .. code-block:: console
+
+    pip install unittest
+
+This can reveal issues related to for instance missing or incompatible dependencies.
+All unit tests must pass before adding new features to the main immuneML codebase, so it is highly recommended to check if the tests pass before starting development.
+Note that it may take some time (up to 20~30 minutes) for all tests to complete.
+
+In PyCharm, unit tests can be run by right-clicking the folder named :code:`test` at the project root, and clicking "Run 'Python tests in test...'".
+
+.. image:: ../_static/images/dev_docs/run_python_test_in_test.png
+   :alt: Pycharm run python tests
+   :width: 400
+
+
+Alternatively, unit tests can be run on the command line using the following command (see also: `the official unittest documentation <https://docs.python.org/3/library/unittest.html>`_):
+
+  .. code-block:: console
+
+    python -m unittest
+

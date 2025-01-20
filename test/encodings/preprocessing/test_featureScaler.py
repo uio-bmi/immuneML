@@ -13,7 +13,7 @@ from immuneML.util.PathBuilder import PathBuilder
 class TestFeatureScaler(TestCase):
     def test_standard_scale(self):
         path = EnvironmentSettings.tmp_test_path / "featurescaler/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         feature_matrix = np.array([[0, 2, 3], [0, 0.1, 1], [0, -2, 1]])
         scaled_feature_matrix = FeatureScaler.standard_scale_fit(StandardScaler(), feature_matrix)
@@ -26,7 +26,7 @@ class TestFeatureScaler(TestCase):
 
     def test_normalize(self):
         path = EnvironmentSettings.tmp_test_path / "featurescalernormalize/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         feature_matrix = np.array([[4, 1, 2, 2], [1, 3, 9, 3], [5, 7, 5, 1]])
         norm_feature_matrix = FeatureScaler.normalize(feature_matrix, NormalizationType.L2)

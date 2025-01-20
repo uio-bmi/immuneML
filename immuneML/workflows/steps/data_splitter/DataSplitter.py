@@ -3,8 +3,7 @@ import random
 import numpy as np
 from sklearn.model_selection import KFold, StratifiedKFold
 
-from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.workflows.steps.Step import Step
 from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
 from immuneML.workflows.steps.data_splitter.LeaveOneOutSplitter import LeaveOneOutSplitter
@@ -16,10 +15,8 @@ class DataSplitter(Step):
 
     @staticmethod
     def run(input_params: DataSplitterParams = None):
-        cache_key = CacheHandler.generate_cache_key(DataSplitter._prepare_caching_params(input_params))
         fn = getattr(DataSplitter, "{}_split".format(input_params.split_strategy.name.lower()))
-        datasets = CacheHandler.memo(cache_key, lambda: fn(input_params))
-        return datasets
+        return fn(input_params)
 
     @staticmethod
     def _prepare_caching_params(input_params: DataSplitterParams):

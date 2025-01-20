@@ -1,16 +1,19 @@
 import logging
-import math
 from multiprocessing import Pool
 from pathlib import Path
 from typing import Tuple, List
 
+import math
+
+import dill
+from immuneML.environment.SequenceType import SequenceType
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.caching.CacheObjectType import CacheObjectType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.atchley_kmer_encoding.RelativeAbundanceType import RelativeAbundanceType
@@ -32,31 +35,37 @@ class AtchleyKmerEncoder(DatasetEncoder):
 
     Note that sequences in the repertoire with length shorter than skip_first_n_aa + skip_last_n_aa + k will not be encoded.
 
-    Arguments:
+    **Dataset type:**
 
-        k (int): k-mer length
+    - RepertoireDatasets
 
-        skip_first_n_aa (int): number of amino acids to remove from the beginning of the receptor sequence
 
-        skip_last_n_aa (int): number of amino acids to remove from the end of the receptor sequence
+    **Specification arguments:**
 
-        abundance: how to compute abundance term for k-mers
+    - k (int): k-mer length
 
-        normalize_all_features (bool): when normalizing features to have 0 mean and unit variance, this parameter indicates if the abundance
-        feature should be included in the normalization
+    - skip_first_n_aa (int): number of amino acids to remove from the beginning of the receptor sequence
 
-    YAML specification:
+    - skip_last_n_aa (int): number of amino acids to remove from the end of the receptor sequence
+
+    - abundance: how to compute abundance term for k-mers
+
+    - normalize_all_features (bool): when normalizing features to have 0 mean and unit variance, this parameter indicates if the abundance feature should be included in the normalization
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-            my_encoder:
-                AtchleyKmer:
-                    k: 4
-                    skip_first_n_aa: 3
-                    skip_last_n_aa: 3
-                    abundance: RELATIVE_ABUNDANCE
-                    normalize_all_features: False
+        definitions:
+            encodings:
+                my_encoder:
+                    AtchleyKmer:
+                        k: 4
+                        skip_first_n_aa: 3
+                        skip_last_n_aa: 3
+                        abundance: RELATIVE_ABUNDANCE
+                        normalize_all_features: False
 
     """
 
@@ -75,12 +84,12 @@ class AtchleyKmerEncoder(DatasetEncoder):
             raise ValueError(f"AtchleyKmerEncoder can only be applied to repertoire dataset, got {type(dataset).__name__} instead.")
 
     def __init__(self, k: int, skip_first_n_aa: int, skip_last_n_aa: int, abundance: str, normalize_all_features: bool, name: str = None):
+        super().__init__(name=name)
         self.k = k
         self.skip_first_n_aa = skip_first_n_aa
         self.skip_last_n_aa = skip_last_n_aa
         self.abundance = RelativeAbundanceType[abundance.upper()]
         self.normalize_all_features = normalize_all_features
-        self.name = name
         self.scaler = None
         self.kmer_keys = None
 
@@ -103,8 +112,11 @@ class AtchleyKmerEncoder(DatasetEncoder):
         examples = np.swapaxes(examples, 1, 2)
 
         feature_names = [f"atchley_factor_{j}_aa_{i}" for i in range(1, self.k + 1) for j in range(1, Util.ATCHLEY_FACTOR_COUNT + 1)] + ["abundance"]
-        encoded_data = EncodedData(examples=examples, example_ids=dataset.get_example_ids(), feature_names=feature_names, labels=labels,
-                                   encoding=AtchleyKmerEncoder.__name__, info={"kmer_keys": self.kmer_keys})
+        encoded_data = EncodedData(examples=examples, example_ids=dataset.get_example_ids(),
+                                   feature_names=feature_names, labels=labels,
+                                   encoding=AtchleyKmerEncoder.__name__, info={"kmer_keys": self.kmer_keys,
+                                                                               'sequence_type': SequenceType.AMINO_ACID,
+                                                                               'region_type': params.region_type})
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = encoded_data
@@ -128,11 +140,14 @@ class AtchleyKmerEncoder(DatasetEncoder):
         keys = set()
         example_count = dataset.get_example_count()
 
-        arguments = [(repertoire, index, example_count) for index, repertoire in enumerate(dataset.repertoires)]
+        arguments = [(repertoire.identifier, dill.dumps(repertoire), index, example_count, params)
+                     for index, repertoire in enumerate(dataset.repertoires)]
 
         with Pool(params.pool_size) as pool:
             chunksize = math.floor(dataset.get_example_count() / params.pool_size) + 1
             examples = pool.starmap(self._process_repertoire_cached, arguments, chunksize=chunksize)
+
+        examples = [dill.loads(example) for example in examples]
 
         for example in examples:
             keys.update(list(example.keys()))
@@ -141,29 +156,29 @@ class AtchleyKmerEncoder(DatasetEncoder):
 
         return examples, keys, labels
 
-    def _process_repertoire_cached(self, repertoire, index, example_count):
-        return CacheHandler.memo_by_params((('repertoire', repertoire.identifier), ('encoder', AtchleyKmerEncoder.__name__),
+    def _process_repertoire_cached(self, repertoire_id: str, repertoire, index, example_count, params):
+        return CacheHandler.memo_by_params((('repertoire', repertoire_id), ('encoder', AtchleyKmerEncoder.__name__),
                                             (self.abundance, self.skip_last_n_aa, self.skip_first_n_aa, self.k)),
-                                           lambda: self._process_repertoire(repertoire, index, example_count), CacheObjectType.ENCODING_STEP)
+                                           lambda: self._process_repertoire(repertoire, index, example_count, params),
+                                           CacheObjectType.ENCODING_STEP)
 
-    def _process_repertoire(self, repertoire, index, example_count):
-        if self.skip_first_n_aa > 0 and self.skip_last_n_aa > 0:
-            remove_aa_func = lambda seqs: [seq[self.skip_first_n_aa:-self.skip_last_n_aa] for seq in seqs]
-        elif self.skip_last_n_aa > 0:
-            remove_aa_func = lambda seqs: [seq[:-self.skip_last_n_aa] for seq in seqs]
-        else:
-            remove_aa_func = lambda seqs: [seq[self.skip_first_n_aa:] for seq in seqs]
+    def _process_repertoire(self, repertoire, index, example_count, params: EncoderParams):
+
+        if isinstance(repertoire, bytes):
+            repertoire = dill.loads(repertoire)
 
         logging.info(f"AtchleyKmerEncoder: encoding repertoire {index + 1}/{example_count}.")
 
-        sequences, counts = self._trunc_sequences(repertoire, remove_aa_func)
+        sequences, counts = self._trunc_sequences(repertoire, params)
         abundances = Util.compute_abundance(sequences, counts, self.k, self.abundance)
-        kmers = list(abundances.keys())
+        kmers = [el.to_string() for el in abundances.keys()]
         atchley_factors_df = Util.get_atchely_factors(kmers, self.k)
         atchley_factors_df["abundances"] = np.log(list(abundances.values()))
 
         encoded = atchley_factors_df.to_dict('index')
         encoded = {key: list(encoded[key].values()) for key in encoded}
+
+        encoded = dill.dumps(encoded)
         return encoded
 
     def _vectorize_examples(self, examples, params: EncoderParams, keys: set) -> np.ndarray:
@@ -177,23 +192,24 @@ class AtchleyKmerEncoder(DatasetEncoder):
 
         return np.array(vectorized_examples, dtype=np.float32)
 
-    def _trunc_sequences(self, repertoire, remove_aa_func):
-        sequences = repertoire.get_sequence_aas()
-        counts = repertoire.get_counts()
-        indices = [i for i in range(sequences.shape[0]) if len(sequences[i]) >= self.skip_first_n_aa + self.skip_last_n_aa + self.k]
+    def _trunc_sequences(self, repertoire, params: EncoderParams):
+        data = repertoire.data
+        sequences = getattr(data, params.region_type.value + "_aa")
+        indices = sequences.lengths >= self.skip_first_n_aa + self.skip_last_n_aa + self.k
         sequences = sequences[indices]
-        counts = counts[indices]
-        if self.skip_first_n_aa > 0 or self.skip_last_n_aa > 0:
-            sequences = np.apply_along_axis(remove_aa_func, 0, sequences)
+        counts = data.duplicate_count[indices]
+
+        if self.skip_first_n_aa > 0 and self.skip_last_n_aa > 0:
+            sequences = sequences[:, self.skip_first_n_aa: -self.skip_last_n_aa]
+        elif self.skip_first_n_aa > 0:
+            sequences = sequences[:, self.skip_first_n_aa:]
+        elif self.skip_last_n_aa > 0:
+            sequences = sequences[:, :-self.skip_last_n_aa]
+
         return sequences, counts
 
     def get_additional_files(self) -> List[str]:
         return []
-
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> Path:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file
 
     @staticmethod
     def load_encoder(encoder_file: Path):

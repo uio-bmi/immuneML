@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.pairwise_repertoire_comparison.ComparisonData import ComparisonData
 from immuneML.util.Logger import log
 from immuneML.util.PathBuilder import PathBuilder

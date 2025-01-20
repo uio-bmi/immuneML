@@ -5,7 +5,8 @@ from pathlib import Path
 
 import numpy as np
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.encodings.abundance_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
 from immuneML.pairwise_repertoire_comparison.ComparisonDataBatch import ComparisonDataBatch
 from immuneML.util.Logger import log
 from immuneML.util.PathBuilder import PathBuilder
@@ -32,11 +33,8 @@ class ComparisonData:
         return self.get_item_vectors(self.iteration_repertoire_ids)
 
     def set_iteration_repertoire_ids(self, iteration_repertoire_ids):
-        '''Defines the subset and order of repertoires to iterate over'''
+        """Defines the subset and order of repertoires to iterate over"""
         self.iteration_repertoire_ids = iteration_repertoire_ids
-
-    def build_matching_fn(self):
-        return lambda repertoire: list(set(zip(*[value for value in repertoire.get_attributes(self.comparison_attributes).values() if value is not None])))
 
     def get_item_names(self):
         return np.array([item for items in [batch.get_items() for batch in self.batches] for item in items])
@@ -86,11 +84,11 @@ class ComparisonData:
 
     @log
     def process_dataset(self, dataset: RepertoireDataset):
-        extract_fn = self.build_matching_fn()
+        extract_fn = AbundanceEncoderHelper.get_matching_func_for_repertoire(self.comparison_attributes)
         repertoire_count = dataset.get_example_count()
         for index, repertoire in enumerate(dataset.get_data()):
             self.process_repertoire(repertoire, str(repertoire.identifier), extract_fn)
-            logging.info("Repertoire {} ({}/{}) processed.".format(repertoire.identifier, index+1, repertoire_count))
+            logging.info("Repertoire {} ({}/{}) processed.".format(repertoire.identifier, index + 1, repertoire_count))
             logging.info(f"Currently, there are {self.item_count} items in the comparison data matrix.")
         self.merge_tmp_batches_to_matrix()
 

@@ -5,12 +5,6 @@ from setuptools import setup, find_packages
 from immuneML.environment.Constants import Constants
 
 
-def import_requirements(filename) -> list:
-    with open(filename, 'r') as file:
-        requirements = file.read().split("\n")
-    return requirements
-
-
 setup(
     name="immuneML",
     version=Constants.VERSION,
@@ -20,19 +14,27 @@ setup(
     author="immuneML Team",
     author_email="milenpa@student.matnat.uio.no",
     url="https://github.com/uio-bmi/immuneML",
-    install_requires=["numpy", "pytest>=4", "pandas>=1,<=1.5.3", "PyYAML>=5.3", "scikit-learn>=0.23",
-                      "gensim>=3.8", "matplotlib>=3.1", "editdistance", "regex", "tzlocal", "airr>=1,<1.4",
-                      "fishersapi", "pystache", "torch>=1.5.1", "dill>=0.3", "plotly>=4", "logomaker>=0.8",
-                      "matplotlib-venn>=0.11", "scipy"],
+    install_requires=["numpy<=1.26.4", "pandas>=2.1.0", "PyYAML>=5.3", "scikit-learn>=0.23",
+                      "matplotlib>=3.1", "editdistance", "regex", "tzlocal", "airr>=1,<1.4",
+                      "pystache", "dill>=0.3", "plotly>=4", "matplotlib-venn>=0.11", "scipy<=1.12.0", "bionumpy==1.0.12",
+                      "umap-learn", "olga>=1.2.4"],
     extras_require={
-        "TCRdist": ["parasail==1.2", "tcrdist3>=0.1.6"]
+        'word2vec': ['gensim>=4'],
+        'fisher': ['fisher>=0.1.9', 'fishersapi'],
+        "TCRdist": ["tcrdist3>=0.1.6"],
+        "gen_models": ['sonnia', 'torch'],
+        "ligo": ['stitchr', 'IMGTgeneDL'],
+        "DL": ['torch', 'keras', 'tensorflow', 'logomaker', 'gensim'],
+        "KerasSequenceCNN": ["keras==2.11.0", "tensorflow==2.11.0"],
+        "all": ['tcrdist3>=0.1.6', 'sonnia', 'torch', 'stitchr', 'IMGTgeneDL', 'keras', 'tensorflow', 'fisher>=0.1.9', 'logomaker',
+                'fishersapi', 'gensim>=4']
     },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU Affero General Public License v3"
     ],
     python_requires='>=3.7',
-    packages=find_packages(exclude=["test", "test.*", "performance_tests", "performance_tests.*"]),
+    packages=find_packages(exclude=["test", "test.*"]),
     package_data={
         'immuneML': [str(Path('IO/dataset_import/conversion/*.csv')),
                      str(Path("presentation/html/templates/*.html")),
@@ -43,7 +45,8 @@ setup(
     entry_points={
         'console_scripts': [
             'immune-ml = immuneML.app.ImmuneMLApp:main',
-            'immune-ml-quickstart = immuneML.workflows.instructions.quickstart:main'
+            'immune-ml-quickstart = immuneML.workflows.instructions.quickstart:main',
+            'ligo = immuneML.app.LigoApp:main'
         ]
     },
 )

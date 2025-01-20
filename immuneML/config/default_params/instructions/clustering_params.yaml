@@ -1,0 +1,5 @@
+number_of_processes: 4
+reports: []
+labels: null
+region_type: IMGT_CDR3
+sequence_type: AMINO_ACID

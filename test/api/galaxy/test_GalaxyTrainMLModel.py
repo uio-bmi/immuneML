@@ -12,7 +12,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TestGalaxyTrainMLModel(TestCase):
     def test_run(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "api_galaxy_trainmlmodel_tool/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "api_galaxy_trainmlmodel_tool/")
         result_path = path / "result/"
 
         specs = {
@@ -21,8 +21,8 @@ class TestGalaxyTrainMLModel(TestCase):
                     "d2": {
                         "format": "RandomRepertoireDataset",
                         "params": {
-                            "repertoire_count": 50,
-                            "sequence_length_probabilities": {10: 1},
+                            "repertoire_count": 20,
+                            "sequence_length_probabilities": {3: 1},
                             'sequence_count_probabilities': {10: 1},
                             'labels': {
                                 "CD": {
@@ -40,14 +40,7 @@ class TestGalaxyTrainMLModel(TestCase):
                             "model_type": "sequence",
                             "vector_size": 8,
                         }
-                    },
-                    "e2": {
-                        "Word2Vec": {
-                            "k": 3,
-                            "model_type": "sequence",
-                            "vector_size": 10,
-                        }
-                    },
+                    }
                 },
                 "ml_methods": {
                     "simpleLR": {
@@ -66,10 +59,6 @@ class TestGalaxyTrainMLModel(TestCase):
                         {
                             "encoding": "e1",
                             "ml_method": "simpleLR"
-                        },
-                        {
-                            "encoding": "e2",
-                            "ml_method": "simpleLR"
                         }
                     ],
                     "assessment": {
@@ -79,7 +68,7 @@ class TestGalaxyTrainMLModel(TestCase):
                     },
                     "selection": {
                         "split_strategy": "random",
-                        "split_count": 2,
+                        "split_count": 1,
                         "training_percentage": 0.7
                     },
                     "labels": ["CD"],
@@ -87,7 +76,7 @@ class TestGalaxyTrainMLModel(TestCase):
                     "strategy": "GridSearch",
                     "metrics": ["accuracy", "auc"],
                     "reports": [],
-                    "number_of_processes": 10,
+                    "number_of_processes": 1,
                     "optimization_metric": "accuracy",
                     'refit_optimal_model': False,
                 }

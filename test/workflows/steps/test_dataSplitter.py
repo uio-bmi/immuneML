@@ -6,8 +6,8 @@ from unittest import TestCase
 import pandas as pd
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
@@ -24,23 +24,19 @@ class TestDataSplitter(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_run(self):
-        dataset = RepertoireDataset(repertoires=[Repertoire(Path("0.npy"), None, "0"), Repertoire(Path("0.npy"), None, "8"),
-                                                 Repertoire(Path("0.npy"), None, "1"), Repertoire(Path("0.npy"), None, "9"),
-                                                 Repertoire(Path("0.npy"), None, "2"), Repertoire(Path("0.npy"), None, "10"),
-                                                 Repertoire(Path("0.npy"), None, "3"), Repertoire(Path("0.npy"), None, "11"),
-                                                 Repertoire(Path("0.npy"), None, "4"), Repertoire(Path("0.npy"), None, "12"),
-                                                 Repertoire(Path("0.npy"), None, "5"), Repertoire(Path("0.npy"), None, "13"),
-                                                 Repertoire(Path("0.npy"), None, "6"), Repertoire(Path("0.npy"), None, "14"),
-                                                 Repertoire(Path("0.npy"), None, "7")])
+        PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "data_splitter/")
 
-        paths = [EnvironmentSettings.root_path / "test/tmp/datasplitter/split_{}".format(i) for i in range(5)]
+        dataset = RepertoireDataset(repertoires=[Repertoire(Path(f"{index}.tsv"), None, str(index))
+                                                 for index in range(15)])
+
+        paths = [EnvironmentSettings.tmp_test_path / "data_splitter/split_{}".format(i) for i in range(5)]
         for path in paths:
             PathBuilder.build(path)
 
-        df = pd.DataFrame(data={"key1": [0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2, 0, 0, 1], "filename": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]})
-        df.to_csv(EnvironmentSettings.root_path / "test/tmp/datasplitter/metadata.csv")
+        df = pd.DataFrame(data={"key1": [0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2, 0, 0, 1], "filename": list(range(15))})
+        df.to_csv(EnvironmentSettings.tmp_test_path / "data_splitter/metadata.csv")
 
-        dataset.metadata_file = EnvironmentSettings.root_path / "test/tmp/datasplitter/metadata.csv"
+        dataset.metadata_file = EnvironmentSettings.tmp_test_path / "data_splitter/metadata.csv"
 
         training_percentage = 0.7
 
@@ -60,17 +56,7 @@ class TestDataSplitter(TestCase):
         self.assertEqual(5, len(tests))
         self.assertEqual(10, len(trains[0].repertoires))
 
-        trains2, tests2 = DataSplitter.run(DataSplitterParams(
-            dataset=dataset,
-            training_percentage=training_percentage,
-            split_strategy=SplitType.RANDOM,
-            split_count=5,
-            paths=paths
-        ))
-
-        self.assertEqual(trains[0].get_repertoire_ids(), trains2[0].get_repertoire_ids())
-
-        paths = [EnvironmentSettings.root_path / "test/tmp/datasplitter/split_{}".format(i) for i in range(dataset.get_example_count())]
+        paths = [EnvironmentSettings.tmp_test_path / "data_splitter/split_{}".format(i) for i in range(dataset.get_example_count())]
         for path in paths:
             PathBuilder.build(path)
 
@@ -89,7 +75,7 @@ class TestDataSplitter(TestCase):
         self.assertEqual(15, len(trains))
         self.assertEqual(15, len(tests))
 
-        paths = [EnvironmentSettings.root_path / "test/tmp/datasplitter/split_{}".format(i) for i in range(5)]
+        paths = [EnvironmentSettings.tmp_test_path / "data_splitter/split_{}".format(i) for i in range(5)]
         for path in paths:
             PathBuilder.build(path)
 
@@ -126,4 +112,4 @@ class TestDataSplitter(TestCase):
         for test in tests:
             self.assertTrue(all(cls in test.get_metadata(["key1"])["key1"] for cls in [0, 1, 2]))
 
-        shutil.rmtree(EnvironmentSettings.root_path / "test/tmp/datasplitter/")
+        shutil.rmtree(EnvironmentSettings.tmp_test_path / "data_splitter/")

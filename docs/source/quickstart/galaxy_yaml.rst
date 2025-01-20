@@ -20,7 +20,7 @@ Using immuneML, we will encode the data as 3-mer frequencies and train a logisti
 Getting started through Galaxy
 -------------------------------------------------
 
-The Galaxy web interface is available at https://galaxy.immuneml.uiocloud.no/.
+The Galaxy web interface is available at https://avant.immuneml.uiocloud.no/.
 You may choose to register a user account or perform the analysis as an anonymous user.
 If you are an anonymous user, the data will disappear once your browser session expires.
 
@@ -35,7 +35,7 @@ Step 1: importing the dataset to a Galaxy history
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Every immuneML analysis takes a dataset as input. For the Quickstart tutorial, an example dataset has been prepared and is
-available through `this Galaxy history <https://galaxy.immuneml.uiocloud.no/u/immuneml/h/quickstart-data>`_ (under 'Shared data' > 'Histories' > 'Quickstart data').
+available through `this Galaxy history <https://avant.immuneml.uiocloud.no/u/immuneml/h/quickstart-data>`_ (under 'Shared data' > 'Histories' > 'Quickstart data').
 Alternatively, the tutorial :ref:`How to make an immuneML dataset in Galaxy` describes in detail
 how to make an immuneML dataset using your own data.
 
@@ -48,7 +48,7 @@ To import the complete history, click the + icon in the right upper corner.
 
 This Quickstart dataset Galaxy history contains the following items:
 
-- 100 repertoire .tsv files in AIRR format. For details about the AIRR format, see the `AIRR documentation <https://docs.airr-community.org/en/stable/datarep/format.html>`_ and `this example file <https://galaxy.immuneml.uiocloud.no/datasets/2a4bf9d66c01414a/display/?preview=True>`_.
+- 100 repertoire .tsv files in AIRR format. For details about the AIRR format, see the `AIRR documentation <https://docs.airr-community.org/en/stable/datarep/format.html>`_
 
 - A Collection of repertoires. This history element collects the 100 above-mentioned repertoire files in a Galaxy collection.
   This Galaxy collection makes it easier to select the repertoires as an input to Galaxy tools (instead of selecting all 100 files manually, you can select the collection).
@@ -56,12 +56,11 @@ This Quickstart dataset Galaxy history contains the following items:
 
 - A metadata.csv file. The metadata file describes which of the 100 repertoires are diseased and healthy, under the
   column named 'signal_disease' which contains the values True and False.
-  For details about the metadata file, see :ref:`What should the metadata file look like?` and `this example file <https://galaxy.immuneml.uiocloud.no/datasets/dfa1565938e7b4c3/display/?preview=True>`_.
-
+  For details about the metadata file, see :ref:`What should the metadata file look like?`
 
 Step 2: creating an immuneML Galaxy dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Use the `Create dataset <https://galaxy.immuneml.uiocloud.no/root?tool_id=immune_ml_dataset>`_  Galaxy tool (under 'immuneML tools') to import the dataset
+Use the `Create Dataset with Reports <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_dataset>`_ Galaxy tool (under 'immuneML tools') to import the dataset
 and create an *immuneML dataset* history item, which can subsequently be used as input for other Galaxy tools.
 
 Select 'Simplified interface', then 'repertoire dataset' as dataset type and 'AIRR' data format, and select the metadata.csv file as metadata file.
@@ -127,63 +126,10 @@ The YAML specification consists of:
 
 The complete YAML specification for this analysis looks like this and can be downloaded here: :download:`quickstart.yaml <../_static/files/quickstart/galaxy/quickstart.yaml>`.
 
-.. highlight:: yaml
-.. code-block:: yaml
+    .. collapse:: quickstart.yaml
 
-    definitions:
-      datasets:
-        my_dataset: # user-defined dataset name
-          format: ImmuneML
-          params:
-            path: dataset.iml_dataset # 'dataset' is the default name given by the Create dataset tool
-
-      encodings:
-        my_kmer_frequency: # user-defined encoding name
-          KmerFrequency:   # encoding type
-            k: 3           # encoding parameters
-
-      ml_methods:
-        my_logistic_regression: LogisticRegression # user-defined ML model name: ML model type (no user-specified parameters)
-
-      reports:
-        my_coefficients: Coefficients # user-defined report name: report type (no user-specified parameters)
-
-    instructions:
-      my_training_instruction: # user-defined instruction name
-        type: TrainMLModel
-
-        dataset: my_dataset # use the same dataset name as in definitions
-        labels:
-        - signal_disease    # use a label available in the metadata.csv file
-
-        settings: # which combinations of ML settings to run
-        - encoding: my_kmer_frequency
-          ml_method: my_logistic_regression
-
-        assessment: # parameters in the assessment (outer) cross-validation loop
-          reports:  # plot the coefficients for the trained model
-            models:
-            - my_coefficients
-          split_strategy: random   # how to split the data - here: split randomly
-          split_count: 1           # how many times (here once - just to train and test)
-          training_percentage: 0.7 # use 70% of the data for training
-
-        selection: # parameters in the selection (inner) cross-validation loop
-          split_strategy: random
-          split_count: 1
-          training_percentage: 1 # use all data for training
-
-        optimization_metric: balanced_accuracy # the metric to optimize during nested cross-validation when comparing multiple models
-        metrics: # other metrics to compute for reference
-        - auc
-        - precision
-        - recall
-
-        strategy: GridSearch # strategy for hyperparameter optimization, GridSearch is currently the only available option
-
-        reports: []                # optional train ML model reports to run
-        number_of_processes: 4     # processes for parallelization
-        refit_optimal_model: false # whether to retrain the model on the whole dataset after optimizing hyperparameters
+        .. literalinclude:: ../_static/files/quickstart/galaxy/quickstart.yaml
+           :language: yaml
 
 The YAML specification can either be saved to a local file and uploaded to Galaxy, or pasted directly as a new entry.
 This can be done by clicking 'Upload Data' in the left-hand menu, and choosing either 'Choose local files' or 'Paste/Fetch data'.
@@ -196,7 +142,7 @@ The file will appear as a new history element
 Step 4: running the analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Next, the `Train machine learning models <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_train_ml_model>`_ Galaxy tool (under 'immuneML tools') should be used.
+Next, the `Train ML Classifiers <https://avant.immuneml.uiocloud.no/root?tool_id=immuneml_train_ml_model>`_ Galaxy tool (under 'immuneML tools') should be used.
 Select the YAML specification and previously created dataset from the history, and no additional files.
 
 .. image:: ../_static/images/galaxy/galaxy_train_ml_model.png

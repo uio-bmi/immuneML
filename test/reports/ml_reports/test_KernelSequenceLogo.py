@@ -9,7 +9,7 @@ from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
-from immuneML.ml_methods.ReceptorCNN import ReceptorCNN
+from immuneML.ml_methods.classifiers.ReceptorCNN import ReceptorCNN
 from immuneML.reports.ml_reports.KernelSequenceLogo import KernelSequenceLogo
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
@@ -33,16 +33,16 @@ class TestKernelSequenceLogo(TestCase):
         cnn.fit(enc_dataset.encoded_data, Label("CMV", [True, False]))
 
         report = KernelSequenceLogo(method=cnn, result_path=path / "logos/")
-        report.generate_report()
+        report._generate()
 
-        self.assertTrue(os.path.isfile(path / "logos/alpha_kernel_3_1.png"))
-        self.assertTrue(os.path.isfile(path / "logos/alpha_kernel_3_2.png"))
-        self.assertTrue(os.path.isfile(path / "logos/beta_kernel_3_1.png"))
-        self.assertTrue(os.path.isfile(path / "logos/beta_kernel_3_2.png"))
-        self.assertTrue(os.path.isfile(path / "logos/alpha_kernel_3_1.csv"))
-        self.assertTrue(os.path.isfile(path / "logos/alpha_kernel_3_2.csv"))
-        self.assertTrue(os.path.isfile(path / "logos/beta_kernel_3_1.csv"))
-        self.assertTrue(os.path.isfile(path / "logos/beta_kernel_3_2.csv"))
+        self.assertTrue(os.path.isfile(path / "logos/TRA_kernel_3_1.png"))
+        self.assertTrue(os.path.isfile(path / "logos/TRA_kernel_3_2.png"))
+        self.assertTrue(os.path.isfile(path / "logos/TRB_kernel_3_1.png"))
+        self.assertTrue(os.path.isfile(path / "logos/TRB_kernel_3_2.png"))
+        self.assertTrue(os.path.isfile(path / "logos/TRA_kernel_3_1.csv"))
+        self.assertTrue(os.path.isfile(path / "logos/TRA_kernel_3_2.csv"))
+        self.assertTrue(os.path.isfile(path / "logos/TRB_kernel_3_1.csv"))
+        self.assertTrue(os.path.isfile(path / "logos/TRB_kernel_3_2.csv"))
         self.assertTrue(os.path.isfile(path / "logos/fully_connected_layer_weights.csv"))
         self.assertTrue(os.path.isfile(path / "logos/fully_connected_layer_weights.html"))
 

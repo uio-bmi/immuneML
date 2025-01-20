@@ -7,12 +7,12 @@ import pandas as pd
 import yaml
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
 from immuneML.reports.ml_reports.Coefficients import Coefficients
@@ -28,15 +28,10 @@ class TestCoefficients(TestCase):
         # dummy logistic regression with 100 observations with 20 features belonging to 2 classes
         dummy_lr = LogisticRegression()
         dummy_lr.fit_by_cross_validation(EncodedData(np.random.rand(100, 20), {"l1": [i % 2 for i in range(0, 100)]}),
-                                         number_of_splits=2, label=Label("l1", [0, 1]))
+                                         number_of_splits=2, label=Label("l1", [0, 1]), optimization_metric="balanced_accuracy")
 
         # Change coefficients to values 1-20
         dummy_lr.model.coef_ = np.array(list(range(0, 20))).reshape(1, -1)
-
-        file_path = path / "ml_details.yaml"
-        with file_path.open("w") as file:
-            yaml.dump({"l1": {"feature_names": [f"feature{i}" for i in range(20)]}},
-                      file)
 
         return dummy_lr
 
@@ -49,7 +44,6 @@ class TestCoefficients(TestCase):
                                               "n_largest": [5]})
 
         report.method = self._create_dummy_lr_model(path)
-        report.ml_details_path = path / "ml_details.yaml"
         report.label = Label("l1", [0, 1])
         report.result_path = path
         report.train_dataset = Dataset()
@@ -59,13 +53,14 @@ class TestCoefficients(TestCase):
         return report
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path / "test/tmp/logregcoefsreport/"
-        PathBuilder.build(path)
+        path = EnvironmentSettings.tmp_test_path / "logregcoefsreport/"
+        PathBuilder.remove_old_and_build(path)
 
         report = self._create_report(path)
 
         # Running the report
-        result = report.generate_report()
+        self.assertTrue(report.check_prerequisites())
+        result = report._generate()
 
         self.assertIsInstance(result, ReportResult)
         self.assertEqual(result.output_tables[0].path, path / "coefficients.csv")

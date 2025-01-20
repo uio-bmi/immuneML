@@ -7,12 +7,12 @@ import pandas as pd
 import yaml
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MotifSeedRecovery import MotifSeedRecovery
 from immuneML.util.PathBuilder import PathBuilder
@@ -26,15 +26,12 @@ class TestMotifSeedRecovery(TestCase):
     def _create_dummy_lr_model(self, path):
         # dummy logistic regression with 100 observations with 20 features belonging to 2 classes
         dummy_lr = LogisticRegression()
-        dummy_lr.fit_by_cross_validation(EncodedData(np.random.rand(100, 5), {"l1": [i % 2 for i in range(0, 100)]}), number_of_splits=2,
+        dummy_lr.fit_by_cross_validation(EncodedData(np.random.rand(100, 5), {"l1": [i % 2 for i in range(0, 100)]}),
+                                         optimization_metric="balanced_accuracy", number_of_splits=2,
                                          label=Label("l1", [0, 1]))
 
         # Change coefficients to values 1-20
         dummy_lr.model.coef_ = np.array(list(range(0, 5))).reshape(1, -1)
-
-        with open(path / "ml_details.yaml", "w") as file:
-            yaml.dump({"l1": {"feature_names": ["AAA", "AAC", "CKJ", "KSA", "AKJ"]}},
-                      file)
 
         return dummy_lr
 
@@ -48,14 +45,14 @@ class TestMotifSeedRecovery(TestCase):
         report.label = Label("l1", [0, 1])
         report.result_path = path
         report.train_dataset = Dataset()
-        report.train_dataset.encoded_data = EncodedData(examples=np.zeros((1, 5)), labels={"l1": [1]}, encoding="KmerFrequencyEncoder",
+        report.train_dataset.encoded_data = EncodedData(examples=np.zeros((1, 5)), labels={"l1": [1]},
+                                                        encoding="KmerFrequencyEncoder",
                                                         feature_names=["AAA", "AAC", "CKJ", "KSA", "AKJ"])
 
         return report
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path  / "test/tmp/motifseedrecovery/"
-        PathBuilder.build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "motif_seed_recovery/")
 
         report = self._create_report(path)
         self.assertTrue(report.check_prerequisites())
@@ -101,19 +98,25 @@ class TestMotifSeedRecovery(TestCase):
         self.assertEqual(report.hamming_overlap(seed="AA/A", feature="AAxA"), 3)
         self.assertEqual(report.hamming_overlap(seed="AA/A", feature="AAxx"), 2)
 
-        self.assertEqual(report.max_overlap_sliding(seed="AAA", feature="xAAAx", overlap_fn=report.identical_overlap), 3)
-        self.assertEqual(report.max_overlap_sliding(seed="AAA", feature="xAAxx", overlap_fn=report.identical_overlap), 0)
+        self.assertEqual(report.max_overlap_sliding(seed="AAA", feature="xAAAx", overlap_fn=report.identical_overlap),
+                         3)
+        self.assertEqual(report.max_overlap_sliding(seed="AAA", feature="xAAxx", overlap_fn=report.identical_overlap),
+                         0)
         self.assertEqual(report.max_overlap_sliding(seed="AAA", feature="AAxx", overlap_fn=report.identical_overlap), 2)
 
-        self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAxAx", overlap_fn=report.identical_overlap), 3)
-        self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAxxx", overlap_fn=report.identical_overlap), 1)
+        self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAxAx", overlap_fn=report.identical_overlap),
+                         3)
+        self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAxxx", overlap_fn=report.identical_overlap),
+                         1)
 
         self.assertEqual(report.max_overlap_sliding(seed="AAA", feature="xAAAx", overlap_fn=report.hamming_overlap), 3)
         self.assertEqual(report.max_overlap_sliding(seed="AAA", feature="xAAxx", overlap_fn=report.hamming_overlap), 2)
         self.assertEqual(report.max_overlap_sliding(seed="AAA", feature="xxAxx", overlap_fn=report.hamming_overlap), 1)
 
-        self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAxAx", overlap_fn=report.hamming_overlap), 3)
-        self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAxxx", overlap_fn=report.hamming_overlap), 2)
+        self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAxAx", overlap_fn=report.hamming_overlap),
+                         3)
+        self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAxxx", overlap_fn=report.hamming_overlap),
+                         2)
 
     def test_overlap_gap(self):
         report = MotifSeedRecovery.build_object(**{"implanted_motifs_per_label": {
@@ -122,12 +125,19 @@ class TestMotifSeedRecovery(TestCase):
                    "gap_sizes": [0, 5]}}})
         report.label = Label("l1", [0, 1])
 
-        self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAAx", overlap_fn=report.identical_overlap), 3)
-        self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAxxxxxAx", overlap_fn=report.identical_overlap), 3)
-        self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xxxxxxxxAAxxxxxxx", overlap_fn=report.identical_overlap), 0)
-        self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAxxxxxxx", overlap_fn=report.identical_overlap), 1)
+        self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAAx", overlap_fn=report.identical_overlap),
+                         3)
+        self.assertEqual(
+            report.max_overlap_sliding(seed="AA/A", feature="xAAxxxxxAx", overlap_fn=report.identical_overlap), 3)
+        self.assertEqual(
+            report.max_overlap_sliding(seed="AA/A", feature="xxxxxxxxAAxxxxxxx", overlap_fn=report.identical_overlap),
+            0)
+        self.assertEqual(
+            report.max_overlap_sliding(seed="AA/A", feature="xAAxxxxxxx", overlap_fn=report.identical_overlap), 1)
 
         self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAAx", overlap_fn=report.hamming_overlap), 3)
         self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAxx", overlap_fn=report.hamming_overlap), 2)
-        self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAxxxxxAx", overlap_fn=report.hamming_overlap), 3)
-        self.assertEqual(report.max_overlap_sliding(seed="AA/A", feature="xAAxxxxxxx", overlap_fn=report.hamming_overlap), 2)
+        self.assertEqual(
+            report.max_overlap_sliding(seed="AA/A", feature="xAAxxxxxAx", overlap_fn=report.hamming_overlap), 3)
+        self.assertEqual(
+            report.max_overlap_sliding(seed="AA/A", feature="xAAxxxxxxx", overlap_fn=report.hamming_overlap), 2)

@@ -1,0 +1,6 @@
+gen_examples_count: 100
+number_of_processes: 4
+reports: []
+export_generated_dataset: true
+export_combined_dataset: false
+training_percentage: 1.

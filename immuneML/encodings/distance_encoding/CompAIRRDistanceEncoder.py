@@ -1,14 +1,14 @@
 import subprocess
-import warnings
+import logging
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 import numpy as np
 import pandas as pd
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.util.CompAIRRHelper import CompAIRRHelper
@@ -30,42 +30,49 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
     Morisita-Horn distance (= similarity - 1) is set to 0 to avoid negative distance scores.
 
 
-    Arguments:
+    **Dataset type:**
 
-        compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
-        has been installed such that it can be called directly on the command line with the command 'compairr',
-        or that it is located at /usr/local/bin/compairr.
+    - RepertoireDatasets
 
-        keep_compairr_input (bool): whether to keep the input file that was passed to CompAIRR. This may take a lot of
-        storage space if the input dataset is large. By default the input file is not kept.
 
-        differences (int): Number of differences allowed between the sequences of two immune receptor chains, this
-        may be between 0 and 2. By default, differences is 0.
+    **Specification arguments:**
 
-        indels (bool): Whether to allow an indel. This is only possible if differences is 1. By default, indels is False.
+    - compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR has been
+      installed such that it can be called directly on the command line with the command 'compairr', or that it is
+      located at /usr/local/bin/compairr.
 
-        ignore_counts (bool): Whether to ignore the frequencies of the immune receptor chains. If False, frequencies
-        will be included, meaning the 'counts' values for the receptors available in two repertoires are multiplied.
-        If False, only the number of unique overlapping immune receptors ('clones') are considered.
-        By default, ignore_counts is False.
+    - keep_compairr_input (bool): whether to keep the input file that was passed to CompAIRR. This may take a lot of
+      storage space if the input dataset is large. By default, the input file is not kept.
 
-        ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor chains
-        have to match. If True, gene information is ignored. By default, ignore_genes is False.
+    - differences (int): Number of differences allowed between the sequences of two immune receptor chains, this may be
+      between 0 and 2. By default, differences is 0.
 
-        threads (int): The number of threads to use for parallelization. Default is 8.
+    - indels (bool): Whether to allow an indel. This is only possible if differences is 1. By default, indels is False.
 
-    YAML specification:
+    - ignore_counts (bool): Whether to ignore the frequencies of the immune receptor chains. If False, frequencies will
+      be included, meaning the 'counts' values for the receptors available in two repertoires are multiplied. If False,
+      only the number of unique overlapping immune receptors ('clones') are considered. By default, ignore_counts is False.
+
+    - ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor
+      chains have to match. If True, gene information is ignored. By default, ignore_genes is False.
+
+    - threads (int): The number of threads to use for parallelization. Default is 8.
+
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_distance_encoder:
-            CompAIRRDistance:
-                compairr_path: optional/path/to/compairr
-                differences: 0
-                indels: False
-                ignore_counts: False
-                ignore_genes: False
+        definitions:
+            encodings:
+                my_distance_encoder:
+                    CompAIRRDistance:
+                        compairr_path: optional/path/to/compairr
+                        differences: 0
+                        indels: False
+                        ignore_counts: False
+                        ignore_genes: False
 
     """
 
@@ -174,12 +181,12 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
         mh_distance = 1 - mh_similarity
 
         if mh_distance < -0.3 and self.compairr_params.differences == 0:
-            warnings.warn(
+            logging.warning(
                 f"CompAIRRDistanceEncoder: Morisita-Horn similarity can only be in the range [0, 1], found {mh_similarity} "
                 f"when comparing repertoires {rowIndex} and {columnIndex}.")
 
         if mh_distance < 0:
-            warnings.warn(
+            logging.warning(
                 f"CompAIRRDistanceEncoder: found negative distance {mh_distance} when comparing repertoires {rowIndex} and {columnIndex}, "
                 f"distance will be set to 0.")
             mh_distance = 0
@@ -198,9 +205,9 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
         return raw_distance_matrix, repertoire_sizes, repertoire_indices
 
     def _run_compairr(self, dataset, params, filename):
-        repertoire_sizes, repertoire_indices = self._prepare_repertoire_file(dataset, filename)
+        repertoire_sizes, repertoire_indices = self._prepare_repertoire_file(dataset, filename, params)
 
-        self.compairr_params.is_cdr3 = dataset.repertoires[0].get_region_type() == RegionType.IMGT_CDR3
+        self.compairr_params.is_cdr3 = params.region_type == RegionType.IMGT_CDR3
         args = CompAIRRHelper.get_cmd_args(self.compairr_params, [filename], params.result_path)
         compairr_result = subprocess.run(args, capture_output=True, text=True)
 
@@ -208,7 +215,7 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
 
         return raw_distance_matrix, repertoire_sizes, repertoire_indices
 
-    def _prepare_repertoire_file(self, dataset, filename):
+    def _prepare_repertoire_file(self, dataset, filename, params: EncoderParams):
         repertoire_sizes = {}
         repertoire_indices = {}
 
@@ -216,7 +223,7 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
         header = True
 
         for repertoire in dataset.get_data():
-            repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, self.compairr_params)
+            repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, self.compairr_params, params)
 
             repertoire_counts = repertoire_contents["duplicate_count"].astype(int)
 
@@ -230,12 +237,3 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
 
         return repertoire_sizes, repertoire_indices
 
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> Path:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file
-
-    @staticmethod
-    def load_encoder(encoder_file: Path):
-        encoder = DatasetEncoder.load_encoder(encoder_file)
-        return encoder

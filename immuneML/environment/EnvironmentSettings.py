@@ -27,7 +27,8 @@ class EnvironmentSettings:
     source_docs_path = root_path / "docs/source"
     max_sequence_length = 20
     low_memory = True
-    compairr_paths = [Path("/usr/local/bin/compairr"), Path("./compairr/src/compairr"), root_path / 'compairr/src/compairr']
+    compairr_paths = [Path("/usr/local/bin/compairr"), Path("./compairr/src/compairr"),
+                      root_path / 'compairr/src/compairr', root_path / 'compairr']
 
     @staticmethod
     def reset_cache_path():
@@ -78,6 +79,6 @@ class EnvironmentSettings:
             alphabet = list("ACGT")
             alphabet.sort()
         else:
-            raise RuntimeError("EnvironmentSettings: the sequence alphabet cannot be obtained if sequence_type was not set properly. "
-                               f"Expected AMINO_ACID or NUCLEOTIDE, but got {seq_type} instead.")
+            raise RuntimeError("EnvironmentSettings: the sequence alphabet cannot be obtained if sequence_type was "
+                               "not set properly. Expected AMINO_ACID or NUCLEOTIDE, but got {seq_type} instead.")
         return alphabet

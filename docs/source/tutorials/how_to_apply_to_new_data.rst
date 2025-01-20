@@ -33,8 +33,11 @@ For a tutorial on importing datasets to immuneML (for training or applying an ML
 YAML specification example using the MLApplication instruction
 ------------------------------------------------------------------
 The :ref:`MLApplication` instruction takes in a :code:`dataset` and a :code:`config_path`. The :code:`config_path` should
-point at one of the .zip files exported by the previously run :ref:`TrainMLModel` instruction. They can be found in the sub-folder
-:code:`instruction_name/optimal_label_name` in the results folder.
+point at one of the .zip files exported by the previously run :ref:`TrainMLModel` instruction.
+The configuration of the optimal ML setting can always be found in the sub-folder :code:`<instruction_name>/optimal_<label_name>/zip` in the results folder.
+Alternatively, when running the :ref:`TrainMLModel` instruction with the parameter :code:`export_all_ml_settings` set to :code:`True`,
+the config file for each of the ML settings can be found inside :code:`<instruction_name>/split_<number>/<ml_setting_name>/ml_settings_config/zip`
+for each ML setting in each assessment split.
 
 
 .. highlight:: yaml

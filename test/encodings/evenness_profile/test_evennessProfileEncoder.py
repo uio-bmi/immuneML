@@ -3,10 +3,9 @@ import shutil
 from unittest import TestCase
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceSet import ReceptorSequence
+from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
 from immuneML.environment.Constants import Constants
@@ -21,19 +20,17 @@ class TestEvennessEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode(self):
-        path = EnvironmentSettings.root_path / "test/tmp/evennessenc/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "evennessenc/")
 
-        PathBuilder.build(path)
+        rep1 = Repertoire.build_from_sequences(
+            sequences=[ReceptorSequence(sequence_aa="AAA", duplicate_count=10, vj_in_frame='T') for i in range(1000)] +
+                      [ReceptorSequence(sequence_aa="AAA", duplicate_count=100, vj_in_frame='T') for i in range(1000)] +
+                      [ReceptorSequence(sequence_aa="AAA", duplicate_count=1, vj_in_frame='T') for i in range(1000)],
+            metadata={"l1": "test_1", "l2": 2}, result_path=path)
 
-        rep1 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence("AAA", metadata=SequenceMetadata(count=10)) for i in range(1000)] +
-                             [ReceptorSequence("AAA", metadata=SequenceMetadata(count=100)) for i in range(1000)] +
-                             [ReceptorSequence("AAA", metadata=SequenceMetadata(count=1)) for i in range(1000)],
-            metadata={"l1": "test_1", "l2": 2}, path=path)
-
-        rep2 = Repertoire.build_from_sequence_objects(
-            sequence_objects=[ReceptorSequence("AAA", metadata=SequenceMetadata(count=10)) for i in range(1000)],
-            metadata={"l1": "test_2", "l2": 3}, path=path)
+        rep2 = Repertoire.build_from_sequences(
+            sequences=[ReceptorSequence(sequence_aa="AAA", duplicate_count=10) for i in range(1000)],
+            metadata={"l1": "test_2", "l2": 3}, result_path=path)
 
         lc = LabelConfiguration()
         lc.add_label("l1", ["test_1", "test_2"])

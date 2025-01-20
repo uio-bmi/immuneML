@@ -12,26 +12,26 @@ from immuneML.util.PathBuilder import PathBuilder
 class TestSubsamplingParser(TestCase):
     def test_parse(self):
 
-        path = PathBuilder.build(f'{EnvironmentSettings.tmp_test_path}/subsampling_parser/')
+        path = PathBuilder.remove_old_and_build(f'{EnvironmentSettings.tmp_test_path}/subsampling_parser/')
         dataset = RandomDatasetGenerator.generate_receptor_dataset(30, {3: 1}, {2: 1}, {}, path)
 
         symbol_table = SymbolTable()
         symbol_table.add("d1", SymbolType.DATASET, dataset)
 
         SubsamplingParser().parse('inst1',
-                                  {'dataset': 'd1', 'type': 'Subsampling', 'subsampled_dataset_sizes': [10, 20], 'dataset_export_formats': ['ImmuneML']},
+                                  {'dataset': 'd1', 'type': 'Subsampling', 'subsampled_dataset_sizes': [10, 20], 'dataset_export_formats': ['AIRR']},
                                   symbol_table)
 
         with self.assertRaises(AssertionError):
             SubsamplingParser().parse('inst1',
                                       {'dataset': 'd1', 'type': 'Subsampling', 'subsampled_dataset_sizes': [10, 50],
-                                       'dataset_export_formats': ['ImmuneML']},
+                                       'dataset_export_formats': ['AIRR']},
                                       symbol_table)
 
         with self.assertRaises(AssertionError):
             SubsamplingParser().parse('inst1',
                                       {'dataset': 'd2', 'type': 'Subsampling', 'subsampled_dataset_sizes': [10, 20],
-                                       'dataset_export_formats': ['ImmuneML']},
+                                       'dataset_export_formats': ['AIRR']},
                                       symbol_table)
 
         with self.assertRaises(AssertionError):

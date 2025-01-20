@@ -1,4 +1,3 @@
-import copy
 import json
 import shutil
 import zipfile
@@ -7,14 +6,9 @@ from pathlib import Path
 import airr
 import pandas as pd
 
-from immuneML.IO.dataset_import.AIRRImport import AIRRImport
 from immuneML.IO.dataset_import.DataImport import DataImport
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.ChainPair import ChainPair
-from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.data_model.repertoire.Repertoire import Repertoire
-from immuneML.util.ImportHelper import ImportHelper
+from immuneML.data_model.SequenceParams import ChainPair, RegionType
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.util.PathBuilder import PathBuilder
 from scripts.specification_util import update_docs_per_mapping
 
@@ -36,121 +30,86 @@ class IReceptorImport(DataImport):
     When importing a ReceptorDataset, the AIRR field cell_id is used to determine the chain pairs.
 
 
-    Arguments:
+    **Specification arguments:**
 
-        path (str): This is the path to a directory **with .zip files** retrieved from the iReceptor Gateway. These .zip files should include AIRR files (with .tsv extension) and corresponding metadata.json files with matching names (e.g., for my_dataset.tsv the corresponding metadata file is called my_dataset-metadata.json). The zip files must use the .zip extension.
+    - path (str): This is the path to a directory **with .zip files** retrieved from the iReceptor Gateway. These .zip files should include AIRR files (with .tsv extension) and corresponding metadata.json files with matching names (e.g., for my_dataset.tsv the corresponding metadata file is called my_dataset-metadata.json). The zip files must use the .zip extension.
 
-        is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or ReceptorDataset. By default, is_repertoire is set to True.
+    - is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or ReceptorDataset. By default, is_repertoire is set to True.
 
-        paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a SequenceDataset (paired = False) or a ReceptorDataset (paired = True). In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together based on the identifier given in the AIRR column named 'cell_id'.
+    - label_columns (list): For Sequence- or ReceptorDataset, this parameter can be used to explicitly set the column names of labels to import. These labels can be used as prediction target. When label_columns are not set, label names are attempted to be discovered automatically (any column name which is not used in the column_mapping). For RepertoireDataset labels, label_columns is ignored, metadata is discovered automatically from the metadata json.
 
-        receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor. Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum. If receptor_chains is not provided, the chain pair is automatically detected (only one chain pair type allowed per repertoire).
+    - paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a SequenceDataset (paired = False) or a ReceptorDataset (paired = True). In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together based on the identifier given in the AIRR column named 'cell_id'.
 
-        import_productive (bool): Whether productive sequences (with value 'T' in column productive) should be included in the imported sequences. By default, import_productive is True.
+    - receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor. Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum. If receptor_chains is not provided, the chain pair is automatically detected (only one chain pair type allowed per repertoire).
 
-        import_with_stop_codon (bool): Whether sequences with stop codons (with value 'T' in column stop_codon) should be included in the imported sequences. This only applies if column stop_codon is present. By default, import_with_stop_codon is False.
+    - import_productive (bool): Whether productive sequences (with value 'T' in column productive) should be included in the imported sequences. By default, import_productive is True.
 
-        import_out_of_frame (bool): Whether out of frame sequences (with value 'F' in column vj_in_frame) should be included in the imported sequences. This only applies if column vj_in_frame is present. By default, import_out_of_frame is False.
+    - import_with_stop_codon (bool): Whether sequences with stop codons (with value 'T' in column stop_codon) should be included in the imported sequences. This only applies if column stop_codon is present. By default, import_with_stop_codon is False.
 
-        import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.
+    - import_out_of_frame (bool): Whether out of frame sequences (with value 'F' in column vj_in_frame) should be included in the imported sequences. This only applies if column vj_in_frame is present. By default, import_out_of_frame is False.
 
-        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.
+    - import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.
 
-        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
+    - import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.
 
-        region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as AIRR uses the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
+    - import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
 
-        column_mapping (dict): A mapping from AIRR column names to immuneML's internal data representation. For AIRR, this is by default set to the values shown in YAML below.  A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the AIRR file, or using alternative column names). Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the AIRR file, or using alternative column names). Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS.
+    - region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as AIRR uses the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
-            .. indent with spaces
-            .. code-block:: yaml
-
-                    junction: sequences
-                    junction_aa: sequence_aas
-                    v_call: v_alleles
-                    j_call: j_alleles
-                    locus: chains
-                    duplicate_count: counts
-                    sequence_id: sequence_identifiers
-
-        column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For AIRR format, there is no default column_mapping_synonyms.
-
-        metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDatasets. This should specify a mapping similar to column_mapping where keys are AIRR column names and values are the names that are internally used in immuneML as metadata fields. These metadata fields can be used as prediction labels for Sequence- and ReceptorDatasets. For AIRR format, there is no default metadata_column_mapping. When importing a RepertoireDataset, the metadata is automatically extracted from the metadata json files.
-
-        separator (str): Column separator, for AIRR this is by default "\\t".
+    - separator (str): Column separator, for AIRR this is by default "\\t".
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_airr_dataset:
-            format: IReceptor
-            params:
-                path: path/to/zipfiles/
-                is_repertoire: True # whether to import a RepertoireDataset
-                metadata_column_mapping: # metadata column mapping AIRR: immuneML for Sequence- or ReceptorDatasetDataset
-                    airr_column_name1: metadata_label1
-                    airr_column_name2: metadata_label2
-                import_productive: True # whether to include productive sequences in the dataset
-                import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
-                import_out_of_frame: False # whether to include out of frame sequences in the dataset
-                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
-                import_empty_nt_sequences: True # keep sequences even if the `sequences` column is empty (provided that other fields are as specified here)
-                import_empty_aa_sequences: False # remove all sequences with empty `sequence_aas` column
-                # Optional fields with AIRR-specific defaults, only change when different behavior is required:
-                separator: "\\t" # column separator
-                region_type: IMGT_CDR3 # what part of the sequence to import
-                column_mapping: # column mapping AIRR: immuneML
-                    junction: sequences
-                    junction_aa: sequence_aas
-                    v_call: v_alleles
-                    j_call: j_alleles
-                    locus: chains
-                    duplicate_count: counts
-                    sequence_id: sequence_identifiers
+        definitions:
+            datasets:
+                my_airr_dataset:
+                    format: IReceptor
+                    params:
+                        path: path/to/zipfiles/
+                        is_repertoire: True # whether to import a RepertoireDataset
+                        metadata_column_mapping: # metadata column mapping AIRR: immuneML for Sequence- or ReceptorDatasetDataset
+                            airr_column_name1: metadata_label1
+                            airr_column_name2: metadata_label2
+                        import_productive: True # whether to include productive sequences in the dataset
+                        import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
+                        import_out_of_frame: False # whether to include out of frame sequences in the dataset
+                        import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
+                        import_empty_nt_sequences: True # keep sequences even if the `sequences` column is empty (provided that other fields are as specified here)
+                        import_empty_aa_sequences: False # remove all sequences with empty `sequence_aas` column
+                        # Optional fields with AIRR-specific defaults, only change when different behavior is required:
+                        separator: "\\t" # column separator
+                        region_type: IMGT_CDR3 # what part of the sequence to import
 
     """
     REPERTOIRES_FOLDER = "repertoires/"
 
-    @staticmethod
-    def import_dataset(params: dict, dataset_name: str) -> Dataset:
-        if params["is_repertoire"]:
-            dataset = IReceptorImport.import_repertoire_dataset(params, dataset_name)
-        else:
-            dataset = IReceptorImport.import_sequence_dataset(params, dataset_name)
-
-        return dataset
-
-    @staticmethod
-    def import_repertoire_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
-        base_result_path = params['result_path'] / "tmp_airr"
+    def import_repertoire_dataset(self) -> RepertoireDataset:
+        base_result_path = self.params.result_path / "tmp_airr"
         metadata_file_path = base_result_path / "metadata.csv"
 
-        IReceptorImport._create_airr_repertoiredataset(params['path'], base_result_path, metadata_file_path)
+        IReceptorImport._create_airr_repertoiredataset(self.params.path, base_result_path, metadata_file_path)
 
-        airr_params = copy.deepcopy(params)
-        airr_params["path"] = base_result_path
-        airr_params["metadata_file"] = metadata_file_path
+        self.params.path = base_result_path
+        self.params.metadata_file = metadata_file_path
 
-        dataset = ImportHelper.import_dataset(AIRRImport, airr_params, dataset_name)
+        dataset = super().import_repertoire_dataset()
 
         shutil.rmtree(base_result_path)
 
         return dataset
 
-    @staticmethod
-    def import_sequence_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
-        base_result_path = params['result_path'] / "tmp_airr"
+    def import_sequence_dataset(self):
+        base_result_path = self.params.result_path / "tmp_airr"
 
         unzipped_path = base_result_path / "tmp_unzipped"
-        IReceptorImport._unzip_files(params['path'], unzipped_path, unzip_metadata=False)
+        IReceptorImport._unzip_files(self.params.path, unzipped_path, unzip_metadata=False)
+        self.params.path = unzipped_path
 
-        airr_params = copy.deepcopy(params)
-        airr_params["path"] = unzipped_path
-
-        dataset = ImportHelper.import_dataset(AIRRImport, airr_params, dataset_name)
+        dataset = super().import_sequence_dataset()
 
         shutil.rmtree(unzipped_path)
 
@@ -182,7 +141,7 @@ class IReceptorImport(DataImport):
 
 
     @staticmethod
-    def _unzip_files(path: Path, unzipped_path: Path, unzip_metadata=True) -> Dataset:
+    def _unzip_files(path: Path, unzipped_path: Path, unzip_metadata=True):
         for zip_filename in path.glob("*.zip"):
             with zipfile.ZipFile(zip_filename, "r") as zip_object:
                 for file in zip_object.filelist:
@@ -327,13 +286,10 @@ class IReceptorImport(DataImport):
 
         chain_pair_values = str([chain_pair.name for chain_pair in ChainPair])[1:-1].replace("'", "`")
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
-        repertoire_fields = list(Repertoire.FIELDS)
-        repertoire_fields.remove("region_types")
 
         mapping = {
             "Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum.": f"Valid values are {chain_pair_values}.",
             "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
-            "Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS": f"Valid immuneML fields that can be specified here are {repertoire_fields}."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

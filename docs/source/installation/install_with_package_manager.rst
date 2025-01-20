@@ -15,9 +15,13 @@ This manual shows how to install immuneML using either conda or pip.
 Install immuneML with pip
 ------------------------------
 
-0. To install immuneML with pip, make sure to have Python version 3.7 or 3.8 installed. immuneML with later Python versions should also work, but it has not been extensively tested. For more information on Python versions, see `the official Python website <https://www.python.org/>`_.
+0. To install immuneML with pip, make sure to have Python version **3.9 or later** installed.
 
-1. Create a virtual environment where immuneML will be installed. It is possible to install immuneML as a global package, but it is not recommended as there might be conflicting versions of different packages. For more details, see `the official documentation on creating virtual environments with Python <https://docs.python.org/3/library/venv.html>`_. To create an environment, run the following in the terminal (for Windows-specific commands, see the virtual environment documentation linked above):
+1. Create a virtual environment where immuneML will be installed. It is possible to install immuneML as a global
+   package, but it is not recommended as there might be conflicting versions of different packages. For more details,
+   see `the official documentation on creating virtual environments with Python <https://docs.python.org/3/library/venv.html>`_.
+   To create an environment, run the following in the terminal (for Windows-specific commands, see the virtual
+   environment documentation linked above):
 
 .. code-block:: console
 
@@ -29,7 +33,10 @@ Install immuneML with pip
 
   source ./immuneml_venv/bin/activate
 
-Note: when creating a python virtual environment, it will automatically use the same Python version as the environment it was created in. To ensure that the preferred Python version (3.8) is used, it is possible to instead make a conda environment (see :ref:`Install immuneML with conda` steps 0-3) and proceed to install immuneML with pip inside the conda environment.
+Note: when creating a python virtual environment, it will automatically use the same Python version as the environment
+it was created in. To ensure that the preferred Python version (3.9 or later) is used, it is possible to instead make a conda
+environment (see :ref:`Install immuneML with conda` steps 0-3) and proceed to install immuneML with pip inside the
+conda environment.
 
 
 3. If not already up-to-date, update pip:
@@ -38,25 +45,12 @@ Note: when creating a python virtual environment, it will automatically use the 
 
   python3 -m pip install --upgrade pip
 
-4. If not already installed, install the wheel package. If it is not installed, the installation of some of the dependencies might default to legacy 'setup.py install'.
 
-.. code-block:: console
-
-  pip install wheel
-
-5. To install `immuneML from PyPI <https://pypi.org/project/immuneML/>`_ in this virtual environment, run the following:
+4. To install `immuneML from PyPI <https://pypi.org/project/immuneML/>`_ in this virtual environment, run the following:
 
 .. code-block:: console
 
   pip install immuneML
-
-Alternatively, if you want to use the :ref:`TCRdistClassifier` ML method and corresponding :ref:`TCRdistMotifDiscovery` report, include the optional extra :code:`TCRdist`:
-
-.. code-block:: console
-
-  pip install immuneML[TCRdist]
-
-See also this question under 'Troubleshooting': :ref:`I get an error when installing PyTorch (could not find a version that satisfies the requirement torch)`
 
 
 
@@ -72,12 +66,12 @@ Install immuneML with conda
   mkdir immuneML/
   cd immuneML/
 
-2. Create a virtual environment using conda. immuneML has been tested extensively with Python versions 3.7 and 3.8, but not 3.9.
-   To create a conda virtual environment with Python version 3.8, use:
+2. Create a virtual environment using conda. immuneML should work with Python version 3.9 or later, and has been tested extensively with Python version 3.11.
+   To create a conda virtual environment with Python version 3.11, use:
 
 .. code-block:: console
 
-  conda create --prefix immuneml_env/ python=3.8
+  conda create --prefix immuneml_env/ python=3.11
 
 3. Activate the created environment:
 
@@ -95,6 +89,25 @@ Install immuneML with conda
 Installing optional dependencies
 ----------------------------------
 
+TCRDist
+*******
+
+If you want to use the :ref:`TCRdistClassifier` ML method and corresponding :ref:`TCRdistMotifDiscovery` report, you can include the optional extra :code:`TCRdist`:
+
+.. code-block:: console
+
+  pip install immuneML[TCRdist]
+
+The TCRdist dependencies can also be installed manually using the :download:`requirements_TCRdist.txt <https://raw.githubusercontent.com/uio-bmi/immuneML/master/requirements_TCRdist.txt>` file:
+
+.. code-block:: console
+
+  pip install -r requirements_TCRdist.txt
+
+
+DeepRC
+******
+
 Optionally, if you want to use the :ref:`DeepRC` ML method and and corresponding :ref:`DeepRCMotifDiscovery` report, you also
 have to install DeepRC dependencies using the :download:`requirements_DeepRC.txt <https://raw.githubusercontent.com/uio-bmi/immuneML/master/requirements_DeepRC.txt>` file.
 Important note: DeepRC uses PyTorch functionalities that depend on GPU. Therefore, DeepRC does not work on a CPU.
@@ -104,8 +117,44 @@ To install the DeepRC dependencies, run:
 
   pip install -r requirements_DeepRC.txt --no-dependencies
 
+See also this question under 'Troubleshooting': :ref:`I get an error when installing PyTorch (could not find a version that satisfies the requirement torch)`
+
+
+Deep learning methods
+************************
+
+In order to use any of the supported deep learning models (KerasSequenceCNN or others), install DL optional dependencies:
+
+.. code-block:: console
+
+  pip install immuneML[DL]
+
+Fisher's exact test
+**********************
+
+For using ProbabilisticBinaryClassifier or any of the abundance encoders (following Emerson et al. 2017 publication),
+please install 'fisher' optional dependencies:
+
+.. code-block:: console
+
+  pip install immuneML[fisher]
+
+Full immuneML installation
+******************************
+
+To install all optional dependencies and have access to the full set of immuneML features, use the following installation command:
+
+.. code-block:: console
+
+  pip install immuneML[all]
+
+CompAIRR
+********
+
 If you want to use the :ref:`CompAIRRDistance` or :ref:`CompAIRRSequenceAbundance` encoder, you have to install the C++ tool `CompAIRR <https://github.com/uio-bmi/compairr>`_.
-The easiest way to do this is by cloning CompAIRR from GitHub and installing it using :code:`make` in the main folder:
+Furthermore, the :ref:`SimilarToPositiveSequence` encoder can be run both with and without CompAIRR, but the CompAIRR-based version is faster.
+
+The easiest way to install CompAIRR is by cloning CompAIRR from GitHub and installing it using :code:`make` in the main folder:
 
 .. code-block:: console
 
@@ -122,7 +171,7 @@ to :ref:`CompAIRRDistance` or :ref:`CompAIRRSequenceAbundance` encoder.
 Testing immuneML
 -----------------
 
-1. To validate the installation, run:
+To validate the installation, run:
 
 .. code-block:: console
 
@@ -149,13 +198,5 @@ The output should look like this:
                         standard immuneML.
     --version           show program's version and exit
 
-2. To quickly test out whether immuneML is able to run, try running the quickstart command:
 
-.. code-block:: console
-
-    immune-ml-quickstart ./quickstart_results/
-
-This will generate a synthetic dataset and run a simple machine machine learning analysis on the generated data.
-The results folder will contain two sub-folders: one for the generated dataset (:code:`synthetic_dataset`) and one for the results of the machine
-learning analysis (:code:`machine_learning_analysis`). The files named specs.yaml are the input files for immuneML that describe how to generate the dataset
-and how to do the machine learning analysis. The index.html files can be used to navigate through all the results that were produced.
+.. include:: ./run_quickstart.rst

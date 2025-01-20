@@ -16,8 +16,8 @@ from immuneML.hyperparameter_optimization.states.HPLabelState import HPLabelStat
 from immuneML.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
-from immuneML.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_methods.classifiers.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.train_ml_model_reports.CVFeaturePerformance import CVFeaturePerformance
 
@@ -28,22 +28,20 @@ class TestCVFeaturePerformance(TestCase):
 
         state = TrainMLModelState(assessment=SplitConfig(split_count=5, split_strategy=SplitType.K_FOLD),
                                   selection=SplitConfig(split_count=10, split_strategy=SplitType.K_FOLD),
-                                  optimization_metric=Metric.ACCURACY,
+                                  optimization_metric=ClassificationMetric.ACCURACY,
                                   label_configuration=LabelConfiguration(labels=[Label(name="CMV", values=[True, False])]),
                                   hp_settings=[HPSetting(encoder_params={"p_value_threshold": 0.001}, encoder_name="e1",
                                                          encoder=SequenceAbundanceEncoder([], 0, 0, 0), preproc_sequence=[], ml_method_name="ml1",
-                                                         ml_method=ProbabilisticBinaryClassifier(10, 0.1), ml_params={}),
+                                                         ml_method=ProbabilisticBinaryClassifier(10, 0.1, -1e-10), ml_params={}),
                                                HPSetting(encoder_params={"p_value_threshold": 0.01}, encoder_name="e2",
                                                          encoder=SequenceAbundanceEncoder([], 0, 0, 0), preproc_sequence=[], ml_method_name="ml1",
-                                                         ml_method=ProbabilisticBinaryClassifier(10, 0.1), ml_params={}),
+                                                         ml_method=ProbabilisticBinaryClassifier(10, 0.1, -1e-10), ml_params={}),
                                                HPSetting(encoder_params={"p_value_threshold": 0.01},
                                                          encoder=SequenceAbundanceEncoder([], 0, 0, 0), preproc_sequence=[],
-                                                         ml_method=ProbabilisticBinaryClassifier(10, 0.01), ml_params={})
+                                                         ml_method=ProbabilisticBinaryClassifier(10, 0.01, -1e-10), ml_params={})
                                                ], dataset=None, hp_strategy=None, metrics=None)
 
         report = CVFeaturePerformance("p_value_threshold", state, path, is_feature_axis_categorical=True, name="report1")
-        with self.assertWarns(RuntimeWarning):
-            report.generate_report()
 
         state.hp_settings = state.hp_settings[:2]
 
@@ -61,7 +59,8 @@ class TestCVFeaturePerformance(TestCase):
 
         report.state = state
 
-        report_result = report.generate_report()
+        self.assertTrue(report.check_prerequisites())
+        report_result = report._generate()
 
         self.assertTrue(isinstance(report_result, ReportResult))
         self.assertEqual(2, len(report_result.output_tables))

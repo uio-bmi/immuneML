@@ -3,13 +3,14 @@ import shutil
 from unittest import TestCase
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
@@ -24,21 +25,21 @@ class TestMatchedReceptorsEncoder(TestCase):
         labels = {"subject_id": ["subject_1", "subject_2", "subject_3"],
                   "label": ["yes", "no", "no"]}
 
-        metadata_alpha = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.LIGHT.value}
-        metadata_beta = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.HEAVY.value}
+        metadata_alpha = {"v_call": "V1", "j_call": "J1", "locus": Chain.LIGHT.value}
+        metadata_beta = {"v_call": "V1", "j_call": "J1", "locus": Chain.HEAVY.value}
 
-        repertoires, metadata = RepertoireBuilder.build(sequences=[["XXAGQXGSSNTGKLIXX", "XXAGQXGSSNTGKLIYY", "XXSAGQGETQYXX"],
-                                                                   ["ASSXRXX"],
-                                                                   ["XXIXXNDYKLSXX", "CCCC", "SSSS", "TTTT"]],
+        repertoires, metadata = RepertoireBuilder.build(sequences=[["FFAGQFGSSNTGKLIFF", "FFAGQFGSSNTGKLIYY", "FFSAGQGETQYFF"],
+                                                                   ["ASSFRFF"],
+                                                                   ["FFIFFNDYKLSFF", "CCCC", "SSSS", "TTTT"]],
                                                         path=path, labels=labels,
-                                                        seq_metadata=[[{**metadata_alpha, "count": 10, "v_gene": "IGLV35"},
-                                                                       {**metadata_alpha, "count": 10},
-                                                                       {**metadata_beta, "count": 10, "v_gene": "IGHV29-1"}],
-                                                                      [{**metadata_beta, "count": 10, "v_gene": "IGHV7-3"}],
-                                                                      [{**metadata_alpha, "count": 5, "v_gene": "IGLV26-2"},
-                                                                       {**metadata_alpha, "count": 2},
-                                                                       {**metadata_beta, "count": 1},
-                                                                       {**metadata_beta, "count": 2}]],
+                                                        seq_metadata=[[{**metadata_alpha, "duplicate_count": 10, "v_call": "IGLV35"},
+                                                                       {**metadata_alpha, "duplicate_count": 10},
+                                                                       {**metadata_beta, "duplicate_count": 10, "v_call": "IGHV29-1"}],
+                                                                      [{**metadata_beta, "duplicate_count": 10, "v_call": "IGHV7-3"}],
+                                                                      [{**metadata_alpha, "duplicate_count": 5, "v_call": "IGLV26-2"},
+                                                                       {**metadata_alpha, "duplicate_count": 2},
+                                                                       {**metadata_beta, "duplicate_count": 1},
+                                                                       {**metadata_beta, "duplicate_count": 2}]],
                                                         subject_ids=labels["subject_id"])
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
@@ -61,7 +62,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         return dataset, label_config, filepath, labels
 
     def test_encode_no_v_all(self):
-        path = EnvironmentSettings.root_path / "test/tmp/regex_matches_encoder/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "regex_matches_encoder_novall/")
 
         dataset, label_config, motif_filepath, labels = self.create_dummy_data(path)
 
@@ -71,11 +72,9 @@ class TestMatchedReceptorsEncoder(TestCase):
             "reads": "all"
         })
 
-
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_config=label_config,
-            filename="dataset.csv"
         ))
 
         expected_outcome = [[20, 10, 0, 0], [0, 0, 10, 0], [0, 0, 0, 5]]
@@ -84,13 +83,12 @@ class TestMatchedReceptorsEncoder(TestCase):
             self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
         self.assertListEqual(["1_IGL", "1_IGH", "2_IGH", "3_IGL"], encoded.encoded_data.feature_names)
-        self.assertListEqual(["subject_1", "subject_2", "subject_3"], encoded.encoded_data.example_ids)
+        self.assertListEqual(dataset.get_example_ids(), encoded.encoded_data.example_ids)
 
         shutil.rmtree(path)
 
-
     def test_encode_no_v_unique(self):
-        path = EnvironmentSettings.root_path / "test/tmp/regex_matches_encoder/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "regex_matches_encoder_vunique/")
 
         dataset, label_config, motif_filepath, labels = self.create_dummy_data(path)
 
@@ -100,11 +98,9 @@ class TestMatchedReceptorsEncoder(TestCase):
             "reads": "unique"
         })
 
-
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_config=label_config,
-            filename="dataset.csv"
         ))
 
         expected_outcome = [[2, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
@@ -113,13 +109,12 @@ class TestMatchedReceptorsEncoder(TestCase):
             self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
         self.assertListEqual(["1_IGL", "1_IGH", "2_IGH", "3_IGL"], encoded.encoded_data.feature_names)
-        self.assertListEqual(["subject_1", "subject_2", "subject_3"], encoded.encoded_data.example_ids)
+        self.assertListEqual(dataset.get_example_ids(), encoded.encoded_data.example_ids)
 
         shutil.rmtree(path)
 
-
     def test_encode_with_v_all(self):
-        path = EnvironmentSettings.root_path / "test/tmp/regex_matches_encoder/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "regex_matches_encoder_vall/")
 
         dataset, label_config, motif_filepath, labels = self.create_dummy_data(path)
 
@@ -129,11 +124,9 @@ class TestMatchedReceptorsEncoder(TestCase):
             "reads": "all"
         })
 
-
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_config=label_config,
-            filename="dataset.csv"
         ))
 
         expected_outcome = [[10, 10, 0, 0, 0], [0, 0, 10, 0, 0], [0, 0, 0, 0, 5]]
@@ -142,6 +135,6 @@ class TestMatchedReceptorsEncoder(TestCase):
             self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
         self.assertListEqual(["1_IGL", "1_IGH", "2_IGH", "3_IGL", "4_IGL"], encoded.encoded_data.feature_names)
-        self.assertListEqual(["subject_1", "subject_2", "subject_3"], encoded.encoded_data.example_ids)
+        self.assertListEqual(dataset.get_example_ids(), encoded.encoded_data.example_ids)
 
         shutil.rmtree(path)

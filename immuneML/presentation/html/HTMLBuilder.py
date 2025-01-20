@@ -16,7 +16,7 @@ class HTMLBuilder:
     """
     Outputs HTML results of the analysis. This is currently the only defined format of presentation of results.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
@@ -41,7 +41,7 @@ class HTMLBuilder:
     def _make_document(presentations: List[InstructionPresentation], path: Path) -> Path:
         result_path = path / "index.html"
         if len(presentations) > 1:
-            html_map = {"instructions": presentations, "css_path": EnvironmentSettings.html_templates_path / "css/custom.css",
+            html_map = {"instructions": presentations, "css_style": Util.get_css_content(EnvironmentSettings.html_templates_path / "css/custom.css"),
                         "full_specs": Util.get_full_specs_path(path), 'immuneML_version': MLUtil.get_immuneML_version()}
             TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "index.html",
                                  template_map=html_map, result_path=result_path)

@@ -1,6 +1,6 @@
-import warnings
+import logging
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.util.ParameterValidator import ParameterValidator
 
@@ -38,7 +38,7 @@ class LabelHelper:
                 label_values = list(set(dataset.get_metadata([label_name])[label_name]))
             else:
                 label_values = []
-                warnings.warn(f"{instruction_name}: for {yaml_location}, label values could not be recovered for label "
+                logging.warning(f"{instruction_name}: for {yaml_location}, label values could not be recovered for label "
                               f"{label}, using empty list instead. This issue may occur due to improper loading of dataset {dataset.name},"
                               f"and could cause problems with some encodings.")
 

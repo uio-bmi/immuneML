@@ -7,8 +7,8 @@ import pandas as pd
 import yaml
 from scipy.sparse import csr_matrix
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.reports.encoding_reports.DesignMatrixExporter import DesignMatrixExporter
 
@@ -25,7 +25,8 @@ class TestDesignMatrixExporter(TestCase):
         path = EnvironmentSettings.tmp_test_path / "designmatrrixexporterreport/"
 
         report = DesignMatrixExporter(dataset, path, name='report', file_format='csv')
-        report.generate_report()
+        self.assertTrue(report.check_prerequisites())
+        report._generate()
         self.assertTrue(os.path.isfile(path / "design_matrix.csv"))
 
         self.assertTrue(os.path.isfile(path / "labels.csv"))
@@ -61,7 +62,7 @@ class TestDesignMatrixExporter(TestCase):
 
         report = DesignMatrixExporter(dataset=dataset, result_path=path,
                                       name="design_matrix", file_format='csv')
-        report.generate_report()
+        report._generate()
         self.assertTrue(os.path.isfile(path / "design_matrix.csv"))
         report.file_format = 'csv.zip'
         report._export_matrix()
@@ -73,6 +74,12 @@ class TestDesignMatrixExporter(TestCase):
         report.file_format = 'npy.zip'
         report._export_matrix()
         self.assertTrue(os.path.isfile(path / "design_matrix.npy.zip"))
+
+        report.file_format = 'pt'
+        report._export_matrix()
+        self.assertTrue(os.path.isfile(path / "design_matrix.pt"))
+
+        shutil.rmtree(path)
 
         with self.assertRaises(AssertionError):
             DesignMatrixExporter.build_object(**{'file_format': "random"})

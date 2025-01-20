@@ -9,11 +9,11 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 
 from immuneML.IO.ml_method.MLMethodConfiguration import MLMethodConfiguration
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.KNN import KNN
-from immuneML.ml_methods.SVM import SVM
+from immuneML.ml_methods.classifiers.KNN import KNN
+from immuneML.ml_methods.classifiers.SVM import SVM
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -47,7 +47,7 @@ class TestSklearnMethod(TestCase):
         y = {"default": np.array(['a', "b", "c", "a"])}
 
         svm = SVM()
-        svm._fit(sparse.csr_matrix(x), y["default"])
+        svm._fit_model(sparse.csr_matrix(x), y["default"])
 
         path = EnvironmentSettings.root_path / "test/tmp/storesklearn/"
 
@@ -66,15 +66,15 @@ class TestSklearnMethod(TestCase):
         y = {"default": np.array(['a', "b", "c", "a"])}
 
         svm = SVM()
-        svm._fit(sparse.csr_matrix(x), y["default"])
+        svm._fit_model(sparse.csr_matrix(x), y["default"])
 
         path = EnvironmentSettings.root_path / "test/tmp/store_load_sklearn/"
         details_path = EnvironmentSettings.root_path / "test/tmp/store_load_sklearn/details.yaml"
 
-        svm.store(path=path, details_path=details_path)
+        svm.store(path=path)
 
         svm2 = SVM()
-        svm2.load(path=path, details_path=details_path)
+        svm2.load(path=path)
 
         shutil.rmtree(path)
 

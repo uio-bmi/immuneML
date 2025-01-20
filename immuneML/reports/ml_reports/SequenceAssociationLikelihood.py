@@ -5,10 +5,10 @@ import numpy as np
 import plotly.graph_objects as go
 from scipy.stats import beta
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
-from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
@@ -20,14 +20,15 @@ class SequenceAssociationLikelihood(MLReport):
     Plots the beta distribution used as a prior for class assignment in ProbabilisticBinaryClassifier. The distribution plotted shows
     the probability that a sequence is associated with a given class for a label.
 
-    Attributes: the report does not take in any arguments.
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_sequence_assoc_report: SequenceAssociationLikelihood
+        definitions:
+            reports:
+                my_sequence_assoc_report: SequenceAssociationLikelihood
 
     """
 

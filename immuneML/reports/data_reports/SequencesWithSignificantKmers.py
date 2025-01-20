@@ -1,11 +1,13 @@
-import warnings
+import logging
 from pathlib import Path
 from typing import List
 
 import pandas as pd
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -22,39 +24,45 @@ class SequencesWithSignificantKmers(DataReport):
     For each combination of p-value and k-mer size given, a file is written containing all sequences containing a significant
     k-mer of the given size at the given p-value.
 
-    Arguments:
+    **Specification arguments:**
 
-        reference_sequences_path (str): Path to a file containing the reference sequences,
-        The file should contain one sequence per line, without a header, and without V or J genes.
+    - reference_sequences_path (str): Path to a file containing the reference sequences,
+      The file should contain one sequence per line, without a header, and without V or J genes.
 
-        p_values (list): The p value thresholds to be used by Fisher's exact test. Each p-value specified here will become one panel in the output figure.
+    - p_values (list): The p value thresholds to be used by Fisher's exact test. Each p-value specified here will become
+      one panel in the output figure.
 
-        k_values (list): Length of the k-mers (number of amino acids) created by the :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder`.
-        Each k-mer length will become one panel in the output figure.
+    - k_values (list): Length of the k-mers (number of amino acids) created by the
+      :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder`.
+      Each k-mer length will become one panel in the output figure.
 
-        label (dict): A label configuration. One label should be specified, and the positive_class for this label should be defined. See the YAML specification below for an example.
+    - label (dict): A label configuration. One label should be specified, and the positive_class for this label should
+      be defined. See the YAML specification below for an example.
 
 
-    YAML specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_sequences_with_significant_kmers:
-            SequencesWithSignificantKmers:
-                reference_sequences_path: path/to/reference/sequences.txt
-                p_values:
-                    - 0.1
-                    - 0.01
-                    - 0.001
-                    - 0.0001
-                k_values:
-                    - 3
-                    - 4
-                    - 5
-                label: # Define a label, and the positive class for that given label
-                    CMV:
-                        positive_class: +
+        definitions:
+            reports:
+                my_sequences_with_significant_kmers:
+                    SequencesWithSignificantKmers:
+                        reference_sequences_path: path/to/reference/sequences.txt
+                        p_values:
+                            - 0.1
+                            - 0.01
+                            - 0.001
+                            - 0.0001
+                        k_values:
+                            - 3
+                            - 4
+                            - 5
+                        label: # Define a label, and the positive class for that given label
+                            CMV:
+                                positive_class: +
+
     """
 
     @classmethod
@@ -69,19 +77,22 @@ class SequencesWithSignificantKmers(DataReport):
 
     def __init__(self, dataset: RepertoireDataset = None, reference_sequences_path: Path = None,
                  p_values: List[float] = None, k_values: List[int] = None, label: dict = None,
-                 result_path: Path = None, name: str = None, number_of_processes: int = 1):
+                 result_path: Path = None, name: str = None, number_of_processes: int = 1,
+                 sequence_type: SequenceType = None, region_type: RegionType = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.reference_sequences_path = reference_sequences_path
         self.reference_sequences = SignificantFeaturesHelper.load_sequences(reference_sequences_path)
         self.p_values = p_values
         self.k_values = k_values
         self.label = label
+        self.sequence_type = sequence_type
+        self.region_type = region_type
 
     def check_prerequisites(self):
         if isinstance(self.dataset, RepertoireDataset):
             return True
         else:
-            warnings.warn(f"{SequencesWithSignificantKmers.__name__}: report can be generated only from RepertoireDataset. Skipping this report...")
+            logging.warning(f"{SequencesWithSignificantKmers.__name__}: report can be generated only from RepertoireDataset. Skipping this report...")
             return False
 
     def _generate(self) -> ReportResult:
@@ -91,7 +102,8 @@ class SequencesWithSignificantKmers(DataReport):
         report_outputs = self._write_output_files()
 
         return ReportResult(name=self.name,
-                            info="Given a list of reference sequences, this report writes out the subsets of reference sequences containing significant k-mers.",
+                            info="Given a list of reference sequences, this report writes out the subsets of reference "
+                                 "sequences containing significant k-mers.",
                             output_tables=report_outputs)
 
     def _write_output_files(self):
@@ -128,7 +140,8 @@ class SequencesWithSignificantKmers(DataReport):
 
     def _compute_significant_kmers(self, k, p_value):
         encoder_result_path = self._get_encoder_result_path(k, p_value)
-        encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path)
+        encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path,
+                                                                         self.region_type, self.sequence_type)
         encoder = SignificantFeaturesHelper._build_kmer_encoder(self.dataset, k, p_value, encoder_params)
         sequences = pd.read_csv(encoder.relevant_sequence_path)
 

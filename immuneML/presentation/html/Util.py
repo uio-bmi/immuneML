@@ -8,6 +8,7 @@ import numpy as np
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.StringHelper import StringHelper
 
 
 class Util:
@@ -77,6 +78,26 @@ class Util:
         return path_str
 
     @staticmethod
+    def get_logfile_path(base_path) -> str:
+        path_str = ""
+
+        logfile_path = list(base_path.glob("../*log.txt"))
+
+        if len(logfile_path) == 1:
+            path_str = os.path.relpath(logfile_path[0], base_path)
+        else:
+            try:
+                logger = logging.getLogger()
+                if len(logger.handlers) == 1:
+                    handler = logger.handlers[0]
+                    if isinstance(handler, logging.handlers.FileHandler):
+                        path_str = os.path.relpath(str(handler.baseFilename), base_path)
+            except Exception:
+                pass
+
+        return path_str
+
+    @staticmethod
     def get_table_string_from_csv_string(csv_string: str, separator: str = ",", has_header: bool = True) -> str:
         table_string = "<table>\n"
         for index, line in enumerate(csv_string.splitlines()):
@@ -111,7 +132,17 @@ class Util:
                             shutil.copyfile(src=str(output.path), dst=new_path)
                             output.path = new_path
                     else:
-                        logging.warning(f"HTML util: one of the report outputs was not returned properly from the report {report_result.name}, "
-                                        f"and it will not be moved to HTML output folder.")
+                        logging.warning(f"HTML util: one of the report outputs was not returned properly from the "
+                                        f"report {report_result.name}, and it will not be moved to HTML output folder.")
 
         return report_result
+
+    @staticmethod
+    def make_dataset_html_map(dataset, dataset_key="dataset"):
+        return {f"{dataset_key}_name": dataset.name,
+                f"{dataset_key}_type": StringHelper.camel_case_to_word_string(type(dataset).__name__),
+                f"{dataset_key}_size": f"{dataset.get_example_count()} {type(dataset).__name__.replace('Dataset', 's').lower()}",
+                f"{dataset_key}_labels": [{f"{dataset_key}_label_name": label_name,
+                                           f"{dataset_key}_label_classes": ", ".join(str(class_name) for class_name in dataset.labels[label_name])}
+                                                for label_name in dataset.get_label_names()],
+                f"show_{dataset_key}_labels": len(dataset.get_label_names()) > 0}

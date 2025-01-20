@@ -5,13 +5,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
-from immuneML.ml_methods.LogisticRegression import LogisticRegression
-from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.ml_methods.RandomForestClassifier import RandomForestClassifier
-from immuneML.ml_methods.SVC import SVC
-from immuneML.ml_methods.SVM import SVM
+from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.RandomForestClassifier import RandomForestClassifier
+from immuneML.ml_methods.classifiers.SVC import SVC
+from immuneML.ml_methods.classifiers.SVM import SVM
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
@@ -65,43 +65,57 @@ class MotifSeedRecovery(MLReport):
         Feature: xAxAAx
                   ^/^^
 
-    See :ref:`Recovering simulated immune signals` for more details and an example plot.
+    See :ref:`Recovering simulated immune signals` for more details.
 
 
-    Arguments:
+    Example output:
 
-        implanted_motifs_per_label (dict): a nested dictionary that specifies the motif seeds that were implanted in the given dataset. The first
-        level of keys in this dictionary represents the different labels. In the inner dictionary there should be two keys: "seeds" and
-        "hamming_distance":
-                - seeds: a list of motif seeds. The seeds may contain gaps, specified by a '/' symbol.
-                - hamming_distance: A boolean value that specifies whether hamming distance was allowed when implanting the motif seeds for a given label. Note that this applies to all seeds for this label.
-                - gap_sizes: a list of all the possible gap sizes that were used when implanting a gapped motif seed. When no gapped seeds are used, this value has no effect.
+    .. image:: ../../_static/images/reports/motif_seed_recovery.png
+       :alt: Motif seed recovery report
+       :width: 650
 
 
-    YAML specification:
+    **Specification arguments:**
+
+    - implanted_motifs_per_label (dict): a nested dictionary that specifies the motif seeds that were implanted in the given dataset. The first
+      level of keys in this dictionary represents the different labels. In the inner dictionary there should be two keys: "seeds" and
+      "hamming_distance":
+
+      - seeds: a list of motif seeds. The seeds may contain gaps, specified by a '/' symbol.
+
+      - hamming_distance: A boolean value that specifies whether hamming distance was allowed when implanting the motif
+        seeds for a given label. Note that this applies to all seeds for this label.
+
+      - gap_sizes: a list of all the possible gap sizes that were used when implanting a gapped motif seed. When no
+        gapped seeds are used, this value has no effect.
+
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_motif_report:
-            MotifSeedRecovery:
-                implanted_motifs_per_label:
-                    CD:
-                        seeds:
-                        - AA/A
-                        - AAA
-                        hamming_distance: False
-                        gap_sizes:
-                        - 0
-                        - 1
-                        - 2
-                    T1D:
-                        seeds:
-                        - CC/C
-                        - CCC
-                        hamming_distance: True
-                        gap_sizes:
-                        - 2
+        definitions:
+            reports:
+                my_motif_report:
+                    MotifSeedRecovery:
+                        implanted_motifs_per_label:
+                            CD:
+                                seeds:
+                                - AA/A
+                                - AAA
+                                hamming_distance: False
+                                gap_sizes:
+                                - 0
+                                - 1
+                                - 2
+                            T1D:
+                                seeds:
+                                - CC/C
+                                - CCC
+                                hamming_distance: True
+                                gap_sizes:
+                                - 2
 
     """
 
@@ -283,18 +297,18 @@ class MotifSeedRecovery(MLReport):
             run_report = False
 
         if self.label.name not in self.implanted_motifs_per_label.keys():
-            warnings.warn(
+            logging.warning(
                 f"{location}: no implanted motifs were specified for the label '{self.label}'. "
                 f"These motifs should be specified under 'implanted_motifs_per_label'. Report {self.name} will not be created.")
             run_report = False
 
         if self.train_dataset.encoded_data is None or self.train_dataset.encoded_data.examples is None or self.train_dataset.encoded_data.feature_names is None:
-            warnings.warn(
+            logging.warning(
                 f"{location}: this report can only be created for an encoded dataset with specified feature names. Report {self.name} will not be created.")
             run_report = False
 
         if self.train_dataset.encoded_data.encoding != "KmerFrequencyEncoder":
-            warnings.warn(
+            logging.warning(
                 f"{location}: this report can only be created for a dataset encoded with the KmerFrequencyEncoder. Report {self.name} will not be created.")
             run_report = False
 

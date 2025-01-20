@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.instruction_parsers.DatasetExportParser import DatasetExportParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
@@ -10,7 +10,7 @@ from immuneML.workflows.instructions.dataset_generation.DatasetExportInstruction
 
 class TestDatasetExportParser(TestCase):
     def test_parse_no_preproc(self):
-        specs = {"type": "DatasetExport", "export_formats": ["ImmuneML", "AIRR"], "datasets": ["d1"]}
+        specs = {"type": "DatasetExport", "export_formats": ["AIRR"], "datasets": ["d1"]}
 
         symbol_table = SymbolTable()
         symbol_table.add("d1", SymbolType.DATASET, RepertoireDataset())
@@ -18,12 +18,12 @@ class TestDatasetExportParser(TestCase):
         instruction = DatasetExportParser().parse("instr1", specs, symbol_table)
 
         self.assertTrue(isinstance(instruction, DatasetExportInstruction))
-        self.assertEqual(2, len(instruction.exporters))
+        self.assertEqual(1, len(instruction.exporters))
         self.assertEqual(1, len(instruction.datasets))
         self.assertIsNone(instruction.preprocessing_sequence)
 
     def test_parse_preproc(self):
-        specs = {"type": "DatasetExport", "export_formats": ["ImmuneML", "AIRR"], "datasets": ["d1"], "preprocessing_sequence": "p1"}
+        specs = {"type": "DatasetExport", "export_formats": ["AIRR"], "datasets": ["d1"], "preprocessing_sequence": "p1"}
 
         symbol_table = SymbolTable()
         symbol_table.add("d1", SymbolType.DATASET, RepertoireDataset())
@@ -32,7 +32,7 @@ class TestDatasetExportParser(TestCase):
         instruction = DatasetExportParser().parse("instr1", specs, symbol_table)
 
         self.assertTrue(isinstance(instruction, DatasetExportInstruction))
-        self.assertEqual(2, len(instruction.exporters))
+        self.assertEqual(1, len(instruction.exporters))
         self.assertEqual(1, len(instruction.datasets))
         self.assertEqual(1, len(instruction.preprocessing_sequence))
         self.assertIsInstance(instruction.preprocessing_sequence[0], ClonesPerRepertoireFilter)

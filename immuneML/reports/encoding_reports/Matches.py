@@ -1,13 +1,12 @@
 import itertools
-import warnings
+import logging
 from pathlib import Path
 from typing import List
 
 import numpy as np
 import pandas as pd
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
@@ -37,12 +36,14 @@ class Matches(EncodingReport):
       the paired matches (where a match was found in both chains) per repertoire.
 
 
-    YAML Specification:
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_match_report: Matches
+        definitions:
+            reports:
+                my_match_report: Matches
     """
 
     @classmethod
@@ -65,7 +66,7 @@ class Matches(EncodingReport):
         if self.dataset.encoded_data.encoding == "MatchedSequencesEncoder":
             output_tables += self._write_sequence_info(self.result_path / "sequence_info")
         else:
-            if len(self.dataset.encoded_data.feature_annotations["chain"].unique()) == 2:
+            if len(self.dataset.encoded_data.feature_annotations["locus"].unique()) == 2:
                 output_tables += self._write_paired_matches(self.result_path / "paired_matches")
 
             if self.dataset.encoded_data.encoding == "MatchedReceptorsEncoder":
@@ -77,7 +78,7 @@ class Matches(EncodingReport):
 
     def _write_match_table(self):
         id_df = pd.DataFrame({"repertoire_id": self.dataset.encoded_data.example_ids,
-                              'subject_id': self.dataset.get_subject_ids()})
+                              'subject_id': self.dataset.get_metadata(['subject_id'])['subject_id']})
         label_df = pd.DataFrame(self.dataset.encoded_data.labels)
         matches_df = pd.DataFrame(self.dataset.encoded_data.examples, columns=self.dataset.encoded_data.feature_names)
         different_cols = label_df.columns.difference(id_df.columns)
@@ -130,8 +131,8 @@ class Matches(EncodingReport):
 
         annotation_df = self.dataset.encoded_data.feature_annotations
 
-        for receptor_id in sorted(set(annotation_df["receptor_id"])):
-            chain_ids = list(annotation_df.loc[annotation_df["receptor_id"] == receptor_id]["chain_id"])
+        for cell_id in sorted(set(annotation_df["regex_id"])):
+            chain_ids = list(annotation_df.loc[annotation_df["regex_id"] == cell_id]["locus_id"])
 
             if len(chain_ids) == 2:
                 first_match_idx = self.dataset.encoded_data.feature_names.index(chain_ids[0])
@@ -150,23 +151,23 @@ class Matches(EncodingReport):
         """
         Writes the repertoire sizes (# clones & # reads) per subject, per chain.
         """
-        all_subjects = sorted(set(self.dataset.get_subject_ids()))
-        all_chains = sorted(set(self.dataset.encoded_data.feature_annotations["chain"]))
+        all_subjects = sorted(set(self.dataset.get_metadata(['subject_id'])['subject_id']))
+        all_chains = sorted(set(self.dataset.encoded_data.feature_annotations["locus"]))
 
         results_df = pd.DataFrame(list(itertools.product(all_subjects, all_chains)),
-                                  columns=["subject_id", "chain"])
+                                  columns=["subject_id", "locus"])
         results_df["n_reads"] = 0
         results_df["n_clones"] = 0
 
         for repertoire in self.dataset.repertoires:
-            rep_counts = repertoire.get_counts()
-            rep_chains = repertoire.get_chains()
+            rep_counts = repertoire.data.duplicate_count
+            rep_chains = repertoire.data.locus.tolist()
 
             for chain in all_chains:
-                indices = rep_chains == Chain.get_chain(chain.upper())
-                results_df.loc[(results_df.subject_id == repertoire.metadata["subject_id"]) & (results_df.chain == chain),
+                indices = [el == chain for el in rep_chains]
+                results_df.loc[(results_df.subject_id == repertoire.metadata["subject_id"]) & (results_df.locus == chain),
                                'n_reads'] += np.sum(rep_counts[indices])
-                results_df.loc[(results_df.subject_id == repertoire.metadata["subject_id"]) & (results_df.chain == chain),
+                results_df.loc[(results_df.subject_id == repertoire.metadata["subject_id"]) & (results_df.locus == chain),
                                'n_clones'] += len(rep_counts[indices])
 
         results_path = self.result_path / "repertoire_sizes.csv"
@@ -178,15 +179,15 @@ class Matches(EncodingReport):
         PathBuilder.build(receptor_info_path)
 
         receptor_chains = self.dataset.encoded_data.feature_annotations
-        chain_types = receptor_chains["chain"].unique()
+        chain_types = receptor_chains["locus"].unique()
 
-        first_chains = receptor_chains.loc[receptor_chains.chain == chain_types[0]]
-        second_chains = receptor_chains.loc[receptor_chains.chain == chain_types[1]]
+        first_chains = receptor_chains.loc[receptor_chains.locus == chain_types[0]]
+        second_chains = receptor_chains.loc[receptor_chains.locus == chain_types[1]]
 
-        first_chains.drop(columns=["chain"], inplace=True)
-        second_chains.drop(columns=["chain"], inplace=True)
+        first_chains.drop(columns=["locus"], inplace=True)
+        second_chains.drop(columns=["locus"], inplace=True)
 
-        on_cols = ["receptor_id"]
+        on_cols = ["cell_id"]
         if "clonotype_id" in second_chains.columns and first_chains.columns:
             on_cols += ["clonotype_id"]
 
@@ -194,10 +195,10 @@ class Matches(EncodingReport):
                              on=on_cols,
                              suffixes=(f"_{chain_types[0]}", f"_{chain_types[1]}"))
 
-        unique_alpha_chains = first_chains.drop_duplicates(subset=["sequence", "v_gene", "j_gene"])
-        unique_beta_chains = second_chains.drop_duplicates(subset=["sequence", "v_gene", "j_gene"])
-        unique_receptors = receptors.drop_duplicates(subset=[f"sequence_{chain_types[0]}", f"v_gene_{chain_types[0]}", f"j_gene_{chain_types[0]}",
-                                                             f"sequence_{chain_types[1]}", f"v_gene_{chain_types[1]}", f"j_gene_{chain_types[1]}"])
+        unique_alpha_chains = first_chains.drop_duplicates(subset=["sequence", "v_call", "j_call"])
+        unique_beta_chains = second_chains.drop_duplicates(subset=["sequence", "v_call", "j_call"])
+        unique_receptors = receptors.drop_duplicates(subset=[f"sequence_{chain_types[0]}", f"v_call_{chain_types[0]}", f"j_call_{chain_types[0]}",
+                                                             f"sequence_{chain_types[1]}", f"v_call_{chain_types[1]}", f"j_call_{chain_types[1]}"])
 
         receptor_chains_path = receptor_info_path / "all_chains.csv"
         receptor_chains.to_csv(receptor_chains_path, index=False)
@@ -220,7 +221,7 @@ class Matches(EncodingReport):
         PathBuilder.build(sequence_info_path)
 
         chains = self.dataset.encoded_data.feature_annotations
-        unique_chains = chains.drop_duplicates(subset=["sequence", "v_gene", "j_gene"])
+        unique_chains = chains.drop_duplicates(subset=["sequence", "v_call", "j_call"])
 
         chains_path = sequence_info_path / "all_chains.csv"
         chains.to_csv(chains_path, index=False)
@@ -231,11 +232,11 @@ class Matches(EncodingReport):
 
     def check_prerequisites(self):
         if self.dataset.encoded_data is None or self.dataset.encoded_data.examples is None:
-            warnings.warn(f"No encoding was specified for dataset {self.dataset.identifier}. Please use one of the following encodings: MatchedReceptorsEncoder, MatchedSequencesEncoder, MatchedRegexEncoder. Matches report will not be created.")
+            logging.warning(f"No encoding was specified for dataset {self.dataset.identifier}. Please use one of the following encodings: MatchedReceptorsEncoder, MatchedSequencesEncoder, MatchedRegexEncoder. Matches report will not be created.")
             return False
 
         if self.dataset.encoded_data.encoding not in ("MatchedReceptorsEncoder", "MatchedSequencesEncoder", "MatchedRegexEncoder"):
-            warnings.warn(f"Encoding {self.dataset.encoded_data.encoding} is not compatible with this report type. Matches report will not be created.")
+            logging.warning(f"Encoding {self.dataset.encoded_data.encoding} is not compatible with this report type. Matches report will not be created.")
             return False
         else:
             return True

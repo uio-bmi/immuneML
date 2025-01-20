@@ -1,11 +1,10 @@
 import logging
-import warnings
 from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.encoding_reports.FeatureReport import FeatureReport
 from immuneML.util.ParameterValidator import ParameterValidator
@@ -13,50 +12,64 @@ from immuneML.util.ParameterValidator import ParameterValidator
 
 class FeatureComparison(FeatureReport):
     """
-    Compares the feature values in a given encoded data matrix across two values for a metadata label.
-    These labels are specified in the metadata file for repertoire datasets, or as metadata columns for sequence and receptor datasets.
-    Can be used in combination with any encoding and dataset type. This report produces a scatterplot, where each
-    point represents one feature, and the values on the x and y axes are the average feature values across two
-    subsets of the data. For example, when :ref:`KmerFrequency` encoder is used, and the comparison_label is used to
-    represent a disease (true/false), then the features are the k-mers (AAA, AAC, etc..) and their x and y position in the
-    scatterplot is determined by their frequency in the subset of the data where disease=true and disease=false.
+    Encoding a dataset results in a numeric matrix, where the rows are examples (e.g., sequences, receptors, repertoires)
+    and the columns are features. For example, when :ref:`KmerFrequency` encoder is used, the features are the
+    k-mers (AAA, AAC, etc..) and the feature values are the frequencies per k-mer.
 
-    Optional metadata labels can be specified to divide the scatterplot into groups based on color, row facets or column facets.
+    This report separates the examples based on a binary metadata label, and plots the mean feature value
+    of each feature in one example group against the other example group (for example: plot the feature
+    value of 'sick' repertoires on the x axis, and 'healthy' repertoires on the y axis to spot consistent differences).
+    The plot can be separated into different colors or facets using other metadata labels
+    (for example: plot the average feature values of 'cohort1', 'cohort2' and 'cohort3' in different colors to spot biases).
 
-    Alternatively, when the feature values are of interest without comparing them between labelled subgroups of the data, please
-    use :ref:`FeatureValueBarplot` or :ref:`FeatureDistribution` instead.
-
-    Arguments:
-
-        comparison_label (str): Mandatory label. This label is used to split the encoded data matrix and define the x and y axes of the plot.
-        This label is only allowed to have 2 classes (for example: sick and healthy, binding and non-binding).
-
-        color_grouping_label (str): Optional label that is used to color the points in the scatterplot. This can not be the same as comparison_label.
-
-        row_grouping_label (str): Optional label that is used to group scatterplots into different row facets. This can not be the same as comparison_label.
-
-        column_grouping_label (str): Optional label that is used to group scatterplots into different column facets. This can not be the same as comparison_label.
-
-        show_error_bar (bool): Whether to show the error bar (standard deviation) for the points, both in the x and y dimension.
-
-        log_scale (bool): Whether to plot the x and y axes in log10 scale (log_scale = True) or continuous scale (log_scale = False). By default, log_scale is False.
-
-        keep_fraction (float): The total number of features may be very large and only the features differing significantly across
-        comparison labels may be of interest. When the keep_fraction parameter is set below 1, only the fraction of features that
-        differs the most across comparison labels is kept for plotting (note that the produced .csv file still contains all data).
-        By default, keep_fraction is 1, meaning that all features are plotted.
-
-        opacity (float): a value between 0 and 1 setting the opacity for data points making it easier to see if there are overlapping points
+    Alternatively, when plotting features without comparing them across a binary label, see:
+    :py:obj:`~immuneML.reports.encoding_reports.FeatureValueBarplot.FeatureValueBarplot` report to plot
+    a simple bar chart per feature (average across examples).
+    Or :py:obj:`~immuneML.reports.encoding_reports.FeatureDistribution.FeatureDistribution` report to plot
+    the distribution of each feature across examples, rather than only showing the mean value in a bar plot.
 
 
-    YAML specification:
+    Example output:
+
+    .. image:: ../../_static/images/reports/feature_comparison_zoom.png
+       :alt: Feature comparison zoomed in plot with VLEQ highlighted
+       :width: 650
+
+
+
+    **Specification arguments:**
+
+    - comparison_label (str): Mandatory label. This label is used to split the encoded data matrix and define the x and y axes of the plot.
+      This label is only allowed to have 2 classes (for example: sick and healthy, binding and non-binding).
+
+    - color_grouping_label (str): Optional label that is used to color the points in the scatterplot. This can not be the same as comparison_label.
+
+    - row_grouping_label (str): Optional label that is used to group scatterplots into different row facets. This can not be the same as comparison_label.
+
+    - column_grouping_label (str): Optional label that is used to group scatterplots into different column facets. This can not be the same as comparison_label.
+
+    - show_error_bar (bool): Whether to show the error bar (standard deviation) for the points, both in the x and y dimension.
+
+    - log_scale (bool): Whether to plot the x and y axes in log10 scale (log_scale = True) or continuous scale (log_scale = False). By default, log_scale is False.
+
+    - keep_fraction (float): The total number of features may be very large and only the features differing significantly across
+      comparison labels may be of interest. When the keep_fraction parameter is set below 1, only the fraction of features that
+      differs the most across comparison labels is kept for plotting (note that the produced .csv file still contains all data).
+      By default, keep_fraction is 1, meaning that all features are plotted.
+
+    - opacity (float): a value between 0 and 1 setting the opacity for data points making it easier to see if there are overlapping points
+
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_comparison_report:
-            FeatureComparison: # compare the different classes defined in the label disease
-                comparison_label: disease
+        definitions:
+            reports:
+                my_comparison_report:
+                    FeatureComparison: # compare the different classes defined in the label disease
+                        comparison_label: disease
 
     """
 
@@ -161,22 +174,22 @@ class FeatureComparison(FeatureReport):
         run_report = True
 
         if self.dataset.encoded_data is None or self.dataset.encoded_data.examples is None:
-            warnings.warn(
+            logging.warning(
                 f"{location}: this report can only be created for an encoded dataset. {location} report will not be created.")
             run_report = False
         elif len(self.dataset.encoded_data.examples.shape) != 2:
-            warnings.warn(
+            logging.warning(
                 f"{location}: this report can only be created for a 2-dimensional encoded dataset. {location} report will not be created.")
             run_report = False
         else:
             legal_labels = list(self.dataset.get_label_names())
 
             if self.comparison_label not in legal_labels:
-                warnings.warn(
+                logging.warning(
                     f"{location}: comparison_label was not defined. {location} report will not be created.")
                 run_report = False
             elif len(set(self.dataset.get_metadata([self.comparison_label])[self.comparison_label])) != 2:
-                warnings.warn(
+                logging.warning(
                     f"{location}: comparison label {self.comparison_label} does not have 2 values: {set(self.dataset.get_metadata([self.comparison_label])[self.comparison_label])}. {location} report will not be created.")
                 run_report = False
             else:
@@ -185,11 +198,11 @@ class FeatureComparison(FeatureReport):
                 for label_param in [self.color, self.facet_row, self.facet_column]:
                     if label_param is not None:
                         if label_param == self.comparison_label:
-                            warnings.warn(
+                            logging.warning(
                                 f"{location}: comparison label '{self.comparison_label}' can not be used in other fields. {location} report will not be created.")
                             run_report = False
                         if label_param not in legal_labels:
-                            warnings.warn(
+                            logging.warning(
                                 f"{location}: undefined label '{label_param}'. Legal options are: {legal_labels}. {location} report will not be created.")
                             run_report = False
 

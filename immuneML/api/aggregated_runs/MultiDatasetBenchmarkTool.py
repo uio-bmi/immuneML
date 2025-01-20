@@ -19,7 +19,7 @@ class MultiDatasetBenchmarkTool:
     TrainMLModel instruction for each of the listed datasets and performs nested CV on each, accumulates the results of these runs and then
     generates reports on the cumulative results.
 
-    YAML specification:
+    **YAML specification:**
 
     .. highlight:: yaml
     .. code-block:: yaml
@@ -105,7 +105,7 @@ class MultiDatasetBenchmarkTool:
                                                     MultiDatasetBenchmarkTool.__name__, "benchmark_reports")
 
         reports = {key: value for key, value in workflow_specification['definitions']['reports'].items() if key in report_keys}
-        symbol_table, _ = ReportParser.parse_reports(reports, SymbolTable())
+        symbol_table, _ = ReportParser.parse(reports, SymbolTable())
         self.reports = [entry.item for entry in symbol_table.get_by_type(SymbolType.REPORT)]
 
     def _split_specs_file(self) -> dict:

@@ -3,7 +3,7 @@ import shutil
 from unittest import TestCase
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.reference_encoding.MatchedSequencesEncoder import MatchedSequencesEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -29,7 +29,7 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
 
     def test_run(self):
         path = EnvironmentSettings.tmp_test_path / "explanalysisprocintegration/"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset = self.create_dataset(path)
 

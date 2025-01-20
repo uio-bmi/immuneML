@@ -1,6 +1,5 @@
 # quality: gold
 import logging
-import warnings
 from typing import List
 
 from immuneML.environment.Label import Label
@@ -25,7 +24,7 @@ class LabelConfiguration:
         vals = list(values) if values else None
 
         if label_name in self._labels and self._labels[label_name] is not None and len(self._labels[label_name]) > 0:
-            warnings.warn("Label " + label_name + " has already been set. Overriding existing values...", Warning)
+            logging.warning("Label " + label_name + " has already been set. Overriding existing values...")
 
         if positive_class is not None:
             if all(isinstance(val, str) for val in vals) and not isinstance(positive_class, str):
@@ -39,7 +38,8 @@ class LabelConfiguration:
         self._labels[label_name] = Label(label_name, vals, auxiliary_labels, positive_class)
 
     def _get_default_positive_class(self, classes):
-        """Returns the default positive class when a class pair is given where the positive class is obvious (0, 1; true, false)"""
+        """Returns the default positive class when a class pair is given where the positive class is obvious (0,
+        1; true, false)"""
 
         if len(classes) != 2:
             return None
@@ -48,7 +48,7 @@ class LabelConfiguration:
         if classes[1] == True and classes[0] == False:
             return classes[1]
 
-        for positive_str, negative_str in [("1", "0"), ("true", "false"), ("positive", "negative"), ("+", "-")]:
+        for positive_str, negative_str in [("1", "0"), ("true", "false"), ("positive", "negative"), ("+", "-"), ("yes", "no")]:
             if set(classes) == {positive_str, negative_str}:
                 return positive_str
             if set(classes) == {positive_str.upper(), negative_str.upper()}:

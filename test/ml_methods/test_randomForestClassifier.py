@@ -8,11 +8,11 @@ from scipy import sparse
 from sklearn.ensemble import RandomForestClassifier as RFC
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.RandomForestClassifier import RandomForestClassifier
+from immuneML.ml_methods.classifiers.RandomForestClassifier import RandomForestClassifier
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -48,7 +48,7 @@ class TestRandomForestClassifier(TestCase):
             labels={"t1": [1, 0, 2, 0, 1, 0, 2, 0], "t2": [1, 0, 2, 0, 1, 0, 2, 0]})
 
         rfc = RandomForestClassifier()
-        rfc.fit_by_cross_validation(x, number_of_splits=2, label=Label("t2", [1, 0, 2]))
+        rfc.fit_by_cross_validation(x, number_of_splits=2, label=Label("t2", [1, 0, 2]), optimization_metric="balanced_accuracy")
 
     def test_store(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])

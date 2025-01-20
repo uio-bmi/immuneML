@@ -1,15 +1,15 @@
 from pathlib import Path
 
-from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.Label import Label
-from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.workflows.steps.StepParams import StepParams
 
 
 class MLMethodAssessmentParams(StepParams):
 
-    def __init__(self, method: MLMethod, dataset: Dataset, metrics: set, optimization_metric: Metric, label: Label,
+    def __init__(self, method: MLMethod, dataset: Dataset, metrics: set, optimization_metric: ClassificationMetric, label: Label,
                  path: Path, split_index: int, predictions_path: Path, ml_score_path: Path):
         self.method = method
         self.dataset = dataset

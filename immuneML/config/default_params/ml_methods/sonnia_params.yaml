@@ -1,0 +1,5 @@
+batch_size: 10000
+epochs: 5
+deep: False
+include_joint_genes: True
+n_gen_seqs: 100

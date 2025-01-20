@@ -106,7 +106,7 @@ class TestMLIE(TestCase):
                     "d1": {
                         "format": 'RandomRepertoireDataset',
                         "params": {
-                            "result_path": str(path / "dataset/"),
+                            "result_path": str(path / "test_dataset/"),
                             "repertoire_count": 30,
                             "sequence_length_probabilities": {3: 1},
                             "sequence_count_probabilities": {3: 1},
@@ -135,7 +135,7 @@ class TestMLIE(TestCase):
         return path / "specs_import.yaml"
 
     def test_ml(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "integration_ml/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "integration_ml/")
         specs_path = self.prepare_specs(path)
 
         PathBuilder.build(path / "result_export/")

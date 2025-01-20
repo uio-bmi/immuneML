@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.util.EncoderHelper import EncoderHelper
@@ -27,54 +27,62 @@ class MatchedRegexEncoder(DatasetEncoder):
     This encoding can be used in combination with the :ref:`Matches` report.
 
 
-    Arguments:
+    **Dataset type:**
 
-        match_v_genes (bool): Whether V gene matches are required. If this is True, a match is only counted if the
-        V gene matches the gene specified in the motif input file. By default match_v_genes is False.
-
-        reads (:py:mod:`~immuneML.util.ReadsType`): Reads type signify whether the counts of the sequences in the
-        repertoire will be taken into account. If :py:mod:`~immuneML.util.ReadsType.UNIQUE`, only unique sequences
-        (clonotypes) are counted, and if :py:mod:`~immuneML.util.ReadsType.ALL`, the sequence 'count' value is
-        summed when determining the number of matches. The default value for reads is all.
-
-        motif_filepath (str): The path to the motif input file. This should be a tab separated file containing a
-        column named 'id' and for every chain that should be matched a column containing the regex (<chain>_regex) and a column containing
-        the V gene (<chain>V) if match_v_genes is True.
-        The chains are specified by their three letter code, see :py:obj:`~immuneML.data_model.receptor.receptor_sequence.Chain.Chain`.
-
-        In the simplest case, when counting the number of occurrences of a given list of k-mers in TRB sequences, the contents of the motif file could look like this:
-
-            ====  ==========
-            id    TRB_regex
-            ====  ==========
-            1     ACG
-            2     EDNA
-            3     DFWG
-            ====  ==========
-
-        It is also possible to test whether paired regular expressions occur in the dataset (for example: regular expressions
-        matching both a TRA chain and a TRB chain) by specifying them on the same line.
-        In a more complex case where both paired and unpaired regular expressions are specified, in addition to matching the V
-        genes, the contents of the motif file could look like this:
-
-            ====  ==========  =======  ==========  ========
-            id    TRA_regex   TRAV     TRB_regex   TRBV
-            ====  ==========  =======  ==========  ========
-            1     AGQ.GSS     TRAV35   S[APL]GQY   TRBV29-1
-            2                          ASS.R.*     TRBV7-3
-            ====  ==========  =======  ==========  ========
+    - RepertoireDatasets
 
 
-    YAML Specification:
+    **Specification arguments:**
+
+    - match_v_genes (bool): Whether V gene matches are required. If this is True, a match is only counted if the
+      V gene matches the gene specified in the motif input file. By default match_v_genes is False.
+
+    - reads (:py:mod:`~immuneML.util.ReadsType`): Reads type signify whether the counts of the sequences in the
+      repertoire will be taken into account. If :py:mod:`~immuneML.util.ReadsType.UNIQUE`, only unique sequences
+      (clonotypes) are counted, and if :py:mod:`~immuneML.util.ReadsType.ALL`, the sequence 'count' value is
+      summed when determining the number of matches. The default value for reads is all.
+
+    - motif_filepath (str): The path to the motif input file. This should be a tab separated file containing a
+      column named 'id' and for every chain that should be matched a column containing the regex (<chain>_regex) and a
+      column containing the V gene (<chain>V) if match_v_genes is True.
+      The chains are specified by their three-letter code, see :py:obj:`~immuneML.data_model.receptor.receptor_sequence.Chain.Chain`.
+
+    In the simplest case, when counting the number of occurrences of a given list of k-mers in TRB sequences, the
+    contents of the motif file could look like this:
+
+        ====  ==========
+        id    TRB_regex
+        ====  ==========
+        1     ACG
+        2     EDNA
+        3     DFWG
+        ====  ==========
+
+    It is also possible to test whether paired regular expressions occur in the dataset (for example: regular expressions
+    matching both a TRA chain and a TRB chain) by specifying them on the same line.
+    In a more complex case where both paired and unpaired regular expressions are specified, in addition to matching the V
+    genes, the contents of the motif file could look like this:
+
+        ====  ==========  =======  ==========  ========
+        id    TRA_regex   TRAV     TRB_regex   TRBV
+        ====  ==========  =======  ==========  ========
+        1     AGQ.GSS     TRAV35   S[APL]GQY   TRBV29-1
+        2                          ASS.R.*     TRBV7-3
+        ====  ==========  =======  ==========  ========
+
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_mr_encoding:
-            MatchedRegex:
-                motif_filepath: path/to/file.txt
-                match_v_genes: True
-                reads: unique
+        definitions:
+            encodings:
+                my_mr_encoding:
+                    MatchedRegex:
+                        motif_filepath: path/to/file.txt
+                        match_v_genes: True
+                        reads: unique
 
     """
 
@@ -83,13 +91,13 @@ class MatchedRegexEncoder(DatasetEncoder):
     }
 
     def __init__(self, motif_filepath: Path, match_v_genes: bool, reads: ReadsType, chains: list, name: str = None):
+        super().__init__(name=name)
         self.motif_filepath = motif_filepath
         self.match_v_genes = match_v_genes
         self.reads = reads
         self.chains = chains
         self.regex_df = None
         self.feature_count = None
-        self.name = name
 
     @staticmethod
     def _prepare_parameters(motif_filepath: str, match_v_genes: bool, reads: str, name: str = None):

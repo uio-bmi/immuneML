@@ -1,18 +1,14 @@
-import warnings
+import logging
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
-from sklearn import metrics as sklearn_metrics
-from sklearn.preprocessing import label_binarize
 
-from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.environment.Constants import Constants
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.hyperparameter_optimization import HPSetting
-from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.ml_metrics import ml_metrics
-from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
+from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.ml_metrics.MetricUtil import MetricUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -27,35 +23,38 @@ class TrainingPerformance(MLReport):
     The available metrics are accuracy, balanced_accuracy, confusion_matrix, f1_micro, f1_macro, f1_weighted, precision,
     recall, auc and log_loss (see :py:obj:`immuneML.environment.Metric.Metric`).
 
-    Arguments:
+    **Specification arguments:**
 
-        metrics (list): A list of metrics used to evaluate training performance. See :py:obj:`immuneML.environment.Metric.Metric` for available options.
+    - metrics (list): A list of metrics used to evaluate training performance. See :py:obj:`immuneML.environment.Metric.Metric` for available options.
 
-    YAML specification:
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_performance_report:
-            TrainingPerformance: 
-                metrics:
-                    - accuracy
-                    - balanced_accuracy
-                    - confusion_matrix
-                    - f1_micro
-                    - f1_macro
-                    - f1_weighted
-                    - precision
-                    - recall
-                    - auc
-                    - log_loss
+        definitions:
+            reports:
+                my_performance_report:
+                    TrainingPerformance:
+                        metrics:
+                            - accuracy
+                            - balanced_accuracy
+                            - confusion_matrix
+                            - f1_micro
+                            - f1_macro
+                            - f1_weighted
+                            - precision
+                            - recall
+                            - auc
+                            - log_loss
 
     """
 
     @classmethod
     def build_object(cls, **kwargs):
         location = "TrainingPerformance"        
-        valid_metrics = [m.name for m in Metric]
+        valid_metrics = [m.name for m in ClassificationMetric]
 
         name = kwargs["name"] if "name" in kwargs else None
         metrics = kwargs["metrics"] if "metrics" in kwargs else valid_metrics
@@ -88,7 +87,7 @@ class TrainingPerformance(MLReport):
         }
 
         for metric in self.metrics_set:
-            _score = MetricUtil.score_for_metric(metric=Metric.get_metric(metric),
+            _score = MetricUtil.score_for_metric(metric=ClassificationMetric.get_metric(metric),
                                                  predicted_y=predicted_y, predicted_proba_y=predicted_proba_y,
                                                  true_y=true_y, classes=classes)
 
@@ -167,18 +166,18 @@ class TrainingPerformance(MLReport):
 
     def check_prerequisites(self) -> bool:
         if not hasattr(self, "result_path") or self.result_path is None:
-            warnings.warn(f"{self.__class__.__name__} requires an output 'path' to be set. {self.__class__.__name__}"
+            logging.warning(f"{self.__class__.__name__} requires an output 'path' to be set. {self.__class__.__name__}"
                           f" report will not be created.")
             return False
 
         if self.train_dataset is None or self.train_dataset.encoded_data is None:
-            warnings.warn(
+            logging.warning(
                 f"{self.__class__.__name__}: train dataset is not encoded and can not be run."
                 f"{self.__class__.__name__} report will not be created.")
             return False
 
         if self.method is None:
-            warnings.warn(
+            logging.warning(
                 f"{self.__class__.__name__}: method is not defined and can not be run."
                 f"{self.__class__.__name__} report will not be created.")
             return False

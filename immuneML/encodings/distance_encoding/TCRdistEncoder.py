@@ -1,9 +1,7 @@
-from pathlib import Path
-
 import pandas as pd
 
-from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.util.EncoderHelper import EncoderHelper
@@ -18,24 +16,32 @@ class TCRdistEncoder(DatasetEncoder):
     For the implementation, `TCRdist3 <https://tcrdist3.readthedocs.io/en/latest/>`_ library was used (source code available
     `here <https://github.com/kmayerb/tcrdist3>`_).
 
-    Arguments:
+    **Dataset type:**
 
-        cores (int): number of processes to use for the computation
+    - ReceptorDatasets
 
-    YAML specification:
+
+    **Specification arguments:**
+
+    - cores (int): number of processes to use for the computation
+
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_tcr_dist_enc: # user-defined name
-            TCRdist:
-                cores: 4
+        definitions:
+            encodings:
+                my_tcr_dist_enc:
+                    TCRdist:
+                        cores: 4
 
     """
 
     def __init__(self, cores: int, name: str = None):
+        super().__init__(name=name)
         self.cores = cores
-        self.name = name
         self.distance_matrix = None
         self.context = None
 
@@ -79,7 +85,3 @@ class TCRdistEncoder(DatasetEncoder):
                 labels[label_name].append(receptor.metadata[label_name])
         return labels
 
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> str:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file

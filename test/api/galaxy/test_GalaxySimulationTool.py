@@ -1,6 +1,5 @@
 import shutil
 from argparse import Namespace
-from unittest import TestCase
 
 import yaml
 
@@ -9,75 +8,69 @@ from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class TestGalaxySimulationTool(TestCase):
-    def test_run(self):
+def test_galaxy_sim_tool():
+    path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "api_galaxy_simulation_tool/")
+    result_path = path / "result"
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "api_galaxy_simulation_tool/")
-        result_path = path / "result"
-
-        specs = {
-            "definitions": {
-                "datasets": {
-                    "d1": {
-                        "format": "RandomRepertoireDataset",
-                        "params": {
-                            "repertoire_count": 50,
-                            "sequence_length_probabilities": {10: 1},
-                            'sequence_count_probabilities': {10: 1},
-                            'labels': {
-                                "CD": {
-                                    True: 0.5,
-                                    False: 0.5
-                                }
+    specs = {
+        'definitions': {
+            'motifs': {
+                'motif1': {'seed': 'AA'},
+                'motif2': {'seed': 'GG'}
+            },
+            'signals': {
+                'signal1': {'motifs': ['motif1']},
+                'signal2': {'motifs': ['motif2']}
+            },
+            'simulations': {
+                'sim1': {
+                    'is_repertoire': True,
+                    'paired': False,
+                    'sequence_type': 'amino_acid',
+                    'simulation_strategy': 'Implanting',
+                    'remove_seqs_with_signals': True,  # remove signal-specific AIRs from the background
+                    'sim_items': {
+                        'AIRR1': {
+                            'immune_events': {'ievent1': True, 'ievent1': False},
+                            'signals': {'signal1': 0.3, 'signal2': 0.3},
+                            'number_of_examples': 10,
+                            'is_noise': False,
+                            'receptors_in_repertoire_count': 6,
+                            'generative_model': {
+                                'default_model_name': 'humanIGH',
+                                'type': 'OLGA'},
+                        },
+                        'AIRR2': {
+                            'immune_events': {'ievent1': False, 'ievent1': True},
+                            'signals': {'signal1': 0.5, 'signal2': 0.5},
+                            'number_of_examples': 10,
+                            'is_noise': False,
+                            'receptors_in_repertoire_count': 6,
+                            'generative_model': {
+                                'default_model_name': 'humanIGH',
+                                'type': 'OLGA'
                             }
                         }
                     }
-                },
-                "motifs": {
-                    "motif1": {
-                        "seed": "E/E",
-                        "instantiation": {
-                            "GappedKmer": {
-                                "max_gap": 1
-                            },
-                        }
-                    },
-                    "motif2": {
-                        "seed": "TTT",
-                        "instantiation": "GappedKmer"
-                    }
-                },
-                "signals": {
-                    "signal1": {
-                        "motifs": ["motif1", "motif2"],
-                        "implanting": "HealthySequence",
-                        "sequence_position_weights": None
-                    }
-                },
-                "simulations": {
-                    "sim1": {
-                        "var1": {
-                            "signals": ["signal1"],
-                            "dataset_implanting_rate": 0.5,
-                            "repertoire_implanting_rate": 0.5
-                        }
-                    }
-                },
-            },
-            "instructions": {
-                "inst1": {
-                    "type": "Simulation",
-                    "dataset": "d1",
-                    "simulation": "sim1",
-                    "export_formats": ["AIRR"]
-                },
+                }
             }
+        },
+        'instructions': {
+            'my_sim_inst': {
+                'export_p_gens': False,
+                'max_iterations': 100,
+                'number_of_processes': 4,
+                'sequence_batch_size': 1000,
+                'simulation': 'sim1',
+                'type': 'LigoSim'}
         }
+    }
 
-        specs_path = path / "specs.yaml"
-        with open(specs_path, "w") as file:
-            yaml.dump(specs, file)
+    specs_path = path / "specs.yaml"
+    with open(specs_path, "w") as file:
+        yaml.dump(specs, file)
 
-        run_immuneML(Namespace(**{"specification_path": specs_path, "result_path": result_path / 'result/', 'tool': "GalaxySimulationTool"}))
+    run_immuneML(Namespace(
+        **{"specification_path": specs_path, "result_path": result_path / 'result/', 'tool': "GalaxySimulationTool"}))
 
-        shutil.rmtree(path)
+    shutil.rmtree(path)

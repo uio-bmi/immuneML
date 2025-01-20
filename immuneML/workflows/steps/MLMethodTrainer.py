@@ -2,7 +2,7 @@ import copy
 
 import pandas as pd
 
-from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.util.Logger import print_log
 from immuneML.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
 from immuneML.workflows.steps.Step import Step
@@ -34,13 +34,16 @@ class MLMethodTrainer(Step):
                                            cores_for_training=input_params.cores_for_training,
                                            optimization_metric=input_params.optimization_metric)
         else:
-            method.fit(encoded_data=input_params.dataset.encoded_data, label=input_params.label, cores_for_training=input_params.cores_for_training)
+            method.fit(encoded_data=input_params.dataset.encoded_data,
+                       label=input_params.label,
+                       cores_for_training=input_params.cores_for_training,
+                       optimization_metric=input_params.optimization_metric)
 
         return method
 
     @staticmethod
     def store(method: MLMethod, input_params: MLMethodTrainerParams):
-        method.store(input_params.result_path, input_params.dataset.encoded_data.feature_names, input_params.ml_details_path)
+        method.store(input_params.result_path)
         train_predictions = method.predict(input_params.dataset.encoded_data, input_params.label)
         train_proba_predictions = method.predict_proba(input_params.dataset.encoded_data, input_params.label)
 

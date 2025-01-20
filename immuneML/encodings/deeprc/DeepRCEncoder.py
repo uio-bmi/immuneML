@@ -1,12 +1,13 @@
-
 from pathlib import Path
 
 import pandas as pd
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.environment.SequenceType import SequenceType
+from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -20,12 +21,19 @@ class DeepRCEncoder(DatasetEncoder):
 
     Note: sequences where count is None, the count value will be set to 1
 
-    YAML specification:
+    **Dataset type:**
+
+    - RepertoireDatasets
+
+
+    **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_deeprc_encoder: DeepRC
+        definitions:
+            encodings:
+                my_deeprc_encoder: DeepRC
 
     """
     ID_COLUMN = "ID"
@@ -37,8 +45,8 @@ class DeepRCEncoder(DatasetEncoder):
     METADATA_SEP = ","
 
     def __init__(self, context: dict = None, name: str = None):
+        super().__init__(name=name)
         self.context = context
-        self.name = name
         self.max_sequence_length = 0
 
     def set_context(self, context: dict):
@@ -58,14 +66,17 @@ class DeepRCEncoder(DatasetEncoder):
         else:
             raise ValueError("DeepRCEncoder is not defined for dataset types which are not RepertoireDataset.")
 
-    def export_repertoire_tsv_files(self, output_folder: Path):
+    def export_repertoire_tsv_files(self, output_folder: Path, params: EncoderParams):
         repertoires = self.context["dataset"].repertoires
+        sequence_column = params.region_type.value + ("_aa" if params.sequence_type == SequenceType.AMINO_ACID else "")
 
         for repertoire in repertoires:
             filepath = output_folder / f"{repertoire.identifier}.{DeepRCEncoder.EXTENSION}"
 
             if not filepath.is_file():
-                df = pd.DataFrame({DeepRCEncoder.SEQUENCE_COLUMN: repertoire.get_sequence_aas(), DeepRCEncoder.COUNTS_COLUMN: repertoire.get_counts()})
+                df = (repertoire.data.topandas()[[sequence_column, 'duplicate_count']]
+                      .rename(columns={sequence_column: DeepRCEncoder.SEQUENCE_COLUMN,
+                                       'duplicate_count': DeepRCEncoder.COUNTS_COLUMN}))
                 df[DeepRCEncoder.COUNTS_COLUMN].fillna(1, inplace=True)
 
                 df.to_csv(path_or_buf=filepath, sep=DeepRCEncoder.SEP, index=False)
@@ -86,21 +97,18 @@ class DeepRCEncoder(DatasetEncoder):
         result_path = params.result_path / "encoding"
         PathBuilder.build(result_path)
 
-        self.export_repertoire_tsv_files(result_path)
+        self.export_repertoire_tsv_files(result_path, params)
 
-        labels = params.label_config.get_labels_by_name()
-        metadata_filepath = self.export_metadata_file(dataset, labels, result_path)
+        metadata_filepath = self.export_metadata_file(dataset, params.label_config.get_labels_by_name(), result_path)
 
         encoded_dataset = dataset.clone()
-        encoded_dataset.encoded_data = EncodedData(examples=None, labels=dataset.get_metadata(labels) if params.encode_labels else None,
-                                                   example_ids=dataset.repertoire_ids,
+        encoded_dataset.encoded_data = EncodedData(examples=None,
+                                                   labels=EncoderHelper.encode_dataset_labels(dataset,
+                                                                                              params.label_config,
+                                                                                              params.encode_labels),
+                                                   example_ids=dataset.get_repertoire_ids(),
                                                    encoding=DeepRCEncoder.__name__,
                                                    info={"metadata_filepath": metadata_filepath,
                                                          "max_sequence_length": self.max_sequence_length})
 
         return encoded_dataset
-
-    @staticmethod
-    def export_encoder(path: Path, encoder) -> Path:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        return encoder_file

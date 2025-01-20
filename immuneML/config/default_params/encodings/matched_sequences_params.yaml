@@ -2,3 +2,4 @@ max_edit_distance: 2 # max Levenshtein distance
 sum_matches: False
 reads: all
 normalize: False
+output_count_as_feature: False

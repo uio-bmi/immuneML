@@ -2,13 +2,14 @@ import shutil
 from unittest import TestCase
 
 from immuneML.IO.dataset_import.ImmunoSEQSampleImport import ImmunoSEQSampleImport
-from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.SequenceParams import Chain, RegionType
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestImmunoSEQSampleImport(TestCase):
+
     def create_dummy_dataset(self, path, add_metadata):
         rep1text = """nucleotide	aminoAcid	count (templates/reads)	frequencyCount (%)	cdr3Length	vMaxResolved	vFamilyName	vGeneName	vGeneAllele	vFamilyTies	vGeneNameTies	vGeneAlleleTies	dMaxResolved	dFamilyName	dGeneName	dGeneAllele	dFamilyTies	dGeneNameTies	dGeneAlleleTies	jMaxResolved	jFamilyName	jGeneName	jGeneAllele	jFamilyTies	jGeneNameTies	jGeneAlleleTies	vDeletion	n1Insertion	d5Deletion	d3Deletion	n2Insertion	jDeletion	vIndex	n1Index	dIndex	n2Index	jIndex	estimatedNumberGenomes	sequenceStatus	cloneResolved	vOrphon	dOrphon	jOrphon	vFunction	dFunction	jFunction	fractionNucleated	vAlignLength	vAlignSubstitutionCount	vAlignSubstitutionIndexes	vAlignSubstitutionGeneThreePrimeIndexes	vSeqWithMutations
 GCCATCCCCAACCAGACAGCTCTTTACTTCTGTGCCACCAGTGATCAACTTAACCGTTGGGGGACCGGGGAGCTGTTTTTTGGAGAA	CATSDQLNRWGTGELFF	38	0.0017525250196006087	51	TCRBV24	TCRBV24				TCRBV24-01,TCRBV24-or09_02						TCRBD01,TCRBD02	TCRBD01-01,TCRBD02-01		TCRBJ02-02*01	TCRBJ02	TCRBJ02-02	01				3	0	6	1	13	5	30	45	58	-1	63	38	In	VDJ												
@@ -31,7 +32,7 @@ GGGTTGGAGTCGGCTGCTCCCTCCCAAACATCTGTGTACTTCTGTGCCAGCAGTCCAGGGGACACCGGGGAGCTGTTTTT
 CTGAACATGAGCTCCTTGGAGCTGGGGGACTCAGCCCTGTACTTCTGTGCCAGCAGCTTACGCACAGATACGCAGTATTTTGGCCCA	CASSLRTDTQYF	9	4.1507171516856525E-4	36	TCRBV13-01*01	TCRBV13	TCRBV13-01	01											TCRBJ02-03*01	TCRBJ02	TCRBJ02-03	01				2	1	0	0	0	1	45	-1	-1	60	61	9	In	VJ												
 AAGAAGCTCCTTCTCAGTGACTCTGGCTTCTATCTCTGTGCCTGGAGTGTACGTCCGGGCGCAGGGTACGAGCAGTACTTCGGGCCG	CAWSVRPGAGYEQYF	1	4.611907946317391E-5	45	TCRBV30-01*01	TCRBV30	TCRBV30-01	01				TCRBD01-01*01	TCRBD01	TCRBD01-01	01				TCRBJ02-07*01	TCRBJ02	TCRBJ02-07	01				0	0	4	3	11	4	36	50	61	-1	66	1	In	VDJ												"""
 
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         with open(path / "rep1.tsv", "w") as file:
             file.writelines(rep1text)
@@ -43,12 +44,10 @@ AAGAAGCTCCTTCTCAGTGACTCTGGCTTCTATCTCTGTGCCTGGAGTGTACGTCCGGGCGCAGGGTACGAGCAGTACTT
 rep1.tsv,TRA,1234a,no"""
                 )
 
-
     def test_import_repertoire_dataset(self):
-        path = EnvironmentSettings.root_path / "test/tmp/immunoseq/"
+        path = EnvironmentSettings.tmp_test_path / "immunoseq/"
 
         self.create_dummy_dataset(path, True)
-
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "ImmunoSEQSample")
         params["is_repertoire"] = True
@@ -56,22 +55,21 @@ rep1.tsv,TRA,1234a,no"""
         params["metadata_file"] = path / "metadata.csv"
         params["path"] = path
 
-        dataset = ImmunoSEQSampleImport.import_dataset(params, "immunoseq_dataset")
+        dataset = ImmunoSEQSampleImport(params, "immunoseq_dataset").import_dataset()
 
         self.assertEqual(1, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
             self.assertEqual("1234a", rep.metadata["subject_id"])
-            self.assertEqual(18, len(rep.sequences))
-            self.assertEqual("ATSDQLNRWGTGELF", rep.sequences[0].get_sequence())
-            self.assertEqual("TRBV25-1", rep.sequences[2].metadata.v_gene)
-            self.assertListEqual([38, 48, 37, 53, 28, 16, 72, 14, 26, 13,  8, 16,  8, 28,  7,  1,  9, 1], list(rep.get_counts()))
-            self.assertListEqual([Chain.BETA for i in range(18)], list(rep.get_chains()))
+            self.assertEqual(18, len(rep.sequences()))
+            self.assertEqual("ATSDQLNRWGTGELF", rep.sequences()[0].sequence_aa)
+            self.assertEqual("TRBV25-1", rep.sequences()[2].v_call)
+            self.assertListEqual([38, 48, 37, 53, 28, 16, 72, 14, 26, 13, 8, 16, 8, 28, 7, 1, 9, 1], rep.data.duplicate_count.tolist())
+            self.assertListEqual([Chain.BETA.value for i in range(18)], rep.data.locus.tolist())
 
         shutil.rmtree(path)
 
-
     def test_import_sequence_dataset(self):
-        path = EnvironmentSettings.root_path / "test/tmp/immunoseq/"
+        path = EnvironmentSettings.tmp_test_path / "immunoseq_seq"
 
         self.create_dummy_dataset(path, False)
 
@@ -81,14 +79,13 @@ rep1.tsv,TRA,1234a,no"""
         params["result_path"] = path
         params["path"] = path
 
-        dataset = ImmunoSEQSampleImport.import_dataset(params, "immunoseq_dataset")
+        dataset = ImmunoSEQSampleImport(params, "immunoseq_dataset").import_dataset()
 
         seqs = [sequence for sequence in dataset.get_data()]
 
-        self.assertEqual(seqs[0].amino_acid_sequence, "ATSDQLNRWGTGELF")
-        self.assertEqual(seqs[1].amino_acid_sequence, "ASKDGDTGELF")
-        self.assertEqual(seqs[2].amino_acid_sequence, "ASSGEGQGVFGGTEAF")
-        self.assertEqual(seqs[3].amino_acid_sequence, "ASSEEVGGNQPQH")
+        self.assertEqual(seqs[0].sequence_aa, "ATSDQLNRWGTGELF")
+        self.assertEqual(seqs[1].sequence_aa, "ASKDGDTGELF")
+        self.assertEqual(seqs[2].sequence_aa, "ASSGEGQGVFGGTEAF")
+        self.assertEqual(seqs[3].sequence_aa, "ASSEEVGGNQPQH")
 
         shutil.rmtree(path)
-
