@@ -65,8 +65,7 @@ class Decoder(nn.Module):
         self.decoder_linear_2 = nn.Linear(linear_nodes_count, linear_nodes_count)
 
         # decoding layers
-        self.cdr3_post_linear_flat = nn.Linear(linear_nodes_count, self.vocab_size * self.max_cdr3_len)
-        self.cdr3_output = nn.Linear(self.vocab_size * self.max_cdr3_len, self.vocab_size * self.max_cdr3_len)
+        self.cdr3_output = nn.Linear(linear_nodes_count, self.max_cdr3_len * self.vocab_size)
         self.v_gene_output = nn.Linear(linear_nodes_count, n_v_genes)
         self.j_gene_output = nn.Linear(linear_nodes_count, n_j_genes)
 
@@ -77,11 +76,10 @@ class Decoder(nn.Module):
         decoder_linear_2 = elu(self.decoder_linear_2(decoder_linear_1))
 
         # decoding
-        cdr3_post_dense_flat = self.cdr3_post_linear_flat(decoder_linear_2)
-        cdr3_output = softmax(self.cdr3_output(cdr3_post_dense_flat).view(-1, self.max_cdr3_len, self.vocab_size),
-                              dim=1, dtype=torch.double)
-        v_gene_output = softmax(self.v_gene_output(decoder_linear_2), dim=1)
-        j_gene_output = softmax(self.j_gene_output(decoder_linear_2), dim=1)
+        cdr3_output = self.cdr3_output(decoder_linear_2).view(-1, self.max_cdr3_len, self.vocab_size)
+
+        v_gene_output = self.v_gene_output(decoder_linear_2)
+        j_gene_output = self.j_gene_output(decoder_linear_2)
 
         return cdr3_output, v_gene_output, j_gene_output
 
@@ -94,13 +92,13 @@ class SimpleVAEGenerator(nn.Module):
         self.decoder = decoder
 
     def forward(self, cdr3_input, v_gene_input, j_gene_input):
-        z_mean, z_log_var = self.encoder(cdr3_input, v_gene_input, j_gene_input)
+        z_mean, z_log_var = self.encode(cdr3_input, v_gene_input, j_gene_input)
 
         # reparameterization trick
         epsilon = torch.randn(z_mean.size()).to(z_mean.device)
         z = z_mean + torch.exp(z_log_var / 2) * epsilon
 
-        cdr3_output, v_gene_output, j_gene_output = self.decoder(z)
+        cdr3_output, v_gene_output, j_gene_output = self.decode(z)
         return cdr3_output, v_gene_output, j_gene_output, z
 
     def decode(self, z):
@@ -117,6 +115,7 @@ class SimpleVAEGenerator(nn.Module):
 
 
 def vae_cdr3_loss(cdr3_output, cdr3_input, max_cdr3_len, z_mean, z_log_var, beta):
-    xent_loss = max_cdr3_len * cross_entropy(cdr3_input.float(), cdr3_output.float())
+    cdr3_input = torch.argmax(cdr3_input, dim=1)
+    xent_loss = max_cdr3_len * cross_entropy(cdr3_output, cdr3_input.long())
     kl_loss = -0.5 * torch.sum(1 + z_log_var - torch.square(z_mean) - z_log_var.exp(), dim=-1) * beta
     return xent_loss + kl_loss
