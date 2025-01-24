@@ -7,7 +7,7 @@ import pandas as pd
 import scipy
 import torch.optim
 from torch.distributions import Categorical
-from torch.nn.functional import cross_entropy, one_hot
+from torch.nn.functional import cross_entropy, one_hot, softmax
 from torch.utils.data import DataLoader
 
 from immuneML import Constants
@@ -235,7 +235,7 @@ class SimpleVAE(GenerativeModel):
             cdr3_output, v_gene_output, j_gene_output, z = model(cdr3_input, v_gene_input, j_gene_input)
             loss = (vae_cdr3_loss(cdr3_output, cdr3_input, self.max_cdr3_len, z[0], z[1], beta)
                     + cross_entropy(v_gene_output, v_gene_input.float()) * self.v_gene_loss_weight
-                    + cross_entropy(j_gene_output, j_gene_input.float())) * self.j_gene_loss_weight
+                    + cross_entropy(j_gene_output, j_gene_input.float()) * self.j_gene_loss_weight)
 
             optimizer.zero_grad()
             loss.backward()
@@ -293,6 +293,10 @@ class SimpleVAE(GenerativeModel):
             z_sample = torch.as_tensor(np.random.normal(0, 1, size=(count, self.latent_dim)),
                                        device=self.device).float()
             sequences, v_genes, j_genes = self.model.decode(z_sample)
+
+            sequences = softmax(sequences, dim=2)
+            v_genes = softmax(v_genes, dim=1)
+            j_genes = softmax(j_genes, dim=1)
 
         seq_objs = []
         for i in range(count):
