@@ -115,7 +115,8 @@ class SimpleVAEGenerator(nn.Module):
 
 
 def vae_cdr3_loss(cdr3_output, cdr3_input, max_cdr3_len, z_mean, z_log_var, beta):
-    cdr3_input = torch.argmax(cdr3_input, dim=1)
-    xent_loss = max_cdr3_len * cross_entropy(cdr3_output, cdr3_input.long())
+    vocab_size = cdr3_output.size(-1)
+    cdr3_input = torch.argmax(cdr3_input, dim=-1)
+    xent_loss = max_cdr3_len * cross_entropy(cdr3_output.view(-1, vocab_size), cdr3_input.view(-1))
     kl_loss = -0.5 * torch.sum(1 + z_log_var - torch.square(z_mean) - z_log_var.exp(), dim=-1) * beta
     return xent_loss + kl_loss
