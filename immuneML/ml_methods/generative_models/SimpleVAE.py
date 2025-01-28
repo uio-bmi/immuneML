@@ -211,20 +211,21 @@ class SimpleVAE(GenerativeModel):
     def _pretrain(self, data_loader, path: Path):
 
         pretrained_weights_path = PathBuilder.build(path) / 'pretrained_warmup_weights.yaml'
+        best_val_loss = np.inf
 
         for pretrain_index in range(self.pretrains):
             model = self.make_new_model()
             optimizer = torch.optim.Adam(model.parameters())
             beta = 0 if self.warmup_epochs > 0 else self.beta
-            best_val_loss = np.inf
+            current_val_loss = np.inf
 
-            for epoch in range(self.warmup_epochs + 1):
+            for epoch in range(self.warmup_epochs):
                 loss = self._train_for_epoch(data_loader, model, beta, optimizer)
-                val_loss = loss.item()
+                current_val_loss = loss.item()
                 beta = self._update_beta_on_epoch_end(epoch)
-                if val_loss < best_val_loss:
-                    best_val_loss = val_loss
-                    store_weights(model, pretrained_weights_path)
+            if current_val_loss <= best_val_loss:
+                best_val_loss = current_val_loss
+                store_weights(model, pretrained_weights_path)
 
         return pretrained_weights_path
 

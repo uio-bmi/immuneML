@@ -1,6 +1,15 @@
 import torch
 from torch import nn
-from torch.nn.functional import softmax, cross_entropy, elu
+from torch.nn.functional import cross_entropy, elu
+
+
+class XavierLinear(nn.Linear):
+
+    def __init__(self, in_features, out_features, bias=True):
+        super().__init__(in_features, out_features, bias)
+        nn.init.xavier_uniform_(self.weight)
+        if self.bias is not None:
+            nn.init.zeros_(self.bias)
 
 
 class Encoder(nn.Module):
@@ -9,26 +18,24 @@ class Encoder(nn.Module):
                  latent_dim, max_cdr3_len, linear_nodes_count):
         super().__init__()
 
-        # TODO: add weight initialization
-
         # params
         self.vocab_size = vocab_size
         self.cdr3_embed_dim = cdr3_embed_dim
         self.max_cdr3_len = max_cdr3_len
 
         # input layers
-        self.cdr3_embedding = nn.Linear(vocab_size, cdr3_embed_dim)
-        self.v_gene_embedding = nn.Linear(n_v_genes, v_gene_embed_dim)
-        self.j_gene_embedding = nn.Linear(n_j_genes, j_gene_embed_dim)
+        self.cdr3_embedding = XavierLinear(vocab_size, cdr3_embed_dim, bias=False)
+        self.v_gene_embedding = XavierLinear(n_v_genes, v_gene_embed_dim)
+        self.j_gene_embedding = XavierLinear(n_j_genes, j_gene_embed_dim)
 
         # encoding layers
-        self.encoder_linear_layer_1 = nn.Linear(cdr3_embed_dim * max_cdr3_len + v_gene_embed_dim + j_gene_embed_dim,
+        self.encoder_linear_layer_1 = XavierLinear(cdr3_embed_dim * max_cdr3_len + v_gene_embed_dim + j_gene_embed_dim,
                                                 linear_nodes_count)
-        self.encoder_linear_layer_2 = nn.Linear(linear_nodes_count, linear_nodes_count)
+        self.encoder_linear_layer_2 = XavierLinear(linear_nodes_count, linear_nodes_count)
 
         # latent layers
-        self.z_mean = nn.Linear(linear_nodes_count, latent_dim)
-        self.z_log_var = nn.Linear(linear_nodes_count, latent_dim)
+        self.z_mean = XavierLinear(linear_nodes_count, latent_dim)
+        self.z_log_var = XavierLinear(linear_nodes_count, latent_dim)
 
     def forward(self, cdr3_input, v_gene_input, j_gene_input):
         # input processing
@@ -61,13 +68,13 @@ class Decoder(nn.Module):
         self.vocab_size = vocab_size
 
         # latent layers
-        self.decoder_linear_1 = nn.Linear(latent_dim, linear_nodes_count)
-        self.decoder_linear_2 = nn.Linear(linear_nodes_count, linear_nodes_count)
+        self.decoder_linear_1 = XavierLinear(latent_dim, linear_nodes_count)
+        self.decoder_linear_2 = XavierLinear(linear_nodes_count, linear_nodes_count)
 
         # decoding layers
-        self.cdr3_output = nn.Linear(linear_nodes_count, self.max_cdr3_len * self.vocab_size)
-        self.v_gene_output = nn.Linear(linear_nodes_count, n_v_genes)
-        self.j_gene_output = nn.Linear(linear_nodes_count, n_j_genes)
+        self.cdr3_output = XavierLinear(linear_nodes_count, self.max_cdr3_len * self.vocab_size)
+        self.v_gene_output = XavierLinear(linear_nodes_count, n_v_genes)
+        self.j_gene_output = XavierLinear(linear_nodes_count, n_j_genes)
 
     def forward(self, z):
 
