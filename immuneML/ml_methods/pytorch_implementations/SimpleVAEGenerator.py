@@ -12,6 +12,13 @@ class XavierLinear(nn.Linear):
             nn.init.zeros_(self.bias)
 
 
+class UniformLinear(nn.Linear):
+
+        def __init__(self, in_features, out_features, bias=False):
+            super().__init__(in_features, out_features, bias)
+            nn.init.uniform_(self.weight, a=-0.05, b=0.05)
+
+
 class Encoder(nn.Module):
 
     def __init__(self, vocab_size, cdr3_embed_dim, n_v_genes, v_gene_embed_dim, n_j_genes, j_gene_embed_dim,
@@ -24,7 +31,7 @@ class Encoder(nn.Module):
         self.max_cdr3_len = max_cdr3_len
 
         # input layers
-        self.cdr3_embedding = XavierLinear(vocab_size, cdr3_embed_dim, bias=False)
+        self.cdr3_embedding = UniformLinear(vocab_size, cdr3_embed_dim)
         self.v_gene_embedding = XavierLinear(n_v_genes, v_gene_embed_dim)
         self.j_gene_embedding = XavierLinear(n_j_genes, j_gene_embed_dim)
 
