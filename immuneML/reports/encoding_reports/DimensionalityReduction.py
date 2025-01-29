@@ -62,7 +62,7 @@ class DimensionalityReduction(EncodingReport):
 
     def check_prerequisites(self):
         return (isinstance(self.dataset.encoded_data, EncodedData) and
-                self.dataset.encoded_data.dimensionality_reduced_data is not None)
+                (self.dataset.encoded_data.dimensionality_reduced_data is not None or self._dim_red_method is not None))
 
     def _generate(self) -> ReportResult:
         if self._dim_red_method:

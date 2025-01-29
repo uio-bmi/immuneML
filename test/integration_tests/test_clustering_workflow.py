@@ -64,7 +64,8 @@ def test_clustering_workflow():
                 ],
                 'split_config': {
                     'split_strategy': 'random',
-                    'training_percentage': 0.5
+                    'training_percentage': 0.5,
+                    "split_count": 2
                 },
                 'reports': ['rep1'],
                 'number_of_processes': 4
@@ -76,4 +77,4 @@ def test_clustering_workflow():
 
     ImmuneMLApp(path / 'specs.yaml', path / 'output').run()
 
-    shutil.rmtree(path)
+    # shutil.rmtree(path)

@@ -5,6 +5,190 @@
     <title>immuneML: Clustering overview</title>
     <style>
         {{{css_style}}}
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #009688;
+            --background-color: #f8f9fa;
+            --text-color: #2c3e50;
+            --border-color: #dee2e6;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+        
+        h1, h2, h3, h4, h5 {
+            color: var(--primary-color);
+            margin-top: 1.5em;
+            margin-bottom: 0.75em;
+        }
+        
+        h1 { font-size: 2em; }
+        h2 { font-size: 1.75em; }
+        h3 { font-size: 1.5em; }
+        h4 { font-size: 1.25em; }
+        h5 { font-size: 1.1em; }
+        
+        .split-section {
+            margin: 2em 0;
+            padding: 0.5em 0;
+        }
+        
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 1em 0;
+        }
+        
+        .table-container {
+            margin: 1em 0;
+            overflow-x: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 0.75em;
+            width: fit-content;
+            min-width: 50%;
+        }
+        
+        .table-container table {
+            width: auto;
+            border-collapse: collapse;
+            margin: 0;
+        }
+        
+        .table-container thead {
+            background-color: var(--background-color);
+        }
+        
+        .table-container th {
+            padding: 0.5em 0.75em;
+            text-align: left;
+            border-bottom: 2px solid var(--accent-color);
+            color: var(--primary-color);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .table-container td {
+            padding: 0.4em 0.75em;
+            border-bottom: 1px solid var(--border-color);
+            line-height: 1.4;
+        }
+        
+        .table-container td:not(:first-child) {
+            text-align: right;
+            padding-left: 2em;
+        }
+        
+        .table-container tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .table-container tr:hover {
+            background-color: var(--background-color);
+        }
+        
+        .table-container td:first-child,
+        .table-container th:first-child {
+            font-weight: 500;
+        }
+        
+        .prediction-table {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 1em 0;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background: white;
+            width: fit-content;
+            min-width: 50%;
+        }
+        
+        .prediction-table table {
+            width: auto;
+            border-collapse: collapse;
+            margin: 0;
+        }
+        
+        .prediction-table th {
+            background-color: var(--background-color);
+            padding: 0.5em 0.75em;
+            text-align: left;
+            border-bottom: 2px solid var(--accent-color);
+            color: var(--primary-color);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            white-space: nowrap;
+        }
+        
+        .prediction-table td {
+            padding: 0.4em 0.75em;
+            border-bottom: 1px solid var(--border-color);
+            line-height: 1.4;
+        }
+        
+        .prediction-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .prediction-table tr:hover {
+            background-color: var(--background-color);
+        }
+        
+        .setting-links {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .setting-links li {
+            margin: 0.5em 0;
+        }
+        
+        .setting-links a {
+            display: block;
+            padding: 0.5em;
+            background: var(--background-color);
+            text-decoration: none;
+            color: var(--text-color);
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .setting-links a:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        details {
+            margin: 1em 0;
+        }
+        
+        summary {
+            cursor: pointer;
+            padding: 0.5em;
+            background-color: var(--background-color);
+            border-radius: 4px;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        summary:hover {
+            background-color: var(--border-color);
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2em;
+            margin: 1em 0;
+        }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
@@ -41,85 +225,110 @@
             </div>
 
             </details>
-            <h2>Performances on discovery data</h2>
-                <div class="padded-top padded-bottom"><a href="{{discovery_predictions_path}}">Download cluster predictions for discovery dataset here.</a></div>
+            <h2>Results by Split</h2>
+            <p>Splitting into multiple discovery and validation set pairs allows for stability analysis of
+                the clustering settings.</p>
+            {{#splits}}
+            <div class="split-section">
+                <h3>Split {{number}}</h3>
+                <hr>
+                <details>
+                    <summary>View Predictions</summary>
+                    <div class="results-grid">
+                        <div>
+                            <h4>Discovery</h4>
+                            <a href="{{predictions.discovery.path}}">Download predictions</a>
+                            <div class="prediction-table">
+                                {{{predictions.discovery.data}}}
+                            </div>
+                        </div>
+                        {{#has_method_based}}
+                        <div>
+                            <h4>Method-based Validation</h4>
+                            <a href="{{predictions.method_based.path}}">Download predictions</a>
+                            <div class="prediction-table">
+                                {{{predictions.method_based.data}}}
+                            </div>
+                        </div>
+                        {{/has_method_based}}
+                        {{#has_result_based}}
+                        <div>
+                            <h4>Result-based Validation</h4>
+                            <a href="{{predictions.result_based.path}}">Download predictions</a>
+                            <div class="prediction-table">
+                                {{{predictions.result_based.data}}}
+                            </div>
+                        </div>
+                        {{/has_result_based}}
+                    </div>
+                </details>
 
-                {{ #show_internal_eval }}
-                <h3>Internal evaluation</h3>
+                {{#performance.internal.show}}
+                <h4>Internal Performance</h4>
                 <p>
                     The table below shows performance measured by internal performance metrics. This means that only the
                     quality of the clusters was measured, without reference to any additional (labeled) information.
                 </p>
+                <h5>Discovery</h5>
                 <div class="table-container padded">
-                        {{{performance_table_internal_val}}}
+
+                    {{{performance.internal.discovery}}}
                 </div>
-                {{ /show_internal_eval }}
-                {{ #show_external_eval }}
-                <h3>External evaluation</h3>
+
+                    {{#has_method_based}}
+                    <h5>Method-based Validation</h5>
+                <div class="table-container padded">
+                    {{{performance.internal.method_based}}}
+                </div>
+                    {{/has_method_based}}
+                    {{#has_result_based}}
+                    <h5>Result-based Validation</h5>
+                <div class="table-container padded">
+                    {{{performance.internal.result_based}}}
+                </div>
+                    {{/has_result_based}}
+                </div>
+                {{/performance.internal.show}}
+
+                {{#performance.external.show}}
+                <h4>External Performance</h4>
                 <p>
                     The tables below show performance measured by external performance metrics. This means that for each
                     potential label of interest that was provided as input to the instruction, it was measured how well the
                     clusters correspond to the label.
                 </p>
-                {{ #label_eval_tables_disc }}
-                <h4>Label: {{ label }}</h4>
+                {{#performance.external.discovery}}
+                <h5>Discovery</h5>
                 <div class="table-container padded">
-                        {{{performance_table}}}
+                    {{{performance_table}}}
                 </div>
-                {{ /label_eval_tables_disc }}
-                {{ /show_external_eval }}
-                {{ #show_cluster_setting_pages_disc }}
-                <h3>Detailed information per cluster setting</h3>
-                <p>
-                    Reports for each combination of encoding, dimensionality reduction and clustering method are shown in
-                    pages linked below.
-                </p>
-                <ul>
-                {{#cluster_setting_pages_disc}}
-                <li><a href="{{path}}">{{ name }}</a></li>
-                {{/cluster_setting_pages_disc}}
-                </ul>
-                {{ /show_cluster_setting_pages_disc }}
+                {{/performance.external.discovery}}
+                {{#has_method_based}}
+                {{#performance.external.method_based}}
+                <h5>Method-based Validation</h5>
+                <div class="table-container padded">
+                    {{{performance_table}}}
+                </div>
+                {{/performance.external.method_based}}
+                {{/has_method_based}}
+                {{#has_result_based}}
+                {{#performance.external.result_based}}
+                <h5>Result-based Validation</h5>
+                <div class="table-container padded">
+                    {{{performance_table}}}
+                </div>
+                {{/performance.external.result_based}}
+                {{/has_result_based}}
+                {{/performance.external.show}}
 
-            <h2>Performances on validation data</h2>
-                <div class="padded-top padded-bottom"><a href="{{validation_predictions_path}}">Download cluster predictions on validation data here.</a></div>
-
-                {{ #show_internal_eval }}
-                <h3>Internal evaluation</h3>
-                <p>
-                    The table below shows performance measured by internal performance metrics. This means that only the
-                    quality of the clusters was measured, without reference to any additional (labeled) information.
-                </p>
-                <div class="table-container padded">
-                        {{{performance_table_internal_val}}}
-                </div>
-                {{ /show_internal_eval }}
-                {{ #show_external_eval }}
-                <h3>External evaluation</h3>
-                <p>
-                    The tables below show performance measured by external performance metrics. This means that for each
-                    potential label of interest that was provided as input to the instruction, it was measured how well the
-                    clusters correspond to the label.
-                </p>
-                {{ #label_eval_tables_val }}
-                <h4>Label: {{ label }}</h4>
-                <div class="table-container padded">
-                        {{{performance_table}}}
-                </div>
-                {{ /label_eval_tables_val }}
-                {{ /show_external_eval }}
-                {{ #show_cluster_setting_pages_val }}
-                <h2>Detailed information per cluster setting</h2>
-                <p>
-                    Reports for each combination of encoding, dimensionality reduction and clustering method are shown in
-                    pages linked below.
-                </p>
-                <ul>
-                {{#cluster_setting_pages_val}}
-                <li><a href="{{path}}">{{ name }}</a></li>
-                {{/cluster_setting_pages_val }}
+                <h4>Detailed Results by Setting</h4>
+                <ul class="setting-links">
+                    {{#setting_details}}
+                    <li><a href="{{path}}">{{name}}</a></li>
+                    {{/setting_details}}
                 </ul>
-                {{ /show_cluster_setting_pages_val }}
+            </div>
+            {{/splits}}
         </div>
     </div>
 </body>
