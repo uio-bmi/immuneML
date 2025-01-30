@@ -131,14 +131,14 @@ class SequenceDataset(ElementDataset):
 
     def make_subset(self, example_indices, path, dataset_type: str):
         data = self.data[example_indices]
-        name = f"subset_{self.name}"
+        name = f'{dataset_type}_{self.name}'
 
-        bnp_write_to_file(path / self.filename.name, data)
+        bnp_write_to_file(path / f'{dataset_type}_{self.filename.name}', data)
 
         metadata_filename = path / f'{name}.yaml'
         shutil.copyfile(self.dataset_file, metadata_filename)
 
-        return SequenceDataset(filename=path / self.filename.name, name=name, labels=copy.deepcopy(self.labels),
+        return SequenceDataset(filename=path / f'{dataset_type}_{self.filename.name}', name=name, labels=copy.deepcopy(self.labels),
                                dynamic_fields=self.dynamic_fields, dataset_file=metadata_filename,
                                bnp_dataclass=self.bnp_dataclass)
 
