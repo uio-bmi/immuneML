@@ -81,7 +81,8 @@ class DataImport(metaclass=abc.ABCMeta):
 
         metadata = self.import_repertoire_metadata(self.params.metadata_file)
         repertoires = self.load_repertoires(metadata)
-        new_metadata_file = ImportHelper.make_new_metadata_file(repertoires, metadata, self.params.result_path, self.dataset_name)
+        new_metadata_file = ImportHelper.make_new_metadata_file(repertoires, metadata, self.params.result_path,
+                                                                self.dataset_name)
         # type_dict = self.determine_repertoire_type_dict(repertoires)
         labels = self.determine_repertoire_dataset_labels(metadata, imported_labels=imported_labels)
 
@@ -136,7 +137,8 @@ class DataImport(metaclass=abc.ABCMeta):
             return {}
 
     def determine_repertoire_dataset_labels(self, metadata, imported_labels=None):
-        potential_label_names = list(set(metadata.columns.tolist()) - {"filename", "type_dict_dynamic_fields", "identifier", "subject_id"})
+        potential_label_names = list(
+            set(metadata.columns.tolist()) - {"filename", "type_dict_dynamic_fields", "identifier", "subject_id"})
         potential_labels = {key: list(set(metadata[key].values.tolist())) for key in potential_label_names}
 
         if imported_labels is not None:
@@ -151,11 +153,11 @@ class DataImport(metaclass=abc.ABCMeta):
 
         return labels
 
-
     def import_element_dataset(self, dataset_class: Type, filter_func=None):
         if self.params.dataset_file is not None and self.params.dataset_file.is_file():
             filenames = [Path(read_yaml(self.params.dataset_file)["filename"])]
-            assert filenames[0].is_file(), f"DataImport: filename {filenames[0]} specified in dataset file was not found."
+            assert filenames[
+                0].is_file(), f"DataImport: filename {filenames[0]} specified in dataset file was not found."
         else:
             filenames = ImportHelper.get_sequence_filenames(self.params.path, self.dataset_name)
 
@@ -172,7 +174,8 @@ class DataImport(metaclass=abc.ABCMeta):
                                                           in self.params.label_columns]
             possible_labels = {key: value for key, value in possible_labels.items() if key in label_variants}
 
-        dataset_filename = self._write_element_dataset_metadata_file(dataset_class, filename, type_dict, possible_labels)
+        dataset_filename = self._write_element_dataset_metadata_file(dataset_class, filename, type_dict,
+                                                                     possible_labels)
         metadata = read_yaml(dataset_filename)
 
         logging.info(f"Displayed labels for dataset '{self.dataset_name}' are: {list(metadata['labels'].keys())}")
@@ -236,7 +239,8 @@ class DataImport(metaclass=abc.ABCMeta):
             repertoire = Repertoire.build(**repertoire_inputs)
 
             if repertoire.get_element_count() == 0:
-                logging.warning(f"Repertoire {repertoire.identifier} contains 0 sequences. It is recommended to remove this repertoire from the dataset. ")
+                logging.warning(
+                    f"Repertoire {repertoire.identifier} contains 0 sequences. It is recommended to remove this repertoire from the dataset. ")
 
             return repertoire
         except Exception as e:
