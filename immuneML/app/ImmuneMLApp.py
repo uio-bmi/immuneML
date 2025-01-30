@@ -22,13 +22,13 @@ class ImmuneMLApp:
 
     def __init__(self, specification_path: Path, result_path: Path):
 
-        logging.basicConfig(filename=Path(result_path) / "log.txt", level=logging.INFO,
-                            format='%(asctime)s %(levelname)s: %(message)s')
-
         self._specification_path = Path(specification_path)
         self._result_path = Path(os.path.relpath(result_path))
 
         PathBuilder.build(self._result_path)
+
+        logging.basicConfig(filename=Path(self._result_path) / "log.txt", level=logging.INFO,
+                            format='%(asctime)s %(levelname)s: %(message)s', force=True)
 
         self._cache_path = self._result_path / "cache"
 

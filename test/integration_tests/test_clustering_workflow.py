@@ -48,7 +48,12 @@ def test_clustering_workflow():
                 }
             },
             'reports': {
-                'rep1': 'DimensionalityReduction',
+                'rep1': {
+                    'DimensionalityReduction': {
+                        'label': 'epitope',
+                        'dim_red_method': {
+                            'PCA': {
+                                "n_components": 2}}}}
             }
         },
         'instructions': {
@@ -68,7 +73,8 @@ def test_clustering_workflow():
                     "split_count": 2
                 },
                 'reports': ['rep1'],
-                'number_of_processes': 4
+                'number_of_processes': 4,
+                'validation_type': ['result_based', 'method_based']
             }
         }
     }
@@ -77,4 +83,4 @@ def test_clustering_workflow():
 
     ImmuneMLApp(path / 'specs.yaml', path / 'output').run()
 
-    # shutil.rmtree(path)
+    shutil.rmtree(path)

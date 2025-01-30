@@ -186,14 +186,24 @@
                 <h2>Discovery Results</h2>
                 
                 <h3>Internal Performance</h3>
+                {{#discovery.internal_performance}}
                 <div class="table-container">
                     {{{discovery.internal_performance}}}
                 </div>
+                {{/discovery.internal_performance}}
+                {{^discovery.internal_performance}}
+                <p>No internal performance metrics available</p>
+                {{/discovery.internal_performance}}
 
                 <h3>External Performance</h3>
+                {{#discovery.external_performance}}
                 <div class="table-container">
                     {{{discovery.external_performance}}}
                 </div>
+                {{/discovery.external_performance}}
+                {{^discovery.external_performance}}
+                <p>No external performance metrics available</p>
+                {{/discovery.external_performance}}
 
                 <p><a href="{{discovery.predictions_path}}">Download predictions</a></p>
 
@@ -202,31 +212,47 @@
                 {{#discovery.reports.reports}}
                 <div class="report-section">
                     <h4>{{name}}</h4>
-                    <p>{{info}}</p>
+                    {{#info}}
+                    <p class="padded-bottom">{{info}}</p>
+                    {{/info}}
                     
                     {{#output_figures}}
-                    <div class="figure-container">
+                    <div>
+                        {{#name}}<h5>{{name}}</h5>{{/name}}
                         {{#is_embed}}
-                        <embed src="{{path}}" type="image/svg+xml" class="report-figure">
+                        <embed src="{{download_link}}">
                         {{/is_embed}}
                         {{^is_embed}}
-                        <img src="{{path}}" alt="{{name}}" class="report-figure">
+                        <img src="{{download_link}}">
                         {{/is_embed}}
-                        {{#name}}<p class="figure-caption">{{name}}</p>{{/name}}
                     </div>
                     {{/output_figures}}
                     
+                    {{#output_tables.length}}
+                    <p>Downloadable tables:</p>
                     {{#output_tables}}
-                    <div class="report-download">
-                        <a href="{{path}}" class="download-link">Download {{name}} table</a>
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
                     </div>
                     {{/output_tables}}
+                    {{/output_tables.length}}
                     
+                    {{#output_text.length}}
+                    <p>Text reports:</p>
                     {{#output_text}}
-                    <div class="report-download">
-                        <a href="{{path}}" class="download-link">Download {{name}} text</a>
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
                     </div>
                     {{/output_text}}
+                    {{/output_text.length}}
                 </div>
                 {{/discovery.reports.reports}}
                 {{/discovery.reports.has_reports}}
@@ -249,27 +275,55 @@
 
                 <p><a href="{{method_based.predictions_path}}">Download predictions</a></p>
 
-                {{#method_based.reports}}
+                {{#method_based.reports.has_reports}}
                 <h3>Reports</h3>
-                <div class="grid-container">
+                {{#method_based.reports.reports}}
+                <div class="report-section">
+                    <h4>{{name}}</h4>
+                    {{#info}}
+                    <p class="padded-bottom">{{info}}</p>
+                    {{/info}}
+
                     {{#output_figures}}
+                    <div>
+                        {{#name}}<h5>{{name}}</h5>{{/name}}
                         {{#is_embed}}
-                        <div class="grid-item-full-width"><embed src="{{path}}">{{#name}}<p>{{name}}</p>{{/name}}</div>
+                        <embed src="{{download_link}}">
                         {{/is_embed}}
                         {{^is_embed}}
-                        <div><img src="{{path}}">{{#name}}<p>{{name}}</p>{{/name}}</div>
+                        <img src="{{download_link}}">
                         {{/is_embed}}
+                    </div>
                     {{/output_figures}}
-                    <ul>
+
+                    {{#output_tables.length}}
+                    <p>Downloadable tables:</p>
                     {{#output_tables}}
-                    <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
                     {{/output_tables}}
+                    {{/output_tables.length}}
+
+                    {{#output_text.length}}
+                    <p>Text reports:</p>
                     {{#output_text}}
-                    <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
                     {{/output_text}}
-                    </ul>
+                    {{/output_text.length}}
                 </div>
-                {{/method_based.reports}}
+                {{/method_based.reports.reports}}
+                {{/method_based.reports.has_reports}}
             </div>
             {{/has_method_based}}
 
@@ -290,27 +344,55 @@
 
                 <p><a href="{{result_based.predictions_path}}">Download predictions</a></p>
 
-                {{#result_based.reports}}
+                {{#result_based.reports.has_reports}}
                 <h3>Reports</h3>
-                <div class="grid-container">
+                {{#result_based.reports.reports}}
+                <div class="report-section">
+                    <h4>{{name}}</h4>
+                    {{#info}}
+                    <p class="padded-bottom">{{info}}</p>
+                    {{/info}}
+
                     {{#output_figures}}
+                    <div>
+                        {{#name}}<h5>{{name}}</h5>{{/name}}
                         {{#is_embed}}
-                        <div class="grid-item-full-width"><embed src="{{path}}">{{#name}}<p>{{name}}</p>{{/name}}</div>
+                        <embed src="{{download_link}}">
                         {{/is_embed}}
                         {{^is_embed}}
-                        <div><img src="{{path}}">{{#name}}<p>{{name}}</p>{{/name}}</div>
+                        <img src="{{download_link}}">
                         {{/is_embed}}
+                    </div>
                     {{/output_figures}}
-                    <ul>
+
+                    {{#output_tables.length}}
+                    <p>Downloadable tables:</p>
                     {{#output_tables}}
-                    <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
                     {{/output_tables}}
+                    {{/output_tables.length}}
+
+                    {{#output_text.length}}
+                    <p>Text reports:</p>
                     {{#output_text}}
-                    <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
                     {{/output_text}}
-                    </ul>
+                    {{/output_text.length}}
                 </div>
-                {{/result_based.reports}}
+                {{/result_based.reports.reports}}
+                {{/result_based.reports.has_reports}}
             </div>
             {{/has_result_based}}
         </div>

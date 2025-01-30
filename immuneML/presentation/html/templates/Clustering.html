@@ -297,23 +297,28 @@
                     potential label of interest that was provided as input to the instruction, it was measured how well the
                     clusters correspond to the label.
                 </p>
-                {{#performance.external.discovery}}
                 <h5>Discovery</h5>
+                {{#performance.external.discovery}}
+                <h6>Label: {{label}}</h6>
                 <div class="table-container padded">
                     {{{performance_table}}}
                 </div>
                 {{/performance.external.discovery}}
+
                 {{#has_method_based}}
-                {{#performance.external.method_based}}
                 <h5>Method-based Validation</h5>
+                {{#performance.external.method_based}}
+                <h6>Label: {{label}}</h6>
                 <div class="table-container padded">
                     {{{performance_table}}}
                 </div>
                 {{/performance.external.method_based}}
                 {{/has_method_based}}
+
                 {{#has_result_based}}
-                {{#performance.external.result_based}}
                 <h5>Result-based Validation</h5>
+                {{#performance.external.result_based}}
+                <h6>Label: {{label}}</h6>
                 <div class="table-container padded">
                     {{{performance_table}}}
                 </div>

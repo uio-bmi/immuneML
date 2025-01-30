@@ -86,13 +86,66 @@ table, td, th {
     border: 1px solid #cccccc;
 }
 
+/* Table styling */
 table {
     border-collapse: collapse;
+    width: auto;
+    margin: 0;
 }
 
 td, th {
-    padding: 0.4em;
-    text-align: center;
+    padding: 0.5em 0.75em;
+    text-align: left;
+    line-height: 1.4;
+}
+
+th {
+    border-bottom: 2px solid #009688;  /* accent-color */
+    color: #2c3e50;  /* primary-color */
+    font-weight: 600;
+    white-space: nowrap;
+    background-color: #f8f9fa;  /* background-color */
+}
+
+td:not(:first-child) {
+    text-align: right;
+    padding-left: 2em;
+}
+
+tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Table container styling */
+.table-container {
+    margin: 1em 0;
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 0.75em;
+    width: fit-content;
+    min-width: 50%;
+    max-width: 100%;
+}
+
+/* Prediction table specific styling */
+.prediction-table {
+    max-height: 400px;
+    overflow-y: auto;
+    margin: 1em 0;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    background: white;
+    width: fit-content;
+    min-width: 50%;
+    max-width: 100%;
+}
+
+.prediction-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 img {
@@ -177,11 +230,6 @@ ul > li {
     padding-top: 1em;
 }
 
-.table-container{
-    width: 100%;
-    overflow-x: auto;
-}
-
 .table-container table thead {
     font-weight: bold;
 }
@@ -229,4 +277,10 @@ code {
 .nested-list-container ul li ul li {
     border-left: 1px solid #68b5b3;  /* Accent for nested items */
     margin: 4px 0;
+}
+
+h6 {
+    color: var(--secondary-color);
+    margin-top: 1em;
+    margin-bottom: 0.5em;
 }

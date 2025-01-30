@@ -107,14 +107,21 @@ class Report(metaclass=abc.ABCMeta):
             if self.check_prerequisites():
                 return self._generate()
             else:
-                print_log(f"Report {self.name} failed while checking the prerequisites and was not generated, see the log file for more information.", include_datetime=True)
+                print_log(
+                    f"Report {self.name} failed while checking the prerequisites and was not generated, see the "
+                    f"log file for more information.",
+                    include_datetime=True)
                 return ReportResult(name=f"{self.name} (failed)",
-                                info="This report failed while checking the prerequisites. "
-                                     "This usually means the wrong dataset type was used or wrong input parameters were specified. "
-                                     "See the log file for more information")
+                                    info="This report failed while checking the prerequisites. This usually means "
+                                         "the wrong dataset type was used, that wrong input parameters were specified "
+                                         "or that the specific report is not applicable in this case. "
+                                         "See the log file for more information.")
         except Exception as e:
             logging.exception(f"An exception occurred while generating report {self.name}. See the details below:")
-            print_log(f"Report {self.name} encountered an error and could not be generated (error: {e}). See the log file for more info.", include_datetime=True)
+            print_log(
+                f"Report {self.name} encountered an error and could not be generated (error: {e}). "
+                f"See the log file for more info.",
+                include_datetime=True)
             return ReportResult(name=f"{self.name} (failed)",
                                 info="This report failed during execution, see the log file for more information.")
 
@@ -145,7 +152,8 @@ class Report(metaclass=abc.ABCMeta):
             if callable(plot):
                 return plot(**kwargs)
         except Exception as e:
-            logging.exception(f"An exception occurred while plotting the data in report {self.name}. See the details below:")
+            logging.exception(
+                f"An exception occurred while plotting the data in report {self.name}. See the details below:")
             print_log(warning_mssg, include_datetime=True)
 
     def _write_output_table(self, table, file_path, name=None):
@@ -153,5 +161,3 @@ class Report(metaclass=abc.ABCMeta):
         table.to_csv(file_path, index=False, sep=sep)
 
         return ReportOutput(path=file_path, name=name)
-
-
