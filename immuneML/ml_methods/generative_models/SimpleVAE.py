@@ -17,6 +17,7 @@ from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_fie
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.ml_methods.pytorch_implementations.SimpleVAEGenerator import Encoder, Decoder, SimpleVAEGenerator, \
     vae_cdr3_loss
@@ -24,6 +25,8 @@ from immuneML.ml_methods.util.pytorch_util import store_weights
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.StringHelper import StringHelper
+from immuneML.workflows.steps.data_splitter.DataSplitter import DataSplitter
+from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
 
 
 class SimpleVAE(GenerativeModel):
@@ -76,6 +79,8 @@ class SimpleVAE(GenerativeModel):
 
     - device (str): name of the device where to train the model (e.g., cpu)
 
+    - validation_split (float): what percentage of the data to use for validation (default is 0.1)
+
 
     **YAML specification:**
 
@@ -120,13 +125,14 @@ class SimpleVAE(GenerativeModel):
 
     def __init__(self, locus, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim, pretrains,
                  v_gene_embed_dim, cdr3_embed_dim, warmup_epochs, patience, iter_count_prob_estimation, device,
-                 vocab=None, max_cdr3_len=None, unique_v_genes=None, unique_j_genes=None, name: str = None):
+                 validation_split=0.1, vocab=None, max_cdr3_len=None, unique_v_genes=None, unique_j_genes=None,
+                 name: str = None, region_type: str = RegionType.IMGT_JUNCTION.name):
         super().__init__(locus)
         self.sequence_type = SequenceType.AMINO_ACID
         self.iter_count_prob_estimation = iter_count_prob_estimation
         self.num_epochs = num_epochs
         self.pretrains = pretrains
-        self.region_type = RegionType.IMGT_JUNCTION
+        self.region_type = RegionType.get_object(region_type)
         self.vocab = vocab if vocab is not None else (
             sorted((EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + [Constants.GAP_LETTER])))
         self.vocab_size = len(self.vocab)
@@ -146,6 +152,7 @@ class SimpleVAE(GenerativeModel):
         # hard-coded in the original implementation
         self.v_gene_loss_weight = 0.8138
         self.j_gene_loss_weight = 0.1305
+        self.validation_split = validation_split
 
         self.loss_path = None
 
@@ -174,29 +181,40 @@ class SimpleVAE(GenerativeModel):
 
     def fit(self, data, path: Path = None):
 
-        data_loader = self.encode_dataset(data)
-        # TODO: split the data to train and validation? or have external validation/test dataset
+        train_data, validation_data = DataSplitter.run(DataSplitterParams(
+            dataset=data,
+            training_percentage=1-self.validation_split,
+            split_strategy=SplitType.RANDOM,
+            split_count=1,
+            paths=[path / 'split_data']
+        ))
+        train_data_loader = self.encode_dataset(train_data[0])
+        validation_data_loader = self.encode_dataset(validation_data[0])
 
-        pretrained_weights_path = self._pretrain(data_loader=data_loader, path=path)
+        pretrained_weights_path = self._pretrain(train_data_loader=train_data_loader,
+                                                 validation_data_loader=validation_data_loader, path=path)
 
         model = self.make_new_model(pretrained_weights_path)
         model.train()
 
         optimizer = torch.optim.Adam(model.parameters())
         losses = []
+        val_losses = []
         epoch = 1
         loss_decreasing = True
 
         while epoch <= self.num_epochs and loss_decreasing:
-            loss = self._train_for_epoch(data_loader, model, self.beta, optimizer)
+            loss = self._train_for_epoch(train_data_loader, model, self.beta, optimizer)
+            val_loss = self._validate_for_epoch(validation_data_loader, model)
             losses.append(loss.item())
+            val_losses.append(val_loss)
             print_log(f"{SimpleVAE.__name__}: epoch: {epoch}, loss: {loss}.")
 
             if min(losses) == loss.item():
                 store_weights(model, path / 'state_dict.yaml')
 
             if epoch > self.patience and all(
-                    x <= y for x, y in zip(losses[-self.patience:], losses[-self.patience:][1:])):
+                    x <= y for x, y in zip(val_losses[-self.patience:], val_losses[-self.patience:][1:])):
                 loss_decreasing = False
 
             epoch += 1
@@ -207,7 +225,7 @@ class SimpleVAE(GenerativeModel):
 
         self.model = self.make_new_model(path / 'state_dict.yaml')
 
-    def _pretrain(self, data_loader, path: Path):
+    def _pretrain(self, train_data_loader, validation_data_loader, path: Path):
 
         pretrained_weights_path = PathBuilder.build(path) / 'pretrained_warmup_weights.yaml'
         best_val_loss = np.inf
@@ -216,14 +234,14 @@ class SimpleVAE(GenerativeModel):
             model = self.make_new_model()
             optimizer = torch.optim.Adam(model.parameters())
             beta = 0 if self.warmup_epochs > 0 else self.beta
-            current_val_loss = np.inf
+            val_loss = np.inf
 
             for epoch in range(self.warmup_epochs):
-                loss = self._train_for_epoch(data_loader, model, beta, optimizer)
-                current_val_loss = loss.item()
+                self._train_for_epoch(train_data_loader, model, beta, optimizer)
+                val_loss = self._validate_for_epoch(validation_data_loader, model)
                 beta = self._update_beta_on_epoch_end(epoch)
-            if current_val_loss <= best_val_loss:
-                best_val_loss = current_val_loss
+            if val_loss <= best_val_loss:
+                best_val_loss = val_loss
                 store_weights(model, pretrained_weights_path)
 
         return pretrained_weights_path
@@ -242,10 +260,29 @@ class SimpleVAE(GenerativeModel):
             optimizer.step()
         return loss
 
+    def _validate_for_epoch(self, validation_data_loader, model):
+        model.eval()
+        losses = []
+
+        with torch.no_grad():
+            for batch in validation_data_loader:
+                cdr3_input, v_gene_input, j_gene_input = batch
+                cdr3_output, v_gene_output, j_gene_output, z = model(cdr3_input, v_gene_input, j_gene_input)
+                loss = (vae_cdr3_loss(cdr3_output, cdr3_input, self.max_cdr3_len, z[0], z[1], self.beta)
+                        + cross_entropy(v_gene_output, v_gene_input.float()) * self.v_gene_loss_weight
+                        + cross_entropy(j_gene_output, j_gene_input.float()) * self.j_gene_loss_weight)
+                losses.append(loss.item())
+
+        average_loss = sum(losses) / len(losses) if losses else float('inf')
+        return average_loss
+
     def encode_dataset(self, dataset, batch_size=None, shuffle=True):
         seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
         data = dataset.data.topandas()[[seq_col, 'v_call', 'j_call']]
-        assert set(data[seq_col]) != {""}, f"{SimpleVAE.__name__}: sequence column {seq_col} contained only empty sequences. This indicates something may have gone wrong with data import."
+        assert set(data[seq_col]) != {""}, (f"{SimpleVAE.__name__}: sequence column {seq_col} contained only "
+                                            f"empty sequences; region and sequence type were set to "
+                                            f"{self.region_type.to_string()} and {self.sequence_type.value}. "
+                                            f"This indicates something may have gone wrong with data import.")
 
         if self.unique_v_genes is None:
             self.unique_v_genes = sorted(list(set([el.split("*")[0] for el in data['v_call']])))
