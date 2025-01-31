@@ -57,6 +57,12 @@ Here is the configuration yaml file:
               simulation: sim1
               type: LigoSim
 
+To run this analysis from the command line with immuneML installed, run:
+
+.. code-block:: bash
+
+    immune-ml ligo_complete_specification.yaml ./simulated_dataset/
+
 Step 2: Clustering analysis
 ----------------------------
 
@@ -80,7 +86,7 @@ the clustering, and external metrics that compare the clustering to some externa
 
 In this tutorial, we will use the following settings:
 
-. collapse:: ligo_complete_specification.yaml
+. collapse:: clustering_analysis.yaml
 
         .. highlight:: yaml
         .. code-block:: yaml
@@ -90,8 +96,8 @@ In this tutorial, we will use the following settings:
                     d1:
                       format: AIRR
                       params:
-                        path: simulated_dataset.tsv # paths to files from the previous step
-                        dataset_file: simulated_dataset.yaml
+                        path: simulated_dataset/simulated_dataset.tsv # paths to files from the previous step
+                        dataset_file: simulated_dataset/simulated_dataset.yaml
                   encodings:
                     kmer: KmerFrequency # we encode the sequences using k-mer frequencies
                   ml_methods:
@@ -112,7 +118,7 @@ In this tutorial, we will use the following settings:
                             n_components: 2
                         label: signal1 # we will color the graph by the signal we implanted
                 instructions:
-                  clustering:
+                  clustering_instruction_with_ligo_data:
                     clustering_settings: # what combinations of encoding+dim_reduction+clustering we want to try
                     - encoding: kmer
                       method: kmeans2
@@ -138,3 +144,12 @@ In this tutorial, we will use the following settings:
                     validation_type: # the type of validation we want to perform [here we do both]
                     - result_based
                     - method_based
+
+To run the clustering analysis from the command line with immuneML installed, run:
+
+.. code-block:: bash
+
+    immune-ml clustering_analysis.yaml ./clustering_results/
+
+This will generate a report with the clustering results in the specified directory. To explore the results, see the
+index.html file in output directory.
