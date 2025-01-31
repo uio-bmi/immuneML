@@ -116,8 +116,8 @@ class ClusteringHTMLBuilder:
         splits = []
         for split_id in range(state.config.split_config.split_count):
             validation_types = {
-                "has_method_based": "method-based" in state.config.validation_type,
-                "has_result_based": "result-based" in state.config.validation_type
+                "has_method_based": "method_based" in state.config.validation_type,
+                "has_result_based": "result_based" in state.config.validation_type
             }
 
             split_map = {

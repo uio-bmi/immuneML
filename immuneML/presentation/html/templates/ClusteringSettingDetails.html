@@ -39,6 +39,17 @@
             margin: 1em 0;
         }
 
+        .plot-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 2em auto;
+        }
+
+        .plot-container embed {
+            width: 100%;
+            border: none;
+        }
+
         details {
             margin: 1em 0;
         }
@@ -91,10 +102,17 @@
         
         img, embed {
             max-width: 100%;
-            height: auto;
             margin: 1em 0;
             border-radius: 4px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        /* Make embedded plots more square-shaped */
+        embed {
+            width: 100%;
+            height: 400px;  /* Reduced fixed height */
+            margin: 0 auto;
+            display: block;
         }
         
         ul {
@@ -217,7 +235,7 @@
                     {{/info}}
                     
                     {{#output_figures}}
-                    <div>
+                    <div class="plot-container">
                         {{#name}}<h5>{{name}}</h5>{{/name}}
                         {{#is_embed}}
                         <embed src="{{download_link}}">
@@ -285,7 +303,7 @@
                     {{/info}}
 
                     {{#output_figures}}
-                    <div>
+                    <div class="plot-container">
                         {{#name}}<h5>{{name}}</h5>{{/name}}
                         {{#is_embed}}
                         <embed src="{{download_link}}">
@@ -354,7 +372,7 @@
                     {{/info}}
 
                     {{#output_figures}}
-                    <div>
+                    <div class="plot-container">
                         {{#name}}<h5>{{name}}</h5>{{/name}}
                         {{#is_embed}}
                         <embed src="{{download_link}}">

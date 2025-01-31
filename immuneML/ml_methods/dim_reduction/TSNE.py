@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 from sklearn.manifold import TSNE as SklearnTSNE
 
@@ -43,3 +44,6 @@ class TSNE(DimRedMethod):
 
     def fit_transform(self, dataset: Dataset):
         return self.method.fit_transform(dataset.encoded_data.examples)
+
+    def get_dimension_names(self) -> List[str]:
+        return [f"tSNE_dimension_{i+1}" for i in range(self.method.n_components)]
