@@ -1,3 +1,4 @@
+import logging
 import shutil
 from itertools import chain
 from pathlib import Path
@@ -50,6 +51,8 @@ class SimpleLSTM(GenerativeModel):
 
     - temperature (float): a higher temperature leads to faster yet more unstable learning
 
+    - prime_str (str): the initial sequence to start generating from
+
 
     **YAML specification:**
 
@@ -85,11 +88,11 @@ class SimpleLSTM(GenerativeModel):
         lstm._model = lstm.make_new_model(state_dict_file)
         return lstm
 
-    ITER_TO_REPORT = 100
+    ITER_TO_REPORT = 20
 
     def __init__(self, locus: str, sequence_type: str, hidden_size: int, learning_rate: float, num_epochs: int,
                  batch_size: int, num_layers: int, embed_size: int, temperature, device: str, name=None,
-                 region_type: str = RegionType.IMGT_CDR3.name):
+                 region_type: str = RegionType.IMGT_CDR3.name, prime_str: str = "C"):
 
         super().__init__(Chain.get_chain(locus))
         self._model = None
@@ -102,6 +105,7 @@ class SimpleLSTM(GenerativeModel):
         self.batch_size = batch_size
         self.embed_size = embed_size
         self.temperature = temperature
+        self.prime_str = prime_str
         self.name = name
         self.device = device
         self.unique_letters = EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + ["*"]
@@ -113,7 +117,7 @@ class SimpleLSTM(GenerativeModel):
     def make_new_model(self, state_dict_file: Path = None):
         model = SimpleLSTMGenerator(input_size=self.num_letters, hidden_size=self.hidden_size,
                                     embed_size=self.embed_size, output_size=self.num_letters,
-                                    batch_size=self.batch_size)
+                                    batch_size=self.batch_size, device=self.device)
 
         if isinstance(state_dict_file, Path) and state_dict_file.is_file():
             state_dict = read_yaml(state_dict_file)
@@ -124,33 +128,41 @@ class SimpleLSTM(GenerativeModel):
 
         return model
 
+    def _log_training_progress(self, loss_summary, epoch, loss):
+        if (epoch + 1) % SimpleLSTM.ITER_TO_REPORT == 0:
+            message = f"{SimpleLSTM.__name__}: Epoch [{epoch + 1}/{self.num_epochs}]: loss: {loss:.4f}"
+            print_log(message, True)
+            
+            loss_summary['loss'].append(loss)
+            loss_summary['epoch'].append(epoch + 1)
+        return loss_summary
+
     def fit(self, data, path: Path = None):
         data_loader = self._encode_dataset(data)
-
         model = self.make_new_model()
         model.train()
 
-        criterion = nn.CrossEntropyLoss(reduction='sum')
+        criterion = nn.CrossEntropyLoss(reduction='mean')
         optimizer = optim.Adam(model.parameters(), self.learning_rate)
         loss_summary = {"loss": [], "epoch": []}
 
-        with torch.autograd.set_detect_anomaly(True):
-            for epoch in range(self.num_epochs):
-                loss = 0.
-                state = model.init_zero_state()
+        for epoch in range(self.num_epochs):
+            epoch_loss = 0.
+            state = model.init_zero_state()
+
+            for batch_idx, (x_batch, y_batch) in enumerate(data_loader):
+                state = state[0][:, :x_batch.size(0), :], state[1][:, :x_batch.size(0), :]
                 optimizer.zero_grad()
-
-                for x_batch, y_batch in data_loader:
-                    state = state[0][:, :x_batch.size(0), :], state[1][:, :x_batch.size(0), :]
-
-                    outputs, state = model(x_batch, state)
-                    loss = loss + criterion(outputs, y_batch)
-
-                loss = loss / len(data_loader.dataset)
+                outputs, state = model(x_batch, state)
+                loss = criterion(outputs, y_batch)
                 loss.backward()
                 optimizer.step()
+                
+                epoch_loss = (epoch_loss * batch_idx + loss.item()) / (batch_idx + 1)
+                
+                state = (state[0].detach(), state[1].detach())
 
-                loss_summary = self._log_training_progress(loss_summary, epoch, loss)
+            loss_summary = self._log_training_progress(loss_summary, epoch, epoch_loss)
 
         self._log_training_summary(loss_summary, path)
 
@@ -158,17 +170,12 @@ class SimpleLSTM(GenerativeModel):
 
     def _log_training_summary(self, loss_summary, path):
         if path is not None:
-            PathBuilder.build(path)
-            self.loss_summary_path = path / 'loss_summary.csv'
-            pd.DataFrame(loss_summary).to_csv(str(self.loss_summary_path), index=False)
-
-    def _log_training_progress(self, loss_summary, epoch, loss):
-        if (epoch + 1) % SimpleLSTM.ITER_TO_REPORT == 0:
-            print_log(f"{SimpleLSTM.__name__}: Epoch [{epoch + 1}/{self.num_epochs}]: loss: {loss.item():.4f}",
-                      True)
-            loss_summary['loss'].append(loss.item())
-            loss_summary['epoch'].append(epoch + 1)
-        return loss_summary
+            try:
+                PathBuilder.build(path)
+                self.loss_summary_path = path / 'loss_summary.csv'
+                pd.DataFrame(loss_summary).to_csv(str(self.loss_summary_path), index=False)
+            except Exception as e:
+                logging.error(f"{SimpleLSTM.__name__}: failed to save loss summary: {e};\n{loss_summary}")
 
     def _encode_dataset(self, dataset: SequenceDataset):
         seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
@@ -183,19 +190,20 @@ class SimpleLSTM(GenerativeModel):
     def is_same(self, model) -> bool:
         raise NotImplementedError
 
-    def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
+    def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool,
+                           max_failed_trials: int = 1000):
         torch.manual_seed(seed)
 
         self._model.eval()
-        prime_str = "CAS"
-        input_vector = torch.as_tensor([self.letter_to_index[letter] for letter in prime_str], device=self.device).long()
-        predicted = prime_str
+        input_vector = torch.as_tensor([self.letter_to_index[letter] for letter in self.prime_str], device=self.device).long()
+        predicted = self.prime_str
+        failed_trials = 0
 
         with torch.no_grad():
 
             state = self._model.init_zero_state(batch_size=1)
 
-            for p in range(len(prime_str) - 1):
+            for p in range(len(self.prime_str) - 1):
                 _, state = self._model(input_vector[p], state)
 
             inp = input_vector[-1]
@@ -210,8 +218,15 @@ class SimpleLSTM(GenerativeModel):
                 predicted_char = self.index_to_letter[top_i]
                 predicted += predicted_char
                 inp = torch.as_tensor(self.letter_to_index[predicted_char], device=self.device).long()
-                if predicted_char == "*":
+                if predicted_char == "*" and len(predicted) > 1 and predicted[-2] != "*":
                     gen_seq_count += 1
+                elif predicted_char == "*" and len(predicted) > 1 and predicted[-2] != "*":
+                    failed_trials += 1
+                    if failed_trials % 10 == 0:
+                        print_log("Warning: LSTM model generated an empty sequence.", True)
+                    if failed_trials >= max_failed_trials:
+                        logging.warning(f"{SimpleLSTM.__name__} {self.name}: failed to generate {count} sequences.")
+                        break
 
         print_log(f"{SimpleLSTM.__name__} {self.name}: generated {count} sequences.", True)
 
@@ -225,7 +240,8 @@ class SimpleLSTM(GenerativeModel):
         }) for i, sequence in enumerate(sequences)]
 
         return SequenceDataset.build_from_objects(sequences=sequence_objs, path=PathBuilder.build(path),
-                                                  name='synthetic_lstm_dataset', labels={'gen_model_name': [self.name]})
+                                                  name='synthetic_lstm_dataset', labels={'gen_model_name': [self.name]},
+                                                  region_type=self.region_type)
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         raise RuntimeError
