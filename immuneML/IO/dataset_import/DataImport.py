@@ -156,8 +156,14 @@ class DataImport(metaclass=abc.ABCMeta):
     def import_element_dataset(self, dataset_class: Type, filter_func=None):
         if self.params.dataset_file is not None and self.params.dataset_file.is_file():
             filenames = [Path(read_yaml(self.params.dataset_file)["filename"])]
-            assert filenames[
-                0].is_file(), f"DataImport: filename {filenames[0]} specified in dataset file was not found."
+            if self.params.path.is_file():
+                filenames[0] = self.params.path
+            elif self.params.path:
+                filenames[0] = self.params.path / Path(filenames[0]).name
+            else:
+                filenames[0] = self.params.dataset_file.parent / Path(filenames[0]).name
+            assert filenames[0].is_file(), \
+                f"DataImport: filename {filenames[0]} specified in dataset file was not found."
         else:
             filenames = ImportHelper.get_sequence_filenames(self.params.path, self.dataset_name)
 
