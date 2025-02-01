@@ -27,17 +27,20 @@ class SimpleLSTMGenerator(nn.Module):
         nn.init.zeros_(self.fc.bias)
 
     def forward(self, features, hidden_and_cell_state):
-        features = features.view(1, -1)
-
-        embedded = self.embed(features)
-
+        # features shape: (batch_size, seq_len)
+        features = features.transpose(0, 1)  # Convert to (seq_len, batch_size)
+        embedded = self.embed(features)  # (seq_len, batch_size, embed_size)
+        
         output, hidden_and_cell_state = self.lstm(embedded, hidden_and_cell_state)
-
-        output = output.squeeze(0)
-        output = self.fc(output)
+        # output shape: (seq_len, batch_size, hidden_size)
+        
+        output = self.fc(output)  # (seq_len, batch_size, output_size)
+        output = output.transpose(0, 1)  # Convert back to (batch_size, seq_len, output_size)
         return output, hidden_and_cell_state
 
     def init_zero_state(self, batch_size=None):
-        init_hidden = torch.zeros(self.num_layers, batch_size if batch_size else self.batch_size, self.hidden_size, device=self.device)
-        init_cell = torch.zeros(self.num_layers, batch_size if batch_size else self.batch_size, self.hidden_size, device=self.device)
+        if batch_size is None:
+            batch_size = self.batch_size
+        init_hidden = torch.zeros(self.num_layers, batch_size, self.hidden_size, device=self.device)
+        init_cell = torch.zeros(self.num_layers, batch_size, self.hidden_size, device=self.device)
         return init_hidden, init_cell

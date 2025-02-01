@@ -92,7 +92,7 @@ class SimpleLSTM(GenerativeModel):
 
     def __init__(self, locus: str, sequence_type: str, hidden_size: int, learning_rate: float, num_epochs: int,
                  batch_size: int, num_layers: int, embed_size: int, temperature, device: str, name=None,
-                 region_type: str = RegionType.IMGT_CDR3.name, prime_str: str = "C"):
+                 region_type: str = RegionType.IMGT_CDR3.name, prime_str: str = "C", window_size: int = 64):
 
         super().__init__(Chain.get_chain(locus))
         self._model = None
@@ -106,6 +106,7 @@ class SimpleLSTM(GenerativeModel):
         self.embed_size = embed_size
         self.temperature = temperature
         self.prime_str = prime_str
+        self.window_size = window_size
         self.name = name
         self.device = device
         self.unique_letters = EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + ["*"]
@@ -148,24 +149,35 @@ class SimpleLSTM(GenerativeModel):
 
         for epoch in range(self.num_epochs):
             epoch_loss = 0.
-            state = model.init_zero_state()
+            num_batches = 0
 
-            for batch_idx, (x_batch, y_batch) in enumerate(data_loader):
-                state = state[0][:, :x_batch.size(0), :], state[1][:, :x_batch.size(0), :]
+            for x_batch, y_batch in data_loader:
+                x_batch, y_batch = x_batch.to(self.device), y_batch.to(self.device)
+                
+                # Initialize state for each batch
+                state = model.init_zero_state(x_batch.size(0))
+                
                 optimizer.zero_grad()
-                outputs, state = model(x_batch, state)
+                
+                outputs, _ = model(x_batch, state)
+                # outputs shape: (batch_size, seq_len, vocab_size)
+                # need to reshape to (batch_size * seq_len, vocab_size) for loss
+                outputs = outputs.reshape(-1, outputs.size(-1))
+                y_batch = y_batch.reshape(-1)
+                
                 loss = criterion(outputs, y_batch)
+                
                 loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5)
                 optimizer.step()
                 
-                epoch_loss = (epoch_loss * batch_idx + loss.item()) / (batch_idx + 1)
-                
-                state = (state[0].detach(), state[1].detach())
+                epoch_loss += loss.item()
+                num_batches += 1
 
-            loss_summary = self._log_training_progress(loss_summary, epoch, epoch_loss)
+            avg_epoch_loss = epoch_loss / num_batches
+            loss_summary = self._log_training_progress(loss_summary, epoch, avg_epoch_loss)
 
         self._log_training_summary(loss_summary, path)
-
         self._model = model
 
     def _log_training_summary(self, loss_summary, path):
@@ -181,11 +193,21 @@ class SimpleLSTM(GenerativeModel):
         seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
         sequences = dataset.get_attribute(seq_col).tolist()
 
+        # Flatten all sequences into one long sequence with end tokens
         sequences = list(chain.from_iterable(
             [[self.letter_to_index[letter] for letter in seq] + [self.letter_to_index['*']] for seq in sequences]))
-        sequences = torch.as_tensor(sequences, device=self.device).long()
 
-        return DataLoader(TensorDataset(sequences[:-1], sequences[1:]), shuffle=True, batch_size=self.batch_size)
+        sequences = torch.as_tensor(sequences, device=self.device).long()
+        
+        # Create overlapping windows of size window_size
+        # stride=1 means each window overlaps with previous window by window_size-1 elements
+        windows = sequences.unfold(0, self.window_size, 1)  
+        
+        # Create input-target pairs from windows
+        x = windows[:, :-1]  # All but last character of each window
+        y = windows[:, 1:]   # All but first character of each window
+
+        return DataLoader(TensorDataset(x, y), shuffle=True, batch_size=self.batch_size)
 
     def is_same(self, model) -> bool:
         raise NotImplementedError
@@ -198,40 +220,47 @@ class SimpleLSTM(GenerativeModel):
         input_vector = torch.as_tensor([self.letter_to_index[letter] for letter in self.prime_str], device=self.device).long()
         predicted = self.prime_str
         failed_trials = 0
+        total_trials = 0
 
         with torch.no_grad():
-
             state = self._model.init_zero_state(batch_size=1)
 
+            # Add sequence and batch dimensions for LSTM input
             for p in range(len(self.prime_str) - 1):
-                _, state = self._model(input_vector[p], state)
+                inp = input_vector[p].unsqueeze(0).unsqueeze(0)
+                _, state = self._model(inp, state)
 
-            inp = input_vector[-1]
+            inp = input_vector[-1].unsqueeze(0).unsqueeze(0)
             gen_seq_count = 0
 
-            while gen_seq_count <= count:
+            while gen_seq_count < count and failed_trials < max_failed_trials:
                 output, state = self._model(inp, state)
-
-                output_dist = output.data.view(-1).div(self.temperature).exp()
+                
+                output_dist = output[0, 0].div(self.temperature).exp()
                 top_i = torch.multinomial(output_dist, 1)[0].item()
 
                 predicted_char = self.index_to_letter[top_i]
                 predicted += predicted_char
                 inp = torch.as_tensor(self.letter_to_index[predicted_char], device=self.device).long()
-                if predicted_char == "*" and len(predicted) > 1 and predicted[-2] != "*":
-                    gen_seq_count += 1
-                elif predicted_char == "*" and len(predicted) > 1 and predicted[-2] != "*":
-                    failed_trials += 1
-                    if failed_trials % 10 == 0:
-                        print_log("Warning: LSTM model generated an empty sequence.", True)
-                    if failed_trials >= max_failed_trials:
-                        logging.warning(f"{SimpleLSTM.__name__} {self.name}: failed to generate {count} sequences.")
-                        break
+                inp = inp.unsqueeze(0).unsqueeze(0)
 
-        print_log(f"{SimpleLSTM.__name__} {self.name}: generated {count} sequences.", True)
+                if predicted_char == "*":
+                    # Get the last generated sequence
+                    last_seq = predicted.split('*')[-2]
+                    if len(last_seq) > 0:  # Valid sequence
+                        gen_seq_count += 1
+                        print_log(f"Generated valid sequence {gen_seq_count}/{count}", True)
+                    else:  # Empty sequence
+                        failed_trials += 1
+                        if failed_trials % 10 == 0:
+                            print_log(f"Warning: LSTM model generated {failed_trials} empty sequences", True)
+                
+                total_trials += 1
 
-        sequences = predicted.split('*')[1:-1]
-        return self._export_dataset(sequences, count, path)
+        print_log(f"{SimpleLSTM.__name__} {self.name}: generated {gen_seq_count} sequences with {failed_trials} failed attempts.", True)
+
+        sequences = [seq for seq in predicted.split('*') if len(seq) > 0]
+        return self._export_dataset(sequences[:count], count, path)
 
     def _export_dataset(self, sequences, count, path):
         sequence_objs = [ReceptorSequence(**{
