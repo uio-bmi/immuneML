@@ -50,7 +50,7 @@ def test_simple_lstm():
     assert sequence_df.shape[0] == gen_seq_count
     assert all(sequence_df['cdr3_aa'].str.len() >= 1)
 
-    # shutil.rmtree(path)
+    shutil.rmtree(path)
 
 
 if __name__ == "__main__":
