@@ -95,8 +95,11 @@ class ClusteringRunner:
 
     def _fit_and_predict(self, dataset: Dataset, cl_setting: ClusteringSetting) -> np.ndarray:
         """Fit clustering method and get predictions."""
-        cl_setting.clustering_method.fit(dataset)
-        return cl_setting.clustering_method.predict(dataset)
+        if hasattr(cl_setting.clustering_method, 'fit_predict'):
+            return cl_setting.clustering_method.fit_predict(dataset)
+        else:
+            cl_setting.clustering_method.fit(dataset)
+            return cl_setting.clustering_method.predict(dataset)
 
     def evaluate_clustering(self, predictions: pd.DataFrame, cl_setting: ClusteringSetting, features) \
             -> Dict[str, Path]:

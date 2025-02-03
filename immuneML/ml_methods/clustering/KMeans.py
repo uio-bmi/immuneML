@@ -5,7 +5,7 @@ from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod, ge
 
 
 class KMeans(ClusteringMethod):
-    '''
+    """
     k-means clustering method which wraps scikit-learn's KMeans. Input arguments for the method are the
     same as supported by scikit-learn (see `KMeans scikit-learn documentation
     <https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html>`_ for details).
@@ -21,7 +21,7 @@ class KMeans(ClusteringMethod):
                     KMeans:
                         # arguments as defined by scikit-learn
                         n_clusters: 2
-    '''
+    """
 
     def __init__(self, name=None, **kwargs):
         super().__init__(name)
@@ -30,6 +30,10 @@ class KMeans(ClusteringMethod):
     def fit(self, dataset: Dataset):
         data = get_data_for_clustering(dataset)
         self.model.fit(data)
+
+    def fit_predict(self, dataset: Dataset):
+        data = get_data_for_clustering(dataset)
+        return self.model.fit_predict(data)
 
     def predict(self, dataset: Dataset):
         data = get_data_for_clustering(dataset)

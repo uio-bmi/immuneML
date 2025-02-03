@@ -1,19 +1,18 @@
 from pathlib import Path
 from typing import Tuple
 
+import numpy as np
 import pandas as pd
-from sklearn.base import BaseEstimator
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import NearestCentroid, KNeighborsClassifier
 
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.util.PathBuilder import PathBuilder
-from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringState, ClusteringConfig
 from immuneML.workflows.instructions.clustering.ClusteringReportHandler import ClusteringReportHandler
 from immuneML.workflows.instructions.clustering.ClusteringRunner import ClusteringRunner
+from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringConfig, ClusteringState
 from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringSetting, ClusteringItem, \
     DataFrameWrapper
-from immuneML.workflows.steps.DataEncoder import DataEncoder
 
 
 class ValidationHandler:
@@ -60,18 +59,17 @@ class ValidationHandler:
             )
 
             clustering_items[cl_setting.get_key()] = cl_item
-            state = self.report_handler.run_item_reports(cl_item, "result_based_validation", run_id, cl_setting.path, state)
+            state = self.report_handler.run_item_reports(cl_item, "result_based_validation", run_id, cl_setting.path,
+                                                         state)
 
         predictions_df.to_csv(state.predictions_paths[run_id]['result_based_validation'], index=False)
         state.clustering_items[run_id]['result_based_validation'] = clustering_items
 
         return state
 
-    def _train_cluster_classifier(self, discovery_clusters: ClusteringItem,
-                                  cl_setting: ClusteringSetting) -> BaseEstimator:
+    def _train_cluster_classifier(self, discovery_clusters: ClusteringItem, cl_setting: ClusteringSetting):
         """Train a classifier using discovery data clusters as labels."""
-        classifier = RandomForestClassifier(n_estimators=100)
-        # TODO: make this configurable and use cl setting to pick classifier
+        classifier = get_complementary_classifier(cl_setting)
 
         # Get features and cluster assignments from discovery data
         features = (discovery_clusters.dataset.encoded_data.examples
@@ -86,7 +84,8 @@ class ValidationHandler:
                                   classifier,
                                   predictions_df: pd.DataFrame,
                                   analysis_desc: str,
-                                  run_id: int, path: Path, encoder: DatasetEncoder) -> Tuple[ClusteringItem, pd.DataFrame]:
+                                  run_id: int, path: Path, encoder: DatasetEncoder) -> Tuple[
+        ClusteringItem, pd.DataFrame]:
         """Apply trained classifier to validation data."""
         enc_dataset = self.runner.encode_dataset(dataset, cl_setting, learn_model=False, encoder=encoder)
         features = self.runner.get_features(enc_dataset, cl_setting)
@@ -106,3 +105,31 @@ class ValidationHandler:
         )
 
         return cl_item, predictions_df
+
+
+def get_complementary_classifier(cl_setting: ClusteringSetting):
+    """
+    Returns a complementary classifier based on the clustering method.
+
+    Args:
+        cl_setting: ClusteringSetting object containing the clustering method configuration
+
+    Returns:
+        An instance of the appropriate classifier; NearestCentroid if no matches are found
+    """
+    clustering_method = cl_setting.clustering_method
+    method_name = clustering_method.__class__.__name__
+
+    if method_name == 'KMeans':
+        return NearestCentroid()
+    elif method_name == 'AgglomerativeClustering':
+        if hasattr(clustering_method.model, 'linkage'):
+            if clustering_method.model.linkage == 'ward':
+                return NearestCentroid()
+            elif clustering_method.model.linkage == 'complete':
+                def custom_weights(distances):
+                    return np.eye(len(distances))[:, -1]
+
+                return KNeighborsClassifier(weights=custom_weights)
+
+    return NearestCentroid()
