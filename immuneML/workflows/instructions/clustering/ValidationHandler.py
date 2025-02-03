@@ -9,7 +9,7 @@ from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.clustering.ClusteringReportHandler import ClusteringReportHandler
-from immuneML.workflows.instructions.clustering.ClusteringRunner import ClusteringRunner
+from immuneML.workflows.instructions.clustering.ClusteringRunner import ClusteringRunner, get_features
 from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringConfig, ClusteringState
 from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringSetting, ClusteringItem, \
     DataFrameWrapper
@@ -88,7 +88,7 @@ class ValidationHandler:
         ClusteringItem, pd.DataFrame]:
         """Apply trained classifier to validation data."""
         enc_dataset = self.runner.encode_dataset(dataset, cl_setting, learn_model=False, encoder=encoder)
-        features = self.runner.get_features(enc_dataset, cl_setting)
+        features = get_features(enc_dataset, cl_setting)
 
         predictions = classifier.predict(features)
         predictions_df[f'predictions_{cl_setting.get_key()}'] = predictions

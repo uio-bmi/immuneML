@@ -1,7 +1,6 @@
 import copy
-from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Dict
+from typing import List
 
 import pandas as pd
 
@@ -12,14 +11,13 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
 from immuneML.reports.Report import Report
-from immuneML.reports.ReportResult import ReportResult
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
 from immuneML.workflows.instructions.clustering.ClusteringReportHandler import ClusteringReportHandler
 from immuneML.workflows.instructions.clustering.ClusteringRunner import ClusteringRunner
 from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringConfig, ClusteringState
 from immuneML.workflows.instructions.clustering.ValidationHandler import ValidationHandler
-from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringSetting, ClusteringItem
+from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringSetting
 
 
 class ClusteringInstruction(Instruction):

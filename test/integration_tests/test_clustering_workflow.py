@@ -53,7 +53,11 @@ def test_clustering_workflow():
                         'label': 'epitope',
                         'dim_red_method': {
                             'PCA': {
-                                "n_components": 2}}}}
+                                "n_components": 2}}}},
+                'stability':
+                    {'ClusteringStabilityReport': {
+                        'metric': 'adjusted_rand_score'
+                    }}
             }
         },
         'instructions': {
@@ -72,7 +76,7 @@ def test_clustering_workflow():
                     'training_percentage': 0.5,
                     "split_count": 2
                 },
-                'reports': ['rep1'],
+                'reports': ['rep1', 'stability'],
                 'number_of_processes': 4,
                 'validation_type': ['result_based', 'method_based']
             }

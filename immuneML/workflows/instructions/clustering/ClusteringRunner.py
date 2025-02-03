@@ -54,7 +54,7 @@ class ClusteringRunner:
         predictions_df[f'predictions_{cl_setting.get_key()}'] = predictions
 
         # Evaluate results
-        features = self.get_features(enc_dataset, cl_setting)
+        features = get_features(enc_dataset, cl_setting)
         performance_paths = self.evaluate_clustering(predictions_df, cl_setting, features)
 
         cl_item = ClusteringItem(
@@ -87,11 +87,6 @@ class ClusteringRunner:
                 enc_dataset)
 
         return enc_dataset
-
-    def get_features(self, dataset: Dataset, cl_setting: ClusteringSetting):
-        """Get features from encoded dataset."""
-        return dataset.encoded_data.examples if cl_setting.dim_reduction_method is None \
-            else dataset.encoded_data.dimensionality_reduced_data
 
     def _fit_and_predict(self, dataset: Dataset, cl_setting: ClusteringSetting) -> np.ndarray:
         """Fit clustering method and get predictions."""
@@ -149,3 +144,9 @@ class ClusteringRunner:
             result['external'] = cl_setting.path / 'external_performances.csv'
 
         return result
+
+
+def get_features(dataset: Dataset, cl_setting: ClusteringSetting):
+    """Get features from encoded dataset."""
+    return dataset.encoded_data.examples if cl_setting.dim_reduction_method is None \
+        else dataset.encoded_data.dimensionality_reduced_data

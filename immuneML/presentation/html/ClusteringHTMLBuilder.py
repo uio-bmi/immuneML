@@ -38,6 +38,7 @@ class ClusteringHTMLBuilder:
             'immuneML_version': MLUtil.get_immuneML_version(),
             "full_specs": Util.get_full_specs_path(base_path),
             "logfile": Util.get_logfile_path(base_path),
+            "clustering_reports": ClusteringHTMLBuilder._format_reports(state.clustering_report_results, base_path),
             "splits": ClusteringHTMLBuilder._make_split_maps(state, base_path),
             **Util.make_dataset_html_map(state.config.dataset)
         }
@@ -54,11 +55,7 @@ class ClusteringHTMLBuilder:
 
     @staticmethod
     def _format_reports(reports, base_path: Path) -> dict:
-        """Format reports for HTML display and copy files to HTML output directory."""
-        if isinstance(reports, dict) and 'encoding' in reports:
-            reports = reports['encoding']
-
-        if not (isinstance(reports, list) and reports):
+        if not reports:
             return {"has_reports": False}
 
         result = {
@@ -68,24 +65,33 @@ class ClusteringHTMLBuilder:
 
         for report in reports:
             if isinstance(report, ReportResult):
-                # Copy report files to HTML dir and get relative paths
-                report_copy = Util.update_report_paths(report, base_path)
-                
                 formatted_report = {
-                    "name": report_copy.name,
-                    "info": report_copy.info,
+                    "name": report.name,
+                    "info": report.info,
                     "output_figures": [],
                     "output_tables": [],
                     "output_text": []
                 }
 
-                # Process all outputs
-                for output_type in ['output_figures', 'output_tables', 'output_text']:
-                    for output in getattr(report_copy, output_type):
+                # Process tables
+                for table in report.output_tables:
+                    try:
+                        # Read the CSV content
+                        df = pd.read_csv(table.path)
+                        formatted_report["output_tables"].append({
+                            "name": table.name,
+                            "path": os.path.relpath(table.path, base_path),
+                            "content": df.to_html(classes="table-container", index=False)
+                        })
+                    except Exception as e:
+                        print(f"Error processing table {table.name}: {e}")
+
+                # Process other outputs as before
+                for output_type in ['output_figures', 'output_text']:
+                    for output in getattr(report, output_type):
                         try:
-                            rel_path = os.path.relpath(output.path, base_path)
                             formatted_report[output_type].append({
-                                "path": str(rel_path),
+                                "path": os.path.relpath(output.path, base_path),
                                 "name": output.name,
                                 "is_embed": str(output.path).endswith(('.html', '.svg'))
                             })

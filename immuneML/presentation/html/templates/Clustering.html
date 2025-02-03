@@ -225,6 +225,46 @@
             </div>
 
             </details>
+            {{#clustering_reports.has_reports}}
+            <h2>Clustering Analysis Reports</h2>
+            {{#clustering_reports.reports}}
+            <div class="report-section">
+                <h3>{{name}}</h3>
+                {{#info}}<p>{{info}}</p>{{/info}}
+
+                {{#output_figures}}
+                <div class="figure-container">
+                    <h4>{{name}}</h4>
+                    {{#is_embed}}
+                    <iframe src="{{path}}" width="100%" height="600px" frameborder="0"></iframe>
+                    {{/is_embed}}
+                    {{^is_embed}}
+                    <img src="{{path}}" alt="{{name}}">
+                    {{/is_embed}}
+                </div>
+                {{/output_figures}}
+
+                {{#output_tables}}
+                <div class="table-section">
+                <h4>{{name}}</h4>
+                <a href="{{path}}">Download CSV</a>
+                <div class="table-container">
+                    {{{content}}}
+                </div>
+                </div>
+                {{/output_tables}}
+
+                {{#output_text}}
+                <div class="text-section">
+                    <h4>{{name}}</h4>
+                    <pre class="text-output">{{path}}</pre>
+                </div>
+                {{/output_text}}
+            </div>
+            {{/clustering_reports.reports}}
+            </div>
+            {{/clustering_reports.has_reports}}
+
             <h2>Results by Split</h2>
             <p>Splitting into multiple discovery and validation set pairs allows for stability analysis of
                 the clustering settings.</p>

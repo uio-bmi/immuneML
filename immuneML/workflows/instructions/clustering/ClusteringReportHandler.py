@@ -24,7 +24,7 @@ class ClusteringReportHandler:
             if isinstance(report, ClusteringReport):
                 tmp_report = copy.deepcopy(report)
                 tmp_report.result_path = report_path
-                tmp_report.cl_state = state
+                tmp_report.state = state
                 state.clustering_report_results.append(tmp_report.generate_report())
 
         if len(self.reports) > 0:
