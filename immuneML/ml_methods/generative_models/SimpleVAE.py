@@ -180,6 +180,8 @@ class SimpleVAE(GenerativeModel):
         return vae
 
     def fit(self, data, path: Path = None):
+        seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
+        self._extract_data_characteristics(data, seq_col)
 
         train_data, validation_data = DataSplitter.run(DataSplitterParams(
             dataset=data,
@@ -188,8 +190,8 @@ class SimpleVAE(GenerativeModel):
             split_count=1,
             paths=[path / 'split_data']
         ))
-        train_data_loader = self.encode_dataset(train_data[0])
-        validation_data_loader = self.encode_dataset(validation_data[0])
+        train_data_loader = self.encode_dataset(train_data[0], seq_col)
+        validation_data_loader = self.encode_dataset(validation_data[0], seq_col)
 
         pretrained_weights_path = self._pretrain(train_data_loader=train_data_loader,
                                                  validation_data_loader=validation_data_loader, path=path)
@@ -225,8 +227,22 @@ class SimpleVAE(GenerativeModel):
 
         self.model = self.make_new_model(path / 'state_dict.yaml')
 
-    def _pretrain(self, train_data_loader, validation_data_loader, path: Path):
+    def _extract_data_characteristics(self, dataset, seq_col):
+        data = dataset.data.topandas()[[seq_col, 'v_call', 'j_call']]
 
+        assert set(data[seq_col]) != {""}, (f"{SimpleVAE.__name__}: sequence column {seq_col} contained only "
+                                            f"empty sequences; region and sequence type were set to "
+                                            f"{self.region_type.to_string()} and {self.sequence_type.value}. "
+                                            f"This indicates something may have gone wrong with data import.")
+
+        if self.unique_v_genes is None:
+            self.unique_v_genes = sorted(list(set([el.split("*")[0] for el in data['v_call']])))
+        if self.unique_j_genes is None:
+            self.unique_j_genes = sorted(list(set([el.split("*")[0] for el in data['j_call']])))
+        if self.max_cdr3_len is None:
+            self.max_cdr3_len = max(len(el) for el in data[seq_col])
+
+    def _pretrain(self, train_data_loader, validation_data_loader, path: Path):
         pretrained_weights_path = PathBuilder.build(path) / 'pretrained_warmup_weights.yaml'
         best_val_loss = np.inf
 
@@ -276,20 +292,8 @@ class SimpleVAE(GenerativeModel):
         average_loss = sum(losses) / len(losses) if losses else float('inf')
         return average_loss
 
-    def encode_dataset(self, dataset, batch_size=None, shuffle=True):
-        seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
+    def encode_dataset(self, dataset, seq_col, batch_size=None, shuffle=True):
         data = dataset.data.topandas()[[seq_col, 'v_call', 'j_call']]
-        assert set(data[seq_col]) != {""}, (f"{SimpleVAE.__name__}: sequence column {seq_col} contained only "
-                                            f"empty sequences; region and sequence type were set to "
-                                            f"{self.region_type.to_string()} and {self.sequence_type.value}. "
-                                            f"This indicates something may have gone wrong with data import.")
-
-        if self.unique_v_genes is None:
-            self.unique_v_genes = sorted(list(set([el.split("*")[0] for el in data['v_call']])))
-        if self.unique_j_genes is None:
-            self.unique_j_genes = sorted(list(set([el.split("*")[0] for el in data['j_call']])))
-        if self.max_cdr3_len is None:
-            self.max_cdr3_len = max(len(el) for el in data[seq_col])
 
         encoded_v_genes = one_hot(
             torch.as_tensor([self.unique_v_genes.index(v_gene.split("*")[0]) for v_gene in data['v_call']],
