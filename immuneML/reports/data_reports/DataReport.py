@@ -15,6 +15,9 @@ class DataReport(Report):
     .. indent with spaces
     .. code-block:: yaml
 
+        definitions:
+            reports:
+                my_data_report: SequenceCountDistribution
         my_instruction:
             type: TrainMLModel
             selection:
