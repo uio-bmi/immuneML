@@ -32,6 +32,20 @@ def bnp_read_from_file(filename: Path, buffer_type: bnp.io.delimited_buffers.Del
     with bnp.open(str(filename), buffer_type=buffer_type) as file:
         return file.read()  # TODO: fix - throws error when empty file (no lines after header)
 
+def write_dataset_yaml(filename: Path, yaml_dict):
+    for mandatory_field in ["identifier", "dataset_type", "name", "labels"]:
+        assert mandatory_field in yaml_dict.keys(), f"Error exporting {filename.stem}: missing field {mandatory_field}"
+
+    if yaml_dict["dataset_type"] == "RepertoireDataset":
+        assert "metadata_file" in yaml_dict.keys(), f"Error exporting {filename.stem}: missing field metadata_file"
+
+    if yaml_dict["dataset_type"] in ("SequenceDataset", "ReceptorDataset"):
+        assert "filename" in yaml_dict.keys(), f"Error exporting {filename.stem}: missing field filename"
+        assert "type_dict_dynamic_fields" in yaml_dict.keys(), f"Error exporting {filename.stem}: missing field type_dict_dynamic_fields"
+
+    assert type(yaml_dict["labels"]) == dict or type(yaml_dict["labels"]) == None, "labels format must be dict or None"
+
+    write_yaml(filename, yaml_dict)
 
 def write_yaml(filename: Path, yaml_dict):
     with filename.open('w') as file:

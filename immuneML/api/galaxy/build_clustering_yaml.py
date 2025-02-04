@@ -6,7 +6,6 @@ from immuneML.api.galaxy.Util import Util
 from immuneML.data_model.bnp_util import write_yaml
 from immuneML.util.PathBuilder import PathBuilder
 
-
 from immuneML.ml_metrics.ClusteringMetric import INTERNAL_EVAL_METRICS, EXTERNAL_EVAL_METRICS
 
 
@@ -16,18 +15,20 @@ def build_labels(labels_str):
 
 
 def parse_command_line_arguments(args):
-    parser = argparse.ArgumentParser(description="Tool for building specification for applying previously trained ML models in Galaxy")
+    parser = argparse.ArgumentParser(
+        description="Tool for building specification for applying previously trained ML models in Galaxy")
 
-    parser.add_argument("-l", "--labels", type=str, default="", help="Which metadata labels should be predicted for the dataset (separated by comma).")
-    parser.add_argument("-e", "--eval_metrics", type=str, choices=INTERNAL_EVAL_METRICS+EXTERNAL_EVAL_METRICS, default=[], nargs="+",
+    parser.add_argument("-l", "--labels", type=str, default="",
+                        help="Which metadata labels should be predicted for the dataset (separated by comma).")
+    parser.add_argument("-e", "--eval_metrics", type=str, choices=INTERNAL_EVAL_METRICS + EXTERNAL_EVAL_METRICS,
+                        default=[], nargs="+",
                         help="External evaluation metrics to use for clustering, for these metrics, clusters are compared to a provided label.")
 
     parser.add_argument("-k", "--encoding_k", type=int, required=True, help="")
     parser.add_argument("-n", "--n_clusters", type=int, required=True, help="")
-    parser.add_argument("-d", "--dim_red_method", type=str, choices=["PCA", "UMAP", "TSNE", "None"], default="None",help="External evaluation metrics to use for clustering, for these metrics, clusters are compared to a provided label.")
+    parser.add_argument("-d", "--dim_red_method", type=str, choices=["PCA", "UMAP", "TSNE", "None"], default="None",
+                        help="External evaluation metrics to use for clustering, for these metrics, clusters are compared to a provided label.")
     parser.add_argument("-t", "--training_percentage", type=int, default=100)
-
-
 
     parser.add_argument("-o", "--output_path", required=True,
                         help="Output location for the generated yaml file (directory).")
@@ -47,7 +48,7 @@ def build_specs(parsed_args):
                 }
             },
             'reports': {
-                'dim_reduction': 'DimensionalityReduction',
+                'dim_reduction': {'DimensionalityReduction': {"dim_red_method": {}}}
             },
             'encodings': {
                 'kmer': {
@@ -61,6 +62,11 @@ def build_specs(parsed_args):
                     'KMeans': {
                         'n_clusters': parsed_args.n_clusters
                     }
+                },
+                "pca_2": {
+                    "PCA": {
+                        "n_components": 2
+                    }
                 }
             }
         },
@@ -70,7 +76,7 @@ def build_specs(parsed_args):
                 "dataset": "dataset",
                 'metrics': parsed_args.eval_metrics,
                 'clustering_settings': [
-                    {'encoding': 'kmer', 'method': 'kmeans'},
+                    {'encoding': 'kmer', "dim_reduction": "pca_2", 'method': 'kmeans'},
                 ],
                 'split_config': {
                     'split_strategy': 'random',
@@ -82,14 +88,21 @@ def build_specs(parsed_args):
 
     if parsed_args.labels != "":
         specs["instructions"]["clustering"]["labels"] = build_labels(parsed_args.labels)
+        specs['definitions']['reports']['dim_reduction']["DimensionalityReduction"]['label'] = (
+            specs)["instructions"]["clustering"]["labels"][0]
 
     if parsed_args.dim_red_method in ["PCA", "TSNE", "UMAP"]:
-        specs["definitions"]["ml_methods"][parsed_args.dim_red_method.lower()] = {parsed_args.dim_red_method: {"n_components": 2}}
-        specs["definitions"]["reports"] = {'dim_reduction': 'DimensionalityReduction'}
-        specs["instructions"]["clustering"]["clustering_settings"][0]["dim_reduction"] = parsed_args.dim_red_method.lower()
+        specs["definitions"]["ml_methods"][parsed_args.dim_red_method.lower()] = {
+            parsed_args.dim_red_method: {"n_components": 2}}
+        if parsed_args.dim_red_method == 'TSNE':
+            specs["definitions"]["ml_methods"][parsed_args.dim_red_method.lower()][parsed_args.dim_red_method]['init'] = "random"
+        specs["definitions"]["reports"]["dim_reduction"]["DimensionalityReduction"]["dim_red_method"] = {
+            parsed_args.dim_red_method.upper(): {"n_components": 2}
+        }
         specs["instructions"]["clustering"]["reports"] = ["dim_reduction"]
 
     return specs
+
 
 def main(args):
     parsed_args = parse_command_line_arguments(args)

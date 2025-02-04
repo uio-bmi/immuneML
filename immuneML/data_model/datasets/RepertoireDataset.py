@@ -10,7 +10,7 @@ import pandas as pd
 from immuneML import Constants
 from immuneML.data_model.EncodedData import EncodedData
 from immuneML.data_model.SequenceSet import Repertoire
-from immuneML.data_model.bnp_util import write_yaml
+from immuneML.data_model.bnp_util import write_yaml, write_dataset_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
@@ -44,15 +44,15 @@ class RepertoireDataset(Dataset):
         dataset.labels = {label: list(set(values)) for label, values in dataset.get_metadata(label_names).items()}
 
         dataset_file = PathBuilder.build(kwargs['path']) / 'dataset.yaml'
-        dataset_meta_content = cls.create_metadata_dict(type_dict={k: v for tmp_dict in [rep.metadata['type_dict_dynamic_fields']
-                                                                    for rep in kwargs['repertoires']]
-                                                                    for k, v in tmp_dict.items()},
-                                                        labels=dataset.labels,
+        dataset_meta_content = cls.create_metadata_dict(labels=dataset.labels,
                                                         identifier=dataset.identifier,
                                                         name=dataset.name,
                                                         metadata_file=str(metadata_path.name))
+                                                        #type_dict={k: v for tmp_dict in [rep.metadata['type_dict_dynamic_fields']
+                                                                    # for rep in kwargs['repertoires']]
+                                                                    # for k, v in tmp_dict.items()},
 
-        write_yaml(dataset_file, dataset_meta_content)
+        write_dataset_yaml(dataset_file, dataset_meta_content)
         dataset.dataset_file = dataset_file
 
         return dataset
@@ -82,12 +82,12 @@ class RepertoireDataset(Dataset):
         return RepertoireDataset(**{**kwargs, **{"repertoires": repertoires}})
 
     @classmethod
-    def create_metadata_dict(cls, metadata_file, type_dict, labels, identifier, name):
-         return {"metadata_file": metadata_file,
-                 "type_dict_dynamic_fields": type_dict,
-                 "labels": labels,
-                 'identifier': identifier,
+    def create_metadata_dict(cls, metadata_file, labels, name, identifier=None):
+         return {"metadata_file": Path(metadata_file).name,
+                 # "type_dict_dynamic_fields": type_dict,
+                 "labels": {} if labels is None else labels,
                  "name": name,
+                 "identifier": identifier if identifier is not None else uuid4().hex,
                  "dataset_type": cls.__name__,
                  "timestamp": datetime.now()}
 

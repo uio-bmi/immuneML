@@ -13,7 +13,7 @@ from bionumpy import AminoAcidEncoding
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet, AminoAcidXEncoding, DNANEncoding
 from immuneML.data_model.SequenceSet import Repertoire, build_dynamic_airr_sequence_set_dataclass
-from immuneML.data_model.bnp_util import bnp_write_to_file, write_yaml, read_yaml
+from immuneML.data_model.bnp_util import bnp_write_to_file, write_yaml, read_yaml, write_dataset_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset, ReceptorDataset, ElementDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
@@ -63,11 +63,48 @@ class DataImport(metaclass=abc.ABCMeta):
         return dataset
 
     def import_repertoire_dataset(self) -> RepertoireDataset:
+        if self.params.dataset_file is not None and self.params.dataset_file.is_file():
+            imported_dataset_yaml = read_yaml(self.params.dataset_file)
 
-        self.check_or_discover_metadata_file()
+            self.params.path = self.params.dataset_file.parent
 
+            if self.params.metadata_file is None:
+                self.params.metadata_file = self.params.dataset_file.parent / imported_dataset_yaml['metadata_file']
+
+            imported_identifier = imported_dataset_yaml['identifier']
+            imported_labels = imported_dataset_yaml['labels']
+
+            # type_dict = imported_dataset_yaml['type_dict']
+        else:
+            imported_labels = None
+            imported_identifier = None
+
+        metadata = self.import_repertoire_metadata(self.params.metadata_file)
+        repertoires = self.load_repertoires(metadata)
+        new_metadata_file = ImportHelper.make_new_metadata_file(repertoires, metadata, self.params.result_path, self.dataset_name)
+        # type_dict = self.determine_repertoire_type_dict(repertoires)
+        labels = self.determine_repertoire_dataset_labels(metadata, imported_labels=imported_labels)
+
+        dataset_filename = self.params.result_path / f"{self.dataset_name}.yaml"
+        dataset_yaml = RepertoireDataset.create_metadata_dict(metadata_file=new_metadata_file,
+                                                              # type_dict=type_dict,
+                                                              labels=labels,
+                                                              name=self.dataset_name,
+                                                              identifier=imported_identifier)
+        write_dataset_yaml(dataset_filename, dataset_yaml)
+
+        return RepertoireDataset(labels=labels,
+                                 repertoires=repertoires, metadata_file=new_metadata_file, name=self.dataset_name,
+                                 dataset_file=dataset_filename, identifier=dataset_yaml["identifier"])
+
+    def import_repertoire_metadata(self, metadata_file_path):
         try:
-            metadata = pd.read_csv(self.params.metadata_file, sep=",")
+            metadata = pd.read_csv(metadata_file_path, sep=",")
+            if "identifier" in metadata.columns:
+                assert len(list(metadata["identifier"])) == len(set(list(metadata["identifier"]))), \
+                    (f"DataImport: if the field 'identifier' is supplied, each repertoire must have "
+                     f"a unique identifier (found {len(set(list(metadata['identifier'])))} unique "
+                     f"identifiers for {len(list(metadata['identifier']))} repertoires).")
         except Exception as e:
             raise Exception(f"{e}\nAn error occurred while reading in the metadata file {self.params.metadata_file}. "
                             f"Please see the error log above for more details on this error and the documentation "
@@ -75,27 +112,45 @@ class DataImport(metaclass=abc.ABCMeta):
 
         ParameterValidator.assert_keys_present(metadata.columns.tolist(), ["filename"], self.__class__.__name__,
                                                f'{self.dataset_name}: params: metadata_file')
+        return metadata
 
+    def load_repertoires(self, metadata):
         PathBuilder.build(self.params.result_path / "repertoires/")
 
         with Pool(self.params.number_of_processes) as pool:
             repertoires = pool.map(self.load_repertoire_object, [row for _, row in metadata.iterrows()])
 
-        new_metadata_file = ImportHelper.make_new_metadata_file(repertoires, metadata, self.params.result_path,
-                                                                self.dataset_name)
+        return repertoires
 
-        potential_labels = list(set(metadata.columns.tolist()) - {"filename", 'type_dict_dynamic_fields'})
-        dataset_filename, dataset_file_content = self._make_dataset_file_for_repertoire_dataset(repertoires)
+    def determine_repertoire_type_dict(self, repertoires):
+        try:
+            if all(repertoires[0].metadata['type_dict_dynamic_fields'] == rep.metadata['type_dict_dynamic_fields'] for
+                   rep
+                   in repertoires[1:]):
+                return repertoires[0].metadata['type_dict_dynamic_fields']
+            else:
+                raise RuntimeError()
+        except Exception as e:
+            logging.warning(f'{DataImport.__name__}: dynamic fields for the dataset {self.dataset_name} could not be '
+                            f'extracted, some repertoires have different fields.')
+            return {}
 
-        if 'labels' in dataset_file_content and dataset_file_content['labels']:
-            if any(label not in potential_labels for label in dataset_file_content['labels']):
-                logging.warning(f"{DataImport.__name__}: {self.dataset_name}: an error occurred when importing "
-                                f"dataset. Labels specified in the dataset file could not be found in the repertoire "
+    def determine_repertoire_dataset_labels(self, metadata, imported_labels=None):
+        potential_label_names = list(set(metadata.columns.tolist()) - {"filename", "type_dict_dynamic_fields", "identifier", "subject_id"})
+        potential_labels = {key: list(set(metadata[key].values.tolist())) for key in potential_label_names}
+
+        if imported_labels is not None:
+            labels = imported_labels
+            if any(label not in potential_label_names for label in imported_labels):
+                logging.warning(f"{DataImport.__name__}: an error occurred when importing dataset {self.dataset_name}. "
+                                f"Labels specified in the dataset file ({imported_labels}) could not be found in the repertoire "
                                 f"fields. Proceeding with the following labels: {potential_labels}.")
+                labels = potential_labels
+        else:
+            labels = potential_labels
 
-        return RepertoireDataset(labels={key: list(set(metadata[key].values.tolist())) for key in potential_labels},
-                                 repertoires=repertoires, metadata_file=new_metadata_file, name=self.dataset_name,
-                                 dataset_file=dataset_filename)
+        return labels
+
 
     def import_element_dataset(self, dataset_class: Type, filter_func=None):
         if self.params.dataset_file is not None and self.params.dataset_file.is_file():
@@ -131,34 +186,6 @@ class DataImport(metaclass=abc.ABCMeta):
     def import_receptor_dataset(self) -> ReceptorDataset:
         return self.import_element_dataset(ReceptorDataset, ImportHelper.filter_illegal_receptors)
 
-    def check_or_discover_metadata_file(self):
-        if self.params.metadata_file is None and self.params.dataset_file and self.params.dataset_file.is_file():
-            dataset_metadata = read_yaml(self.params.dataset_file)
-            if 'metadata_file' in dataset_metadata:
-                self.params.metadata_file = self.params.dataset_file.parent / dataset_metadata['metadata_file']
-
-    def _make_dataset_file_for_repertoire_dataset(self, repertoires: List[Repertoire]) -> Tuple[Path, dict]:
-        dataset_filename = self.params.result_path / f"{self.dataset_name}.yaml"
-
-        metadata = read_yaml(self.params.dataset_file) if self.params.dataset_file else {}
-
-        metadata = {**{'dataset_name': self.dataset_name, 'example_count': len(repertoires)}, **metadata}
-
-        try:
-            if all(repertoires[0].metadata['type_dict_dynamic_fields'] == rep.metadata['type_dict_dynamic_fields'] for
-                   rep
-                   in repertoires[1:]):
-                metadata['type_dict_dynamic_fields'] = repertoires[0].metadata['type_dict_dynamic_fields']
-            else:
-                raise RuntimeError()
-        except Exception as e:
-            logging.warning(f'{DataImport.__name__}: dynamic fields for the dataset {self.dataset_name} could not be '
-                            f'extracted, some repertoires have different fields.')
-
-        write_yaml(dataset_filename, metadata)
-
-        return dataset_filename, metadata
-
     def _construct_element_dataset_data_dict(self, filenames, filter_func) -> dict:
         final_df = None
 
@@ -190,7 +217,7 @@ class DataImport(metaclass=abc.ABCMeta):
                                                            type_dict=type_dict,
                                                            name=self.dataset_name,
                                                            labels=possible_labels)
-        write_yaml(dataset_filename, metadata)
+        write_dataset_yaml(dataset_filename, metadata)
         return dataset_filename
 
     def load_repertoire_object(self, metadata_row: pd.Series) -> Repertoire:
@@ -202,9 +229,14 @@ class DataImport(metaclass=abc.ABCMeta):
             repertoire_inputs = {**{"metadata": metadata_row.to_dict(),
                                     "path": self.params.result_path / "repertoires/",
                                     "filename_base": filename.stem}, **dataframe.to_dict(orient='list')}
+
+            if "identifier" in metadata_row:
+                repertoire_inputs["identifier"] = metadata_row["identifier"]
+
             repertoire = Repertoire.build(**repertoire_inputs)
 
-            # assert repertoire.get_element_count() > 0, "resulting repertoire contains 0 sequences, please remove this repertoire from the dataset."
+            if repertoire.get_element_count() == 0:
+                logging.warning(f"Repertoire {repertoire.identifier} contains 0 sequences. It is recommended to remove this repertoire from the dataset. ")
 
             return repertoire
         except Exception as e:

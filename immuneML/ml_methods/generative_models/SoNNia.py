@@ -85,14 +85,12 @@ class SoNNia(GenerativeModel):
 
     def __init__(self, locus=None, batch_size: int = None, epochs: int = None, deep: bool = False, name: str = None,
                  default_model_name: str = None, n_gen_seqs: int = None, include_joint_genes: bool = True,
-                 custom_model_path: str = None, region_type: RegionType = RegionType.IMGT_CDR3):
-        if region_type is not None and isinstance(region_type, str):
-            region_type = RegionType[region_type]
+                 custom_model_path: str = None):
 
         if locus is not None:
-            super().__init__(locus, region_type=region_type)
+            super().__init__(locus, region_type=RegionType.IMGT_JUNCTION)
         elif default_model_name is not None:
-            super().__init__(locus=Chain.get_chain(default_model_name[-3:]), region_type=region_type)
+            super().__init__(locus=Chain.get_chain(default_model_name[-3:]), region_type=RegionType.IMGT_JUNCTION)
         self.epochs = epochs
         self.batch_size = int(batch_size)
         self.deep = deep
@@ -136,10 +134,12 @@ class SoNNia(GenerativeModel):
 
         gen_model = SequenceGeneration(self._model)
         sequences = gen_model.generate_sequences_post(count)
+
         return SequenceDataset.build_from_objects(sequences=[ReceptorSequence(sequence_aa=seq[0], sequence=seq[3],
                                                                               v_call=seq[1], j_call=seq[2],
                                                                               metadata={'gen_model_name': self.name})
                                                              for seq in sequences],
+                                                  region_type=RegionType.IMGT_JUNCTION,
                                                   path=PathBuilder.build(path), name='SoNNiaDataset',
                                                   labels={'gen_model_name': [self.name]})
 
@@ -163,10 +163,9 @@ class SoNNia(GenerativeModel):
         PathBuilder.build(path / 'model')
 
         write_yaml(path / 'model/model_overview.yaml', {'type': 'SoNNia', 'locus': self.locus.name,
-                                                        'region_type': self.region_type.name,
                                                         **{k: v for k, v in vars(self).items()
                                                            if
-                                                           k not in ['_model', 'locus', '_model_path', 'region_type']}}) # todo add 'dataset_type': 'SequenceDataset',
+                                                           k not in ['_model', 'locus', '_model_path', 'region_type']}})
         attributes_to_save = ['data_seqs', 'gen_seqs', 'log']
         self._model.save_model(path / 'model', attributes_to_save)
 

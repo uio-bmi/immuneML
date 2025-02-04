@@ -1,6 +1,7 @@
 import pandas as pd
 
 from immuneML.IO.dataset_import.DataImport import DataImport
+from immuneML.data_model.SequenceParams import RegionType
 from scripts.specification_util import update_docs_per_mapping
 
 
@@ -28,16 +29,22 @@ class MiXCRImport(DataImport):
 
     - import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
 
-    - region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as MiXCR uses IMGT junction as CDR3. Alternatively to importing the CDR3 sequence, other region types can be specified here as well. Valid values for region_type are defined in MiXCRImport.SEQUENCE_NAME_MAP.
+    - region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as MiXCR format contains the trailing and leading conserved amino acids in the CDR3. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
-    - column_mapping (dict): A mapping from MiXCR column names to immuneML's internal data representation. The columns that specify the sequences to import are handled by the region_type parameter. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the MiXCR file, or using alternative column names). Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS. For MiXCR, this is by default set to:
+    - column_mapping (dict): A mapping from MiXCR column names to immuneML's internal data representation. The columns that specify the sequences to import are handled by the region_type parameter. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the MiXCR file, or using alternative column names). Valid immuneML fields that can be specified here are defined by the AIRR standard (AIRRSequenceSet). For MiXCR, this is by default set to:
 
         .. indent with spaces
         .. code-block:: yaml
 
-                cloneCount: duplicate_count
-                allVHitsWithScore: v_call
-                allJHitsWithScore: j_call
+            cloneCount: duplicate_count
+            allVHitsWithScore: v_call
+            allJHitsWithScore: j_call
+            aaSeqCDR3: junction_aa
+            nSeqCDR3: junction
+            aaSeqCDR1: cdr1_aa
+            nSeqCDR1: cdr1
+            aaSeqCDR2: cdr2_aa
+            nSeqCDR2: cdr2
 
     - columns_to_load (list): Specifies which subset of columns must be loaded from the MiXCR file. By default, this is: [cloneCount, allVHitsWithScore, allJHitsWithScore, aaSeqCDR3, nSeqCDR3]
 
@@ -88,13 +95,15 @@ class MiXCRImport(DataImport):
     def get_documentation():
         doc = str(MiXCRImport.__doc__)
 
-        region_type_values = str([region_type.name for region_type in MiXCRImport.SEQUENCE_NAME_MAP.keys()])[1:-1].replace("'", "`")
+        region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
 
         mapping = {
-            "Valid values for region_type are defined in MiXCRImport.SEQUENCE_NAME_MAP.": f"Valid values are {region_type_values}.",
+            "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
+            "Valid immuneML fields that can be specified here are defined by the AIRR standard (AIRRSequenceSet)": f"Valid immuneML fields that can be specified here by `the AIRR Rearrangement Schema <https://docs.airr-community.org/en/latest/datarep/rearrangements.html>`_."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc
+
 
 
 def load_alleles(df: pd.DataFrame, column_name):

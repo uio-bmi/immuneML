@@ -74,7 +74,7 @@ def fit_and_apply_gen_model(gen_model):
                             10: 0.5
                         },
                         'sequence_count': 10,
-                        'region_type': 'IMGT_JUNCTION' if model_name not in ['SimpleVAE'] else 'IMGT_CDR3'
+                        'region_type': 'IMGT_JUNCTION'
                     }
                 }
             },

@@ -251,7 +251,7 @@ class SimpleLSTM(GenerativeModel):
         write_yaml(filename=model_path / 'model_overview.yaml',
                    yaml_dict={**{k: v for k, v in vars(self).items() if k not in skip_keys_for_export},
                               **{'type': self.__class__.__name__, 'region_type': self.region_type.name,
-                                 'sequence_type': self.sequence_type.name, 'locus': self.locus.name}}) # todo add 'dataset_type': 'SequenceDataset',
+                                 'sequence_type': self.sequence_type.name, 'locus': self.locus.name}})
 
         store_weights(self._model, model_path / 'state_dict.yaml')
 

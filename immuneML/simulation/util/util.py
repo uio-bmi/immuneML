@@ -301,7 +301,13 @@ def prepare_data_for_airr_seq_set(in_df: pd.DataFrame) -> pd.DataFrame:
         'sequence': region_type
     }).drop(columns=['frame_type', 'region_type'])
 
+    if "junction" in df.columns and "cdr3" not in df.columns:
+        df['cdr3'] = df.junction.str[3:-3]
+    if "junction_aa" in df.columns and "cdr3_aa" not in df.columns:
+        df['cdr3_aa'] = df.junction_aa.str[1:-1]
+
     df = make_full_airr_seq_set_df(df)
+
     return df
 
 

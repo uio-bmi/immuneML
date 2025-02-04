@@ -29,22 +29,33 @@ Alternatively to importing data from files, it is also possible to generate data
 see :ref:`How to generate a dataset with random sequences`.
 
 
-What should the metadata file look like?
+Dataset metadata (labels)
 ------------------------------------------
+In order to use a dataset for training ML classifiers, the metadata, which contains prediction :code:`labels`, needs to be available.
+For repertoire datasets, the metadata is supplied through a metadata file. The metadata file is a .csv file which contains
+one repertoire (filename) per row, and the metadata labels for that repertoire.
 
-The metadata file is a simple .csv file describing metadata fields for a repertoire dataset where each row corresponds to one repertoire.
-Metadata files are only used for repertoire datasets, for receptor and sequence datasets the metadata information should be defined as additional
-columns in the same file that contains the sequences.
+For sequence and receptor datasets the metadata should be available in the columns of the sequence data files. For example,
+VDJdb files contain columns named 'Epitope', 'Epitope gene' and 'Epitope species'. These columns can be specified to serve
+as metadata columns. immuneML attempts to import any additional columns for sequence- or receptor datasets as labels,
+but the import parameter :code:`label_columns` can be used to explicitly set the column names of labels to import
+(see the documentation of the respective import class for details).
 
-In case of repertoire datasets, each repertoire is represented by one file in the given format (e.g., AIRR/MiXCR/Adaptive).
-For all repertoires in one dataset, a single metadata file should be defined containing the following columns:
+
+What should the metadata file look like?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The metadata file is a simple .csv file describing each repertoire in the dataset, and its corresponding metadata labels.
+Note that *only the repertoire files that are present in the metadata file will be imported*.
+
+The format is as follows:
 
 .. image:: ../_static/images/metadata.png
 
-The columns :code:`filename` and :code:`subject_id` are mandatory. Other columns may be defined by the user.
-There are no restrictions as to what type of information these columns should represent, but typically they will represent
-diseases, HLA, age or sex. These columns can be used as a prediction target (also known as :code:`labels`) when training ML models.
-When writing a :ref:`YAML specification`, the :code:`labels` are defined by using the same name as the user-defined column(s) in the metadata file.
+The columns :code:`filename` and :code:`subject_id` are mandatory. The column :code:`identifier` is recommended to
+easily identify which results are associated with which repertoire. If no identifiers are supplied, random identifiers are generated.
+Any other columns may be defined by the user and will serve as repertoire :code:`labels`, such as for example disease state, HLA type, age or sex.
+These labels may be used as prediction targets of ML models, or as additional information when running specific analysis :ref:`Reports`.
 
 For an example of a metadata file, `see here the metadata file <https://ns9999k.webs.sigma2.no/10.11582_2021.00008/cmv_metadata.csv>`_ used to
 replicate the analysis by `Emerson et al. 2017 <https://doi.org/10.1038/ng.3822>`_.
@@ -53,18 +64,7 @@ replicate the analysis by `Emerson et al. 2017 <https://doi.org/10.1038/ng.3822>
 YAML specification for importing data from files
 -------------------------------------------------
 
-Data import must be defined as a part of the YAML specification. First, we choose a name which will be used to refer to the dataset in the subsequent analyses:
-
-.. indent with spaces
-.. code-block:: yaml
-
-  definitions:
-    datasets:
-      my_dataset: # this is the name of the dataset we will use in the YAML specification
-        ... # here, format and input parameters will be specified
-
-The name is defined by the user. It can consist of letters, numbers and underscores.
-
+Data import must be defined as a part of the YAML specification. The name is defined by the user. It can consist of letters, numbers and underscores.
 Under the dataset name key, the :code:`format` of the data must be specified, as well as additional parameters under a key named :code:`params`.
 Under :code:`format`, any of the formats listed under :ref:`Datasets` may be filled in. Under :code:`params`, the parameter :code:`path` is always
 required when importing data from files. All the files must be stored in a single folder, and this folder must set through the

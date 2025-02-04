@@ -3,14 +3,11 @@ import logging
 from dataclasses import field, dataclass
 from pathlib import Path
 from typing import Dict, List
-from uuid import uuid4
 
 import numpy as np
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
-from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
-from immuneML.data_model.bnp_util import merge_dataclass_objects, bnp_write_to_file, get_type_dict_from_bnp_object, \
-    write_yaml
+from immuneML.data_model.bnp_util import merge_dataclass_objects, bnp_write_to_file, write_dataset_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
@@ -77,7 +74,7 @@ class TrainGenModelInstruction(GenModelInstruction):
             my_train_gen_model_inst: # user-defined instruction name
                 type: TrainGenModel
                 dataset: d1 # defined previously under definitions/datasets
-                model: model1 # defined previously under definitions/ml_methods
+                method: model1 # defined previously under definitions/ml_methods
                 gen_examples_count: 100
                 number_of_processes: 4
                 training_percentage: 0.7
@@ -164,7 +161,7 @@ class TrainGenModelInstruction(GenModelInstruction):
                                              name=f'combined_{self.state.name}_dataset',
                                              labels={'gen_model_name': [self.method.name, ''], "from_gen_model": [True, False]})
 
-        write_yaml(path / f'combined_{self.state.name}_dataset.yaml', metadata_yaml)
+        write_dataset_yaml(path / f'combined_{self.state.name}_dataset.yaml', metadata_yaml)
 
         self.state.combined_dataset = SequenceDataset.build(
             metadata_filename=path / f'combined_{self.state.name}_dataset.yaml',

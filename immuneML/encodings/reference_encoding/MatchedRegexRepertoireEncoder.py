@@ -44,7 +44,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
          - v_gene (if match_v_genes == True)
         only for the motifs for which a regex was specified
         """
-        features = {"receptor_id": [], "locus_id": [], "locus": [], "regex": []}
+        features = {"regex_id": [], "locus_id": [], "locus": [], "regex": []}
 
         if self.match_v_genes:
             features["v_call"] = []
@@ -54,7 +54,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
                 regex = row[f"{chain_type}_regex"]
 
                 if regex is not None:
-                    features["receptor_id"].append(f"{row['id']}")
+                    features["regex_id"].append(f"{row['id']}")
                     features["locus_id"].append(f"{row['id']}_{chain_type}")
                     features["locus"].append(Chain.get_chain(chain_type).name.lower())
                     features["regex"].append(regex)

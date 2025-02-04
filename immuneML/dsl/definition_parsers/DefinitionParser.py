@@ -81,8 +81,7 @@ class DefinitionParser:
                                DocumentationFormat(LigoPWM, "PWM", DocumentationFormat.LEVELS[2]),
                                DocumentationFormat(Signal, "Signals", DocumentationFormat.LEVELS[1]),
                                DocumentationFormat(SimConfig, "Simulation config", DocumentationFormat.LEVELS[1]),
-                               DocumentationFormat(SimConfigItem, "Simulation config item",
-                                                   DocumentationFormat.LEVELS[2])]
+                               DocumentationFormat(SimConfigItem, "Simulation config item", DocumentationFormat.LEVELS[2])]
 
         file_path = path / "simulation.rst"
         with file_path.open("w") as file:
@@ -114,7 +113,7 @@ class DefinitionParser:
             subdir = DefaultParamsLoader.convert_to_snake_case(report_type_class.__name__) + "s"
 
             classes = ReflectionHandler.all_nonabstract_subclasses(report_type_class, "", f"reports/{subdir}/")
-            make_docs(path, classes, filename, "", "a")
+            make_docs(path, classes, filename, "", "a", format_level=DocumentationFormat.LEVELS[2])
 
     @staticmethod
     def make_ml_methods_docs(path: Path):
@@ -135,7 +134,7 @@ class DefinitionParser:
 
             classes = ReflectionHandler.all_nonabstract_subclasses(method['method_type'], "",
                                                                    f"ml_methods/{method['subdir']}/")
-            make_docs(path, classes, filename, "", "a")
+            make_docs(path, classes, filename, "", "a", format_level=DocumentationFormat.LEVELS[2])
 
     @staticmethod
     def make_preprocessing_docs(path: Path):

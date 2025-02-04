@@ -115,7 +115,8 @@ class Report(metaclass=abc.ABCMeta):
         except Exception as e:
             logging.exception(f"An exception occurred while generating report {self.name}. See the details below:")
             print_log(f"Report {self.name} encountered an error and could not be generated (error: {e}). See the log file for more info.", include_datetime=True)
-            return ReportResult(name=f"{self.name} (failed)", info="This report failed during execution, see the log file for more information.")
+            return ReportResult(name=f"{self.name} (failed)",
+                                info="This report failed during execution, see the log file for more information.")
 
     def _safe_plot(self, output_written=True, plot_callable="_plot", **kwargs):
         """

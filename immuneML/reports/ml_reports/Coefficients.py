@@ -38,7 +38,7 @@ class Coefficients(MLReport):
 
     Example output:
 
-    .. image:: _static/images/reports/coefficients_logistic_regression.png
+    .. image:: ../_static/images/reports/coefficients_logistic_regression.png
        :alt: Coefficients report
        :width: 650
 
