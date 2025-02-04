@@ -22,7 +22,8 @@ class RepertoireClonotypeSummary(DataReport):
 
     **Specification arguments:**
 
-    - color_by_label (str): name of the label to use to color the plot, e.g., could be disease label, or None
+    - label (str): name of the label to use to color the plot, e.g., could be disease label, or None
+    - split_by_label (bool): if True, the plot will be colored by the label specified in the label argument. Default is False.
 
     **YAML specification:**
 
@@ -33,7 +34,8 @@ class RepertoireClonotypeSummary(DataReport):
             reports:
                 my_clonotype_summary_rep:
                     RepertoireClonotypeSummary:
-                        color_by_label: celiac
+                        label: celiac
+                        split_by_label: true
 
     """
 
