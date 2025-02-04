@@ -100,7 +100,6 @@ td, th {
 }
 
 th {
-    border-bottom: 2px solid #009688;  /* accent-color */
     color: #2c3e50;  /* primary-color */
     font-weight: 600;
     white-space: nowrap;
@@ -121,12 +120,10 @@ tr:hover {
     margin: 1em 0;
     overflow-x: auto;
     background: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     padding: 0.75em;
     width: fit-content;
-    min-width: 50%;
     max-width: 100%;
+    min-width: 50%;
 }
 
 /* Prediction table specific styling */
@@ -134,8 +131,6 @@ tr:hover {
     max-height: 400px;
     overflow-y: auto;
     margin: 1em 0;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     background: white;
     width: fit-content;
     min-width: 50%;

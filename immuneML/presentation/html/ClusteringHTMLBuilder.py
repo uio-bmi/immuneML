@@ -81,7 +81,7 @@ class ClusteringHTMLBuilder:
                         formatted_report["output_tables"].append({
                             "name": table.name,
                             "path": os.path.relpath(table.path, base_path),
-                            "content": df.to_html(classes="table-container", index=False)
+                            "content": df.to_html(classes="table-container", justify='left', index=False)
                         })
                     except Exception as e:
                         print(f"Error processing table {table.name}: {e}")
@@ -165,7 +165,7 @@ class ClusteringHTMLBuilder:
         """Read and format predictions file for HTML display."""
         try:
             df = pd.read_csv(file_path)
-            return df.to_html(classes="prediction-table", max_rows=None, index=False)
+            return df.to_html(classes="prediction-table", max_rows=None, justify='left', index=False)
         except:
             return "Error loading predictions"
 
@@ -233,10 +233,10 @@ class ClusteringHTMLBuilder:
             result = {
                 "predictions_path": os.path.relpath(state.predictions_paths[split_id][analysis_type], base_path),
                 "internal_performance": internal_df.to_html(
-                    index=False, classes="table-container", float_format=lambda x: f"{x:.3f}"
+                    index=False, classes="table-container", float_format=lambda x: f"{x:.3f}", justify='left',
                 ) if internal_df is not None else None,
                 "external_performance": external_df.to_html(
-                    index=False, classes="table-container", float_format=lambda x: f"{x:.3f}"
+                    index=False, classes="table-container", float_format=lambda x: f"{x:.3f}", justify='left'
                 ) if external_df is not None else None,
                 "reports": {
                     "has_reports": bool(processed_reports),
@@ -257,7 +257,7 @@ class ClusteringHTMLBuilder:
     def _format_predictions(predictions) -> str:
         """Format predictions for HTML display."""
         df = pd.DataFrame({"cluster": predictions})
-        return df.to_html(classes="prediction-table", max_rows=10, show_dimensions=True, index=False)
+        return df.to_html(classes="prediction-table", justify='left', max_rows=10, show_dimensions=True, index=False)
 
     @staticmethod
     def make_external_performance_tables(state: ClusteringState, analysis_desc: str, split_id: int) -> List[dict]:

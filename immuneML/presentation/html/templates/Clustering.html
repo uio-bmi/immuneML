@@ -48,8 +48,6 @@
             margin: 1em 0;
             overflow-x: auto;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             padding: 0.75em;
             width: fit-content;
             min-width: 50%;
@@ -68,7 +66,6 @@
         .table-container th {
             padding: 0.5em 0.75em;
             text-align: left;
-            border-bottom: 2px solid var(--accent-color);
             color: var(--primary-color);
             font-weight: 600;
             white-space: nowrap;
@@ -327,7 +324,6 @@
                     {{{performance.internal.result_based}}}
                 </div>
                     {{/has_result_based}}
-                </div>
                 {{/performance.internal.show}}
 
                 {{#performance.external.show}}
@@ -374,7 +370,6 @@
                 </ul>
             </div>
             {{/splits}}
-        </div>
     </div>
 </body>
 </html>

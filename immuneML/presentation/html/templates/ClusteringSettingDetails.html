@@ -27,7 +27,8 @@
         }
         
         h1 { font-size: 2em; }
-        h2 { font-size: 1.75em; }
+        h2 { font-size: 1.75em;
+            border-bottom: 1px solid teal;}
         h3 { font-size: 1.5em; }
         h4 { font-size: 1.25em; }
         h5 { font-size: 1.1em; }
@@ -88,18 +89,7 @@
             padding: 0.75em;
             border-bottom: 1px solid var(--border-color);
         }
-        
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2em;
-            margin: 1em 0;
-        }
-        
-        .grid-item-full-width {
-            grid-column: 1 / -1;
-        }
-        
+
         img, embed {
             max-width: 100%;
             margin: 1em 0;
@@ -142,8 +132,8 @@
         .section {
             margin: 2em 0;
             padding: 1em;
-            background: var(--background-color);
             border-radius: 4px;
+            border: 1px solid teal;
         }
 
         .report-section {
@@ -151,47 +141,8 @@
             padding: 1em;
             background: white;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        .figure-container {
-            margin: 1.5em 0;
-            text-align: center;
-        }
-
-        .report-figure {
-            max-width: 100%;
-            height: auto;
-            margin: 0 auto;
-            display: block;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .figure-caption {
-            margin-top: 0.5em;
-            color: var(--secondary-color);
-            font-style: italic;
-        }
-
-        .report-download {
-            margin: 0.5em 0;
-        }
-
-        .download-link {
-            display: inline-block;
-            padding: 0.4em 0.8em;
-            background: var(--background-color);
-            color: var(--text-color);
-            text-decoration: none;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-
-        .download-link:hover {
-            background: var(--accent-color);
-            color: white;
-        }
     </style>
 </head>
 <body>
