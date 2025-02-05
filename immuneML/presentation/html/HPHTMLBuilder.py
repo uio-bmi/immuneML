@@ -274,6 +274,21 @@ class HPHTMLBuilder:
         return mapping
 
     @staticmethod
+    def _process_report_tables(report_result, base_path: Path) -> list:
+        """Process table outputs from a report result into a format suitable for HTML display"""
+        tables = []
+        if hasattr(report_result, "output_tables") and report_result.output_tables:
+            for table in report_result.output_tables:
+                table_path = Path(os.path.relpath(path=str(table.path), start=str(base_path)))
+                table_data = {
+                    "name": table.name if hasattr(table, "name") else None,
+                    "path": str(table_path),
+                    "table": Util.get_table_string_from_csv(table.path) if table.path.suffix == '.csv' else None
+                }
+                tables.append(table_data)
+        return tables
+
+    @staticmethod
     def _make_main_html_map(state: TrainMLModelState, base_path: Path) -> dict:
         html_map = {**Util.make_dataset_html_map(state.dataset), **{
             "css_style": Util.get_css_content(HPHTMLBuilder.CSS_PATH),
@@ -286,7 +301,12 @@ class HPHTMLBuilder:
             "assessment_desc": state.assessment,
             "selection_desc": state.selection,
             "show_hp_reports": bool(state.report_results),
-            'hp_reports': Util.to_dict_recursive(state.report_results, base_path) if state.report_results else None,
+            'hp_reports': [{
+                "name": report.name,
+                "info": report.info if hasattr(report, "info") else None,
+                "output_figures": Util.to_dict_recursive(report.output_figures, base_path) if hasattr(report, "output_figures") else None,
+                "output_tables": HPHTMLBuilder._process_report_tables(report, base_path) if hasattr(report, "output_tables") else None
+            } for report in state.report_results] if state.report_results else None,
             "hp_per_label": HPHTMLBuilder._make_hp_per_label(state),
             'models_per_label': HPHTMLBuilder._make_model_per_label(state, base_path),
             'immuneML_version': MLUtil.get_immuneML_version()

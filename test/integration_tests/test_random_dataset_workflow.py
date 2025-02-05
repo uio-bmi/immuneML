@@ -29,6 +29,10 @@ class TestRandomDatasetWorkflow(TestCase):
                                 "cmv": {
                                     True: 0.5,
                                     False: 0.5
+                                },
+                                "batch": {
+                                    'b1': 0.4,
+                                    'b2': 0.6
                                 }
                             }
                         }
@@ -52,6 +56,16 @@ class TestRandomDatasetWorkflow(TestCase):
                         }
                     }
                 },
+                "reports": {
+                    "rep1": {
+                        "PerformancePerLabel": {
+                            'alternative_label': 'batch',
+                            'metric': 'balanced_accuracy',
+                            'compute_for_selection': True,
+                            'compute_for_assessment': True
+                        }
+                    }
+                }
 
             },
             "instructions": {
@@ -77,7 +91,7 @@ class TestRandomDatasetWorkflow(TestCase):
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
                     "number_of_processes": 4,
-                    "reports": None,
+                    "reports": ['rep1'],
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False,
                 }
@@ -103,15 +117,27 @@ class TestRandomDatasetWorkflow(TestCase):
                                 "cmv_epitope": {
                                     True: 0.5,
                                     False: 0.5
+                                },
+                                "batch": {
+                                    'b1': 0.4,
+                                    'b2': 0.6
                                 }
                             }
                         }
                     }
                 },
                 "encodings": {
-                    "kmer_freq": {
+                    "3mer_freq": {
                         "KmerFrequency": {
                             "k": 3,
+                            "sequence_encoding": "continuous_kmer",
+                            "normalization_type": "relative_frequency",
+                            "reads": "unique"
+                        }
+                    },
+                    "4mer_freq": {
+                        "KmerFrequency": {
+                            "k": 4,
                             "sequence_encoding": "continuous_kmer",
                             "normalization_type": "relative_frequency",
                             "reads": "unique"
@@ -126,6 +152,16 @@ class TestRandomDatasetWorkflow(TestCase):
                         }
                     }
                 },
+                "reports": {
+                    "rep1": {
+                        "PerformancePerLabel": {
+                            'alternative_label': 'batch',
+                            'metric': 'balanced_accuracy',
+                            'compute_for_selection': True,
+                            'compute_for_assessment': True
+                        }
+                    }
+                }
 
             },
             "instructions": {
@@ -133,18 +169,22 @@ class TestRandomDatasetWorkflow(TestCase):
                     "type": "TrainMLModel",
                     "settings": [
                         {
-                            "encoding": "kmer_freq",
+                            "encoding": "3mer_freq",
+                            "ml_method": "logistic_regression"
+                        },
+                        {
+                            "encoding": "4mer_freq",
                             "ml_method": "logistic_regression"
                         }
                     ],
                     "assessment": {
                         "split_strategy": "random",
-                        "split_count": 1,
+                        "split_count": 3,
                         "training_percentage": 0.7,
                     },
                     "selection": {
                         "split_strategy": "random",
-                        "split_count": 1,
+                        "split_count": 3,
                         "training_percentage": 0.7,
                     },
                     "labels": ["cmv_epitope"],
@@ -152,7 +192,7 @@ class TestRandomDatasetWorkflow(TestCase):
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
                     "number_of_processes": 4,
-                    "reports": None,
+                    "reports": ['rep1'],
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False
                 }
