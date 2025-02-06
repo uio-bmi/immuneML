@@ -8,7 +8,6 @@ from immuneML.caching.CacheObjectType import CacheObjectType
 from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
-from immuneML.util.Logger import log
 
 
 class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):

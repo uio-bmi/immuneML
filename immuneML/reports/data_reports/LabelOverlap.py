@@ -1,15 +1,14 @@
 import logging
 from pathlib import Path
+
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
-import numpy as np
 
 from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.util.ParameterValidator import ParameterValidator
-from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -86,10 +85,7 @@ class LabelOverlap(DataReport):
             title=f"Label Overlap: {self.row_label} vs {self.column_label}",
             xaxis_title=self.column_label,
             yaxis_title=self.row_label,
-            xaxis_tickangle=-45,
             template="plotly_white",
-            width=800,
-            height=600,
             font=dict(size=12)
         )
 

@@ -160,6 +160,12 @@ class TestRandomDatasetWorkflow(TestCase):
                             'compute_for_selection': True,
                             'compute_for_assessment': True
                         }
+                    },
+                    'lbl': {
+                        "LabelOverlap": {
+                            'column_label': 'cmv_epitope',
+                            'row_label': 'batch'
+                        }
                     }
                 }
 
@@ -181,6 +187,9 @@ class TestRandomDatasetWorkflow(TestCase):
                         "split_strategy": "random",
                         "split_count": 3,
                         "training_percentage": 0.7,
+                        "reports": {
+                            'data_splits': ['lbl']
+                        }
                     },
                     "selection": {
                         "split_strategy": "random",
