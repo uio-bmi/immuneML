@@ -4,7 +4,6 @@ from unittest import TestCase
 
 import pandas as pd
 
-from immuneML.analysis.criteria_matches.DataType import DataType
 from immuneML.analysis.criteria_matches.OperationType import OperationType
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
@@ -35,10 +34,7 @@ class TestMetadataRepertoireFilter(TestCase):
         dataset1 = MetadataFilter(**{
             "criteria": {
                 "type": OperationType.GREATER_THAN.name,
-                "value": {
-                    "type": DataType.COLUMN.name,
-                    "name": "key2"
-                },
+                "column": "key2",
                 "threshold": 1
             },
             "result_path": path
@@ -49,11 +45,8 @@ class TestMetadataRepertoireFilter(TestCase):
         dataset1 = MetadataFilter(**{
             'criteria': {
                 'type': OperationType.IN.name,
-                'allowed_values': [1],
-                'value': {
-                    'type': DataType.COLUMN.name,
-                    'name': 'key2'
-                }
+                'values': [1],
+                'column': 'key2'
             }
         }).process_dataset(dataset, path / 'ex2')
 
