@@ -20,14 +20,14 @@ from immuneML.util.ReflectionHandler import ReflectionHandler
 
 class ImmuneMLApp:
 
-    def __init__(self, specification_path: Path, result_path: Path):
+    def __init__(self, specification_path: Path, result_path: Path, logging_level: str = 'INFO'):
 
         self._specification_path = Path(specification_path)
         self._result_path = Path(os.path.relpath(result_path))
 
         PathBuilder.build(self._result_path)
 
-        logging.basicConfig(filename=Path(self._result_path) / "log.txt", level=logging.INFO,
+        logging.basicConfig(filename=Path(self._result_path) / "log.txt", level=getattr(logging, logging_level.upper()),
                             format='%(asctime)s %(levelname)s: %(message)s', force=True)
 
         self._cache_path = self._result_path / "cache"
@@ -81,7 +81,7 @@ def run_immuneML(namespace: argparse.Namespace):
     PathBuilder.build(result_path)
 
     if namespace.tool is None:
-        app = ImmuneMLApp(namespace.specification_path, result_path)
+        app = ImmuneMLApp(namespace.specification_path, result_path, namespace.logging)
     else:
         app_cls = ReflectionHandler.get_class_by_name(namespace.tool, "api/")
         app = app_cls(**vars(namespace))
@@ -97,6 +97,8 @@ def main():
     parser.add_argument("--tool", help="Name of the tool which calls immuneML. This name will be used to invoke "
                                        "appropriate API call, which will then do additional work in tool-dependent "
                                        "way before running standard immuneML.")
+    parser.add_argument('--logging', help='Logging level to use',
+                        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], default='INFO')
     parser.add_argument("--version", action="version", version=Constants.VERSION)
 
     namespace = parser.parse_args()

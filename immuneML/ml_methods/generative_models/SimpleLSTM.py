@@ -237,7 +237,13 @@ class SimpleLSTM(GenerativeModel):
                 output, state = self._model(inp, state)
                 
                 output_dist = output[0, 0].div(self.temperature).exp()
-                top_i = torch.multinomial(output_dist, 1)[0].item()
+                try:
+                    top_i = torch.multinomial(output_dist, 1)[0].item()
+                except RuntimeError as e:
+                    logging.warning(f"{SimpleLSTM.__name__}: error while generating sequence: {e}; "
+                                    f"choosing top character instead of sampling from multinomial distribution.")
+                    logging.debug(f"{SimpleLSTM.__name__}: {output_dist}\n")
+                    top_i = output_dist.argmax().item()
 
                 predicted_char = self.index_to_letter[top_i]
                 predicted += predicted_char
