@@ -143,7 +143,7 @@ class PWM(GenerativeModel):
     def _export_gen_dataset(self, sequences: List[str], path: Path) -> SequenceDataset:
         count = len(sequences)
         df = pd.DataFrame({get_sequence_field_name(self.region_type, self.sequence_type): sequences,
-                           'locus': [self.locus for _ in range(count)],
+                           'locus': [self.locus.to_string() for _ in range(count)],
                            'gen_model_name': [self.name for _ in range(count)]})
 
         df = make_full_airr_seq_set_df(df)

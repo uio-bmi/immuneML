@@ -88,7 +88,7 @@ class SoNNia(GenerativeModel):
                  custom_model_path: str = None):
 
         if locus is not None:
-            super().__init__(locus, region_type=RegionType.IMGT_JUNCTION)
+            super().__init__(Chain.get_chain(str(locus)), region_type=RegionType.IMGT_JUNCTION)
         elif default_model_name is not None:
             super().__init__(locus=Chain.get_chain(default_model_name[-3:]), region_type=RegionType.IMGT_JUNCTION)
         self.epochs = epochs
@@ -137,6 +137,7 @@ class SoNNia(GenerativeModel):
 
         return SequenceDataset.build_from_objects(sequences=[ReceptorSequence(sequence_aa=seq[0], sequence=seq[3],
                                                                               v_call=seq[1], j_call=seq[2],
+                                                                              locus=self.locus.to_string(),
                                                                               metadata={'gen_model_name': self.name})
                                                              for seq in sequences],
                                                   region_type=RegionType.IMGT_JUNCTION,

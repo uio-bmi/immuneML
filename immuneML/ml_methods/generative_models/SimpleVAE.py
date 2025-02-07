@@ -343,7 +343,7 @@ class SimpleVAE(GenerativeModel):
                 self.sequence_type.value: ''.join(seq_content).replace(Constants.GAP_LETTER, ''),
                 'v_call': self.unique_v_genes[Categorical(v_genes[i]).sample()],
                 'j_call': self.unique_j_genes[Categorical(j_genes[i]).sample()],
-                'locus': self.locus,
+                'locus': self.locus.to_string(),
                 'metadata': {'gen_model_name': self.name if self.name else "SimpleVAE"}
             })
 

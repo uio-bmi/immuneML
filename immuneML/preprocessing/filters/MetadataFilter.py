@@ -5,18 +5,19 @@ import pandas as pd
 
 from immuneML.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
 from immuneML.analysis.criteria_matches.CriteriaTypeInstantiator import CriteriaTypeInstantiator
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.preprocessing.filters.Filter import Filter
+from immuneML.util.PathBuilder import PathBuilder
 
 
-class MetadataRepertoireFilter(Filter):
+class MetadataFilter(Filter):
     """
-    Removes repertoires from a RepertoireDataset based on information stored in the metadata_file.
-    Note that this filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
+    Removes examples from a dataset based on the examples' metadata. It works for any dataset type. Note that
+    for repertoire datasets, this means that repertoires will be filtered out, and for sequences datasets - sequences.
 
-    Since this filter changes the number of repertoires (examples for the machine learning task), it cannot be used with
-    :ref:`TrainMLModel` instruction. To filter out repertoires, use preprocessing from the :ref:`DatasetExport` instruction that will create
-    a new dataset ready to be used for training machine learning models.
+    Since this filter changes the number of examples, it cannot be used with
+    :ref:`TrainMLModel` instruction. Use with DatasetExport instruction instead.
 
     **Specification arguments:**
 
@@ -32,12 +33,20 @@ class MetadataRepertoireFilter(Filter):
             my_preprocessing:
                 - my_filter:
                     # Example filter that keeps repertoires with values greater than 1 in the "my_column_name" column of the metadata_file
-                    MetadataRepertoireFilter:
+                    MetadataFilter:
                         type: GREATER_THAN
                         value:
                             type: COLUMN
                             name: my_column_name
                         threshold: 1
+            my_second_preprocessing:
+                - my_filter2: # only examples which in column "label" have values 'label_val1' or 'label_val2' are kept
+                    MetadataFilter:
+                        type: IN
+                        allowed_values: ['label_val1', 'label_val2']
+                        value:
+                            type: COLUMN
+                            name: label
 
     """
 
@@ -48,22 +57,14 @@ class MetadataRepertoireFilter(Filter):
     def keeps_example_count(self) -> bool:
         return False
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1):
-        self.check_dataset_type(dataset, [RepertoireDataset], "MetadataRepertoireFilter")
+    def process_dataset(self, dataset: Dataset, result_path: Path, number_of_processes=1):
         self.result_path = result_path if result_path is not None else self.result_path
+        PathBuilder.build(self.result_path)
+        indices = self._get_matching_indices(dataset)
+        return dataset.make_subset(indices, self.result_path, "filtered")
 
-        processed_dataset = dataset.clone()
-        original_repertoires = processed_dataset.get_data()
-        indices = self._get_matching_indices(processed_dataset)
-        processed_dataset.repertoires = [original_repertoires[i] for i in indices]
-        processed_dataset.metadata_file = self._build_new_metadata(dataset, indices)
-
-        self.check_dataset_not_empty(processed_dataset, "MetadataRepertoireFilter")
-
-        return processed_dataset
-
-    def _get_matching_indices(self, dataset: RepertoireDataset):
-        metadata = pd.DataFrame(dataset.get_metadata(None))
+    def _get_matching_indices(self, dataset: Dataset):
+        metadata = dataset.get_metadata(None, True)
         matches = CriteriaMatcher().match(self.criteria, metadata)
         indices = np.where(matches)[0]
         return indices
