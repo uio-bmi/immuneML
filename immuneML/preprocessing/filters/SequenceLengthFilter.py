@@ -83,7 +83,7 @@ class SequenceLengthFilter(Filter):
 
         elif isinstance(dataset, SequenceDataset):
             indices_to_keep = self._get_indices_to_keep(dataset.data)
-            os.makedirs(result_path, exist_ok=True)     # breaks if dir not created
+            os.makedirs(result_path, exist_ok=True)
             return dataset.make_subset(example_indices=indices_to_keep, path=result_path, dataset_type="SequenceDataset")
 
     def _process_repertoire(self, repertoire: Repertoire, result_path: Path) -> Repertoire:
