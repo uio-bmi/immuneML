@@ -1,4 +1,5 @@
 import abc
+import logging
 import os
 import warnings
 import inspect
@@ -109,14 +110,14 @@ class SklearnMethod(MLMethod):
 
             return {self.label.name: {class_name: probabilities[:, i] for i, class_name in enumerate(class_names)}}
         else:
-            warnings.warn(f"{self.__class__.__name__}: cannot predict probabilities.")
+            logging.warning(f"{self.__class__.__name__}: cannot predict probabilities.")
             return None
 
     def _fit_model(self, X, y, w=None, cores_for_training: int = 1):
         self.model = self._get_ml_model(cores_for_training, X)
 
         if w is not None and not self._check_method_supports_example_weight(self.model.fit) and not self._check_method_supports_example_weight(self.model.predict):
-            warnings.warn(f"{self.__class__.__name__}: cannot fit this classifier with example weights, fitting without example weights instead... Example weights will still be applied when computing evaluation metrics after fitting.")
+            logging.warning(f"{self.__class__.__name__}: cannot fit this classifier with example weights, fitting without example weights instead... Example weights will still be applied when computing evaluation metrics after fitting.")
 
         if not self.show_warnings:
             warnings.simplefilter("ignore")
@@ -167,7 +168,7 @@ class SklearnMethod(MLMethod):
 
         if scoring not in get_scorer_names():
             scoring = "balanced_accuracy"
-            warnings.warn(
+            logging.warning(
                 f"{self.__class__.__name__}: specified optimization metric ({self.optimization_metric}) is not defined as a sklearn scoring function, using {scoring} instead... ")
 
         if not self.show_warnings:

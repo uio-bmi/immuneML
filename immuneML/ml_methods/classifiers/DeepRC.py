@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import warnings
 from pathlib import Path
 
@@ -353,7 +354,7 @@ class DeepRC(MLMethod):
     def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None,
                                 cores_for_training: int = -1,
                                 optimization_metric=None):
-        warnings.warn("DeepRC: cross-validation on this classifier is not defined: fitting one model instead...")
+        logging.warning("DeepRC: cross-validation on this classifier is not defined: fitting one model instead...")
         self.fit(encoded_data, label)
 
     def get_params(self):

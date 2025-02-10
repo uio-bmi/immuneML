@@ -1,3 +1,4 @@
+import logging
 import warnings
 from pathlib import Path
 from collections import Counter
@@ -365,19 +366,22 @@ class VJGeneDistribution(DataReport):
         if self.split_by_label:
             if self.label_name is None:
                 if len(self.dataset.get_label_names()) != 1:
-                    warnings.warn(
-                        f"{VJGeneDistribution.__name__}: ambiguous label: split_by_label was set to True but no label name was specified, and the number of available labels is {len(self.dataset.get_label_names())}: {self.dataset.get_label_names()}. Skipping this report...")
+                    logging.warning(
+                        f"{VJGeneDistribution.__name__}: ambiguous label: split_by_label was set to True but no label "
+                        f"name was specified, and the number of available labels is "
+                        f"{len(self.dataset.get_label_names())}: {self.dataset.get_label_names()}. Skipping this "
+                        f"report...")
                     return False
             else:
                 if not self.is_sequence_label and self.label_name not in self.dataset.get_label_names():
-                    warnings.warn(f"{VJGeneDistribution.__name__}: the specified label name ({self.label_name}) was not available among the dataset labels: {self.dataset.get_label_names()}. If this is a sequence label, please set is_sequence_label to True. Skipping this report...")
+                    logging.warning(f"{VJGeneDistribution.__name__}: the specified label name ({self.label_name}) was not available among the dataset labels: {self.dataset.get_label_names()}. If this is a sequence label, please set is_sequence_label to True. Skipping this report...")
                     return False
 
         if isinstance(self.dataset, ReceptorDataset) or isinstance(self.dataset, SequenceDataset):
             try:
                 self.dataset.data.topandas()[["v_call", "j_call", "locus"]]
             except AttributeError as e:
-                warnings.warn(
+                logging.warning(
                     f"{VJGeneDistribution.__name__}: the following attributes were expected to be present in the "
                     f"dataset: v_call, j_call, locus. The following error occurred when attempting to get these "
                     f"attributes: {e} Skipping this report...")
