@@ -163,23 +163,6 @@
             color: white;
         }
         
-        details {
-            margin: 1em 0;
-        }
-        
-        summary {
-            cursor: pointer;
-            padding: 0.5em;
-            background-color: var(--background-color);
-            border-radius: 4px;
-            color: var(--primary-color);
-            font-weight: 500;
-        }
-        
-        summary:hover {
-            background-color: var(--border-color);
-        }
-        
         .results-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -225,15 +208,15 @@
             {{#clustering_reports.has_reports}}
             <h2>Clustering Analysis Reports</h2>
             {{#clustering_reports.reports}}
+            <details><summary>{{ name }}</summary>
             <div class="report-section">
-                <h3>{{name}}</h3>
                 {{#info}}<p>{{info}}</p>{{/info}}
 
                 {{#output_figures}}
                 <div class="figure-container">
                     <h4>{{name}}</h4>
                     {{#is_embed}}
-                    <iframe src="{{path}}" width="100%" height="600px" frameborder="0"></iframe>
+                    <iframe src="{{path}}" width="100%" height="600px"></iframe>
                     {{/is_embed}}
                     {{^is_embed}}
                     <img src="{{path}}" alt="{{name}}">
@@ -243,11 +226,16 @@
 
                 {{#output_tables}}
                 <div class="table-section">
-                <h4>{{name}}</h4>
-                <a href="{{path}}">Download CSV</a>
-                <div class="table-container">
-                    {{{content}}}
-                </div>
+                    <details>
+                        <summary>
+                            <h4 style="display: inline;">{{name}}</h4>
+                            <span class="table-preview">(click to expand/collapse)</span>
+                        </summary>
+                        <div class="scrollable-table">
+                            <a href="{{download_link}}" download>Download {{file_name}}</a>
+                            {{{table}}}
+                        </div>
+                    </details>
                 </div>
                 {{/output_tables}}
 
@@ -258,8 +246,8 @@
                 </div>
                 {{/output_text}}
             </div>
+            </details>
             {{/clustering_reports.reports}}
-            </div>
             {{/clustering_reports.has_reports}}
 
             <h2>Results by Split</h2>

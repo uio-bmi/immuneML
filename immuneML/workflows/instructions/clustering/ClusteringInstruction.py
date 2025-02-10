@@ -15,7 +15,8 @@ from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
 from immuneML.workflows.instructions.clustering.ClusteringReportHandler import ClusteringReportHandler
 from immuneML.workflows.instructions.clustering.ClusteringRunner import ClusteringRunner
-from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringConfig, ClusteringState
+from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringConfig, ClusteringState, \
+    ClusteringResultPerRun
 from immuneML.workflows.instructions.clustering.ValidationHandler import ValidationHandler
 from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringSetting
 
@@ -138,7 +139,6 @@ class ClusteringInstruction(Instruction):
     def run(self, result_path: Path):
         """Execute the clustering instruction workflow."""
         self._setup_paths(result_path)
-        self._init_result_structure()
         self._split_dataset()
 
         for run_id in range(self.state.config.split_config.split_count):
@@ -173,7 +173,8 @@ class ClusteringInstruction(Instruction):
         clustering_items, predictions_df = self.cl_runner.run_all_settings(dataset, analysis_desc, path, run_id, predictions_df, self.state)
 
         predictions_df.to_csv(self.state.predictions_paths[run_id][analysis_desc], index=False)
-        self.state.clustering_items[run_id][analysis_desc] = clustering_items
+        cl_result = ClusteringResultPerRun(run_id, analysis_desc, clustering_items)
+        self.state.add_cl_result_per_run(run_id, analysis_desc, cl_result)
 
     def _split_dataset(self):
         self.state.discovery_datasets, self.state.validation_datasets = HPUtil.split_data(
@@ -201,11 +202,3 @@ class ClusteringInstruction(Instruction):
         predictions_df['example_id'] = dataset.get_example_ids()
 
         return predictions_df
-
-    def _init_result_structure(self):
-        self.state.cl_item_report_results = [{analysis_desc: {
-            cl_setting.get_key(): {'encoding': []} for cl_setting in self.state.config.clustering_settings
-        } for analysis_desc in ['discovery', 'method_based_validation', 'result_based_validation']}
-            for _ in range(self.state.config.split_config.split_count)]
-
-        self.state.clustering_items = [{} for _ in range(self.state.config.split_config.split_count)]

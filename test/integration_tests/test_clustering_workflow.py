@@ -57,7 +57,12 @@ def test_clustering_workflow():
                 'stability':
                     {'ClusteringStabilityReport': {
                         'metric': 'adjusted_rand_score'
-                    }}
+                    }},
+                'external_labels_summary': {
+                    'ExternalLabelClusterSummary': {
+                        'external_labels': ['epitope']
+                    }
+                }
             }
         },
         'instructions': {
@@ -76,7 +81,7 @@ def test_clustering_workflow():
                     'training_percentage': 0.5,
                     "split_count": 2
                 },
-                'reports': ['rep1', 'stability'],
+                'reports': ['rep1', 'stability', 'external_labels_summary'],
                 'number_of_processes': 4,
                 'validation_type': ['result_based', 'method_based']
             }
@@ -87,4 +92,4 @@ def test_clustering_workflow():
 
     ImmuneMLApp(path / 'specs.yaml', path / 'output').run()
 
-    shutil.rmtree(path)
+    # shutil.rmtree(path)

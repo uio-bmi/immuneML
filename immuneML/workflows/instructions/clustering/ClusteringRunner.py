@@ -13,7 +13,8 @@ from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.ml_metrics.ClusteringMetric import is_external, is_internal
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.clustering.ClusteringReportHandler import ClusteringReportHandler
-from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringConfig, ClusteringState
+from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringConfig, ClusteringState, \
+    ClusteringItemResult
 from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringItem, DataFrameWrapper, \
     ClusteringSetting
 from immuneML.workflows.steps.DataEncoder import DataEncoder
@@ -40,12 +41,13 @@ class ClusteringRunner:
         return clustering_items, predictions_df
 
     def run_setting(self, dataset: Dataset, cl_setting: ClusteringSetting, analysis_desc: str, path: Path,
-                    run_id: int, predictions_df: pd.DataFrame, state: ClusteringState) -> Tuple[ClusteringItem, pd.DataFrame]:
+                    run_id: int, predictions_df: pd.DataFrame, state: ClusteringState) \
+            -> Tuple[ClusteringItemResult, pd.DataFrame]:
         cl_setting.path = PathBuilder.build(path / f"{cl_setting.get_key()}")
 
         # Encode data
         encoder = cl_setting.encoder if analysis_desc == 'discovery' \
-            else state.clustering_items[run_id]['discovery'][cl_setting.get_key()].encoder
+            else state.clustering_items[run_id].discovery.get_cl_item(cl_setting).encoder
         enc_dataset = self.encode_dataset(dataset, cl_setting, learn_model=analysis_desc == 'discovery',
                                           encoder=encoder)
 
@@ -66,9 +68,9 @@ class ClusteringRunner:
             internal_performance=DataFrameWrapper(path=performance_paths['internal'])
         )
 
-        self.report_handler.run_item_reports(cl_item, analysis_desc, run_id, cl_setting.path, state)
+        report_results = self.report_handler.run_item_reports(cl_item, analysis_desc, run_id, cl_setting.path, state)
 
-        return cl_item, predictions_df
+        return ClusteringItemResult(cl_item, report_results), predictions_df
 
     def encode_dataset(self, dataset: Dataset, cl_setting: ClusteringSetting, learn_model: bool = True,
                        encoder: DatasetEncoder = None) -> Dataset:

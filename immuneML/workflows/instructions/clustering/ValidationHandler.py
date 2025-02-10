@@ -10,7 +10,8 @@ from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.clustering.ClusteringReportHandler import ClusteringReportHandler
 from immuneML.workflows.instructions.clustering.ClusteringRunner import ClusteringRunner, get_features
-from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringConfig, ClusteringState
+from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringConfig, ClusteringState, \
+    ClusteringResultPerRun, ClusteringItemResult
 from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringSetting, ClusteringItem, \
     DataFrameWrapper
 
@@ -28,7 +29,8 @@ class ValidationHandler:
         """Run method-based validation."""
         cl_items, predictions_df = self.runner.run_all_settings(dataset, 'method_based_validation', path,
                                                                 run_id, predictions_df, state)
-        state.clustering_items[run_id]['method_based_validation'] = cl_items
+        state.add_cl_result_per_run(run_id, 'method_based_validation',
+                                    ClusteringResultPerRun(run_id, 'method_based_validation', cl_items))
         predictions_df.to_csv(state.predictions_paths[run_id]['method_based_validation'], index=False)
 
         return state
@@ -36,11 +38,12 @@ class ValidationHandler:
     def run_result_based_validation(self, dataset: Dataset, run_id: int, path: Path, predictions_df: pd.DataFrame,
                                     state: ClusteringState):
         """Run result-based validation by training a classifier on discovery clusters."""
-        clustering_items = {}
+        cl_items = {}
+        analysis_desc = 'result_based_validation'
 
         for cl_setting in self.config.clustering_settings:
             # Get discovery data clustering results
-            discovery_item = state.clustering_items[run_id]['discovery'][cl_setting.get_key()]
+            discovery_item = state.clustering_items[run_id].discovery.items[cl_setting.get_key()].item
 
             # Train classifier on discovery data using clusters as labels
             classifier = self._train_cluster_classifier(discovery_item, cl_setting)
@@ -52,18 +55,18 @@ class ValidationHandler:
                 cl_setting=cl_setting,
                 classifier=classifier,
                 predictions_df=predictions_df,
-                analysis_desc='result_based_validation',
+                analysis_desc=analysis_desc,
                 run_id=run_id,
                 path=cl_setting.path,
                 encoder=discovery_item.encoder
             )
 
-            clustering_items[cl_setting.get_key()] = cl_item
-            state = self.report_handler.run_item_reports(cl_item, "result_based_validation", run_id, cl_setting.path,
-                                                         state)
+            report_results = self.report_handler.run_item_reports(cl_item, analysis_desc, run_id, cl_setting.path,
+                                                                  state)
+            cl_items[cl_setting.get_key()] = ClusteringItemResult(cl_item, report_results)
 
-        predictions_df.to_csv(state.predictions_paths[run_id]['result_based_validation'], index=False)
-        state.clustering_items[run_id]['result_based_validation'] = clustering_items
+        predictions_df.to_csv(state.predictions_paths[run_id][analysis_desc], index=False)
+        state.add_cl_result_per_run(run_id, analysis_desc, ClusteringResultPerRun(run_id, analysis_desc, cl_items))
 
         return state
 

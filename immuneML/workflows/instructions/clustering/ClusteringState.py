@@ -25,13 +25,42 @@ class ClusteringConfig:
 
 
 @dataclass
+class ClusteringItemResult:
+    item: ClusteringItem
+    report_results: List[ReportResult] = field(default_factory=list)
+
+
+@dataclass
+class ClusteringResultPerRun:
+    run_id: int
+    run_type: str
+    items: Dict[str, ClusteringItemResult] = field(default_factory=dict)
+
+    def get_cl_item(self, cl_setting: str | ClusteringSetting):
+        key = cl_setting if isinstance(cl_setting, str) else cl_setting.get_key()
+        return self.items[key].item
+
+
+@dataclass
+class ClusteringResults:
+    discovery: ClusteringResultPerRun = None
+    method_based_validation: ClusteringResultPerRun = None
+    result_based_validation: ClusteringResultPerRun = None
+
+
+@dataclass
 class ClusteringState:
     name: str
     config: ClusteringConfig
     result_path: Path = None
-    clustering_items: List[Dict[str, Dict[str, ClusteringItem]]] = field(default_factory=list)
+    clustering_items: List[ClusteringResults] = field(default_factory=list)
     predictions_paths: List[Dict[str, Path]] = None
     discovery_datasets: List[Dataset] = None
     validation_datasets: List[Dataset] = None
-    cl_item_report_results: List[Dict[str, Dict[str, List[ReportResult]]]] = None
     clustering_report_results: List[ReportResult] = field(default_factory=list)
+
+    def add_cl_result_per_run(self, run_id: int, analysis_desc: str, cl_item_result: ClusteringResultPerRun):
+        if len(self.clustering_items) <= run_id:
+            self.clustering_items.append(ClusteringResults(**{analysis_desc: cl_item_result}))
+        else:
+            setattr(self.clustering_items[run_id], analysis_desc, cl_item_result)

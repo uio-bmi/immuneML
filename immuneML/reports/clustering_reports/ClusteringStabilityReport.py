@@ -1,19 +1,19 @@
 import logging
 from pathlib import Path
-from typing import List, Dict, Callable, Tuple
+from typing import Callable, Tuple
 
 import pandas as pd
-import numpy as np
 from sklearn import metrics
-from sklearn.metrics import adjusted_rand_score, jaccard_score
+from sklearn.metrics import jaccard_score
 
-from immuneML.reports.clustering_reports.ClusteringReport import ClusteringReport
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
+from immuneML.reports.clustering_reports.ClusteringReport import ClusteringReport
+from immuneML.util.ParameterValidator import ParameterValidator
+from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.clustering.ClusteringRunner import get_features
 from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringState
-from immuneML.workflows.instructions.clustering.ValidationHandler import ValidationHandler, get_complementary_classifier
-from immuneML.util.ParameterValidator import ParameterValidator
+from immuneML.workflows.instructions.clustering.ValidationHandler import get_complementary_classifier
 from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringSetting
 
 
@@ -86,85 +86,82 @@ class ClusteringStabilityReport(ClusteringReport):
 
     def _generate(self) -> ReportResult:
         """Generate the stability analysis report"""
+        self.result_path = PathBuilder.build(self.result_path / self.name)
         stability_results = []
 
         # For each data split
-        for split_id in range(len(self.state.discovery_datasets)):
+        for split_id in range(self.state.config.split_config.split_count):
             # For each clustering setting
             for setting in self.state.config.clustering_settings:
                 setting_key = setting.get_key()
 
                 # Get discovery and validation results
-                discovery_clusters = self._get_cluster_assignments('discovery', split_id, setting_key)
-                validation_clusters = self._get_cluster_assignments('method_based_validation', split_id, setting_key)
+                discovery_result = self._get_cluster_result('discovery', split_id, setting_key)
+                validation_result = self._get_cluster_result('method_based_validation', split_id, setting_key)
 
-                if discovery_clusters is not None and validation_clusters is not None:
+                if discovery_result and validation_result:
+                    discovery_clusters = discovery_result.item.predictions
+                    validation_clusters = validation_result.item.predictions
+
                     # Get encoded data
-                    discovery_data = self._get_encoded_data('discovery', split_id, setting)
-                    validation_data = self._get_encoded_data('method_based_validation', split_id, setting)
+                    discovery_data = get_features(discovery_result.item.dataset, setting)
+                    validation_data = get_features(validation_result.item.dataset, setting)
 
                     if discovery_data is not None and validation_data is not None:
-                        clf = get_complementary_classifier(setting)
-                        clf.fit(discovery_data, discovery_clusters)
-                        predicted_clusters = clf.predict(validation_data)
+                        try:
+                            # Train classifier on discovery data
+                            clf = get_complementary_classifier(setting)
+                            clf.fit(discovery_data, discovery_clusters)
+                            predicted_clusters = clf.predict(validation_data)
 
-                        # Calculate stability score
-                        stability_score = self.metric_fn(validation_clusters, predicted_clusters)
+                            # Calculate stability score
+                            stability_score = self.metric_fn(validation_clusters, predicted_clusters)
 
-                        stability_results.append({
-                            'split': split_id + 1,
-                            'clustering_setting': setting_key,
-                            self.metric: stability_score
-                        })
+                            # Add additional information
+                            result_entry = {
+                                'split': split_id + 1,
+                                'clustering_setting': setting_key,
+                                self.metric: stability_score,
+                                'n_clusters_discovery': len(set(discovery_clusters)),
+                                'n_clusters_validation': len(set(validation_clusters))
+                            }
+
+                            stability_results.append(result_entry)
+                        except Exception as e:
+                            logging.warning(f"Error calculating stability for split {split_id + 1}, setting {setting_key}: {str(e)}")
+
+        if not stability_results:
+            logging.warning("No stability results could be calculated. Check if validation data is available.")
+            return ReportResult(
+                name=self.name,
+                info="No stability results could be calculated. Check if validation data is available."
+            )
 
         # Create report outputs
         df = pd.DataFrame(stability_results)
 
-        # Save results table
+        # Save detailed results table
         table_path = self.result_path / f"{self.result_name}.csv"
         df.to_csv(table_path, index=False)
         table_output = ReportOutput(path=table_path, name="Stability scores per setting")
 
         return ReportResult(
             name=self.name,
-            info="Analysis of clustering stability between discovery and validation datasets.",
-            output_tables=[table_output],
+            info=f"Analysis of clustering stability between discovery and validation datasets using {self.metric}.",
+            output_tables=[table_output]
         )
 
-    def _get_cluster_assignments(self, analysis_type: str, split_id: int, setting_key: str):
+    def _get_cluster_result(self, analysis_type: str, split_id: int, setting_key: str):
+        """Get clustering result for a specific analysis type, split, and setting"""
         try:
-            return self.state.clustering_items[split_id][analysis_type][setting_key].predictions
-        except (KeyError, AttributeError):
-            return None
-
-    def _get_encoded_data(self, analysis_type: str, split_id: int, setting: ClusteringSetting):
-        try:
-            return get_features(self.state.clustering_items[split_id][analysis_type][setting.get_key()].dataset,
-                                setting)
-        except (KeyError, AttributeError):
-            return None
-
-    def _create_report_output(self, df: pd.DataFrame) -> str:
-        """Creates a text summary of the stability analysis results"""
-        output = []
-        output.append(f"Clustering Stability Analysis using {self.metric.upper()} metric\n")
-
-        # Overall statistics
-        mean_stability = df['stability_score'].mean()
-        std_stability = df['stability_score'].std()
-        output.append(f"Overall mean stability score: {mean_stability:.3f} (±{std_stability:.3f})\n")
-
-        # Per setting statistics
-        for setting in df['clustering_setting'].unique():
-            setting_data = df[df['clustering_setting'] == setting]
-            output.append(f"\nClustering setting: {setting}")
-            output.append(f"Mean stability score: {setting_data['stability_score'].mean():.3f}")
-            output.append(f"Std stability score: {setting_data['stability_score'].std():.3f}")
-            output.append(f"Average number of clusters (discovery): {setting_data['n_clusters_discovery'].mean():.1f}")
-            output.append(
-                f"Average number of clusters (validation): {setting_data['n_clusters_validation'].mean():.1f}")
-
-        return "\n".join(output)
+            cl_result = self.state.clustering_items[split_id]
+            if hasattr(cl_result, analysis_type):
+                analysis_result = getattr(cl_result, analysis_type)
+                if analysis_result and setting_key in analysis_result.items:
+                    return analysis_result.items[setting_key]
+        except (IndexError, AttributeError, KeyError) as e:
+            logging.warning(f"Could not retrieve clustering result for {analysis_type}, split {split_id}, setting {setting_key}: {str(e)}")
+        return None
 
     def check_prerequisites(self):
         run_report = True

@@ -34,22 +34,21 @@ class ClusteringReportHandler:
         return state
 
     def run_item_reports(self, cl_item: ClusteringItem, analysis_desc: str, run_id: int, path: Path,
-                         state: ClusteringState) -> ClusteringState:
+                         state: ClusteringState) -> list:
         """Generate reports for individual clustering items."""
         report_path = PathBuilder.build(path / f'reports/')
+        report_results = []
         for report in self.reports:
             if isinstance(report, EncodingReport):
                 tmp_report = copy.deepcopy(report)
                 tmp_report.result_path = PathBuilder.build(report_path / tmp_report.name)
                 tmp_report.dataset = cl_item.dataset
                 rep_result = tmp_report.generate_report()
-                state.cl_item_report_results[run_id][analysis_desc][cl_item.cl_setting.get_key()]['encoding'].append(rep_result)
+                report_results.append(rep_result)
 
         if len(self.reports) > 0:
-            gen_rep_count = sum(len(reports) for rep_type, reports in
-                                state.cl_item_report_results[run_id][analysis_desc][
-                                    cl_item.cl_setting.get_key()].items())
+            gen_rep_count = len(report_results)
             print_log(f"{state.config.name}: generated {gen_rep_count} reports for setting "
                       f"{cl_item.cl_setting.get_key()} for {analysis_desc}, run id: {run_id + 1}.", True)
 
-        return state
+        return report_results
