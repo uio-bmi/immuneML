@@ -1,5 +1,9 @@
+import logging
 from pathlib import Path
+from typing import Tuple, List
 
+import numpy as np
+import pandas as pd
 import plotly.express as px
 
 from immuneML.data_model.datasets.Dataset import Dataset
@@ -49,6 +53,12 @@ class FeatureDistribution(FeatureReport):
 
     - y_title (str): y-axis label
 
+    - plot_top_n (int): plot n of the largest features on average separately (useful when there are too many features to plot at the same time)
+
+    - plot_bottom_n (int): plot n of the smallest features on average separately (useful when there are too many features to plot at the same time)
+
+    - plot_all_features (bool): whether to plot all (might be slow for large number of features)
+
 
     **YAML specification:**
 
@@ -60,6 +70,9 @@ class FeatureDistribution(FeatureReport):
                 my_fdistr_report:
                     FeatureDistribution:
                         mode: sparse
+                        plot_all_features: True
+                        plot_top_n: 10
+                        plot_bottom_n: 10
 
     """
 
@@ -69,7 +82,8 @@ class FeatureDistribution(FeatureReport):
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, color_grouping_label: str = None,
                  row_grouping_label=None, column_grouping_label=None,
-                 mode: str = 'auto', x_title: str = None, y_title: str = None, number_of_processes: int = 1, name: str = None):
+                 mode: str = 'auto', x_title: str = None, y_title: str = None, number_of_processes: int = 1, name: str = None,
+                 plot_top_n: int = None, plot_bottom_n: int = None, plot_all_features: bool = True):
         super().__init__(dataset=dataset, result_path=result_path, color_grouping_label=color_grouping_label,
                          row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label,
                          number_of_processes=number_of_processes, name=name)
@@ -77,37 +91,49 @@ class FeatureDistribution(FeatureReport):
         self.y_title = y_title if y_title is not None else "value"
         self.mode = mode
         self.result_name = "feature_distributions"
+        self.plot_all_features = plot_all_features
+        self.plot_top_n = plot_top_n
+        self.plot_bottom_n = plot_bottom_n
 
     def _generate(self):
         result = self._generate_report_result()
         result.info = "Each boxplot represents one feature of the encoded data matrix, and shows the distribution of values for that feature."
         return result
 
-    def _plot(self, data_long_format, mode='sparse') -> ReportOutput:
+    def _plot(self, data_long_format, mode='sparse') -> Tuple[List[ReportOutput], List[ReportOutput]]:
+
+        plotting_data_dict = self._get_plotting_data_dict(data_long_format)
+
+        output_figures = []
+        output_tables = []
         sparse_threshold = 0.01
 
-        if self.mode == 'auto':
-            if (data_long_format.value == 0).mean() < sparse_threshold:
-                self.mode = 'normal'
-            else:
-                self.mode = 'sparse'
+        for key, data in plotting_data_dict.items():
 
-        if self.mode == 'sparse':
-            return self._plot_sparse(data_long_format)
-        elif self.mode == 'normal':
-            return self._plot_normal(data_long_format)
+            if self.mode == 'auto':
+                if (data.value == 0).mean() < sparse_threshold:
+                    self.mode = 'normal'
+                else:
+                    self.mode = 'sparse'
 
-    def _plot_sparse(self, data_long_format) -> ReportOutput:
+            if self.mode == 'sparse':
+                output_figures, output_tables = self._plot_sparse(key, data, output_tables, output_figures)
+            elif self.mode == 'normal':
+                output_figures, output_tables = self._plot_normal(key, data, output_tables, output_figures)
+
+        return output_figures, output_tables
+
+    def _plot_sparse(self, key, plotting_data, output_tables, output_figures) -> Tuple[List[ReportOutput], List[ReportOutput]]:
         columns_to_filter = [self.x, "value"]
         for optional_column in [self.color, self.facet_row, self.facet_column]:
             if optional_column is not None:
                 columns_to_filter.append(optional_column)
 
-        data_long_format_filtered = data_long_format.loc[data_long_format.value != 0, columns_to_filter]
+        plotting_data_filtered = plotting_data.loc[plotting_data.value != 0, columns_to_filter]
         columns_to_filter.remove("value")
-        total_counts = data_long_format_filtered.groupby(columns_to_filter, as_index=False).agg(
+        total_counts = plotting_data_filtered.groupby(columns_to_filter, as_index=False).agg(
             {"value": 'sum'})
-        data_long_format_filtered = data_long_format_filtered.merge(total_counts,
+        plotting_data_filtered = plotting_data_filtered.merge(total_counts,
                                                                     on=self.x,
                                                                     how="left",
                                                                     suffixes=('', '_sum')) \
@@ -115,7 +141,7 @@ class FeatureDistribution(FeatureReport):
             .sort_values(by=self.x) \
             .reset_index(drop=True)
 
-        figure = px.violin(data_long_format_filtered, x=self.x, y="value", color=self.color,
+        figure = px.violin(plotting_data_filtered, x=self.x, y="value", color=self.color,
                         facet_row=self.facet_row, facet_col=self.facet_column,
                         labels={
                             "value": self.y_title,
@@ -123,14 +149,19 @@ class FeatureDistribution(FeatureReport):
                         }, template='plotly_white',
                         color_discrete_sequence=px.colors.diverging.Tealrose)
 
-        file_path = self.result_path / f"{self.result_name}.html"
+        file_path = self.result_path / f"{self.result_name}_{key}.html"
+        plotting_data.to_csv(self.result_path / f"{self.result_name}_{key}.csv", index=False)
 
         figure.write_html(str(file_path))
+        output_tables.append(
+            ReportOutput(path=self.result_path / f"{self.result_name}_{key}.csv", name=f"{self.result_name} {key}"))
 
-        return ReportOutput(path=file_path, name="Distributions of feature values (sparse data, zero values filtered)")
+        output_figures.append(ReportOutput(path=file_path, name=f"Distributions of feature values ({key}, sparse data, zero values filtered)"))
 
-    def _plot_normal(self, data_long_format) -> ReportOutput:
-        figure = px.violin(data_long_format, x=self.x, y="value", color=self.color,
+        return output_figures, output_tables
+
+    def _plot_normal(self, key, plotting_data, output_tables, output_figures) -> Tuple[List[ReportOutput], List[ReportOutput]]:
+        figure = px.violin(plotting_data, x=self.x, y="value", color=self.color,
                         facet_row=self.facet_row, facet_col=self.facet_column,
                         labels={
                             "value": self.y_title,
@@ -138,8 +169,36 @@ class FeatureDistribution(FeatureReport):
                         }, template='plotly_white',
                         color_discrete_sequence=px.colors.diverging.Tealrose)
 
-        file_path = self.result_path / f"{self.result_name}.html"
+        file_path = self.result_path / f"{self.result_name}_{key}.html"
+        plotting_data.to_csv(self.result_path / f"{self.result_name}_{key}.csv", index=False)
 
         figure.write_html(str(file_path))
+        output_tables.append(
+            ReportOutput(path=self.result_path / f"{self.result_name}_{key}.csv", name=f"{self.result_name} {key}"))
 
-        return ReportOutput(path=file_path, name="Distributions of feature values")
+        output_figures.append(ReportOutput(path=file_path,
+                                           name=f"Distributions of feature values ({key})"))
+
+        return output_figures, output_tables
+
+    def _get_plotting_data_dict(self, data_long_format):
+        plotting_data_all = data_long_format
+        groupby_cols = [self.x, self.color, self.facet_row, self.facet_column]
+        groupby_cols = [i for i in groupby_cols if i]
+        groupby_cols = list(set(groupby_cols))
+        grouped_data = data_long_format.groupby(groupby_cols, as_index=False).agg(
+            {"value": ['mean', self.std]})
+
+        grouped_data.columns = grouped_data.columns.map(''.join)
+        plotting_data_dict = {'all': plotting_data_all} if self.plot_all_features else {}
+
+        if self.plot_top_n:
+            top_n_features = grouped_data.iloc[np.argpartition(grouped_data['valuemean'].values, -self.plot_top_n)[-self.plot_top_n:]][self.x]
+            plotting_data_dict[f'top_{self.plot_top_n}'] = plotting_data_all.loc[plotting_data_all[self.x].isin(top_n_features)]
+
+        if self.plot_bottom_n:
+            bottom_n_features = grouped_data.iloc[np.argpartition(grouped_data['valuemean'].values, self.plot_bottom_n)[:self.plot_bottom_n]][self.x]
+            plotting_data_dict[f'bottom_{self.plot_bottom_n}'] = plotting_data_all.loc[plotting_data_all[self.x].isin(bottom_n_features)]
+
+        return plotting_data_dict
+
