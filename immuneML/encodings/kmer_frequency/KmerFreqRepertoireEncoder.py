@@ -51,12 +51,15 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
                                            lambda: self.encode_repertoire(rep, params), CacheObjectType.ENCODING_STEP)
 
     def encode_repertoire(self, repertoire, params: EncoderParams):
-        counts = Counter()
         sequence_encoder = self._prepare_sequence_encoder()
-        feature_names = sequence_encoder.get_feature_names(params)
-        params.region_type = self.region_type
-        for sequence in repertoire.sequences(params.region_type):
-            counts = self._encode_sequence(sequence, params, sequence_encoder, counts)
+        
+        # Try using optimized k-mer computation
+        counts = self._process_sequences(repertoire.data, params)
+        
+        if counts is None:
+            counts = Counter()
+            for sequence in repertoire.sequences(params.region_type):
+                counts = self._encode_sequence(sequence, params, sequence_encoder, counts)
 
         label_config = params.label_config
         labels = dict() if params.encode_labels else None
@@ -66,5 +69,4 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
                 label = repertoire.metadata[label_name]
                 labels[label_name] = label
 
-        # TODO: refactor this not to return 4 values but e.g. a dict or split into different functions?
-        return counts, repertoire.identifier, labels, feature_names
+        return counts, repertoire.identifier, labels, sequence_encoder.get_feature_names(params)

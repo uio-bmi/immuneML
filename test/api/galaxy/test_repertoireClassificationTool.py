@@ -1,24 +1,18 @@
 import os
-import random as rn
 import shutil
 from unittest import TestCase
 
-from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.api.galaxy.RepertoireClassificationTool import RepertoireClassificationTool
-from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
-from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestRepertoireClassificationTool(TestCase):
 
     def make_random_dataset(self, path):
-        alphabet = EnvironmentSettings.get_sequence_alphabet()
-        sequences = [["".join([rn.choice(alphabet) for i in range(20)]) for i in range(100)] for i in range(40)]
-
-        dataset = RepertoireBuilder.build_dataset(sequences, path, subject_ids=[i % 2 for i in range(len(sequences))], name="dataset")
-        AIRRExporter.export(dataset, path)
+        RandomDatasetGenerator.generate_repertoire_dataset(100, {20: 1.},
+                                                           {5: 1.}, name="dataset", path=path, labels={})
 
     def test_run(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "galaxy_repertoire_classification/")

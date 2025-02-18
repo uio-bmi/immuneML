@@ -1,5 +1,4 @@
 import abc
-from pathlib import Path
 from typing import List
 
 import pandas as pd
@@ -13,6 +12,8 @@ from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.kmer_frequency.BNPSequenceEncodingStrategies import OptimizedContinuousKmerStrategy, \
+    OptimizedGappedKmerStrategy
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
 from immuneML.environment.Constants import Constants
@@ -301,14 +302,44 @@ class KmerFrequencyEncoder(DatasetEncoder):
     def _encode_sequence(self, sequence: ReceptorSequence, params: EncoderParams, sequence_encoder, counts):
         params.model = vars(self)
         features = sequence_encoder.encode_sequence(sequence, params)
+        new_counts = {}
         if features is not None:
             for i in features:
                 if self.reads == ReadsType.UNIQUE:
-                    counts[i] += 1
+                    new_counts[i] = 1
                 elif self.reads == ReadsType.ALL:
-                    counts[i] += sequence.duplicate_count
+                    new_counts[i] = sequence.duplicate_count
+        
+        # Update the counts
+        for key, value in new_counts.items():
+            counts[key] = counts.get(key, 0) + value
+            
         return counts
 
     def get_additional_files(self) -> List[str]:
         return []
+
+    def _compute_kmers(self, sequences, counts=None):
+        """Common k-mer computation logic for all encoders"""
+        if self.sequence_encoding == SequenceEncodingType.CONTINUOUS_KMER:
+            strategy = OptimizedContinuousKmerStrategy(self.k)
+        elif self.sequence_encoding == SequenceEncodingType.GAPPED_KMER:
+            strategy = OptimizedGappedKmerStrategy(self.k_left, self.k_right, self.min_gap, self.max_gap)
+        else:
+            return None  # Use traditional encoding for other types
+            
+        return strategy.compute_kmers(sequences, counts)
+
+    def _get_sequence_field(self, data, params: EncoderParams):
+        """Get the correct sequence field from AIRRSequenceSet based on params"""
+        field_name = params.get_sequence_field_name()
+        return getattr(data, field_name)
+
+    def _process_sequences(self, data, params: EncoderParams):
+        """Process sequences using optimized k-mer computation when possible"""
+        if self.sequence_encoding in [SequenceEncodingType.CONTINUOUS_KMER, SequenceEncodingType.GAPPED_KMER]:
+            if self.k != 1 or self.k_left != 1 or self.k_right != 1:
+                sequences = self._get_sequence_field(data, params)
+                return self._compute_kmers(sequences, data.duplicate_count if self.reads == ReadsType.ALL else None)
+        return None  # Signal to use traditional encoding
 
