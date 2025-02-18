@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List
+from typing import List, Union
 
 
 class Chain(Enum):
@@ -12,7 +12,7 @@ class Chain(Enum):
     KAPPA = "IGK"
 
     @staticmethod
-    def get_chain(item: str):
+    def get_chain(item: Union[str, 'Chain']):
         if type(item) is Chain:
             return item
         elif item.upper() in ["TRA", "TCRA", "A", "ALPHA", "TCRA"]:

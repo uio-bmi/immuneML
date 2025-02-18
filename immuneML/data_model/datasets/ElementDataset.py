@@ -11,13 +11,14 @@ from typing import List
 from uuid import uuid4
 
 import numpy as np
+import pandas as pd
 from bionumpy import get_bufferclass_for_datatype
 
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.SequenceSet import Receptor, ReceptorSequence, AIRRSequenceSet, \
     build_dynamic_airr_sequence_set_dataclass, make_receptors_from_data, make_sequences_from_data
 from immuneML.data_model.bnp_util import bnp_write_to_file, bnp_read_from_file, read_yaml, \
-    extend_dataclass_with_dynamic_fields, write_dataset_yaml
+    extend_dataclass_with_dynamic_fields, write_dataset_yaml, make_full_airr_seq_set_df
 from immuneML.data_model.datasets.Dataset import Dataset
 
 
@@ -104,7 +105,8 @@ class SequenceDataset(ElementDataset):
 
         all_fields_dict = make_all_fields_dict_from_sequences(sequences, region_type)
         bnp_dc, type_dict = build_dynamic_airr_sequence_set_dataclass(all_fields_dict)
-        bnp_write_to_file(filename, bnp_dc(**all_fields_dict))
+        dc_object = bnp_dc(**all_fields_dict)
+        bnp_write_to_file(filename, dc_object)
 
         dataset_metadata = cls.create_metadata_dict(dataset_class=cls.__name__,
                                                     filename=filename,
@@ -118,6 +120,23 @@ class SequenceDataset(ElementDataset):
         return SequenceDataset(filename=filename, name=name, labels=labels, dynamic_fields=type_dict,
                                dataset_file=metadata_filename, bnp_dataclass=bnp_dc,
                                identifier=dataset_metadata["identifier"])
+
+    @classmethod
+    def build_from_partial_df(cls, df: pd.DataFrame, path: Path, name: str = None, labels: dict = None,
+                              type_dict: dict = None):
+
+        airr_df = make_full_airr_seq_set_df(df)
+        name = name if name is not None else uuid4().hex
+        filename = path / f"{name}.tsv"
+
+        airr_df.to_csv(filename, sep='\t', index=False)
+
+        dataset_yaml = SequenceDataset.create_metadata_dict(SequenceDataset, filename=filename, type_dict=type_dict,
+                                                            name=name, labels=labels)
+
+        write_dataset_yaml(path / f'{name}.yaml', dataset_yaml)
+
+        return SequenceDataset.build(filename, path / f'{name}.yaml', name)
 
     def get_metadata(self, field_names: list, return_df: bool = False):
         """Returns a dict or an equivalent pandas DataFrame with metadata information from Receptor objects for

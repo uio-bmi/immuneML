@@ -13,7 +13,8 @@ from torch.utils.data import DataLoader
 from immuneML import Constants
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.SequenceSet import ReceptorSequence
-from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
+from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name, make_full_airr_seq_set_df, \
+    write_dataset_yaml
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
@@ -336,31 +337,15 @@ class SimpleVAE(GenerativeModel):
             v_genes = softmax(v_genes, dim=1)
             j_genes = softmax(j_genes, dim=1)
 
-        seq_objs = []
-        for i in range(count):
-            seq_content = [self.vocab[Categorical(letter).sample()] for letter in sequences[i]]
-            sequence = ReceptorSequence(**{
-                self.sequence_type.value: ''.join(seq_content).replace(Constants.GAP_LETTER, ''),
-                'v_call': self.unique_v_genes[Categorical(v_genes[i]).sample()],
-                'j_call': self.unique_j_genes[Categorical(j_genes[i]).sample()],
-                'locus': self.locus.to_string(),
-                'metadata': {'gen_model_name': self.name if self.name else "SimpleVAE"}
-            })
+        df = pd.DataFrame({get_sequence_field_name(self.region_type, self.sequence_type):
+                               [''.join([self.vocab[Categorical(letter).sample()] for letter in sequences[i]]).replace(Constants.GAP_LETTER, '') for i in range(count)],
+                           'locus': [self.locus.to_string() for _ in range(count)],
+                           'v_call': [self.unique_v_genes[Categorical(v_genes[i]).sample()] for i in range(count)],
+                           'j_call': [self.unique_j_genes[Categorical(j_genes[i]).sample()] for i in range(count)],
+                           'gen_model_name': [self.name for _ in range(count)]})
 
-            seq_objs.append(sequence)
-
-        # for obj in seq_objs:
-        #     log_prob = self.compute_p_gen({self.sequence_type.value: obj.get_attribute(self.sequence_type.value),
-        #                                    'v_call': obj.metadata.v_call, 'j_call': obj.metadata.j_call},
-        #                                   self.sequence_type)
-        #     obj.metadata.custom_params = {'log_prob': log_prob}
-
-        dataset = SequenceDataset.build_from_objects(seq_objs, PathBuilder.build(path),
-                                                     f'synthetic_{self.name}_dataset',
-                                                     {'gen_model_name': [self.name]},
-                                                     self.region_type)
-
-        return dataset
+        return SequenceDataset.build_from_partial_df(df, PathBuilder.build(path), 'synthetic_dataset',
+                                                     {'gen_model_name': [self.name]}, {'gen_model_name': str})
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         pass
