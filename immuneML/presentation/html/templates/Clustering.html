@@ -5,170 +5,6 @@
     <title>immuneML: Clustering overview</title>
     <style>
         {{{css_style}}}
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --accent-color: #009688;
-            --background-color: #f8f9fa;
-            --text-color: #2c3e50;
-            --border-color: #dee2e6;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-        }
-        
-        h1, h2, h3, h4, h5 {
-            color: var(--primary-color);
-            margin-top: 1.5em;
-            margin-bottom: 0.75em;
-        }
-        
-        h1 { font-size: 2em; }
-        h2 { font-size: 1.75em; }
-        h3 { font-size: 1.5em; }
-        h4 { font-size: 1.25em; }
-        h5 { font-size: 1.1em; }
-        
-        .split-section {
-            margin: 2em 0;
-            padding: 0.5em 0;
-        }
-        
-        hr {
-            border: 0;
-            height: 1px;
-            background-color: var(--border-color);
-            margin: 1em 0;
-        }
-        
-        .table-container {
-            margin: 1em 0;
-            overflow-x: auto;
-            background: white;
-            padding: 0.75em;
-            width: fit-content;
-            min-width: 50%;
-        }
-        
-        .table-container table {
-            width: auto;
-            border-collapse: collapse;
-            margin: 0;
-        }
-        
-        .table-container thead {
-            background-color: var(--background-color);
-        }
-        
-        .table-container th {
-            padding: 0.5em 0.75em;
-            text-align: left;
-            color: var(--primary-color);
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        
-        .table-container td {
-            padding: 0.4em 0.75em;
-            border-bottom: 1px solid var(--border-color);
-            line-height: 1.4;
-        }
-        
-        .table-container td:not(:first-child) {
-            text-align: right;
-            padding-left: 2em;
-        }
-        
-        .table-container tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .table-container tr:hover {
-            background-color: var(--background-color);
-        }
-        
-        .table-container td:first-child,
-        .table-container th:first-child {
-            font-weight: 500;
-        }
-        
-        .prediction-table {
-            max-height: 400px;
-            overflow-y: auto;
-            margin: 1em 0;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            background: white;
-            width: fit-content;
-            min-width: 50%;
-        }
-        
-        .prediction-table table {
-            width: auto;
-            border-collapse: collapse;
-            margin: 0;
-        }
-        
-        .prediction-table th {
-            background-color: var(--background-color);
-            padding: 0.5em 0.75em;
-            text-align: left;
-            border-bottom: 2px solid var(--accent-color);
-            color: var(--primary-color);
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-            white-space: nowrap;
-        }
-        
-        .prediction-table td {
-            padding: 0.4em 0.75em;
-            border-bottom: 1px solid var(--border-color);
-            line-height: 1.4;
-        }
-        
-        .prediction-table tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .prediction-table tr:hover {
-            background-color: var(--background-color);
-        }
-        
-        .setting-links {
-            list-style-type: none;
-            padding: 0;
-        }
-        
-        .setting-links li {
-            margin: 0.5em 0;
-        }
-        
-        .setting-links a {
-            display: block;
-            padding: 0.5em;
-            background: var(--background-color);
-            text-decoration: none;
-            color: var(--text-color);
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-        
-        .setting-links a:hover {
-            background: var(--accent-color);
-            color: white;
-        }
-        
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2em;
-            margin: 1em 0;
-        }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
@@ -179,185 +15,75 @@
             <p>immuneML version: {{immuneML_version}}</p>
             <p>Full specification is available <a href="{{{full_specs}}}">here</a>.</p>
             <p>Log file is available <a href="{{{logfile}}}">here</a>.</p>
-            <p></p>
 
-            <details>
-            <summary>Dataset details</summary>
-            <div class="grid-container">
-                <div class="">
-                    <div class="table-container padded-top padded-bottom">
-                        <table>
-                        <tr>
-                            <td><b>Name</b></td>
-                            <td>{{dataset_name}}</td>
-                        </tr>
-                        <tr>
-                            <td><b>Type</b></td>
-                            <td>{{dataset_type}}</td>
-                        </tr>
-                        <tr>
-                            <td><b>Dataset size</b></td>
-                            <td>{{dataset_size}}</td>
-                        </tr>
-                    </table>
-                    </div>
-                </div>
+            <div class="dataset-info">
+                <table>
+                    <tr>
+                        <td>Name</td>
+                        <td>{{dataset_name}}</td>
+                    </tr>
+                    <tr>
+                        <td>Type</td>
+                        <td>{{dataset_type}}</td>
+                    </tr>
+                    <tr>
+                        <td>Dataset size</td>
+                        <td>{{dataset_size}}</td>
+                    </tr>
+                </table>
             </div>
 
-            </details>
             {{#clustering_reports.has_reports}}
             <h2>Clustering Analysis Reports</h2>
             {{#clustering_reports.reports}}
-            <details><summary>{{ name }}</summary>
-            <div class="report-section">
-                {{#info}}<p>{{info}}</p>{{/info}}
+            <details>
+                <summary>{{ name }}</summary>
+                <div class="report-section">
+                    {{#info}}<p>{{info}}</p>{{/info}}
 
-                {{#output_figures}}
-                <div class="figure-container">
-                    <h4>{{name}}</h4>
-                    {{#is_embed}}
-                    <iframe src="{{path}}" width="100%" height="600px"></iframe>
-                    {{/is_embed}}
-                    {{^is_embed}}
-                    <img src="{{path}}" alt="{{name}}">
-                    {{/is_embed}}
-                </div>
-                {{/output_figures}}
+                    {{#output_figures}}
+                    <div class="figure-container">
+                        <h4>{{name}}</h4>
+                        {{#is_embed}}
+                        <iframe src="{{path}}" width="100%" height="600px"></iframe>
+                        {{/is_embed}}
+                        {{^is_embed}}
+                        <img src="{{path}}" alt="{{name}}">
+                        {{/is_embed}}
+                    </div>
+                    {{/output_figures}}
 
-                {{#output_tables}}
-                <div class="table-section">
-                    <details>
-                        <summary>
-                            <h4 style="display: inline;">{{name}}</h4>
-                            <span class="table-preview">(click to expand/collapse)</span>
-                        </summary>
-                        <div class="scrollable-table">
-                            <a href="{{download_link}}" download>Download {{file_name}}</a>
+                    {{#output_tables}}
+                    <div class="table-section">
+                        <h4>{{name}}</h4>
+                        <a href="{{download_link}}" download>Download {{file_name}}</a>
+                        <div class="table-container">
                             {{{table}}}
                         </div>
-                    </details>
-                </div>
-                {{/output_tables}}
+                    </div>
+                    {{/output_tables}}
 
-                {{#output_text}}
-                <div class="text-section">
-                    <h4>{{name}}</h4>
-                    <pre class="text-output">{{path}}</pre>
+                    {{#output_text}}
+                    <div class="text-section">
+                        <h4>{{name}}</h4>
+                        <pre class="text-output">{{path}}</pre>
+                    </div>
+                    {{/output_text}}
                 </div>
-                {{/output_text}}
-            </div>
             </details>
             {{/clustering_reports.reports}}
             {{/clustering_reports.has_reports}}
 
             <h2>Results by Split</h2>
             <p>Splitting into multiple discovery and validation set pairs allows for stability analysis of
-                the clustering settings.</p>
-            {{#splits}}
-            <div class="split-section">
-                <h3>Split {{number}}</h3>
-                <hr>
-                <details>
-                    <summary>View Predictions</summary>
-                    <div class="results-grid">
-                        <div>
-                            <h4>Discovery</h4>
-                            <a href="{{predictions.discovery.path}}">Download predictions</a>
-                            <div class="prediction-table">
-                                {{{predictions.discovery.data}}}
-                            </div>
-                        </div>
-                        {{#has_method_based}}
-                        <div>
-                            <h4>Method-based Validation</h4>
-                            <a href="{{predictions.method_based.path}}">Download predictions</a>
-                            <div class="prediction-table">
-                                {{{predictions.method_based.data}}}
-                            </div>
-                        </div>
-                        {{/has_method_based}}
-                        {{#has_result_based}}
-                        <div>
-                            <h4>Result-based Validation</h4>
-                            <a href="{{predictions.result_based.path}}">Download predictions</a>
-                            <div class="prediction-table">
-                                {{{predictions.result_based.data}}}
-                            </div>
-                        </div>
-                        {{/has_result_based}}
-                    </div>
-                </details>
-
-                {{#performance.internal.show}}
-                <h4>Internal Performance</h4>
-                <p>
-                    The table below shows performance measured by internal performance metrics. This means that only the
-                    quality of the clusters was measured, without reference to any additional (labeled) information.
-                </p>
-                <h5>Discovery</h5>
-                <div class="table-container padded">
-
-                    {{{performance.internal.discovery}}}
-                </div>
-
-                    {{#has_method_based}}
-                    <h5>Method-based Validation</h5>
-                <div class="table-container padded">
-                    {{{performance.internal.method_based}}}
-                </div>
-                    {{/has_method_based}}
-                    {{#has_result_based}}
-                    <h5>Result-based Validation</h5>
-                <div class="table-container padded">
-                    {{{performance.internal.result_based}}}
-                </div>
-                    {{/has_result_based}}
-                {{/performance.internal.show}}
-
-                {{#performance.external.show}}
-                <h4>External Performance</h4>
-                <p>
-                    The tables below show performance measured by external performance metrics. This means that for each
-                    potential label of interest that was provided as input to the instruction, it was measured how well the
-                    clusters correspond to the label.
-                </p>
-                <h5>Discovery</h5>
-                {{#performance.external.discovery}}
-                <h6>Label: {{label}}</h6>
-                <div class="table-container padded">
-                    {{{performance_table}}}
-                </div>
-                {{/performance.external.discovery}}
-
-                {{#has_method_based}}
-                <h5>Method-based Validation</h5>
-                {{#performance.external.method_based}}
-                <h6>Label: {{label}}</h6>
-                <div class="table-container padded">
-                    {{{performance_table}}}
-                </div>
-                {{/performance.external.method_based}}
-                {{/has_method_based}}
-
-                {{#has_result_based}}
-                <h5>Result-based Validation</h5>
-                {{#performance.external.result_based}}
-                <h6>Label: {{label}}</h6>
-                <div class="table-container padded">
-                    {{{performance_table}}}
-                </div>
-                {{/performance.external.result_based}}
-                {{/has_result_based}}
-                {{/performance.external.show}}
-
-                <h4>Detailed Results by Setting</h4>
-                <ul class="setting-links">
-                    {{#setting_details}}
-                    <li><a href="{{path}}">{{name}}</a></li>
-                    {{/setting_details}}
-                </ul>
-            </div>
-            {{/splits}}
+                the clustering settings. Click on a split below to view detailed results:</p>
+            
+            <ul class="setting-links">
+                {{#splits}}
+                <li><a href="{{path}}">Split {{number}}</a></li>
+                {{/splits}}
+            </ul>
+        </div>
     </div>
 </body>
 </html>

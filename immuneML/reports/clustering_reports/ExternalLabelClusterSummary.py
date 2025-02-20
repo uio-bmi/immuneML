@@ -120,7 +120,6 @@ class ExternalLabelClusterSummary(ClusteringReport):
                 ))
 
                 fig.update_layout(
-                    title=f'Cluster vs {label} Distribution ({analysis_name.replace("_", " ")}, {setting_key})',
                     xaxis_title=label,
                     yaxis_title='Cluster'
                 )

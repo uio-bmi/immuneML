@@ -27,6 +27,10 @@ class ClusteringHTMLBuilder:
         TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "Clustering.html",
                              template_map=html_map, result_path=result_file)
 
+        # Generate split pages
+        for split_id in range(state.config.split_config.split_count):
+            ClusteringHTMLBuilder._make_split_page(state, split_id, base_path)
+
         # Generate detail pages for each setting in each split
         for split_id in range(state.config.split_config.split_count):
             for setting in state.config.clustering_settings:
@@ -43,71 +47,66 @@ class ClusteringHTMLBuilder:
             "full_specs": Util.get_full_specs_path(base_path),
             "logfile": Util.get_logfile_path(base_path),
             "clustering_reports": ClusteringHTMLBuilder._format_reports(state.clustering_report_results, base_path),
-            "splits": ClusteringHTMLBuilder._make_split_maps(state, base_path),
+            "splits": [{"number": i + 1, "path": f"split_{i + 1}.html"} for i in range(state.config.split_config.split_count)],
             **Util.make_dataset_html_map(state.config.dataset)
         }
         return html_map
 
     @staticmethod
-    def _make_split_maps(state: ClusteringState, base_path: Path) -> List[dict]:
-        splits = []
-        for split_id in range(state.config.split_config.split_count):
-            split_map = {
-                "number": split_id + 1,
-                "predictions": {
-                    "discovery": {
-                        "path": os.path.relpath(state.predictions_paths[split_id]['discovery'], base_path),
-                        "data": ClusteringHTMLBuilder._format_predictions_file(
-                            state.predictions_paths[split_id]['discovery'])
-                    }
+    def _make_split_page(state: ClusteringState, split_id: int, base_path: Path):
+        split_map = {
+            "css_style": Util.get_css_content(ClusteringHTMLBuilder.CSS_PATH),
+            "name": state.config.name,
+            "split_number": split_id + 1,
+            "predictions": {
+                "discovery": {
+                    "path": os.path.relpath(state.predictions_paths[split_id]['discovery'], base_path),
+                    "data": ClusteringHTMLBuilder._format_predictions_file(
+                        state.predictions_paths[split_id]['discovery'])
+                }
+            },
+            "performance": {
+                "internal": {
+                    "show": any(is_internal(m) for m in state.config.metrics),
+                    "discovery": ClusteringHTMLBuilder._make_internal_performance_table(state, 'discovery', split_id)
                 },
-                "performance": {
-                    "internal": {
-                        "show": any(is_internal(m) for m in state.config.metrics),
-                        "discovery": ClusteringHTMLBuilder._make_internal_performance_table(state, 'discovery',
-                                                                                            split_id)
-                    },
-                    "external": {
-                        "show": any(is_external(m) for m in state.config.metrics),
-                        "discovery": ClusteringHTMLBuilder._make_external_performance_tables(state, 'discovery',
-                                                                                             split_id)
-                    }
-                },
-                "setting_details": ClusteringHTMLBuilder._make_setting_links(state, split_id, base_path),
-                "has_method_based": "method_based" in state.config.validation_type,
-                "has_result_based": "result_based" in state.config.validation_type
+                "external": {
+                    "show": any(is_external(m) for m in state.config.metrics),
+                    "discovery": ClusteringHTMLBuilder._make_external_performance_tables(state, 'discovery', split_id)
+                }
+            },
+            "setting_details": ClusteringHTMLBuilder._make_setting_links(state, split_id, base_path),
+            "has_method_based": "method_based" in state.config.validation_type,
+            "has_result_based": "result_based" in state.config.validation_type,
+            "main_page_link": f"Clustering_{state.config.name}.html"
+        }
+
+        # Add validation results if present
+        if "method_based" in state.config.validation_type:
+            split_map["predictions"]["method_based"] = {
+                "path": os.path.relpath(state.predictions_paths[split_id]['method_based_validation'], base_path),
+                "data": ClusteringHTMLBuilder._format_predictions_file(
+                    state.predictions_paths[split_id]['method_based_validation'])
             }
+            split_map["performance"]["internal"]["method_based"] = ClusteringHTMLBuilder._make_internal_performance_table(
+                state, 'method_based_validation', split_id)
+            split_map["performance"]["external"]["method_based"] = ClusteringHTMLBuilder._make_external_performance_tables(
+                state, 'method_based_validation', split_id)
 
-            # Add validation results if present
-            if "method_based" in state.config.validation_type:
-                split_map["predictions"]["method_based"] = {
-                    "path": os.path.relpath(state.predictions_paths[split_id]['method_based_validation'], base_path),
-                    "data": ClusteringHTMLBuilder._format_predictions_file(
-                        state.predictions_paths[split_id]['method_based_validation'])
-                }
-                split_map["performance"]["internal"][
-                    "method_based"] = ClusteringHTMLBuilder._make_internal_performance_table(
-                    state, 'method_based_validation', split_id)
-                split_map["performance"]["external"][
-                    "method_based"] = ClusteringHTMLBuilder._make_external_performance_tables(
-                    state, 'method_based_validation', split_id)
+        if "result_based" in state.config.validation_type:
+            split_map["predictions"]["result_based"] = {
+                "path": os.path.relpath(state.predictions_paths[split_id]['result_based_validation'], base_path),
+                "data": ClusteringHTMLBuilder._format_predictions_file(
+                    state.predictions_paths[split_id]['result_based_validation'])
+            }
+            split_map["performance"]["internal"]["result_based"] = ClusteringHTMLBuilder._make_internal_performance_table(
+                state, 'result_based_validation', split_id)
+            split_map["performance"]["external"]["result_based"] = ClusteringHTMLBuilder._make_external_performance_tables(
+                state, 'result_based_validation', split_id)
 
-            if "result_based" in state.config.validation_type:
-                split_map["predictions"]["result_based"] = {
-                    "path": os.path.relpath(state.predictions_paths[split_id]['result_based_validation'], base_path),
-                    "data": ClusteringHTMLBuilder._format_predictions_file(
-                        state.predictions_paths[split_id]['result_based_validation'])
-                }
-                split_map["performance"]["internal"][
-                    "result_based"] = ClusteringHTMLBuilder._make_internal_performance_table(
-                    state, 'result_based_validation', split_id)
-                split_map["performance"]["external"][
-                    "result_based"] = ClusteringHTMLBuilder._make_external_performance_tables(
-                    state, 'result_based_validation', split_id)
-
-            splits.append(split_map)
-
-        return splits
+        result_path = base_path / f"split_{split_id + 1}.html"
+        TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "ClusteringSplit.html",
+                             template_map=split_map, result_path=result_path)
 
     @staticmethod
     def _make_setting_links(state: ClusteringState, split_id: int, base_path: Path) -> List[dict]:
@@ -148,11 +147,11 @@ class ClusteringHTMLBuilder:
                 item_result = analysis_result.items[setting.get_key()]
                 return {
                     "predictions_path": os.path.relpath(state.predictions_paths[split_id][analysis_type], base_path),
-                    "internal_performance": item_result.item.internal_performance.get_df().to_html(
-                        classes="table-container", justify='left',
+                    "internal_performance": item_result.item.internal_performance.get_df().to_html(border=0,
+                        justify='left',
                         index=False) if item_result.item.internal_performance else None,
-                    "external_performance": item_result.item.external_performance.get_df().to_html(
-                        classes="table-container", justify='left',
+                    "external_performance": item_result.item.external_performance.get_df().to_html(border=0,
+                        justify='left',
                         index=False) if item_result.item.external_performance else None,
                     "reports": ClusteringHTMLBuilder._format_reports(item_result.report_results, base_path)
                 }
@@ -162,7 +161,7 @@ class ClusteringHTMLBuilder:
     def _format_predictions_file(file_path: Path) -> str:
         try:
             df = pd.read_csv(file_path)
-            return df.to_html(classes="prediction-table", max_rows=20, justify='left', index=False)
+            return df.to_html(border=0, classes="prediction-table", max_rows=20, justify='left', index=False)
         except:
             return "Error loading predictions"
 
@@ -199,7 +198,7 @@ class ClusteringHTMLBuilder:
                                 "name": table.name,
                                 "download_link": os.path.relpath(table.path, base_path),
                                 "file_name": os.path.basename(table.path),
-                                "table": df.to_html(classes="table-container", justify='left', index=False)
+                                "table": df.to_html(border=0, justify='left', index=False)
                             })
                         except Exception as e:
                             logging.warning(f"Error processing table {table.name}: {e}")
@@ -242,7 +241,7 @@ class ClusteringHTMLBuilder:
 
         if performance_data["clustering setting"]:
             df = pd.DataFrame(performance_data)
-            return df.to_html(classes="table-container", justify='left', index=False)
+            return df.to_html(border=0, justify='left', index=False)
         return None
 
     @staticmethod
@@ -276,7 +275,7 @@ class ClusteringHTMLBuilder:
                 df = pd.DataFrame(performance_data)
                 tables.append({
                     "label": label,
-                    "performance_table": df.to_html(classes="table-container", justify='left', index=False)
+                    "performance_table": df.to_html(border=0, justify='left', index=False)
                 })
 
         return tables
