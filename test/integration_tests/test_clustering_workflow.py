@@ -52,8 +52,8 @@ def test_clustering_workflow():
                     'DimensionalityReduction': {
                         'label': 'epitope',
                         'dim_red_method': {
-                            'PCA': {
-                                "n_components": 2}}}},
+                            'KernelPCA': {
+                                "n_components": 2, 'kernel': 'rbf'}}}},
                 'stability':
                     {'ClusteringStabilityReport': {
                         'metric': 'adjusted_rand_score'
@@ -92,4 +92,4 @@ def test_clustering_workflow():
 
     ImmuneMLApp(path / 'specs.yaml', path / 'output').run()
 
-    # shutil.rmtree(path)
+    shutil.rmtree(path)
