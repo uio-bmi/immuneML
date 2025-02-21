@@ -1,7 +1,5 @@
 from itertools import zip_longest
 import numpy as np
-import torch
-from transformers import BertModel, BertTokenizer
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.EncodedData import EncodedData
@@ -84,6 +82,7 @@ class TCRBertEncoder(DatasetEncoder):
                 ("encoding_params", tuple(vars(self).items())))
 
     def _encode_data(self, dataset, params: EncoderParams):
+        import torch
         seqs = self._get_sequences(dataset, params)
         model, tok = self._get_relevant_model_and_tok()
         embeddings = []
@@ -167,6 +166,7 @@ class TCRBertEncoder(DatasetEncoder):
         return seqs
 
     def _get_relevant_model_and_tok(self):
+        from transformers import BertModel, BertTokenizer
         model = BertModel.from_pretrained(f"wukevin/{self.model}")
         tok = BertTokenizer.from_pretrained(f"wukevin/{self.model}",
                                             do_basic_tokenize=False, do_lower_case=False,
