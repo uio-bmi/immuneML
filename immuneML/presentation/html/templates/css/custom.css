@@ -9,7 +9,7 @@ body {
   left: 0;
   top: 0;
   font-size: 100%;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: -apple-system, "system-ui", 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #333447;
   line-height: 1.2;
 }
@@ -110,10 +110,10 @@ a:hover {
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     margin: 1.5em 0;
+    width: fit-content;
 }
 
 .table-container table {
-    width: 100%;
     margin: 0;
 }
 
@@ -279,7 +279,6 @@ code {
 }
 
 .nested-list-container {
-    font-family: Arial, sans-serif;
     padding: 10px;
     max-width: 600px;
 }
@@ -329,7 +328,6 @@ iframe {
 }
 
 table {
-    width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
 }

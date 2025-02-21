@@ -148,10 +148,10 @@ class ClusteringHTMLBuilder:
                 return {
                     "predictions_path": os.path.relpath(state.predictions_paths[split_id][analysis_type], base_path),
                     "internal_performance": item_result.item.internal_performance.get_df().to_html(border=0,
-                        justify='left',
+                        justify='left', max_rows=None,
                         index=False) if item_result.item.internal_performance else None,
                     "external_performance": item_result.item.external_performance.get_df().to_html(border=0,
-                        justify='left',
+                        justify='left', max_rows=None,
                         index=False) if item_result.item.external_performance else None,
                     "reports": ClusteringHTMLBuilder._format_reports(item_result.report_results, base_path)
                 }
@@ -161,7 +161,7 @@ class ClusteringHTMLBuilder:
     def _format_predictions_file(file_path: Path) -> str:
         try:
             df = pd.read_csv(file_path)
-            return df.to_html(border=0, classes="prediction-table", max_rows=20, justify='left', index=False)
+            return df.to_html(border=0, classes="prediction-table", max_rows=None, justify='left', index=False)
         except:
             return "Error loading predictions"
 
@@ -198,7 +198,7 @@ class ClusteringHTMLBuilder:
                                 "name": table.name,
                                 "download_link": os.path.relpath(table.path, base_path),
                                 "file_name": os.path.basename(table.path),
-                                "table": df.to_html(border=0, justify='left', index=False)
+                                "table": df.to_html(border=0, justify='left', max_rows=None, index=False)
                             })
                         except Exception as e:
                             logging.warning(f"Error processing table {table.name}: {e}")
@@ -241,7 +241,7 @@ class ClusteringHTMLBuilder:
 
         if performance_data["clustering setting"]:
             df = pd.DataFrame(performance_data)
-            return df.to_html(border=0, justify='left', index=False)
+            return df.to_html(border=0, justify='left', max_rows=None, index=False)
         return None
 
     @staticmethod
@@ -275,7 +275,7 @@ class ClusteringHTMLBuilder:
                 df = pd.DataFrame(performance_data)
                 tables.append({
                     "label": label,
-                    "performance_table": df.to_html(border=0, justify='left', index=False)
+                    "performance_table": df.to_html(border=0, justify='left', max_rows=None, index=False)
                 })
 
         return tables

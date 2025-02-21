@@ -5,33 +5,6 @@
     <title>Split {{split_number}} - {{setting_name}} Details</title>
     <style>
         {{{css_style}}}
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --accent-color: #009688;  /* Changed to teal */
-            --background-color: #f8f9fa;
-            --text-color: #2c3e50;
-            --border-color: #dee2e6;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-        }
-        
-        h1, h2, h3, h4, h5 {
-            color: var(--primary-color);
-            margin-top: 1.5em;
-            margin-bottom: 0.75em;
-        }
-        
-        h1 { font-size: 2em; }
-        h2 { font-size: 1.75em;
-            border-bottom: 1px solid teal;}
-        h3 { font-size: 1.5em; }
-        h4 { font-size: 1.25em; }
-        h5 { font-size: 1.1em; }
 
         .results-grid {
             display: grid;
@@ -51,52 +24,13 @@
             border: none;
         }
 
-        details {
-            margin: 1em 0;
-        }
-        
-        summary {
-            cursor: pointer;
-            padding: 0.5em;
-            background-color: var(--background-color);
-            border-radius: 4px;
-            color: var(--primary-color);
-            font-weight: 500;
-        }
-        
-        summary:hover {
-            background-color: var(--border-color);
-        }
-        
-        .table-container {
-            margin: 1em 0;
-            overflow-x: auto;
-        }
-        
-        .table-container table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .table-container th {
-            background-color: var(--background-color);
-            padding: 0.75em;
-            text-align: left;
-            border-bottom: 2px solid var(--border-color);
-        }
-        
-        .table-container td {
-            padding: 0.75em;
-            border-bottom: 1px solid var(--border-color);
-        }
-
         img, embed {
             max-width: 100%;
             margin: 1em 0;
             border-radius: 4px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        
+
         /* Make embedded plots more square-shaped */
         embed {
             width: 100%;
@@ -104,16 +38,16 @@
             margin: 0 auto;
             display: block;
         }
-        
+
         ul {
             list-style-type: none;
             padding: 0;
         }
-        
+
         ul li {
             margin: 0.5em 0;
         }
-        
+
         ul li a {
             display: block;
             padding: 0.5em;
@@ -123,7 +57,7 @@
             border-radius: 4px;
             transition: all 0.2s ease;
         }
-        
+
         ul li a:hover {
             background: var(--accent-color);
             color: white;
@@ -153,7 +87,7 @@
             <!-- Discovery Section -->
             <div class="section">
                 <h2>Discovery Results</h2>
-                
+                <hr>
                 <h3>Internal Performance</h3>
                 {{#discovery.internal_performance}}
                 <div class="table-container">
@@ -231,7 +165,7 @@
             {{#has_method_based}}
             <div class="section">
                 <h2>Method-based Validation</h2>
-                
+                <hr>
                 <h3>Internal Performance</h3>
                 <div class="table-container">
                     {{{method_based.internal_performance}}}
@@ -300,7 +234,7 @@
             {{#has_result_based}}
             <div class="section">
                 <h2>Result-based Validation</h2>
-                
+                <hr>
                 <h3>Internal Performance</h3>
                 <div class="table-container">
                     {{{result_based.internal_performance}}}
