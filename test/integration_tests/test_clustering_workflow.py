@@ -28,7 +28,8 @@ def test_clustering_workflow():
                 }
             },
             'encodings': {
-                'kmer': 'KmerFrequency'
+                'kmer': 'KmerFrequency',
+                'bert': "TCRBert"
             },
             'ml_methods': {
                 'pca': {
@@ -62,6 +63,13 @@ def test_clustering_workflow():
                     'ExternalLabelClusterSummary': {
                         'external_labels': ['epitope']
                     }
+                },
+                'cluster_vis': {
+                    'ClusteringVisualization': {
+                        "dim_red_method": {
+                            "KernelPCA": {"n_components": 2, 'kernel': 'rbf'}
+                        }
+                    }
                 }
             }
         },
@@ -74,14 +82,14 @@ def test_clustering_workflow():
                 'labels': ['epitope'],
                 'clustering_settings': [
                     {'encoding': 'kmer', 'method': 'kmeans2'},
-                    {'encoding': 'kmer', 'dim_reduction': 'pca', 'method': 'kmeans3'}
+                    {'encoding': 'bert', 'dim_reduction': 'pca', 'method': 'kmeans3'}
                 ],
                 'split_config': {
                     'split_strategy': 'random',
                     'training_percentage': 0.5,
                     "split_count": 2
                 },
-                'reports': ['rep1', 'stability', 'external_labels_summary'],
+                'reports': ['rep1', 'stability', 'external_labels_summary', 'cluster_vis'],
                 'number_of_processes': 4,
                 'validation_type': ['result_based', 'method_based']
             }
