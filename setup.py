@@ -23,7 +23,7 @@ setup(
         'fisher': ['fisher>=0.1.9', 'fishersapi'],
         "TCRdist": ["tcrdist3>=0.1.6"],
         "gen_models": ['sonnia', 'torch'],
-        "embeddings": ['transformers'],
+        "embeddings": ['transformers', 'torch'],
         "ligo": ['stitchr', 'IMGTgeneDL'],
         "DL": ['torch', 'keras', 'tensorflow', 'logomaker', 'gensim'],
         "KerasSequenceCNN": ["keras==2.11.0", "tensorflow==2.11.0"],

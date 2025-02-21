@@ -5,6 +5,16 @@
     <title>immuneML: Clustering overview</title>
     <style>
         {{{css_style}}}
+        .figures-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2em;
+        }
+        @media (max-width: 1200px) {
+            .figures-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
@@ -41,17 +51,19 @@
                 <div class="report-section">
                     {{#info}}<p>{{info}}</p>{{/info}}
 
-                    {{#output_figures}}
-                    <div class="figure-container">
-                        <h4>{{name}}</h4>
-                        {{#is_embed}}
-                        <iframe src="{{path}}" width="100%" height="600px"></iframe>
-                        {{/is_embed}}
-                        {{^is_embed}}
-                        <img src="{{path}}" alt="{{name}}">
-                        {{/is_embed}}
+                    <div class="figures-grid">
+                        {{#output_figures}}
+                        <div class="figure-container">
+                            <h4>{{name}}</h4>
+                            {{#is_embed}}
+                            <iframe src="{{path}}" width="100%" height="600px"></iframe>
+                            {{/is_embed}}
+                            {{^is_embed}}
+                            <img src="{{path}}" alt="{{name}}">
+                            {{/is_embed}}
+                        </div>
+                        {{/output_figures}}
                     </div>
-                    {{/output_figures}}
 
                     {{#output_tables}}
                     <div class="table-section">
