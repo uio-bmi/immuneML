@@ -9,10 +9,9 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, TensorDataset
 
+from immuneML.data_model.SequenceParams import RegionType, Chain
 from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
-from immuneML.data_model.SequenceParams import RegionType, Chain
-from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
@@ -133,12 +132,13 @@ class SimpleLSTM(GenerativeModel):
         if (epoch + 1) % SimpleLSTM.ITER_TO_REPORT == 0:
             message = f"{SimpleLSTM.__name__}: Epoch [{epoch + 1}/{self.num_epochs}]: loss: {loss:.4f}"
             print_log(message, True)
-            
+
             loss_summary['loss'].append(loss)
             loss_summary['epoch'].append(epoch + 1)
         return loss_summary
 
     def fit(self, data, path: Path = None):
+
         data_loader = self._encode_dataset(data)
         model = self.make_new_model()
         model.train()
@@ -153,24 +153,22 @@ class SimpleLSTM(GenerativeModel):
 
             for x_batch, y_batch in data_loader:
                 x_batch, y_batch = x_batch.to(self.device), y_batch.to(self.device)
-                
+
                 # Initialize state for each batch
                 state = model.init_zero_state(x_batch.size(0))
-                
+
                 optimizer.zero_grad()
-                
+
                 outputs, _ = model(x_batch, state)
-                # outputs shape: (batch_size, seq_len, vocab_size)
-                # need to reshape to (batch_size * seq_len, vocab_size) for loss
                 outputs = outputs.reshape(-1, outputs.size(-1))
                 y_batch = y_batch.reshape(-1)
-                
+
                 loss = criterion(outputs, y_batch)
-                
+
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5)
                 optimizer.step()
-                
+
                 epoch_loss += loss.item()
                 num_batches += 1
 
@@ -198,14 +196,14 @@ class SimpleLSTM(GenerativeModel):
             [[self.letter_to_index[letter] for letter in seq] + [self.letter_to_index['*']] for seq in sequences]))
 
         sequences = torch.as_tensor(sequences, device=self.device).long()
-        
+
         # Create overlapping windows of size window_size
         # stride=1 means each window overlaps with previous window by window_size-1 elements
-        windows = sequences.unfold(0, self.window_size, 1)  
-        
+        windows = sequences.unfold(0, self.window_size, 1)
+
         # Create input-target pairs from windows
         x = windows[:, :-1]  # All but last character of each window
-        y = windows[:, 1:]   # All but first character of each window
+        y = windows[:, 1:]  # All but first character of each window
 
         return DataLoader(TensorDataset(x, y), shuffle=True, batch_size=self.batch_size)
 
@@ -214,10 +212,12 @@ class SimpleLSTM(GenerativeModel):
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool,
                            max_failed_trials: int = 1000):
+
         torch.manual_seed(seed)
 
         self._model.eval()
-        input_vector = torch.as_tensor([self.letter_to_index[letter] for letter in self.prime_str], device=self.device).long()
+        input_vector = torch.as_tensor([self.letter_to_index[letter] for letter in self.prime_str],
+                                       device=self.device).long()
         predicted = self.prime_str
         failed_trials = 0
         total_trials = 0
@@ -235,15 +235,21 @@ class SimpleLSTM(GenerativeModel):
 
             while gen_seq_count < count and failed_trials < max_failed_trials:
                 output, state = self._model(inp, state)
-                
-                output_dist = output[0, 0].div(self.temperature).exp()
+
+                scaled_logits = output[0, 0] / self.temperature
+                scaled_logits = torch.clamp(scaled_logits, min=-100, max=100)
+                output_dist = torch.nn.functional.softmax(scaled_logits, dim=0)
+
                 try:
+                    output_dist = output_dist + 1e-10
+                    output_dist = output_dist / output_dist.sum()
                     top_i = torch.multinomial(output_dist, 1)[0].item()
                 except RuntimeError as e:
-                    logging.warning(f"{SimpleLSTM.__name__}: error while generating sequence: {e}; "
-                                    f"choosing top character instead of sampling from multinomial distribution.")
-                    logging.debug(f"{SimpleLSTM.__name__}: {output_dist}\n")
-                    top_i = output_dist.argmax().item()
+                    logging.warning(f"{SimpleLSTM.__name__}: Error sampling from distribution: {e}; "
+                                    f"Using argmax instead.")
+                    logging.debug(f"{SimpleLSTM.__name__}: Distribution: {output_dist}\n"
+                                  f"Sum: {output_dist.sum()}, Min: {output_dist.min()}, Max: {output_dist.max()}")
+                    top_i = scaled_logits.argmax().item()
 
                 predicted_char = self.index_to_letter[top_i]
                 predicted += predicted_char
@@ -251,32 +257,35 @@ class SimpleLSTM(GenerativeModel):
                 inp = inp.unsqueeze(0).unsqueeze(0)
 
                 if predicted_char == "*":
-                    # Get the last generated sequence
                     last_seq = predicted.split('*')[-2]
-                    if len(last_seq) > 0:  # Valid sequence
+                    if len(last_seq) > 0:
                         gen_seq_count += 1
                         print_log(f"Generated valid sequence {gen_seq_count}/{count}", True)
-                    else:  # Empty sequence
+
+                    else:
                         failed_trials += 1
                         if failed_trials % 10 == 0:
                             print_log(f"Warning: LSTM model generated {failed_trials} empty sequences", True)
-                
+
                 total_trials += 1
 
-        print_log(f"{SimpleLSTM.__name__} {self.name}: generated {gen_seq_count} sequences with {failed_trials} failed attempts.", True)
+        print_log(
+            f"{SimpleLSTM.__name__} {self.name}: generated {gen_seq_count} sequences with {failed_trials} failed attempts.",
+            True)
 
+        dataset = self._export_dataset(predicted, path)
+        return dataset
+
+    def _export_dataset(self, predicted, path):
         sequences = [seq for seq in predicted.split('*') if len(seq) > 0]
-        return self._export_dataset(sequences[:count], count, path)
+        count = len(sequences)
+        df = pd.DataFrame({get_sequence_field_name(self.region_type, self.sequence_type): sequences,
+                           'locus': [self.locus.to_string() for _ in range(count)],
+                           'gen_model_name': [self.name for _ in range(count)]})
 
-    def _export_dataset(self, sequences, count, path):
-        sequence_objs = [ReceptorSequence(**{
-            self.sequence_type.value: sequence,
-            'locus': self.locus.to_string(), 'metadata': {'gen_model_name': self.name}
-        }) for i, sequence in enumerate(sequences)]
+        return SequenceDataset.build_from_partial_df(df, PathBuilder.build(path), 'synthetic_lstm_dataset',
+                                                     {'gen_model_name': [self.name]}, {'gen_model_name': str})
 
-        return SequenceDataset.build_from_objects(sequences=sequence_objs, path=PathBuilder.build(path),
-                                                  name='synthetic_lstm_dataset', labels={'gen_model_name': [self.name]},
-                                                  region_type=self.region_type)
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         raise RuntimeError
