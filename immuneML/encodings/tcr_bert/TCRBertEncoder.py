@@ -57,6 +57,7 @@ class TCRBertEncoder(DatasetEncoder):
         else:
             raise ValueError("TCRBertEncoder is not defined for dataset types which are not SequenceDataset.")
 
+    @staticmethod
     def _prepare_parameters(name: str = None, model: str = None, layers: list = None, method: str = None,
                             batch_size: int = None):
         location = TCRBertEncoder.__name__
