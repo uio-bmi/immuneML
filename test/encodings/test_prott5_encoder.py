@@ -1,7 +1,7 @@
 import os
 import shutil
 
-import pytest
+import numpy as np
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.encodings.EncoderParams import EncoderParams
@@ -73,6 +73,8 @@ class TestProtT5Encoder:
         assert encoded.encoded_data is not None
         assert encoded.encoded_data.examples.shape[0] == 10  # number of receptors
         assert encoded.encoded_data.examples.shape[1] == 2048  # embedding dimension (2 * 1024)
+        assert isinstance(encoded.encoded_data.examples, np.ndarray)
+        assert encoded.encoded_data.examples.dtype == np.float32
         assert len(encoded.encoded_data.example_ids) == 10
         assert all(isinstance(label, bool) for label in encoded.encoded_data.labels["label"])
 

@@ -82,46 +82,45 @@ class ProtT5Encoder(DatasetEncoder):
 
     def _encode_receptor_dataset(self, dataset: ReceptorDataset, params: EncoderParams):
         seq_field = get_sequence_field_name(region_type=self.region_type, sequence_type=SequenceType.AMINO_ACID)
-        transformer_link = "Rostlab/prot_t5_xl_half_uniref50-enc"
 
-        data = dataset.data.topandas()
-        loci = sorted(list(set(data.locus)))
+        data = dataset.data
 
+        loci = sorted(list(set(data.locus.tolist())))
         assert len(loci) == 2, (f"{ProtT5Encoder.__name__}: {self.name}: to encode receptor dataset, it has to include "
                                 f"two different chains, but got: {loci} instead.")
-        chain_pair = ChainPair.get_chain_pair([Chain.get_chain(locus) for locus in loci])
 
-        chain1 = data[data.locus == loci[0]].sort_values('cell_id')
-        chain2 = data[data.locus == loci[1]].sort_values('cell_id')
+        embeddings = self._embed_sequence_set(data, seq_field)
 
-        assert all(chain1.cell_id.values == chain2.cell_id.values), (
-            f"{ProtT5Encoder.__name__}: {self.name}: different number of "
-            f"sequences per chain when sorted by cell_id:\n{chain1}\n{chain2}.")
-        
-        # Select rows from BNPDataClass using the sorted cell IDs
-        chain1_data = dataset.data[dataset.data.locus.tolist() == loci[0]]
-        chain2_data = dataset.data[dataset.data.locus.tolist() == loci[1]]
+        cell_ids = data.cell_id.tolist()
+        chain_types = data.locus.tolist()
 
-        # Get sorting indices
-        chain1_order = np.argsort(chain1_data.cell_id)
-        chain2_order = np.argsort(chain2_data.cell_id)
+        chain1_embeddings = {}
+        chain2_embeddings = {}
 
-        # Apply sorting
-        chain1_data = chain1_data[chain1_order]
-        chain2_data = chain2_data[chain2_order]
+        for i, (cell_id, chain_type) in enumerate(zip(cell_ids, chain_types)):
+            if chain_type == loci[0]:
+                chain1_embeddings[cell_id] = embeddings[i]
+            else:
+                chain2_embeddings[cell_id] = embeddings[i]
 
-        chain1_embeddings = self._embed_sequence_set(chain1_data, seq_field)
-        chain2_embeddings = self._embed_sequence_set(chain2_data, seq_field)
+        assert set(chain1_embeddings.keys()) == set(chain2_embeddings.keys()), \
+            f"{ProtT5Encoder.__name__}: {self.name}: some receptors are missing one of the chains"
 
-        # Concatenate embeddings from both chains
-        embeddings = np.concatenate((chain1_embeddings, chain2_embeddings), axis=1)
+        receptor_ids = list(chain1_embeddings.keys())
+        concatenated_embeddings = np.array([
+            np.concatenate([chain1_embeddings[cell_id], chain2_embeddings[cell_id]])
+            for cell_id in receptor_ids
+        ])
+
+        labels = (data.topandas().groupby('cell_id').first()[params.label_config.get_labels_by_name()]
+                  .to_dict(orient='list'))
 
         encoded_dataset = dataset.clone()
-        encoded_dataset.encoded_data = EncodedData(examples=embeddings,
-                                                   labels={label.name: getattr(dataset, label.name) for label in
-                                                           params.label_config.get_label_objects()},
-                                                   example_ids=dataset.get_example_ids(),
-                                                   encoding=f'ProtT5Encoder({transformer_link})')
+        encoded_dataset.encoded_data = EncodedData(
+            examples=concatenated_embeddings,
+            labels=labels, example_ids=receptor_ids,
+            encoding=f'ProtT5Encoder({self.transformer_link})'
+        )
 
         return encoded_dataset
 
