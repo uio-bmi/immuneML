@@ -91,69 +91,22 @@ class VJGeneDistribution(DataReport):
             self.label_name = None
 
     def _get_sequence_receptor_results(self):
-        attributes = [self.label_name] if self.split_by_label else []
-        attributes += ["v_call", "j_call", "locus"]
-        dataset_attributes = self.dataset.data.topandas()[attributes]
-        dataset_attributes = {key: value.tolist() for key, value in dataset_attributes.items()}
-
-        v_tables, v_plots = self._get_single_gene_results_from_attributes(dataset_attributes, "v_call")
-        j_tables, j_plots = self._get_single_gene_results_from_attributes(dataset_attributes, "j_call")
-        vj_tables, vj_plots = self._get_combo_gene_results_from_attributes(dataset_attributes)
+        v_tables, v_plots = self._get_single_gene_results("v_call")
+        j_tables, j_plots = self._get_single_gene_results("j_call")
+        vj_tables, vj_plots = self._get_combo_gene_results()
 
         return ReportResult(name=self.name,
                             info="V and J gene distributions",
                             output_figures=v_plots + j_plots + vj_plots,
                             output_tables=v_tables + j_tables + vj_tables)
 
-    def _get_single_gene_results_from_attributes(self, dataset_attributes, call_type):
-        vj = call_type[0].upper()
+    def _get_attribute_counts(self, sequence_set, attribute_names):
+        # sequence_set = repertoire.data or dataset.data
+        assert all([name in dir(sequence_set) for name in attribute_names]), \
+            f"{VJGeneDistribution.__name__}: Sequence set does not contain all attributes: {', '.join({name: name in dir(sequence_set) for name in attribute_names})}"
 
-        tables = []
-        plots = []
-
-        counts_df = self._get_gene_count_df(dataset_attributes, call_type)
-
-        for chain in set(dataset_attributes["locus"]):
-            chain_df = counts_df[counts_df["locus"] == chain]
-
-            tables.append(self._write_output_table(chain_df,
-                                                   file_path=self.result_path / f"{chain}{vj}_gene_distribution.tsv",
-                                                   name=f"{vj} gene distribution"))
-
-            plots.append(self._safe_plot(plot_callable="_plot_gene_distribution",
-                                         df=chain_df,
-                                         title=f"{chain} {vj} gene distribution",
-                                         filename=f"{chain}{vj}_gene_distribution.html"))
-
-        return tables, plots
-
-    def _get_gene_count_df(self, dataset_attributes, call_type, include_label=True):
-        if self.label_name is None or include_label == False:
-            genes_counter = Counter(zip(dataset_attributes[call_type],
-                                        dataset_attributes["locus"]))
-            colnames = ["genes", "locus"]
-        else:
-            genes_counter = Counter(zip(dataset_attributes[call_type],
-                                        dataset_attributes["locus"],
-                                        dataset_attributes[self.label_name]))
-            colnames = ["genes", "locus", self.label_name]
-
-        return self._counter_to_df(genes_counter, colnames)
-
-    def _get_vj_combo_count_df(self, dataset_attributes, include_label=True):
-        if self.label_name is None or include_label == False:
-            genes_counter = Counter(zip(dataset_attributes["v_call"],
-                                        dataset_attributes["j_call"],
-                                        dataset_attributes["locus"]))
-            colnames = ["v_genes", "j_genes", "locus"]
-        else:
-            genes_counter = Counter(zip(dataset_attributes["v_call"],
-                                        dataset_attributes["j_call"],
-                                        dataset_attributes["locus"],
-                                        dataset_attributes[self.label_name]))
-            colnames = ["v_genes", "j_genes", "locus", self.label_name]
-
-        return self._counter_to_df(genes_counter, colnames)
+        counter = Counter(zip(*[getattr(sequence_set, attribute_name).tolist() for attribute_name in attribute_names]))
+        return self._counter_to_df(counter, attribute_names)
 
     def _counter_to_df(self, counter, colnames):
         df = pd.DataFrame.from_dict(counter, orient="index", columns=["counts"])
@@ -161,12 +114,39 @@ class VJGeneDistribution(DataReport):
 
         return df[colnames + ["counts"]].reset_index(drop=True)
 
-    def _plot_gene_distribution(self, df, title, filename):
-        figure = px.bar(df, x="genes", y="counts", color=self.label_name,
-                        labels={"genes": "Gene names",
+    def _get_single_gene_results(self, call_type):
+        vj = call_type[0].upper()
+
+        attributes = [self.label_name] if self.split_by_label else []
+        attributes += ["locus", call_type]
+
+        tables = []
+        plots = []
+
+        counts_df = self._get_attribute_counts(self.dataset.data, attributes)
+
+        for chain in counts_df["locus"].unique():
+            chain_df = counts_df[counts_df["locus"] == chain]
+
+            tables.append(self._write_output_table(chain_df,
+                                                   file_path=self.result_path / f"{chain}{vj}_gene_distribution.tsv",
+                                                   name=f"{vj} gene distribution"))
+
+            plots.append(self._safe_plot(plot_callable="_plot_gene_distribution",
+                                         gene_col=call_type,
+                                         df=chain_df,
+                                         title=f"{chain} {vj} gene distribution",
+                                         filename=f"{chain}{vj}_gene_distribution.html"))
+
+        return tables, plots
+
+
+    def _plot_gene_distribution(self, df, gene_col, title, filename):
+        figure = px.bar(df, x=gene_col, y="counts", color=self.label_name,
+                        labels={gene_col: "Gene names",
                                 "counts": "Observed frequency"},
                         color_discrete_sequence=px.colors.diverging.Tealrose)
-        figure.update_layout(xaxis=dict(tickmode='array', tickvals=df["genes"]),
+        figure.update_layout(xaxis=dict(tickmode='array', tickvals=df[gene_col]),
                              yaxis=dict(tickmode='array', tickvals=df["counts"]),
                              template="plotly_white",
                              barmode="group")
@@ -175,15 +155,17 @@ class VJGeneDistribution(DataReport):
         figure.write_html(str(file_path))
         return ReportOutput(path=file_path, name=title)
 
-    def _get_combo_gene_results_from_attributes(self, dataset_attributes):
+    def _get_combo_gene_results(self):
+        attributes = [self.label_name] if self.split_by_label else []
+        attributes += ["locus", "v_call", "j_call"]
+
+        counts_df = self._get_attribute_counts(self.dataset.data, attributes)
+
         tables = []
         plots = []
 
-        vj_combo_count_df = self._get_vj_combo_count_df(dataset_attributes)
-
-
-        for chain in set(dataset_attributes["locus"]):
-            chain_df = vj_combo_count_df[vj_combo_count_df["locus"] == chain]
+        for chain in counts_df["locus"].unique():
+            chain_df = counts_df[counts_df["locus"] == chain]
 
             tables.append(self._write_output_table(chain_df,
                                                    file_path=self.result_path / f"{chain}VJ_gene_distribution.tsv",
@@ -199,7 +181,7 @@ class VJGeneDistribution(DataReport):
                 # ensure the same color scale is used for each heatmap
                 zmax = max(chain_df["counts"])
 
-                for label_class in set(dataset_attributes[self.label_name]):
+                for label_class in counts_df[self.label_name].unique():
                     label_chain_df = chain_df[chain_df[self.label_name] == label_class]
 
                     plots.append(self._safe_plot(plot_callable="_plot_gene_combo_heatmap",
@@ -214,7 +196,7 @@ class VJGeneDistribution(DataReport):
                                  color_name="Observed frequency"):
         zmax = max(chain_df[value_to_plot]) if zmax is None else zmax
 
-        chain_df = chain_df.pivot(index="v_genes", columns="j_genes", values=value_to_plot).round(decimals=2)
+        chain_df = chain_df.pivot(index="v_call", columns="j_call", values=value_to_plot).round(decimals=2)
         figure = px.imshow(chain_df, labels=dict(x="V genes",
                                                  y="J genes",
                                                  color=color_name),
@@ -234,11 +216,13 @@ class VJGeneDistribution(DataReport):
 
         for chain in set(vj_df["locus"]):
             plots.append(self._safe_plot(plot_callable="_plot_gene_distribution_across_repertoires",
+                                         gene_col="v_call",
                                          chain_df=v_df[v_df["locus"] == chain],
                                          title=f"{chain} V gene distribution per repertoire",
                                          filename=f"{chain}V_gene_distribution.html"))
 
             plots.append(self._safe_plot(plot_callable="_plot_gene_distribution_across_repertoires",
+                                         gene_col="j_call",
                                          chain_df=j_df[j_df["locus"] == chain],
                                          title=f"{chain} J gene distribution per repertoire",
                                          filename=f"{chain}J_gene_distribution.html"))
@@ -279,7 +263,7 @@ class VJGeneDistribution(DataReport):
         return plots
 
     def _average_norm_counts_per_repertoire(self, chain_vj_df):
-        groupby_cols = ["v_genes", "j_genes", "locus"]
+        groupby_cols = ["v_call", "j_call", "locus"]
         groupby_cols += [self.label_name] if self.label_name is not None else []
 
         mean_chain_vj_df = pd.DataFrame(chain_vj_df.groupby(groupby_cols)["norm_counts"].mean()).reset_index()
@@ -288,27 +272,22 @@ class VJGeneDistribution(DataReport):
         return mean_chain_vj_df
 
     def _get_repertoire_count_dfs(self):
+        attributes = [self.label_name] if self.split_by_label and self.is_sequence_label else []
+        attributes += ["locus"]
+
         v_dfs = []
         j_dfs = []
         vj_dfs = []
 
         for repertoire in self.dataset.repertoires:
-            data = repertoire.data
-            if hasattr(data, "locus"):
-                assert len(set(data.locus.tolist())) == 1, (f"{VJGeneDistribution.__name__}: Repertoire {repertoire.identifier} of dataset {self.dataset.name} contained multiple loci: {set(data.locus.tolist())}. "
+            sequence_set = repertoire.data
+            if hasattr(sequence_set, "locus"):
+                assert len(set(sequence_set.locus.tolist())) == 1, (f"{VJGeneDistribution.__name__}: Repertoire {repertoire.identifier} of dataset {self.dataset.name} contained multiple loci: {set(data.locus.tolist())}. "
                                                               f"This report can only be created for 1 locus per repertoire.")
 
-
-            repertoire_attributes = {"v_call": data.v_call.tolist(),
-                                     "j_call": data.j_call.tolist(),
-                                     "locus": data.locus.tolist()}
-
-            if self.is_sequence_label:
-                repertoire_attributes[self.label_name] = getattr(data, self.label_name).tolist()
-
-            v_rep_df = self._get_gene_count_df(repertoire_attributes, "v_call", include_label=self.is_sequence_label)
-            j_rep_df = self._get_gene_count_df(repertoire_attributes, "j_call", include_label=self.is_sequence_label)
-            vj_rep_df = self._get_vj_combo_count_df(repertoire_attributes, include_label=self.is_sequence_label)
+            v_rep_df = self._get_attribute_counts(sequence_set, attributes + ["v_call"])
+            j_rep_df = self._get_attribute_counts(sequence_set, attributes + ["j_call"])
+            vj_rep_df = self._get_attribute_counts(sequence_set, attributes + ["v_call", "j_call"])
 
             self._supplement_repertoire_df(v_rep_df, repertoire)
             self._supplement_repertoire_df(j_rep_df, repertoire)
@@ -349,10 +328,10 @@ class VJGeneDistribution(DataReport):
 
         return tables
 
-    def _plot_gene_distribution_across_repertoires(self, chain_df, title, filename):
-        figure = px.box(chain_df, x="genes", y="norm_counts", color=self.label_name,
+    def _plot_gene_distribution_across_repertoires(self, chain_df, gene_col, title, filename):
+        figure = px.box(chain_df, x=gene_col, y="norm_counts", color=self.label_name,
                         hover_data=["repertoire_id", "subject_id"],
-                        labels={"genes": "Gene names",
+                        labels={gene_col: "Gene names",
                                 "norm_counts": "Fraction of the repertoire"},
                         color_discrete_sequence=px.colors.diverging.Tealrose)
         figure.update_layout(template="plotly_white")
