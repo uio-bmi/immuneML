@@ -96,13 +96,14 @@ class ValidationHandler:
         ClusteringItem, pd.DataFrame]:
         """Apply trained classifier to validation data."""
 
+        enc_dataset = self.runner.encode_dataset(dataset, cl_setting, learn_model=False, encoder=encoder)
+        features = get_features(enc_dataset, cl_setting)
+
         if isinstance(classifier, numbers.Number):
             predictions = [classifier] * dataset.get_example_count()
             logging.warning(f"Only one cluster found in discovery data. Assigning all validation data to "
                             f"cluster {classifier}.")
         else:
-            enc_dataset = self.runner.encode_dataset(dataset, cl_setting, learn_model=False, encoder=encoder)
-            features = get_features(enc_dataset, cl_setting)
             predictions = classifier.predict(features)
 
         predictions_df[f'predictions_{cl_setting.get_key()}'] = predictions
