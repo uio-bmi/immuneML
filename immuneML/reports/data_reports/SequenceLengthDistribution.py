@@ -98,8 +98,8 @@ class SequenceLengthDistribution(DataReport):
         elif isinstance(self.dataset, ReceptorDataset):
             sequence_lengths_df = self._get_sequence_lengths_df_receptor_dataset()
 
-        if not self.split_by_label and "class" in sequence_lengths_df.columns:
-            sequence_lengths_df.drop(columns=["class"], inplace=True)
+        if not self.split_by_label and self.label_name in sequence_lengths_df.columns:
+            sequence_lengths_df.drop(columns=[self.label_name], inplace=True)
 
         return sequence_lengths_df
 
@@ -125,7 +125,7 @@ class SequenceLengthDistribution(DataReport):
 
         for class_name, raw_count_dict in raw_count_dict_per_class.items():
             result_df = self._count_dict_to_df(raw_count_dict)
-            result_df["class"] = class_name
+            result_df[self.label_name] = class_name
             result_dfs.append(result_df)
 
         return pd.concat(result_dfs)
@@ -180,21 +180,22 @@ class SequenceLengthDistribution(DataReport):
 
     def _count_in_repertoire(self, repertoire: Repertoire) -> Counter:
         return Counter(getattr(repertoire.data,
-                                bnp_util.get_sequence_field_name(self.region_type,
-                                                                 self.sequence_type)).lengths.tolist())
+                               bnp_util.get_sequence_field_name(self.region_type,
+                                                                self.sequence_type)).lengths.tolist())
 
     def _plot(self, df: pd.DataFrame) -> ReportOutput:
         if isinstance(self.dataset, ReceptorDataset):
             facet_col = "chain"
         else:
-            facet_col = "class" if "class" in df.columns else None
+            facet_col = self.label_name if self.label_name in df.columns else None
 
-        figure = px.bar(df, x="sequence_lengths", y="counts",
-                        facet_col=facet_col)
-        figure.update_layout(xaxis=dict(tickmode='array', tickvals=df["sequence_lengths"]),
-                             yaxis=dict(tickmode='array', tickvals=df["counts"]),
-                             template="plotly_white")
+        figure = px.bar(df, x="sequence_lengths", y="counts", facet_col=facet_col)
+        figure.update_layout(template="plotly_white")
         figure.update_traces(marker_color=px.colors.diverging.Tealrose[0])
+
+        for annotation in figure.layout.annotations:
+            annotation['font'] = {'size': 16}
+
         PathBuilder.build(self.result_path)
 
         file_path = self.result_path / "sequence_length_distribution.html"
