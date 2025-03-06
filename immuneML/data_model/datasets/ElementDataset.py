@@ -324,7 +324,7 @@ def fill_in_neutral_vals(all_fields, airr_fields, sequences):
 
 
 def fix_empty_strings_in_metadata(df: pd.DataFrame):
-    for col, col_type in df.dtypes.todict().items():
+    for col, col_type in df.dtypes.to_dict().items():
         if col_type == object:
             df[col] = df[col].astype(str).replace('nan', '')
     return df
