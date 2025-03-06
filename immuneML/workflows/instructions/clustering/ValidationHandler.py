@@ -1,4 +1,5 @@
 import logging
+import numbers
 from pathlib import Path
 from typing import Tuple
 
@@ -95,7 +96,7 @@ class ValidationHandler:
         ClusteringItem, pd.DataFrame]:
         """Apply trained classifier to validation data."""
 
-        if isinstance(classifier, int):
+        if isinstance(classifier, numbers.Number):
             predictions = [classifier] * dataset.get_example_count()
             logging.warning(f"Only one cluster found in discovery data. Assigning all validation data to "
                             f"cluster {classifier}.")
