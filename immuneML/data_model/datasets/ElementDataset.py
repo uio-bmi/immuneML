@@ -74,7 +74,8 @@ class ElementDataset(Dataset, ABC):
         return dataset
 
     def get_label_names(self):
-        return [el for el in list(self.labels.keys()) if el not in ['type_dict_dynamic_fields', 'organism']] \
+        invalid_label_names = ['type_dict_dynamic_fields', 'organism', 'j_gene', 'v_gene', 'j_call', 'v_call']
+        return [el for el in list(self.labels.keys()) if el not in invalid_label_names] \
             if isinstance(self.labels, dict) else []
 
 
@@ -139,9 +140,10 @@ class SequenceDataset(ElementDataset):
         return SequenceDataset.build(filename, path / f'{name}.yaml', name)
 
     def get_metadata(self, field_names: list, return_df: bool = False):
-        """Returns a dict or an equivalent pandas DataFrame with metadata information from Receptor objects for
+        """Returns a dict or an equivalent pandas DataFrame with metadata information from ReceptorSequence objects for
         provided field names"""
         result = self.data.topandas()[field_names]
+        result = fix_empty_strings_in_metadata(result)
 
         return result if return_df else result.to_dict("list")
 
@@ -221,7 +223,9 @@ class ReceptorDataset(ElementDataset):
     def get_metadata(self, field_names: list, return_df: bool = False):
         """Returns a dict or an equivalent pandas DataFrame with metadata information from Receptor objects for
         provided field names"""
-        result = self.data.topandas().groupby('cell_id', sort=False).agg(
+        result = fix_empty_strings_in_metadata(self.data.topandas())
+
+        result = result.groupby('cell_id', sort=False).agg(
             lambda x: "_".join([str(el) for el in list(set(x))])).reset_index()
         if any(field_name not in result.columns for field_name in field_names):
             logging.warning(
@@ -317,3 +321,10 @@ def fill_in_neutral_vals(all_fields, airr_fields, sequences):
             all_fields[f.name] = [val if val is not None else neutral_val for val in all_fields[f.name]]
 
     return all_fields
+
+
+def fix_empty_strings_in_metadata(df: pd.DataFrame):
+    for col, col_type in df.dtypes.todict().items():
+        if col_type == object:
+            df[col] = df[col].astype(str).replace('nan', '')
+    return df
