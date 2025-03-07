@@ -52,7 +52,7 @@ class ProtT5Encoder(DatasetEncoder):
     @staticmethod
     def build_object(dataset: Dataset, **params):
         ParameterValidator.assert_region_type(params, ProtT5Encoder.__name__)
-        return ProtT5Encoder(**params, region_type=RegionType[params['region_type'].upper()])
+        return ProtT5Encoder(**{**params, 'region_type': RegionType[params['region_type'].upper()]})
 
     def encode(self, dataset: Dataset, params: EncoderParams) -> Dataset:
         cache_params = (dataset.identifier, ProtT5Encoder.__name__, self.region_type.name, self.transformer_link)
