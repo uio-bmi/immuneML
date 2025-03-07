@@ -44,7 +44,7 @@ class ProtT5Encoder(ProteinEmbeddingEncoder):
     @staticmethod
     def build_object(dataset: Dataset, **params):
         ParameterValidator.assert_region_type(params, ProtT5Encoder.__name__)
-        return ProtT5Encoder(**params, region_type=RegionType[params['region_type'].upper()])
+        return ProtT5Encoder(**{**params, 'region_type': RegionType[params['region_type'].upper()]})
 
     def _embed_sequence_set(self, sequence_set: AIRRSequenceSet, seq_field: str):
         import torch
