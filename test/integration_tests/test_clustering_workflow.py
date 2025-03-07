@@ -29,7 +29,8 @@ def test_clustering_workflow():
             },
             'encodings': {
                 'kmer': 'KmerFrequency',
-                'bert': "TCRBert"
+                'bert': "TCRBert",
+                'prottrans': "ProtT5"
             },
             'ml_methods': {
                 'pca': {
