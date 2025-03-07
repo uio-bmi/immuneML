@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Union
 
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
@@ -36,7 +36,7 @@ class ClusteringResultPerRun:
     run_type: str
     items: Dict[str, ClusteringItemResult] = field(default_factory=dict)
 
-    def get_cl_item(self, cl_setting: str | ClusteringSetting):
+    def get_cl_item(self, cl_setting: Union[str, ClusteringSetting]):
         key = cl_setting if isinstance(cl_setting, str) else cl_setting.get_key()
         return self.items[key].item
 

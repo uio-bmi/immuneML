@@ -5,7 +5,7 @@ import numpy as np
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.prott5.ProtT5Encoder import ProtT5Encoder
+from immuneML.encodings.protein_embedding.ProtT5Encoder import ProtT5Encoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
@@ -39,7 +39,6 @@ class TestProtT5Encoder:
         encoder = self.create_encoder()
         dataset = RandomDatasetGenerator.generate_sequence_dataset(sequence_count=10, length_probabilities={3: 1},
                                                                    labels={"label": {True: 0.5, False: 0.5}}, path=path)
-
         lc = self.create_label_config()
         encoded = encoder.encode(dataset, EncoderParams(
             label_config=lc,

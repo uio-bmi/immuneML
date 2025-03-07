@@ -1,17 +1,13 @@
 from itertools import zip_longest
 import numpy as np
-
-from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.EncodedData import EncodedData
-from immuneML.data_model.bnp_util import get_sequence_field_name
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
-from immuneML.data_model.datasets.ElementDataset import SequenceDataset
-from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.protein_embedding.ProteinEmbeddingEncoder import ProteinEmbeddingEncoder
 from immuneML.util.ParameterValidator import ParameterValidator
 
 
-class TCRBertEncoder(DatasetEncoder):
+class TCRBertEncoder(ProteinEmbeddingEncoder):
     """
     TCRBertEncoder is based on `TCR-BERT <https://github.com/wukevin/tcr-bert/tree/main>`, a large language model
     trained on TCR sequences. TCRBertEncoder embeds TCR sequences using either of the pre-trained models provided on
@@ -41,9 +37,9 @@ class TCRBertEncoder(DatasetEncoder):
                     my_tcr_bert_encoder: TCRBert
 
         """
-    def __init__(self, name: str = None, model: str = None, layers: list = None, method: str = None,
+    def __init__(self, name: str = None, region_type: RegionType = RegionType.IMGT_CDR3, model: str = None, layers: list = None, method: str = None,
                  batch_size: int = None):
-        super().__init__(name=name)
+        super().__init__(region_type, name)
         self.model = model
         self.layers = layers
         self.method = method
@@ -51,11 +47,8 @@ class TCRBertEncoder(DatasetEncoder):
 
     @staticmethod
     def build_object(dataset: Dataset, **params):
-        if isinstance(dataset, SequenceDataset):
-            prepared_params = TCRBertEncoder._prepare_parameters(**params)
-            return TCRBertEncoder(**prepared_params)
-        else:
-            raise ValueError("TCRBertEncoder is not defined for dataset types which are not SequenceDataset.")
+        prepared_params = TCRBertEncoder._prepare_parameters(**params)
+        return TCRBertEncoder(**prepared_params)
 
     @staticmethod
     def _prepare_parameters(name: str = None, model: str = None, layers: list = None, method: str = None,
@@ -67,24 +60,17 @@ class TCRBertEncoder(DatasetEncoder):
         ParameterValidator.assert_type_and_value(batch_size, int, location, "batch_size")
         return {"name": name, "model": model, "layers": layers, "method": method, "batch_size": batch_size}
 
-    def encode(self, dataset, params: EncoderParams) -> Dataset:
-        cache_params = self._prepare_caching_params(dataset, params)
-        encoded_data = CacheHandler.memo_by_params(cache_params, lambda: self._encode_data(dataset, params))
-        encoded_dataset = dataset.clone()
-        encoded_dataset.encoded_data = encoded_data
-        return encoded_dataset
-
-    def _prepare_caching_params(self, dataset, params: EncoderParams, step: str = ""):
+    def _get_caching_params(self, dataset, params: EncoderParams):
         return (("dataset_identifier", dataset.identifier),
                 ("labels", tuple(params.label_config.get_labels_by_name())),
                 ("encoding", TCRBertEncoder.__name__),
                 ("learn_model", params.learn_model),
-                ("step", step),
+                ("step", ""),
                 ("encoding_params", tuple(vars(self).items())))
 
-    def _encode_data(self, dataset, params: EncoderParams):
+    def _embed_sequence_set(self, sequence_set, seq_field):
         import torch
-        seqs = self._get_sequences(dataset, params)
+        seqs = self._get_sequences(sequence_set, seq_field)
         model, tok = self._get_relevant_model_and_tok()
         embeddings = []
         chunks_pair = [None]
@@ -152,17 +138,10 @@ class TCRBertEncoder(DatasetEncoder):
         del x
         del model
         torch.cuda.empty_cache()
-        labels = dataset.get_metadata(params.label_config.get_labels_by_name()) if params.encode_labels else None
-        encoded_data = EncodedData(examples=embeddings,
-                                   labels=labels,
-                                   example_ids=dataset.get_example_ids(),
-                                   encoding=TCRBertEncoder.__name__,
-                                   info={"sequence_type": params.sequence_type, 'region_type': params.region_type})
-        return encoded_data
+        return embeddings
 
-    def _get_sequences(self, dataset, params):
-        field_name = get_sequence_field_name(params.region_type, params.sequence_type)
-        seqs = getattr(dataset.data, field_name).tolist()
+    def _get_sequences(self, sequence_set, field_name):
+        seqs = getattr(sequence_set, field_name).tolist()
         seqs = [" ".join(list(s)) for s in seqs]
         return seqs
 
@@ -174,3 +153,9 @@ class TCRBertEncoder(DatasetEncoder):
                                             tokenize_chinese_chars=False, unk_token="?", sep_token="|",
                                             pad_token="$", cls_token="*", mask_token=".", padding_side="right")
         return model, tok
+
+    def _get_encoding_name(self) -> str:
+        return f"TCRBertEncoder({self.model})"
+
+    def _get_model_link(self) -> str:
+        return self.model
