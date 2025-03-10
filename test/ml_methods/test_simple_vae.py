@@ -22,8 +22,8 @@ def test_simple_vae():
     vae.generate_sequences(7, 1, path / 'generated_dataset', SequenceType.AMINO_ACID, False)
 
     assert (path / 'generated_dataset').exists()
-    assert (path / 'generated_dataset/synthetic_None_dataset.tsv').exists()
+    assert (path / 'generated_dataset/synthetic_dataset.tsv').exists()
 
-    assert pd.read_csv(str(path / 'generated_dataset/synthetic_None_dataset.tsv'), sep='\t').shape[0] == 7
+    assert pd.read_csv(str(path / 'generated_dataset/synthetic_dataset.tsv'), sep='\t').shape[0] == 7
 
     shutil.rmtree(path)
