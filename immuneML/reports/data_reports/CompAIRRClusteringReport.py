@@ -68,10 +68,9 @@ class CompAIRRClusteringReport(DataReport):
         self.threads = threads
         self.is_cdr3 = is_cdr3
         self.clustering_threshold = clustering_threshold
-        self.compairr_params = None
 
     def check_prerequisites(self) -> bool:
-        if not self.compairr_params.compairr_path:
+        if not self.compairr_path:
             logging.warning("CompAIRR path not provided. CompAIRR must be installed and available in the system PATH.")
             return False
         if not isinstance(self.dataset, RepertoireDataset):
