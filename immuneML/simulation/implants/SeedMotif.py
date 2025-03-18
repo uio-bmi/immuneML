@@ -183,5 +183,3 @@ class SeedMotif(Motif):
             missing_keys = [key for key in allowed_keys if key not in weights]
             weights = {**{key: (1 - weight_sum) / len(missing_keys) for key in missing_keys}, **weights}
         return weights
-
-

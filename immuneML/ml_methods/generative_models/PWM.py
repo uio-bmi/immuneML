@@ -143,24 +143,11 @@ class PWM(GenerativeModel):
     def _export_gen_dataset(self, sequences: List[str], path: Path) -> SequenceDataset:
         count = len(sequences)
         df = pd.DataFrame({get_sequence_field_name(self.region_type, self.sequence_type): sequences,
-                           'locus': [self.locus for _ in range(count)],
+                           'locus': [self.locus.to_string() for _ in range(count)],
                            'gen_model_name': [self.name for _ in range(count)]})
 
-        df = make_full_airr_seq_set_df(df)
-        filename = str(PathBuilder.build(path) / 'synthetic_dataset.tsv')
-
-        df.to_csv(filename, sep='\t', index=False)
-
-        dataset_yaml = SequenceDataset.create_metadata_dict(SequenceDataset,
-                                             filename=filename,
-                                             type_dict={'gen_model_name': str},
-                                             name="synthetic_dataset",
-                                             labels={'gen_model_name': [self.name]})
-
-        write_dataset_yaml(path / 'synthetic_metadata.yaml', dataset_yaml)
-
-        return SequenceDataset.build(path / 'synthetic_dataset.tsv', path / 'synthetic_metadata.yaml',
-                                     'synthetic_dataset')
+        return SequenceDataset.build_from_partial_df(df, PathBuilder.build(path), 'synthetic_dataset',
+                                                     {'gen_model_name': [self.name]}, {'gen_model_name': str})
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         raise NotImplementedError

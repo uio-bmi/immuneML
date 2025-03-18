@@ -4,7 +4,6 @@ from pathlib import Path
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
-from immuneML.encodings.kmer_frequency.KmerFreqSequenceEncoder import KmerFreqSequenceEncoder
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from immuneML.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from immuneML.environment.LabelConfiguration import LabelConfiguration
@@ -103,7 +102,7 @@ class ExploratoryAnalysisParser:
                                                     ExploratoryAnalysisParser.__name__, "dim_reduction")
             params["dim_reduction"] = copy.deepcopy(valid_dim_reductions[analysis['dim_reduction']])
 
-            assert isinstance(params["encoder"], (KmerFreqSequenceEncoder, Word2VecEncoder)), \
+            assert isinstance(params["encoder"], (KmerFrequencyEncoder, Word2VecEncoder)), \
                 (f"{loc}: {yaml_location}: Only KmerFrequency and Word2Vec are valid encoders when doing dimensionality"
                  f" reduction.")
 

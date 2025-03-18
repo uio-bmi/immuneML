@@ -1,4 +1,5 @@
 import abc
+from typing import List
 
 from immuneML.data_model.datasets.Dataset import Dataset
 
@@ -28,6 +29,10 @@ class DimRedMethod:
 
     @abc.abstractmethod
     def fit_transform(self, dataset: Dataset):
+        pass
+
+    @abc.abstractmethod
+    def get_dimension_names(self) -> List[str]:
         pass
 
     @classmethod

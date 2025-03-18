@@ -7,6 +7,7 @@ import pandas as pd
 
 from immuneML.IO.dataset_export.DataExporter import DataExporter
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
+from immuneML.data_model.bnp_util import read_yaml, write_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import ElementDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
@@ -47,12 +48,18 @@ class AIRRExporter(DataExporter):
 
             elif isinstance(dataset, ElementDataset):
                 AIRRExporter.process_and_store_data_file(dataset.filename, path / dataset.filename.name)
-                shutil.copyfile(dataset.dataset_file, path / dataset.dataset_file.name)
+                AIRRExporter.process_and_store_dataset_file(dataset.dataset_file, path / dataset.dataset_file.name)
 
         except shutil.SameFileError as e:
             logging.warning(f"AIRRExporter: target and input path are the same. Skipping the copy operation...")
 
         # TODO: add here export of full sequence if possible
+
+    @staticmethod
+    def process_and_store_dataset_file(input_filename, output_filename):
+        metadata = read_yaml(input_filename)
+        metadata['filename'] = str(Path(metadata['filename']).name)
+        write_yaml(output_filename, metadata)
 
     @staticmethod
     def process_and_store_data_file(input_filename, output_filename):

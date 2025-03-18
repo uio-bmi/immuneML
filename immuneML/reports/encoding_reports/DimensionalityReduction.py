@@ -22,9 +22,9 @@ class DimensionalityReduction(EncodingReport):
 
     - label (str): name of the label to use for highlighting data points; or None
 
-    - dim_red_method (str): name of the dimensionality reduction method defined under ml_methods that will be
-      used to transform the data for plotting; if None, it will visualize the encoded data of reduced dimensionality if
-      set
+    - dim_red_method (str): dimensionality reduction method to be used for plotting; if set, in a workflow, this
+      dimensionality reduction will be used for plotting instead of any other set in the workflow; if None, it will
+      visualize the encoded data of reduced dimensionality if set
 
 
     **YAML specification:**
@@ -57,12 +57,13 @@ class DimensionalityReduction(EncodingReport):
         super().__init__(dataset=dataset, result_path=result_path, name=name)
         self._label = label
         self._dim_red_method = dim_red_method
-        self.info = (f"This report visualizes the encoded data after applying dimensionality reduction "
-                     f"({self._dim_red_method.__class__.__name__}).")
+        self._dimension_names = ['dimension_1',
+                                 'dimension_2'] if self._dim_red_method else self._dim_red_method.get_dimension_names()
+        self.info = "This report visualizes the encoded data after applying dimensionality reduction"
 
     def check_prerequisites(self):
         return (isinstance(self.dataset.encoded_data, EncodedData) and
-                self.dataset.encoded_data.dimensionality_reduced_data is not None)
+                (self.dataset.encoded_data.dimensionality_reduced_data is not None or self._dim_red_method is not None))
 
     def _generate(self) -> ReportResult:
         if self._dim_red_method:
@@ -84,7 +85,8 @@ class DimensionalityReduction(EncodingReport):
         PathBuilder.build(self.result_path)
 
         df = pd.DataFrame({'example_id': self.dataset.get_example_ids(),
-                           "x": dim_reduced_data[:, 0], 'y': dim_reduced_data[:, 1]})
+                           self._dimension_names[0]: dim_reduced_data[:, 0],
+                           self._dimension_names[1]: dim_reduced_data[:, 1]})
         if self._label:
             df[self._label] = data_labels
         df.to_csv(self.result_path / 'dimensionality_reduced_data.csv', index=False)
@@ -92,14 +94,30 @@ class DimensionalityReduction(EncodingReport):
         report_output_fig = self._safe_plot(df=df, output_written=True)
         output_figures = None if report_output_fig is None else [report_output_fig]
 
-        return ReportResult(name=self.name, info=self.info,
+        dim_red_text = f" ({self._dim_red_method.__class__.__name__})." if self._dim_red_method else "."
+
+        return ReportResult(name=self.name, info=self.info + dim_red_text,
                             output_figures=output_figures,
                             output_tables=[ReportOutput(self.result_path / 'dimensionality_reduced_data.csv',
                                                         'data after dimensionality reduction')])
 
     def _plot(self, df: pd.DataFrame) -> ReportOutput:
-        figure = px.scatter(df, x="x", y="y", color=self._label)
+        if self._label:
+            # Convert to categorical if few unique values
+            unique_values = df[self._label].unique()
+            if len(unique_values) <= 3:
+                df[self._label] = df[self._label].astype('category')
+                figure = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1], color=self._label,
+                                    color_discrete_sequence=px.colors.qualitative.Set1,
+                                    category_orders={self._label: sorted(unique_values)})
+            else:
+                figure = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1], color=self._label)
+        else:
+            # No label case - just plot points
+            figure = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1])
+
         figure.update_layout(template="plotly_white")
+
         PathBuilder.build(self.result_path)
 
         file_path = self.result_path / "dimensionality_reduction.html"

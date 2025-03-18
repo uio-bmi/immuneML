@@ -171,7 +171,7 @@ class TestImmuneMLApp(TestCase):
         with specs_file.open("w") as file:
             yaml.dump(specs, file)
 
-        app = ImmuneMLApp.ImmuneMLApp(specs_file, path / "results")
+        app = ImmuneMLApp.ImmuneMLApp(specs_file, path / "results", 'DEBUG')
         app.run()
 
         full_specs_path = path / "results/full_specs.yaml"

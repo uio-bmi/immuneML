@@ -16,6 +16,7 @@ class ClusteringMethod:
 
     def __init__(self, name: str = None):
         self.name = name
+        self.model = None
 
     @abc.abstractmethod
     def fit(self, dataset: Dataset):
@@ -23,6 +24,10 @@ class ClusteringMethod:
 
     @abc.abstractmethod
     def predict(self, dataset: Dataset):
+        pass
+
+    @abc.abstractmethod
+    def fit_predict(self, dataset: Dataset):
         pass
 
     @abc.abstractmethod

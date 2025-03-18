@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import warnings
 from pathlib import Path
 
@@ -8,7 +9,6 @@ import torch
 import yaml
 from sklearn.exceptions import NotFittedError
 from sklearn.model_selection import train_test_split
-from torch.utils.data import DataLoader
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.EncodedData import EncodedData
@@ -74,6 +74,8 @@ class DeepRC(MLMethod):
 
     - sequence_counts_scaling_fn: it can either be `log` (logarithmic scaling of sequence counts) or None
 
+    - sequence_counts_scaling_fn: it can either be `log` (logarithmic scaling of sequence counts) or None
+
     - evaluate_at (int): Evaluate model on training and validation set every `evaluate_at` updates. This will also check for a new best model for early stopping.
 
     - sample_n_sequences (int): Optional random sub-sampling of `sample_n_sequences` sequences per repertoire. Number of sequences per repertoire might be smaller than `sample_n_sequences` if repertoire is smaller or random indices have been drawn multiple times. If None, all sequences will be loaded for each repertoire.
@@ -117,6 +119,9 @@ class DeepRC(MLMethod):
 
         self.model = None
         self.max_seq_len = None
+
+        self.label = None
+        self.feature_names = None
 
         self.keep_dataset_in_ram = keep_dataset_in_ram
         self.pytorch_device_name = pytorch_device_name
@@ -246,11 +251,13 @@ class DeepRC(MLMethod):
                 ("evaluate_at", self.evaluate_at),
                 ("pytorch_device_name", self.pytorch_device_name))
 
-    def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
+    def _fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
+        self.feature_names = encoded_data.feature_names
+        self.label = label
         self.model = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, "fit", self.label.name),
                                                  lambda: self._fit(encoded_data, self.label, cores_for_training))
 
-    def _fit_model(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
+    def _fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
 
         hdf5_filepath, pre_loaded_hdf5_file = self._convert_dataset_to_hdf5(encoded_data, label)
 
@@ -344,6 +351,12 @@ class DeepRC(MLMethod):
                                show_progress=False, device=self.pytorch_device, evaluate_at=self.evaluate_at,
                                task_definition=task_definition, early_stopping_target_id=label.name)
 
+    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None,
+                                cores_for_training: int = -1,
+                                optimization_metric=None):
+        logging.warning("DeepRC: cross-validation on this classifier is not defined: fitting one model instead...")
+        self.fit(encoded_data, label)
+
     def get_params(self):
         return {name: param.data.tolist() for name, param in self.model.named_parameters()}
 
@@ -358,15 +371,16 @@ class DeepRC(MLMethod):
         pos_class_probs = probabilities[self.label.name][self.label.positive_class]
         negative_class = self.label.get_binary_negative_class()
 
-        return {self.label.name: [self.label.positive_class if probability > 0.5 else negative_class for probability in
+        # TODO: check what is returned here and how it works with multiclass
+        return {label.name: [label.positive_class if probability > 0.5 else negative_class for probability in
                              pos_class_probs]}
 
-    def _predict_proba(self, encoded_data: EncodedData):
+    def predict_proba(self, encoded_data: EncodedData, label: Label):
         from deeprc.dataset_readers import RepertoireDataset as DeepRCRepDataset
-        self.check_is_fitted(self.label.name)
+        self.check_is_fitted(label.name)
 
-        hdf5_filepath, _ = self._convert_dataset_to_hdf5(encoded_data, self.label)
-        task_definition = self._make_task_definition(self.label)
+        hdf5_filepath, _ = self._convert_dataset_to_hdf5(encoded_data, label)
+        task_definition = self._make_task_definition(label)
 
         test_dataset = DeepRCRepDataset(metadata_filepath=encoded_data.info['metadata_filepath'],
                                         hdf5_filepath=str(hdf5_filepath),

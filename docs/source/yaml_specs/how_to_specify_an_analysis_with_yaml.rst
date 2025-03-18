@@ -14,6 +14,12 @@ Since immuneML can be used for a variety of different tasks, different parameter
 The keys are essentially the input parameters to immuneML, except the values to these parameters can consist of more key-value pairs.
 Throughout the documentation, the names of keys (which have a specific meaning) will be formatted like :code:`this`.
 
+.. note::
+
+        If you have not used YAML before, we recommend reading the official docs for an overview (https://yaml.org/spec/1.2.2/#chapter-2-language-overview) or any tutorial online.
+        We also recommend using a YAML-friendly editor (Sublime Text, PyCharm or others) or an online YAML validator (https://jsonformatter.org/yaml-validator) to make sure
+        your YAML file is correctly formatted.
+
 
 The immuneML YAML specification reflects two main sets of keys:
 

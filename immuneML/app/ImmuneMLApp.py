@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import shutil
+from datetime import datetime
 from sys import exit as sys_exit
 import warnings
 from pathlib import Path
@@ -19,11 +20,15 @@ from immuneML.util.ReflectionHandler import ReflectionHandler
 
 class ImmuneMLApp:
 
-    def __init__(self, specification_path: Path, result_path: Path):
+    def __init__(self, specification_path: Path, result_path: Path, logging_level: str = 'INFO'):
+
         self._specification_path = Path(specification_path)
         self._result_path = Path(os.path.relpath(result_path))
 
         PathBuilder.build(self._result_path)
+
+        logging.basicConfig(filename=Path(self._result_path) / "log.txt", level=getattr(logging, logging_level.upper()),
+                            format='%(asctime)s %(levelname)s: %(message)s', force=True)
 
         self._cache_path = self._result_path / "cache"
 
@@ -67,16 +72,16 @@ class ImmuneMLApp:
 
 def run_immuneML(namespace: argparse.Namespace):
     if os.path.isdir(namespace.result_path) and len(os.listdir(namespace.result_path)) != 0:
-        raise ValueError(f"Directory {namespace.result_path} already exists. Please specify a new output directory "
-                         f"for the analysis.")
-    PathBuilder.build(namespace.result_path)
+        result_path = f"{namespace.result_path}_{datetime.now()}"
+        print(f"Directory {namespace.result_path} already exists. The output of this analysis will be "
+              f"stored in {result_path}.")
+    else:
+        result_path = namespace.result_path
 
-    logging.basicConfig(filename=Path(namespace.result_path) / "log.txt", level=logging.INFO,
-                        format='%(asctime)s %(levelname)s: %(message)s')
-    warnings.showwarning = lambda message, category, filename, lineno, file=None, line=None: logging.warning(message)
+    PathBuilder.build(result_path)
 
     if namespace.tool is None:
-        app = ImmuneMLApp(namespace.specification_path, namespace.result_path)
+        app = ImmuneMLApp(namespace.specification_path, result_path, namespace.logging)
     else:
         app_cls = ReflectionHandler.get_class_by_name(namespace.tool, "api/")
         app = app_cls(**vars(namespace))
@@ -92,6 +97,8 @@ def main():
     parser.add_argument("--tool", help="Name of the tool which calls immuneML. This name will be used to invoke "
                                        "appropriate API call, which will then do additional work in tool-dependent "
                                        "way before running standard immuneML.")
+    parser.add_argument('--logging', help='Logging level to use',
+                        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], default='INFO')
     parser.add_argument("--version", action="version", version=Constants.VERSION)
 
     namespace = parser.parse_args()

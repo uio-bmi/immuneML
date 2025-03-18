@@ -85,13 +85,13 @@ class ExploratoryAnalysisInstruction(Instruction):
         name = self.name if self.name is not None else "exploratory_analysis"
         self.state.result_path = result_path / name
         for index, (key, unit) in enumerate(self.state.exploratory_analysis_units.items()):
-            print_log(f"Started analysis {key} ({index+1}/{len(self.state.exploratory_analysis_units)}).",
+            print_log(f"Started analysis {key} ({index + 1}/{len(self.state.exploratory_analysis_units)}).",
                       include_datetime=True)
             path = self.state.result_path / f"analysis_{key}"
             PathBuilder.build(path)
             report_result = self.run_unit(unit, path)
             unit.report_result = report_result
-            print_log(f"Finished analysis {key} ({index+1}/{len(self.state.exploratory_analysis_units)}).\n",
+            print_log(f"Finished analysis {key} ({index + 1}/{len(self.state.exploratory_analysis_units)}).\n",
                       include_datetime=True)
         return self.state
 
@@ -118,8 +118,11 @@ class ExploratoryAnalysisInstruction(Instruction):
         if unit.preprocessing_sequence is not None and len(unit.preprocessing_sequence) > 0:
             dataset = unit.dataset
             for preprocessing in unit.preprocessing_sequence:
-                dataset = preprocessing.process_dataset(dataset, result_path, number_of_processes=unit.number_of_processes)
-                print_log(f"Preprocessed {dataset.__class__.__name__.split('Dataset')[0].lower()} dataset {dataset.name} with {preprocessing.__class__.__name__}:\n"
+                dataset = preprocessing.process_dataset(dataset, result_path,
+                                                        number_of_processes=unit.number_of_processes)
+                print_log(
+                    f"Preprocessed {dataset.__class__.__name__.split('Dataset')[0].lower()} dataset "
+                    f"{dataset.name} with {preprocessing.__class__.__name__}:\n"
                     f"- Example count: {dataset.get_example_count()}\n"
                     f"- Labels: {dataset.get_label_names()}", True)
         else:
@@ -129,11 +132,12 @@ class ExploratoryAnalysisInstruction(Instruction):
     def weight_examples(self, unit: ExploratoryAnalysisUnit, result_path: Path):
         if unit.example_weighting is not None:
             from immuneML.example_weighting.ExampleWeightingParams import ExampleWeightingParams
-            weighted_dataset = DataWeighter.run(DataWeighterParams(dataset=unit.dataset, weighting_strategy=unit.example_weighting,
-                                                                   weighting_params=ExampleWeightingParams(result_path=result_path,
-                                                                                                           pool_size=unit.number_of_processes,
-                                                                                                           learn_model=True),
-                                                                   ))
+            weighted_dataset = DataWeighter.run(
+                DataWeighterParams(dataset=unit.dataset, weighting_strategy=unit.example_weighting,
+                                   weighting_params=ExampleWeightingParams(result_path=result_path,
+                                                                           pool_size=unit.number_of_processes,
+                                                                           learn_model=True),
+                                   ))
         else:
             weighted_dataset = unit.dataset
 
@@ -158,4 +162,3 @@ class ExploratoryAnalysisInstruction(Instruction):
 
         unit.report.dataset = unit.dataset
         return unit.report.generate_report()
-

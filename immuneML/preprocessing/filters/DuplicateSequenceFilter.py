@@ -1,4 +1,5 @@
 import copy
+import os
 from multiprocessing.pool import Pool
 from pathlib import Path
 from uuid import uuid4
@@ -8,7 +9,8 @@ import pandas as pd
 from immuneML.data_model import bnp_util
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.SequenceParams import RegionType
-from immuneML.data_model.bnp_util import write_yaml
+from immuneML.data_model.bnp_util import write_yaml, read_yaml
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.environment.SequenceType import SequenceType
@@ -20,8 +22,8 @@ from scripts.specification_util import update_docs_per_mapping
 
 class DuplicateSequenceFilter(Filter):
     """
-    Collapses duplicate nucleotide or amino acid sequences within each repertoire in the given RepertoireDataset.
-    This filter can be applied to Repertoires and RepertoireDatasets.
+    Collapses duplicate nucleotide or amino acid sequences within each repertoire in the given RepertoireDataset or within a SequenceDataset.
+    This filter can be applied to Repertoires, RepertoireDatasets, and SequenceDatasets.
 
     Sequences are considered duplicates if the following fields are identical:
 
@@ -93,19 +95,23 @@ class DuplicateSequenceFilter(Filter):
         self.sequence_of_interest = bnp_util.get_sequence_field_name(self.region_type, self.filter_sequence_type)
         self.sequence_to_ignore = bnp_util.get_sequence_field_name(self.region_type, [t for t in SequenceType if t != self.filter_sequence_type][0])
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1) -> RepertoireDataset:
+    def process_dataset(self, dataset, result_path: Path, number_of_processes=1):
         self.result_path = result_path if result_path is not None else self.result_path
 
-        self.check_dataset_type(dataset, [RepertoireDataset], "DuplicateSequenceFilter")
+        self.check_dataset_type(dataset, [RepertoireDataset, SequenceDataset], "DuplicateSequenceFilter")
 
         processed_dataset = dataset.clone()
 
-        with Pool(self.batch_size) as pool:
-            repertoires = pool.map(self._process_repertoire, dataset.repertoires)
+        if isinstance(dataset, RepertoireDataset):
+            with Pool(self.batch_size) as pool:
+                repertoires = pool.map(self._process_repertoire, dataset.repertoires)
 
-        processed_dataset.repertoires = repertoires
+            processed_dataset.repertoires = repertoires
+            return processed_dataset
 
-        return processed_dataset
+        elif isinstance(dataset, SequenceDataset):
+            processed_dataset = self._process_sequences(dataset)
+            return processed_dataset
 
     def _prepare_group_by_field(self, columns):
         rep_fields = list(AIRRSequenceSet.get_field_type_dict().keys())
@@ -141,15 +147,7 @@ class DuplicateSequenceFilter(Filter):
         return agg_dict
 
     def _process_repertoire(self, repertoire: Repertoire) -> Repertoire:
-        data = repertoire.data.topandas()
-        data['duplicate_count'].replace(-1, pd.NA, inplace=True)
-        columns = data.columns
-
-        groupby_fields = self._prepare_group_by_field(columns)
-        custom_lists = list(repertoire.dynamic_fields.keys())
-        agg_dict = self._prepare_agg_dict(columns, custom_lists)
-
-        no_duplicates = data.groupby(groupby_fields, sort=False).agg(agg_dict).reset_index()
+        no_duplicates = self._filter_duplicates(repertoire)
 
         no_duplicates.to_csv(f"{self.result_path}/{repertoire.data_filename.stem}_filtered.tsv", sep='\t', index=False)
         write_yaml(Path(f"{self.result_path}/{repertoire.metadata_filename.stem}_filtered.yaml"), repertoire.metadata)
@@ -158,6 +156,31 @@ class DuplicateSequenceFilter(Filter):
                           metadata_filename=Path(f"{self.result_path}/{repertoire.metadata_filename.stem}_filtered.yaml"),
                           identifier=str(uuid4().hex),
                           dynamic_fields=repertoire.dynamic_fields)
+
+    def _process_sequences(self, dataset: SequenceDataset) -> SequenceDataset:
+        no_duplicates = self._filter_duplicates(dataset)
+        metadata = read_yaml(dataset.dataset_file)
+
+        os.makedirs(self.result_path, exist_ok=True)
+        no_duplicates.to_csv(f"{self.result_path}/{dataset.filename.stem}_filtered.tsv", sep='\t', index=False)
+        write_yaml(Path(f"{self.result_path}/{dataset.dataset_file.stem}_filtered.yaml"), metadata)
+
+        return SequenceDataset(name=dataset.name,
+                               filename=Path(f"{self.result_path}/{dataset.filename.stem}_filtered.tsv"),
+                               dataset_file=Path(f"{self.result_path}/{dataset.dataset_file.stem}_filtered.yaml"),
+                               dynamic_fields=dataset.dynamic_fields)
+
+    def _filter_duplicates(self, dataset):
+        data = dataset.data.topandas()
+        data['duplicate_count'].replace(-1, pd.NA, inplace=True)
+        columns = data.columns
+
+        groupby_fields = self._prepare_group_by_field(columns)
+        custom_lists = list(dataset.dynamic_fields.keys())
+        agg_dict = self._prepare_agg_dict(columns, custom_lists)
+
+        no_duplicates = data.groupby(groupby_fields, sort=False).agg(agg_dict).reset_index()
+        return no_duplicates
 
     @staticmethod
     def get_documentation():

@@ -5,7 +5,7 @@ import pandas as pd
 import plotly.express as px
 from pandas import DataFrame
 
-from immuneML.data_model import bnp_util
+from immuneML.data_model import bnp_util, AIRRSequenceSet
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.data_model.datasets.Dataset import Dataset
@@ -30,6 +30,13 @@ class SequenceLengthDistribution(DataReport):
 
     - region_type (str): which part of the sequence to examine; e.g., IMGT_CDR3
 
+    - split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a
+      single label, or alternatively the label of interest can be specified under 'label'. By default,
+      split_by_label is False.
+
+    - label (str): if split_by_label is set to True, a label can be specified here.
+
+
     **YAML specification:**
 
     .. indent with spaces
@@ -41,6 +48,8 @@ class SequenceLengthDistribution(DataReport):
                     SequenceLengthDistribution:
                         sequence_type: amino_acid
                         region_type: IMGT_CDR3
+                        label: label_1
+                        split_by_label: True
 
     """
 
@@ -54,19 +63,23 @@ class SequenceLengthDistribution(DataReport):
 
     def __init__(self, dataset: Dataset = None, batch_size: int = 1, result_path: Path = None,
                  number_of_processes: int = 1, region_type: RegionType = RegionType.IMGT_CDR3,
-                 sequence_type: SequenceType = SequenceType.AMINO_ACID, name: str = None):
+                 sequence_type: SequenceType = SequenceType.AMINO_ACID, name: str = None, label: str = None,
+                 split_by_label: bool = False):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.batch_size = batch_size
         self.sequence_type = sequence_type
         self.region_type = region_type
+        self.label_name = label
+        self.split_by_label = split_by_label
 
     def check_prerequisites(self):
         return True
 
     def _generate(self) -> ReportResult:
-        df = self._get_sequence_lengths_df()
         PathBuilder.build(self.result_path)
+        self.label_name = self._get_label_name()
 
+        df = self._get_sequence_lengths_df()
         df.to_csv(self.result_path / 'sequence_length_distribution.csv', index=False)
 
         report_output_fig = self._safe_plot(df=df, output_written=False)
@@ -79,29 +92,71 @@ class SequenceLengthDistribution(DataReport):
 
     def _get_sequence_lengths_df(self) -> DataFrame:
         if isinstance(self.dataset, RepertoireDataset):
-            return self._get_sequence_lengths_df_repertoire_dataset()
+            sequence_lengths_df = self._get_sequence_lengths_df_repertoire_dataset()
         elif isinstance(self.dataset, SequenceDataset):
-            return self._get_sequence_lengths_df_sequence_dataset()
+            sequence_lengths_df = self._get_sequence_lengths_df_sequence_dataset()
         elif isinstance(self.dataset, ReceptorDataset):
-            return self._get_sequence_lengths_df_receptor_dataset()
+            sequence_lengths_df = self._get_sequence_lengths_df_receptor_dataset()
+
+        if not self.split_by_label and self.label_name in sequence_lengths_df.columns:
+            sequence_lengths_df.drop(columns=[self.label_name], inplace=True)
+
+        return sequence_lengths_df
 
     def _get_sequence_lengths_df_repertoire_dataset(self):
-        sequence_lengths = Counter()
+        raw_count_dict_per_class = {}
+        label_name = self._get_label_name()
 
-        for repertoire in self.dataset.get_data(self.batch_size):
-            seq_lengths = self._count_in_repertoire(repertoire)
-            sequence_lengths += seq_lengths
+        if self.split_by_label:
+            class_names = self.dataset.get_metadata([label_name])[label_name]
+        else:
+            class_names = [0] * self.dataset.get_example_count()
 
-        return pd.DataFrame({"counts": list(sequence_lengths.values()),
-                             'sequence_lengths': list(sequence_lengths.keys())})
+        for repertoire, class_name in zip(self.dataset.get_data(), class_names):
+            self._count_seq_lengths(repertoire.data, raw_count_dict_per_class, class_name)
+
+        return self._count_dict_per_class_to_df(raw_count_dict_per_class)
 
     def _get_sequence_lengths_df_sequence_dataset(self):
-        sequence_lengths = Counter(getattr(self.dataset.data,
-                                           bnp_util.get_sequence_field_name(self.region_type,
-                                                                            self.sequence_type)).lengths.tolist())
+        return self._count_dict_per_class_to_df(self._count_seq_lengths(self.dataset.data, class_name=None))
 
-        return pd.DataFrame({"counts": list(sequence_lengths.values()),
-                             'sequence_lengths': list(sequence_lengths.keys())})
+    def _count_dict_per_class_to_df(self, raw_count_dict_per_class):
+        result_dfs = []
+
+        for class_name, raw_count_dict in raw_count_dict_per_class.items():
+            result_df = self._count_dict_to_df(raw_count_dict)
+            result_df[self.label_name] = class_name
+            result_dfs.append(result_df)
+
+        return pd.concat(result_dfs)
+
+    def _count_seq_lengths(self, data: AIRRSequenceSet, raw_count_dict=None, class_name: str = None):
+        raw_count_dict = {} if raw_count_dict is None else raw_count_dict
+
+        for item in data.to_iter():
+            sequence = getattr(item, bnp_util.get_sequence_field_name(self.region_type, SequenceType.AMINO_ACID))
+
+            if self.split_by_label and self.label_name is not None:
+                if class_name is None:
+                    cls_name = getattr(item, self.label_name)
+                else:
+                    cls_name = class_name
+            else:
+                cls_name = 0
+
+            if cls_name not in raw_count_dict:
+                raw_count_dict[cls_name] = {}
+
+            if len(sequence) not in raw_count_dict[cls_name]:
+                raw_count_dict[cls_name][len(sequence)] = 1
+            else:
+                raw_count_dict[cls_name][len(sequence)] += 1
+
+        return raw_count_dict
+
+    def _count_dict_to_df(self, count_dict):
+        return pd.DataFrame({"counts": list(count_dict.values()),
+                             'sequence_lengths': list(count_dict.keys())})
 
     def _get_dataset_chains(self):
         return next(self.dataset.get_data()).get_chains()
@@ -125,18 +180,33 @@ class SequenceLengthDistribution(DataReport):
 
     def _count_in_repertoire(self, repertoire: Repertoire) -> Counter:
         return Counter(getattr(repertoire.data,
-                                bnp_util.get_sequence_field_name(self.region_type,
-                                                                 self.sequence_type)).lengths.tolist())
+                               bnp_util.get_sequence_field_name(self.region_type,
+                                                                self.sequence_type)).lengths.tolist())
 
     def _plot(self, df: pd.DataFrame) -> ReportOutput:
-        figure = px.bar(df, x="sequence_lengths", y="counts",
-                        facet_col="chain" if isinstance(self.dataset, ReceptorDataset) else None)
-        figure.update_layout(xaxis=dict(tickmode='array', tickvals=df["sequence_lengths"]),
-                             yaxis=dict(tickmode='array', tickvals=df["counts"]),
-                             template="plotly_white")
+        if isinstance(self.dataset, ReceptorDataset):
+            facet_col = "chain"
+        else:
+            facet_col = self.label_name if self.label_name in df.columns else None
+
+        figure = px.bar(df, x="sequence_lengths", y="counts", facet_col=facet_col)
+        figure.update_layout(template="plotly_white")
         figure.update_traces(marker_color=px.colors.diverging.Tealrose[0])
+
+        for annotation in figure.layout.annotations:
+            annotation['font'] = {'size': 16}
+
         PathBuilder.build(self.result_path)
 
         file_path = self.result_path / "sequence_length_distribution.html"
         figure.write_html(str(file_path))
         return ReportOutput(path=file_path, name="Sequence length distribution plot")
+
+    def _get_label_name(self):
+        if self.split_by_label:
+            if self.label_name is None:
+                return list(self.dataset.get_label_names())[0]
+            else:
+                return self.label_name
+        else:
+            return None

@@ -1,3 +1,4 @@
+import logging
 import shutil
 from itertools import chain
 from pathlib import Path
@@ -8,10 +9,9 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, TensorDataset
 
+from immuneML.data_model.SequenceParams import RegionType, Chain
 from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
-from immuneML.data_model.SequenceParams import RegionType, Chain
-from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
@@ -50,6 +50,8 @@ class SimpleLSTM(GenerativeModel):
 
     - temperature (float): a higher temperature leads to faster yet more unstable learning
 
+    - prime_str (str): the initial sequence to start generating from
+
 
     **YAML specification:**
 
@@ -85,11 +87,11 @@ class SimpleLSTM(GenerativeModel):
         lstm._model = lstm.make_new_model(state_dict_file)
         return lstm
 
-    ITER_TO_REPORT = 100
+    ITER_TO_REPORT = 20
 
     def __init__(self, locus: str, sequence_type: str, hidden_size: int, learning_rate: float, num_epochs: int,
                  batch_size: int, num_layers: int, embed_size: int, temperature, device: str, name=None,
-                 region_type: str = RegionType.IMGT_CDR3.name):
+                 region_type: str = RegionType.IMGT_CDR3.name, prime_str: str = "C", window_size: int = 64):
 
         super().__init__(Chain.get_chain(locus))
         self._model = None
@@ -102,6 +104,8 @@ class SimpleLSTM(GenerativeModel):
         self.batch_size = batch_size
         self.embed_size = embed_size
         self.temperature = temperature
+        self.prime_str = prime_str
+        self.window_size = window_size
         self.name = name
         self.device = device
         self.unique_letters = EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + ["*"]
@@ -113,7 +117,7 @@ class SimpleLSTM(GenerativeModel):
     def make_new_model(self, state_dict_file: Path = None):
         model = SimpleLSTMGenerator(input_size=self.num_letters, hidden_size=self.hidden_size,
                                     embed_size=self.embed_size, output_size=self.num_letters,
-                                    batch_size=self.batch_size)
+                                    batch_size=self.batch_size, device=self.device)
 
         if isinstance(state_dict_file, Path) and state_dict_file.is_file():
             state_dict = read_yaml(state_dict_file)
@@ -124,108 +128,164 @@ class SimpleLSTM(GenerativeModel):
 
         return model
 
-    def fit(self, data, path: Path = None):
-        data_loader = self._encode_dataset(data)
+    def _log_training_progress(self, loss_summary, epoch, loss):
+        if (epoch + 1) % SimpleLSTM.ITER_TO_REPORT == 0:
+            message = f"{SimpleLSTM.__name__}: Epoch [{epoch + 1}/{self.num_epochs}]: loss: {loss:.4f}"
+            print_log(message, True)
 
+            loss_summary['loss'].append(loss)
+            loss_summary['epoch'].append(epoch + 1)
+        return loss_summary
+
+    def fit(self, data, path: Path = None):
+
+        data_loader = self._encode_dataset(data)
         model = self.make_new_model()
         model.train()
 
-        criterion = nn.CrossEntropyLoss(reduction='sum')
+        criterion = nn.CrossEntropyLoss(reduction='mean')
         optimizer = optim.Adam(model.parameters(), self.learning_rate)
         loss_summary = {"loss": [], "epoch": []}
 
-        with torch.autograd.set_detect_anomaly(True):
-            for epoch in range(self.num_epochs):
-                loss = 0.
-                state = model.init_zero_state()
+        for epoch in range(self.num_epochs):
+            epoch_loss = 0.
+            num_batches = 0
+
+            for x_batch, y_batch in data_loader:
+                x_batch, y_batch = x_batch.to(self.device), y_batch.to(self.device)
+
+                # Initialize state for each batch
+                state = model.init_zero_state(x_batch.size(0))
+
                 optimizer.zero_grad()
 
-                for x_batch, y_batch in data_loader:
-                    state = state[0][:, :x_batch.size(0), :], state[1][:, :x_batch.size(0), :]
+                outputs, _ = model(x_batch, state)
+                outputs = outputs.reshape(-1, outputs.size(-1))
+                y_batch = y_batch.reshape(-1)
 
-                    outputs, state = model(x_batch, state)
-                    loss = loss + criterion(outputs, y_batch)
+                loss = criterion(outputs, y_batch)
 
-                loss = loss / len(data_loader.dataset)
                 loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5)
                 optimizer.step()
 
-                loss_summary = self._log_training_progress(loss_summary, epoch, loss)
+                epoch_loss += loss.item()
+                num_batches += 1
+
+            avg_epoch_loss = epoch_loss / num_batches
+            loss_summary = self._log_training_progress(loss_summary, epoch, avg_epoch_loss)
 
         self._log_training_summary(loss_summary, path)
-
         self._model = model
 
     def _log_training_summary(self, loss_summary, path):
         if path is not None:
-            PathBuilder.build(path)
-            self.loss_summary_path = path / 'loss_summary.csv'
-            pd.DataFrame(loss_summary).to_csv(str(self.loss_summary_path), index=False)
-
-    def _log_training_progress(self, loss_summary, epoch, loss):
-        if (epoch + 1) % SimpleLSTM.ITER_TO_REPORT == 0:
-            print_log(f"{SimpleLSTM.__name__}: Epoch [{epoch + 1}/{self.num_epochs}]: loss: {loss.item():.4f}",
-                      True)
-            loss_summary['loss'].append(loss.item())
-            loss_summary['epoch'].append(epoch + 1)
-        return loss_summary
+            try:
+                PathBuilder.build(path)
+                self.loss_summary_path = path / 'loss_summary.csv'
+                pd.DataFrame(loss_summary).to_csv(str(self.loss_summary_path), index=False)
+            except Exception as e:
+                logging.error(f"{SimpleLSTM.__name__}: failed to save loss summary: {e};\n{loss_summary}")
 
     def _encode_dataset(self, dataset: SequenceDataset):
         seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
         sequences = dataset.get_attribute(seq_col).tolist()
 
+        # Flatten all sequences into one long sequence with end tokens
         sequences = list(chain.from_iterable(
             [[self.letter_to_index[letter] for letter in seq] + [self.letter_to_index['*']] for seq in sequences]))
+
         sequences = torch.as_tensor(sequences, device=self.device).long()
 
-        return DataLoader(TensorDataset(sequences[:-1], sequences[1:]), shuffle=True, batch_size=self.batch_size)
+        # Create overlapping windows of size window_size
+        # stride=1 means each window overlaps with previous window by window_size-1 elements
+        windows = sequences.unfold(0, self.window_size, 1)
+
+        # Create input-target pairs from windows
+        x = windows[:, :-1]  # All but last character of each window
+        y = windows[:, 1:]  # All but first character of each window
+
+        return DataLoader(TensorDataset(x, y), shuffle=True, batch_size=self.batch_size)
 
     def is_same(self, model) -> bool:
         raise NotImplementedError
 
-    def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
+    def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool,
+                           max_failed_trials: int = 1000):
+
         torch.manual_seed(seed)
 
         self._model.eval()
-        prime_str = "CAS"
-        input_vector = torch.as_tensor([self.letter_to_index[letter] for letter in prime_str], device=self.device).long()
-        predicted = prime_str
+        input_vector = torch.as_tensor([self.letter_to_index[letter] for letter in self.prime_str],
+                                       device=self.device).long()
+        predicted = self.prime_str
+        failed_trials = 0
+        total_trials = 0
 
         with torch.no_grad():
-
             state = self._model.init_zero_state(batch_size=1)
 
-            for p in range(len(prime_str) - 1):
-                _, state = self._model(input_vector[p], state)
+            # Add sequence and batch dimensions for LSTM input
+            for p in range(len(self.prime_str) - 1):
+                inp = input_vector[p].unsqueeze(0).unsqueeze(0)
+                _, state = self._model(inp, state)
 
-            inp = input_vector[-1]
+            inp = input_vector[-1].unsqueeze(0).unsqueeze(0)
             gen_seq_count = 0
 
-            while gen_seq_count <= count:
+            while gen_seq_count < count and failed_trials < max_failed_trials:
                 output, state = self._model(inp, state)
 
-                output_dist = output.data.view(-1).div(self.temperature).exp()
-                top_i = torch.multinomial(output_dist, 1)[0].item()
+                scaled_logits = output[0, 0] / self.temperature
+                scaled_logits = torch.clamp(scaled_logits, min=-100, max=100)
+                output_dist = torch.nn.functional.softmax(scaled_logits, dim=0)
+
+                try:
+                    output_dist = output_dist + 1e-10
+                    output_dist = output_dist / output_dist.sum()
+                    top_i = torch.multinomial(output_dist, 1)[0].item()
+                except RuntimeError as e:
+                    logging.warning(f"{SimpleLSTM.__name__}: Error sampling from distribution: {e}; "
+                                    f"Using argmax instead.")
+                    logging.debug(f"{SimpleLSTM.__name__}: Distribution: {output_dist}\n"
+                                  f"Sum: {output_dist.sum()}, Min: {output_dist.min()}, Max: {output_dist.max()}")
+                    top_i = scaled_logits.argmax().item()
 
                 predicted_char = self.index_to_letter[top_i]
                 predicted += predicted_char
                 inp = torch.as_tensor(self.letter_to_index[predicted_char], device=self.device).long()
+                inp = inp.unsqueeze(0).unsqueeze(0)
+
                 if predicted_char == "*":
-                    gen_seq_count += 1
+                    last_seq = predicted.split('*')[-2]
+                    if len(last_seq) > 0:
+                        gen_seq_count += 1
+                        print_log(f"Generated valid sequence {gen_seq_count}/{count}", True)
 
-        print_log(f"{SimpleLSTM.__name__} {self.name}: generated {count} sequences.", True)
+                    else:
+                        failed_trials += 1
+                        if failed_trials % 10 == 0:
+                            print_log(f"Warning: LSTM model generated {failed_trials} empty sequences", True)
 
-        sequences = predicted.split('*')[1:-1]
-        return self._export_dataset(sequences, count, path)
+                total_trials += 1
 
-    def _export_dataset(self, sequences, count, path):
-        sequence_objs = [ReceptorSequence(**{
-            self.sequence_type.value: sequence,
-            'locus': self.locus.name, 'metadata': {'gen_model_name': self.name}
-        }) for i, sequence in enumerate(sequences)]
+        print_log(
+            f"{SimpleLSTM.__name__} {self.name}: generated {gen_seq_count} sequences with {failed_trials} failed attempts.",
+            True)
 
-        return SequenceDataset.build_from_objects(sequences=sequence_objs, path=PathBuilder.build(path),
-                                                  name='synthetic_lstm_dataset', labels={'gen_model_name': [self.name]})
+        dataset = self._export_dataset(predicted, path)
+        return dataset
+
+    def _export_dataset(self, predicted, path):
+        sequences = [seq for seq in predicted.split('*') if len(seq) > 0]
+        count = len(sequences)
+        df = pd.DataFrame({get_sequence_field_name(self.region_type, self.sequence_type): sequences,
+                           'locus': [self.locus.to_string() for _ in range(count)],
+                           'gen_model_name': [self.name for _ in range(count)]})
+
+        return SequenceDataset.build_from_partial_df(df, PathBuilder.build(path), 'synthetic_lstm_dataset',
+                                                     {'gen_model_name': [self.name]}, {'gen_model_name': str})
+
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         raise RuntimeError

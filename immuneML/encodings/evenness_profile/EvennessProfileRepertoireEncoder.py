@@ -19,7 +19,6 @@ from immuneML.util.Logger import log
 
 class EvennessProfileRepertoireEncoder(EvennessProfileEncoder):
 
-    @log
     def _encode_new_dataset(self, dataset, params: EncoderParams):
 
         encoded_data = self._encode_data(dataset, params)
@@ -29,7 +28,6 @@ class EvennessProfileRepertoireEncoder(EvennessProfileEncoder):
 
         return encoded_dataset
 
-    @log
     def _encode_examples(self, dataset, params: EncoderParams):
 
         arguments = [(repertoire.identifier, dill.dumps(repertoire), params) for repertoire in dataset.repertoires]

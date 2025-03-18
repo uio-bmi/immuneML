@@ -25,3 +25,4 @@ fishersapi
 olga>=1.2.4
 stitchr
 IMGTgeneDL
+sentencepiece

@@ -13,3 +13,4 @@ warmup_epochs: 20
 patience: 20
 iter_count_prob_estimation: 5
 device: cpu
+learning_rate: 0.001

@@ -1,3 +1,4 @@
+import os
 from multiprocessing import Pool
 from pathlib import Path
 
@@ -6,6 +7,7 @@ import numpy as np
 
 from immuneML.data_model import bnp_util
 from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.environment.SequenceType import SequenceType
@@ -66,28 +68,39 @@ class SequenceLengthFilter(Filter):
         return cls(min_len=kwargs['min_len'], max_len=kwargs['max_len'], sequence_type=SequenceType[kwargs['sequence_type'].upper()],
                    name=kwargs['name'] if 'name' in kwargs else SequenceLengthFilter.__name__, region_type=RegionType[kwargs['region_type']])
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes: int = 1) -> RepertoireDataset:
-        if not isinstance(dataset, RepertoireDataset):
-            raise NotImplementedError
+    def process_dataset(self, dataset, result_path: Path, number_of_processes: int = 1):
+        if not isinstance(dataset, (RepertoireDataset, SequenceDataset)):
+            raise NotImplementedError(f"Unsupported dataset type: {type(dataset).__name__}")
 
-        new_reps_path = PathBuilder.build(result_path / 'repertoires')
-        arguments = [(dill.dumps(repertoire), new_reps_path) for repertoire in dataset.repertoires]
+        if isinstance(dataset, RepertoireDataset):
+            new_reps_path = PathBuilder.build(result_path / 'repertoires')
+            arguments = [(dill.dumps(repertoire), new_reps_path) for repertoire in dataset.repertoires]
 
-        with Pool(number_of_processes) as pool:
-            repertoires = pool.starmap(self._process_repertoire, arguments)
+            with Pool(number_of_processes) as pool:
+                repertoires = pool.starmap(self._process_repertoire, arguments)
 
-        return RepertoireDataset.build_from_objects(repertoires=repertoires, path=result_path)
+            return RepertoireDataset.build_from_objects(repertoires=repertoires, path=result_path)
+
+        elif isinstance(dataset, SequenceDataset):
+            indices_to_keep = self._get_indices_to_keep(dataset.data)
+            os.makedirs(result_path, exist_ok=True)
+            return dataset.make_subset(example_indices=indices_to_keep, path=result_path, dataset_type="SequenceDataset")
 
     def _process_repertoire(self, repertoire: Repertoire, result_path: Path) -> Repertoire:
         repertoire = dill.loads(repertoire) if isinstance(repertoire, bytes) else repertoire
-        sequences = getattr(repertoire.data, bnp_util.get_sequence_field_name(self._region_type, self._sequence_type))
-
-        below_max_len = sequences.lengths <= self._max_len if self._max_len >= 0 else np.ones(len(sequences), dtype=bool)
-        above_min_len = sequences.lengths >= self._min_len if self._min_len >= 0 else np.ones(len(sequences), dtype=bool)
-        indices_to_keep = np.logical_and(above_min_len, below_max_len)
-
+        indices_to_keep = self._get_indices_to_keep(repertoire.data)
         return Repertoire.build_like(repertoire, indices_to_keep, result_path,
                                      filename_base=repertoire.metadata['subject_id'] + '_filtered' if 'subject_id' in repertoire.metadata else None)
+
+    def _get_indices_to_keep(self, data):
+        sequences = getattr(data, bnp_util.get_sequence_field_name(self._region_type, self._sequence_type))
+
+        below_max_len = sequences.lengths <= self._max_len if self._max_len >= 0 else np.ones(len(sequences),
+                                                                                              dtype=bool)
+        above_min_len = sequences.lengths >= self._min_len if self._min_len >= 0 else np.ones(len(sequences),
+                                                                                              dtype=bool)
+        indices_to_keep = np.logical_and(above_min_len, below_max_len)
+        return indices_to_keep
 
     def _get_keep_seq_func(self):
         if self._max_len < 0:

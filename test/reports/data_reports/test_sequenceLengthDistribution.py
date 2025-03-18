@@ -45,14 +45,30 @@ class TestSequenceLengthDistribution(TestCase):
 
         shutil.rmtree(path)
 
+    def test_sequence_lengths_rep_dataset_with_label(self):
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "seq_len_rep")
+
+        dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=20,
+                                                                     sequence_count_probabilities={10: 1},
+                                                                     sequence_length_probabilities={10: 0.5, 11: 0.4, 12: 0.1},
+                                                                     labels={"l1": {"a": 0.5, "b": 0.5}},
+                                                                     path=path / "dataset")
+
+        sld = SequenceLengthDistribution.build_object(dataset=dataset, sequence_type='amino_acid', result_path=path,
+                                                      region_type='IMGT_CDR3', split_by_label=True, label='l1')
+        self.assertTrue(sld.check_prerequisites())
+        result = sld._generate()
+        self.assertTrue(os.path.isfile(result.output_figures[0].path))
+        shutil.rmtree(path)
+
     def test_sequence_lengths_seq_dataset(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "seq_len_seq")
 
-        dataset = RandomDatasetGenerator.generate_sequence_dataset(50, {4: 0.33, 5: 0.33, 7: 0.33}, {},
+        dataset = RandomDatasetGenerator.generate_sequence_dataset(50, {4: 0.33, 5: 0.33, 7: 0.33}, {"l1": {"a": 0.5, "b": 0.5}},
                                                                    path / 'dataset')
 
         sld = SequenceLengthDistribution(dataset, 1, path, sequence_type=SequenceType.AMINO_ACID,
-                                         region_type=RegionType.IMGT_CDR3)
+                                         region_type=RegionType.IMGT_CDR3, label='l1', split_by_label=True)
 
         self.assertTrue(sld.check_prerequisites())
         result = sld._generate()

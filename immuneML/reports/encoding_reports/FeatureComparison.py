@@ -108,7 +108,9 @@ class FeatureComparison(FeatureReport):
 
     def _generate(self):
         result = self._generate_report_result()
-        result.info = "Compares the feature values in a given encoded data matrix across two values for a metadata label. Each point in the resulting scatterplot represents one feature, and the values on the x and y axes are the average feature values across examples of two different classes. "
+        result.info = ("Compares the feature values in a given encoded data matrix across two values for a metadata "
+                       "label. Each point in the resulting scatterplot represents one feature, and the values on the "
+                       "x and y axes are the average feature values across examples of two different classes. ")
         return result
 
     def _plot(self, data_long_format) -> ReportOutput:
@@ -121,8 +123,8 @@ class FeatureComparison(FeatureReport):
         plotting_data.columns = plotting_data.columns.map(''.join)
 
         unique_label_values = plotting_data[self.comparison_label].unique()
-        assert len(
-            unique_label_values) == 2, f"FeatureComparison: comparison label {self.comparison_label} does not have 2 values; {unique_label_values}"
+        assert len(unique_label_values) == 2, \
+            f"FeatureComparison: comparison label {self.comparison_label} does not have 2 values; {unique_label_values}"
         class_x, class_y = unique_label_values
 
         merge_labels = [label for label in ["feature", self.color, self.facet_row, self.facet_column] if label]
@@ -149,7 +151,8 @@ class FeatureComparison(FeatureReport):
                             }, template='plotly_white',
                             color_discrete_sequence=px.colors.diverging.Tealrose)
 
-        self.add_diagonal(figure)
+        self.add_diagonal(figure, x_range=(plotting_data['valuemean_x'].min(), plotting_data["valuemean_x"].max()),
+                          y_range=(plotting_data['valuemean_y'].min(), plotting_data["valuemean_y"].max()))
 
         file_path = self.result_path / f"{self.result_name}.html"
 
@@ -157,9 +160,11 @@ class FeatureComparison(FeatureReport):
 
         return ReportOutput(path=file_path, name=f"Comparison of feature values across {self.comparison_label}")
 
-    def add_diagonal(self, figure):
-        figure.update_layout(shapes=[{'type': "line", 'line': dict(color="#B0C2C7", dash="dash"), 'yref': 'paper', 'xref': 'paper', 'y0': 0,
-                                      'y1': 1, 'x0': 0, 'x1': 1, 'layer': 'below'}])
+    def add_diagonal(self, figure, x_range: tuple, y_range: tuple):
+        figure.update_layout(shapes=[{'type': "line", 'line': dict(color="#B0C2C7", dash="dash"),
+                                      'y0': min(x_range[0], y_range[0]), 'y1': max(x_range[1], y_range[1]),
+                                      'x0': min(x_range[0], y_range[0]), 'x1': max(x_range[1], y_range[1]),
+                                      'layer': 'below'}])
 
     def _filter_keep_fraction(self, plotting_data):
         plotting_data["diff_xy"] = abs(plotting_data["valuemean_x"] - plotting_data["valuemean_y"])
