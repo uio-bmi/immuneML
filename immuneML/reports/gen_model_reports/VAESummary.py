@@ -1,6 +1,7 @@
 import shutil
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import torch
 from plotly.subplots import make_subplots
@@ -59,7 +60,7 @@ class VAESummary(GenModelReport):
 
         return VAESummary(name=name, dim_dist_cols=kwargs['dim_dist_cols'], dim_dist_rows=kwargs['dim_dist_rows'])
 
-    def __init__(self, dim_dist_rows: int, dim_dist_cols: int, dataset: Dataset = None, model: GenerativeModel = None,
+    def __init__(self, dim_dist_rows: int, dim_dist_cols: int, dataset: Dataset = None, model: SimpleVAE = None,
                  result_path: Path = None, name: str = None):
         super().__init__(dataset, model, result_path, name)
         self.dim_dist_rows = dim_dist_rows
@@ -68,12 +69,14 @@ class VAESummary(GenModelReport):
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
 
-        latent_space_table_out = self._prepare_latent_space()
+        embeddings = self.get_embeddings()
+
+        latent_space_table_out = self._prepare_latent_space(embeddings)
         train_progress_table_out = self._prepare_training_progress()
 
         latent_space_fig_out = self._safe_plot(output_written=True, plot_callable='_plot_latent_space',
                                                latent_space_table=latent_space_table_out)
-        latent_dim_dist_fig_out = self._safe_plot(output_written=True,
+        latent_dim_dist_fig_out = self._safe_plot(output_written=True, embeddings=embeddings,
                                                   plot_callable='_plot_latent_dimension_distributions')
         train_progress_fig_out = self._safe_plot(output_written=True, plot_callable='_plot_training_progress',
                                                  training_progress_table=train_progress_table_out)
@@ -85,13 +88,18 @@ class VAESummary(GenModelReport):
                               output_tables=[latent_space_table_out, train_progress_table_out])
         return result
 
-    def _prepare_latent_space(self) -> ReportOutput:
-        data_loader = self.model.encode_dataset(self.dataset, self.dataset.get_example_count(), False)
+    def get_embeddings(self):
+
+        data_loader = self.model.encode_dataset(self.dataset, None, self.dataset.get_example_count(), False)
 
         for data in data_loader:
             with torch.no_grad():
                 cdr3_input, v_gene_input, j_gene_input = data
                 embeddings = self.model.model.encoding_func(cdr3_input, v_gene_input, j_gene_input)
+
+        return embeddings
+
+    def _prepare_latent_space(self, embeddings) -> ReportOutput:
 
         pca = PCA(n_components=2)
         embeddings = pca.fit_transform(embeddings.numpy())
@@ -138,13 +146,7 @@ class VAESummary(GenModelReport):
                             f'principal component analysis on the data embedded into {self.model.latent_dim} '
                             f'dimensional space')
 
-    def _plot_latent_dimension_distributions(self) -> ReportOutput:
-        data_loader = self.model.encode_dataset(self.dataset, self.dataset.get_example_count(), False)
-
-        for data in data_loader:
-            with torch.no_grad():
-                cdr3_input, v_gene_input, j_gene_input = data
-                embeddings = self.model.model.encoding_func(cdr3_input, v_gene_input, j_gene_input)
+    def _plot_latent_dimension_distributions(self, embeddings) -> ReportOutput:
 
         if self.dim_dist_rows is None:
             self.dim_dist_rows = int(self.model.latent_dim / self.dim_dist_cols)

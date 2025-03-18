@@ -294,6 +294,8 @@ class SimpleVAE(GenerativeModel):
         return average_loss
 
     def encode_dataset(self, dataset, seq_col, batch_size=None, shuffle=True):
+        if seq_col is None:
+            seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
         data = dataset.data.topandas()[[seq_col, 'v_call', 'j_call']]
 
         encoded_v_genes = one_hot(

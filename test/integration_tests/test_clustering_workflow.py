@@ -83,6 +83,7 @@ def test_clustering_workflow():
                 'labels': ['epitope'],
                 'clustering_settings': [
                     {'encoding': 'kmer', 'method': 'kmeans2'},
+                    {'encoding': 'prottrans', 'method': 'kmeans2'},
                     {'encoding': 'bert', 'dim_reduction': 'pca', 'method': 'kmeans3'}
                 ],
                 'split_config': {
