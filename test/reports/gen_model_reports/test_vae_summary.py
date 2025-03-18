@@ -16,7 +16,7 @@ def test_vae_summary():
                                                                region_type=RegionType.IMGT_JUNCTION.name)
 
     vae = SimpleVAE(Chain.get_chain('beta'), 0.75, 8, 4, 10, 100, 2,
-                    1, 1, 21, 2, 5, 10, 'cpu')
+                    1, 1, 21, 2, 5, 10, 'cpu', 0.01)
 
     vae.fit(dataset, path / 'model')
 
