@@ -35,7 +35,7 @@ class TestTrainMLModelInstruction(TestCase):
 
     def test_run(self):
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "hpoptimproc/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "hpoptimproc/")
 
         repertoires, metadata = RepertoireBuilder.build(sequences=[["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
                                                                  ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],

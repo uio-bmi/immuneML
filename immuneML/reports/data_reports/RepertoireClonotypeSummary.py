@@ -22,7 +22,8 @@ class RepertoireClonotypeSummary(DataReport):
 
     **Specification arguments:**
 
-    - color_by_label (str): name of the label to use to color the plot, e.g., could be disease label, or None
+    - label (str): name of the label to use to color the plot, e.g., could be disease label, or None
+    - split_by_label (bool): if True, the plot will be colored by the label specified in the label argument. Default is False.
 
     **YAML specification:**
 
@@ -33,7 +34,8 @@ class RepertoireClonotypeSummary(DataReport):
             reports:
                 my_clonotype_summary_rep:
                     RepertoireClonotypeSummary:
-                        color_by_label: celiac
+                        label: celiac
+                        split_by_label: true
 
     """
 
@@ -65,10 +67,13 @@ class RepertoireClonotypeSummary(DataReport):
         clonotypes = pd.DataFrame.from_records(sorted([self._get_clonotype_count_with_label(repertoire) for repertoire in self.dataset.get_data()],
                                                       key=lambda x: x[0]), columns=['clonotype_count', self.label_name])
         clonotypes['repertoire'] = list(range(1, self.dataset.get_example_count()+1))
-        fig = px.bar(clonotypes, x='repertoire', y='clonotype_count', color=self.label_name, title='Clonotype count per repertoire',
+        clonotypes['repertoire_id'] = self.dataset.get_example_ids()
+        fig = px.bar(clonotypes, x='repertoire', y='clonotype_count', color=self.label_name,
+                     title='Clonotype count per repertoire',
                      color_discrete_sequence=px.colors.diverging.Tealrose)
-        fig.update_layout(template="plotly_white", yaxis_title='clonotype count', xaxis_title='repertoires sorted by clonotype count')
-        clonotypes.to_csv(self.result_path / 'clonotype_count_per_repertoire.csv')
+        fig.update_layout(template="plotly_white", yaxis_title='clonotype count',
+                          xaxis_title='repertoires sorted by clonotype count')
+        clonotypes.to_csv(self.result_path / 'clonotype_count_per_repertoire.csv', index=False)
         fig.write_html(str(self.result_path / 'clonotype_count_per_repertoire.html'))
 
         return ReportResult(name=self.name, info="Clonotype count per repertoire",
@@ -77,13 +82,14 @@ class RepertoireClonotypeSummary(DataReport):
 
     def _get_clonotype_count_with_label(self, repertoire: Repertoire) -> Tuple[int, str]:
 
-        sequences = repertoire.data
+        sequences = repertoire.data.topandas()
 
-        sequence_count = len(sequences)
-        unique_sequence_count = np.unique(sequences.cdr3_aa.tolist()).shape[0]
+        sequence_count = sequences.shape[0]
+        unique_sequence_count = len(sequences.groupby(['cdr3_aa', 'v_call', 'j_call']).size().reset_index(name='count'))
         if sequence_count != unique_sequence_count:
-            logging.warning(f"{RepertoireClonotypeSummary.__name__}: for repertoire {repertoire.identifier}, there are {sequence_count} sequences, "
-                            f"but {unique_sequence_count} unique sequences.")
+            logging.warning(f"{RepertoireClonotypeSummary.__name__}: {self.name}: for repertoire {repertoire.identifier}, "
+                            f"there are {sequence_count} sequences, but {unique_sequence_count} unique (CDR3 amino acid"
+                            f" sequence, V call, J call) combinations.")
 
         return unique_sequence_count, repertoire.metadata[self.label_name] if self.split_by_label else None
 
@@ -91,5 +97,6 @@ class RepertoireClonotypeSummary(DataReport):
         if isinstance(self.dataset, RepertoireDataset):
             return True
         else:
-            logging.warning(f"{RepertoireClonotypeSummary.__name__}: report can be generated only from RepertoireDataset. Skipping this report...")
+            logging.warning(f"{RepertoireClonotypeSummary.__name__}: report can be generated only from "
+                            f"RepertoireDataset. Skipping this report...")
             return False

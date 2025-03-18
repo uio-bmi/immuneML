@@ -2,54 +2,302 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Clustering setting {{ cl_setting_name }} detailed overview</title>
+    <title>Split {{split_number}} - {{setting_name}} Details</title>
     <style>
         {{{css_style}}}
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 1em 0;
+        }
+
+        .plot-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 2em auto;
+        }
+
+        .plot-container embed {
+            width: 100%;
+            border: none;
+        }
+
+        img, embed {
+            max-width: 100%;
+            margin: 1em 0;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Make embedded plots more square-shaped */
+        embed {
+            width: 100%;
+            height: 400px;  /* Reduced fixed height */
+            margin: 0 auto;
+            display: block;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            margin: 0.5em 0;
+        }
+
+        ul li a {
+            display: block;
+            padding: 0.5em;
+            background: var(--background-color);
+            text-decoration: none;
+            color: var(--text-color);
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        ul li a:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .section {
+            margin: 2em 0;
+            padding: 1em;
+            border-radius: 4px;
+            border: 1px solid teal;
+        }
+
+        .report-section {
+            margin: 2em 0;
+            padding: 1em;
+            background: white;
+            border-radius: 8px;
+        }
+
     </style>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
     <div class="container">
-        <h1>Clustering setting {{ cl_setting_name }} overview</h1>
-        {{ #show_internal_performances }}
-        <details>
-            <summary>Internal performances</summary>
-            <div class="table-container padded">
-            {{{ internal_performances }}}
+        <h1>Split {{split_number}} - {{setting_name}} Details</h1>
+
+        <div class="results-grid">
+            <!-- Discovery Section -->
+            <div class="section">
+                <h2>Discovery Results</h2>
+                <hr>
+                <h3>Internal Performance</h3>
+                {{#discovery.internal_performance}}
+                <div class="table-container">
+                    {{{discovery.internal_performance}}}
+                </div>
+                {{/discovery.internal_performance}}
+                {{^discovery.internal_performance}}
+                <p>No internal performance metrics available</p>
+                {{/discovery.internal_performance}}
+
+                <h3>External Performance</h3>
+                {{#discovery.external_performance}}
+                <div class="table-container">
+                    {{{discovery.external_performance}}}
+                </div>
+                {{/discovery.external_performance}}
+                {{^discovery.external_performance}}
+                <p>No external performance metrics available</p>
+                {{/discovery.external_performance}}
+
+                <p><a href="{{discovery.predictions_path}}">Download predictions</a></p>
+
+                {{#discovery.reports.has_reports}}
+                <h3>Reports</h3>
+                {{#discovery.reports.reports}}
+                <div class="report-section">
+                    <h4>{{name}}</h4>
+                    {{#info}}
+                    <p class="padded-bottom">{{info}}</p>
+                    {{/info}}
+                    
+                    {{#output_figures}}
+                    <div class="plot-container">
+                        {{#name}}<h5>{{name}}</h5>{{/name}}
+                        {{#is_embed}}
+                        <embed src="{{path}}">
+                        {{/is_embed}}
+                        {{^is_embed}}
+                        <img src="{{path}}">
+                        {{/is_embed}}
+                    </div>
+                    {{/output_figures}}
+                    
+                    {{#output_tables.length}}
+                    <p>Downloadable tables:</p>
+                    {{#output_tables}}
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
+                    {{/output_tables}}
+                    {{/output_tables.length}}
+                    
+                    {{#output_text.length}}
+                    <p>Text reports:</p>
+                    {{#output_text}}
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
+                    {{/output_text}}
+                    {{/output_text.length}}
+                </div>
+                {{/discovery.reports.reports}}
+                {{/discovery.reports.has_reports}}
             </div>
-        </details>
-        {{ /show_internal_performances }}
-        {{ #show_external_performances }}
-        <details>
-            <summary>External performances</summary>
-            <div class="table-container padded">
-            {{{ external_performances }}}
+
+            <!-- Method-based Validation Section -->
+            {{#has_method_based}}
+            <div class="section">
+                <h2>Method-based Validation</h2>
+                <hr>
+                <h3>Internal Performance</h3>
+                <div class="table-container">
+                    {{{method_based.internal_performance}}}
+                </div>
+
+                <h3>External Performance</h3>
+                <div class="table-container">
+                    {{{method_based.external_performance}}}
+                </div>
+
+                <p><a href="{{method_based.predictions_path}}">Download predictions</a></p>
+
+                {{#method_based.reports.has_reports}}
+                <h3>Reports</h3>
+                {{#method_based.reports.reports}}
+                <div class="report-section">
+                    <h4>{{name}}</h4>
+                    {{#info}}
+                    <p class="padded-bottom">{{info}}</p>
+                    {{/info}}
+
+                    {{#output_figures}}
+                    <div class="plot-container">
+                        {{#name}}<h5>{{name}}</h5>{{/name}}
+                        {{#is_embed}}
+                        <embed src="{{path}}">
+                        {{/is_embed}}
+                        {{^is_embed}}
+                        <img src="{{path}}">
+                        {{/is_embed}}
+                    </div>
+                    {{/output_figures}}
+
+                    {{#output_tables.length}}
+                    <p>Downloadable tables:</p>
+                    {{#output_tables}}
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
+                    {{/output_tables}}
+                    {{/output_tables.length}}
+
+                    {{#output_text.length}}
+                    <p>Text reports:</p>
+                    {{#output_text}}
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
+                    {{/output_text}}
+                    {{/output_text.length}}
+                </div>
+                {{/method_based.reports.reports}}
+                {{/method_based.reports.has_reports}}
             </div>
-        </details>
-        {{ /show_external_performances }}
-        <div>
-            {{#reports}}
-            <h4>Report {{name}}</h4>
-            <p class="padded-bottom">{{info}}</p>
-            <div class="grid-container">
-                {{#output_figures}}
-                    {{#is_embed}}
-                    <div class="grid-item-full-width"><embed src="{{path}}">{{#name}}<p>{{name}}</p>{{/name}}</div>
-                    {{/is_embed}}
-                    {{^is_embed}}
-                    <div><img src="{{path}}">{{#name}}<p>{{name}}</p>{{/name}}</div>
-                    {{/is_embed}}
-                {{/output_figures}}
-                <ul>
-                {{#output_tables}}
-                <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
-                {{/output_tables}}
-                {{#output_text}}
-                <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
-                {{/output_text}}
-                </ul>
+            {{/has_method_based}}
+
+            <!-- Result-based Validation Section -->
+            {{#has_result_based}}
+            <div class="section">
+                <h2>Result-based Validation</h2>
+                <hr>
+                <h3>Internal Performance</h3>
+                <div class="table-container">
+                    {{{result_based.internal_performance}}}
+                </div>
+
+                <h3>External Performance</h3>
+                <div class="table-container">
+                    {{{result_based.external_performance}}}
+                </div>
+
+                <p><a href="{{result_based.predictions_path}}">Download predictions</a></p>
+
+                {{#result_based.reports.has_reports}}
+                <h3>Reports</h3>
+                {{#result_based.reports.reports}}
+                <div class="report-section">
+                    <h4>{{name}}</h4>
+                    {{#info}}
+                    <p class="padded-bottom">{{info}}</p>
+                    {{/info}}
+
+                    {{#output_figures}}
+                    <div class="plot-container">
+                        {{#name}}<h5>{{name}}</h5>{{/name}}
+                        {{#is_embed}}
+                        <embed src="{{path}}">
+                        {{/is_embed}}
+                        {{^is_embed}}
+                        <img src="{{path}}">
+                        {{/is_embed}}
+                    </div>
+                    {{/output_figures}}
+
+                    {{#output_tables.length}}
+                    <p>Downloadable tables:</p>
+                    {{#output_tables}}
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
+                    {{/output_tables}}
+                    {{/output_tables.length}}
+
+                    {{#output_text.length}}
+                    <p>Text reports:</p>
+                    {{#output_text}}
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
+                    {{/output_text}}
+                    {{/output_text.length}}
+                </div>
+                {{/result_based.reports.reports}}
+                {{/result_based.reports.has_reports}}
             </div>
-            {{/reports}}
+            {{/has_result_based}}
         </div>
     </div>
 </body>

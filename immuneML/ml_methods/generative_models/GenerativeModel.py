@@ -3,7 +3,7 @@ from pathlib import Path
 
 import numpy as np
 
-from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.SequenceParams import RegionType, Chain
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.SequenceType import SequenceType
 
@@ -21,8 +21,8 @@ class GenerativeModel:
     DOCS_TITLE = "Generative models"
     OUTPUT_COLUMNS = []
 
-    def __init__(self, locus, name: str = None, region_type: RegionType = None):
-        self.locus = locus
+    def __init__(self, locus: Chain, name: str = None, region_type: RegionType = None):
+        self.locus = Chain.get_chain(locus)
         self.name = name
         self.region_type = region_type
 

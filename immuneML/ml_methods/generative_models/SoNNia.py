@@ -3,9 +3,10 @@ import shutil
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from olga import load_model
 
-from immuneML.data_model.bnp_util import write_yaml, read_yaml
+from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.SequenceParams import RegionType, Chain
@@ -88,7 +89,7 @@ class SoNNia(GenerativeModel):
                  custom_model_path: str = None):
 
         if locus is not None:
-            super().__init__(locus, region_type=RegionType.IMGT_JUNCTION)
+            super().__init__(Chain.get_chain(str(locus)), region_type=RegionType.IMGT_JUNCTION)
         elif default_model_name is not None:
             super().__init__(locus=Chain.get_chain(default_model_name[-3:]), region_type=RegionType.IMGT_JUNCTION)
         self.epochs = epochs
@@ -135,13 +136,18 @@ class SoNNia(GenerativeModel):
         gen_model = SequenceGeneration(self._model)
         sequences = gen_model.generate_sequences_post(count)
 
-        return SequenceDataset.build_from_objects(sequences=[ReceptorSequence(sequence_aa=seq[0], sequence=seq[3],
-                                                                              v_call=seq[1], j_call=seq[2],
-                                                                              metadata={'gen_model_name': self.name})
-                                                             for seq in sequences],
-                                                  region_type=RegionType.IMGT_JUNCTION,
-                                                  path=PathBuilder.build(path), name='SoNNiaDataset',
-                                                  labels={'gen_model_name': [self.name]})
+        df = pd.DataFrame({
+            get_sequence_field_name(self.region_type, SequenceType.AMINO_ACID): [seq[0] for seq in sequences],
+            get_sequence_field_name(self.region_type, SequenceType.NUCLEOTIDE): [seq[3] for seq in sequences],
+            'v_call': [seq[1] for seq in sequences],
+            'j_call': [seq[2] for seq in sequences],
+            'gen_model_name': [self.name] * count,
+            'locus': [self.locus.to_string()] * count
+        })
+
+        return SequenceDataset.build_from_partial_df(df, path=PathBuilder.build(path), name='SoNNiaDataset',
+                                                     labels={'gen_model_name': [self.name]},
+                                                     type_dict={'gen_model_name': str})
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         raise NotImplementedError

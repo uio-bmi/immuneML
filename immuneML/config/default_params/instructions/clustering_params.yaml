@@ -3,3 +3,4 @@ reports: []
 labels: null
 region_type: IMGT_CDR3
 sequence_type: AMINO_ACID
+validation_type: [method_based]

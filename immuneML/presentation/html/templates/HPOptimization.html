@@ -102,7 +102,7 @@
             {{#hp_per_label}}
             <h4>{{label}}</h4>
             <p>
-                The following table shows a summary of training ML models for the label {{label}}. For each of the data splits made in the assessment (outer) cross-validation loop, it shows which of combinations of ML settings had the best {{optimization_metric}} score out of all. By clicking ‘see details’ you will find more detailed information about the performance of the trained models on each data split, and generated reports.
+                The following table shows a summary of training ML models for the label {{label}}. For each of the data splits made in the assessment (outer) cross-validation loop, it shows which of combinations of ML settings had the best {{optimization_metric}} score out of all. By clicking 'see details' you will find more detailed information about the performance of the trained models on each data split, and generated reports.
             </p>
             <div class="table-container">
                 <table>
@@ -160,6 +160,20 @@
                     {{/is_embed}}
                 {{/output_figures}}
             </div>
+            {{#output_tables}}
+            <div class="table-container">
+                <details>
+                    <summary>
+                        <h5 style="display: inline;">{{name}}</h5>
+                        <span class="table-preview">(click to expand/collapse)</span>
+                    </summary>
+                    <div class="scrollable-table">
+                        {{{table}}}
+                    </div>
+                    <p><a href="{{path}}" download>Download full table</a></p>
+                </details>
+            </div>
+            {{/output_tables}}
             {{/hp_reports}}
         </div>
         {{/show_hp_reports}}

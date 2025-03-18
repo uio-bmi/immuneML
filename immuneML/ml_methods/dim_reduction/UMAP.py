@@ -1,3 +1,5 @@
+from typing import List
+
 import umap
 
 from immuneML.data_model.datasets.Dataset import Dataset
@@ -43,3 +45,6 @@ class UMAP(DimRedMethod):
 
     def fit_transform(self, dataset: Dataset):
         return self.method.fit_transform(dataset.encoded_data.examples)
+
+    def get_dimension_names(self) -> List[str]:
+        return [f"UMAP_dimension_{i+1}" for i in range(self.method.n_components)]

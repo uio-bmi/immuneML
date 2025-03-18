@@ -16,14 +16,14 @@ def test_simple_vae():
                                                                {}, path / 'dataset', region_type="IMGT_JUNCTION")
 
     vae = SimpleVAE('beta', 0.75, 20, 75, 50, 10, 2,
-                    2, 1, 21, 2, 5, 10, 'cpu')
+                    2, 1, 21, 2, 5, 10, 'cpu', 0.01)
 
     vae.fit(dataset, path / 'model')
     vae.generate_sequences(7, 1, path / 'generated_dataset', SequenceType.AMINO_ACID, False)
 
     assert (path / 'generated_dataset').exists()
-    assert (path / 'generated_dataset/synthetic_None_dataset.tsv').exists()
+    assert (path / 'generated_dataset/synthetic_dataset.tsv').exists()
 
-    assert pd.read_csv(str(path / 'generated_dataset/synthetic_None_dataset.tsv'), sep='\t').shape[0] == 7
+    assert pd.read_csv(str(path / 'generated_dataset/synthetic_dataset.tsv'), sep='\t').shape[0] == 7
 
     shutil.rmtree(path)

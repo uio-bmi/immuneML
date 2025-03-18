@@ -1,3 +1,5 @@
+from typing import List
+
 from sklearn.decomposition import PCA as SklearnPCA
 
 from immuneML.data_model.datasets.Dataset import Dataset
@@ -37,3 +39,6 @@ class PCA(DimRedMethod):
 
     def fit_transform(self, dataset: Dataset):
         return self.method.fit_transform(dataset.encoded_data.get_examples_as_np_matrix())
+
+    def get_dimension_names(self) -> List[str]:
+        return [f"PC{i+1}" for i in range(self.method.n_components)]

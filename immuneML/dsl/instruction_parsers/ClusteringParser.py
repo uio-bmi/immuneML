@@ -34,27 +34,39 @@ class ClusteringParser:
 
         ParameterValidator.assert_region_type(instruction, ClusteringParser.__name__)
         ParameterValidator.assert_sequence_type(instruction, ClusteringParser.__name__)
+        if instruction['validation_type'] is not None:
+            ParameterValidator.assert_type_and_value(instruction['validation_type'], list, ClusteringParser.__name__,
+                                                     'validation_type')
+            for val_type in instruction['validation_type']:
+                ParameterValidator.assert_in_valid_list(val_type, ['method_based', 'result_based'],
+                                                        ClusteringParser.__name__, 'validation_type')
 
         dataset = symbol_table.get(instruction['dataset'])
         clustering_settings = parse_clustering_settings(key, instruction, symbol_table)
         metrics = parse_metrics(key, instruction, symbol_table)
         label_config = parse_labels(key, instruction, dataset)
         reports = parse_reports(key, instruction, symbol_table)
-        split_config = parse_split_config(key, instruction, symbol_table)
+        split_config = parse_split_config(instruction)
 
         return ClusteringInstruction(dataset=dataset, metrics=metrics, clustering_settings=clustering_settings,
                                      name=key, label_config=label_config, reports=reports,
                                      sequence_type=SequenceType[instruction['sequence_type'].upper()],
                                      region_type=RegionType[instruction['region_type'].upper()],
-                                     split_config=split_config)
+                                     split_config=split_config, validation_type=instruction['validation_type'])
 
 
-def parse_split_config(key, instruction, symbol_table) -> SplitConfig:
-
+def parse_split_config(instruction) -> SplitConfig:
     try:
         split_key = 'split_config'
         default_params = DefaultParamsLoader.load("instructions/", SplitConfig.__name__)
         instruction[split_key] = {**default_params, **instruction[split_key]}
+
+        valid_keys = [k for k in inspect.signature(SplitConfig.__init__).parameters.keys() if k not in ['self']]
+
+        ParameterValidator.assert_keys(instruction[split_key].keys(), valid_keys, ClusteringParser.__name__, split_key,
+                                       exclusive=False)
+        ParameterValidator.assert_type_and_value(instruction[split_key]['split_count'], int, ClusteringParser.__name__,
+                                                 'split_count', min_inclusive=1)
 
         split_strategy = SplitType[instruction[split_key]["split_strategy"].upper()]
         training_percentage = float(
@@ -79,7 +91,7 @@ def parse_split_config(key, instruction, symbol_table) -> SplitConfig:
                                                          parameter_name="validation_data")
 
         return SplitConfig(split_strategy=split_strategy,
-                           split_count=1, training_percentage=training_percentage,
+                           split_count=instruction[split_key]['split_count'], training_percentage=training_percentage,
                            manual_config=ManualSplitConfig(train_metadata_path=instruction[split_key]['discovery_data'],
                                                            test_metadata_path=instruction[split_key]['validation_data'])
                            if "manual_config" in instruction[split_key] else None,
@@ -107,7 +119,8 @@ def parse_reports(key, instruction, symbol_table) -> List[Report]:
         valid_reports = symbol_table.get_keys_by_type(SymbolType.REPORT)
 
         ParameterValidator.assert_all_type_and_value(instruction['reports'], str, 'ClusteringParser', 'reports')
-        ParameterValidator.assert_all_in_valid_list(instruction['reports'], valid_reports, 'ClusteringParser', 'reports')
+        ParameterValidator.assert_all_in_valid_list(instruction['reports'], valid_reports, 'ClusteringParser',
+                                                    'reports')
 
         reports = [symbol_table.get(report_id) for report_id in instruction['reports']]
         return reports
@@ -125,7 +138,8 @@ def parse_metrics(key: str, instruction: dict, symbol_table: SymbolTable) -> Lis
 
 
 def parse_clustering_settings(key: str, instruction: dict, symbol_table: SymbolTable) -> List[ClusteringSetting]:
-    ParameterValidator.assert_type_and_value(instruction['clustering_settings'], list, 'ClusteringParser', 'key:clustering_settings')
+    ParameterValidator.assert_type_and_value(instruction['clustering_settings'], list, 'ClusteringParser',
+                                             'key:clustering_settings')
     valid_encodings = symbol_table.get_keys_by_type(SymbolType.ENCODING)
     valid_dim_red = [method.symbol for method in symbol_table.get_by_type(SymbolType.ML_METHOD)
                      if isinstance(method.item, DimRedMethod)]
@@ -142,8 +156,10 @@ def parse_clustering_settings(key: str, instruction: dict, symbol_table: SymbolT
 
 
 def make_setting_obj(setting, valid_encodings, valid_clusterings, valid_dim_red, symbol_table, instruction):
-    ParameterValidator.assert_keys_present(setting.keys(), ['encoding', 'method'], 'ClusteringParser', 'clustering_settings')
-    ParameterValidator.assert_keys(setting.keys(), ['encoding', 'dim_reduction', 'method'], 'ClusteringParser', 'clustering_settings', exclusive=False)
+    ParameterValidator.assert_keys_present(setting.keys(), ['encoding', 'method'], 'ClusteringParser',
+                                           'clustering_settings')
+    ParameterValidator.assert_keys(setting.keys(), ['encoding', 'dim_reduction', 'method'], 'ClusteringParser',
+                                   'clustering_settings', exclusive=False)
 
     ParameterValidator.assert_in_valid_list(setting['encoding'], valid_encodings, 'ClusteringParser', 'encoding')
     ParameterValidator.assert_in_valid_list(setting['method'], valid_clusterings, 'ClusteringParser',

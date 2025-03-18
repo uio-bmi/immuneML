@@ -30,4 +30,5 @@ This page provides an overview of tutorials for how to use immuneML for differen
   tutorials/how_to_apply_to_new_data
   tutorials/how_to_perform_exploratory_analysis
   tutorials/motif_recovery
+  tutorials/clustering_tutorial
 

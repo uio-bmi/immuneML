@@ -2,7 +2,7 @@ Report parameters
 =======================
 
 Under the :code:`definitions/reports` component, the user can specify reports which visualise or summarise different properties
-of the dataset or analysis.
+of the dataset or analysis. To use a report, it must be specified in the specific :code:`reports` list of the instruction that generates it.
 
 Reports have been divided into different types. Different types of reports can be specified depending on which instruction is run. Click on the name of the report type to see more details.
 

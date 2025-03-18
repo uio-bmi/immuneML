@@ -11,13 +11,14 @@ from typing import List
 from uuid import uuid4
 
 import numpy as np
+import pandas as pd
 from bionumpy import get_bufferclass_for_datatype
 
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.SequenceSet import Receptor, ReceptorSequence, AIRRSequenceSet, \
     build_dynamic_airr_sequence_set_dataclass, make_receptors_from_data, make_sequences_from_data
 from immuneML.data_model.bnp_util import bnp_write_to_file, bnp_read_from_file, read_yaml, \
-    extend_dataclass_with_dynamic_fields, write_dataset_yaml
+    extend_dataclass_with_dynamic_fields, write_dataset_yaml, make_full_airr_seq_set_df
 from immuneML.data_model.datasets.Dataset import Dataset
 
 
@@ -73,7 +74,8 @@ class ElementDataset(Dataset, ABC):
         return dataset
 
     def get_label_names(self):
-        return [el for el in list(self.labels.keys()) if el not in ['type_dict_dynamic_fields', 'organism']] \
+        invalid_label_names = ['type_dict_dynamic_fields', 'organism', 'j_gene', 'v_gene', 'j_call', 'v_call']
+        return [el for el in list(self.labels.keys()) if el not in invalid_label_names] \
             if isinstance(self.labels, dict) else []
 
 
@@ -104,7 +106,8 @@ class SequenceDataset(ElementDataset):
 
         all_fields_dict = make_all_fields_dict_from_sequences(sequences, region_type)
         bnp_dc, type_dict = build_dynamic_airr_sequence_set_dataclass(all_fields_dict)
-        bnp_write_to_file(filename, bnp_dc(**all_fields_dict))
+        dc_object = bnp_dc(**all_fields_dict)
+        bnp_write_to_file(filename, dc_object)
 
         dataset_metadata = cls.create_metadata_dict(dataset_class=cls.__name__,
                                                     filename=filename,
@@ -119,10 +122,28 @@ class SequenceDataset(ElementDataset):
                                dataset_file=metadata_filename, bnp_dataclass=bnp_dc,
                                identifier=dataset_metadata["identifier"])
 
+    @classmethod
+    def build_from_partial_df(cls, df: pd.DataFrame, path: Path, name: str = None, labels: dict = None,
+                              type_dict: dict = None):
+
+        airr_df = make_full_airr_seq_set_df(df)
+        name = name if name is not None else uuid4().hex
+        filename = path / f"{name}.tsv"
+
+        airr_df.to_csv(filename, sep='\t', index=False)
+
+        dataset_yaml = SequenceDataset.create_metadata_dict(SequenceDataset, filename=filename, type_dict=type_dict,
+                                                            name=name, labels=labels)
+
+        write_dataset_yaml(path / f'{name}.yaml', dataset_yaml)
+
+        return SequenceDataset.build(filename, path / f'{name}.yaml', name)
+
     def get_metadata(self, field_names: list, return_df: bool = False):
-        """Returns a dict or an equivalent pandas DataFrame with metadata information from Receptor objects for
+        """Returns a dict or an equivalent pandas DataFrame with metadata information from ReceptorSequence objects for
         provided field names"""
         result = self.data.topandas()[field_names]
+        result = fix_empty_strings_in_metadata(result)
 
         return result if return_df else result.to_dict("list")
 
@@ -131,14 +152,15 @@ class SequenceDataset(ElementDataset):
 
     def make_subset(self, example_indices, path, dataset_type: str):
         data = self.data[example_indices]
-        name = f"subset_{self.name}"
+        name = f"subset_{self.name}_{dataset_type}"
+        data_filename = path / f'{name}.tsv'
 
-        bnp_write_to_file(path / self.filename.name, data)
+        bnp_write_to_file(data_filename, data)
 
         metadata_filename = path / f'{name}.yaml'
         shutil.copyfile(self.dataset_file, metadata_filename)
 
-        return SequenceDataset(filename=path / self.filename.name, name=name, labels=copy.deepcopy(self.labels),
+        return SequenceDataset(filename=data_filename, name=name, labels=copy.deepcopy(self.labels),
                                dynamic_fields=self.dynamic_fields, dataset_file=metadata_filename,
                                bnp_dataclass=self.bnp_dataclass)
 
@@ -201,7 +223,9 @@ class ReceptorDataset(ElementDataset):
     def get_metadata(self, field_names: list, return_df: bool = False):
         """Returns a dict or an equivalent pandas DataFrame with metadata information from Receptor objects for
         provided field names"""
-        result = self.data.topandas().groupby('cell_id', sort=False).agg(
+        result = fix_empty_strings_in_metadata(self.data.topandas())
+
+        result = result.groupby('cell_id', sort=False).agg(
             lambda x: "_".join([str(el) for el in list(set(x))])).reset_index()
         if any(field_name not in result.columns for field_name in field_names):
             logging.warning(
@@ -297,3 +321,10 @@ def fill_in_neutral_vals(all_fields, airr_fields, sequences):
             all_fields[f.name] = [val if val is not None else neutral_val for val in all_fields[f.name]]
 
     return all_fields
+
+
+def fix_empty_strings_in_metadata(df: pd.DataFrame):
+    for col, col_type in df.dtypes.to_dict().items():
+        if col_type == object:
+            df[col] = df[col].astype(str).replace('nan', '')
+    return df

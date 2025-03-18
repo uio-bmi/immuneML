@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 
 from immuneML.analysis.criteria_matches.BooleanType import BooleanType
-from immuneML.analysis.criteria_matches.DataType import DataType
 from immuneML.analysis.criteria_matches.OperationType import OperationType
 
 
@@ -25,18 +24,12 @@ class CriteriaMatcher:
                         {
                             "type": OperationType.IN,
                             "allowed_values": ["GAD", "PPI"],
-                            "value": {
-                                "type": DataType.COLUMN,
-                                "name": "matching_specificity"
-                            }
+                            "name": "matching_specificity"
                         },
                         {
                             "type": OperationType.LESS_THAN,
                             "threshold": 0.001,
-                            "value": {
-                                "type": DataType.COLUMN,
-                                "name": "p_val"
-                            }
+                            "column": : "p_val"
                         },
                     ]
                 },
@@ -46,18 +39,12 @@ class CriteriaMatcher:
                         {
                             "type": OperationType.IN,
                             "allowed_values": ["yes"],
-                            "value": {
-                                "type": DataType.COLUMN,
-                                "name": "a"
-                            }
+                            "column": "a"
                         },
                         {
                             "type": OperationType.GREATER_THAN,
                             "threshold": 0.5,
-                            "value": {
-                                "type": DataType.COLUMN,
-                                "name": "odds_ratio"
-                            }
+                            "column": "odds_ratio"
                         },
                     ]
                 },
@@ -76,12 +63,12 @@ class CriteriaMatcher:
 
     @staticmethod
     def evaluate_in(data: pd.Series, criteria: dict):
-        result = data.isin(criteria["allowed_values"])
+        result = data.isin(criteria["values"])
         return result.values
 
     @staticmethod
     def evaluate_not_in(data: pd.Series, criteria: dict):
-        result = ~data.isin(criteria["allowed_values"])
+        result = ~data.isin(criteria["values"])
         return result.values
 
     @staticmethod
@@ -127,11 +114,9 @@ class CriteriaMatcher:
 
     @staticmethod
     def parse_criteria(criteria, data):
-        if criteria["type"] in DataType:
-            return data[criteria["name"]]
-        elif criteria["type"] in OperationType:
+        if criteria["type"] in OperationType:
             operation = getattr(CriteriaMatcher, "evaluate_" + criteria["type"].name.lower())
-            return operation(CriteriaMatcher.parse_criteria(criteria["value"], data), criteria)
+            return operation(data[criteria['column']], criteria)
         elif criteria["type"] in BooleanType:
             operation = getattr(CriteriaMatcher, "evaluate_" + criteria["type"].name.lower())
             booleans = []
