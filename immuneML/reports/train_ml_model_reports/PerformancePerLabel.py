@@ -30,9 +30,9 @@ class PerformancePerLabel(TrainMLModelReport):
 
     - metric (str): The metric to use for the report. Default is balanced_accuracy.
 
-    - compute_for_selection (bool): If True, the report will be computed for the selection. Default is False.
+    - compute_for_selection (bool): If True, the report will be computed for the selection. Default is True.
 
-    - compute_for_assessment (bool): If True, the report will be computed for the assessment. Default is False.
+    - compute_for_assessment (bool): If True, the report will be computed for the assessment. Default is True.
 
     **YAML specification:**
 
@@ -45,8 +45,8 @@ class PerformancePerLabel(TrainMLModelReport):
                     metric: balanced_accuracy
     """
 
-    def __init__(self, alternative_label: str, metric: str = "balanced_accuracy", compute_for_selection: bool = False,
-                 compute_for_assessment: bool = False, state: TrainMLModelState = None, result_path: Path = None,
+    def __init__(self, alternative_label: str, metric: str = "balanced_accuracy", compute_for_selection: bool = True,
+                 compute_for_assessment: bool = True, state: TrainMLModelState = None, result_path: Path = None,
                  name: str = None, label: Label = None, number_of_processes: int = 1):
         super().__init__(name=name, state=state, label=label, result_path=result_path,
                          number_of_processes=number_of_processes)
@@ -116,7 +116,7 @@ class PerformancePerLabel(TrainMLModelReport):
 
             data = self._get_performance_data(assessment_items_per_setting)
 
-            outputs.extend(self._write_split_results(data,f"{label.name}_assessment", label.name))
+            outputs.extend(self._write_split_results(data, f"{label.name}_assessment", label.name))
         return outputs
 
     def _get_performance_for_dataset(self, predictions: pd.DataFrame, dataset: Dataset, label: Label, counts: dict):
