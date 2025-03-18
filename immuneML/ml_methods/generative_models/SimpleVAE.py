@@ -12,9 +12,7 @@ from torch.utils.data import DataLoader
 
 from immuneML import Constants
 from immuneML.data_model.SequenceParams import RegionType
-from immuneML.data_model.SequenceSet import ReceptorSequence
-from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name, make_full_airr_seq_set_df, \
-    write_dataset_yaml
+from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
@@ -126,8 +124,8 @@ class SimpleVAE(GenerativeModel):
 
     def __init__(self, locus, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim, pretrains,
                  v_gene_embed_dim, cdr3_embed_dim, warmup_epochs, patience, iter_count_prob_estimation, device,
-                 validation_split=0.1, vocab=None, max_cdr3_len=None, unique_v_genes=None, unique_j_genes=None,
-                 name: str = None, region_type: str = RegionType.IMGT_JUNCTION.name):
+                 learning_rate: float, validation_split=0.1, vocab=None, max_cdr3_len=None, unique_v_genes=None,
+                 unique_j_genes=None, name: str = None, region_type: str = RegionType.IMGT_JUNCTION.name):
         super().__init__(locus)
         self.sequence_type = SequenceType.AMINO_ACID
         self.iter_count_prob_estimation = iter_count_prob_estimation
@@ -144,6 +142,7 @@ class SimpleVAE(GenerativeModel):
         self.latent_dim = latent_dim
         self.j_gene_embed_dim, self.v_gene_embed_dim = j_gene_embed_dim, v_gene_embed_dim
         self.linear_nodes_count = linear_nodes_count
+        self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.device = device
         self.max_cdr3_len, self.unique_v_genes, self.unique_j_genes = max_cdr3_len, unique_v_genes, unique_j_genes
@@ -200,7 +199,7 @@ class SimpleVAE(GenerativeModel):
         model = self.make_new_model(pretrained_weights_path)
         model.train()
 
-        optimizer = torch.optim.Adam(model.parameters())
+        optimizer = torch.optim.Adam(model.parameters(), lr=self.learning_rate)
         losses = []
         val_losses = []
         epoch = 1
@@ -317,7 +316,7 @@ class SimpleVAE(GenerativeModel):
         return DataLoader(pytorch_dataset, shuffle=shuffle, batch_size=batch_size if batch_size else self.batch_size)
 
     def is_same(self, model) -> bool:
-        raise RuntimeError
+        raise NotImplementedError
 
     def _update_beta_on_epoch_end(self, epoch):
         new_beta = self.beta
