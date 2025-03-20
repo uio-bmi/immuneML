@@ -1,12 +1,11 @@
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
 
 from immuneML.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
 from immuneML.analysis.criteria_matches.CriteriaTypeInstantiator import CriteriaTypeInstantiator
 from immuneML.data_model.datasets.Dataset import Dataset
-from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.preprocessing.filters.Filter import Filter
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -80,7 +79,11 @@ class MetadataFilter(Filter):
         return dataset.make_subset(indices, self.result_path, "filtered")
 
     def _get_matching_indices(self, dataset: Dataset):
-        metadata = dataset.get_metadata(None, True)
+        if isinstance(dataset, SequenceDataset):
+            field_names = dataset.get_label_names()
+        else:
+            field_names = None
+        metadata = dataset.get_metadata(field_names, True)
         matches = CriteriaMatcher().match(self.criteria, metadata)
         indices = np.where(matches)[0]
         return indices
