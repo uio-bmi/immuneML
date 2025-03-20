@@ -30,23 +30,24 @@ class SoNNia(GenerativeModel):
 
     **Specification arguments:**
 
-    - locus (str)
+    - locus (str): The locus of the receptor chain.
 
-    - batch_size (int)
+    - batch_size (int): number of sequences to use in each batch
 
-    - epochs (int)
+    - epochs (int): number of epochs to train the model
 
-    - deep (bool)
+    - deep (bool): whether to use a deep model
 
     - include_joint_genes (bool)
 
     - n_gen_seqs (int)
 
-    - custom_model_path (str)
+    - custom_model_path (str): path for the custom OLGA model if used
 
-    - default_model_name (str)
+    - default_model_name (str): name of the default OLGA model if used
 
-        **YAML specification:**
+
+     **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
@@ -55,7 +56,12 @@ class SoNNia(GenerativeModel):
             ml_methods:
                 my_sonnia_model:
                     SoNNia:
-                        ...
+                        batch_size: 1e4
+                        epochs: 5
+                        default_model_name: humanTRB
+                        deep: False
+                        include_joint_genes: True
+                        n_gen_seqs: 100
 
     """
 

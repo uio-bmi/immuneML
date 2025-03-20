@@ -15,6 +15,7 @@ from immuneML.dsl.definition_parsers.SimulationParser import SimulationParser
 from immuneML.dsl.import_parsers.ImportParser import ImportParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
+from immuneML.encodings.protein_embedding.ProteinEmbeddingEncoder import ProteinEmbeddingEncoder
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
@@ -97,6 +98,9 @@ class DefinitionParser:
     @staticmethod
     def make_encodings_docs(path: Path):
         enc_classes = ReflectionHandler.all_direct_subclasses(DatasetEncoder, "Encoder", "encodings/")
+        enc_classes = [cl for cl in enc_classes if cl.__name__ != "ProteinEmbeddingEncoder"]
+        enc_classes += ReflectionHandler.all_direct_subclasses(ProteinEmbeddingEncoder, "Encoder", "encodings/")
+
         make_docs(path, enc_classes, "specs_encodings.rst", "Encoder")
 
     @staticmethod

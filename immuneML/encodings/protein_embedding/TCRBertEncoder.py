@@ -9,36 +9,48 @@ from immuneML.util.ParameterValidator import ParameterValidator
 
 class TCRBertEncoder(ProteinEmbeddingEncoder):
     """
-    TCRBertEncoder is based on `TCR-BERT <https://github.com/wukevin/tcr-bert/tree/main>`, a large language model
+    TCRBertEncoder is based on `TCR-BERT <https://github.com/wukevin/tcr-bert/tree/main>`_, a large language model
     trained on TCR sequences. TCRBertEncoder embeds TCR sequences using either of the pre-trained models provided on
     HuggingFace repository.
 
-    TCRBertEncoder should be used in combination with either dimensionality reduction or clustering methods.
+    Original publication:
+    Wu, K. E., Yost, K., Daniel, B., Belk, J., Xia, Y., Egawa, T., Satpathy, A., Chang, H., & Zou, J. (2024).
+    TCR-BERT: Learning the grammar of T-cell receptors for flexible antigen-binding analyses. Proceedings of the
+    18th Machine Learning in Computational Biology Meeting, 194–229. https://proceedings.mlr.press/v240/wu24b.html
 
-        **Dataset type:**
+    **Dataset type:**
 
-        - SequenceDatasets
+    - SequenceDataset
 
-        **Specification arguments:**
+    - ReceptorDataset
 
-        - model (str): The pre-trained model to use (huggingface model hub identifier). Available options are 'tcr-bert' and 'tcr-bert-mlm-only'.
-        - layers (list): The hidden layers to use for encoding. Layers should be given as negative integers, where -1 indicates the last representation, -2 second to last, etc. Default is [-1].
-        - method (str): The method to use for pooling the hidden states. Available options are 'mean', 'max', 'attn_mean',
-            'cls', and 'pool'. Default is 'mean'. For explanation of the methods, see GitHub repository of TCR-BERT.
-        - batch_size (int): The batch size to use for encoding. Default is 256.
+    - RepertoireDataset
 
-        **YAML specification:**
+    **Specification arguments:**
 
-        .. indent with spaces
-        .. code-block:: yaml
+    - model (str): The pre-trained model to use (huggingface model hub identifier). Available options are 'tcr-bert'
+      and 'tcr-bert-mlm-only'.
 
-            definitions:
-                encodings:
-                    my_tcr_bert_encoder: TCRBert
+    - layers (list): The hidden layers to use for encoding. Layers should be given as negative integers, where -1
+      indicates the last representation, -2 second to last, etc. Default is [-1].
 
-        """
-    def __init__(self, name: str = None, region_type: RegionType = RegionType.IMGT_CDR3, model: str = None, layers: list = None, method: str = None,
-                 batch_size: int = None):
+    - method (str): The method to use for pooling the hidden states. Available options are 'mean', 'max', 'attn_mean',
+      'cls', and 'pool'. Default is 'mean'. For explanation of the methods, see GitHub repository of TCR-BERT.
+
+    - batch_size (int): The batch size to use for encoding. Default is 256.
+
+    **YAML specification:**
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        definitions:
+            encodings:
+                my_tcr_bert_encoder: TCRBert
+
+    """
+    def __init__(self, name: str = None, region_type: RegionType = RegionType.IMGT_CDR3, model: str = None,
+                 layers: list = None, method: str = None, batch_size: int = None):
         super().__init__(region_type, name)
         self.model = model
         self.layers = layers
