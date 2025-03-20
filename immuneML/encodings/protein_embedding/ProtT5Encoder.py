@@ -56,11 +56,8 @@ class ProtT5Encoder(ProteinEmbeddingEncoder):
 
     def __init__(self, name: str = None, region_type: RegionType = RegionType.IMGT_CDR3, device: str = 'cpu',
                  num_processes: int = 1):
-        super().__init__(region_type, name)
-        self.region_type = region_type
-        self.device = device
+        super().__init__(region_type, name, num_processes, device)
         self.transformer_link = "Rostlab/prot_t5_xl_half_uniref50-enc"
-        self.num_processes = num_processes
 
     @staticmethod
     def build_object(dataset: Dataset, **params):

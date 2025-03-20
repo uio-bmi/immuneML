@@ -34,7 +34,7 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
     - layers (list): The hidden layers to use for encoding. Layers should be given as negative integers, where -1
       indicates the last representation, -2 second to last, etc. Default is [-1].
 
-    - method (str): The method to use for pooling the hidden states. Available options are 'mean', 'max', 'attn_mean',
+    - method (str): The method to use for pooling the hidden states. Available options are 'mean', 'max'',
       'cls', and 'pool'. Default is 'mean'. For explanation of the methods, see GitHub repository of TCR-BERT.
 
     - batch_size (int): The batch size to use for encoding. Default is 256.
@@ -50,8 +50,8 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
 
     """
     def __init__(self, name: str = None, region_type: RegionType = RegionType.IMGT_CDR3, model: str = None,
-                 layers: list = None, method: str = None, batch_size: int = None):
-        super().__init__(region_type, name)
+                 layers: list = None, method: str = None, batch_size: int = None, device: str = 'cpu'):
+        super().__init__(region_type, name, num_processes=1, device=device)
         self.model = model
         self.layers = layers
         self.method = method
@@ -94,11 +94,7 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
                 encoded = tok(
                     *seq_chunk, padding="max_length", max_length=64, return_tensors="pt"
                 )
-                # manually calculated mask lengths
-                # temp = [sum([len(p.split()) for p in pair]) + 3 for pair in zip(*seq_chunk)]
-                input_mask = encoded["attention_mask"].numpy()
-                encoded = {k: v.to('cpu') for k, v in encoded.items()}
-                # encoded contains input attention mask of (batch, seq_len)
+                encoded = {k: v.to(self.device) for k, v in encoded.items()}
                 x = model.forward(**encoded, output_hidden_states=True, output_attentions=True)
                 if self.method == "pool":
                     embeddings.append(x.pooler_output.cpu().numpy().astype(np.float64))
@@ -130,23 +126,14 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
                             e.append(seq_hidden.mean(axis=0))
                         elif self.method == "max":
                             e.append(seq_hidden.max(axis=0))
-                        elif self.method == "attn_mean":
-                            # (attn_heads, seq_len, seq_len)
-                            # columns past seq_len + 2 are all 0
-                            # summation over last seq_len dim = 1 (as expected after softmax)
-                            attn = x.attentions[l][i, :, :, : seq_len + 2]
-                            # print(attn.shape)
-                            print(attn.sum(axis=-1))
-                            raise NotImplementedError
                         else:
                             raise ValueError(f"Unrecognized method: {self.method}")
                     e = np.hstack(e)
                     assert len(e.shape) == 1
                     embeddings.append(e)
-        if len(embeddings[0].shape) == 1:
-            embeddings = np.stack(embeddings)
-        else:
-            embeddings = np.vstack(embeddings)
+
+        embeddings = np.stack(embeddings) if len(embeddings[0].shape) == 1 else np.vstack(embeddings)
+
         del x
         del model
         torch.cuda.empty_cache()
@@ -159,7 +146,7 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
 
     def _get_relevant_model_and_tok(self):
         from transformers import BertModel, BertTokenizer
-        model = BertModel.from_pretrained(f"wukevin/{self.model}")
+        model = BertModel.from_pretrained(f"wukevin/{self.model}").to(self.device)
         tok = BertTokenizer.from_pretrained(f"wukevin/{self.model}",
                                             do_basic_tokenize=False, do_lower_case=False,
                                             tokenize_chinese_chars=False, unk_token="?", sep_token="|",

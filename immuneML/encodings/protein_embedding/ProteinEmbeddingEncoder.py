@@ -21,9 +21,11 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
     Subclasses must implement the _embed_sequence_set method.
     """
 
-    def __init__(self, region_type: RegionType, name: str = None):
+    def __init__(self, region_type: RegionType, name: str = None, num_processes: int = 1, device: str = 'cpu'):
         super().__init__(name)
         self.region_type = region_type
+        self.num_processes = num_processes
+        self.device = device
 
     @staticmethod
     @abstractmethod
