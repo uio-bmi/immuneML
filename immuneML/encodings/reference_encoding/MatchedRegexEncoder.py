@@ -50,25 +50,25 @@ class MatchedRegexEncoder(DatasetEncoder):
     In the simplest case, when counting the number of occurrences of a given list of k-mers in TRB sequences, the
     contents of the motif file could look like this:
 
-        ====  ==========
-        id    TRB_regex
-        ====  ==========
-        1     ACG
-        2     EDNA
-        3     DFWG
-        ====  ==========
+    ====  ==========
+    id    TRB_regex
+    ====  ==========
+    1     ACG
+    2     EDNA
+    3     DFWG
+    ====  ==========
 
     It is also possible to test whether paired regular expressions occur in the dataset (for example: regular expressions
     matching both a TRA chain and a TRB chain) by specifying them on the same line.
     In a more complex case where both paired and unpaired regular expressions are specified, in addition to matching the V
     genes, the contents of the motif file could look like this:
 
-        ====  ==========  =======  ==========  ========
-        id    TRA_regex   TRAV     TRB_regex   TRBV
-        ====  ==========  =======  ==========  ========
-        1     AGQ.GSS     TRAV35   S[APL]GQY   TRBV29-1
-        2                          ASS.R.*     TRBV7-3
-        ====  ==========  =======  ==========  ========
+    ====  ==========  =======  ==========  ========
+    id    TRA_regex   TRAV     TRB_regex   TRBV
+    ====  ==========  =======  ==========  ========
+    1     AGQ.GSS     TRAV35   S[APL]GQY   TRBV29-1
+    2                          ASS.R.*     TRBV7-3
+    ====  ==========  =======  ==========  ========
 
 
     **YAML specification:**

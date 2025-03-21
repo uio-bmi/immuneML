@@ -78,6 +78,8 @@ class SimpleVAE(GenerativeModel):
 
     - device (str): name of the device where to train the model (e.g., cpu)
 
+    - learning_rate (float): learning rate for the optimizer (default is 0.001)
+
     - validation_split (float): what percentage of the data to use for validation (default is 0.1)
 
 

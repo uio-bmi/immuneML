@@ -11,35 +11,53 @@ from immuneML.util.ParameterValidator import ParameterValidator
 class ProtT5Encoder(ProteinEmbeddingEncoder):
 
     """
-        Encoder based on a pretrained protein language model by Elnaggar et al. 2021. The used transformer model is
-        "Rostlab/prot_t5_xl_half_uniref50-enc".
+    Encoder based on a pretrained protein language model by Elnaggar et al. 2021. The used transformer model is
+    "Rostlab/prot_t5_xl_half_uniref50-enc".
 
-        Original publication:
-        Elnaggar, A., Heinzinger, M., Dallago, C., Rihawi, G., Wang, Y., Jones, L., Gibbs, T., Feher, T.,
-        Angerer, C., Steinegger, M., Bhowmik, D., & Rost, B. (2021). ProtTrans: Towards Cracking the Language of
-        Life's Code Through Self-Supervised Deep Learning and High Performance Computing (No. arXiv:2007.06225).
-        arXiv. https://doi.org/10.48550/arXiv.2007.06225
+    Original publication:
+    Elnaggar, A., Heinzinger, M., Dallago, C., Rihawi, G., Wang, Y., Jones, L., Gibbs, T., Feher, T.,
+    Angerer, C., Steinegger, M., Bhowmik, D., & Rost, B. (2021). ProtTrans: Towards Cracking the Language of
+    Life's Code Through Self-Supervised Deep Learning and High Performance Computing (No. arXiv:2007.06225).
+    arXiv. https://doi.org/10.48550/arXiv.2007.06225
 
-        Original GitHub repository with license information: https://github.com/agemagician/ProtTrans
+    Original GitHub repository with license information: https://github.com/agemagician/ProtTrans
 
-        **Specification arguments:**
+    **Dataset type:**
 
-        - region_type (RegionType): Which part of the receptor sequence to encode. Defaults to IMGT_CDR3.
+    - SequenceDatasets
 
-        - device (str): Which device to use for model inference - 'cpu', 'cuda', 'mps' - as defined by pytorch.
-          Defaults to 'cpu'.
+    - ReceptorDatasets
 
-        - num_processes (int): Number of processes to use for parallel processing. Defaults to 1.
+    - RepertoireDatasets
 
-        """
+    **Specification arguments:**
+
+    - region_type (RegionType): Which part of the receptor sequence to encode. Defaults to IMGT_CDR3.
+
+    - device (str): Which device to use for model inference - 'cpu', 'cuda', 'mps' - as defined by pytorch.
+      Defaults to 'cpu'.
+
+    - num_processes (int): Number of processes to use for parallel processing. Defaults to 1.
+
+    **YAML specification:**
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        definitions:
+            encodings:
+                my_prot_t5_encoder:
+                    ProtT5::
+                        region_type: IMGT_CDR3
+                        device: cpu
+                        num_processes: 4
+
+    """
 
     def __init__(self, name: str = None, region_type: RegionType = RegionType.IMGT_CDR3, device: str = 'cpu',
                  num_processes: int = 1):
-        super().__init__(region_type, name)
-        self.region_type = region_type
-        self.device = device
+        super().__init__(region_type, name, num_processes, device)
         self.transformer_link = "Rostlab/prot_t5_xl_half_uniref50-enc"
-        self.num_processes = num_processes
 
     @staticmethod
     def build_object(dataset: Dataset, **params):

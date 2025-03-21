@@ -24,27 +24,31 @@ class CompAIRRClusteringReport(DataReport):
 
     The report assumes that CompAIRR (https://github.com/uio-bmi/compairr) has been installed.
 
+    .. note::
+
+        This is an experimental feature.
+
     Arguments:
 
-        label (str): The label by which to color the dendrogram leaves. Must be one of the metadata fields in the dataset.
+    - label (str): The label by which to color the dendrogram leaves. Must be one of the metadata fields in the dataset.
 
-        compairr_path (str): Path to the CompAIRR executable.
+    - compairr_path (str): Path to the CompAIRR executable.
 
-        max_distance (int): Max Hamming distance allowed between sequences (default: 1)
+    - max_distance (int): Max Hamming distance allowed between sequences (default: 1)
 
-        indels (bool): Whether to allow insertions/deletions when matching sequences (default: False)
+    - indels (bool): Whether to allow insertions/deletions when matching sequences (default: False)
 
-        ignore_counts (bool): Whether to ignore sequence counts when computing overlap (default: False)
+    - ignore_counts (bool): Whether to ignore sequence counts when computing overlap (default: False)
 
-        ignore_genes (bool): Whether to ignore V/J gene assignments when matching sequences (default: False)
+    - ignore_genes (bool): Whether to ignore V/J gene assignments when matching sequences (default: False)
 
-        threads (int): Number of threads to use for CompAIRR computation (default: 4)
+    - threads (int): Number of threads to use for CompAIRR computation (default: 4)
 
-        linkage_method (str): The linkage method to use for hierarchical clustering (default: 'single')
+    - linkage_method (str): The linkage method to use for hierarchical clustering (default: 'single')
 
-        is_cdr3 (bool): Whether the sequences represent CDR3s (default: True)
+    - is_cdr3 (bool): Whether the sequences represent CDR3s (default: True)
 
-        clustering_threshold (float): The threshold to use for cutting the dendrogram into clusters (default: 0.5)
+    - clustering_threshold (float): The threshold to use for cutting the dendrogram into clusters (default: 0.5)
 
     """
 

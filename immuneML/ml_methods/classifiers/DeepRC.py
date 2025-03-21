@@ -1,6 +1,5 @@
 import hashlib
 import logging
-import warnings
 from pathlib import Path
 
 import numpy as np
@@ -10,7 +9,6 @@ import yaml
 from sklearn.exceptions import NotFittedError
 from sklearn.model_selection import train_test_split
 
-from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.deeprc.DeepRCEncoder import DeepRCEncoder
 from immuneML.environment.Label import Label
@@ -212,6 +210,7 @@ class DeepRC(MLMethod):
         """
         from deeprc.dataset_readers import no_stack_collate_fn
         from deeprc.dataset_readers import RepertoireDatasetSubset as DeepRCRepDatasetSubset
+        from torch.utils.data import DataLoader
 
         sample_n_sequences = None if eval_only else self.sample_n_sequences
         batch_size = self.training_batch_size if is_train else 1
@@ -251,21 +250,15 @@ class DeepRC(MLMethod):
                 ("evaluate_at", self.evaluate_at),
                 ("pytorch_device_name", self.pytorch_device_name))
 
-    def _fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
-        self.feature_names = encoded_data.feature_names
-        self.label = label
-        self.model = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, "fit", self.label.name),
-                                                 lambda: self._fit(encoded_data, self.label, cores_for_training))
+    def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
 
-    def _fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
-
-        hdf5_filepath, pre_loaded_hdf5_file = self._convert_dataset_to_hdf5(encoded_data, label)
+        hdf5_filepath, pre_loaded_hdf5_file = self._convert_dataset_to_hdf5(encoded_data, self.label)
 
         train_indices, val_indices = self._get_train_val_indices(len(encoded_data.example_ids),
-                                                                 encoded_data.labels[label.name])
+                                                                 encoded_data.labels[self.label.name])
         self.max_seq_len = encoded_data.info["max_sequence_length"]
 
-        self._fit_for_label(encoded_data.info["metadata_filepath"], hdf5_filepath, train_indices, val_indices, label,
+        self._fit_for_label(encoded_data.info["metadata_filepath"], hdf5_filepath, train_indices, val_indices, self.label,
                             cores_for_training)
 
         return self.model
@@ -375,12 +368,12 @@ class DeepRC(MLMethod):
         return {label.name: [label.positive_class if probability > 0.5 else negative_class for probability in
                              pos_class_probs]}
 
-    def predict_proba(self, encoded_data: EncodedData, label: Label):
+    def _predict_proba(self, encoded_data: EncodedData):
         from deeprc.dataset_readers import RepertoireDataset as DeepRCRepDataset
-        self.check_is_fitted(label.name)
+        self.check_is_fitted(self.label.name)
 
-        hdf5_filepath, _ = self._convert_dataset_to_hdf5(encoded_data, label)
-        task_definition = self._make_task_definition(label)
+        hdf5_filepath, _ = self._convert_dataset_to_hdf5(encoded_data, self.label)
+        task_definition = self._make_task_definition(self.label)
 
         test_dataset = DeepRCRepDataset(metadata_filepath=encoded_data.info['metadata_filepath'],
                                         hdf5_filepath=str(hdf5_filepath),
@@ -396,8 +389,8 @@ class DeepRC(MLMethod):
         probs_pos_class = self._model_predict(self.model, test_dataloader)
 
         # TODO: update for multiclass
-        return {label.name: {label.positive_class: probs_pos_class,
-                             label.get_binary_negative_class(): 1 - probs_pos_class}}
+        return {self.label.name: {self.label.positive_class: probs_pos_class,
+                                  self.label.get_binary_negative_class(): 1 - probs_pos_class}}
 
     def _model_predict(self, model, dataloader):
         """Based on the DeepRC function evaluate (deeprc.training.evaluate)"""
@@ -463,7 +456,6 @@ class DeepRC(MLMethod):
                 desc["label"] = self.label.get_desc_for_storage()
 
             yaml.dump(desc, file)
-
 
     def get_package_info(self) -> str:
         return Util.get_immuneML_version() + '; deepRC ' + pkg_resources.get_distribution('DeepRC').version

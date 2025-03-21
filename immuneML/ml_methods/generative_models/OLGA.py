@@ -52,7 +52,6 @@ class OLGA(GenerativeModel):
         While this is a generative model, in the current version of immuneML it cannot be used in combination with TrainGenModel or
         ApplyGenModel instruction. If you want to use OLGA for sequence simulation, see :ref:`Dataset simulation with LIgO`.
 `
-
     **Specification arguments:**
 
     - model_path (str): if not default model, this parameter should point to a folder where the four OLGA/IGOR format

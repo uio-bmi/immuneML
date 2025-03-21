@@ -1,3 +1,5 @@
+import shutil
+
 import numpy as np
 
 from immuneML.data_model.SequenceSet import ReceptorSequence
@@ -55,6 +57,8 @@ class TestTCRBertEncoder:
         assert isinstance(encoded_dataset.encoded_data.examples, np.ndarray), "The embeddings are not of type numpy.ndarray"
         assert encoded_dataset.encoded_data.examples.shape == (3, 768), f"The array shape is {encoded_dataset.encoded_data.examples.shape}, expected (3, 768)"
 
+        shutil.rmtree(path)
+
     def test_encode_receptor_test_dataset(self):
         path = EnvironmentSettings.tmp_test_path / "tcr_bert/"
         PathBuilder.remove_old_and_build(path)
@@ -75,6 +79,8 @@ class TestTCRBertEncoder:
         assert len(encoded_dataset.encoded_data.example_ids) == 10, f"The number of example ids is {len(encoded_dataset.encoded_data.example_ids)}, expected 10"
         assert all(isinstance(label, bool) for label in encoded_dataset.encoded_data.labels['label']), "All labels are not of type bool"
         assert encoded_dataset.encoded_data.encoding == "TCRBertEncoder(tcr-bert)", f"The encoding is {encoded_dataset.encoded_data.encoding}, expected TCRBertEncoder(tcr-bert)"
+
+        shutil.rmtree(path)
 
     def test_encode_repertoire_test_dataset(self):
         path = EnvironmentSettings.tmp_test_path / "tcr_bert/"
@@ -99,5 +105,7 @@ class TestTCRBertEncoder:
 
         ))
         assert isinstance(encoded_dataset.encoded_data.examples, np.ndarray), "The embeddings are not of type numpy.ndarray"
-        assert encoded_dataset.encoded_data.examples.shape == (10, 10), f"The array shape is {encoded_dataset.encoded_data.examples.shape}, expected (10, 10)"
+        assert encoded_dataset.encoded_data.examples.shape == (10, 768), f"The array shape is {encoded_dataset.encoded_data.examples.shape}, expected (10, 768)"
         assert all(isinstance(label, bool) for label in encoded_dataset.encoded_data.labels['label']), "All labels are not of type bool"
+
+        shutil.rmtree(path)

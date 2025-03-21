@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 import numpy as np
 
 from immuneML.caching.CacheHandler import CacheHandler
@@ -12,7 +13,6 @@ from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.SequenceType import SequenceType
-from immuneML.util.ParameterValidator import ParameterValidator
 
 
 class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
@@ -21,9 +21,11 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
     Subclasses must implement the _embed_sequence_set method.
     """
 
-    def __init__(self, region_type: RegionType, name: str = None):
+    def __init__(self, region_type: RegionType, name: str = None, num_processes: int = 1, device: str = 'cpu'):
         super().__init__(name)
         self.region_type = region_type
+        self.num_processes = num_processes
+        self.device = device
 
     @staticmethod
     @abstractmethod
@@ -118,7 +120,7 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
         return encoded_dataset
 
     def _avg_sequence_set_embedding(self, embedding: np.ndarray) -> np.ndarray:
-        return embedding.mean(axis=1)
+        return embedding.mean(axis=0)
 
     @abstractmethod
     def _embed_sequence_set(self, sequence_set: AIRRSequenceSet, seq_field: str) -> np.ndarray:

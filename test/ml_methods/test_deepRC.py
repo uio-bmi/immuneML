@@ -101,8 +101,5 @@ class TestDeepRC(TestCase):
         classifier.get_package_info()
 
     def test(self):
-        try:
-            import deeprc
-            self.internal_deep_RC_test()
-        except ImportError as e:
-            print("Test ignored since deepRC is not installed.")
+        # the test should always be run
+        self.internal_deep_RC_test()
