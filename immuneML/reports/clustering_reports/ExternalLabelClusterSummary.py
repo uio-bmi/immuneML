@@ -24,6 +24,16 @@ class ExternalLabelClusterSummary(ClusteringReport):
     - external_labels (list): the list of metadata columns in the dataset that should be compared against cluster
       assignment
 
+    **YAML specification:**
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        reports:
+            my_external_label_cluster_summary:
+                ExternalLabelClusterSummary:
+                    external_labels: [disease, HLA]
+
     """
 
     @classmethod

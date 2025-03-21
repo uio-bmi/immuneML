@@ -8,6 +8,8 @@ from immuneML.workflows.instructions.clustering.ClusteringState import Clusterin
 
 class ClusteringReport(Report):
 
+    DOCS_TITLE = "Clustering Instruction Reports"
+
     def __init__(self, name: str = None, result_path: Path = None, number_of_processes: int = 1,
                  state: ClusteringState = None):
         super().__init__(name, result_path, number_of_processes)
