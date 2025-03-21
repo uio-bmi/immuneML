@@ -19,6 +19,8 @@ class ExternalLabelClusterSummary(ClusteringReport):
     1. A contingency table showing the count of examples for each combination of cluster and label value
     2. A heatmap visualization of these counts
 
+    It can be used in combination with Clustering instruction.
+
     **Specification arguments:**
 
     - external_labels (list): the list of metadata columns in the dataset that should be compared against cluster
