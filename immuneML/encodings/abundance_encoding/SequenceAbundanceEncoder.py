@@ -40,6 +40,11 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
     - RepertoireDatasets
 
+    .. note::
+
+        This encoder is computationally intensive and may require a large amount of memory and time to run. Use
+        CompAIRRSequenceAbundance encoder instead for more efficient computation and for the same functionality.
+
 
     **Specification arguments:**
 

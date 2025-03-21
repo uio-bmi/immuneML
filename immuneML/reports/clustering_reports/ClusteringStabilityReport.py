@@ -68,6 +68,7 @@ class ClusteringStabilityReport(ClusteringReport):
         self.state = state
         self.metric_fn, self.metric = self._get_similarity_metric(similarity_metric)
         self.result_name = "clustering_stability_analysis"
+        self.desc = "Clustering Stability Report"
 
     def _get_similarity_metric(self, metric_name: str) -> Tuple[Callable, str]:
         try:
@@ -133,7 +134,7 @@ class ClusteringStabilityReport(ClusteringReport):
         if not stability_results:
             logging.warning("No stability results could be calculated. Check if validation data is available.")
             return ReportResult(
-                name=self.name,
+                name=f"{self.desc} ({self.name})",
                 info="No stability results could be calculated. Check if validation data is available."
             )
 
@@ -146,7 +147,7 @@ class ClusteringStabilityReport(ClusteringReport):
         table_output = ReportOutput(path=table_path, name="Stability scores per setting")
 
         return ReportResult(
-            name=self.name,
+            name=f"{self.desc} ({self.name})",
             info=f"Analysis of clustering stability between discovery and validation datasets using {self.metric}.",
             output_tables=[table_output]
         )

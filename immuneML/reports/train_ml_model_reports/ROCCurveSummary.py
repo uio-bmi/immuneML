@@ -40,17 +40,19 @@ class ROCCurveSummary(TrainMLModelReport):
 
     def _generate(self) -> ReportResult:
         report_result = ReportResult(name=self.name,
-                                     info="Plots ROC curves for all trained ML settings ([preprocessing], encoding, ML model) in the outer loop of cross-validation in the TrainMLModel instruction")
+                                     info="Plots ROC curves for all trained ML settings ([preprocessing], encoding, "
+                                          "ML model) in the outer loop of cross-validation in the TrainMLModel "
+                                          "instruction")
 
         PathBuilder.build(self.result_path)
 
         for label in self.state.label_configuration.get_label_objects():
             if len(label.values) != 2:
-                logging.warning(f"{ROCCurveSummary.__name__}: report {self.name} is skipping label {label.name} as it has {len(label.values)} "
-                                f"classes, while this report expects 2 classes.")
+                logging.warning(f"{ROCCurveSummary.__name__}: report {self.name} is skipping label {label.name} "
+                                f"as it has {len(label.values)} classes, while this report expects 2 classes.")
             elif label.positive_class is None:
-                logging.warning(f"{ROCCurveSummary.__name__}: report {self.name} is skipping label {label.name} because 'positive_class' parameter "
-                                f"is not set.")
+                logging.warning(f"{ROCCurveSummary.__name__}: report {self.name} is skipping label {label.name} "
+                                f"because 'positive_class' parameter is not set.")
             else:
                 for index in range(self.state.assessment.split_count):
                     figure = self._create_figure_for_assessment_split(index, label)
@@ -61,23 +63,23 @@ class ROCCurveSummary(TrainMLModelReport):
     def _create_figure_for_assessment_split(self, index, label: Label):
         data = []
         for hp_item_name, hp_item in self.state.assessment_states[index].label_states[label.name].assessment_items.items():
-            data.append(self._make_roc_curve(hp_item, label.name, f"{label.name}_{label.positive_class}_proba"))
+            data.append(self._make_roc_curve(hp_item, label, f"{label.name}_{label.positive_class}_proba"))
 
         figure = self._draw_rocs(data=data, roc_legends=[f"{item['HPItem']} (AUROC = {round(item['AUC'], 2)})" for item in data],
                                  figure_name=f"ROC curves for label {label.name} on assessment split {index + 1}.html")
         return figure
 
-    def _make_roc_curve(self, hp_item: HPItem, label_name: str, proba_name: str) -> dict:
+    def _make_roc_curve(self, hp_item: HPItem, label: Label, proba_name: str) -> dict:
         df = pd.read_csv(hp_item.test_predictions_path)
 
-        true_y = df[f"{label_name}_true_class"].values
+        true_y = df[f"{label.name}_true_class"].values
 
         if hp_item.method.can_predict_proba():
             predicted_y = df[proba_name].values
         else:
-            predicted_y = df[f"{label_name}_predicted_class"].values
+            predicted_y = df[f"{label.name}_predicted_class"].values
 
-        fpr, tpr, _ = roc_curve(y_true=true_y, y_score=predicted_y)
+        fpr, tpr, _ = roc_curve(y_true=true_y, y_score=predicted_y, pos_label=label.positive_class)
 
         return {
             "FPR": fpr,

@@ -36,6 +36,9 @@ class SequenceLengthDistribution(DataReport):
 
     - label (str): if split_by_label is set to True, a label can be specified here.
 
+    - plot_frequencies (bool): if set to True, the plot will show the frequencies of the sequence lengths instead of the
+      counts. By default, plot_frequencies is False.
+
 
     **YAML specification:**
 
@@ -50,6 +53,7 @@ class SequenceLengthDistribution(DataReport):
                         region_type: IMGT_CDR3
                         label: label_1
                         split_by_label: True
+                        plot_frequencies: True
 
     """
 
@@ -64,13 +68,14 @@ class SequenceLengthDistribution(DataReport):
     def __init__(self, dataset: Dataset = None, batch_size: int = 1, result_path: Path = None,
                  number_of_processes: int = 1, region_type: RegionType = RegionType.IMGT_CDR3,
                  sequence_type: SequenceType = SequenceType.AMINO_ACID, name: str = None, label: str = None,
-                 split_by_label: bool = False):
+                 split_by_label: bool = False, plot_frequencies: bool = False):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.batch_size = batch_size
         self.sequence_type = sequence_type
         self.region_type = region_type
         self.label_name = label
         self.split_by_label = split_by_label
+        self.plot_frequencies = plot_frequencies
 
     def check_prerequisites(self):
         return True
@@ -98,8 +103,18 @@ class SequenceLengthDistribution(DataReport):
         elif isinstance(self.dataset, ReceptorDataset):
             sequence_lengths_df = self._get_sequence_lengths_df_receptor_dataset()
 
-        if not self.split_by_label and "class" in sequence_lengths_df.columns:
-            sequence_lengths_df.drop(columns=["class"], inplace=True)
+        if not self.split_by_label and self.label_name in sequence_lengths_df.columns:
+            sequence_lengths_df.drop(columns=[self.label_name], inplace=True)
+
+        if self.plot_frequencies:
+            if self.split_by_label and 'chain' not in sequence_lengths_df.columns:
+                sequence_lengths_df['frequencies'] = sequence_lengths_df.groupby(self.label_name)['counts'].transform(
+                    lambda x: x / x.sum())
+            elif self.split_by_label and 'chain' in sequence_lengths_df.columns:
+                sequence_lengths_df['frequencies'] = sequence_lengths_df.groupby([self.label_name, 'chain'])[
+                    'counts'].transform(lambda x: x / x.sum())
+            else:
+                sequence_lengths_df['frequencies'] = sequence_lengths_df['counts'] / sequence_lengths_df['counts'].sum()
 
         return sequence_lengths_df
 
@@ -125,7 +140,7 @@ class SequenceLengthDistribution(DataReport):
 
         for class_name, raw_count_dict in raw_count_dict_per_class.items():
             result_df = self._count_dict_to_df(raw_count_dict)
-            result_df["class"] = class_name
+            result_df[self.label_name] = class_name
             result_dfs.append(result_df)
 
         return pd.concat(result_dfs)
@@ -166,35 +181,41 @@ class SequenceLengthDistribution(DataReport):
         chains = list(set(data.locus.tolist()))
 
         dfs = []
+        label_name = self._get_label_name()
 
         for chain in chains:
             chain_data = data[[el == chain for el in data.locus.tolist()]]
-            chain_counter = Counter(getattr(chain_data,
-                                            bnp_util.get_sequence_field_name(self.region_type,
-                                                                             self.sequence_type)).lengths.tolist())
-            dfs.append(pd.DataFrame({'counts': list(chain_counter.values()),
-                                     'sequence_lengths': list(chain_counter.keys()),
-                                     'chain': chain}))
+
+            if self.split_by_label and label_name:
+                chain_df = self._count_dict_per_class_to_df(self._count_seq_lengths(chain_data, class_name=None))
+                chain_df["chain"] = chain
+                dfs.append(chain_df)
+            else:
+                chain_counter = Counter(getattr(chain_data,
+                                                bnp_util.get_sequence_field_name(self.region_type,
+                                                                                 self.sequence_type)).lengths.tolist())
+                dfs.append(pd.DataFrame({'counts': list(chain_counter.values()),
+                                         'sequence_lengths': list(chain_counter.keys()),
+                                         'chain': chain}))
 
         return pd.concat(dfs)
 
     def _count_in_repertoire(self, repertoire: Repertoire) -> Counter:
         return Counter(getattr(repertoire.data,
-                                bnp_util.get_sequence_field_name(self.region_type,
-                                                                 self.sequence_type)).lengths.tolist())
+                               bnp_util.get_sequence_field_name(self.region_type,
+                                                                self.sequence_type)).lengths.tolist())
 
     def _plot(self, df: pd.DataFrame) -> ReportOutput:
-        if isinstance(self.dataset, ReceptorDataset):
-            facet_col = "chain"
-        else:
-            facet_col = "class" if "class" in df.columns else None
 
-        figure = px.bar(df, x="sequence_lengths", y="counts",
-                        facet_col=facet_col)
-        figure.update_layout(xaxis=dict(tickmode='array', tickvals=df["sequence_lengths"]),
-                             yaxis=dict(tickmode='array', tickvals=df["counts"]),
-                             template="plotly_white")
+        figure = px.bar(df, x="sequence_lengths", y="frequencies" if self.plot_frequencies else "counts",
+                        facet_col=self.label_name if self.label_name in df.columns else None,
+                        facet_row="chain" if isinstance(self.dataset, ReceptorDataset) else None)
+        figure.update_layout(template="plotly_white")
         figure.update_traces(marker_color=px.colors.diverging.Tealrose[0])
+
+        for annotation in figure.layout.annotations:
+            annotation['font'] = {'size': 16}
+
         PathBuilder.build(self.result_path)
 
         file_path = self.result_path / "sequence_length_distribution.html"

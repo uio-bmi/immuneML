@@ -139,7 +139,7 @@ A complete specification for importing a sequence dataset from AIRR format with 
           path: path/to/data/
           is_repertoire: false
           paired: false # must be true for receptor dataset and false for sequence datasets
-          metadata_column_mapping: # metadata column mapping AIRR: immuneML
+          column_mapping: # any columns that should be renamed
             binding: binding # the names could just be the same
             Epitope.gene: epitope_gene # if the column name contains undesired characters, it may be renamed for internal use
           # Other parameters specific to AIRR data may be specified here
@@ -160,9 +160,7 @@ of chain pair that should be imported. The resulting specification may look like
           is_repertoire: false
           paired: true # must be true for receptor dataset and False for sequence datasets
           receptor_chains: TRA_TRB # choose from TRA_TRB, TRG_TRD, IGH_IGL and IGH_IGK
-          metadata_column_mapping: # metadata column mapping AIRR: immuneML
-            binding: binding # the names could just be the same
-            Epitope.gene: epitope_gene # if the column name contains undesired characters, it may be renamed for internal use
+          label_columns: ['binding'] # specify the columns that should be imported as labels; if not specified, these will be discovered automatically
           # Other parameters specific to AIRR data may be specified here
 
 

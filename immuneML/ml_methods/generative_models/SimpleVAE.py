@@ -12,7 +12,6 @@ from torch.utils.data import DataLoader
 
 from immuneML import Constants
 from immuneML.data_model.SequenceParams import RegionType
-from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -79,6 +78,8 @@ class SimpleVAE(GenerativeModel):
 
     - device (str): name of the device where to train the model (e.g., cpu)
 
+    - learning_rate (float): learning rate for the optimizer (default is 0.001)
+
     - validation_split (float): what percentage of the data to use for validation (default is 0.1)
 
 
@@ -125,8 +126,8 @@ class SimpleVAE(GenerativeModel):
 
     def __init__(self, locus, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim, pretrains,
                  v_gene_embed_dim, cdr3_embed_dim, warmup_epochs, patience, iter_count_prob_estimation, device,
-                 validation_split=0.1, vocab=None, max_cdr3_len=None, unique_v_genes=None, unique_j_genes=None,
-                 name: str = None, region_type: str = RegionType.IMGT_JUNCTION.name):
+                 learning_rate: float, validation_split=0.1, vocab=None, max_cdr3_len=None, unique_v_genes=None,
+                 unique_j_genes=None, name: str = None, region_type: str = RegionType.IMGT_JUNCTION.name):
         super().__init__(locus)
         self.sequence_type = SequenceType.AMINO_ACID
         self.iter_count_prob_estimation = iter_count_prob_estimation
@@ -143,6 +144,7 @@ class SimpleVAE(GenerativeModel):
         self.latent_dim = latent_dim
         self.j_gene_embed_dim, self.v_gene_embed_dim = j_gene_embed_dim, v_gene_embed_dim
         self.linear_nodes_count = linear_nodes_count
+        self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.device = device
         self.max_cdr3_len, self.unique_v_genes, self.unique_j_genes = max_cdr3_len, unique_v_genes, unique_j_genes
@@ -199,7 +201,7 @@ class SimpleVAE(GenerativeModel):
         model = self.make_new_model(pretrained_weights_path)
         model.train()
 
-        optimizer = torch.optim.Adam(model.parameters())
+        optimizer = torch.optim.Adam(model.parameters(), lr=self.learning_rate)
         losses = []
         val_losses = []
         epoch = 1
@@ -293,6 +295,8 @@ class SimpleVAE(GenerativeModel):
         return average_loss
 
     def encode_dataset(self, dataset, seq_col, batch_size=None, shuffle=True):
+        if seq_col is None:
+            seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
         data = dataset.data.topandas()[[seq_col, 'v_call', 'j_call']]
 
         encoded_v_genes = one_hot(
@@ -314,7 +318,7 @@ class SimpleVAE(GenerativeModel):
         return DataLoader(pytorch_dataset, shuffle=shuffle, batch_size=batch_size if batch_size else self.batch_size)
 
     def is_same(self, model) -> bool:
-        raise RuntimeError
+        raise NotImplementedError
 
     def _update_beta_on_epoch_end(self, epoch):
         new_beta = self.beta
@@ -336,31 +340,15 @@ class SimpleVAE(GenerativeModel):
             v_genes = softmax(v_genes, dim=1)
             j_genes = softmax(j_genes, dim=1)
 
-        seq_objs = []
-        for i in range(count):
-            seq_content = [self.vocab[Categorical(letter).sample()] for letter in sequences[i]]
-            sequence = ReceptorSequence(**{
-                self.sequence_type.value: ''.join(seq_content).replace(Constants.GAP_LETTER, ''),
-                'v_call': self.unique_v_genes[Categorical(v_genes[i]).sample()],
-                'j_call': self.unique_j_genes[Categorical(j_genes[i]).sample()],
-                'locus': self.locus.to_string(),
-                'metadata': {'gen_model_name': self.name if self.name else "SimpleVAE"}
-            })
+        df = pd.DataFrame({get_sequence_field_name(self.region_type, self.sequence_type):
+                               [''.join([self.vocab[Categorical(letter).sample()] for letter in sequences[i]]).replace(Constants.GAP_LETTER, '') for i in range(count)],
+                           'locus': [self.locus.to_string() for _ in range(count)],
+                           'v_call': [self.unique_v_genes[Categorical(v_genes[i]).sample()] for i in range(count)],
+                           'j_call': [self.unique_j_genes[Categorical(j_genes[i]).sample()] for i in range(count)],
+                           'gen_model_name': [self.name for _ in range(count)]})
 
-            seq_objs.append(sequence)
-
-        # for obj in seq_objs:
-        #     log_prob = self.compute_p_gen({self.sequence_type.value: obj.get_attribute(self.sequence_type.value),
-        #                                    'v_call': obj.metadata.v_call, 'j_call': obj.metadata.j_call},
-        #                                   self.sequence_type)
-        #     obj.metadata.custom_params = {'log_prob': log_prob}
-
-        dataset = SequenceDataset.build_from_objects(seq_objs, PathBuilder.build(path),
-                                                     f'synthetic_{self.name}_dataset',
-                                                     {'gen_model_name': [self.name]},
-                                                     self.region_type)
-
-        return dataset
+        return SequenceDataset.build_from_partial_df(df, PathBuilder.build(path), 'synthetic_dataset',
+                                                     {'gen_model_name': [self.name]}, {'gen_model_name': str})
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         pass
@@ -412,11 +400,11 @@ class SimpleVAE(GenerativeModel):
     def save_model(self, path: Path) -> Path:
         model_path = PathBuilder.build(path / 'model')
 
-        skip_export_keys = ['model', 'loss_path', 'j_gene_loss_weight', 'v_gene_loss_weight', 'region_type',
+        skip_export_keys = ['model', 'locus', 'loss_path', 'j_gene_loss_weight', 'v_gene_loss_weight', 'region_type',
                             'sequence_type', 'vocab_size']
         write_yaml(filename=model_path / 'model_overview.yaml',
                    yaml_dict={**{k: v for k, v in vars(self).items() if k not in skip_export_keys},
-                              **{'type': self.__class__.__name__}}) # todo add 'dataset_type': 'SequenceDataset',
+                              **{'type': self.__class__.__name__, 'locus': self.locus.name}}) # todo add 'dataset_type': 'SequenceDataset',
 
         store_weights(self.model, model_path / 'state_dict.yaml')
 

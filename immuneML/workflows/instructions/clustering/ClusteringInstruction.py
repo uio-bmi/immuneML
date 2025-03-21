@@ -67,6 +67,7 @@ class ClusteringInstruction(Instruction):
         split_config:
             split_strategy: random
             training_percentage: 0.5
+            split_count: 3 # repeat the random split 3 times -> 3 discovery and 3 validation datasets
 
       .. indent with spaces
       .. code-block:: yaml
@@ -108,6 +109,7 @@ class ClusteringInstruction(Instruction):
                 region_type: imgt_cdr3
                 validation_type: [method_based, result_based]
                 split_config:
+                    split_count: 1
                     split_strategy: manual
                     manual_config:
                         discovery_data: file_with_ids_of_examples_for_discovery_data.csv

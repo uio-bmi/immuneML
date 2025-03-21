@@ -1,3 +1,5 @@
+import logging
+import numbers
 from pathlib import Path
 from typing import Tuple
 
@@ -79,8 +81,11 @@ class ValidationHandler:
                     if discovery_clusters.dataset.encoded_data.dimensionality_reduced_data is None
                     else discovery_clusters.dataset.encoded_data.dimensionality_reduced_data)
 
-        classifier.fit(features, discovery_clusters.predictions)
-        return classifier
+        if len(list(set(discovery_clusters.predictions))) == 1:
+            return discovery_clusters.predictions[0]
+        else:
+            classifier.fit(features, discovery_clusters.predictions)
+            return classifier
 
     def _apply_cluster_classifier(self, dataset: Dataset,
                                   cl_setting: ClusteringSetting,
@@ -90,10 +95,17 @@ class ValidationHandler:
                                   run_id: int, path: Path, encoder: DatasetEncoder) -> Tuple[
         ClusteringItem, pd.DataFrame]:
         """Apply trained classifier to validation data."""
+
         enc_dataset = self.runner.encode_dataset(dataset, cl_setting, learn_model=False, encoder=encoder)
         features = get_features(enc_dataset, cl_setting)
 
-        predictions = classifier.predict(features)
+        if isinstance(classifier, numbers.Number):
+            predictions = [classifier] * dataset.get_example_count()
+            logging.warning(f"Only one cluster found in discovery data. Assigning all validation data to "
+                            f"cluster {classifier}.")
+        else:
+            predictions = classifier.predict(features)
+
         predictions_df[f'predictions_{cl_setting.get_key()}'] = predictions
 
         # Evaluate clustering

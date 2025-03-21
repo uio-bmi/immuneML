@@ -14,9 +14,9 @@ class XavierLinear(nn.Linear):
 
 class UniformLinear(nn.Linear):
 
-        def __init__(self, in_features, out_features, bias=False):
-            super().__init__(in_features, out_features, bias)
-            nn.init.uniform_(self.weight, a=-0.05, b=0.05)
+    def __init__(self, in_features, out_features, bias=False):
+        super().__init__(in_features, out_features, bias)
+        nn.init.uniform_(self.weight, a=-0.05, b=0.05)
 
 
 class Encoder(nn.Module):
@@ -37,7 +37,7 @@ class Encoder(nn.Module):
 
         # encoding layers
         self.encoder_linear_layer_1 = XavierLinear(cdr3_embed_dim * max_cdr3_len + v_gene_embed_dim + j_gene_embed_dim,
-                                                linear_nodes_count)
+                                                   linear_nodes_count)
         self.encoder_linear_layer_2 = XavierLinear(linear_nodes_count, linear_nodes_count)
 
         # latent layers
@@ -84,7 +84,6 @@ class Decoder(nn.Module):
         self.j_gene_output = XavierLinear(linear_nodes_count, n_j_genes)
 
     def forward(self, z):
-
         # latent
         decoder_linear_1 = elu(self.decoder_linear_1(z))
         decoder_linear_2 = elu(self.decoder_linear_2(decoder_linear_1))
@@ -113,7 +112,7 @@ class SimpleVAEGenerator(nn.Module):
         z = z_mean + torch.exp(z_log_var / 2) * epsilon
 
         cdr3_output, v_gene_output, j_gene_output = self.decode(z)
-        return cdr3_output, v_gene_output, j_gene_output, z
+        return cdr3_output, v_gene_output, j_gene_output, (z_mean, z_log_var)
 
     def decode(self, z):
         return self.decoder(z)
@@ -129,8 +128,17 @@ class SimpleVAEGenerator(nn.Module):
 
 
 def vae_cdr3_loss(cdr3_output, cdr3_input, max_cdr3_len, z_mean, z_log_var, beta):
+    # format: batch_size, sequence_length, vocab_size
     vocab_size = cdr3_output.size(-1)
-    cdr3_input = torch.argmax(cdr3_input, dim=-1)
-    xent_loss = max_cdr3_len * cross_entropy(cdr3_output.view(-1, vocab_size), cdr3_input.view(-1))
+
+    # Cross entropy: mean across all positions, then multiply by sequence length
+    cdr3_input_modified = torch.argmax(cdr3_input, dim=-1)
+    xent_loss = max_cdr3_len * cross_entropy(cdr3_output.view(-1, vocab_size),
+                                             cdr3_input_modified.view(-1),
+                                             reduction='mean')  # mean across all positions
+
+    # KL loss: sum across latent dimension
     kl_loss = -0.5 * torch.sum(1 + z_log_var - torch.square(z_mean) - z_log_var.exp(), dim=-1) * beta
-    return xent_loss + kl_loss
+
+    # Sum the losses
+    return xent_loss + torch.mean(kl_loss)  # mean of KL loss to match cross entropy scale

@@ -37,7 +37,7 @@ class TestSequenceLengthDistribution(TestCase):
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
 
         sld = SequenceLengthDistribution.build_object(dataset=dataset, sequence_type='amino_acid', result_path=path,
-                                                      region_type='IMGT_CDR3')
+                                                      region_type='IMGT_CDR3', plot_frequencies=True)
 
         self.assertTrue(sld.check_prerequisites())
         result = sld._generate()
@@ -68,7 +68,8 @@ class TestSequenceLengthDistribution(TestCase):
                                                                    path / 'dataset')
 
         sld = SequenceLengthDistribution(dataset, 1, path, sequence_type=SequenceType.AMINO_ACID,
-                                         region_type=RegionType.IMGT_CDR3, label='l1', split_by_label=True)
+                                         region_type=RegionType.IMGT_CDR3, label='l1', split_by_label=True,
+                                         plot_frequencies=True)
 
         self.assertTrue(sld.check_prerequisites())
         result = sld._generate()
@@ -79,15 +80,16 @@ class TestSequenceLengthDistribution(TestCase):
     def test_sequence_lengths_receptor_dataset(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "seq_len_rec")
 
-        dataset = RandomDatasetGenerator.generate_receptor_dataset(receptor_count=50,
+        dataset = RandomDatasetGenerator.generate_receptor_dataset(receptor_count=5,
                                                                    chain_1_length_probabilities={4: 0.33, 5: 0.33,
                                                                                                  7: 0.33},
                                                                    chain_2_length_probabilities={7: 0.33, 8: 0.33,
                                                                                                  9: 0.33},
-                                                                   labels={}, path=path / 'dataset')
+                                                                   labels={'l1': {"a": 0.5, "b": 0.5}},
+                                                                   path=path / 'dataset')
 
         sld = SequenceLengthDistribution(dataset, 1, path, sequence_type=SequenceType.AMINO_ACID,
-                                         region_type=RegionType.IMGT_CDR3)
+                                         region_type=RegionType.IMGT_CDR3, split_by_label=True, label='l1', plot_frequencies=True)
 
         result = sld.generate_report()
         self.assertTrue(os.path.isfile(result.output_figures[0].path))

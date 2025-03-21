@@ -15,11 +15,14 @@ from immuneML.dsl.definition_parsers.SimulationParser import SimulationParser
 from immuneML.dsl.import_parsers.ImportParser import ImportParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
+from immuneML.encodings.protein_embedding.ProteinEmbeddingEncoder import ProteinEmbeddingEncoder
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.preprocessing.Preprocessor import Preprocessor
+from immuneML.reports.clustering_method_reports.ClusteringMethodReport import ClusteringMethodReport
+from immuneML.reports.clustering_reports.ClusteringReport import ClusteringReport
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.reports.gen_model_reports.GenModelReport import GenModelReport
@@ -97,6 +100,9 @@ class DefinitionParser:
     @staticmethod
     def make_encodings_docs(path: Path):
         enc_classes = ReflectionHandler.all_direct_subclasses(DatasetEncoder, "Encoder", "encodings/")
+        enc_classes = [cl for cl in enc_classes if cl.__name__ != "ProteinEmbeddingEncoder"]
+        enc_classes += ReflectionHandler.all_direct_subclasses(ProteinEmbeddingEncoder, "Encoder", "encodings/")
+
         make_docs(path, enc_classes, "specs_encodings.rst", "Encoder")
 
     @staticmethod
@@ -105,7 +111,10 @@ class DefinitionParser:
         file_path = path / filename
         mode = "w"
 
-        for report_type_class in [DataReport, EncodingReport, MLReport, TrainMLModelReport, MultiDatasetReport, GenModelReport]:
+        report_types = [DataReport, EncodingReport, MLReport, GenModelReport, TrainMLModelReport, ClusteringReport,
+                        MultiDatasetReport]
+
+        for report_type_class in report_types:
             with file_path.open(mode) as file:
                 doc_format = DocumentationFormat(cls=report_type_class,
                                                  cls_name=f"**{report_type_class.DOCS_TITLE}**",

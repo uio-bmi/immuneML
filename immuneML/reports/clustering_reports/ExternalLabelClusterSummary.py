@@ -19,10 +19,22 @@ class ExternalLabelClusterSummary(ClusteringReport):
     1. A contingency table showing the count of examples for each combination of cluster and label value
     2. A heatmap visualization of these counts
 
+    It can be used in combination with Clustering instruction.
+
     **Specification arguments:**
 
     - external_labels (list): the list of metadata columns in the dataset that should be compared against cluster
       assignment
+
+    **YAML specification:**
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        reports:
+            my_external_label_cluster_summary:
+                ExternalLabelClusterSummary:
+                    external_labels: [disease, HLA]
 
     """
 
@@ -38,6 +50,7 @@ class ExternalLabelClusterSummary(ClusteringReport):
                  result_path: Path = None, number_of_processes: int = 1):
         super().__init__(name, result_path, number_of_processes, state)
         self.external_labels = external_labels
+        self.desc = "External Label Cluster Summary"
 
     def _generate(self) -> ReportResult:
         self.result_path = PathBuilder.build(self.result_path / self.name)
@@ -68,13 +81,13 @@ class ExternalLabelClusterSummary(ClusteringReport):
 
         if not report_outputs:
             return ReportResult(
-                name=self.name,
+                name=f"{self.desc} ({self.name})",
                 info="No results were generated. This could be because no external labels were found in the dataset "
                      "metadata."
             )
 
         return ReportResult(
-            name=self.name,
+            name=f"{self.desc} ({self.name})",
             info="Summary of cluster assignments versus external labels",
             output_tables=[output for output in report_outputs if 'table' in output.name],
             output_figures=[output for output in report_outputs if 'heatmap' in output.name]
@@ -120,9 +133,8 @@ class ExternalLabelClusterSummary(ClusteringReport):
                 ))
 
                 fig.update_layout(
-                    title=f'Cluster vs {label} Distribution ({analysis_name.replace("_", " ")}, {setting_key})',
                     xaxis_title=label,
-                    yaxis_title='Cluster'
+                    yaxis_title='cluster'
                 )
 
                 # Save heatmap

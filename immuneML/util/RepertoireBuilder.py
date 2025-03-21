@@ -56,7 +56,7 @@ class RepertoireBuilder:
             })
 
             if seq_metadata is None:
-                df['v_call'], df['j_call'], df['duplicate_count'], df['locus'] = "TRBV1-1*01", "TRBJ1-1*01", [random.randint(1, 10) for _ in sequence_list], "TRB"
+                df['v_call'], df['j_call'], df['duplicate_count'], df['locus'] = "TRBV1-1*01", "TRBJ1-1*01", [1 for _ in sequence_list], "TRB"
             else:
                 df = pd.concat([df, pd.DataFrame.from_records(seq_metadata[rep_index])], axis=1)
 

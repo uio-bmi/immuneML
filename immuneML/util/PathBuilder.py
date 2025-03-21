@@ -1,9 +1,9 @@
 # quality: gold
 
 import errno
+import logging
 import os
 import shutil
-import warnings
 from pathlib import Path
 
 

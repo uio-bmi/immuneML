@@ -22,7 +22,7 @@ class GenerativeModel:
     OUTPUT_COLUMNS = []
 
     def __init__(self, locus: Chain, name: str = None, region_type: RegionType = None):
-        self.locus = locus
+        self.locus = Chain.get_chain(locus)
         self.name = name
         self.region_type = region_type
 

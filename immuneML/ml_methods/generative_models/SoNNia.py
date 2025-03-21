@@ -3,9 +3,10 @@ import shutil
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from olga import load_model
 
-from immuneML.data_model.bnp_util import write_yaml, read_yaml
+from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.SequenceParams import RegionType, Chain
@@ -29,23 +30,24 @@ class SoNNia(GenerativeModel):
 
     **Specification arguments:**
 
-    - locus (str)
+    - locus (str): The locus of the receptor chain.
 
-    - batch_size (int)
+    - batch_size (int): number of sequences to use in each batch
 
-    - epochs (int)
+    - epochs (int): number of epochs to train the model
 
-    - deep (bool)
+    - deep (bool): whether to use a deep model
 
     - include_joint_genes (bool)
 
     - n_gen_seqs (int)
 
-    - custom_model_path (str)
+    - custom_model_path (str): path for the custom OLGA model if used
 
-    - default_model_name (str)
+    - default_model_name (str): name of the default OLGA model if used
 
-        **YAML specification:**
+
+     **YAML specification:**
 
     .. indent with spaces
     .. code-block:: yaml
@@ -54,7 +56,12 @@ class SoNNia(GenerativeModel):
             ml_methods:
                 my_sonnia_model:
                     SoNNia:
-                        ...
+                        batch_size: 1e4
+                        epochs: 5
+                        default_model_name: humanTRB
+                        deep: False
+                        include_joint_genes: True
+                        n_gen_seqs: 100
 
     """
 
@@ -135,14 +142,18 @@ class SoNNia(GenerativeModel):
         gen_model = SequenceGeneration(self._model)
         sequences = gen_model.generate_sequences_post(count)
 
-        return SequenceDataset.build_from_objects(sequences=[ReceptorSequence(sequence_aa=seq[0], sequence=seq[3],
-                                                                              v_call=seq[1], j_call=seq[2],
-                                                                              locus=self.locus.to_string(),
-                                                                              metadata={'gen_model_name': self.name})
-                                                             for seq in sequences],
-                                                  region_type=RegionType.IMGT_JUNCTION,
-                                                  path=PathBuilder.build(path), name='SoNNiaDataset',
-                                                  labels={'gen_model_name': [self.name]})
+        df = pd.DataFrame({
+            get_sequence_field_name(self.region_type, SequenceType.AMINO_ACID): [seq[0] for seq in sequences],
+            get_sequence_field_name(self.region_type, SequenceType.NUCLEOTIDE): [seq[3] for seq in sequences],
+            'v_call': [seq[1] for seq in sequences],
+            'j_call': [seq[2] for seq in sequences],
+            'gen_model_name': [self.name] * count,
+            'locus': [self.locus.to_string()] * count
+        })
+
+        return SequenceDataset.build_from_partial_df(df, path=PathBuilder.build(path), name='SoNNiaDataset',
+                                                     labels={'gen_model_name': [self.name]},
+                                                     type_dict={'gen_model_name': str})
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         raise NotImplementedError

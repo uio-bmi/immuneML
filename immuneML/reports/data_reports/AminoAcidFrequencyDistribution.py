@@ -29,7 +29,7 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     Example output:
 
-    .. image:: _static/images/reports/amino_acid_frequency.png
+    .. image:: ../../_static/images/reports/amino_acid_frequency.png
        :alt: Amino acid frequency
        :width: 800
 
@@ -89,10 +89,12 @@ class AminoAcidFrequencyDistribution(DataReport):
         location = AminoAcidFrequencyDistribution.__name__
 
         if "imgt_positions" in kwargs:
-            raise ValueError(f"{location}: parameter 'imgt_positions' is deprecated. For 'imgt_positions: True', use 'alignment: IMGT'. For 'imgt_positions: False', use any other alignment option (CENTER/LEFT/RIGHT).")
+            raise ValueError(
+                f"{location}: parameter 'imgt_positions' is deprecated. For 'imgt_positions: True', use 'alignment: IMGT'. For 'imgt_positions: False', use any other alignment option (CENTER/LEFT/RIGHT).")
 
         ParameterValidator.assert_type_and_value(kwargs["alignment"], str, location, "alignment")
-        ParameterValidator.assert_in_valid_list(kwargs["alignment"].upper(), ["IMGT", "LEFT", "RIGHT", "CENTER"], location, "alignment")
+        ParameterValidator.assert_in_valid_list(kwargs["alignment"].upper(), ["IMGT", "LEFT", "RIGHT", "CENTER"],
+                                                location, "alignment")
         ParameterValidator.assert_type_and_value(kwargs["relative_frequency"], bool, location, "relative_frequency")
         ParameterValidator.assert_type_and_value(kwargs["split_by_label"], bool, location, "split_by_label")
         ParameterValidator.assert_region_type(kwargs, location)
@@ -151,7 +153,7 @@ class AminoAcidFrequencyDistribution(DataReport):
             plotting_data = self._get_repertoire_dataset_plotting_data()
 
         if not self.split_by_label:
-            plotting_data.drop(columns=["class"], inplace=True)
+            plotting_data.drop(columns=[self.label_name], inplace=True)
 
         return plotting_data
 
@@ -163,7 +165,7 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         for class_name, raw_count_dict in raw_count_dict_per_class.items():
             result_df = self._count_dict_to_df(raw_count_dict)
-            result_df["class"] = class_name
+            result_df[self.label_name] = class_name
             result_dfs.append(result_df)
 
         return pd.concat(result_dfs)
@@ -181,7 +183,7 @@ class AminoAcidFrequencyDistribution(DataReport):
             for class_name, raw_count_dict in raw_count_dict_per_class.items():
                 result_df = self._count_dict_to_df(raw_count_dict)
                 result_df["locus"] = chain
-                result_df["class"] = class_name
+                result_df[self.label_name] = class_name
                 result_dfs.append(result_df)
 
         return pd.concat(result_dfs)
@@ -221,8 +223,8 @@ class AminoAcidFrequencyDistribution(DataReport):
             for aa, pos in zip(sequence, seq_pos):
                 if pos not in raw_count_dict[cls_name]:
                     raw_count_dict[cls_name][pos] = {legal_aa: 0 for legal_aa in
-                                                       EnvironmentSettings.get_sequence_alphabet(
-                                                           SequenceType.AMINO_ACID)}
+                                                     EnvironmentSettings.get_sequence_alphabet(
+                                                         SequenceType.AMINO_ACID)}
 
                 raw_count_dict[cls_name][pos][aa] += 1
 
@@ -264,16 +266,17 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     def _plot_distribution(self, freq_dist):
         freq_dist.sort_values(by=["amino acid"], ascending=False, inplace=True)
-        category_orders = None if "class" not in freq_dist.columns else {"class": sorted(set(freq_dist["class"]))}
+        category_orders = None if self.label_name not in freq_dist.columns \
+            else {self.label_name: sorted(set(freq_dist[self.label_name]))}
 
         y = "relative frequency" if self.relative_frequency else "count"
 
         figure = px.bar(freq_dist, x="position", y=y, color="amino acid", text="amino acid",
-                        facet_col="class" if "class" in freq_dist.columns else None,
+                        facet_col=self.label_name if self.label_name in freq_dist.columns else None,
                         facet_row="locus" if "locus" in freq_dist.columns else None,
                         color_discrete_map=PlotlyUtil.get_amino_acid_color_map(),
                         category_orders=category_orders,
-                        labels={"position": "IMGT position" if self.alignment=="IMGT" else "Position",
+                        labels={"position": "IMGT position" if self.alignment == "IMGT" else "Position",
                                 "count": "Count",
                                 "relative frequency": "Relative frequency",
                                 "amino acid": "Amino acid"}, template="plotly_white")
@@ -293,18 +296,18 @@ class AminoAcidFrequencyDistribution(DataReport):
             if min(positions) == "105" and max(positions) == "117":
                 return PositionHelper.gen_imgt_positions_from_cdr3_length(len(set(positions)))
             elif min(positions) == "104" and max(positions) == "118":
-                return ["104"] + PositionHelper.gen_imgt_positions_from_cdr3_length(len(set(positions))-2) + ["118"]
+                return ["104"] + PositionHelper.gen_imgt_positions_from_cdr3_length(len(set(positions)) - 2) + ["118"]
         else:
             return [str(pos) for pos in sorted(set(positions.astype(int)))]
 
     def _compute_frequency_change(self, freq_dist):
-        classes = sorted(set(freq_dist["class"]))
+        classes = sorted(set(freq_dist[self.label_name]))
         assert len(classes) == 2, \
             (f"{AminoAcidFrequencyDistribution.__name__}: cannot compute frequency change when the number of "
              f"classes is not 2: {classes}")
 
-        class_a_df = freq_dist[freq_dist["class"] == classes[0]]
-        class_b_df = freq_dist[freq_dist["class"] == classes[1]]
+        class_a_df = freq_dist[freq_dist[self.label_name] == classes[0]]
+        class_b_df = freq_dist[freq_dist[self.label_name] == classes[1]]
 
         on = ["amino acid", "position"]
         on = on + ["locus"] if "locus" in freq_dist.columns else on
@@ -332,8 +335,8 @@ class AminoAcidFrequencyDistribution(DataReport):
                         facet_col="positive_class",
                         facet_row="locus" if "locus" in frequency_change.columns else None,
                         color_discrete_map=PlotlyUtil.get_amino_acid_color_map(),
-                        labels={"position": "IMGT position" if self.alignment=="IMGT" else "Position",
-                                "positive_class": "Class",
+                        labels={"position": "IMGT position" if self.alignment == "IMGT" else "Position",
+                                "positive_class": self.label_name,
                                 "frequency_change": "Difference in relative frequency",
                                 "amino acid": "Amino acid"}, template="plotly_white")
 
@@ -361,14 +364,14 @@ class AminoAcidFrequencyDistribution(DataReport):
             if self.label_name is None:
                 if len(self.dataset.get_label_names()) != 1:
                     logging.warning(f"{AminoAcidFrequencyDistribution.__name__}: ambiguous label: split_by_label was "
-                                  f"set to True but no label name was specified, and the number of available labels "
-                                  f"is {len(self.dataset.get_label_names())}: {self.dataset.get_label_names()}. "
-                                  f"Skipping this report...")
+                                    f"set to True but no label name was specified, and the number of available labels "
+                                    f"is {len(self.dataset.get_label_names())}: {self.dataset.get_label_names()}. "
+                                    f"Skipping this report...")
                     return False
             elif self.label_name not in self.dataset.get_label_names():
                 logging.warning(f"{AminoAcidFrequencyDistribution.__name__}: the specified label name "
-                              f"({self.label_name}) was not available among the dataset labels: "
-                              f"{self.dataset.get_label_names()}. Skipping this report...")
+                                f"({self.label_name}) was not available among the dataset labels: "
+                                f"{self.dataset.get_label_names()}. Skipping this report...")
                 return False
 
         return True

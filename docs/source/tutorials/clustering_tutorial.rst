@@ -117,6 +117,18 @@ In this tutorial, we will use the following settings:
                           PCA:
                             n_components: 2
                         label: signal1 # we will color the graph by the signal we implanted
+                    cluster_vis: # this will visualize clustering results
+                      ClusteringVisualization: # plot a scatter plot of dim-reduced data and color the points by cluster assignments
+                        dim_red_method:
+                          KernelPCA: # here we can use any dimensionality reduction method supported in immuneML (see docs)
+                            n_components: 2
+                            kernel: rbf
+                    stability: # for each split, assess how well the clusters from discovery data correspond to validation data (see docs)
+                      ClusteringStabilityReport:
+                        metric: adjusted_rand_score
+                    external_labels_summary: # show heatmap of how cluster assignments correspond to external labels
+                      ExternalLabelClusterSummary:
+                        external_labels: [signal1]
                 instructions:
                   clustering_instruction_with_ligo_data:
                     clustering_settings: # what combinations of encoding+dim_reduction+clustering we want to try
@@ -136,6 +148,9 @@ In this tutorial, we will use the following settings:
                     number_of_processes: 4
                     reports:
                     - rep1
+                    - stability
+                    - external_labels_summary
+                    - cluster_vis
                     split_config: # we want to repeat the analysis on different splits of the data to assess stability of the results
                       split_count: 2
                       split_strategy: random # the splits will be random
