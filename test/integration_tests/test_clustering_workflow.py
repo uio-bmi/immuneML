@@ -30,7 +30,7 @@ def test_clustering_workflow():
             'encodings': {
                 'kmer': 'KmerFrequency',
                 'bert': "TCRBert",
-                'prottrans': "ProtT5"
+                'esmc': "ESMC"
             },
             'ml_methods': {
                 'pca': {
@@ -83,7 +83,7 @@ def test_clustering_workflow():
                 'labels': ['epitope'],
                 'clustering_settings': [
                     {'encoding': 'kmer', 'method': 'kmeans2'},
-                    {'encoding': 'prottrans', 'method': 'kmeans2'},
+                    {'encoding': 'esmc', 'dim_reduction': 'pca', 'method': 'kmeans2'},
                     {'encoding': 'bert', 'dim_reduction': 'pca', 'method': 'kmeans3'}
                 ],
                 'split_config': {
