@@ -5,7 +5,11 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from scipy.cluster.hierarchy import dendrogram
+import plotly.express as px
+import plotly.figure_factory as ff
+import plotly.graph_objects as go
+import scipy
+from scipy.cluster.hierarchy import linkage
 from sklearn.cluster import AgglomerativeClustering
 
 from immuneML.data_model.SequenceSet import Repertoire
@@ -28,13 +32,11 @@ class CompAIRRClusteringReport(DataReport):
 
         This is an experimental feature.
 
-    Arguments:
+    **Specification arguments**:
 
     - label (str): The label by which to color the dendrogram leaves. Must be one of the metadata fields in the dataset.
 
     - compairr_path (str): Path to the CompAIRR executable.
-
-    - max_distance (int): Max Hamming distance allowed between sequences (default: 1)
 
     - indels (bool): Whether to allow insertions/deletions when matching sequences (default: False)
 
@@ -48,7 +50,27 @@ class CompAIRRClusteringReport(DataReport):
 
     - is_cdr3 (bool): Whether the sequences represent CDR3s (default: True)
 
-    - clustering_threshold (float): The threshold to use for cutting the dendrogram into clusters (default: 0.5)
+    - clustering_threshold (float): The threshold for the clustering algorithm (default: 0.5)
+
+    **YAML specification:**
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        definitions:
+            reports:
+                my_compairr_clustering_report:
+                    CompAIRRClusteringReport:
+                        label: disease
+                        compairr_path: /path/to/compairr
+                        indels: false
+                        ignore_counts: true
+                        ignore_genes: true
+                        threads: 4
+                        linkage_method: single
+                        is_cdr3: true
+                        clustering_criterion: distance
+                        clustering_threshold: 0.5
 
     """
 
@@ -57,15 +79,13 @@ class CompAIRRClusteringReport(DataReport):
         return CompAIRRClusteringReport(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, label: str = None,
-                 compairr_path: str = None,
-                 max_distance: int = 1, indels: bool = False, ignore_counts: bool = False, ignore_genes: bool = False,
-                 threads: int = 4, linkage_method: str = 'single', is_cdr3: bool = True,
-                 clustering_threshold: float = 0.5, name: str = None):
+                 compairr_path: str = None, indels: bool = False, ignore_counts: bool = False,
+                 ignore_genes: bool = False, threads: int = 4, linkage_method: str = 'single', is_cdr3: bool = True,
+                 name: str = None, clustering_threshold: float = 0.5):
         super().__init__(dataset=dataset, result_path=result_path, name=name)
         self.label = label
         self.linkage_method = linkage_method
         self.compairr_path = compairr_path
-        self.max_distance = max_distance
         self.indels = indels
         self.ignore_counts = ignore_counts
         self.ignore_genes = ignore_genes
@@ -90,25 +110,30 @@ class CompAIRRClusteringReport(DataReport):
         distance_matrix = self.compute_distance_matrix(similarity_matrix)
 
         model = AgglomerativeClustering(distance_threshold=0, n_clusters=None, linkage=self.linkage_method,
-                                        metric='precomputed')
+                                        metric='precomputed', )
         predictions = model.fit_predict(distance_matrix.values)
+
+        metadata = self.dataset.get_metadata([self.label, 'subject_id'], return_df=True)
+        subject_ids = metadata['subject_id'].tolist()
+        labels = metadata.set_index('subject_id')[self.label].to_dict()
 
         # Save outputs
         distance_output = self._store_matrix(distance_matrix, 'distance_matrix')
         similarity_output = self._store_matrix(similarity_matrix, 'similarity_matrix')
-        dendrogram_output = self._create_dendrogram(model, self.dataset.get_metadata(['subject_id'])['subject_id'])
+        similarity_heatmap = self._make_similarity_heatmap(similarity_matrix, 'similarity')
+        dendrogram_output = self._create_dendrogram(subject_ids, distance_matrix, labels)
         cluster_output = self._store_cluster_assignments(self.dataset.get_example_ids(), predictions)
 
         return ReportResult(
             name=self.name,
             info="Hierarchical clustering of repertoires based on CompAIRR sequence overlap",
-            output_figures=[dendrogram_output],
+            output_figures=[dendrogram_output, similarity_heatmap],
             output_tables=[distance_output, similarity_output, cluster_output]
         )
 
     def compute_distance_matrix(self, similarity_matrix) -> pd.DataFrame:
-        return pd.DataFrame(data=1 - similarity_matrix.values / similarity_matrix.values.max(),
-                            columns=similarity_matrix.columns, index=similarity_matrix.index)
+        return pd.DataFrame(data=1 - similarity_matrix.values, columns=similarity_matrix.columns,
+                            index=similarity_matrix.index)
 
     def compare_repertoires(self) -> pd.DataFrame:
         # Create similarity matrix
@@ -118,7 +143,7 @@ class CompAIRRClusteringReport(DataReport):
         # Compare repertoires pairwise
         for i in range(n_repertoires):
             rep1 = self.dataset.repertoires[i]
-            similarity_matrix.loc[rep1.identifier, rep1.identifier] = rep1.get_element_count()
+            similarity_matrix.loc[rep1.identifier, rep1.identifier] = 1
             for j in range(i + 1, n_repertoires):
                 rep2 = self.dataset.repertoires[j]
                 similarity_matrix = self._run_compairr(rep1, rep2, similarity_matrix)
@@ -140,22 +165,23 @@ class CompAIRRClusteringReport(DataReport):
     def _run_compairr(self, rep1: Repertoire, rep2: Repertoire, similarity_matrix: pd.DataFrame):
         output_file = self.result_path / f"overlap_{rep1.identifier}_{rep2.identifier}.tsv"
 
-        cmd_args = [str(self.compairr_path), "-m", str(rep1.data_filename), str(rep2.data_filename),
-                    "-d", str(self.max_distance), "-o", str(output_file)]
+        cmd_args = [str(self.compairr_path), "--matrix", str(rep1.data_filename), str(rep2.data_filename),
+                    "-o", str(output_file)]
         if self.indels:
             cmd_args.append("-i")
         if self.ignore_counts:
-            cmd_args.append("-f")
+            cmd_args.append("--ignore-counts")
         if self.ignore_genes:
-            cmd_args.append("-g")
+            cmd_args.append("--ignore-genes")
         if self.is_cdr3:
             cmd_args.append("--cdr3")
+        cmd_args.extend(["-t", str(self.threads)])
+        cmd_args.extend(["-s", 'Jaccard'])
 
         subprocess.run(cmd_args, capture_output=True, text=True)
 
-        # Calculate similarity as sum of matches
         if output_file.is_file():
-            similarity = pd.read_csv(output_file, sep="\t").sum().sum()
+            similarity = pd.read_csv(output_file, sep="\t").iloc[0, 1]
             similarity_matrix.loc[rep1.identifier, rep2.identifier] = similarity
             similarity_matrix.loc[rep2.identifier, rep1.identifier] = similarity
 
@@ -166,10 +192,18 @@ class CompAIRRClusteringReport(DataReport):
     def _store_matrix(self, matrix: pd.DataFrame, name: str) -> ReportOutput:
         output_path = self.result_path / f"{name}.tsv"
         matrix.to_csv(output_path, sep="\t")
-        return ReportOutput(
-            path=output_path,
-            name=name,
-        )
+        return ReportOutput(path=output_path, name=name)
+
+    def _make_similarity_heatmap(self, matrix: pd.DataFrame, name: str) -> ReportOutput:
+        subject_ids = self.dataset.get_metadata(['subject_id'])['subject_id'] if 'subject_id' in self.dataset.labels \
+            else [str(el) for el in range(matrix.shape[0])]
+
+        fig = px.imshow(matrix.values, text_auto=True, labels=dict(x="Repertoire", y="Repertoire", color="Similarity"),
+                        x=subject_ids, y=subject_ids, title=f"{name} matrix")
+        fig.update_layout(template="plotly_white")
+        fig.write_html(self.result_path / f"{name}_heatmap.html")
+
+        return ReportOutput(path=self.result_path / f"{name}_heatmap.html", name=f"{name} heatmap")
 
     def _store_cluster_assignments(self, repertoire_ids, clusters) -> ReportOutput:
         output_path = self.result_path / "cluster_assignments.tsv"
@@ -183,39 +217,154 @@ class CompAIRRClusteringReport(DataReport):
             name="Cluster Assignments",
         )
 
-    def _create_dendrogram(self, model, repertoire_ids: list) -> ReportOutput:
-        from matplotlib import pyplot as plt
-        fig = plt.figure(figsize=(len(repertoire_ids) * 0.3 + 1, 10))
+    def _create_dendrogram(self, repertoire_ids: list, distance_matrix, external_labels: dict) -> ReportOutput:
+        """
+        Parameters:
+        -----------
+        repertoire_ids : list
+            List of repertoire IDs
+        distance_matrix : DataFrame
+            Distance matrix
+        external_labels : dict
+            Dictionary mapping repertoire_ids to their labels/categories
+        """
+        output_path = self.result_path / "dendrogram.html"
+        condensed_dist = distance_matrix.values
 
-        # create the counts of samples under each node
-        counts = np.zeros(model.children_.shape[0])
-        n_samples = len(model.labels_)
-        for i, merge in enumerate(model.children_):
-            current_count = 0
-            for child_idx in merge:
-                if child_idx < n_samples:
-                    current_count += 1  # leaf node
-                else:
-                    current_count += counts[child_idx - n_samples]
-            counts[i] = current_count
+        # Compute linkage matrix
+        Z = linkage(condensed_dist, method='single')  # TODO: use this to find and export clusters (move up)
 
-        linkage_matrix = np.column_stack([model.children_, model.distances_, counts]).astype(float)
+        # Create dummy data array for dendrogram
+        n = distance_matrix.shape[0]
+        dummy_data = np.zeros((n, 2))  # 2D dummy data
 
-        labels = self.dataset.get_metadata([self.label])[self.label]
-        import plotly.express as px
-        unique_label_values = list(self.dataset.labels[self.label])
-        colors = {rep_id: tuple([round(float(el) / 255, 3) for el in
-                                 px.colors.qualitative.Prism[unique_label_values.index(labels[ind])][4:-1].split(', ')])
-                  for ind, rep_id in enumerate(repertoire_ids)}
+        # Initialize figure by creating upper dendrogram only
+        fig = ff.create_dendrogram(dummy_data, orientation='bottom',
+                                   labels=repertoire_ids, linkagefun=lambda x: Z,
+                                   distfun=lambda x: condensed_dist)
 
-        ddata = dendrogram(linkage_matrix, labels=np.array(repertoire_ids))
+        # Remove trace numbers from dendrogram hover
+        for i in range(len(fig['data'])):
+            fig['data'][i]['yaxis'] = 'y2'
+            fig['data'][i]['hovertemplate'] = None
+            fig['data'][i]['showlegend'] = False
 
-        for leaf, leaf_color in zip(plt.gca().get_xticklabels(), ddata["leaves_color_list"]):
-            leaf.set_color(colors[leaf.get_text()])
+        # Create a mapping from labels to indices
+        label_to_idx = {label: idx for idx, label in enumerate(repertoire_ids)}
 
-        plt.xticks(rotation=90)
+        # Get the ordering of leaves from the top dendrogram and convert to indices
+        dendro_leaves = [label_to_idx[label] for label in fig['layout']['xaxis']['ticktext']]
+        ordered_labels = [repertoire_ids[idx] for idx in dendro_leaves]
 
-        output_path = self.result_path / "hierarchical_clustering_of_repertoires.png"
-        plt.savefig(str(output_path), dpi=300)
+        # Create the annotation row
+        annotation_values = [external_labels[label] for label in ordered_labels]
+
+        # Convert labels to numeric values for coloring
+        unique_labels = sorted(list(set(external_labels.values())))  # sort for consistency
+        label_to_num = {label: i for i, label in enumerate(unique_labels)}
+        annotation_numeric = [label_to_num[label] for label in annotation_values]
+
+        # Add annotation row
+        annotation_trace = go.Heatmap(
+            x=fig['layout']['xaxis']['tickvals'],
+            y=['annotation'],  # Give it a name instead of [0]
+            z=[annotation_numeric],
+            colorscale=[[i / (len(unique_labels) - 1), color] for i, color in
+                        enumerate(px.colors.qualitative.D3[:len(unique_labels)])],
+            colorbar=dict(
+                title=self.label,
+                ticktext=unique_labels,
+                tickvals=list(range(len(unique_labels))),
+                tickmode='array',
+                len=0.22,  # Shorter colorbar
+                yanchor='top',
+                y=1.0,
+                xanchor='left',
+                x=1.02,  # Position colorbar to the right of the plot
+                thickness=20,
+                bgcolor='rgba(255,255,255,0.8)',
+            ),
+            showscale=True,  # Set to False if you don't want the colorbar
+            hovertemplate=self.label + ': %{text}<br>Repertoire: %{x}<extra></extra>',
+            text=[annotation_values],
+            yaxis='y3'  # Specify which axis to use
+        )
+        fig.add_trace(annotation_trace)
+
+        # Reorder the distance matrix according to dendrogram leaves
+        heat_data = distance_matrix.values[dendro_leaves, :]
+        heat_data = heat_data[:, dendro_leaves]
+
+        # Create Heatmap with custom hover template
+        heatmap = [
+            go.Heatmap(
+                x=fig['layout']['xaxis']['tickvals'],
+                y=fig['layout']['xaxis']['tickvals'],
+                z=heat_data,
+                colorscale='Darkmint',
+                showscale=True,
+                colorbar=dict(
+                    title='Distance',
+                    yanchor='top',
+                    y=0.73,
+                    xanchor='left',
+                    x=1.02,  # Position closer to plot than categories legend
+                    len=0.75,
+                    thickness=20
+                ),
+                hovertemplate='X: %{x}<br>Y: %{y}<br>Distance: %{z}<extra></extra>'
+            )
+        ]
+
+        # Add Heatmap Data to Figure
+        for data in heatmap:
+            fig.add_trace(data)
+
+        # Edit Layout with adjusted domains for the new annotation row
+        fig.update_layout({
+            'autosize': True,
+            'showlegend': False,
+            'hovermode': 'closest',
+            'template': 'plotly_white',
+            'xaxis': {
+                'domain': [0, 1],
+                'mirror': False,
+                'showgrid': False,
+                'showline': False,
+                'zeroline': False,
+                'ticks': ""
+            },
+            'yaxis': {
+                'domain': [0, 0.75],  # Reduced height for main heatmap
+                'mirror': False,
+                'showgrid': False,
+                'showline': False,
+                'zeroline': False,
+                'ticktext': fig['layout']['xaxis']['ticktext'],
+                'tickvals': fig['layout']['xaxis']['tickvals'],
+                'showticklabels': True,
+                'ticks': ""
+            },
+            'yaxis2': {
+                'domain': [0.85, 1],  # Top dendrogram
+                'mirror': False,
+                'showgrid': False,
+                'showline': False,
+                'zeroline': False,
+                'showticklabels': False,
+                'ticks': ""
+            },
+            'yaxis3': {
+                'domain': [0.77, 0.83],  # New annotation row
+                'mirror': False,
+                'showgrid': False,
+                'showline': False,
+                'zeroline': False,
+                'showticklabels': False,
+                'ticks': ""
+            },
+        })
+
+        fig.write_html(str(output_path))
 
         return ReportOutput(path=output_path, name="hierarchical_clustering_of_repertoires")
