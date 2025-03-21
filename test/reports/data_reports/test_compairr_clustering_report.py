@@ -71,11 +71,11 @@ def _test_generate(compairr_path):
 
     # Test distance matrix format
     distance_matrix = pd.read_csv(result.output_tables[0].path, sep="\t", index_col=0)
-    assert distance_matrix.shape == (4, 4)  # 3x3 matrix for 3 repertoires
-    assert np.all(distance_matrix.values >= 0)  # All distances should be non-negative
-    assert np.all(distance_matrix.values <= 1)  # CompAIRR normalizes distances to [0,1]
-    assert np.allclose(distance_matrix.values, distance_matrix.values.T)  # Matrix should be symmetric
-    assert np.all(np.diag(distance_matrix.values) == 0)  # Diagonal should be zeros
+    assert distance_matrix.shape == (4, 4)
+    assert np.all(distance_matrix.values >= 0)
+    assert np.all(distance_matrix.values <= 1)
+    assert np.allclose(distance_matrix.values, distance_matrix.values.T)  #
+    assert np.all(np.diag(distance_matrix.values) == 0)
 
     # Test cluster assignments
     clusters = pd.read_csv(result.output_tables[2].path, sep="\t")

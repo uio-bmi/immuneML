@@ -9,7 +9,7 @@ import plotly.express as px
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 import scipy
-from scipy.cluster.hierarchy import linkage
+from scipy.cluster.hierarchy import linkage, fcluster
 from sklearn.cluster import AgglomerativeClustering
 
 from immuneML.data_model.SequenceSet import Repertoire
@@ -17,6 +17,7 @@ from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
+from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -50,7 +51,11 @@ class CompAIRRClusteringReport(DataReport):
 
     - is_cdr3 (bool): Whether the sequences represent CDR3s (default: True)
 
-    - clustering_threshold (float): The threshold for the clustering algorithm (default: 0.5)
+    - clustering_criterion (str): The criterion to use for clustering (default: 'distance'), as defined in
+      scipy.cluster.hierarchy.linkage; valid values are 'distance', 'maxclust', 'monocrit', 'maxclust_monocrit'
+
+    - clustering_threshold (float): The threshold for the clustering algorithm (default: 0.5), mapped to 't' parameter
+      in scipy.cluster.hierarchy.fcluster
 
     **YAML specification:**
 
@@ -76,12 +81,21 @@ class CompAIRRClusteringReport(DataReport):
 
     @classmethod
     def build_object(cls, **kwargs):
+        valid_keys = ['label', 'compairr_path', 'indels', 'ignore_counts', 'ignore_genes', 'threads', 'linkage_method',
+                      'is_cdr3', 'clustering_threshold', 'clustering_criterion', 'name']
+        ParameterValidator.assert_keys(kwargs, valid_keys, CompAIRRClusteringReport.__name__,
+                                       CompAIRRClusteringReport.__name__, True)
+        ParameterValidator.assert_in_valid_list(kwargs['clustering_criterion'],
+                                                ['distance', 'maxclust', 'monocrit', 'maxclust_monocrit'],
+                                                CompAIRRClusteringReport.__name__, 'clustering_criterion')
+        assert isinstance(kwargs['clustering_threshold'], (int, float)), 'clustering_threshold must be a number'
+
         return CompAIRRClusteringReport(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, label: str = None,
                  compairr_path: str = None, indels: bool = False, ignore_counts: bool = False,
                  ignore_genes: bool = False, threads: int = 4, linkage_method: str = 'single', is_cdr3: bool = True,
-                 name: str = None, clustering_threshold: float = 0.5):
+                 name: str = None, clustering_threshold: float = 0.5, clustering_criterion: str = 'distance'):
         super().__init__(dataset=dataset, result_path=result_path, name=name)
         self.label = label
         self.linkage_method = linkage_method
@@ -92,6 +106,7 @@ class CompAIRRClusteringReport(DataReport):
         self.threads = threads
         self.is_cdr3 = is_cdr3
         self.clustering_threshold = clustering_threshold
+        self.clustering_criterion = clustering_criterion
 
     def check_prerequisites(self) -> bool:
         if not self.compairr_path:
@@ -109,9 +124,8 @@ class CompAIRRClusteringReport(DataReport):
         similarity_matrix = self.compare_repertoires()
         distance_matrix = self.compute_distance_matrix(similarity_matrix)
 
-        model = AgglomerativeClustering(distance_threshold=0, n_clusters=None, linkage=self.linkage_method,
-                                        metric='precomputed', )
-        predictions = model.fit_predict(distance_matrix.values)
+        linkage_matrix = linkage(distance_matrix.values, method='single')
+        predictions = fcluster(linkage_matrix, self.clustering_threshold, criterion=self.clustering_criterion)
 
         metadata = self.dataset.get_metadata([self.label, 'subject_id'], return_df=True)
         subject_ids = metadata['subject_id'].tolist()
@@ -121,7 +135,7 @@ class CompAIRRClusteringReport(DataReport):
         distance_output = self._store_matrix(distance_matrix, 'distance_matrix')
         similarity_output = self._store_matrix(similarity_matrix, 'similarity_matrix')
         similarity_heatmap = self._make_similarity_heatmap(similarity_matrix, 'similarity')
-        dendrogram_output = self._create_dendrogram(subject_ids, distance_matrix, labels)
+        dendrogram_output = self._create_dendrogram(subject_ids, distance_matrix, labels, linkage_matrix)
         cluster_output = self._store_cluster_assignments(self.dataset.get_example_ids(), predictions)
 
         return ReportResult(
@@ -195,11 +209,14 @@ class CompAIRRClusteringReport(DataReport):
         return ReportOutput(path=output_path, name=name)
 
     def _make_similarity_heatmap(self, matrix: pd.DataFrame, name: str) -> ReportOutput:
-        subject_ids = self.dataset.get_metadata(['subject_id'])['subject_id'] if 'subject_id' in self.dataset.labels \
+
+        metadata = self.dataset.get_metadata(field_names=None, return_df=True)
+
+        subject_ids = metadata['subject_id'].tolist() if 'subject_id' in metadata.columns \
             else [str(el) for el in range(matrix.shape[0])]
 
-        fig = px.imshow(matrix.values, text_auto=True, labels=dict(x="Repertoire", y="Repertoire", color="Similarity"),
-                        x=subject_ids, y=subject_ids, title=f"{name} matrix")
+        fig = px.imshow(matrix.values, text_auto=True, labels=dict(x="repertoire", y="repertoire", color="Similarity"),
+                        x=subject_ids, y=subject_ids, title=f"{name} matrix", color_continuous_scale='Darkmint')
         fig.update_layout(template="plotly_white")
         fig.write_html(self.result_path / f"{name}_heatmap.html")
 
@@ -207,17 +224,23 @@ class CompAIRRClusteringReport(DataReport):
 
     def _store_cluster_assignments(self, repertoire_ids, clusters) -> ReportOutput:
         output_path = self.result_path / "cluster_assignments.tsv"
-        cluster_df = pd.DataFrame({
+        cluster_df_data = {
             'repertoire_id': repertoire_ids,
             'cluster': clusters
-        })
+        }
+
+        metadata = self.dataset.get_metadata(field_names=None, return_df=True)
+        if 'subject_id' in metadata.columns:
+            cluster_df_data['subject_id'] = metadata['subject_id'].tolist()
+
+        cluster_df = pd.DataFrame(cluster_df_data)
         cluster_df.to_csv(output_path, sep="\t", index=False)
         return ReportOutput(
             path=output_path,
             name="Cluster Assignments",
         )
 
-    def _create_dendrogram(self, repertoire_ids: list, distance_matrix, external_labels: dict) -> ReportOutput:
+    def _create_dendrogram(self, repertoire_ids: list, distance_matrix, external_labels: dict, linkage_matrix) -> ReportOutput:
         """
         Parameters:
         -----------
@@ -229,10 +252,6 @@ class CompAIRRClusteringReport(DataReport):
             Dictionary mapping repertoire_ids to their labels/categories
         """
         output_path = self.result_path / "dendrogram.html"
-        condensed_dist = distance_matrix.values
-
-        # Compute linkage matrix
-        Z = linkage(condensed_dist, method='single')  # TODO: use this to find and export clusters (move up)
 
         # Create dummy data array for dendrogram
         n = distance_matrix.shape[0]
@@ -240,8 +259,8 @@ class CompAIRRClusteringReport(DataReport):
 
         # Initialize figure by creating upper dendrogram only
         fig = ff.create_dendrogram(dummy_data, orientation='bottom',
-                                   labels=repertoire_ids, linkagefun=lambda x: Z,
-                                   distfun=lambda x: condensed_dist)
+                                   labels=repertoire_ids, linkagefun=lambda x: linkage_matrix,
+                                   distfun=lambda x: distance_matrix.values)
 
         # Remove trace numbers from dendrogram hover
         for i in range(len(fig['data'])):
