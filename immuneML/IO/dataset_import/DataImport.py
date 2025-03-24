@@ -193,7 +193,8 @@ class DataImport(metaclass=abc.ABCMeta):
         return self.import_element_dataset(SequenceDataset)
 
     def import_receptor_dataset(self) -> ReceptorDataset:
-        return self.import_element_dataset(ReceptorDataset, ImportHelper.filter_illegal_receptors)
+        return self.import_element_dataset(ReceptorDataset,
+                                           lambda df: ImportHelper.filter_illegal_receptors(df, self.params.receptor_chains))
 
     def _construct_element_dataset_data_dict(self, filenames, filter_func) -> dict:
         final_df = None
