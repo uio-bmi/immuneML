@@ -136,7 +136,10 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
 
         del x
         del model
-        torch.cuda.empty_cache()
+
+        if self.device != 'cpu' and torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
         return embeddings
 
     def _get_sequences(self, sequence_set, field_name):
