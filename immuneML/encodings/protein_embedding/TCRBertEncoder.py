@@ -1,3 +1,4 @@
+import re
 from itertools import zip_longest
 import numpy as np
 from immuneML.data_model.SequenceParams import RegionType
@@ -64,13 +65,17 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
 
     @staticmethod
     def _prepare_parameters(name: str = None, model: str = None, layers: list = None, method: str = None,
-                            batch_size: int = None):
+                            batch_size: int = None, device: str = None):
         location = TCRBertEncoder.__name__
         ParameterValidator.assert_in_valid_list(model, ["tcr-bert", "tcr-bert-mlm-only"], location, "model")
         ParameterValidator.assert_type_and_value(layers, list, location, "layers")
         ParameterValidator.assert_in_valid_list(method, ["mean", "max", "attn_mean", "cls", "pool"], location, "method")
         ParameterValidator.assert_type_and_value(batch_size, int, location, "batch_size")
-        return {"name": name, "model": model, "layers": layers, "method": method, "batch_size": batch_size}
+        ParameterValidator.assert_type_and_value(device, str, location, 'device')
+        if len(re.findall("cuda:[0-9]*", device)) == 0:
+            ParameterValidator.assert_in_valid_list(device, ['cpu', 'mps', 'cuda'], location, 'device')
+        return {"name": name, "model": model, "layers": layers, "method": method, "batch_size": batch_size,
+                'device': device}
 
     def _get_caching_params(self, dataset, params: EncoderParams):
         return (("dataset_identifier", dataset.identifier),
@@ -149,7 +154,8 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
 
     def _get_relevant_model_and_tok(self):
         from transformers import BertModel, BertTokenizer
-        model = BertModel.from_pretrained(f"wukevin/{self.model}").to(self.device)
+        model = BertModel.from_pretrained(f"wukevin/{self.model}",
+                                          attn_implementation="eager").to(self.device)
         tok = BertTokenizer.from_pretrained(f"wukevin/{self.model}",
                                             do_basic_tokenize=False, do_lower_case=False,
                                             tokenize_chinese_chars=False, unk_token="?", sep_token="|",
