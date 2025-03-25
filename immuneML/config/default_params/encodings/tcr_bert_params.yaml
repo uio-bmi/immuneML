@@ -3,3 +3,4 @@ layers: [-1] # Transformer layer to use. Layers should be given as negative inte
     # representation, -2 second to last, etc.
 method: "mean" # which method to use to pool the embeddings, see TCR-BERT paper for more details
 batch_size: 256 # number of sequences to load at once
+device: 'cpu'
