@@ -136,7 +136,8 @@ class ClusteringInstruction(Instruction):
         self.state = ClusteringState(config=config, name=name)
         self.report_handler = ClusteringReportHandler(reports)
         self.cl_runner = ClusteringRunner(self.state.config, self.number_of_processes, self.report_handler)
-        self.validation_handler = ValidationHandler(self.state.config, self.cl_runner, self.report_handler)
+        self.validation_handler = ValidationHandler(self.state.config, self.cl_runner, self.report_handler,
+                                                    self.number_of_processes)
 
     def run(self, result_path: Path):
         """Execute the clustering instruction workflow."""
