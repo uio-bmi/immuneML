@@ -78,7 +78,7 @@ class DimensionalityReduction(EncodingReport):
         data_labels = None
 
         try:
-            data_labels = self.dataset.get_attribute(self._label).tolist()
+            data_labels = self.dataset.get_metadata([self._label])[self._label]
         except (AttributeError, TypeError) as e:
             logging.warning(f"Label {self._label} not found in the dataset. Skipping label coloring in the plot.")
 
