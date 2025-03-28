@@ -33,7 +33,7 @@ class TestCacheHandler(TestCase):
         params = (("k1", 1), ("k2", 2))
         obj = "object_example"
 
-        h = CacheHandler._hash(params)
+        h = CacheHandler.hash(params)
         filename = CacheHandler._build_filename(h, CacheObjectType.OTHER)
         with open(filename, "wb") as file:
             pickle.dump(obj, file)
@@ -48,7 +48,7 @@ class TestCacheHandler(TestCase):
 
         CacheHandler.add(params, obj)
 
-        h = CacheHandler._hash(params)
+        h = CacheHandler.hash(params)
         filename = CacheHandler._build_filename(h, CacheObjectType.OTHER)
         with open(filename, "rb") as file:
             obj2 = pickle.load(file)
@@ -60,7 +60,7 @@ class TestCacheHandler(TestCase):
         params = ("k1", 1), ("k2", ("k3", 2))
         obj = "object_example"
 
-        h = CacheHandler._hash(params)
+        h = CacheHandler.hash(params)
         CacheHandler.add_by_key(h, obj)
         filename = CacheHandler._build_filename(h, CacheObjectType.OTHER)
         with open(filename, "rb") as file:

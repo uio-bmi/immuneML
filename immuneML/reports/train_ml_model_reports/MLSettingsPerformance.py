@@ -98,14 +98,14 @@ class MLSettingsPerformance(TrainMLModelReport):
         for assessment_state in self.state.assessment_states:
             for label_key, label_state in assessment_state.label_states.items():
                 for assessment_key, assessment_item in label_state.assessment_items.items():
-                    plotting_data.append([assessment_state.split_index,
+                    plotting_data.append([assessment_state.split_index + 1,
                                           label_key,
                                           self._get_vertical_grouping(assessment_item),
                                           self._get_color_grouping(assessment_item),
                                           assessment_item.performance[self.state.optimization_metric.name.lower()]])
                     # optional: include assessment_item.hp_setting.preproc_sequence_name. for now ignored.
 
-        plotting_data = pd.DataFrame(plotting_data, columns=["fold", "label", self.vertical_grouping, "ml_method", "performance"])
+        plotting_data = pd.DataFrame(plotting_data, columns=["split", "label", self.vertical_grouping, "ml_method", "performance"])
         plotting_data.replace(to_replace=[None], value="NA", inplace=True)
 
         return plotting_data
@@ -113,7 +113,7 @@ class MLSettingsPerformance(TrainMLModelReport):
     def _write_results_table(self, plotting_data):
         filepath = self.result_path / f"{self.result_name}.csv"
         plotting_data.to_csv(filepath, index=False)
-        return ReportOutput(filepath)
+        return ReportOutput(filepath, name=f"Performance table per encoding and ML method across CV splits")
 
     def std(self, x):
         return x.std(ddof=0)
@@ -135,7 +135,7 @@ class MLSettingsPerformance(TrainMLModelReport):
 
     def _preprocess_plotting_data(self, plotting_data):
         plotting_data = plotting_data.groupby(["label", self.vertical_grouping, "ml_method"], as_index=False).agg(
-            {"fold": "first", "performance": ['mean', self.std]})
+            {"split": "first", "performance": ['mean', self.std]})
 
         plotting_data.columns = plotting_data.columns.map(''.join)
 

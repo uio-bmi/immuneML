@@ -12,7 +12,9 @@ from immuneML.data_model.datasets.ElementDataset import SequenceDataset, Recepto
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
@@ -21,11 +23,14 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
     Subclasses must implement the _embed_sequence_set method.
     """
 
-    def __init__(self, region_type: RegionType, name: str = None, num_processes: int = 1, device: str = 'cpu'):
+    def __init__(self, region_type: RegionType, name: str = None, num_processes: int = 1, device: str = 'cpu',
+                 batch_size: int = 4096):
         super().__init__(name)
         self.region_type = region_type
         self.num_processes = num_processes
         self.device = device
+        self.batch_size = batch_size
+        self.mem_map_path = None
 
     @staticmethod
     @abstractmethod
@@ -34,6 +39,7 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
 
     def encode(self, dataset: Dataset, params: EncoderParams) -> Dataset:
         cache_params = self._get_caching_params(dataset, params)
+        self._set_mem_map_path(cache_params)
         if isinstance(dataset, SequenceDataset):
             return CacheHandler.memo_by_params(cache_params, lambda: self._encode_sequence_dataset(dataset, params))
         elif isinstance(dataset, ReceptorDataset):
@@ -121,6 +127,10 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
 
     def _avg_sequence_set_embedding(self, embedding: np.ndarray) -> np.ndarray:
         return embedding.mean(axis=0)
+
+    def _set_mem_map_path(self, cache_params):
+        dir_path = PathBuilder.build(EnvironmentSettings.get_cache_path() / "memmap_storage")
+        self.mem_map_path = dir_path / f"{CacheHandler.hash(cache_params)}.mmap"
 
     @abstractmethod
     def _embed_sequence_set(self, sequence_set: AIRRSequenceSet, seq_field: str) -> np.ndarray:

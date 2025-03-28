@@ -1,6 +1,8 @@
 import datetime
 import logging
 
+import psutil
+
 
 def log(func):
     def wrapped(*args, **kwargs):
@@ -30,3 +32,10 @@ def print_log(mssg, include_datetime=False, log_func_name='info'):
         mssg = f"{datetime.datetime.now()}: {mssg}"
 
     print(mssg, flush=True)
+
+
+def log_memory_usage(stage: str, location: str = None):
+    process = psutil.Process()
+    memory_info = process.memory_info()
+    memory_gb = memory_info.rss / 1024 / 1024 / 1024
+    logging.info(f"{location}: Memory usage at {stage}: {memory_gb:.2f} GB")
