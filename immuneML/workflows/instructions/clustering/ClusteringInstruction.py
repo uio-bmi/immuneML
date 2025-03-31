@@ -1,8 +1,10 @@
 import copy
+import os
 from pathlib import Path
 from typing import List
 
 import pandas as pd
+import sklearn
 
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
@@ -142,6 +144,7 @@ class ClusteringInstruction(Instruction):
 
     def run(self, result_path: Path):
         """Execute the clustering instruction workflow."""
+        self._fix_max_processes()
         self._setup_paths(result_path)
         self._split_dataset()
 
@@ -226,3 +229,17 @@ class ClusteringInstruction(Instruction):
         predictions_df['example_id'] = dataset.get_example_ids()
 
         return predictions_df
+
+    def _fix_max_processes(self):
+
+        if self.number_of_processes:
+
+            try:
+                import torch
+                torch.set_num_threads(self.number_of_processes)
+            except ImportError as e:
+                pass
+
+            os.environ["OMP_NUM_THREADS"] = str(self.number_of_processes)
+            os.environ["OPENBLAS_NUM_THREADS"] = str(self.number_of_processes)
+            os.environ["MKL_NUM_THREADS"] = str(self.number_of_processes)
