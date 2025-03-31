@@ -15,6 +15,7 @@ from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_metrics.ClusteringMetric import is_external, is_internal
+from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.clustering.ClusteringReportHandler import ClusteringReportHandler
 from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringConfig, ClusteringState, \
@@ -47,6 +48,9 @@ class ClusteringRunner:
     def run_setting(self, dataset: Dataset, cl_setting: ClusteringSetting, analysis_desc: str, path: Path,
                     run_id: int, predictions_df: pd.DataFrame, state: ClusteringState) \
             -> Tuple[ClusteringItemResult, pd.DataFrame]:
+
+        print_log(f"Running clustering setting {cl_setting.get_key()}")
+
         cl_setting.path = PathBuilder.build(path / f"{cl_setting.get_key()}")
 
         # Encode data
@@ -59,6 +63,8 @@ class ClusteringRunner:
         # Run clustering
         predictions = self._fit_and_predict(enc_dataset, cl_setting)
         predictions_df[f'predictions_{cl_setting.get_key()}'] = predictions
+
+        print_log(f"{cl_setting.get_key()}: clustering method fitted and predictions made.")
 
         # Evaluate results
         features = get_features(enc_dataset, cl_setting)
@@ -75,6 +81,8 @@ class ClusteringRunner:
 
         report_results = self.report_handler.run_item_reports(cl_item, analysis_desc, run_id, cl_setting.path, state)
         enc_dataset.encoded_data = None
+
+        print_log(f"Clustering setting {cl_setting.get_key()} finished.")
 
         return ClusteringItemResult(cl_item, report_results), predictions_df
 
