@@ -23,7 +23,7 @@ class KmerFreqSequenceEncoder(KmerFrequencyEncoder):
         counts = self._process_sequences(dataset.data, params)
         
         if counts is not None:
-            # Use optimized results
+            # Use optimized results - should be a list of Counters since combine_counters=False
             encoded_sequences = counts
             sequence_ids = dataset.data.sequence_id
             

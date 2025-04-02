@@ -13,7 +13,7 @@ from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.BNPSequenceEncodingStrategies import OptimizedContinuousKmerStrategy, \
-    OptimizedGappedKmerStrategy
+    OptimizedGappedKmerStrategy, OptimizedIMGTKmerStrategy, OptimizedVGeneContKmerStrategy
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
 from immuneML.environment.Constants import Constants
@@ -321,14 +321,23 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     def _compute_kmers(self, sequences, counts=None):
         """Common k-mer computation logic for all encoders"""
+        # Determine if we should combine counters based on the dataset type
+        combine_counters = self.__class__.__name__ == 'KmerFreqRepertoireEncoder'
+            
         if self.sequence_encoding == SequenceEncodingType.CONTINUOUS_KMER:
             strategy = OptimizedContinuousKmerStrategy(self.k)
         elif self.sequence_encoding == SequenceEncodingType.GAPPED_KMER:
             strategy = OptimizedGappedKmerStrategy(self.k_left, self.k_right, self.min_gap, self.max_gap)
+        elif self.sequence_encoding == SequenceEncodingType.IMGT_CONTINUOUS_KMER:
+            strategy = OptimizedIMGTKmerStrategy(self.k)
+            return strategy.compute_kmers(sequences, counts, combine_counters)
+        elif self.sequence_encoding == SequenceEncodingType.V_GENE_CONT_KMER:
+            strategy = OptimizedVGeneContKmerStrategy(self.k)
+            return strategy.compute_kmers(sequences, sequences.v_call, counts, combine_counters)
         else:
-            return None  # Use traditional encoding for other types
+            return None  # Use traditional encoding
             
-        return strategy.compute_kmers(sequences, counts)
+        return strategy.compute_kmers(sequences, counts, combine_counters)
 
     def _get_sequence_field(self, data, params: EncoderParams):
         """Get the correct sequence field from AIRRSequenceSet based on params"""

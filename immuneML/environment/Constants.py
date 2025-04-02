@@ -15,7 +15,7 @@ class Constants:
     COMMENT_SIGN = "#"
     NOT_COMPUTED = "not computed"
     SIGNAL_DELIMITER = "__"
-    GAP_LETTER = "-"
+    GAP_LETTER = "."
 
     # plotting constants
     PLOTLY_BLACK = "#2A3F5E"
