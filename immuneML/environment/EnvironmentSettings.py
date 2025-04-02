@@ -27,6 +27,7 @@ class EnvironmentSettings:
     source_docs_path = root_path / "docs/source"
     max_sequence_length = 20
     low_memory = True
+    max_points_on_plot = 10000
     compairr_paths = [Path("/usr/local/bin/compairr"), Path("./compairr/src/compairr"),
                       root_path / 'compairr/src/compairr', root_path / 'compairr']
 

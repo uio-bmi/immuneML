@@ -3,7 +3,9 @@ from typing import List
 
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.express as px
 
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.clustering_reports.ClusteringReport import ClusteringReport
@@ -108,7 +110,7 @@ class ExternalLabelClusterSummary(ClusteringReport):
 
                 # Create contingency table
                 contingency_df = pd.crosstab(
-                    pd.Series(predictions, name='Cluster'),
+                    pd.Series(predictions, name='cluster'),
                     pd.Series(label_values, name=label)
                 )
 
@@ -128,20 +130,35 @@ class ExternalLabelClusterSummary(ClusteringReport):
                     colorscale='Tealrose',
                     text=contingency_df.values,
                     texttemplate='%{text}',
-                    textfont={"size": 10},
-                    hoverongaps=False
+                    hovertemplate='count: %{z}<br>cluster: %{y}<br>label: %{x}<extra></extra>',
+                    textfont={"size": 15},
+                    hoverongaps=False,
+                    colorbar=dict(
+                        title="Count"
+                    )
                 ))
 
                 fig.update_layout(
                     xaxis_title=label,
-                    yaxis_title='cluster'
+                    yaxis_title='cluster',
+                    legend_title_text='Count'
                 )
+                fig.update_layout(coloraxis_colorbar=dict(orientation="h"))
+
+                fig.update_xaxes(type='category')
+                fig.update_yaxes(type='category')
 
                 # Save heatmap
                 heatmap_path = self.result_path / f"{analysis_name}_{setting_key}_{label}_heatmap.html"
                 fig.write_html(str(heatmap_path))
+
+                # save as image if the number of points is above the threshold
+                plot_path = PlotlyUtil.write_image_to_file(fig,
+                                                           heatmap_path,
+                                                           contingency_df.shape[0])
+
                 outputs.append(ReportOutput(
-                    path=heatmap_path,
+                    path=plot_path,
                     name=f"Distribution heatmap for {label} ({analysis_name.replace('_', ' ')}, {setting_key})"
                 ))
 

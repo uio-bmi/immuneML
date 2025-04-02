@@ -79,7 +79,7 @@ class VJGeneDistribution(DataReport):
         if isinstance(self.dataset, SequenceDataset) or isinstance(self.dataset, ReceptorDataset):
             report_result = self._get_sequence_receptor_results()
 
-        elif isinstance(self.dataset, RepertoireDataset):
+        else:
             report_result = self._get_repertoire_results()
 
         return report_result
