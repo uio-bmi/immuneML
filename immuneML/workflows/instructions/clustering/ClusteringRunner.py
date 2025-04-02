@@ -80,7 +80,6 @@ class ClusteringRunner:
         )
 
         report_results = self.report_handler.run_item_reports(cl_item, analysis_desc, run_id, cl_setting.path, state)
-        enc_dataset.encoded_data = None
 
         print_log(f"Clustering setting {cl_setting.get_key()} finished.")
 

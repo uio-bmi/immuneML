@@ -51,7 +51,7 @@ class ValidationHandler:
         for cl_setting in self.config.clustering_settings:
             # Get discovery data clustering results
             discovery_item = state.clustering_items[run_id].discovery.items[cl_setting.get_key()].item
-            discovery_dataset = state.discovery_datasets[run_id]
+            discovery_dataset = discovery_item.dataset
 
             # Train classifier on discovery data using clusters as labels
             classifier = self._train_cluster_classifier(discovery_item, cl_setting, discovery_dataset)
@@ -86,11 +86,7 @@ class ValidationHandler:
         classifier = get_complementary_classifier(cl_setting)
 
         # Get features and cluster assignments from discovery data
-        encoded_dataset = encode_dataset(discovery_dataset, cl_setting, self.number_of_processes,
-                                         self.config.label_config,
-                                         False, self.config.sequence_type, self.config.region_type,
-                                         discovery_clusters.encoder)
-        features = get_features(encoded_dataset, cl_setting)
+        features = get_features(discovery_dataset, cl_setting)
 
         if len(list(set(discovery_clusters.predictions))) == 1:
             return discovery_clusters.predictions[0]
