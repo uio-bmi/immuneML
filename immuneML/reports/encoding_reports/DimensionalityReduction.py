@@ -127,11 +127,11 @@ class DimensionalityReduction(EncodingReport):
                     df[label] = df[label].astype('category')
                     figure = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1], color=label,
                                         color_discrete_sequence=px.colors.qualitative.Set1,
-                                        hover_data=self._dimension_names + [label],
+                                        hover_data=self._dimension_names + self._labels,
                                         category_orders={label: sorted(unique_values)})
                 else:
                     figure = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1], color=label,
-                                        hover_data=self._dimension_names + [label])
+                                        hover_data=self._dimension_names + self._labels)
 
                 figure.update_layout(template="plotly_white", showlegend=True)
                 figure.update_traces(opacity=.6)
