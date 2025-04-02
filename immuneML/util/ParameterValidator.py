@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 import pandas as pd
 
@@ -106,3 +107,7 @@ class ParameterValidator:
             assert params['region_type'].upper() in [rt.name for rt in RegionType], \
                 (f"{location}: {params['region_type']} is not a valid region type. Valid sequence types "
                  f"are: {[rt.name for rt in RegionType]}.")
+
+    @classmethod
+    def warn_deprecated_parameter(cls, old_param, new_param, location: str = ""):
+        logging.warning(f"{location}: Parameter {old_param} is deprecated, please use parameter {new_param} instead.")

@@ -18,12 +18,12 @@ class EncodingParser:
         for key in encodings.keys():
 
             encoder, params = EncodingParser.parse_encoder(key, encodings[key])
+            encodings[key] = {encoder.__name__[:-7]: params}
             symbol_table.add(key, SymbolType.ENCODING, encoder, {"encoder_params": params})
 
         return symbol_table, encodings
 
     @staticmethod
-    @log
     def parse_encoder(key: str, specs: dict):
         class_path = "encodings"
         valid_encoders = ReflectionHandler.all_nonabstract_subclass_basic_names(DatasetEncoder, "Encoder", class_path)

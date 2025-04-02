@@ -19,16 +19,19 @@ repertoires (AIRR). To **get started using immuneML right away**, check out our 
 
 immuneML can be used for:
 
-- **Training ML models** for repertoire classification (e.g., disease prediction) or receptor sequence
-  classification (e.g., antigen binding prediction), and applying them to new datasets with unknown class labels.
+- **Exploratory analysis of datasets** such as dataset overview, statistical analyses, visualizations to get the
+  overview of the data;
 
-- **Simulating datasets** for ML model benchmarking. Data can be simulated by implanting ground truth
-  immune signals using LIgO, or by training generative models to learn the underlying patterns in a natural dataset.
+- **Clustering analysis of datasets** to examine whether the examples form any clusters, how stable the clusters are,
+  how much the clusters correspond to any of the external labels available;
 
-- **Exploratory analysis of datasets** such as statistical analyses, dimensionality reduction or clustering
-  in order to gain deeper insight into the data.
+- **Training classification ML models** for repertoire classification (e.g., disease prediction) or receptor sequence
+  classification (e.g., antigen binding prediction), and applying them to new datasets with unknown class labels;
 
-- **And more!**
+- **Simulating datasets** for ML model benchmarking with known ground truth immune signals using LIgO;
+
+- **Training generative ML models** of receptor sequences and evaluating synthetic sequences across a range of
+  characteristics.
 
 The starting point for any immuneML analysis is the YAML specification file. In this file, the settings of the analysis
 components are defined (also known as :code:`definitions`), which are shown in six different colors in the figure below. Additionally, the YAML file

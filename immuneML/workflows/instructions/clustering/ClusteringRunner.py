@@ -7,10 +7,15 @@ import pandas as pd
 import sklearn
 from scipy.sparse import issparse
 
+from immuneML.caching.CacheHandler import CacheHandler
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_metrics.ClusteringMetric import is_external, is_internal
+from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.clustering.ClusteringReportHandler import ClusteringReportHandler
 from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringConfig, ClusteringState, \
@@ -43,17 +48,23 @@ class ClusteringRunner:
     def run_setting(self, dataset: Dataset, cl_setting: ClusteringSetting, analysis_desc: str, path: Path,
                     run_id: int, predictions_df: pd.DataFrame, state: ClusteringState) \
             -> Tuple[ClusteringItemResult, pd.DataFrame]:
+
+        print_log(f"Running clustering setting {cl_setting.get_key()}")
+
         cl_setting.path = PathBuilder.build(path / f"{cl_setting.get_key()}")
 
         # Encode data
         encoder = cl_setting.encoder if analysis_desc == 'discovery' \
             else state.clustering_items[run_id].discovery.get_cl_item(cl_setting).encoder
-        enc_dataset = self.encode_dataset(dataset, cl_setting, learn_model=analysis_desc == 'discovery',
-                                          encoder=encoder)
+        enc_dataset = encode_dataset(dataset, cl_setting, self.number_of_processes, self.config.label_config,
+                                     analysis_desc == 'discovery', self.config.sequence_type, self.config.region_type,
+                                     encoder)
 
         # Run clustering
         predictions = self._fit_and_predict(enc_dataset, cl_setting)
         predictions_df[f'predictions_{cl_setting.get_key()}'] = predictions
+
+        print_log(f"{cl_setting.get_key()}: clustering method fitted and predictions made.")
 
         # Evaluate results
         features = get_features(enc_dataset, cl_setting)
@@ -70,25 +81,9 @@ class ClusteringRunner:
 
         report_results = self.report_handler.run_item_reports(cl_item, analysis_desc, run_id, cl_setting.path, state)
 
+        print_log(f"Clustering setting {cl_setting.get_key()} finished.")
+
         return ClusteringItemResult(cl_item, report_results), predictions_df
-
-    def encode_dataset(self, dataset: Dataset, cl_setting: ClusteringSetting, learn_model: bool = True,
-                       encoder: DatasetEncoder = None) -> Dataset:
-        """Handle dataset encoding and dimensionality reduction."""
-        enc_params = EncoderParams(model=cl_setting.encoder_params, result_path=cl_setting.path,
-                                   pool_size=self.number_of_processes, label_config=self.config.label_config,
-                                   learn_model=learn_model, encode_labels=False,
-                                   sequence_type=self.config.sequence_type,
-                                   region_type=self.config.region_type)
-        enc_dataset = DataEncoder.run(DataEncoderParams(dataset=dataset,
-                                                        encoder=cl_setting.encoder if encoder is None else encoder,
-                                                        encoder_params=enc_params))
-
-        if cl_setting.dim_reduction_method:
-            enc_dataset.encoded_data.dimensionality_reduced_data = cl_setting.dim_reduction_method.fit_transform(
-                enc_dataset)
-
-        return enc_dataset
 
     def _fit_and_predict(self, dataset: Dataset, cl_setting: ClusteringSetting) -> np.ndarray:
         """Fit clustering method and get predictions."""
@@ -152,3 +147,36 @@ def get_features(dataset: Dataset, cl_setting: ClusteringSetting):
     """Get features from encoded dataset."""
     return dataset.encoded_data.examples if cl_setting.dim_reduction_method is None \
         else dataset.encoded_data.dimensionality_reduced_data
+
+
+def encode_dataset(dataset: Dataset, cl_setting: ClusteringSetting, number_of_processes: int,
+                   label_config: LabelConfiguration, learn_model: bool, sequence_type: SequenceType,
+                   region_type: RegionType, encoder: DatasetEncoder = None):
+
+    def dict_to_sorted_tuple(d: dict) -> tuple:
+        return tuple(sorted(d.items(), key=lambda tup: tup[0])) if d is not None else None
+
+    return CacheHandler.memo_by_params(
+        (dataset.identifier, dict_to_sorted_tuple(cl_setting.encoder_params), label_config.get_labels_by_name(),
+         sequence_type.name, region_type.name, cl_setting.dim_red_name, dict_to_sorted_tuple(cl_setting.dim_red_params)),
+        lambda: encode_dataset_internal(dataset, cl_setting, number_of_processes, label_config,
+                                        learn_model, sequence_type, region_type, encoder))
+
+
+def encode_dataset_internal(dataset: Dataset, cl_setting: ClusteringSetting, number_of_processes: int,
+                            label_config: LabelConfiguration, learn_model: bool, sequence_type: SequenceType,
+                            region_type: RegionType, encoder: DatasetEncoder = None):
+    enc_params = EncoderParams(model=cl_setting.encoder_params, result_path=cl_setting.path,
+                               pool_size=number_of_processes, label_config=label_config,
+                               learn_model=learn_model, encode_labels=False,
+                               sequence_type=sequence_type,
+                               region_type=region_type)
+    enc_dataset = DataEncoder.run(DataEncoderParams(dataset=dataset,
+                                                    encoder=cl_setting.encoder if encoder is None else encoder,
+                                                    encoder_params=enc_params))
+
+    if cl_setting.dim_reduction_method:
+        enc_dataset.encoded_data.dimensionality_reduced_data = cl_setting.dim_reduction_method.fit_transform(
+            enc_dataset)
+
+    return enc_dataset

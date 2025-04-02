@@ -32,7 +32,7 @@ def test_dimensionality_reduction():
             "reports": {
                 "rep1": {
                     "DimensionalityReduction": {
-                        "label": "diseased",
+                        "labels": ["diseased"],
                         "dim_red_method": {"TSNE": {"n_components": 2, 'init': 'random', "perplexity": 5}}
                     }
                 }

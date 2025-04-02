@@ -21,7 +21,7 @@ class CacheHandler:
 
     @staticmethod
     def get(params: tuple, object_type, cache_type=None):
-        h = CacheHandler._hash(params)
+        h = CacheHandler.hash(params)
         return CacheHandler.get_by_key(h, object_type, cache_type)
 
     @staticmethod
@@ -82,5 +82,5 @@ class CacheHandler:
         return CacheHandler.memo(cache_key, fn, object_type, cache_type)
 
     @staticmethod
-    def _hash(params: tuple) -> str:
+    def hash(params: tuple) -> str:
         return hashlib.sha256(str(params).encode('utf-8')).hexdigest()

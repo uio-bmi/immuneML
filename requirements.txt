@@ -28,3 +28,4 @@ IMGTgeneDL
 sentencepiece
 transformers
 esm
+psutil

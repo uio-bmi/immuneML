@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import List
 
 import pandas as pd
 import plotly.express as px
@@ -11,6 +12,7 @@ from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
+from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -20,7 +22,7 @@ class DimensionalityReduction(EncodingReport):
 
     **Specification arguments:**
 
-    - label (str): name of the label to use for highlighting data points; or None
+    - labels (list): names of the label to use for highlighting data points; or None
 
     - dim_red_method (str): dimensionality reduction method to be used for plotting; if set, in a workflow, this
       dimensionality reduction will be used for plotting instead of any other set in the workflow; if None, it will
@@ -36,7 +38,7 @@ class DimensionalityReduction(EncodingReport):
             reports:
                 rep1:
                     DimensionalityReduction:
-                        label: epitope
+                        labels: [epitope, source]
                         dim_red_method:
                             PCA:
                                 n_components: 2
@@ -50,16 +52,31 @@ class DimensionalityReduction(EncodingReport):
             method = MLParser.parse_any_model("dim_red_method", kwargs['dim_red_method'], cls_name)[0]
         else:
             method = None
-        return DimensionalityReduction(**{**kwargs, "dim_red_method": method})
+
+        location = f"DimensionalityReduction ({kwargs['name'] if 'name' in kwargs else ''})"
+
+        # backwards compatibility: to be removed from next major version
+        if "label" in kwargs:
+            ParameterValidator.warn_deprecated_parameter("label", "labels", location)
+            ParameterValidator.assert_type_and_value(kwargs["label"], str, location, "label")
+            labels = [kwargs["label"]]
+            del kwargs["label"]
+        else:
+            ParameterValidator.assert_type_and_value(kwargs["labels"], list, location, "labels")
+            labels = kwargs["labels"]
+            ParameterValidator.assert_all_type_and_value(labels, str, location, "labels")
+
+        return DimensionalityReduction(**{**kwargs, "dim_red_method": method, 'labels': labels})
 
     def __init__(self, dataset: Dataset = None, batch_size: int = 1, result_path: Path = None,
-                 name: str = None, label: str = None, dim_red_method: DimRedMethod = None):
+                 name: str = None, labels: list = None, dim_red_method: DimRedMethod = None):
         super().__init__(dataset=dataset, result_path=result_path, name=name)
-        self._label = label
+        self._labels = labels
         self._dim_red_method = dim_red_method
         self._dimension_names = ['dimension_1',
                                  'dimension_2'] if self._dim_red_method else self._dim_red_method.get_dimension_names()
-        self.info = "This report visualizes the encoded data after applying dimensionality reduction"
+        self.info = ("This report visualizes the encoded data after applying dimensionality reduction dim_red,"
+                     " optionally colored by labels of interest.")
 
     def check_prerequisites(self):
         return (isinstance(self.dataset.encoded_data, EncodedData) and
@@ -78,48 +95,60 @@ class DimensionalityReduction(EncodingReport):
         data_labels = None
 
         try:
-            data_labels = self.dataset.get_attribute(self._label).tolist()
+            data_labels = self.dataset.get_metadata(self._labels, return_df=True)[self._labels]
         except (AttributeError, TypeError) as e:
-            logging.warning(f"Label {self._label} not found in the dataset. Skipping label coloring in the plot.")
+            logging.warning(f"Labels {self._labels} not found in the dataset. Skipping label coloring in the plot.")
 
         PathBuilder.build(self.result_path)
 
         df = pd.DataFrame({'example_id': self.dataset.get_example_ids(),
                            self._dimension_names[0]: dim_reduced_data[:, 0],
                            self._dimension_names[1]: dim_reduced_data[:, 1]})
-        if self._label:
-            df[self._label] = data_labels
+        if self._labels:
+            df[self._labels] = data_labels
         df.to_csv(self.result_path / 'dimensionality_reduced_data.csv', index=False)
 
-        report_output_fig = self._safe_plot(df=df, output_written=True)
-        output_figures = None if report_output_fig is None else [report_output_fig]
+        report_output_figures = self._safe_plot(df=df, output_written=True)
 
-        dim_red_text = f" ({self._dim_red_method.__class__.__name__})." if self._dim_red_method else "."
+        dim_red_text = f" ({self._dim_red_method.__class__.__name__})" if self._dim_red_method else ""
 
-        return ReportResult(name=self.name, info=self.info + dim_red_text,
-                            output_figures=output_figures,
+        return ReportResult(name=self.name, info=self.info.replace(" dim_red", dim_red_text),
+                            output_figures=report_output_figures,
                             output_tables=[ReportOutput(self.result_path / 'dimensionality_reduced_data.csv',
                                                         'data after dimensionality reduction')])
 
-    def _plot(self, df: pd.DataFrame) -> ReportOutput:
-        if self._label:
-            # Convert to categorical if few unique values
-            unique_values = df[self._label].unique()
-            if len(unique_values) <= 3:
-                df[self._label] = df[self._label].astype('category')
-                figure = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1], color=self._label,
-                                    color_discrete_sequence=px.colors.qualitative.Set1,
-                                    category_orders={self._label: sorted(unique_values)})
-            else:
-                figure = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1], color=self._label)
+    def _plot(self, df: pd.DataFrame) -> List[ReportOutput]:
+        PathBuilder.build(self.result_path)
+        outputs = []
+        if self._labels:
+            for label in self._labels:
+                unique_values = df[label].unique()
+                if len(unique_values) <= 3:
+                    df[label] = df[label].astype('category')
+                    figure = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1], color=label,
+                                        color_discrete_sequence=px.colors.qualitative.Set1,
+                                        hover_data=self._dimension_names + [label],
+                                        category_orders={label: sorted(unique_values)})
+                else:
+                    figure = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1], color=label,
+                                        hover_data=self._dimension_names + [label])
+
+                figure.update_layout(template="plotly_white", showlegend=True)
+                figure.update_traces(opacity=.6)
+
+                file_path = self.result_path / f"dimensionality_reduction_{label}.html"
+                figure.write_html(str(file_path))
+                outputs.append(ReportOutput(path=file_path,
+                                            name="Data visualization after dimensionality reduction "
+                                                 "(highlighted by {})".format(label)))
         else:
             # No label case - just plot points
             figure = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1])
+            figure.update_layout(template="plotly_white")
+            figure.update_traces(opacity=.6)
 
-        figure.update_layout(template="plotly_white")
+            file_path = self.result_path / "dimensionality_reduction.html"
+            figure.write_html(str(file_path))
+            outputs.append(ReportOutput(path=file_path, name="Data visualization after dimensionality reduction"))
 
-        PathBuilder.build(self.result_path)
-
-        file_path = self.result_path / "dimensionality_reduction.html"
-        figure.write_html(str(file_path))
-        return ReportOutput(path=file_path, name="Data visualization after dimensionality reduction")
+        return outputs

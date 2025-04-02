@@ -10,14 +10,6 @@ class LeaveOneOutSplitter:
 
     @staticmethod
     def split_dataset(input_params: DataSplitterParams):
-        if isinstance(input_params.dataset, ReceptorDataset) or isinstance(input_params.dataset, SequenceDataset):
-            return LeaveOneOutSplitter._split_receptor_dataset(input_params)
-        else:
-            raise NotImplementedError("LeaveOneOutSplitter: leave-one-out stratification is currently implemented only for receptor dataset, "
-                                      f"got {type(input_params.dataset).__name__} instead.")
-
-    @staticmethod
-    def _split_receptor_dataset(input_params: DataSplitterParams):
         dataset = input_params.dataset
         param, min_count = input_params.split_config.leave_one_out_config.parameter, input_params.split_config.leave_one_out_config.min_count
 
@@ -54,12 +46,12 @@ class LeaveOneOutSplitter:
         elif isinstance(dataset, SequenceDataset):
             parameter_values = [seq.metadata.custom_params[param] for seq in dataset.get_data()]
         else:
-            raise RuntimeError(f"{LeaveOneOutSplitter.__name__}: dataset of type {type(dataset)} cannot be used with this splitter.")
+            parameter_values = [rep.metadata[param] for rep in dataset.get_data()]
 
         unique_values, count = np.unique(parameter_values, return_counts=True)
 
-        assert all(el > min_count for el in count), f"DataSplitter: there are not enough examples with different values of the parameter {param} " \
-                                                    f"to split the dataset."
+        assert all(el > min_count for el in count), (f"DataSplitter: there are not enough examples with different "
+                                                     f"values of the parameter {param} to split the dataset.")
 
         return unique_values
 

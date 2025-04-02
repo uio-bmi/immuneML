@@ -300,10 +300,11 @@ class PerformancePerLabel(TrainMLModelReport):
         groups_for_perf_eval = np.repeat(groups_for_perf_eval, repetitions)
 
         for setting in data.setting.unique().tolist():
+            setting_data = data[data.setting == setting]
             fig.add_trace(go.Box(
                 name=setting,
                 x=groups_for_perf_eval,
-                y=np.concatenate([data.performance] + [data[f'performance_{alt_lbl_value}'] for alt_lbl_value in self.alternative_label_values]).round(3),
+                y=np.concatenate([setting_data.performance] + [setting_data[f'performance_{alt_lbl_value}'] for alt_lbl_value in self.alternative_label_values]).round(3),
                 boxpoints='all',
                 jitter=0.3
             ))
@@ -318,7 +319,7 @@ class PerformancePerLabel(TrainMLModelReport):
             "yaxis_title": f"{self.metric.replace('_', ' ').title()}",
             "template": "plotly_white",
             'boxmode': 'group',
-            "showlegend": False
+            "showlegend": True
         }
 
     def check_prerequisites(self):

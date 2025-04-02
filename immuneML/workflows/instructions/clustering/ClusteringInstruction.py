@@ -1,8 +1,10 @@
 import copy
+import os
 from pathlib import Path
 from typing import List
 
 import pandas as pd
+import sklearn
 
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
@@ -11,6 +13,7 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
 from immuneML.reports.Report import Report
+from immuneML.util.Logger import print_log, log_memory_usage
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
 from immuneML.workflows.instructions.clustering.ClusteringReportHandler import ClusteringReportHandler
@@ -136,21 +139,29 @@ class ClusteringInstruction(Instruction):
         self.state = ClusteringState(config=config, name=name)
         self.report_handler = ClusteringReportHandler(reports)
         self.cl_runner = ClusteringRunner(self.state.config, self.number_of_processes, self.report_handler)
-        self.validation_handler = ValidationHandler(self.state.config, self.cl_runner, self.report_handler)
+        self.validation_handler = ValidationHandler(self.state.config, self.cl_runner, self.report_handler,
+                                                    self.number_of_processes)
 
     def run(self, result_path: Path):
         """Execute the clustering instruction workflow."""
+        self._fix_max_processes()
         self._setup_paths(result_path)
         self._split_dataset()
 
         for run_id in range(self.state.config.split_config.split_count):
+
+            print_log(f"Running clustering for split {run_id + 1}.")
 
             path = self.state.result_path / f"split_{run_id + 1}"
 
             # Run discovery
             self._run_discovery(run_id, path / 'discovery')
 
+            log_memory_usage(f"discovery in split {run_id + 1}", f"Clustering instruction {self.state.name}")
+
             # Run validations
+            print_log(f"Running validation for split {run_id + 1}.")
+
             predictions_df = self._init_predictions_df(self.state.validation_datasets[run_id])
 
             if "method_based" in self.state.config.validation_type:
@@ -158,25 +169,39 @@ class ClusteringInstruction(Instruction):
                     self.state.validation_datasets[run_id], run_id, PathBuilder.build(path / 'method_based_validation'),
                     copy.deepcopy(predictions_df), self.state)
 
+                log_memory_usage(f"method-based validation in split {run_id + 1}",
+                                 f"Clustering instruction {self.state.name}")
+
             if "result_based" in self.state.config.validation_type:
                 self.state = self.validation_handler.run_result_based_validation(
                     self.state.validation_datasets[run_id], run_id, PathBuilder.build(path / "result_based_validation"),
                     copy.deepcopy(predictions_df), self.state)
+
+                log_memory_usage(f"result-based validation in split {run_id + 1}",
+                                 f"Clustering instruction {self.state.name}")
+
+            print_log(f"Clustering for split {run_id + 1} finished.")
 
         self.report_handler.run_clustering_reports(self.state)
         return self.state
 
     def _run_discovery(self, run_id: int, path: Path):
         """Run clustering on discovery data."""
+
+        print_log("Running clustering on discovery data.")
+
         dataset = self.state.discovery_datasets[run_id]
         analysis_desc = 'discovery'
 
         predictions_df = self._init_predictions_df(dataset)
-        clustering_items, predictions_df = self.cl_runner.run_all_settings(dataset, analysis_desc, path, run_id, predictions_df, self.state)
+        clustering_items, predictions_df = self.cl_runner.run_all_settings(dataset, analysis_desc, path, run_id,
+                                                                           predictions_df, self.state)
 
         predictions_df.to_csv(self.state.predictions_paths[run_id][analysis_desc], index=False)
         cl_result = ClusteringResultPerRun(run_id, analysis_desc, clustering_items)
         self.state.add_cl_result_per_run(run_id, analysis_desc, cl_result)
+
+        print_log("Clustering on discovery data finished.")
 
     def _split_dataset(self):
         self.state.discovery_datasets, self.state.validation_datasets = HPUtil.split_data(
@@ -204,3 +229,17 @@ class ClusteringInstruction(Instruction):
         predictions_df['example_id'] = dataset.get_example_ids()
 
         return predictions_df
+
+    def _fix_max_processes(self):
+
+        if self.number_of_processes:
+
+            try:
+                import torch
+                torch.set_num_threads(self.number_of_processes)
+            except ImportError as e:
+                pass
+
+            os.environ["OMP_NUM_THREADS"] = str(self.number_of_processes)
+            os.environ["OPENBLAS_NUM_THREADS"] = str(self.number_of_processes)
+            os.environ["MKL_NUM_THREADS"] = str(self.number_of_processes)

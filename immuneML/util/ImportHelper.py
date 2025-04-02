@@ -7,7 +7,7 @@ import pandas as pd
 
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
-from immuneML.data_model.SequenceParams import RegionType, Chain
+from immuneML.data_model.SequenceParams import RegionType, Chain, ChainPair
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
@@ -67,7 +67,22 @@ class ImportHelper:
         return kwargs
 
     @staticmethod
-    def filter_illegal_receptors(df: pd.DataFrame) -> pd.DataFrame:
+    def remove_illegal_chains(df: pd.DataFrame, chain_pair: ChainPair = None) -> pd.DataFrame:
+        if chain_pair is not None:
+            rows_with_allowed_chains = [ChainPair.is_allowed(Chain.get_chain(item), chain_pair) for item in df.locus]
+            invalid_sequences = len(rows_with_allowed_chains) - sum(rows_with_allowed_chains)
+            if invalid_sequences != 0:
+                logging.warning(f"Some sequences in the file have locus that is not in {chain_pair}. "
+                                f"Removing {invalid_sequences} sequences.")
+
+                df = df.loc[rows_with_allowed_chains]
+
+        return df
+
+    @staticmethod
+    def filter_illegal_receptors(df: pd.DataFrame, chain_pair: ChainPair = None) -> pd.DataFrame:
+        df = ImportHelper.remove_illegal_chains(df, chain_pair)
+
         assert "cell_id" in df.columns, "Receptor datasets cannot be constructed if cell_id field is missing."
 
         cell_id_counts = df.groupby('cell_id').size()

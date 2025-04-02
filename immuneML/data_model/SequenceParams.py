@@ -54,6 +54,10 @@ class ChainPair(Enum):
     IGH_IGK = (Chain.HEAVY.value, Chain.KAPPA.value)
 
     @staticmethod
+    def is_allowed(chain: Chain, chain_pair: 'ChainPair'):
+        return chain.value in chain_pair.value
+
+    @staticmethod
     def get_chain_pair(chains: List[Chain]):
         """Given a list of 2 chain objects, returns the relevant ChainPair"""
         assert len(chains) == 2, f"ChainPair: expected 2 chains, received {len(chains)}"

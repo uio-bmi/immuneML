@@ -26,7 +26,7 @@ class TestProtT5Encoder:
 
     def create_encoder(self, device='cpu'):
         return ProtT5Encoder(
-            device=device
+            device=device, batch_size=10
         )
 
     def create_label_config(self):
@@ -37,7 +37,7 @@ class TestProtT5Encoder:
         PathBuilder.remove_old_and_build(path)
 
         encoder = self.create_encoder()
-        dataset = RandomDatasetGenerator.generate_sequence_dataset(sequence_count=10, length_probabilities={3: 1},
+        dataset = RandomDatasetGenerator.generate_sequence_dataset(sequence_count=40, length_probabilities={10: 1},
                                                                    labels={"label": {True: 0.5, False: 0.5}}, path=path)
         lc = self.create_label_config()
         encoded = encoder.encode(dataset, EncoderParams(
@@ -47,9 +47,9 @@ class TestProtT5Encoder:
         ))
 
         assert encoded.encoded_data is not None
-        assert encoded.encoded_data.examples.shape[0] == 10  # number of sequences
+        assert encoded.encoded_data.examples.shape[0] == 40  # number of sequences
         assert encoded.encoded_data.examples.shape[1] == 1024  # embedding dimension
-        assert len(encoded.encoded_data.example_ids) == 10
+        assert len(encoded.encoded_data.example_ids) == 40
         assert all(isinstance(label, bool) for label in encoded.encoded_data.labels["label"])
 
     def test_encode_receptor_dataset(self):

@@ -96,7 +96,7 @@ class TestMLSettingsPerformance(TestCase):
         self.assertEqual(result.output_tables[0].path, path / "performance.csv")
 
         written_data = pd.read_csv(path / "performance.csv")
-        self.assertEqual(list(written_data.columns), ["fold", "label", "encoding", "ml_method", "performance"])
+        self.assertEqual(list(written_data.columns), ["split", "label", "encoding", "ml_method", "performance"])
 
         shutil.rmtree(path)
 
@@ -110,7 +110,7 @@ class TestMLSettingsPerformance(TestCase):
         report.result_path = path
         report.state = self._create_state_object(path / "input_data/")
 
-        df = pd.DataFrame({"fold": [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+        df = pd.DataFrame({"split": [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
                            "label": ["l1", "l1", "l1", "l1", "l2", "l2", "l2", "l2", "l1", "l1", "l1", "l1", "l2", "l2", "l2", "l2"],
                            report.vertical_grouping: ["e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2"],
                            "ml_method": ["ml1", "ml1", "ml2", "ml2", "ml1", "ml1", "ml2", "ml2", "ml1", "ml1", "ml2", "ml2", "ml1", "ml1", "ml2",
