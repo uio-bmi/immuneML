@@ -52,14 +52,14 @@ class PlotlyUtil:
                 'Q': 'rgb(158, 185, 243)', 'P': 'rgb(248, 156, 116)', 'N': 'rgb(135, 197, 95)',
                 'M': 'rgb(254, 136, 177)', 'L': 'rgb(201, 219, 116)', 'K': 'rgb(255,237,111)',
                 'I': 'rgb(180, 151, 231)', 'H': 'rgb(246, 207, 113)', 'G': 'rgb(190,186,218)',
-                'F': 'rgb(128,177,211)', 'E': 'rgb(253,180,98)',  'D': 'rgb(252,205,229)',
+                'F': 'rgb(128,177,211)', 'E': 'rgb(253,180,98)', 'D': 'rgb(252,205,229)',
                 'C': 'rgb(188,128,189)', 'A': 'rgb(204,235,197)'}
-
 
     @staticmethod
     def write_image_to_file(figure, file_path, dataset_size: int) -> Path:
         """
-        Writes a plotly figure to an image file.
+        Writes a plotly figure to an HTML and optionally an image file (if dataset_size is large).
+        Returns the path to the image file if it was created, otherwise returns the path to the HTML file.
 
         Args:
             dataset_size: number of points in the plot
@@ -67,10 +67,10 @@ class PlotlyUtil:
             file_path: the path to the file where the image will be saved
 
         """
+        figure.write_html(str(file_path))
         if dataset_size > EnvironmentSettings.max_points_on_plot:
             plot_path = file_path.with_suffix(".png")
             figure.write_image(str(plot_path))
             return plot_path
         else:
-            figure.write_html(str(file_path))
             return file_path

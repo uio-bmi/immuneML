@@ -148,11 +148,7 @@ class ExternalLabelClusterSummary(ClusteringReport):
                 fig.update_xaxes(type='category')
                 fig.update_yaxes(type='category')
 
-                # Save heatmap
                 heatmap_path = self.result_path / f"{analysis_name}_{setting_key}_{label}_heatmap.html"
-                fig.write_html(str(heatmap_path))
-
-                # save as image if the number of points is above the threshold
                 plot_path = PlotlyUtil.write_image_to_file(fig,
                                                            heatmap_path,
                                                            contingency_df.shape[0])
