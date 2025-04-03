@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
@@ -12,11 +13,11 @@ from immuneML.reports.ReportResult import ReportResult
 @dataclass
 class ExploratoryAnalysisUnit:
     dataset: Dataset
-    report: Report
+    reports: List[Report]
     preprocessing_sequence: list = None
     encoder: DatasetEncoder = None
     example_weighting: ExampleWeightingStrategy = None
     label_config: LabelConfiguration = None
     number_of_processes: int = 1
-    report_result: ReportResult = None
+    report_results: List[ReportResult] = None
     dim_reduction: DimRedMethod = None

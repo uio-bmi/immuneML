@@ -47,7 +47,7 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
         refs = {"params": {"path": path / "refs.tsv", "region_type": "FULL_SEQUENCE"}, "format": "VDJdb"}
 
         units = {"named_analysis_4": ExploratoryAnalysisUnit(dataset=dataset,
-                                                             report=DesignMatrixExporter(name='report', file_format='csv'),
+                                                             reports=[DesignMatrixExporter(name='report', file_format='csv')],
                                                              label_config=label_config,
                                                              encoder=MatchedSequencesEncoder.build_object(dataset,
                                                                                                              **{"max_edit_distance": 1,
@@ -59,6 +59,6 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
         process = ExploratoryAnalysisInstruction(units, name="exp")
         process.run(path / "results/")
 
-        self.assertTrue(os.path.isfile(path / "results/exp/analysis_named_analysis_4/report/design_matrix.csv"))
+        self.assertTrue(os.path.isfile(path / "results/exp/analysis_named_analysis_4/report_report/design_matrix.csv"))
 
         shutil.rmtree(path)

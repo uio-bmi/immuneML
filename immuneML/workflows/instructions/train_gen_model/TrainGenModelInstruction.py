@@ -156,10 +156,12 @@ class TrainGenModelInstruction(GenModelInstruction):
         bnp_write_to_file(path / f'combined_{self.state.name}_dataset.tsv', combined_data)
 
         metadata_yaml = SequenceDataset.create_metadata_dict(dataset_class=SequenceDataset.__name__,
-                                             filename=f'combined_{self.state.name}_dataset.tsv',
-                                             type_dict=type(combined_data).get_field_type_dict(all_fields=False),
-                                             name=f'combined_{self.state.name}_dataset',
-                                             labels={'gen_model_name': [self.method.name, ''], "from_gen_model": [True, False]})
+                                                             filename=f'combined_{self.state.name}_dataset.tsv',
+                                                             type_dict=type(combined_data).get_field_type_dict(
+                                                                 all_fields=False),
+                                                             name=f'combined_{self.state.name}_dataset',
+                                                             labels={'gen_model_name': [self.method.name, ''],
+                                                                     "from_gen_model": [True, False]})
 
         write_dataset_yaml(path / f'combined_{self.state.name}_dataset.yaml', metadata_yaml)
 
@@ -207,7 +209,7 @@ class TrainGenModelInstruction(GenModelInstruction):
                 rep.name = rep.name + " (original dataset)"
                 self.state.report_results['data_reports'].append(rep.generate_report())
 
-        super()._print_report_summary_log()
+        self._print_report_summary_log()
 
     def _save_model(self):
         self.state.model_path = self.method.save_model(self.state.result_path / 'trained_model/')

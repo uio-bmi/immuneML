@@ -1,14 +1,11 @@
 import logging
+import random
 import shutil
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import scipy
-import torch.optim
-from torch.distributions import Categorical
-from torch.nn.functional import cross_entropy, one_hot, softmax
-from torch.utils.data import DataLoader
 
 from immuneML import Constants
 from immuneML.data_model.SequenceParams import RegionType
@@ -82,6 +79,8 @@ class SimpleVAE(GenerativeModel):
 
     - validation_split (float): what percentage of the data to use for validation (default is 0.1)
 
+    - seed (int): random seed for the model or None
+
 
     **YAML specification:**
 
@@ -127,13 +126,13 @@ class SimpleVAE(GenerativeModel):
     def __init__(self, locus, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim, pretrains,
                  v_gene_embed_dim, cdr3_embed_dim, warmup_epochs, patience, iter_count_prob_estimation, device,
                  learning_rate: float, validation_split=0.1, vocab=None, max_cdr3_len=None, unique_v_genes=None,
-                 unique_j_genes=None, name: str = None, region_type: str = RegionType.IMGT_JUNCTION.name):
-        super().__init__(locus)
+                 unique_j_genes=None, name: str = None, region_type: str = RegionType.IMGT_JUNCTION.name,
+                 seed: int = None):
+        super().__init__(locus, seed=seed, name=name, region_type=RegionType.get_object(region_type))
         self.sequence_type = SequenceType.AMINO_ACID
         self.iter_count_prob_estimation = iter_count_prob_estimation
         self.num_epochs = num_epochs
         self.pretrains = pretrains
-        self.region_type = RegionType.get_object(region_type)
         self.vocab = vocab if vocab is not None else (
             sorted((EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + [Constants.GAP_LETTER])))
         self.vocab_size = len(self.vocab)
@@ -148,7 +147,6 @@ class SimpleVAE(GenerativeModel):
         self.batch_size = batch_size
         self.device = device
         self.max_cdr3_len, self.unique_v_genes, self.unique_j_genes = max_cdr3_len, unique_v_genes, unique_j_genes
-        self.name = name
         self.model = None
 
         # hard-coded in the original implementation
@@ -159,6 +157,7 @@ class SimpleVAE(GenerativeModel):
         self.loss_path = None
 
     def make_new_model(self, initial_values_path: Path = None):
+        import torch
 
         assert self.unique_v_genes is not None and self.unique_j_genes is not None, \
             f'{SimpleVAE.__name__}: cannot generate empty model since unique V and J genes are not set.'
@@ -182,12 +181,17 @@ class SimpleVAE(GenerativeModel):
         return vae
 
     def fit(self, data, path: Path = None):
+        import torch
         seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
         self._extract_data_characteristics(data, seq_col)
 
+        if self.seed is not None:
+            random.seed(self.seed)
+            torch.manual_seed(self.seed)
+
         train_data, validation_data = DataSplitter.run(DataSplitterParams(
             dataset=data,
-            training_percentage=1-self.validation_split,
+            training_percentage=1 - self.validation_split,
             split_strategy=SplitType.RANDOM,
             split_count=1,
             paths=[path / 'split_data']
@@ -245,6 +249,7 @@ class SimpleVAE(GenerativeModel):
             self.max_cdr3_len = max(len(el) for el in data[seq_col])
 
     def _pretrain(self, train_data_loader, validation_data_loader, path: Path):
+        import torch
         pretrained_weights_path = PathBuilder.build(path) / 'pretrained_warmup_weights.yaml'
         best_val_loss = np.inf
 
@@ -265,6 +270,8 @@ class SimpleVAE(GenerativeModel):
         return pretrained_weights_path
 
     def _train_for_epoch(self, data_loader, model, beta, optimizer):
+        from torch.nn.functional import cross_entropy
+
         loss = None
         for batch in data_loader:
             cdr3_input, v_gene_input, j_gene_input = batch
@@ -279,6 +286,9 @@ class SimpleVAE(GenerativeModel):
         return loss
 
     def _validate_for_epoch(self, validation_data_loader, model):
+        import torch.optim
+        from torch.nn.functional import cross_entropy
+
         model.eval()
         losses = []
 
@@ -295,6 +305,10 @@ class SimpleVAE(GenerativeModel):
         return average_loss
 
     def encode_dataset(self, dataset, seq_col, batch_size=None, shuffle=True):
+        import torch.optim
+        from torch.nn.functional import one_hot
+        from torch.utils.data import DataLoader
+
         if seq_col is None:
             seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
         data = dataset.data.topandas()[[seq_col, 'v_call', 'j_call']]
@@ -312,6 +326,7 @@ class SimpleVAE(GenerativeModel):
              StringHelper.pad_sequence_in_the_middle(seq, self.max_cdr3_len, Constants.GAP_LETTER)]
             for seq in data[seq_col]], device=self.device), num_classes=self.vocab_size)
 
+        PyTorchSequenceDataset = get_pytorch_seq_dataset_class()
         pytorch_dataset = PyTorchSequenceDataset({'v_gene': encoded_v_genes, 'j_gene': encoded_j_genes,
                                                   'cdr3': padded_encoded_cdr3s})
 
@@ -328,6 +343,10 @@ class SimpleVAE(GenerativeModel):
         return new_beta
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
+        import torch
+        from torch.nn.functional import softmax
+        from torch.distributions import Categorical
+
         torch.manual_seed(seed)
         self.model.eval()
 
@@ -341,7 +360,8 @@ class SimpleVAE(GenerativeModel):
             j_genes = softmax(j_genes, dim=1)
 
         df = pd.DataFrame({get_sequence_field_name(self.region_type, self.sequence_type):
-                               [''.join([self.vocab[Categorical(letter).sample()] for letter in sequences[i]]).replace(Constants.GAP_LETTER, '') for i in range(count)],
+                               [''.join([self.vocab[Categorical(letter).sample()] for letter in sequences[i]]).replace(
+                                   Constants.GAP_LETTER, '') for i in range(count)],
                            'locus': [self.locus.to_string() for _ in range(count)],
                            'v_call': [self.unique_v_genes[Categorical(v_genes[i]).sample()] for i in range(count)],
                            'j_call': [self.unique_j_genes[Categorical(j_genes[i]).sample()] for i in range(count)],
@@ -354,6 +374,9 @@ class SimpleVAE(GenerativeModel):
         pass
 
     def compute_p_gen(self, sequence: dict, sequence_type: SequenceType) -> float:
+        import torch
+        from torch.nn.functional import one_hot
+
         with torch.no_grad():
             encoded_v_genes = one_hot(
                 torch.as_tensor([self.unique_v_genes.index(sequence['v_call'].split("*")[0])]),
@@ -404,25 +427,31 @@ class SimpleVAE(GenerativeModel):
                             'sequence_type', 'vocab_size']
         write_yaml(filename=model_path / 'model_overview.yaml',
                    yaml_dict={**{k: v for k, v in vars(self).items() if k not in skip_export_keys},
-                              **{'type': self.__class__.__name__, 'locus': self.locus.name}}) # todo add 'dataset_type': 'SequenceDataset',
+                              **{'type': self.__class__.__name__,
+                                 'locus': self.locus.name}})  # todo add 'dataset_type': 'SequenceDataset',
 
         store_weights(self.model, model_path / 'state_dict.yaml')
 
         return Path(shutil.make_archive(str(path / 'trained_model'), 'zip', str(model_path))).absolute()
 
 
-class PyTorchSequenceDataset(torch.utils.data.Dataset):
-    def __init__(self, data):
-        self.data = data
+def get_pytorch_seq_dataset_class():
+    from torch.utils.data import Dataset as PyTorchDataset
 
-    def __len__(self):
-        return len(self.data['cdr3'])
+    class PyTorchSequenceDataset(PyTorchDataset):
+        def __init__(self, data):
+            self.data = data
 
-    def __getitem__(self, index):
-        return self.data['cdr3'][index], self.data['v_gene'][index], self.data['j_gene'][index]
+        def __len__(self):
+            return len(self.data['cdr3'])
 
-    def get_v_genes(self):
-        return self.data['v_gene']
+        def __getitem__(self, index):
+            return self.data['cdr3'][index], self.data['v_gene'][index], self.data['j_gene'][index]
 
-    def get_j_genes(self):
-        return self.data['j_gene']
+        def get_v_genes(self):
+            return self.data['v_gene']
+
+        def get_j_genes(self):
+            return self.data['j_gene']
+
+    return PyTorchSequenceDataset

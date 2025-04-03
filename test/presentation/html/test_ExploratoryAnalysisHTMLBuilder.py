@@ -30,7 +30,7 @@ class TestExploratoryAnalysisHTMLBuilder(TestCase):
 
     def test_build(self):
         path = EnvironmentSettings.tmp_test_path / "ea_html_builder"
-        PathBuilder.build(path)
+        PathBuilder.remove_old_and_build(path)
 
         dataset = self.create_dataset(path)
 
@@ -62,11 +62,11 @@ class TestExploratoryAnalysisHTMLBuilder(TestCase):
             label_config=label_config,
         ))
 
-        units = {"named_analysis_1": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), number_of_processes=16),
-                 "named_analysis_2": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(),
+        units = {"named_analysis_1": ExploratoryAnalysisUnit(dataset=dataset, reports=[SequenceLengthDistribution()], number_of_processes=16),
+                 "named_analysis_2": ExploratoryAnalysisUnit(dataset=dataset, reports=[SequenceLengthDistribution()],
                                                              preprocessing_sequence=preproc_sequence,
                                                              label_config=LabelConfiguration(labels=[Label(name="test_label", values=["val1", "val2"], positive_class="val1")])),
-                 "named_analysis_3": ExploratoryAnalysisUnit(dataset=encoded, report=Matches(dataset=encoded, name="test_report_name"),
+                 "named_analysis_3": ExploratoryAnalysisUnit(dataset=encoded, reports=[Matches(dataset=encoded, name="test_report_name")],
                                                              preprocessing_sequence=preproc_sequence, encoder=encoder,
                                                              label_config=LabelConfiguration())
                  }

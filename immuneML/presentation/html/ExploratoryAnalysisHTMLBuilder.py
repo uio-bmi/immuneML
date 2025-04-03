@@ -68,17 +68,18 @@ class ExploratoryAnalysisHTMLBuilder:
                         "encoding_params": [{"param_name": key, "param_value": str(value)} for key, value in
                                             vars(analysis.encoder).items()] if analysis.encoder is not None else None,
                         "show_encoding": analysis.encoder is not None,
-                        "report": Util.to_dict_recursive(Util.update_report_paths(analysis.report_result, base_path),
-                                                         base_path) if analysis.report_result is not None else None
+                        "reports": [Util.to_dict_recursive(Util.update_report_paths(report_result, base_path),
+                                                         base_path) for report_result in analysis.report_results] if analysis.report_results is not None else None
                     }
                 } for name, analysis in state.exploratory_analysis_units.items()]
         }
 
         for analysis in html_map["analyses"]:
-            if analysis["report"] is not None:
-                analysis["show_tables"] = len(analysis["report"]["output_tables"]) > 0 if "output_tables" in analysis["report"] else False
-                analysis["show_text"] = len(analysis["report"]["output_text"]) > 0 if "output_text" in analysis["report"] else False
-                analysis["show_info"] = analysis["report"]["info"] is not None and len(analysis["report"]["info"]) > 0 if "info" in analysis["report"] else False
+            if analysis["reports"] is not None:
+                for report in analysis["reports"]:
+                    report["show_tables"] = len(report["output_tables"]) > 0 if "output_tables" in report else False
+                    report["show_text"] = len(report["output_text"]) > 0 if "output_text" in report else False
+                    report["show_info"] = report["info"] is not None and len(report["info"]) > 0 if "info" in report else False
             else:
                 analysis["show_tables"] = False
                 analysis["show_text"] = False
