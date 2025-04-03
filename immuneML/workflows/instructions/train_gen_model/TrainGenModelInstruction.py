@@ -65,6 +65,10 @@ class TrainGenModelInstruction(GenModelInstruction):
       and generating gen_examples_count examples; these can be data reports (to be run on generated examples), ML
       reports (to be run on the fitted model)
 
+    - training_percentage (float): percentage of the dataset to use for training the generative model. If set to 1, the
+      full dataset will be used for training and the test dataset will be the same as the training dataset. Default
+      value is 0.7
+
     **YAML specification:**
 
     .. indent with spaces

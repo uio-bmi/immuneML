@@ -3,4 +3,4 @@ number_of_processes: 4
 reports: []
 export_generated_dataset: true
 export_combined_dataset: false
-training_percentage: 1.
+training_percentage: 0.7
