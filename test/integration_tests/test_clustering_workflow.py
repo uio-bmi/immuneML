@@ -22,6 +22,10 @@ def test_clustering_workflow():
                                 'ep1': 0.33,
                                 'ep2': 0.33,
                                 'ep3': 0.34
+                            },
+                            'source': {
+                                'v1': 0.5,
+                                'v2': 0.5
                             }
                         }
                     }
@@ -71,7 +75,8 @@ def test_clustering_workflow():
                             "KernelPCA": {"n_components": 2, 'kernel': 'rbf'}
                         }
                     }
-                }
+                },
+                "external_label_metric_heatmap": "ExternalLabelMetricHeatmap"
             }
         },
         'instructions': {
@@ -80,7 +85,7 @@ def test_clustering_workflow():
                 'dataset': 'd1',
                 'metrics': ['adjusted_rand_score', 'adjusted_mutual_info_score', 'silhouette_score',
                             'calinski_harabasz_score'],
-                'labels': ['epitope'],
+                'labels': ['epitope', 'source'],
                 'clustering_settings': [
                     {'encoding': 'kmer', 'method': 'kmeans2'},
                     {'encoding': 'esmc', 'dim_reduction': 'pca', 'method': 'kmeans2'},
@@ -91,7 +96,8 @@ def test_clustering_workflow():
                     'training_percentage': 0.5,
                     "split_count": 2
                 },
-                'reports': ['rep1', 'stability', 'external_labels_summary', 'cluster_vis'],
+                'reports': ['rep1', 'stability', 'external_labels_summary', 'cluster_vis',
+                            'external_label_metric_heatmap'],
                 'number_of_processes': 4,
                 'validation_type': ['result_based', 'method_based']
             }
