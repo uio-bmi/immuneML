@@ -1,3 +1,4 @@
+import copy
 import logging
 import os
 import subprocess
@@ -215,9 +216,21 @@ class CompAIRRClusteringReport(DataReport):
         subject_ids = metadata['subject_id'].tolist() if 'subject_id' in metadata.columns \
             else [str(el) for el in range(matrix.shape[0])]
 
-        fig = px.imshow(matrix.values, text_auto=True, labels=dict(x="repertoire", y="repertoire", color="Similarity"),
-                        x=subject_ids, y=subject_ids, title=f"{name} matrix", color_continuous_scale='Darkmint')
-        fig.update_layout(template="plotly_white")
+        mask = np.zeros_like(matrix, dtype=bool)
+        mask[np.triu_indices_from(mask)] = True
+
+        matrix_values = copy.deepcopy(matrix.values)
+        matrix_values[mask] = np.nan
+        matrix_text = matrix_values.round(3).astype(str)
+        matrix_text = np.where(np.isnan(matrix_values), '', matrix_text)
+
+        fig = go.Figure(data=go.Heatmap(z=matrix_values, x=subject_ids[:-1] + [""], y=[""] + subject_ids[1:],
+                                        colorscale='Darkmint',
+                                        hoverongaps=False, text=matrix_text, texttemplate="%{text}"))
+        fig.update_layout(template="plotly_white", title=f"{name} matrix", xaxis_title="repertoire",
+                          yaxis_title='repertoire')
+        fig.update_xaxes(showgrid=False)
+        fig.update_yaxes(showgrid=False, autorange='reversed')
         fig.write_html(self.result_path / f"{name}_heatmap.html")
 
         return ReportOutput(path=self.result_path / f"{name}_heatmap.html", name=f"{name} heatmap")
