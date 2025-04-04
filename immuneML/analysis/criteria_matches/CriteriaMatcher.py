@@ -11,54 +11,10 @@ class CriteriaMatcher:
     """
     Takes a data frame (for example, repertoire or feature annotations) and criteria and allowed values
     as input and returns a list of boolean values indicating a match or not for each row
+
     """
 
     def match(self, criteria, data):
-        """
-        filter_params = {
-            "type": BooleanType.OR,
-            "operands": [
-                {
-                    "type": BooleanType.AND,
-                    "operands": [
-                        {
-                            "type": OperationType.IN,
-                            "allowed_values": ["GAD", "PPI"],
-                            "name": "matching_specificity"
-                        },
-                        {
-                            "type": OperationType.LESS_THAN,
-                            "threshold": 0.001,
-                            "column": : "p_val"
-                        },
-                    ]
-                },
-                {
-                    "type": BooleanType.AND,
-                    "operands": [
-                        {
-                            "type": OperationType.IN,
-                            "allowed_values": ["yes"],
-                            "column": "a"
-                        },
-                        {
-                            "type": OperationType.GREATER_THAN,
-                            "threshold": 0.5,
-                            "column": "odds_ratio"
-                        },
-                    ]
-                },
-            ]
-        }
-            The order of matching is done from the innermost list to the outermost list. Each column has criteria specified
-            with a dictionary with keys "column", "type", and "value". "column" must be present within the data being
-            matched to. Allowed "type"s are "in", "less_than", and "greater_than". Between each column criteria, an operator
-            must be specified to specify how the criteria are to be combined. To force an order of operations, it can be
-            nested within a list. Innermost lists are done first, and recursively simplified until it reaches the outermost
-            list to match criteria.
-        :param data:
-        :return:
-        """
         return CriteriaMatcher.parse_criteria(criteria, data)
 
     @staticmethod

@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import List
 
 import pandas as pd
-import sklearn
 
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
@@ -46,7 +45,9 @@ class ClusteringInstruction(Instruction):
 
     - metrics (list): a list of metrics to use for comparison of clustering algorithms and encodings (it can include
       metrics for either internal evaluation if no labels are provided or metrics for external evaluation so that the
-      clusters can be compared against a list of predefined labels)
+      clusters can be compared against a list of predefined labels); some of the supported metrics include adjusted_rand_score,
+      completeness_score, homogeneity_score, silhouette_score; for the full list, see scikit-learn's documentation of
+      clustering metrics at https://scikit-learn.org/stable/api/sklearn.metrics.html#module-sklearn.metrics.cluster.
 
     - labels (list): an optional list of labels to use for external evaluation of clustering
 

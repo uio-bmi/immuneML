@@ -14,22 +14,29 @@ class RandomSequenceDatasetImport(DataImport):
 
     - sequence_count (int): The number of sequences the SequenceDataset should contain.
 
-    - length_probabilities (dict): A mapping where the keys correspond to different sequence lengths and the values are the probabilities for choosing each sequence length. For example, to create a random SequenceDataset where 40% of the sequences would be of length 10, and 60% of the sequences would have length 12, this mapping would need to be specified:
+    - length_probabilities (dict): A mapping where the keys correspond to different sequence lengths and the values
+      are the probabilities for choosing each sequence length. For example, to create a random SequenceDataset where
+      40% of the sequences would be of length 10, and 60% of the sequences would have length 12, this mapping would
+      need to be specified:
 
-        .. indent with spaces
-        .. code-block:: yaml
+    .. indent with spaces
+    .. code-block:: yaml
 
-                10: 0.4
-                12: 0.6
+            10: 0.4
+            12: 0.6
 
-    - labels (dict): A mapping that specifies randomly chosen labels to be assigned to the sequences. One or multiple labels can be specified here. The keys of this mapping are the labels, and the values consist of another mapping between label classes and their probabilities. For example, to create a random SequenceDataset with the label cmv_epitope where 70% of the sequences has class binding and the remaining 30% has class not_binding, the following mapping should be specified:
+    - labels (dict): A mapping that specifies randomly chosen labels to be assigned to the sequences. One or multiple
+      labels can be specified here. The keys of this mapping are the labels, and the values consist of another mapping
+      between label classes and their probabilities. For example, to create a random SequenceDataset with the label
+      cmv_epitope where 70% of the sequences has class binding and the remaining 30% has class not_binding, the
+      following mapping should be specified:
 
-        .. indent with spaces
-        .. code-block:: yaml
+    .. indent with spaces
+    .. code-block:: yaml
 
-                cmv_epitope:
-                    binding: 0.7
-                    not_binding: 0.3
+            cmv_epitope:
+                binding: 0.7
+                not_binding: 0.3
 
     - region_type (str): which region_type to assign to all randomly generated sequences
 
@@ -55,6 +62,7 @@ class RandomSequenceDatasetImport(DataImport):
                             epitope2: # next label with classes that will be assigned to sequences independently of the previous label or other parameters
                                 1: 0.3 # 30% of the generated sequences will have class 1
                                 0: 0.7 # 70% of the generated sequences will have class 0
+
     """
 
     def __init__(self, params: dict, dataset_name: str):
