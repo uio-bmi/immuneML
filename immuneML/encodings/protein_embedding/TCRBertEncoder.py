@@ -44,6 +44,10 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
     - batch_size (int): The number of sequences to encode at the same time. This could have large impact on memory usage.
       If memory is an issue, try with smaller batch sizes. Defaults to 4096.
 
+    - scale_to_zero_mean (bool): Whether to scale the embeddings to zero mean. Defaults to True.
+
+    - scale_to_unit_variance (bool): Whether to scale the embeddings to unit variance. Defaults to True.
+
     **YAML specification:**
 
     .. indent with spaces
@@ -55,8 +59,10 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
 
     """
     def __init__(self, name: str = None, region_type: RegionType = RegionType.IMGT_CDR3, model: str = None,
-                 layers: list = None, method: str = None, batch_size: int = None, device: str = 'cpu'):
-        super().__init__(region_type, name, num_processes=1, device=device, batch_size=batch_size)
+                 layers: list = None, method: str = None, batch_size: int = None, device: str = 'cpu',
+                 scale_to_zero_mean: bool = True, scale_to_unit_variance: bool = True):
+        super().__init__(region_type, name, num_processes=1, device=device, batch_size=batch_size,
+                         scale_to_zero_mean=scale_to_zero_mean, scale_to_unit_variance=scale_to_unit_variance)
         self.model = model
         self.layers = layers
         self.method = method
@@ -81,13 +87,9 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
         return {"name": name, "model": model, "layers": layers, "method": method, "batch_size": batch_size,
                 'device': device}
 
-    def _get_caching_params(self, dataset, params: EncoderParams):
-        return (("dataset_identifier", dataset.identifier),
-                ("labels", tuple(params.label_config.get_labels_by_name())),
-                ("encoding", TCRBertEncoder.__name__),
-                ("learn_model", params.learn_model),
-                ("step", ""),
-                ("encoding_params", tuple(vars(self).items())))
+    def _get_caching_params(self, dataset, params: EncoderParams, step: str = None):
+        return (dataset.identifier, tuple(params.label_config.get_labels_by_name()), self.scale_to_zero_mean,
+                self.scale_to_unit_variance, step, self.region_type.name, tuple(self.layers), self._get_encoding_name())
 
     def _get_model_and_tokenizer(self, log_location):
         from transformers import BertModel, BertTokenizer

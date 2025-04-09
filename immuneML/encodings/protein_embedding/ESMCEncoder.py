@@ -42,6 +42,10 @@ class ESMCEncoder(ProteinEmbeddingEncoder):
     - batch_size (int): The number of sequences to encode at the same time. This could have large impact on memory usage.
       If memory is an issue, try with smaller batch sizes. Defaults to 4096.
 
+    - scale_to_zero_mean (bool): Whether to scale the embeddings to zero mean. Defaults to True.
+
+    - scale_to_unit_variance (bool): Whether to scale the embeddings to unit variance. Defaults to True.
+
     **YAML specification:**
 
     .. indent with spaces
@@ -59,8 +63,10 @@ class ESMCEncoder(ProteinEmbeddingEncoder):
     """
 
     def __init__(self, name: str = None, region_type: RegionType = RegionType.IMGT_CDR3, device: str = 'cpu',
-                 num_processes: int = 1, batch_size: int = 4096):
-        super().__init__(region_type, name, num_processes, device, batch_size)
+                 num_processes: int = 1, batch_size: int = 4096, scale_to_zero_mean: bool = True,
+                 scale_to_unit_variance: bool = True):
+        super().__init__(region_type, name, num_processes, device, batch_size, scale_to_zero_mean=scale_to_zero_mean,
+                         scale_to_unit_variance=scale_to_unit_variance)
         self.transformer_link = 'esmc_300m'
         self.embedding_dim = 960
 
@@ -131,6 +137,6 @@ class ESMCEncoder(ProteinEmbeddingEncoder):
     def _get_model_link(self) -> str:
         return self.transformer_link
 
-    def _get_caching_params(self, dataset, params: EncoderParams):
-        cache_params = (dataset.identifier, self.__class__.__name__, self.region_type.name, self._get_model_link())
-        return cache_params
+    def _get_caching_params(self, dataset, params: EncoderParams, step: str = None):
+        return (dataset.identifier, tuple(params.label_config.get_labels_by_name()), self.scale_to_zero_mean,
+                self.scale_to_unit_variance, step, self.region_type.name, self._get_encoding_name())

@@ -26,7 +26,8 @@ class TestProtT5Encoder:
 
     def create_encoder(self, device='cpu'):
         return ProtT5Encoder(
-            device=device, batch_size=10
+            device=device, batch_size=10,
+            scale_to_unit_variance=True, scale_to_zero_mean=True
         )
 
     def create_label_config(self):

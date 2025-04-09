@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
+from typing import Union
 
 import numpy as np
+from sklearn.preprocessing import StandardScaler
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
@@ -12,6 +14,7 @@ from immuneML.data_model.datasets.ElementDataset import SequenceDataset, Recepto
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.PathBuilder import PathBuilder
@@ -24,12 +27,14 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
     """
 
     def __init__(self, region_type: RegionType, name: str = None, num_processes: int = 1, device: str = 'cpu',
-                 batch_size: int = 4096):
+                 batch_size: int = 4096, scale_to_zero_mean: bool = True, scale_to_unit_variance: bool = True):
         super().__init__(name)
         self.region_type = region_type
         self.num_processes = num_processes
         self.device = device
         self.batch_size = batch_size
+        self.scale_to_zero_mean = scale_to_zero_mean
+        self.scale_to_unit_variance = scale_to_unit_variance
         self.mem_map_path = None
 
     @staticmethod
@@ -52,9 +57,10 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
     def _encode_sequence_dataset(self, dataset: SequenceDataset, params: EncoderParams):
         seq_field = get_sequence_field_name(self.region_type, SequenceType.AMINO_ACID)
         embeddings = self._embed_sequence_set(dataset.data, seq_field)
+        embeddings = self._scale_examples(dataset, embeddings, params)
 
         encoded_dataset = dataset.clone()
-        encoded_dataset.encoded_data = EncodedData(examples=np.array(embeddings),
+        encoded_dataset.encoded_data = EncodedData(examples=embeddings,
                                                    labels={label.name: getattr(dataset.data, label.name).tolist()
                                                            for label in params.label_config.get_label_objects()},
                                                    example_ids=dataset.data.sequence_id.tolist(),
@@ -94,6 +100,8 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
             for cell_id in receptor_ids
         ])
 
+        concatenated_embeddings = self._scale_examples(dataset, concatenated_embeddings, params)
+
         labels = (data.topandas().groupby('cell_id').first()[params.label_config.get_labels_by_name()]
                   .to_dict(orient='list'))
 
@@ -117,13 +125,29 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
                                                             embedding=self._embed_sequence_set(repertoire.data,
                                                                                                seq_field))))
 
+        examples = self._scale_examples(dataset, np.array(examples), params)
+
         encoded_dataset = dataset.clone()
         labels = dataset.get_metadata(params.label_config.get_labels_by_name())
-        encoded_dataset.encoded_data = EncodedData(examples=np.array(examples), labels=labels,
+        encoded_dataset.encoded_data = EncodedData(examples=examples, labels=labels,
                                                    example_ids=dataset.get_example_ids(),
                                                    encoding=self._get_encoding_name())
 
         return encoded_dataset
+
+    def _scale_examples(self, dataset: Dataset, examples: np.ndarray, params: EncoderParams) -> np.ndarray:
+        if params.learn_model:
+
+            self.scaler = StandardScaler(with_mean=self.scale_to_zero_mean, with_std=self.scale_to_unit_variance)
+            examples = CacheHandler.memo_by_params(
+                self._get_caching_params(dataset, params, step='scaled'),
+                lambda: FeatureScaler.standard_scale_fit(self.scaler, examples, with_mean=self.scale_to_zero_mean))
+        else:
+            examples = CacheHandler.memo_by_params(
+                self._get_caching_params(dataset, params, step='scaled'),
+                lambda: FeatureScaler.standard_scale(self.scaler, examples, with_mean=self.scale_to_zero_mean))
+
+        return examples
 
     def _avg_sequence_set_embedding(self, embedding: np.ndarray) -> np.ndarray:
         return embedding.mean(axis=0)
@@ -145,5 +169,5 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
         pass
 
     @abstractmethod
-    def _get_caching_params(self, dataset, params: EncoderParams):
+    def _get_caching_params(self, dataset, params: EncoderParams, step: str = None) -> tuple:
         pass
