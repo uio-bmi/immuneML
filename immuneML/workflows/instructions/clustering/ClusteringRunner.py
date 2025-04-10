@@ -1,6 +1,7 @@
+import copy
 import logging
 from pathlib import Path
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Union
 
 import numpy as np
 import pandas as pd
@@ -53,11 +54,13 @@ class ClusteringRunner:
 
         cl_setting.path = PathBuilder.build(path / f"{cl_setting.get_key()}")
 
+        learn_model = analysis_desc == 'discovery' or analysis_desc == 'method_based_validation'
+
         # Encode data
-        encoder = cl_setting.encoder if analysis_desc == 'discovery' \
+        encoder = copy.deepcopy(cl_setting.encoder) if learn_model \
             else state.clustering_items[run_id].discovery.get_cl_item(cl_setting).encoder
         enc_dataset = encode_dataset(dataset, cl_setting, self.number_of_processes, self.config.label_config,
-                                     analysis_desc == 'discovery', self.config.sequence_type, self.config.region_type,
+                                     learn_model, self.config.sequence_type, self.config.region_type,
                                      encoder)
 
         # Run clustering
@@ -93,11 +96,7 @@ class ClusteringRunner:
             cl_setting.clustering_method.fit(dataset)
             return cl_setting.clustering_method.predict(dataset)
 
-    def evaluate_clustering(self, predictions: pd.DataFrame, cl_setting: ClusteringSetting, features) \
-            -> Dict[str, Path]:
-
-        result = {'internal': None, 'external': None}
-
+    def _eval_internal_metrics(self, predictions: pd.DataFrame, cl_setting: ClusteringSetting, features) -> Path:
         internal_performances = {}
         dense_features = features.toarray() if issparse(features) else features
 
@@ -111,8 +110,9 @@ class ClusteringRunner:
                 internal_performances[metric] = [np.nan]
 
         pd.DataFrame(internal_performances).to_csv(str(cl_setting.path / 'internal_performances.csv'), index=False)
-        result['internal'] = cl_setting.path / 'internal_performances.csv'
+        return cl_setting.path / 'internal_performances.csv'
 
+    def _eval_external_metrics(self, predictions: pd.DataFrame, cl_setting: ClusteringSetting) -> Union[Path, None]:
         if self.config.label_config is not None and self.config.label_config.get_label_count() > 0:
 
             external_performances = {label: {} for label in self.config.label_config.get_labels_by_name()}
@@ -129,18 +129,18 @@ class ClusteringRunner:
                         logging.info(f"Error calculating metric {metric}: {e}")
                         external_performances[label][metric] = np.nan
 
-                metric_fn = getattr(sklearn.metrics, metric)
-                for label in self.config.label_config.get_labels_by_name():
-                    external_performances[label][metric] = metric_fn(predictions[label].values,
-                                                                     predictions[
-                                                                         f'predictions_{cl_setting.get_key()}'].values)
-
             (pd.DataFrame(external_performances).reset_index().rename(columns={'index': 'metric'})
              .to_csv(str(cl_setting.path / 'external_performances.csv'), index=False))
 
-            result['external'] = cl_setting.path / 'external_performances.csv'
+            return cl_setting.path / 'external_performances.csv'
+        else:
+            return None
 
-        return result
+    def evaluate_clustering(self, predictions: pd.DataFrame, cl_setting: ClusteringSetting, features) \
+            -> Dict[str, Path]:
+
+        return {'internal': self._eval_internal_metrics(predictions, cl_setting, features),
+                'external': self._eval_external_metrics(predictions, cl_setting)}
 
 
 def get_features(dataset: Dataset, cl_setting: ClusteringSetting):
@@ -152,13 +152,13 @@ def get_features(dataset: Dataset, cl_setting: ClusteringSetting):
 def encode_dataset(dataset: Dataset, cl_setting: ClusteringSetting, number_of_processes: int,
                    label_config: LabelConfiguration, learn_model: bool, sequence_type: SequenceType,
                    region_type: RegionType, encoder: DatasetEncoder = None):
-
     def dict_to_sorted_tuple(d: dict) -> tuple:
         return tuple(sorted(d.items(), key=lambda tup: tup[0])) if d is not None else None
 
     return CacheHandler.memo_by_params(
         (dataset.identifier, dict_to_sorted_tuple(cl_setting.encoder_params), label_config.get_labels_by_name(),
-         sequence_type.name, region_type.name, cl_setting.dim_red_name, dict_to_sorted_tuple(cl_setting.dim_red_params)),
+         sequence_type.name, region_type.name, cl_setting.dim_red_name, learn_model,
+         dict_to_sorted_tuple(cl_setting.dim_red_params)),
         lambda: encode_dataset_internal(dataset, cl_setting, number_of_processes, label_config,
                                         learn_model, sequence_type, region_type, encoder))
 
