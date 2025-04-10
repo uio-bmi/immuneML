@@ -51,6 +51,7 @@ class EncodedData:
                 assert len(example_weights) == examples.shape[0]
 
         self.examples = examples
+        self._examples_filename = examples.filename if isinstance(examples, np.memmap) else None
         self.labels = labels
         self.example_ids = example_ids
         self.feature_names = feature_names
@@ -60,9 +61,26 @@ class EncodedData:
         self.info = info
         self.dimensionality_reduced_data = dimensionality_reduced_data
 
+    def __getstate__(self):
+        """Convert memmap to regular array when pickling"""
+        state = self.__dict__.copy()
+        if isinstance(self.examples, np.memmap):
+            state['examples_shape'] = self.examples.shape
+            state['examples'] = None
+        return state
+
+    def __setstate__(self, state):
+        """Restore object state from pickling"""
+        shape = state.pop('examples_shape') if 'examples_shape' in state else None
+        self.__dict__.update(state)
+        if self._examples_filename is not None:
+            self.examples = np.memmap(self._examples_filename, dtype='float32', mode='w+', shape=shape)
+
     def get_examples_as_np_matrix(self):
         if isinstance(self.examples, np.ndarray):
             return self.examples
+        elif isinstance(self.examples, np.memmap):
+            return np.array(self.examples)
         elif isinstance(self.examples, pd.DataFrame):
             return self.examples.to_numpy()
         try:

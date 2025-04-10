@@ -130,7 +130,9 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
         
         # Calculate embedding dimension based on number of layers
         total_dim = len(self.layers) * self.embedding_dim if self.method != "pool" else self.embedding_dim
-        embeddings = np.memmap(self.mem_map_path, dtype='float32', mode='w+', shape=(n_sequences, total_dim))
+        
+        # Create memory-mapped array for embeddings
+        embeddings = self._create_memmap_array((n_sequences, total_dim))
         
         chunks = [seqs[i: i + self.batch_size] for i in range(0, n_sequences, self.batch_size)]
         chunks_pair = [None] * len(chunks)  # Create matching None pairs for zip_longest

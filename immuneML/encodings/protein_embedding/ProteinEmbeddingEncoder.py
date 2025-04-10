@@ -35,7 +35,6 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
         self.batch_size = batch_size
         self.scale_to_zero_mean = scale_to_zero_mean
         self.scale_to_unit_variance = scale_to_unit_variance
-        self.mem_map_path = None
 
     @staticmethod
     @abstractmethod
@@ -44,7 +43,6 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
 
     def encode(self, dataset: Dataset, params: EncoderParams) -> Dataset:
         cache_params = self._get_caching_params(dataset, params)
-        self._set_mem_map_path(cache_params)
         if isinstance(dataset, SequenceDataset):
             return CacheHandler.memo_by_params(cache_params, lambda: self._encode_sequence_dataset(dataset, params))
         elif isinstance(dataset, ReceptorDataset):
@@ -137,7 +135,6 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
 
     def _scale_examples(self, dataset: Dataset, examples: np.ndarray, params: EncoderParams) -> np.ndarray:
         if params.learn_model:
-
             self.scaler = StandardScaler(with_mean=self.scale_to_zero_mean, with_std=self.scale_to_unit_variance)
             examples = CacheHandler.memo_by_params(
                 self._get_caching_params(dataset, params, step='scaled'),
@@ -147,14 +144,21 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
                 self._get_caching_params(dataset, params, step='scaled'),
                 lambda: FeatureScaler.standard_scale(self.scaler, examples, with_mean=self.scale_to_zero_mean))
 
-        return examples
+        return self._create_memmap_array(examples.shape, examples)
+
+    def _create_memmap_array(self, shape: tuple, data: np.ndarray = None) -> np.ndarray:
+        """Creates a memory-mapped array and optionally initializes it with data."""
+        import uuid
+        dir_path = PathBuilder.build(EnvironmentSettings.get_cache_path() / "memmap_storage")
+        memmap_path = dir_path / f"temp_{uuid.uuid4()}.mmap"
+        
+        memmap_array = np.memmap(memmap_path, dtype='float32', mode='w+', shape=shape)
+        if data is not None:
+            memmap_array[:] = data[:]
+        return memmap_array
 
     def _avg_sequence_set_embedding(self, embedding: np.ndarray) -> np.ndarray:
         return embedding.mean(axis=0)
-
-    def _set_mem_map_path(self, cache_params):
-        dir_path = PathBuilder.build(EnvironmentSettings.get_cache_path() / "memmap_storage")
-        self.mem_map_path = dir_path / f"{CacheHandler.hash(cache_params)}.mmap"
 
     @abstractmethod
     def _embed_sequence_set(self, sequence_set: AIRRSequenceSet, seq_field: str) -> np.ndarray:

@@ -99,7 +99,8 @@ class ESMCEncoder(ProteinEmbeddingEncoder):
         sequences = sequences.tolist()
         n_sequences = len(sequences)
 
-        embeddings = np.memmap(self.mem_map_path, dtype='float32', mode='w+', shape=(n_sequences, self.embedding_dim))
+        # Create memory-mapped array for embeddings
+        embeddings = self._create_memmap_array((n_sequences, self.embedding_dim))
 
         # Process in batches
         for i in range(0, n_sequences, self.batch_size):
