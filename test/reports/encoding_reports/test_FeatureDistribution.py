@@ -63,7 +63,7 @@ class TestFeatureDistribution(TestCase):
         return dataset
 
     def _create_dummy_encoded_seq_data(self, path):
-        sequences = [ReceptorSequence(sequence_aa="AAACCC", sequence="AAACCC", sequence_id="1",
+        sequences = [ReceptorSequence(sequence_aa="GGGCCC", sequence="GGGCCC", sequence_id="1",
                                       metadata={"l1": 1}),
                      ReceptorSequence(sequence_aa="ACACAC", sequence="ACACAC", sequence_id="2",
                                       metadata={"l1": 2}),
@@ -152,7 +152,7 @@ class TestFeatureDistribution(TestCase):
                                                      "mode": "sparse",
                                                      "color_grouping_label": "l1",
                                                      "plot_all_features": True,
-                                                     "plot_top_n": 10,
+                                                     "plot_top_n": 4,
                                                      "plot_bottom_n": 5})
 
         report.check_prerequisites()
