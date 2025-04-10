@@ -48,9 +48,13 @@ class FeatureValueBarplot(FeatureReport):
 
     - y_title (str): y-axis label
 
-    - plot_top_n (int): plot n of the largest features on average separately (useful when there are too many features to plot at the same time)
+    - plot_top_n (int): plot n of the largest features on average separately (useful when there are too many features
+      to plot at the same time). The n features are chosen based on the average feature values across all examples
+      without grouping by labels. The plot shows averages per label classes.
 
-    - plot_bottom_n (int): plot n of the smallest features on average separately (useful when there are too many features to plot at the same time)
+    - plot_bottom_n (int): plot n of the smallest features on average separately (useful when there are too many
+      features to plot at the same time). The n features are chosen based on the average feature values across all
+      examples without grouping by labels. The plot shows averages per label classes.
 
     - plot_all_features (bool): whether to plot all (might be slow for large number of features)
 
@@ -99,23 +103,29 @@ class FeatureValueBarplot(FeatureReport):
         return result
 
     def _plot(self, data_long_format) -> Tuple[List[ReportOutput], List[ReportOutput]]:
-        groupby_cols = [self.x, self.color, self.facet_row, self.facet_column]
-        groupby_cols = [i for i in groupby_cols if i]
-        groupby_cols = list(set(groupby_cols))
-        plotting_data = data_long_format.groupby(groupby_cols, as_index=False).agg(
-            {"value": ['mean', self.std]})
+        groupby_cols_features = [self.x]
+        data_groupedby_features = self._get_grouped_data(data_long_format, groupby_cols_features)
+        groupby_cols_labels = [self.x, self.color, self.facet_row, self.facet_column]
+        data_groupedby_labels = self._get_grouped_data(data_long_format, groupby_cols_labels)
 
-        plotting_data.columns = plotting_data.columns.map(''.join)
-        plotting_data_dict = {'all': plotting_data} if self.plot_all_features else {}
+        plotting_data_dict = {'all': data_groupedby_labels} if self.plot_all_features else {}
 
         error_y = "valuestd" if self.show_error_bar else None
         output_figures = []
         output_tables = []
 
         if self.plot_top_n:
-            plotting_data_dict[f'top_{self.plot_top_n}'] = plotting_data.iloc[np.argpartition(plotting_data['valuemean'].values, -self.plot_top_n)[-self.plot_top_n:]]
+            top_n_features = data_groupedby_features.iloc[
+                np.argpartition(data_groupedby_features['valuemean'].values, -self.plot_top_n)[-self.plot_top_n:]][self.x]
+            plotting_data_dict[f'top_{self.plot_top_n}'] = data_groupedby_labels.loc[
+                data_groupedby_labels[self.x].isin(top_n_features)]
+
         if self.plot_bottom_n:
-            plotting_data_dict[f'bottom_{self.plot_bottom_n}'] = plotting_data.iloc[np.argpartition(plotting_data['valuemean'].values, self.plot_bottom_n)[:self.plot_bottom_n]]
+            bottom_n_features = data_groupedby_features.iloc[
+                np.argpartition(data_groupedby_features['valuemean'].values, self.plot_bottom_n)[:self.plot_bottom_n]][
+                self.x]
+            plotting_data_dict[f'bottom_{self.plot_bottom_n}'] = data_groupedby_labels.loc[
+                data_groupedby_labels[self.x].isin(bottom_n_features)]
 
         for key, data in plotting_data_dict.items():
             figure = px.bar(data, x=self.x, y="valuemean", color=self.color, barmode="group",

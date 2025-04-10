@@ -53,9 +53,13 @@ class FeatureDistribution(FeatureReport):
 
     - y_title (str): y-axis label
 
-    - plot_top_n (int): plot n of the largest features on average separately (useful when there are too many features to plot at the same time)
+    - plot_top_n (int): plot n of the largest features on average separately (useful when there are too many features
+      to plot at the same time). The n features are chosen based on the average feature values across all examples
+      without grouping by labels.
 
-    - plot_bottom_n (int): plot n of the smallest features on average separately (useful when there are too many features to plot at the same time)
+    - plot_bottom_n (int): plot n of the smallest features on average separately (useful when there are too many
+      features to plot at the same time). The n features are chosen based on the average feature values across all
+      examples without grouping by labels.
 
     - plot_all_features (bool): whether to plot all (might be slow for large number of features)
 
@@ -183,21 +187,17 @@ class FeatureDistribution(FeatureReport):
 
     def _get_plotting_data_dict(self, data_long_format):
         plotting_data_all = data_long_format
-        groupby_cols = [self.x, self.color, self.facet_row, self.facet_column]
-        groupby_cols = [i for i in groupby_cols if i]
-        groupby_cols = list(set(groupby_cols))
-        grouped_data = data_long_format.groupby(groupby_cols, as_index=False).agg(
-            {"value": ['mean', self.std]})
+        groupby_cols_features = [self.x]
+        data_groupedby_features = self._get_grouped_data(data_long_format, groupby_cols_features)
 
-        grouped_data.columns = grouped_data.columns.map(''.join)
         plotting_data_dict = {'all': plotting_data_all} if self.plot_all_features else {}
 
         if self.plot_top_n:
-            top_n_features = grouped_data.iloc[np.argpartition(grouped_data['valuemean'].values, -self.plot_top_n)[-self.plot_top_n:]][self.x]
+            top_n_features = data_groupedby_features.iloc[np.argpartition(data_groupedby_features['valuemean'].values, -self.plot_top_n)[-self.plot_top_n:]][self.x]
             plotting_data_dict[f'top_{self.plot_top_n}'] = plotting_data_all.loc[plotting_data_all[self.x].isin(top_n_features)]
 
         if self.plot_bottom_n:
-            bottom_n_features = grouped_data.iloc[np.argpartition(grouped_data['valuemean'].values, self.plot_bottom_n)[:self.plot_bottom_n]][self.x]
+            bottom_n_features = data_groupedby_features.iloc[np.argpartition(data_groupedby_features['valuemean'].values, self.plot_bottom_n)[:self.plot_bottom_n]][self.x]
             plotting_data_dict[f'bottom_{self.plot_bottom_n}'] = plotting_data_all.loc[plotting_data_all[self.x].isin(bottom_n_features)]
 
         return plotting_data_dict

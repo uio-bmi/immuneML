@@ -63,7 +63,7 @@ class TestFeatureValueBarplot(TestCase):
 
         report = FeatureValueBarplot.build_object(**{"dataset": dataset, 'plot_all_features': True,
                                                      "result_path": path, 'plot_top_n': 10, 'plot_bottom_n': 5,
-                                                     "column_grouping_label": "disease",
+                                                     "column_grouping_label": None,
                                                      "row_grouping_label": "timepoint",
                                                      "color_grouping_label": "disease"})
 
