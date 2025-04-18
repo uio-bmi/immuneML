@@ -74,7 +74,8 @@ def test_generate():
 
     for compairr_path in EnvironmentSettings.compairr_paths:
         if compairr_path.exists():
-            assert_report_outputs(compairr_path)
+            assert_report_outputs_sequence_dataset(compairr_path)
+            assert_report_outputs_repertoire_dataset(compairr_path)
             compairr_runs += 1
             break
         else:
@@ -83,11 +84,11 @@ def test_generate():
     assert compairr_runs > 0
 
 
-def assert_report_outputs(compairr_path):
+def assert_report_outputs_sequence_dataset(compairr_path):
     path = EnvironmentSettings.tmp_test_path / "node_degree_distribution"
     PathBuilder.remove_old_and_build(path)
 
-    dataset = RandomDatasetGenerator.generate_sequence_dataset(100, {2: 1.},
+    dataset = RandomDatasetGenerator.generate_sequence_dataset(100, {3: 1.},
                                                                {"l1": {'True': 0.5, 'False': 0.5}}, path,
                                                                region_type="IMGT_JUNCTION")
 
@@ -110,5 +111,39 @@ def assert_report_outputs(compairr_path):
 
     assert result.output_tables[0].path.is_file()  # node degree distribution
     assert result.output_figures[0].path.is_file()  # node degree distribution histogram
+
+    shutil.rmtree(path)
+
+
+def assert_report_outputs_repertoire_dataset(compairr_path):
+    path = EnvironmentSettings.tmp_test_path / "node_degree_distribution"
+    PathBuilder.remove_old_and_build(path)
+
+    repertoire_count = 3
+    dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count, {100: 1},
+                                                                 {3: 1},
+                                                                 {"l1": {'True': 0.5, 'False': 0.5}}, path)
+
+    report = NodeDegreeDistribution(
+        dataset=dataset,
+        result_path=path / "node_degree_distribution",
+        compairr_path=compairr_path,
+        indels=False,
+        ignore_genes=False,
+        region_type=RegionType.IMGT_CDR3,
+        hamming_distance=2,
+        per_repertoire=True,
+        threads=4
+    )
+
+    result = report._generate()
+
+    assert isinstance(result, ReportResult)
+    assert len(result.output_figures) == repertoire_count + 1
+    assert len(result.output_tables) == repertoire_count + 1
+
+    for i in range(repertoire_count + 1):
+        assert result.output_tables[i].path.is_file()  # node degree distribution
+        assert result.output_figures[i].path.is_file()  # node degree distribution histogram
 
     shutil.rmtree(path)
