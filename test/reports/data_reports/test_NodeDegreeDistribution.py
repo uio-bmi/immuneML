@@ -64,7 +64,7 @@ def test_build_object_sets_enum_correctly():
         dataset=MagicMock(),
         result_path=Path("/tmp/fake"),
         compairr_path="/usr/bin/compairr",
-        region_type="imgt_cdr3"
+        region_type="IMGT_CDR3"
     )
     assert obj.region_type == RegionType.IMGT_CDR3
 
@@ -97,7 +97,7 @@ def assert_report_outputs(compairr_path):
         compairr_path=compairr_path,
         indels=False,
         ignore_genes=False,
-        region_type="IMGT_JUNCTION",
+        region_type=RegionType.IMGT_JUNCTION,
         hamming_distance=2,
         threads=4,
     )

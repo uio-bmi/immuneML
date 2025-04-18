@@ -99,7 +99,6 @@ class NodeDegreeDistribution(DataReport):
         )
 
     def _compute_node_degree_dist(self):
-        #TODO: deduplicate sequences
         compairr_existence_output = self._run_compairr()
 
         if compairr_existence_output is None:
@@ -113,8 +112,10 @@ class NodeDegreeDistribution(DataReport):
     def _run_compairr(self):
         output_file = self.result_path / f"compairr_existence.tsv"
 
-        cmd_args = [str(self.compairr_path), "--existence", str(self.dataset.filename), str(self.dataset.filename),
-                    "--output", str(output_file), "--differences", str(self.hamming_distance), "--ignore-counts"]
+        dedupliacted_dataset_filename = self._deduplicate_sequences()
+        cmd_args = [str(self.compairr_path), "--existence", str(dedupliacted_dataset_filename),
+                    str(dedupliacted_dataset_filename), "--output", str(output_file), "--differences",
+                    str(self.hamming_distance), "--ignore-counts"]
         if self.indels:
             cmd_args.append("--indels")
         if self.ignore_genes:
@@ -132,7 +133,34 @@ class NodeDegreeDistribution(DataReport):
                                                     header=0)
             os.remove(str(output_file))
 
+        os.remove(dedupliacted_dataset_filename)
+
         return compairr_existence_output
+
+    def _deduplicate_sequences(self):
+        deduplicated_dataset_filename = self.dataset.filename.with_name(
+            f"{self.dataset.filename.stem}_deduplicated{self.dataset.filename.suffix}"
+        )
+        dataset = pd.read_csv(self.dataset.filename, sep="\t", header=0)
+        subset = self._get_deduplication_subset()
+
+        deduplicated_dataset = dataset.drop_duplicates(subset=subset)
+        deduplicated_dataset.to_csv(deduplicated_dataset_filename, sep="\t", index=False)
+
+        return deduplicated_dataset_filename
+
+    def _get_deduplication_subset(self):
+        if self.region_type == RegionType.IMGT_CDR3:
+            subset = ["cdr3_aa"]
+        elif self.region_type == RegionType.IMGT_JUNCTION:
+            subset = ["junction_aa"]
+        else:
+            raise ValueError(f"Unsupported region type: {self.region_type}")
+
+        if not self.ignore_genes:
+            subset.extend(["v_call", "j_call"])
+
+        return subset
 
     def _store_node_degree_dist(self, node_degree_dist: pd.DataFrame, name: str) -> ReportOutput:
         output_path = self.result_path / f"{name}.tsv"
