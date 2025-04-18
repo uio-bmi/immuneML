@@ -45,9 +45,9 @@ def report(tmp_path, dummy_sequence_dataset):
 
 @pytest.mark.parametrize("region_type, compairr_path, dataset_type, expected", [
     (RegionType.IMGT_CDR3, "/path/to/compairr", "sequence", True),
+    (RegionType.IMGT_CDR3, "/path/to/compairr", "repertoire", True),
     (RegionType.IMGT_FR1, "/path/to/compairr", "sequence", False),
     (RegionType.IMGT_CDR3, None, "sequence", False),
-    (RegionType.IMGT_CDR3, "/path/to/compairr", "repertoire", False),
 ])
 def test_check_prerequisites_all(
         report, dummy_sequence_dataset, dummy_repertoire_dataset,
