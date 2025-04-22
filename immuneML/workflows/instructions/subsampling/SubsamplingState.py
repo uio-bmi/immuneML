@@ -11,7 +11,7 @@ class SubsamplingState:
 
     dataset: Dataset
     subsampled_dataset_sizes: List[int] = field(default_factory=list)
-    dataset_exporters: List[DataExporter] = field(default_factory=list)
+    subsampled_repertoire_size: int = None
     result_path: Path = None
     name: str = None
     subsampled_datasets: List[Dataset] = field(default_factory=list)

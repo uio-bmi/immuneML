@@ -39,7 +39,11 @@ class ParameterValidator:
     @staticmethod
     def assert_type_and_value(value, parameter_type, location: str, parameter_name: str,
                               min_inclusive=None, max_inclusive=None,
-                              min_exclusive=None, max_exclusive=None, exact_value=None):
+                              min_exclusive=None, max_exclusive=None, exact_value=None, nullable: bool = False):
+
+        if nullable and value is None:
+            return
+
         type_name = " or ".join([t.__name__ for t in parameter_type]) if type(
             parameter_type) is tuple else parameter_type.__name__
 

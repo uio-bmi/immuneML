@@ -41,7 +41,9 @@ class RepertoireDataset(Dataset):
         logging.info(f"Made new repertoire dataset at {kwargs['path']} with metadata at {metadata_path} "
                      f"with {len(kwargs['repertoires'])} repertoires.")
 
-        dataset = RepertoireDataset(repertoires=kwargs['repertoires'], metadata_file=metadata_path)
+        name = kwargs.get('name', None)
+
+        dataset = RepertoireDataset(repertoires=kwargs['repertoires'], metadata_file=metadata_path, name=name)
         label_names = list(dataset.get_label_names(refresh=True))
         dataset.labels = {label: list(set(values)) for label, values in dataset.get_metadata(label_names).items()}
 
@@ -50,9 +52,6 @@ class RepertoireDataset(Dataset):
                                                         identifier=dataset.identifier,
                                                         name=dataset.name,
                                                         metadata_file=str(metadata_path.name))
-                                                        #type_dict={k: v for tmp_dict in [rep.metadata['type_dict_dynamic_fields']
-                                                                    # for rep in kwargs['repertoires']]
-                                                                    # for k, v in tmp_dict.items()},
 
         write_dataset_yaml(dataset_file, dataset_meta_content)
         dataset.dataset_file = dataset_file
