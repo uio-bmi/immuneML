@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.reports.ReportOutput import ReportOutput
@@ -161,10 +162,10 @@ class FeatureComparison(FeatureReport):
         return ReportOutput(path=file_path, name=f"Comparison of feature values across {self.comparison_label}")
 
     def add_diagonal(self, figure, x_range: tuple, y_range: tuple):
-        figure.update_layout(shapes=[{'type': "line", 'line': dict(color="#B0C2C7", dash="dash"),
-                                      'y0': min(x_range[0], y_range[0]), 'y1': max(x_range[1], y_range[1]),
-                                      'x0': min(x_range[0], y_range[0]), 'x1': max(x_range[1], y_range[1]),
-                                      'layer': 'below'}])
+        figure.add_trace(go.Scatter(hoverinfo='skip', x=[min(x_range[0], y_range[0]), max(x_range[1], y_range[1])],
+                                    y=[min(x_range[0], y_range[0]), max(x_range[1], y_range[1])],
+                                    mode='lines', line=dict(color="#B0C2C7", dash='dash'), zorder=1),
+                         row='all', col='all')
 
     def _filter_keep_fraction(self, plotting_data):
         plotting_data["diff_xy"] = abs(plotting_data["valuemean_x"] - plotting_data["valuemean_y"])
