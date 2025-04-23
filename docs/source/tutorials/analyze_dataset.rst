@@ -5,7 +5,7 @@ In this tutorial, we will show how to analyze your own dataset with some useful 
 which instructions to use, what visualizations to create. This tutorial assumes immuneML is already installed at your machine.
 If that is not the case, see :ref:`Installing immuneML`.
 
-The examples in this tutorial will use a simulated dataset that can be downloaded here. It consists of 200 repertoires
+The examples in this tutorial will use a :download:`simulated dataset <../_static/files/dataset.zip>`. It consists of 200 repertoires
 with two labels: disease (True, False) and batch (True, False).
 
 The available analysis specifications should be general enough that it can be applied to any dataset with
@@ -327,6 +327,20 @@ dataset. The specification file is the same as in step 3, except that dataset fi
 the full dataset instead.
 
 Here are some of the results on the full dataset:
+
+- ROC curves with AUC annotated for all combinations of encoding + ML method listed on the test set:
+
+.. image:: ../_static/images/usability_tutorial/roc_full.png
+   :alt: ROC curves with AUC for encodings and ML methods
+
+As the disease-associated signal is a 3-mer (by the simulation setup), the best performing method is a
+logistic regression with L1 penalty and with data encoded by 3-mer frequencies.
+
+- Since there is also batch information in the dataset, it is possible to check if the performance of the
+  models differs for different batches (the results shown here are for the test set):
+
+.. image:: ../_static/images/usability_tutorial/bacc_per_batch.png
+   :alt: Performance on label disease split by the batch for test set
 
 
 Additional information

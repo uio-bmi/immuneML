@@ -315,7 +315,7 @@ class PerformancePerLabel(TrainMLModelReport):
                     name=setting,
                     x=groups_for_perf_eval,
                     y=y,
-                    hovertemplate="%{name}<br>" + self.alternative_label + ": %{x}<br>" + self.metric + "%{y}<extra></extra>"
+                    hovertemplate=setting + "<br>" + self.alternative_label + ": %{x}<br>" + self.metric + ": %{y}<extra></extra>"
                 ))
         
         fig.update_layout(**self._get_layout_settings({'boxmode': 'group'} if repetitions > 1 else {'barmode': 'group'}))
