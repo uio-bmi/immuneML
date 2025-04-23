@@ -54,7 +54,7 @@ class ESMCEncoder(ProteinEmbeddingEncoder):
         definitions:
             encodings:
                 my_emsc_encoder:
-                    ESMC::
+                    ESMC:
                         region_type: IMGT_CDR3
                         device: cpu
                         num_processes: 4

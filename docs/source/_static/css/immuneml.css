@@ -20,3 +20,12 @@
 iframe {
     margin-bottom: 30px;
 }
+
+details {
+    margin-bottom: 30px;
+    margin-top: 30px
+}
+
+details > summary:hover {
+    cursor: pointer;
+}

@@ -77,8 +77,10 @@ class RepertoireClonotypeSummary(DataReport):
         fig.write_html(str(self.result_path / 'clonotype_count_per_repertoire.html'))
 
         return ReportResult(name=self.name, info="Clonotype count per repertoire",
-                            output_figures=[ReportOutput(self.result_path / 'clonotype_count_per_repertoire.html')],
-                            output_tables=[ReportOutput(self.result_path / 'clonotype_count_per_repertoire.csv')])
+                            output_figures=[ReportOutput(self.result_path / 'clonotype_count_per_repertoire.html',
+                                            name='Clonotype count per repertoire')],
+                            output_tables=[ReportOutput(self.result_path / 'clonotype_count_per_repertoire.csv',
+                                                        name='Clonotype count per repertoire')])
 
     def _get_clonotype_count_with_label(self, repertoire: Repertoire) -> Tuple[int, str]:
 

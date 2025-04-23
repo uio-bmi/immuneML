@@ -301,24 +301,33 @@ class PerformancePerLabel(TrainMLModelReport):
 
         for setting in data.setting.unique().tolist():
             setting_data = data[data.setting == setting]
-            fig.add_trace(go.Box(
-                name=setting,
-                x=groups_for_perf_eval,
-                y=np.concatenate([setting_data.performance] + [setting_data[f'performance_{alt_lbl_value}'] for alt_lbl_value in self.alternative_label_values]).round(3),
-                boxpoints='all',
-                jitter=0.3
-            ))
+            y = np.concatenate([setting_data.performance] + [setting_data[f'performance_{alt_lbl_value}'] for alt_lbl_value in self.alternative_label_values]).round(3)
+            if repetitions > 1:
+                fig.add_trace(go.Box(
+                    name=setting,
+                    x=groups_for_perf_eval,
+                    y=y,
+                    boxpoints='all',
+                    jitter=0.3
+                ))
+            else:
+                fig.add_trace(go.Bar(
+                    name=setting,
+                    x=groups_for_perf_eval,
+                    y=y,
+                    hovertemplate="%{name}<br>" + self.alternative_label + ": %{x}<br>" + self.metric + "%{y}<extra></extra>"
+                ))
         
-        fig.update_layout(**self._get_layout_settings())
+        fig.update_layout(**self._get_layout_settings({'boxmode': 'group'} if repetitions > 1 else {'barmode': 'group'}))
         return fig
 
-    def _get_layout_settings(self):
+    def _get_layout_settings(self, kwargs):
         return {
+            **kwargs,
             "title": f"Performance by {self.alternative_label}",
             "xaxis_title": self.alternative_label,
             "yaxis_title": f"{self.metric.replace('_', ' ').title()}",
             "template": "plotly_white",
-            'boxmode': 'group',
             "showlegend": True
         }
 

@@ -90,18 +90,19 @@ class ROCCurveSummary(TrainMLModelReport):
 
     def _draw_rocs(self, data: list, roc_legends: list, figure_name: str) -> ReportOutput:
         figure = go.Figure()
-        colors = px.colors.sequential.Viridis[::2][::-1]
 
         figure.add_trace(
-            go.Scatter(x=[0, 1], y=[0, 1], mode='lines', name='baseline (AUC = 0.5)', line=dict(color=Constants.PLOTLY_BLACK, dash='dash'),
-                       hoverinfo="skip"))
+            go.Scatter(x=[0, 1], y=[0, 1], mode='lines', name='baseline (AUC = 0.5)',
+                       line=dict(color=Constants.PLOTLY_BLACK, dash='dash'), hoverinfo="skip"))
 
         for index, item in enumerate(data):
             figure.add_trace(
-                go.Scatter(x=item["FPR"], y=item["TPR"], mode='lines', name=roc_legends[index], marker=dict(color=colors[index], line=dict(width=3)),
-                           hoverinfo="skip"))
+                go.Scatter(x=item["FPR"], y=item["TPR"], mode='lines', name=roc_legends[index],
+                           marker=dict(line=dict(width=3)),
+                           hovertemplate="%{name}<extra></extra>"))
 
-        figure.update_layout(template='plotly_white', xaxis_title='false positive rate', yaxis_title='true positive rate')
+        figure.update_layout(template='plotly_white', xaxis_title='false positive rate',
+                             yaxis_title='true positive rate')
         figure.update_layout(legend=dict(yanchor="bottom", y=0.06, xanchor="right", x=0.99), font_size=15)
 
         file_path = self.result_path / figure_name.replace(" ", "_")

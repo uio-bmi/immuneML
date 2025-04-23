@@ -10,13 +10,18 @@ Tutorials
    :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
 
 
-This page provides an overview of tutorials for how to use immuneML for different use cases. If you haven't familiarised yourself yet with the immuneML YAML specification, please see :ref:`How to specify an analysis with YAML`.
+This page provides an overview of tutorials for how to use immuneML for different use cases.
+If you haven't familiarised yourself yet with the immuneML YAML specification,
+please see :ref:`How to specify an analysis with YAML`.
+
+If you are getting started with your own dataset for the analysis, see :ref:`Analyzing Your Own Dataset` tutorial.
 
 
 .. toctree::
   :maxdepth: 1
   :caption: Dataset tutorials:
 
+  tutorials/analyze_dataset
   tutorials/how_to_import_the_data_to_immuneML
   tutorials/how_to_generate_a_random_repertoire_dataset
   tutorials/ligo_simulation_tutorials

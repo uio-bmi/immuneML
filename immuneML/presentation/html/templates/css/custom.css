@@ -166,7 +166,7 @@ img {
 details {
     background: none;
     border: none;
-    padding: 0;
+    padding: 0.7em;
     margin: 1em 0;
 }
 
@@ -176,12 +176,11 @@ details > summary:hover {
 
 details > summary {
     list-style: none;
-    padding: 0.5em 0;
     color: var(--primary-color);
     font-size: 1.1em;
     font-weight: 500;
     border-bottom: 2px solid var(--accent-color);
-    margin-bottom: 1em;
+    margin: 0.5em;
 }
 
 details > summary::-webkit-details-marker {
@@ -189,15 +188,16 @@ details > summary::-webkit-details-marker {
 }
 
 details > summary::after {
-    content: '▼';
+    content: ' ▼ ';
     float: right;
     font-size: 0.8em;
     color: var(--accent-color);
     margin-top: 0.2em;
+    margin-left: 0.2em;
 }
 
 details[open] > summary::after {
-    content: '▲';
+    content: ' ▲ ';
 }
 
 embed {
@@ -315,7 +315,7 @@ h6 {
 .scrollable-table {
     max-height: 400px;
     overflow-y: auto;
-    margin: 10px 0;
+    margin: 10px;
 }
 
 iframe {
