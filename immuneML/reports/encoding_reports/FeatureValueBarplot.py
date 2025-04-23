@@ -135,6 +135,7 @@ class FeatureValueBarplot(FeatureReport):
                                 self.x: self.x_title,
                             }, template='plotly_white',
                             color_discrete_sequence=px.colors.diverging.Tealrose)
+            figure.update_layout(xaxis={'categoryorder': 'total descending'})
 
             file_path = self.result_path / f"{self.result_name}_{key}.html"
 
