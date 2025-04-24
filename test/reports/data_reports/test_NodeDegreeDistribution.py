@@ -120,9 +120,10 @@ def assert_report_outputs_repertoire_dataset(compairr_path):
     PathBuilder.remove_old_and_build(path)
 
     repertoire_count = 3
+    labels = {"l1": {'True': 1}}
+    labels_size = sum(len(inner) for inner in labels.values())
     dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count, {100: 1},
-                                                                 {3: 1},
-                                                                 {"l1": {'True': 0.5, 'False': 0.5}}, path)
+                                                                 {3: 1}, labels, path)
 
     report = NodeDegreeDistribution(
         dataset=dataset,
@@ -133,14 +134,15 @@ def assert_report_outputs_repertoire_dataset(compairr_path):
         region_type=RegionType.IMGT_CDR3,
         hamming_distance=2,
         per_repertoire=True,
+        per_label=True,
         threads=4
     )
 
     result = report._generate()
 
     assert isinstance(result, ReportResult)
-    assert len(result.output_figures) == repertoire_count + 1
-    assert len(result.output_tables) == repertoire_count + 1
+    assert len(result.output_figures) == repertoire_count + labels_size + 1
+    assert len(result.output_tables) == repertoire_count + labels_size + 1
 
     for i in range(repertoire_count + 1):
         assert result.output_tables[i].path.is_file()  # node degree distribution

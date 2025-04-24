@@ -1,6 +1,7 @@
 import logging
 import os
 import subprocess
+from collections import defaultdict
 from pathlib import Path
 
 import pandas as pd
@@ -41,7 +42,11 @@ class NodeDegreeDistribution(DataReport):
 
     - hamming_distance (int): The Hamming distance to use for the analysis. Default is 1.
 
-    - per_repertoire (bool): Whether to compute the node degree distribution for each repertoire separately. Default is False.
+    - per_repertoire (bool): Whether to compute the node degree distribution for each repertoire separately. Only
+    applicable when using a RepertoireDataset. Default is False.
+
+    - per_label (bool): Whether to compute the node degree distribution for each label separately. Only applicable
+    when using a RepertoireDataset. Default is False.
 
     - threads (int): The number of threads to use for the analysis. Default is 4.
 
@@ -58,6 +63,7 @@ class NodeDegreeDistribution(DataReport):
             ignore_genes: False
             hamming_distance: 1
             per_repertoire: False
+            per_label: False
             threads: 4
 
     """
@@ -71,7 +77,7 @@ class NodeDegreeDistribution(DataReport):
     def __init__(self, dataset: [SequenceDataset | RepertoireDataset] = None, result_path: Path = None,
                  name: str = None, compairr_path: str = None, region_type: RegionType = RegionType.IMGT_JUNCTION,
                  indels: bool = False, ignore_genes: bool = False, hamming_distance: int = 1,
-                 per_repertoire: bool = False, threads: int = 4):
+                 per_repertoire: bool = False, per_label=False, threads: int = 4):
         super().__init__(dataset=dataset, result_path=result_path, name=name)
         self.compairr_path = compairr_path
         self.region_type = region_type
@@ -79,6 +85,7 @@ class NodeDegreeDistribution(DataReport):
         self.ignore_genes = ignore_genes
         self.hamming_distance = hamming_distance
         self.per_repertoire = per_repertoire
+        self.per_label = per_label
         self.threads = threads
 
     def check_prerequisites(self) -> bool:
@@ -121,26 +128,50 @@ class NodeDegreeDistribution(DataReport):
         output_tables.append(_store_node_degree_dist(self.result_path, node_degree_dist, "node_degree_distribution"))
 
     def _generate_for_repertoire_dataset(self, output_figures, output_tables):
+        node_degree_dist_list, node_degree_dist_labels = self._compute_repertoire_node_degrees()
+
+        if self.per_repertoire:
+            self._generate_output_per_repertoire(output_figures, output_tables, node_degree_dist_list)
+
+        if self.per_label:
+            self._generate_output_per_label(output_figures, output_tables, node_degree_dist_labels)
+
+        self._generate_average_output(output_figures, output_tables, node_degree_dist_list)
+
+    def _compute_repertoire_node_degrees(self):
         node_degree_dist_list = []
+        node_degree_dist_labels = defaultdict(lambda: defaultdict(list))
+
         for repertoire in self.dataset.repertoires:
-            node_degree_dist = _compute_node_degree_dist(self.result_path, repertoire.data_filename,
-                                                         self.region_type,
-                                                         self.ignore_genes, self.compairr_path,
-                                                         self.hamming_distance, self.indels, self.threads)
+            node_degree_dist = _compute_node_degree_dist(
+                self.result_path, repertoire.data_filename,
+                self.region_type, self.ignore_genes, self.compairr_path,
+                self.hamming_distance, self.indels, self.threads
+            )
             node_degree_dist_list.append(node_degree_dist)
 
-            if self.per_repertoire:
-                output_tables.append(_plot_node_degree_dist(self.result_path, node_degree_dist,
-                                                            f"node_degree_distribution_{repertoire.metadata['subject_id']}"))
-                output_figures.append(
-                    _store_node_degree_dist(self.result_path, node_degree_dist,
-                                            f"node_degree_distribution_{repertoire.metadata['subject_id']}"))
-        output_figures.append(
-            _plot_avg_node_degree_dist(self.result_path, node_degree_dist_list, "node_degree_distribution_average")
-        )
-        output_tables.append(
-            _store_avg_node_degree_dist(self.result_path, node_degree_dist_list, "node_degree_distribution_average")
-        )
+            for label in self.dataset.labels:
+                node_degree_dist_labels[label][repertoire.metadata[label]].append(node_degree_dist)
+
+        return node_degree_dist_list, node_degree_dist_labels
+
+    def _generate_output_per_repertoire(self, output_figures, output_tables, node_degree_dist_list):
+        for dist, repertoire in zip(node_degree_dist_list, self.dataset.repertoires):
+            name = f"node_degree_distribution_{repertoire.metadata['subject_id']}"
+            output_figures.append(_plot_node_degree_dist(self.result_path, dist, name))
+            output_tables.append(_store_node_degree_dist(self.result_path, dist, name))
+
+    def _generate_output_per_label(self, output_figures, output_tables, node_degree_dist_labels):
+        for label, value_map in node_degree_dist_labels.items():
+            for value, dists in value_map.items():
+                name = f"node_degree_distribution_{label}_{value}"
+                output_figures.append(_plot_avg_node_degree_dist(self.result_path, dists, name))
+                output_tables.append(_store_avg_node_degree_dist(self.result_path, dists, name))
+
+    def _generate_average_output(self, output_figures, output_tables, node_degree_dist_list):
+        name = "node_degree_distribution_average"
+        output_figures.append(_plot_avg_node_degree_dist(self.result_path, node_degree_dist_list, name))
+        output_tables.append(_store_avg_node_degree_dist(self.result_path, node_degree_dist_list, name))
 
 
 def _compute_node_degree_dist(result_path, dataset_filename, region_type, ignore_genes, compairr_path, hamming_distance,
@@ -238,10 +269,10 @@ def _plot_avg_node_degree_dist(result_path, node_degree_dists: list[pd.Series], 
     ))
 
     fig.update_layout(xaxis_title="Degree", yaxis_title="Average Count ± Std Dev")
-    output_path = result_path / f"{name}_average.html"
+    output_path = result_path / f"{name}.html"
     fig.write_html(output_path)
 
-    return ReportOutput(path=output_path, name=f"{name}_average")
+    return ReportOutput(path=output_path, name=f"{name}")
 
 
 def _store_node_degree_dist(result_path, node_degree_dist: pd.Series, name: str) -> ReportOutput:
