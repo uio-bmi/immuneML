@@ -30,7 +30,8 @@ def _test_generate(compairr_path):
     PathBuilder.remove_old_and_build(path)
 
     dataset = RepertoireBuilder.build_dataset([["AAA", "AC"], ["AAA", "TAC"], ["TAC", "AC", "EE"], ['EE', "MMM"]],
-                                              path, {'disease': [True, False, True, False]},
+                                              path, {'disease': [True, False, True, False],
+                                                     'hla': ["A", "B", "B", "C"]},
                                               subject_ids=["subj1", "subj2", "subj3", "subj4"])
 
     # Generate random dataset
@@ -38,7 +39,7 @@ def _test_generate(compairr_path):
     #     repertoire_count=50,
     #     sequence_count_probabilities={100: 1},
     #     sequence_length_probabilities={2: 1},
-    #     labels={"disease": {True: 0.5, False: 0.5}},
+    #     labels={"disease": {True: 0.5, False: 0.5}, 'hla': {'A': 0.5, "B": 0.2, "C": 0.3}},
     #     path=path
     # )
 
@@ -46,7 +47,7 @@ def _test_generate(compairr_path):
     report = CompAIRRClusteringReport(
         dataset=dataset,
         result_path=path / "report",
-        label="disease",
+        labels=["disease", "hla"],
         compairr_path=compairr_path,
         indels=False,
         ignore_counts=True,
