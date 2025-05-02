@@ -51,6 +51,8 @@ class SimpleLSTM(GenerativeModel):
 
     - seed (int): random seed for the model or None
 
+    - iter_to_report (int): number of epochs between training progress reports
+
 
     **YAML specification:**
 
@@ -86,12 +88,10 @@ class SimpleLSTM(GenerativeModel):
         lstm._model = lstm.make_new_model(state_dict_file)
         return lstm
 
-    ITER_TO_REPORT = 20
-
     def __init__(self, locus: str, sequence_type: str, hidden_size: int, learning_rate: float, num_epochs: int,
                  batch_size: int, num_layers: int, embed_size: int, temperature, device: str, name=None,
                  region_type: str = RegionType.IMGT_CDR3.name, prime_str: str = "C", window_size: int = 64,
-                 seed: int = None):
+                 seed: int = None, iter_to_report: int = 1):
 
         super().__init__(Chain.get_chain(locus), region_type=RegionType.get_object(region_type), name=name, seed=seed)
         self._model = None
@@ -106,6 +106,7 @@ class SimpleLSTM(GenerativeModel):
         self.prime_str = prime_str
         self.window_size = window_size
         self.device = device
+        self.iter_to_report = iter_to_report
         self.unique_letters = EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + ["*"]
         self.num_letters = len(self.unique_letters)
         self.letter_to_index = {letter: i for i, letter in enumerate(self.unique_letters)}
@@ -128,7 +129,7 @@ class SimpleLSTM(GenerativeModel):
         return model
 
     def _log_training_progress(self, loss_summary, epoch, loss):
-        if (epoch + 1) % SimpleLSTM.ITER_TO_REPORT == 0:
+        if (epoch + 1) % self.iter_to_report == 0:
             message = f"{SimpleLSTM.__name__}: Epoch [{epoch + 1}/{self.num_epochs}]: loss: {loss:.4f}"
             print_log(message, True)
 
