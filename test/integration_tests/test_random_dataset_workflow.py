@@ -64,6 +64,15 @@ class TestRandomDatasetWorkflow(TestCase):
                             'compute_for_selection': True,
                             'compute_for_assessment': True
                         }
+                    },
+                    "rep2": {
+                        "ConfusionMatrixPerLabel": {
+                            'alternative_label': 'batch',
+                            'plot_on_train': False,
+                            'plot_on_test': True,
+                            'compute_for_selection': False,
+                            'compute_for_assessment': True
+                        }
                     }
                 }
 
@@ -83,15 +92,16 @@ class TestRandomDatasetWorkflow(TestCase):
                         "training_percentage": 0.7,
                     },
                     "selection": {
-                        "split_strategy": "stratified_k_fold",
-                        "split_count": 5
+                        "split_strategy": "random",
+                        "split_count": 1,
+                        "training_percentage": 0.7
                     },
                     "labels": ["cmv"],
                     "dataset": "d1",
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
                     "number_of_processes": 4,
-                    "reports": ['rep1'],
+                    "reports": ['rep1', 'rep2'],
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False,
                 }
@@ -159,6 +169,16 @@ class TestRandomDatasetWorkflow(TestCase):
                             'metric': 'balanced_accuracy',
                             'compute_for_selection': True,
                             'compute_for_assessment': True
+                        },
+
+                    },
+                    "rep2": {
+                        "ConfusionMatrixPerLabel": {
+                            'alternative_label': 'batch',
+                            'plot_on_train': False,
+                            'plot_on_test': True,
+                            'compute_for_selection': False,
+                            'compute_for_assessment': True
                         }
                     },
                     'lbl': {
@@ -201,7 +221,7 @@ class TestRandomDatasetWorkflow(TestCase):
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
                     "number_of_processes": 4,
-                    "reports": ['rep1'],
+                    "reports": ['rep1', 'rep2'],
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False
                 }
