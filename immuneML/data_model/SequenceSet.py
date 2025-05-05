@@ -167,7 +167,8 @@ class Repertoire:
         write_yaml(metadata_filename, metadata)
 
         repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier,
-                                dynamic_fields=repertoire.dynamic_fields, element_count=len(data))
+                                dynamic_fields=repertoire.dynamic_fields)
+        repertoire._element_count = len(data)
         return repertoire
 
     @classmethod
@@ -189,8 +190,10 @@ class Repertoire:
         metadata['type_dict_dynamic_fields'] = dynamic_fields
         write_yaml(metadata_filename, metadata)
 
-        repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier, element_count=len(data),
+        repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier,
                                 _bnp_dataclass=type(data), dynamic_fields=dynamic_fields)
+        repertoire._element_count = len(data)
+
         return repertoire
 
     @property

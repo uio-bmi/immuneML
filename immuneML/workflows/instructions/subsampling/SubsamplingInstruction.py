@@ -83,8 +83,10 @@ class SubsamplingInstruction(Instruction):
                 else read_yaml(repertoire.metadata_filename)
 
             data = repertoire.data
-            rows_to_keep = random.sample(list(range(len(data))), k=self.state.subsampled_repertoire_size)
-            data = data[rows_to_keep]
+
+            if self.state.subsampled_repertoire_size:
+                rows_to_keep = random.sample(list(range(len(data))), k=self.state.subsampled_repertoire_size)
+                data = data[rows_to_keep]
 
             rep_name = f"{repertoire.data_filename.stem}_subsampled_{self.state.subsampled_repertoire_size}"
             data_filename = new_dataset_path / f"{rep_name}.tsv"
