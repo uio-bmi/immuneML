@@ -300,6 +300,8 @@ class DataImport(metaclass=abc.ABCMeta):
         if hasattr(self.params, "column_mapping") and self.params.column_mapping is not None:
             df.rename(columns=self.params.column_mapping, inplace=True)
 
+        df = df.dropna(how='all')  # remove all fully empty rows
+
         df = ImportHelper.standardize_bool_values(df)
         df = ImportHelper.standardize_none_values(df)
 
