@@ -72,7 +72,9 @@ class InstructionParser:
     @staticmethod
     def generate_docs(path: Path):
         inst_path = PathBuilder.build(path / "instructions")
-        instructions = sorted(ReflectionHandler.all_nonabstract_subclasses(Instruction, "Instruction", subdirectory='instructions/'), key=lambda x: x.__name__)
+        instructions = sorted(ReflectionHandler.all_nonabstract_subclasses(Instruction, "Instruction",
+                                                                           subdirectory='instructions/'),
+                              key=lambda x: x.__name__)
 
         inst_paths = {}
 

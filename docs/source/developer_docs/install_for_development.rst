@@ -31,7 +31,7 @@ When running into problems during installation, please check the :ref:`Installat
 
 
 Development setup with PyCharm
-**************************
+***********************************
 
 To set up the project in PyCharm, see
 `the official JetBrains tutorial for creating a PyCharm project from an existing GitHub repository <https://www.jetbrains.com/help/pycharm/manage-projects-hosted-on-github.html>`_.
@@ -76,7 +76,7 @@ The syntax for Unix-based systems is the following:
 
 
 Testing the development installation
-------------------------------------
+---------------------------------------
 
 
 Running Quickstart

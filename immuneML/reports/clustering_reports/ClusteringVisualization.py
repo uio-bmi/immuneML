@@ -5,7 +5,9 @@ import plotly
 import plotly.express as px
 
 from immuneML.dsl.definition_parsers.MLParser import MLParser
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.clustering_reports.ClusteringReport import ClusteringReport
@@ -96,16 +98,21 @@ class ClusteringVisualization(ClusteringReport):
     def _make_plot(self, cl_item: ClusteringItem, run_idx: int, analysis_type: str, setting_key: str, result_path: Path)\
             -> Path:
         transformed_data = self.dim_red_method.fit_transform(cl_item.dataset)
+        ext_label_names = self.state.config.label_config.get_labels_by_name()
 
         df = pd.DataFrame(transformed_data, columns=self._dimension_names)
         df['cluster'] = pd.Series(cl_item.predictions).astype(str)
+        df[ext_label_names] = cl_item.dataset.get_metadata(ext_label_names, return_df=True)
 
         fig = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1], color='cluster',
                          color_discrete_sequence=plotly.colors.qualitative.Set2,
-                         category_orders={'cluster': sorted(df.cluster.unique())})
+                         category_orders={'cluster': sorted(df.cluster.unique())},
+                         hover_data=ext_label_names)
 
         fig.update_layout(template="plotly_white")
 
-        plot_path = result_path / f"run_{run_idx}_{analysis_type}_{setting_key}.html"
-        fig.write_html(str(plot_path))
+        plot_path = PlotlyUtil.write_image_to_file(fig,
+                                                   result_path / f"run_{run_idx}_{analysis_type}_{setting_key}.html",
+                                                   df.shape[0])
+
         return plot_path

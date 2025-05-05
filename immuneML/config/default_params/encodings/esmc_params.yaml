@@ -1,0 +1,4 @@
+region_type: IMGT_CDR3
+device: cpu
+num_processes: 4
+batch_size: 4096

@@ -47,7 +47,8 @@ class PerformancePerLabel(TrainMLModelReport):
 
     def __init__(self, alternative_label: str, metric: str = "balanced_accuracy", compute_for_selection: bool = True,
                  compute_for_assessment: bool = True, state: TrainMLModelState = None, result_path: Path = None,
-                 name: str = None, label: Label = None, number_of_processes: int = 1):
+                 name: str = None, label: Label = None, number_of_processes: int = 1, plot_on_train: bool = False,
+                 plot_on_test: bool = True):
         super().__init__(name=name, state=state, label=label, result_path=result_path,
                          number_of_processes=number_of_processes)
         self.alternative_label = alternative_label
@@ -55,6 +56,8 @@ class PerformancePerLabel(TrainMLModelReport):
         self.metric = metric.lower()
         self.compute_for_selection = compute_for_selection
         self.compute_for_assessment = compute_for_assessment
+        self.plot_on_train = plot_on_train
+        self.plot_on_test = plot_on_test
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -161,10 +164,12 @@ class PerformancePerLabel(TrainMLModelReport):
                     datasets = self._prepare_datasets(hp_item_result)
 
                     for dataset_info in datasets:
-                        data = self._process_dataset(dataset_info, label, hp_item_result)
-                        dfs[dataset_info['desc']].append({**data, 'run_id': run_id+1})
+                        if (dataset_info['desc'] == 'train' and self.plot_on_train) or (dataset_info['desc'] == 'test' and self.plot_on_test):
+                            data = self._process_dataset(dataset_info, label, hp_item_result)
+                            dfs[dataset_info['desc']].append({**data, 'run_id': run_id+1})
 
-        return {'train': pd.DataFrame(dfs['train']), 'test': pd.DataFrame(dfs['test'])}
+        return {'train': pd.DataFrame(dfs['train']) if self.plot_on_train else None,
+                'test': pd.DataFrame(dfs['test'] if self.plot_on_test else [])}
 
     def _prepare_datasets(self, hp_item: HPItem):
         train_metadata = hp_item.train_dataset.get_metadata([self.alternative_label], return_df=True)
@@ -260,9 +265,18 @@ class PerformancePerLabel(TrainMLModelReport):
 
     def _write_split_results(self, data: Dict[str, pd.DataFrame], name_suffix: str, label_name: str):
         outputs = []
-        for dataset_desc in ['train', 'test']:
+        datasets = []
+        if self.plot_on_train:
+            datasets.append('train')
+        if self.plot_on_test:
+            datasets.append('test')
+
+        for dataset_desc in datasets:
             outputs.append(self._write_performance_tables(data[dataset_desc], dataset_desc, name_suffix + "_" + dataset_desc, label_name))
             outputs.append(self._create_performance_plot(data[dataset_desc], dataset_desc, name_suffix + "_" + dataset_desc, label_name))
+
+        outputs = [x for item in outputs for x in (item if isinstance(item, list) else [item])]
+
         return outputs
 
     def _write_performance_tables(self, data: pd.DataFrame, dataset_desc: str, name_suffix: str, label_name: str):
@@ -287,38 +301,48 @@ class PerformancePerLabel(TrainMLModelReport):
         return df[cols + perf_cols + count_cols]
 
     def _create_performance_plot(self, data: pd.DataFrame, dataset_desc: str, name_suffix, label_name: str):
-        fig = self._create_figure(data)
+        fig = self._create_figure(data, label_name)
         plot_path = self.result_path / f"{name_suffix}_performance_plot.html"
         fig.write_html(str(plot_path))
         return ReportOutput(plot_path,
                             self._get_desc_from_name_suffix(name_suffix, label_name, dataset_desc))
 
-    def _create_figure(self, data: pd.DataFrame):
+    def _create_figure(self, data: pd.DataFrame, label_name: str):
         fig = go.Figure()
         groups_for_perf_eval = ['all'] + self.alternative_label_values
         repetitions = data.run_id.unique().shape[0]
         groups_for_perf_eval = np.repeat(groups_for_perf_eval, repetitions)
 
         for setting in data.setting.unique().tolist():
-            fig.add_trace(go.Box(
-                name=setting,
-                x=groups_for_perf_eval,
-                y=np.concatenate([data.performance] + [data[f'performance_{alt_lbl_value}'] for alt_lbl_value in self.alternative_label_values]).round(3),
-                boxpoints='all',
-                jitter=0.3
-            ))
+            setting_data = data[data.setting == setting]
+            y = np.concatenate([setting_data.performance] + [setting_data[f'performance_{alt_lbl_value}'] for alt_lbl_value in self.alternative_label_values]).round(3)
+            if repetitions > 1:
+                fig.add_trace(go.Box(
+                    name=setting,
+                    x=groups_for_perf_eval,
+                    y=y,
+                    boxpoints='all',
+                    jitter=0.3
+                ))
+            else:
+                fig.add_trace(go.Bar(
+                    name=setting,
+                    x=groups_for_perf_eval,
+                    y=y,
+                    hovertemplate=setting + "<br>" + self.alternative_label + ": %{x}<br>" + self.metric + ": %{y}<extra></extra>"
+                ))
         
-        fig.update_layout(**self._get_layout_settings())
+        fig.update_layout(**self._get_layout_settings({'boxmode': 'group'} if repetitions > 1 else {'barmode': 'group'}))
         return fig
 
-    def _get_layout_settings(self):
+    def _get_layout_settings(self, kwargs):
         return {
+            **kwargs,
             "title": f"Performance by {self.alternative_label}",
             "xaxis_title": self.alternative_label,
             "yaxis_title": f"{self.metric.replace('_', ' ').title()}",
             "template": "plotly_white",
-            'boxmode': 'group',
-            "showlegend": False
+            "showlegend": True
         }
 
     def check_prerequisites(self):

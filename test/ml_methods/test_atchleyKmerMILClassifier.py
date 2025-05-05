@@ -22,7 +22,7 @@ class TestAtchleyKmerMILClassifier(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_fit(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "kmermil")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "kmermil")
 
         repertoire_count = 10
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=repertoire_count, sequence_count_probabilities={2: 1},

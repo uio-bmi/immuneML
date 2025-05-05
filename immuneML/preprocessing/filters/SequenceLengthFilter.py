@@ -7,7 +7,7 @@ import numpy as np
 
 from immuneML.data_model import bnp_util
 from immuneML.data_model.SequenceParams import RegionType
-from immuneML.data_model.datasets.ElementDataset import SequenceDataset
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset, ReceptorDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.environment.SequenceType import SequenceType
@@ -19,6 +19,15 @@ from immuneML.util.PathBuilder import PathBuilder
 class SequenceLengthFilter(Filter):
     """
     Removes sequences with length out of the predefined range.
+
+    **Supported dataset types:**
+
+    - SequenceDataset
+
+    - ReceptorDataset
+
+    - RepertoireDataset
+
 
     **Specification arguments:**
 
@@ -69,8 +78,6 @@ class SequenceLengthFilter(Filter):
                    name=kwargs['name'] if 'name' in kwargs else SequenceLengthFilter.__name__, region_type=RegionType[kwargs['region_type']])
 
     def process_dataset(self, dataset, result_path: Path, number_of_processes: int = 1):
-        if not isinstance(dataset, (RepertoireDataset, SequenceDataset)):
-            raise NotImplementedError(f"Unsupported dataset type: {type(dataset).__name__}")
 
         if isinstance(dataset, RepertoireDataset):
             new_reps_path = PathBuilder.build(result_path / 'repertoires')
@@ -83,8 +90,21 @@ class SequenceLengthFilter(Filter):
 
         elif isinstance(dataset, SequenceDataset):
             indices_to_keep = self._get_indices_to_keep(dataset.data)
-            os.makedirs(result_path, exist_ok=True)
+            PathBuilder.build(result_path)
             return dataset.make_subset(example_indices=indices_to_keep, path=result_path, dataset_type="SequenceDataset")
+
+        elif isinstance(dataset, ReceptorDataset):
+            return self._filter_receptor_dataset(dataset, result_path)
+
+    def _filter_receptor_dataset(self, dataset: ReceptorDataset, result_path: Path) -> ReceptorDataset:
+        data = dataset.data
+        indices_to_keep = self._get_indices_to_keep(data)  # sequence indices
+        df = data.topandas().loc[indices_to_keep]
+        indices_to_keep = df[df.groupby('cell_id')['cell_id'].transform('count') == 2].index.tolist()
+        indices_to_keep = [ind // 2 for (ind, ind2) in list(zip(indices_to_keep[::2], indices_to_keep[1::2]))]
+
+        return dataset.make_subset(example_indices=indices_to_keep, path=PathBuilder.build(result_path),
+                                   dataset_type='ReceptorDataset')
 
     def _process_repertoire(self, repertoire: Repertoire, result_path: Path) -> Repertoire:
         repertoire = dill.loads(repertoire) if isinstance(repertoire, bytes) else repertoire

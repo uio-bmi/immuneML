@@ -65,6 +65,11 @@ class TrainGenModelInstruction(GenModelInstruction):
       and generating gen_examples_count examples; these can be data reports (to be run on generated examples), ML
       reports (to be run on the fitted model)
 
+    - training_percentage (float): percentage of the dataset to use for training the generative model. If set to 1, the
+      full dataset will be used for training and the test dataset will be the same as the training dataset. Default
+      value is 0.7. When export_combined_dataset is set to True, the splitting of sequences into train, test, and
+      generated will be shown in column dataset_split.
+
     **YAML specification:**
 
     .. indent with spaces
@@ -136,30 +141,37 @@ class TrainGenModelInstruction(GenModelInstruction):
 
         gen_data = self._get_dataclass_object_from_dataset(self.generated_dataset,
                                                            np.ones(self.state.gen_examples_count),
-                                                           np.zeros(self.state.gen_examples_count))
+                                                           np.zeros(self.state.gen_examples_count),
+                                                           ['generated'] * self.state.gen_examples_count)
 
         if self.state.training_percentage < 1:
 
             org_data = self._get_dataclass_object_from_dataset(self.state.train_dataset,
                                                                np.zeros(self.state.train_dataset.get_example_count()),
-                                                               np.ones(self.state.train_dataset.get_example_count()))
+                                                               np.ones(self.state.train_dataset.get_example_count()),
+                                                               ['train'] * self.state.train_dataset.get_example_count())
             test_data = self._get_dataclass_object_from_dataset(self.state.test_dataset,
                                                                 np.zeros(self.state.test_dataset.get_example_count()),
-                                                                np.zeros(self.state.test_dataset.get_example_count()))
+                                                                np.zeros(self.state.test_dataset.get_example_count()),
+                                                                ['test'] * self.state.test_dataset.get_example_count())
 
             combined_data = merge_dataclass_objects([org_data, test_data, gen_data], fill_unmatched=True)
         else:
             org_data = self._get_dataclass_object_from_dataset(self.dataset, np.zeros(self.dataset.get_example_count()),
-                                                               np.ones(self.dataset.get_example_count()))
+                                                               np.ones(self.dataset.get_example_count()),
+                                                               ['train'] * self.dataset.get_example_count())
             combined_data = merge_dataclass_objects([org_data, gen_data], fill_unmatched=True)
 
         bnp_write_to_file(path / f'combined_{self.state.name}_dataset.tsv', combined_data)
 
         metadata_yaml = SequenceDataset.create_metadata_dict(dataset_class=SequenceDataset.__name__,
-                                             filename=f'combined_{self.state.name}_dataset.tsv',
-                                             type_dict=type(combined_data).get_field_type_dict(all_fields=False),
-                                             name=f'combined_{self.state.name}_dataset',
-                                             labels={'gen_model_name': [self.method.name, ''], "from_gen_model": [True, False]})
+                                                             filename=f'combined_{self.state.name}_dataset.tsv',
+                                                             type_dict=type(combined_data).get_field_type_dict(
+                                                                 all_fields=False),
+                                                             name=f'combined_{self.state.name}_dataset',
+                                                             labels={'gen_model_name': [self.method.name, ''],
+                                                                     "from_gen_model": [True, False],
+                                                                     "dataset_split": ['train', 'test', 'generated']},)
 
         write_dataset_yaml(path / f'combined_{self.state.name}_dataset.yaml', metadata_yaml)
 
@@ -168,11 +180,12 @@ class TrainGenModelInstruction(GenModelInstruction):
             filename=path / f'combined_{self.state.name}_dataset.tsv', name=f'combined_{self.state.name}_dataset')
 
     def _get_dataclass_object_from_dataset(self, dataset: Dataset, from_gen_model_vals: np.ndarray,
-                                           used_for_training_vals: np.ndarray):
+                                           used_for_training_vals: np.ndarray, dataset_split: list):
         return dataset.data.add_fields(
             {'from_gen_model': np.where(from_gen_model_vals, 'T', 'F'),
-             'used_for_training': np.where(used_for_training_vals, 'T', 'F')},
-            {'from_gen_model': str, 'used_for_training': str})
+             'used_for_training': np.where(used_for_training_vals, 'T', 'F'),
+             'dataset_split': dataset_split},
+            {'from_gen_model': str, 'used_for_training': str, 'dataset_split': str})
 
     def _make_and_export_combined_dataset(self):
         if self.export_combined_dataset and isinstance(self.dataset, SequenceDataset):
@@ -207,7 +220,7 @@ class TrainGenModelInstruction(GenModelInstruction):
                 rep.name = rep.name + " (original dataset)"
                 self.state.report_results['data_reports'].append(rep.generate_report())
 
-        super()._print_report_summary_log()
+        self._print_report_summary_log()
 
     def _save_model(self):
         self.state.model_path = self.method.save_model(self.state.result_path / 'trained_model/')

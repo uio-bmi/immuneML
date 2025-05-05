@@ -1,20 +1,14 @@
 import shutil
-from datetime import datetime
 from pathlib import Path
 from typing import List
-from uuid import uuid4
 
 import numpy as np
 import pandas as pd
 
-from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
-from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name, make_full_airr_seq_set_df, \
-    write_dataset_yaml
-from immuneML.data_model.datasets.Dataset import Dataset
-from immuneML.data_model.datasets.ElementDataset import SequenceDataset
-from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.SequenceParams import Chain
-from immuneML.data_model.SequenceSet import ReceptorSequence
+from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
@@ -92,9 +86,8 @@ class PWM(GenerativeModel):
         return pwm
 
     def __init__(self, locus, sequence_type: str, region_type: str, name: str = None):
-        super().__init__(Chain.get_chain(locus), name=name)
+        super().__init__(Chain.get_chain(locus), name=name, region_type=RegionType[region_type.upper()])
         self.sequence_type = SequenceType[sequence_type.upper()]
-        self.region_type = RegionType[region_type.upper()]
         self.pwm_matrix = None
         self.length_probs = None
 

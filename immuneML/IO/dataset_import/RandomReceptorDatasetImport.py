@@ -14,24 +14,31 @@ class RandomReceptorDatasetImport(DataImport):
 
     - receptor_count (int): The number of receptors the ReceptorDataset should contain.
 
-    - chain_1_length_probabilities (dict): A mapping where the keys correspond to different sequence lengths for chain 1, and the values are the probabilities for choosing each sequence length. For example, to create a random ReceptorDataset where 40% of the sequences for chain 1 would be of length 10, and 60% of the sequences would have length 12, this mapping would need to be specified:
+    - chain_1_length_probabilities (dict): A mapping where the keys correspond to different sequence lengths for chain
+      1, and the values are the probabilities for choosing each sequence length. For example, to create a random
+      ReceptorDataset where 40% of the sequences for chain 1 would be of length 10, and 60% of the sequences would
+      have length 12, this mapping would need to be specified:
 
-        .. indent with spaces
-        .. code-block:: yaml
+    .. indent with spaces
+    .. code-block:: yaml
 
-            10: 0.4
-            12: 0.6
+        10: 0.4
+        12: 0.6
 
     - chain_2_length_probabilities (dict): Same as chain_1_length_probabilities, but for chain 2.
 
-    - labels (dict): A mapping that specifies randomly chosen labels to be assigned to the receptors. One or multiple labels can be specified here. The keys of this mapping are the labels, and the values consist of another mapping between label classes and their probabilities. For example, to create a random ReceptorDataset with the label cmv_epitope where 70% of the receptors has class binding and the remaining 30% has class not_binding, the following mapping should be specified:
+    - labels (dict): A mapping that specifies randomly chosen labels to be assigned to the receptors. One or multiple
+      labels can be specified here. The keys of this mapping are the labels, and the values consist of another mapping
+      between label classes and their probabilities. For example, to create a random ReceptorDataset with the label
+      cmv_epitope where 70% of the receptors has class binding and the remaining 30% has class not_binding, the
+      following mapping should be specified:
 
-        .. indent with spaces
-        .. code-block:: yaml
+    .. indent with spaces
+    .. code-block:: yaml
 
-            cmv_epitope:
-                binding: 0.7
-                not_binding: 0.3
+        cmv_epitope:
+            binding: 0.7
+            not_binding: 0.3
 
 
     **YAML specification:**

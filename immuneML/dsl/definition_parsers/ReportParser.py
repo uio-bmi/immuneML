@@ -21,7 +21,6 @@ class ReportParser:
         return symbol_table, reports
 
     @staticmethod
-    @log
     def _parse_report(key: str, params: dict, symbol_table: SymbolTable):
         valid_values = ReflectionHandler.all_nonabstract_subclass_basic_names(Report, "", "reports/")
         report_object, params = ObjectParser.parse_object(params, valid_values, "", "reports/", "ReportParser", key, builder=True,

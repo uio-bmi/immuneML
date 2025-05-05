@@ -53,9 +53,13 @@ class FeatureDistribution(FeatureReport):
 
     - y_title (str): y-axis label
 
-    - plot_top_n (int): plot n of the largest features on average separately (useful when there are too many features to plot at the same time)
+    - plot_top_n (int): plot n of the largest features on average separately (useful when there are too many features
+      to plot at the same time). The n features are chosen based on the average feature values across all examples
+      without grouping by labels.
 
-    - plot_bottom_n (int): plot n of the smallest features on average separately (useful when there are too many features to plot at the same time)
+    - plot_bottom_n (int): plot n of the smallest features on average separately (useful when there are too many
+      features to plot at the same time). The n features are chosen based on the average feature values across all
+      examples without grouping by labels.
 
     - plot_all_features (bool): whether to plot all (might be slow for large number of features)
 
@@ -82,7 +86,8 @@ class FeatureDistribution(FeatureReport):
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, color_grouping_label: str = None,
                  row_grouping_label=None, column_grouping_label=None,
-                 mode: str = 'auto', x_title: str = None, y_title: str = None, number_of_processes: int = 1, name: str = None,
+                 mode: str = 'auto', x_title: str = None, y_title: str = None, number_of_processes: int = 1,
+                 name: str = None,
                  plot_top_n: int = None, plot_bottom_n: int = None, plot_all_features: bool = True):
         super().__init__(dataset=dataset, result_path=result_path, color_grouping_label=color_grouping_label,
                          row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label,
@@ -123,7 +128,8 @@ class FeatureDistribution(FeatureReport):
 
         return output_figures, output_tables
 
-    def _plot_sparse(self, key, plotting_data, output_tables, output_figures) -> Tuple[List[ReportOutput], List[ReportOutput]]:
+    def _plot_sparse(self, key, plotting_data, output_tables, output_figures) -> Tuple[
+        List[ReportOutput], List[ReportOutput]]:
         columns_to_filter = [self.x, "value"]
         for optional_column in [self.color, self.facet_row, self.facet_column]:
             if optional_column is not None:
@@ -134,20 +140,21 @@ class FeatureDistribution(FeatureReport):
         total_counts = plotting_data_filtered.groupby(columns_to_filter, as_index=False).agg(
             {"value": 'sum'})
         plotting_data_filtered = plotting_data_filtered.merge(total_counts,
-                                                                    on=self.x,
-                                                                    how="left",
-                                                                    suffixes=('', '_sum')) \
+                                                              on=self.x,
+                                                              how="left",
+                                                              suffixes=('', '_sum')) \
             .fillna(0) \
             .sort_values(by=self.x) \
             .reset_index(drop=True)
 
         figure = px.violin(plotting_data_filtered, x=self.x, y="value", color=self.color,
-                        facet_row=self.facet_row, facet_col=self.facet_column,
-                        labels={
-                            "value": self.y_title,
-                            self.x: self.x_title,
-                        }, template='plotly_white',
-                        color_discrete_sequence=px.colors.diverging.Tealrose)
+                           facet_row=self.facet_row, facet_col=self.facet_column,
+                           labels={
+                               "value": self.y_title,
+                               self.x: self.x_title,
+                           }, template='plotly_white',
+                           category_orders={self.color: sorted(plotting_data_filtered[self.color].unique())},
+                           color_discrete_sequence=px.colors.diverging.Tealrose)
 
         file_path = self.result_path / f"{self.result_name}_{key}.html"
         plotting_data.to_csv(self.result_path / f"{self.result_name}_{key}.csv", index=False)
@@ -156,18 +163,22 @@ class FeatureDistribution(FeatureReport):
         output_tables.append(
             ReportOutput(path=self.result_path / f"{self.result_name}_{key}.csv", name=f"{self.result_name} {key}"))
 
-        output_figures.append(ReportOutput(path=file_path, name=f"Distributions of feature values ({key}, sparse data, zero values filtered)"))
+        output_figures.append(ReportOutput(path=file_path,
+                                           name=f"Distributions of feature values ({key}, sparse data, zero values filtered)"))
 
         return output_figures, output_tables
 
-    def _plot_normal(self, key, plotting_data, output_tables, output_figures) -> Tuple[List[ReportOutput], List[ReportOutput]]:
+    def _plot_normal(self, key, plotting_data, output_tables, output_figures) -> Tuple[
+        List[ReportOutput], List[ReportOutput]]:
         figure = px.violin(plotting_data, x=self.x, y="value", color=self.color,
-                        facet_row=self.facet_row, facet_col=self.facet_column,
-                        labels={
-                            "value": self.y_title,
-                            self.x: self.x_title,
-                        }, template='plotly_white',
-                        color_discrete_sequence=px.colors.diverging.Tealrose)
+                           facet_row=self.facet_row, facet_col=self.facet_column,
+                           labels={
+                               "value": self.y_title,
+                               self.x: self.x_title,
+                           }, template='plotly_white',
+                           color_discrete_sequence=px.colors.diverging.Tealrose)
+
+        figure.update_layout(xaxis={'categoryorder': 'total descending'})
 
         file_path = self.result_path / f"{self.result_name}_{key}.html"
         plotting_data.to_csv(self.result_path / f"{self.result_name}_{key}.csv", index=False)
@@ -183,22 +194,23 @@ class FeatureDistribution(FeatureReport):
 
     def _get_plotting_data_dict(self, data_long_format):
         plotting_data_all = data_long_format
-        groupby_cols = [self.x, self.color, self.facet_row, self.facet_column]
-        groupby_cols = [i for i in groupby_cols if i]
-        groupby_cols = list(set(groupby_cols))
-        grouped_data = data_long_format.groupby(groupby_cols, as_index=False).agg(
-            {"value": ['mean', self.std]})
+        groupby_cols_features = [self.x]
+        data_groupedby_features = self._get_grouped_data(data_long_format, groupby_cols_features)
 
-        grouped_data.columns = grouped_data.columns.map(''.join)
         plotting_data_dict = {'all': plotting_data_all} if self.plot_all_features else {}
 
         if self.plot_top_n:
-            top_n_features = grouped_data.iloc[np.argpartition(grouped_data['valuemean'].values, -self.plot_top_n)[-self.plot_top_n:]][self.x]
-            plotting_data_dict[f'top_{self.plot_top_n}'] = plotting_data_all.loc[plotting_data_all[self.x].isin(top_n_features)]
+            top_n_features = data_groupedby_features.iloc[
+                np.argpartition(data_groupedby_features['valuemean'].values, -self.plot_top_n)[-self.plot_top_n:]][
+                self.x]
+            plotting_data_dict[f'top_{self.plot_top_n}'] = plotting_data_all.loc[
+                plotting_data_all[self.x].isin(top_n_features)]
 
         if self.plot_bottom_n:
-            bottom_n_features = grouped_data.iloc[np.argpartition(grouped_data['valuemean'].values, self.plot_bottom_n)[:self.plot_bottom_n]][self.x]
-            plotting_data_dict[f'bottom_{self.plot_bottom_n}'] = plotting_data_all.loc[plotting_data_all[self.x].isin(bottom_n_features)]
+            bottom_n_features = data_groupedby_features.iloc[
+                np.argpartition(data_groupedby_features['valuemean'].values, self.plot_bottom_n)[:self.plot_bottom_n]][
+                self.x]
+            plotting_data_dict[f'bottom_{self.plot_bottom_n}'] = plotting_data_all.loc[
+                plotting_data_all[self.x].isin(bottom_n_features)]
 
         return plotting_data_dict
-

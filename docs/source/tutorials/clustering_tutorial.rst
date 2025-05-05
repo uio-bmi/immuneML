@@ -12,7 +12,7 @@ where 50 will contain signal1 (meaning they will have either AAA or GGG) and 50 
 
 Here is the configuration yaml file:
 
-. collapse:: ligo_complete_specification.yaml
+.. collapse:: ligo_complete_specification.yaml
 
         .. highlight:: yaml
         .. code-block:: yaml
@@ -86,7 +86,7 @@ the clustering, and external metrics that compare the clustering to some externa
 
 In this tutorial, we will use the following settings:
 
-. collapse:: clustering_analysis.yaml
+.. collapse:: clustering_analysis.yaml
 
         .. highlight:: yaml
         .. code-block:: yaml

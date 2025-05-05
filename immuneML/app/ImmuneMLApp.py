@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import shutil
+import traceback
 from datetime import datetime
 from sys import exit as sys_exit
 import warnings
@@ -68,6 +69,9 @@ class ImmuneMLApp:
         except (ModuleNotFoundError, ImportError) as e:
             sys_exit(f"{e}\n\nAn error occurred when trying to import a package. Please check if all necessary "
                      f"packages are installed correctly. See the log above for more details.")
+        except Exception as e:
+            traceback.print_exc()
+            raise e
 
 
 def run_immuneML(namespace: argparse.Namespace):

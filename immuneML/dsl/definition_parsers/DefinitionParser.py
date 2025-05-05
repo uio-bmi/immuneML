@@ -21,6 +21,8 @@ from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.preprocessing.Preprocessor import Preprocessor
+from immuneML.reports.clustering_method_reports.ClusteringMethodReport import ClusteringMethodReport
+from immuneML.reports.clustering_reports.ClusteringReport import ClusteringReport
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.reports.gen_model_reports.GenModelReport import GenModelReport
@@ -109,7 +111,10 @@ class DefinitionParser:
         file_path = path / filename
         mode = "w"
 
-        for report_type_class in [DataReport, EncodingReport, MLReport, TrainMLModelReport, MultiDatasetReport, GenModelReport]:
+        report_types = [DataReport, EncodingReport, MLReport, GenModelReport, TrainMLModelReport, ClusteringReport,
+                        MultiDatasetReport]
+
+        for report_type_class in report_types:
             with file_path.open(mode) as file:
                 doc_format = DocumentationFormat(cls=report_type_class,
                                                  cls_name=f"**{report_type_class.DOCS_TITLE}**",

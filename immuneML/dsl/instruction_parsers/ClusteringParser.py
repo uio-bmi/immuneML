@@ -139,7 +139,7 @@ def parse_metrics(key: str, instruction: dict, symbol_table: SymbolTable) -> Lis
 
 def parse_clustering_settings(key: str, instruction: dict, symbol_table: SymbolTable) -> List[ClusteringSetting]:
     ParameterValidator.assert_type_and_value(instruction['clustering_settings'], list, 'ClusteringParser',
-                                             'key:clustering_settings')
+                                             f'{key}:clustering_settings')
     valid_encodings = symbol_table.get_keys_by_type(SymbolType.ENCODING)
     valid_dim_red = [method.symbol for method in symbol_table.get_by_type(SymbolType.ML_METHOD)
                      if isinstance(method.item, DimRedMethod)]
@@ -176,7 +176,8 @@ def make_setting_obj(setting, valid_encodings, valid_clusterings, valid_dim_red,
     encoder = make_encoder_obj(symbol_table, setting['encoding'], instruction['dataset'])
     method = copy.deepcopy(symbol_table.get(setting['method']))
 
-    return ClusteringSetting(encoder=encoder, encoder_params=symbol_table.get_config(setting['encoding']),
+    return ClusteringSetting(encoder=encoder,
+                             encoder_params=symbol_table.get_config(setting['encoding'])['encoder_params'],
                              encoder_name=setting['encoding'], clustering_method=method,
                              clustering_params=symbol_table.get_config(setting['method']),
                              clustering_method_name=setting['method'], dim_reduction_method=dim_reduction,

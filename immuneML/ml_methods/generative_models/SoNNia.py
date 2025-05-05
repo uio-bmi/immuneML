@@ -6,11 +6,10 @@ import numpy as np
 import pandas as pd
 from olga import load_model
 
+from immuneML.data_model.SequenceParams import RegionType, Chain
 from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
-from immuneML.data_model.SequenceParams import RegionType, Chain
-from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.ml_methods.generative_models.OLGA import OLGA
@@ -45,6 +44,8 @@ class SoNNia(GenerativeModel):
     - custom_model_path (str): path for the custom OLGA model if used
 
     - default_model_name (str): name of the default OLGA model if used
+
+    - seed (int): random seed for the model or None
 
 
      **YAML specification:**
@@ -81,7 +82,7 @@ class SoNNia(GenerativeModel):
         with open(path / 'model.json', 'r') as json_file:
             model_data = json.load(json_file)
 
-        sonnia._model = InternalSoNNia(custom_pgen_model=sonnia._model_path,
+        sonnia._model = InternalSoNNia(custom_pgen_model=sonnia._model_path, seed=sonnia.seed,
                                        vj=sonnia.locus in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
                                        include_joint_genes=sonnia.include_joint_genes,
                                        include_indep_genes=not sonnia.include_joint_genes)
@@ -92,12 +93,13 @@ class SoNNia(GenerativeModel):
 
     def __init__(self, locus=None, batch_size: int = None, epochs: int = None, deep: bool = False, name: str = None,
                  default_model_name: str = None, n_gen_seqs: int = None, include_joint_genes: bool = True,
-                 custom_model_path: str = None):
+                 custom_model_path: str = None, seed: int = None):
 
         if locus is not None:
-            super().__init__(Chain.get_chain(str(locus)), region_type=RegionType.IMGT_JUNCTION)
+            super().__init__(Chain.get_chain(str(locus)), region_type=RegionType.IMGT_JUNCTION, seed=seed)
         elif default_model_name is not None:
-            super().__init__(locus=Chain.get_chain(default_model_name[-3:]), region_type=RegionType.IMGT_JUNCTION)
+            super().__init__(locus=Chain.get_chain(default_model_name[-3:]), region_type=RegionType.IMGT_JUNCTION,
+                             seed=seed)
         self.epochs = epochs
         self.batch_size = int(batch_size)
         self.deep = deep

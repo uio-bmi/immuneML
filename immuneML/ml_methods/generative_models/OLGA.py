@@ -102,15 +102,17 @@ class OLGA(GenerativeModel):
         if 'model_path' in kwargs and kwargs['model_path']:
             assert 'locus' in kwargs, f"{OLGA.__name__}: locus not defined."
             assert Path(kwargs['model_path']).is_dir(), \
-                f"{OLGA.__name__}: the model path is not a directory. It has to be a directory and contain files with the exact names as " \
-                f"described in the OLGA package documentation: https://github.com/statbiophys/OLGA."
+                (f"{OLGA.__name__}: the model path is not a directory. It has to be a directory and contain files "
+                 f"with the exact names as described in the OLGA package "
+                 f"documentation: https://github.com/statbiophys/OLGA.")
 
             for filename in OLGA.MODEL_FILENAMES.values():
                 assert (Path(kwargs['model_path']) / filename).is_file(), \
                     f"{OLGA.__name__}: file {filename} is missing in the specified directory: {kwargs['model_path']}"
 
             assert kwargs['default_model_name'] is None, \
-                f"{OLGA.__name__}: default_model_name must be None when model_path is set, but now it is {kwargs['default_model_name']}."
+                (f"{OLGA.__name__}: default_model_name must be None when model_path is set, but now it is "
+                 f"{kwargs['default_model_name']}.")
             locus = Chain.get_chain(kwargs['locus'])
         else:
             ParameterValidator.assert_in_valid_list(kwargs['default_model_name'],
@@ -176,6 +178,7 @@ class OLGA(GenerativeModel):
     def _generate_productive_sequences(self, count: int, path: Path, seed: int, olga_model: InternalOlgaModel,
                                        compute_p_gen: bool,
                                        sequence_type: SequenceType, **kwargs):
+        np.random.seed(seed)
         sequences = pd.DataFrame(index=np.arange(count), columns=OLGA.OUTPUT_COLUMNS)
 
         for i in range(count):

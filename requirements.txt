@@ -28,3 +28,5 @@ IMGTgeneDL
 sentencepiece
 transformers
 esm
+psutil
+kaleido

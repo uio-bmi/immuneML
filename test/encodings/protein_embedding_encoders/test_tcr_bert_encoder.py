@@ -46,7 +46,8 @@ class TestTCRBertEncoder:
         dataset, lc = self._prepare_sequence_test_dataset(path)
 
         encoder = TCRBertEncoder.build_object(dataset=dataset, **{"model": "tcr-bert", 'layers': [-1],
-                                                                  "method": "mean", "batch_size": 1})
+                                                                  "method": "mean", "batch_size": 1,
+                                                                  'device': 'cpu'})
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(
             result_path=path / "encoded",
@@ -66,7 +67,8 @@ class TestTCRBertEncoder:
         dataset, lc = self._prepare_receptor_test_dataset(path)
 
         encoder = TCRBertEncoder.build_object(dataset=dataset, **{"model": "tcr-bert", 'layers': [-1],
-                                                                  "method": "mean", "batch_size": 1})
+                                                                  "method": "mean", "batch_size": 1,
+                                                                  'device': 'cpu'})
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(
             result_path=path / "encoded",
@@ -96,7 +98,7 @@ class TestTCRBertEncoder:
         lc.add_label("label", [True, False])
 
         encoder = TCRBertEncoder.build_object(dataset=dataset, **{"model": "tcr-bert", 'layers': [-1],
-                                                                  "method": "mean", "batch_size": 1})
+                                                                  "method": "mean", "batch_size": 1, 'device': 'cpu'})
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(
             result_path=path / "encoded",

@@ -7,7 +7,7 @@ from immuneML.util.ParameterValidator import ParameterValidator
 
 
 class PredefinedWeighting(ExampleWeightingStrategy):
-    '''
+    """
 
     Example weighting strategy where weights are supplied in a file.
 
@@ -21,11 +21,11 @@ class PredefinedWeighting(ExampleWeightingStrategy):
       1           0.5
       2           1
       3           1
-      ========  ==============
+      ==========  ==============
 
     - separator (str): Column separator in the input file.
 
-    '''
+    """
 
     def __init__(self, file_path, separator, name: str = None):
         super().__init__(name)

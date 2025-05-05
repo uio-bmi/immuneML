@@ -76,14 +76,14 @@ class TestExploratoryAnalysisParser(TestCase):
         process = ExploratoryAnalysisParser().parse("a", instruction, symbol_table)
 
         self.assertEqual(3, len(list(process.state.exploratory_analysis_units.values())))
-        self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[0].report, SequenceLengthDistribution))
+        self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[0].reports[0], SequenceLengthDistribution))
 
         # testing matches with and without labels
-        self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[1].report, Matches))
+        self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[1].reports[0], Matches))
         self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[1].encoder, MatchedSequencesEncoder))
         self.assertEqual(1, len(list(process.state.exploratory_analysis_units.values())[1].encoder.reference_sequences))
 
-        self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[2].report, Matches))
+        self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[2].reports[0], Matches))
         self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[2].encoder, MatchedSequencesEncoder))
         self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[2].example_weighting, PredefinedWeighting))
         self.assertEqual(1, len(list(process.state.exploratory_analysis_units.values())[2].encoder.reference_sequences))

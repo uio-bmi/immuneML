@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 import pandas as pd
 
@@ -38,7 +39,11 @@ class ParameterValidator:
     @staticmethod
     def assert_type_and_value(value, parameter_type, location: str, parameter_name: str,
                               min_inclusive=None, max_inclusive=None,
-                              min_exclusive=None, max_exclusive=None, exact_value=None):
+                              min_exclusive=None, max_exclusive=None, exact_value=None, nullable: bool = False):
+
+        if nullable and value is None:
+            return
+
         type_name = " or ".join([t.__name__ for t in parameter_type]) if type(
             parameter_type) is tuple else parameter_type.__name__
 
@@ -106,3 +111,7 @@ class ParameterValidator:
             assert params['region_type'].upper() in [rt.name for rt in RegionType], \
                 (f"{location}: {params['region_type']} is not a valid region type. Valid sequence types "
                  f"are: {[rt.name for rt in RegionType]}.")
+
+    @classmethod
+    def warn_deprecated_parameter(cls, old_param, new_param, location: str = ""):
+        logging.warning(f"{location}: Parameter {old_param} is deprecated, please use parameter {new_param} instead.")

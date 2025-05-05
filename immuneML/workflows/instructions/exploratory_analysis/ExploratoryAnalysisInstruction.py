@@ -1,7 +1,9 @@
 from pathlib import Path
+from typing import List
 
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.reports.Report import Report
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
@@ -22,6 +24,12 @@ class ExploratoryAnalysisInstruction(Instruction):
     and a report to be executed on the [encoded] dataset. Each analysis specified under `analyses` is completely independent from all
     others.
 
+    .. note::
+
+        The "report" parameter has been updated to support multiple "reports" per analysis unit. For backward
+        compatibility, the "report" key is still accepted, but it will be ignored if "reports" is present.
+        "report" option will be removed in the next major version.
+
     **Specification arguments:**
 
     - analyses (dict): a dictionary of analyses to perform. The keys are the names of different analyses, and the values for each
@@ -39,7 +47,7 @@ class ExploratoryAnalysisInstruction(Instruction):
 
       - dim_reduction: which dimensionality reduction to apply;
 
-      - report: which report to run on the dataset. Reports specified here may be of the category :ref:`**Data reports**`
+      - reports: which reports to run on the dataset. Reports specified here may be of the category :ref:`**Data reports**`
         or :ref:`**Encoding reports**`, depending on whether 'encoding' was specified.
 
     - number_of_processes: (int): how many processes should be created at once to speed up the analysis. For personal
@@ -58,11 +66,11 @@ class ExploratoryAnalysisInstruction(Instruction):
                     my_first_analysis: # user-defined name of the analysis
                         dataset: d1 # dataset to use in the first analysis
                         preprocessing_sequence: p1 # preprocessing sequence to use in the first analysis
-                        report: r1 # which report to generate using the dataset d1
+                        reports: [r1] # which reports to generate using the dataset d1
                     my_second_analysis: # user-defined name of another analysis
                         dataset: d1 # dataset to use in the second analysis - can be the same or different from other analyses
                         encoding: e1 # encoding to apply on the specified dataset (d1)
-                        report: r2 # which report to generate in the second analysis
+                        reports: [r2] # which reports to generate in the second analysis
                         labels: # labels present in the dataset d1 which will be included in the encoded data on which report r2 will be run
                             - celiac # name of the first label as present in the column of dataset's metadata file
                             - CMV # name of the second label as present in the column of dataset's metadata file
@@ -70,7 +78,7 @@ class ExploratoryAnalysisInstruction(Instruction):
                         dataset: d1 # dataset to use in the second analysis - can be the same or different from other analyses
                         encoding: e1 # encoding to apply on the specified dataset (d1)
                         dim_reduction: umap # or None; which dimensionality reduction method to apply to encoded d1
-                        report: r3 # which report to generate in the third analysis
+                        reports: [r3] # which report to generate in the third analysis
                 number_of_processes: 4 # number of parallel processes to create (could speed up the computation)
     """
 
@@ -89,13 +97,13 @@ class ExploratoryAnalysisInstruction(Instruction):
                       include_datetime=True)
             path = self.state.result_path / f"analysis_{key}"
             PathBuilder.build(path)
-            report_result = self.run_unit(unit, path)
-            unit.report_result = report_result
+            report_results = self.run_unit(unit, path)
+            unit.report_results = report_results
             print_log(f"Finished analysis {key} ({index + 1}/{len(self.state.exploratory_analysis_units)}).\n",
                       include_datetime=True)
         return self.state
 
-    def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> ReportResult:
+    def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> List[ReportResult]:
         unit.dataset = self.preprocess_dataset(unit, result_path / "preprocessed_dataset")
         unit.dataset = self.weight_examples(unit, result_path / "weighted_dataset")
         unit.dataset = self.encode(unit, result_path / "encoded_dataset")
@@ -103,12 +111,17 @@ class ExploratoryAnalysisInstruction(Instruction):
         if unit.dim_reduction is not None:
             self._run_dimensionality_reduction(unit)
 
-        if unit.report is not None:
-            report_result = self.run_report(unit, result_path)
-        else:
-            report_result = None
+        report_results = []
 
-        return report_result
+        if unit.reports is not None:
+            for report in unit.reports:
+                if report is not None:
+                    report_result = self.run_report(unit, result_path, report)
+                    report_results.append(report_result)
+        else:
+            report_results = None
+
+        return report_results
 
     def _run_dimensionality_reduction(self, unit: ExploratoryAnalysisUnit):
         result = unit.dim_reduction.fit_transform(unit.dataset)
@@ -156,9 +169,9 @@ class ExploratoryAnalysisInstruction(Instruction):
             encoded_dataset = unit.dataset
         return encoded_dataset
 
-    def run_report(self, unit: ExploratoryAnalysisUnit, result_path: Path):
-        unit.report.result_path = result_path / "report"
-        unit.report.number_of_processes = unit.number_of_processes
+    def run_report(self, unit: ExploratoryAnalysisUnit, result_path: Path, report: Report) -> ReportResult:
+        report.result_path = result_path / f"report_{report.name}"
+        report.number_of_processes = unit.number_of_processes
 
-        unit.report.dataset = unit.dataset
-        return unit.report.generate_report()
+        report.dataset = unit.dataset
+        return report.generate_report()

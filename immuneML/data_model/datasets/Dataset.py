@@ -1,7 +1,7 @@
 import abc
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 from immuneML.data_model.EncodedData import EncodedData
 
@@ -58,7 +58,7 @@ class Dataset:
         pass
 
     @abc.abstractmethod
-    def get_metadata(self, field_names: list, return_df: bool = False):
+    def get_metadata(self, field_names: Union[list, None], return_df: bool = False):
         pass
 
     @abc.abstractmethod

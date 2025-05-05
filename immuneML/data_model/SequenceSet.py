@@ -95,7 +95,7 @@ class Repertoire:
     metadata: dict = None
     identifier: str = None
     dynamic_fields: dict = None
-    element_count: int = None
+    _element_count: int = None
     _bnp_dataclass: bytes = None
     _buffer_type: bytes = None
 
@@ -106,6 +106,12 @@ class Repertoire:
             self.metadata = read_yaml(self.metadata_filename)
         if not self.dynamic_fields and 'type_dict_dynamic_fields' in self.metadata:
             self.dynamic_fields = self.metadata.get('type_dict_dynamic_fields', {})
+
+    @property
+    def element_count(self):
+        if self._element_count is None:
+            self._element_count = len(self.data)
+        return self._element_count
 
     @classmethod
     def build_from_dc_object(cls, path: Path, metadata: dict, filename_base: str = None, identifier: str = None,
@@ -161,7 +167,8 @@ class Repertoire:
         write_yaml(metadata_filename, metadata)
 
         repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier,
-                                dynamic_fields=repertoire.dynamic_fields, element_count=len(data))
+                                dynamic_fields=repertoire.dynamic_fields)
+        repertoire._element_count = len(data)
         return repertoire
 
     @classmethod
@@ -183,8 +190,10 @@ class Repertoire:
         metadata['type_dict_dynamic_fields'] = dynamic_fields
         write_yaml(metadata_filename, metadata)
 
-        repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier, element_count=len(data),
+        repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier,
                                 _bnp_dataclass=type(data), dynamic_fields=dynamic_fields)
+        repertoire._element_count = len(data)
+
         return repertoire
 
     @property

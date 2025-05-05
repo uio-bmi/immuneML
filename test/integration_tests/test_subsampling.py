@@ -39,8 +39,7 @@ class TestSubsamplingWorkflow(TestCase):
                 "subsampling": {
                     "type": "Subsampling",
                     "dataset": "d1",
-                    "subsampled_dataset_sizes": [2, 3],
-                    "dataset_export_formats": ['AIRR']
+                    "subsampled_dataset_sizes": [2, 3]
                 }
             }
         }

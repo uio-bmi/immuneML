@@ -1,14 +1,13 @@
 import logging
-import warnings
-from pathlib import Path
 from collections import Counter
+from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
-from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ReportUtil import ReportUtil
@@ -79,7 +78,7 @@ class VJGeneDistribution(DataReport):
         if isinstance(self.dataset, SequenceDataset) or isinstance(self.dataset, ReceptorDataset):
             report_result = self._get_sequence_receptor_results()
 
-        elif isinstance(self.dataset, RepertoireDataset):
+        else:
             report_result = self._get_repertoire_results()
 
         return report_result
@@ -216,11 +215,11 @@ class VJGeneDistribution(DataReport):
         zmax = max(chain_df[value_to_plot]) if zmax is None else zmax
 
         chain_df = chain_df.pivot(index="v_genes", columns="j_genes", values=value_to_plot).round(decimals=2)
-        figure = px.imshow(chain_df, labels=dict(x="V genes",
-                                                 y="J genes",
-                                                 color=color_name),
-                           text_auto=True, zmin=0, zmax=zmax,
-                           aspect="auto")
+        figure = px.imshow(chain_df, labels=dict(x="V genes", y="J genes", color=color_name),
+                           text_auto=True, zmin=0, zmax=zmax, aspect="auto")
+
+        figure.update_traces(hoverongaps=False)
+        figure.update_layout(template='plotly_white', xaxis=dict(showgrid=False), yaxis=dict(showgrid=False))
 
         file_path = self.result_path / filename
         figure.write_html(str(file_path))
@@ -325,7 +324,7 @@ class VJGeneDistribution(DataReport):
 
     def _supplement_repertoire_df(self, rep_df, repertoire):
         rep_df["repertoire_id"] = repertoire.identifier
-        rep_df["subject_id"] = repertoire.metadata["subject_id"]
+        rep_df["subject_id"] = repertoire.metadata["subject_id"] if "subject_id" in repertoire.metadata else ''
         rep_df["repertoire_size"] = repertoire.get_element_count()
         rep_df["norm_counts"] = rep_df["counts"] / rep_df["repertoire_size"]
 

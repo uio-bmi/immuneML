@@ -5,9 +5,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import torch
-from torch import nn, optim
-from torch.utils.data import DataLoader, TensorDataset
 
 from immuneML.data_model.SequenceParams import RegionType, Chain
 from immuneML.data_model.bnp_util import write_yaml, read_yaml, get_sequence_field_name
@@ -52,6 +49,10 @@ class SimpleLSTM(GenerativeModel):
 
     - prime_str (str): the initial sequence to start generating from
 
+    - seed (int): random seed for the model or None
+
+    - iter_to_report (int): number of epochs between training progress reports
+
 
     **YAML specification:**
 
@@ -87,15 +88,13 @@ class SimpleLSTM(GenerativeModel):
         lstm._model = lstm.make_new_model(state_dict_file)
         return lstm
 
-    ITER_TO_REPORT = 20
-
     def __init__(self, locus: str, sequence_type: str, hidden_size: int, learning_rate: float, num_epochs: int,
                  batch_size: int, num_layers: int, embed_size: int, temperature, device: str, name=None,
-                 region_type: str = RegionType.IMGT_CDR3.name, prime_str: str = "C", window_size: int = 64):
+                 region_type: str = RegionType.IMGT_CDR3.name, prime_str: str = "C", window_size: int = 64,
+                 seed: int = None, iter_to_report: int = 1):
 
-        super().__init__(Chain.get_chain(locus))
+        super().__init__(Chain.get_chain(locus), region_type=RegionType.get_object(region_type), name=name, seed=seed)
         self._model = None
-        self.region_type = RegionType.get_object(region_type)
         self.sequence_type = SequenceType[sequence_type.upper()] if sequence_type else SequenceType.AMINO_ACID
         self.hidden_size = hidden_size
         self.learning_rate = learning_rate
@@ -106,8 +105,8 @@ class SimpleLSTM(GenerativeModel):
         self.temperature = temperature
         self.prime_str = prime_str
         self.window_size = window_size
-        self.name = name
         self.device = device
+        self.iter_to_report = iter_to_report
         self.unique_letters = EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + ["*"]
         self.num_letters = len(self.unique_letters)
         self.letter_to_index = {letter: i for i, letter in enumerate(self.unique_letters)}
@@ -115,13 +114,14 @@ class SimpleLSTM(GenerativeModel):
         self.loss_summary_path = None
 
     def make_new_model(self, state_dict_file: Path = None):
+        from torch import as_tensor
         model = SimpleLSTMGenerator(input_size=self.num_letters, hidden_size=self.hidden_size,
                                     embed_size=self.embed_size, output_size=self.num_letters,
                                     batch_size=self.batch_size, device=self.device)
 
         if isinstance(state_dict_file, Path) and state_dict_file.is_file():
             state_dict = read_yaml(state_dict_file)
-            state_dict = {k: torch.as_tensor(v, device=self.device) for k, v in state_dict.items()}
+            state_dict = {k: as_tensor(v, device=self.device) for k, v in state_dict.items()}
             model.load_state_dict(state_dict)
 
         model.to(self.device)
@@ -129,7 +129,7 @@ class SimpleLSTM(GenerativeModel):
         return model
 
     def _log_training_progress(self, loss_summary, epoch, loss):
-        if (epoch + 1) % SimpleLSTM.ITER_TO_REPORT == 0:
+        if (epoch + 1) % self.iter_to_report == 0:
             message = f"{SimpleLSTM.__name__}: Epoch [{epoch + 1}/{self.num_epochs}]: loss: {loss:.4f}"
             print_log(message, True)
 
@@ -138,6 +138,11 @@ class SimpleLSTM(GenerativeModel):
         return loss_summary
 
     def fit(self, data, path: Path = None):
+        import torch
+        from torch import nn, optim
+
+        if self.seed is not None:
+            torch.manual_seed(self.seed)
 
         data_loader = self._encode_dataset(data)
         model = self.make_new_model()
@@ -188,6 +193,9 @@ class SimpleLSTM(GenerativeModel):
                 logging.error(f"{SimpleLSTM.__name__}: failed to save loss summary: {e};\n{loss_summary}")
 
     def _encode_dataset(self, dataset: SequenceDataset):
+        from torch import as_tensor
+        from torch.utils.data import DataLoader, TensorDataset
+
         seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
         sequences = dataset.get_attribute(seq_col).tolist()
 
@@ -195,7 +203,7 @@ class SimpleLSTM(GenerativeModel):
         sequences = list(chain.from_iterable(
             [[self.letter_to_index[letter] for letter in seq] + [self.letter_to_index['*']] for seq in sequences]))
 
-        sequences = torch.as_tensor(sequences, device=self.device).long()
+        sequences = as_tensor(sequences, device=self.device).long()
 
         # Create overlapping windows of size window_size
         # stride=1 means each window overlaps with previous window by window_size-1 elements
@@ -212,6 +220,7 @@ class SimpleLSTM(GenerativeModel):
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool,
                            max_failed_trials: int = 1000):
+        import torch
 
         torch.manual_seed(seed)
 

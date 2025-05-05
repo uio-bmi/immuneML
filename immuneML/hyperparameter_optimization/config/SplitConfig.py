@@ -16,13 +16,16 @@ class SplitConfig:
 
     - k_fold (k-fold cross-validation)
 
-    - stratified_k_fold (stratified k-fold cross-validation that can be used when immuneML is used for single-label classification, see `this documentation <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html>`_ for more details on how this is implemented)
+    - stratified_k_fold (stratified k-fold cross-validation that can be used when immuneML is used for single-label
+      classification, see `this documentation <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html>`_ for more details on how this is implemented)
 
     - random (Monte Carlo cross-validation - randomly splitting the dataset to training and test datasets)
 
     - manual (train and test dataset are explicitly specified by providing metadata files for the two datasets)
 
-    - leave_one_out_stratification (leave-one-out CV where one refers to a specific parameter, e.g. if subject is known in a receptor dataset, it is possible to have leave-subject-out CV - currently only available for receptor and sequence datasets).
+    - leave_one_out_stratification (leave-one-out CV where one refers to a specific parameter, e.g. if subject is known
+      in a receptor dataset, it is possible to have leave-subject-out CV; or if a dataset contains multiple batches, it
+      is possible to split evaluation by batch).
 
     **Specification arguments:**
 

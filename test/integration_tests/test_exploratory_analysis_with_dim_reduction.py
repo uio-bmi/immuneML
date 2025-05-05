@@ -32,8 +32,13 @@ def test_dimensionality_reduction():
             "reports": {
                 "rep1": {
                     "DimensionalityReduction": {
-                        "label": "diseased",
+                        "labels": ["diseased"],
                         "dim_red_method": {"TSNE": {"n_components": 2, 'init': 'random', "perplexity": 5}}
+                    }
+                },
+                "rep2": {
+                    "DesignMatrixExporter": {
+                        "file_format": "csv"
                     }
                 }
             },
@@ -49,12 +54,12 @@ def test_dimensionality_reduction():
             }
         },
         "instructions": {
-            "inst1": {
+            "inst2": {
                 "type": "ExploratoryAnalysis",
                 "analyses": {
                     "my_analysis_1": {  # user-defined analysis name
                         "dataset": "d1",
-                        "report": "rep1",
+                        "reports": ["rep1", "rep2"],
                         "dim_reduction": "pca",
                         "encoding": "e1"
                     },

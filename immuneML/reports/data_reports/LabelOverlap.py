@@ -75,6 +75,8 @@ class LabelOverlap(DataReport):
             colorscale=[[0, '#e5f6f6'], [0.5, '#66b2b2'], [1, '#006666']],  # Custom teal colorscale
             text=overlap_matrix.values,
             texttemplate="%{text}",
+            hovertemplate=f"{self.row_label}: " + "%{y}<br>" + f"{self.column_label}: "
+                          + "%{x}<br>Count: %{z}<extra></extra>",
             textfont={"size": 14},
             showscale=False,  # Hide the color scale legend
             hoverongaps=False,

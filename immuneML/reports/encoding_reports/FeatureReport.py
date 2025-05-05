@@ -51,6 +51,14 @@ class FeatureReport(EncodingReport):
     def _plot(self, data_long_format) -> ReportOutput:
         pass
 
+    def _get_grouped_data(self, data_long_format, cols_list):
+        cols_list = [i for i in cols_list if i]
+        cols_list = list(set(cols_list))
+        grouped_data = data_long_format.groupby(cols_list, as_index=False).agg(
+            {"value": ['mean', self.std]})
+        grouped_data.columns = grouped_data.columns.map(''.join)
+        return grouped_data
+
     def check_prerequisites(self):
         location = self.__class__.__name__
         run_report = True
