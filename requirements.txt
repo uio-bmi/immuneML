@@ -1,25 +1,20 @@
 # main packages
 numpy<=1.26.4
-pytest>=4
 pandas>=2.1.0
 PyYAML>=5.3
 scikit-learn>=0.23
-gensim>=4
 matplotlib>=3.1
 editdistance
 regex
 tzlocal
 airr>=1,<1.4
 pystache
-torch>=1.5.1
 dill>=0.3
 plotly>=4
-logomaker>=0.8
 matplotlib-venn>=0.11
 scipy<=1.12.0
+bionumpy>=1.0.12
 umap-learn
-bionumpy==1.0.12
-npstructures
 fisher>=0.1.9
 fishersapi
 olga>=1.2.4

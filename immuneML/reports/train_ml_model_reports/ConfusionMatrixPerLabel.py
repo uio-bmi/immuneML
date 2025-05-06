@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 from pathlib import Path
 
 import pandas as pd
@@ -8,18 +9,14 @@ from plotly.subplots import make_subplots
 from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
-from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
-from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.train_ml_model_reports.PerformancePerLabel import PerformancePerLabel
-from immuneML.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from immuneML.util.ParameterValidator import ParameterValidator
-from immuneML.util.PathBuilder import PathBuilder
 
 
 class ConfusionMatrixPerLabel(PerformancePerLabel):
     """
-    Report for TrainMLModel instruction: plots the confusion matrix for the label (for each label value).
+    Report for TrainMLModel instruction: plots the confusion matrix split by the alternative label (for each label value).
     It can plot this on train or test data or for selection or assessment results. The confusion matrix will be
     reported per each hyperparameter setting (preprocessing, encoding and ML method combination).
 
@@ -34,9 +31,9 @@ class ConfusionMatrixPerLabel(PerformancePerLabel):
 
     - plot_on_test (bool): whether to plot the confusion matrix on the test data (True by default).
 
-    - plot_on_selection (bool): whether to plot the confusion matrix on the selection data (False by default).
+    - compute_for_selection (bool): whether to plot the confusion matrix on the selection data (False by default).
 
-    - plot_on_assessment (bool): whether to plot the confusion matrix on the assessment data (True by default).
+    - compute_for_assessment (bool): whether to plot the confusion matrix on the assessment data (True by default).
 
 
 
@@ -75,13 +72,16 @@ class ConfusionMatrixPerLabel(PerformancePerLabel):
                          compute_for_selection=compute_for_selection, plot_on_test=plot_on_test,
                          plot_on_train=plot_on_train)
 
+    def _write_performance_tables(self, data: pd.DataFrame, dataset_desc: str, name_suffix: str, label_name: str):
+        table_path = self.result_path / f"{name_suffix}_performance.csv"
+        tmp_data = deepcopy(data)
+        tmp_data['performance'] = tmp_data['performance'].astype(str)
+        tmp_data.to_csv(table_path, index=False)
+        return ReportOutput(table_path, self._get_desc_from_name_suffix(name_suffix, label_name, dataset_desc))
+
     def _process_dataset(self, dataset_info: dict, label: Label, hp_item: HPItem):
         predictions = dataset_info['predictions']
         metadata = dataset_info['metadata']
-
-        assert len(label.values) == 2, (
-            f"ConfusionMatrixPerLabel: the label {label.name} has more than 2 classes, "
-            f"but this report currently supports only binary case. Skipping the report.")
 
         # Calculate overall performance
         overall_performance = self._calculate_performance(predictions, label)
@@ -131,29 +131,24 @@ class ConfusionMatrixPerLabel(PerformancePerLabel):
                                 shared_yaxes=True, shared_xaxes=True, x_title="Predicted Label", y_title='True Label')
 
             for setting_ind, setting in enumerate(data_tmp['setting'].unique()):
-                tn, fp, fn, tp = data_tmp[data_tmp['setting'] == setting]['performance'].values[0].ravel()
-                logging.info(f"ConfusionMatrixPerLabel: {setting}: tn={tn}, fp={fp}, fn={fn}, tp={tp}")
+                values = data_tmp[data_tmp['setting'] == setting]['performance'].values[0]
                 fig.add_trace(go.Heatmap(texttemplate="%{text}",
-                                         hovertemplate="True: %{x}<br>Predicted: %{y}<br>Count: %{text}<extra></extra>",
-                                         z=[[tn, fp], [fn, tp]],
+                                         hovertemplate="True value: %{y}<br>Predicted value: %{x}<br>Count: %{z}<extra></extra>",
+                                         z=values,
                                          x=label_values,
                                          y=label_values, showscale=False,
-                                         text=[[tn, fp], [fn, tp]]), row=setting_ind + 1, col=1)
+                                         text=values), row=setting_ind + 1, col=1)
 
                 for ind, alt_label_value in enumerate(self.alternative_label_values):
-                    tn, fp, fn, tp = data_tmp[data_tmp['setting'] == setting][f"performance_{alt_label_value}"].values[
-                        0].ravel()
-                    logging.info(
-                        f"ConfusionMatrixPerLabel: {setting} - {alt_label_value}: tn={tn}, fp={fp}, fn={fn}, tp={tp}")
-                    fig.add_trace(go.Heatmap(z=[[tn, fp], [fn, tp]], texttemplate="%{text}", text=[[tn, fp], [fn, tp]],
-                                             hovertemplate="True: %{x}<br>Predicted: %{y}<br>Count: %{text}<extra></extra>",
+                    values = data_tmp[data_tmp['setting'] == setting][f"performance_{alt_label_value}"].values[0]
+                    fig.add_trace(go.Heatmap(z=values, texttemplate="%{text}", text=values,
+                                             hovertemplate="True value: %{y}<br>Predicted value: %{x}<br>Count: %{z}<extra></extra>",
                                              x=label_values, y=label_values, showscale=False),
                                   row=setting_ind + 1, col=ind + 2)
 
                 fig.update_yaxes(title_text=setting, row=setting_ind + 1, col=1)
-                fig.update_layout(template='plotly_white', showlegend=False)
-                fig.update_yaxes(autorange="reversed")
-                fig.update_layout(margin_l=140, title=f"Confusion Matrix (split {run_id})")
+                fig.update_layout(template='plotly_white', showlegend=False,
+                                  margin_l=140, title=f"Confusion Matrix (split {run_id})")
                 fig.update_annotations(selector=dict(text='True Label'), xshift=-100)
 
             figs.append(fig)

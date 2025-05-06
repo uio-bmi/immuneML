@@ -34,6 +34,10 @@ class PerformancePerLabel(TrainMLModelReport):
 
     - compute_for_assessment (bool): If True, the report will be computed for the assessment. Default is True.
 
+    - plot_on_test (bool): If True, the report will be plotted on the test data. Default is True.
+
+    - plot_on_train (bool): If True, the report will be plotted on the training data. Default is False.
+
     **YAML specification:**
 
     .. code-block:: yaml
@@ -43,6 +47,7 @@ class PerformancePerLabel(TrainMLModelReport):
                 PerformancePerLabel:
                     alternative_label: batch
                     metric: balanced_accuracy
+
     """
 
     def __init__(self, alternative_label: str, metric: str = "balanced_accuracy", compute_for_selection: bool = True,

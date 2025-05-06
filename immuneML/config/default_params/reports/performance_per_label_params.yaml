@@ -1,2 +1,4 @@
 compute_for_selection: True
 compute_for_assessment: True
+plot_on_train: false
+plot_on_test: true
