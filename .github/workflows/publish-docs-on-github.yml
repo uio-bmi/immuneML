@@ -24,7 +24,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements_sphinx.txt
-          export PYTHONPATH="${PYTHONPATH}:./immuneML/"
+          export PYTHONPATH="${PYTHONPATH}:/home/runner/work/immuneML/immuneML/"
 
       - name: Run custom docs setup
         run: sh scripts/generate_module_API_docs.sh
