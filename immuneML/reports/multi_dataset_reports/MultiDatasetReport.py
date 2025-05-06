@@ -6,7 +6,7 @@ from immuneML.reports.Report import Report
 
 
 class MultiDatasetReport(Report):
-    '''
+    """
     Multi dataset reports are special reports that can be specified when running immuneML with the :py:obj:`~immuneML.api.aggregated_runs.MultiDatasetBenchmarkTool.MultiDatasetBenchmarkTool`.
     See Manuscript use case 1: :ref:`Robustness assessment` for an example.
 
@@ -21,7 +21,8 @@ class MultiDatasetReport(Report):
             benchmark_reports:
                 - my_benchmark_report
             # other parameters...
-    '''
+
+    """
     DOCS_TITLE = "Multi dataset reports"
 
     def __init__(self, instruction_states: List[TrainMLModelState] = None, name: str = None, result_path: Path = None, number_of_processes: int = 1):

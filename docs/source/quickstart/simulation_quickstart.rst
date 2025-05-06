@@ -1,5 +1,5 @@
 LIgO simulation quickstart
-=======================
+============================
 
 As LIgO is now a part of immuneML, it can be directly used for simulation.
 
