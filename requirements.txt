@@ -20,7 +20,5 @@ fishersapi
 olga>=1.2.4
 stitchr
 IMGTgeneDL
-transformers
-esm
 psutil
 kaleido
