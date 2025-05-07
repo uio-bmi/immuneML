@@ -8,21 +8,27 @@ Information for new developers
    :twitter:title: immuneML dev docs: Information for new developers
    :twitter:description: Information for new developers
 
-Besides the challenge of developing a new ML method, setting up the computational pipelines to thoroughly (and correctly) benchmark the new method against existing solutions is a large and complex task.
-And in practice, independently developed methods may be evaluated under different conditions, resulting in a lack of transparency regarding which method(s) are optimal for a given prediction problem.
+Besides the challenge of developing a new ML method, setting up the computational pipelines to thoroughly
+(and correctly) benchmark the new method against existing solutions is a large and complex task.
+And in practice, independently developed methods may be evaluated under different conditions, resulting in a lack of
+transparency regarding which method(s) are optimal for a given prediction problem.
 
 We therefore designed immuneML as a platform to support and accelerate the development of AIRR-ML methods and benchmarking thereof.
 Integration into immuneML has benefits both for new and existing AIRR-ML methods.
 
 We highly encourage anyone to integrate their method into immuneML using the provided tutorials.
-If you experience any issues or have additional questions, please feel free to reach out to contact@immuneml.uio.no and we will be happy to help!
+If you experience any issues or have additional questions, please feel free to reach out to contact@immuneml.uio.no
+and we will be happy to help!
 
 Why should I integrate my method into immuneML?
 ----------------------------------------------------
 
 
-If you are designing a new AIRR-ML method from scratch, developing the method directly as a module inside immuneML can save you a lot of time and boilerplate code.
-And even for already existing methods, integrating it into immuneML directly allows efficient and transparent benchmarking against other methods, and makes your tool just as easily available for other AIRR-ML researchers interested in benchmarking.
+If you are designing a new AIRR-ML method from scratch, developing the method directly as a module inside immuneML
+can save you a lot of time and boilerplate code.
+And even for already existing methods, integrating it into immuneML directly allows efficient and transparent
+benchmarking against other methods, and makes your tool just as easily available for other AIRR-ML researchers
+interested in benchmarking.
 
 The following tasks have already been implemented (and thoroughly tested) in immuneML and can directly be reused:
 
@@ -51,10 +57,8 @@ How do I get started integrating my method into immuneML?
 High-level algorithm design
 ****************************
 
-Within immuneML, the machine learning 'algorithms' that are being evaluated against one another are called the ML setting.
-An ML setting is the set of all the algorithmic steps between the input data and the output prediction.
-In other words, the combination of encoding, ML method, optional preprocessing steps and all associated hyperparameters.
-
+Within immuneML, ML settings consisting of data preprocessing (optional), encoding and ML method (along with a concrete
+set of hyperparameters) are being evaluated and compared.
 
 .. figure:: ../_static/images/ML_setting.png
   :width: 70%
@@ -90,7 +94,7 @@ Designing an ML method
 An ML method takes in an encoded data matrix, fits a model and is able to make predictions on new data.
 The dataset contains :code:`labels` with two or more :code:`classes`.
 For example, a sequence dataset can have label "celiac" and classes "sick" and "healthy".
-ML Models added to immuneML may be binary classifiers (2 classes) or support more classes,
+ML models added to immuneML may be binary classifiers (2 classes) or support more classes,
 but a model is always trained for only one label at a time. If multiple labels are specified
 during training (e.g., sick/healthy for multiple different diseases), the model is trained for only one label at a time.
 It is currently not yet possible to use immuneML for regression (predicting numeric values instead of classes).

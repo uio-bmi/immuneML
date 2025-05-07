@@ -46,33 +46,33 @@ Alternatively to using PyCharm, the following steps describe how to perform the 
 
 2. Execute the command to clone the repository:
 
-  .. code-block:: console
+.. code-block:: console
 
-    git clone https://github.com/uio-bmi/immuneML.git
+  git clone https://github.com/uio-bmi/immuneML.git
 
 3. From the project folder (immuneML folder created when the repository was cloned
 from GitHub), install the requirements from the requirements.txt file (this file can be found in the immuneML root folder):
 
-  .. code-block:: console
+.. code-block:: console
 
-    pip install -r requirements.txt
-    pip install -e .
+  pip install -r requirements.txt
+  pip install -e .
 
 
 If you want to install optional requirements (DeepRC, TCRdist, KerasSequenceCNN), install the relevant requirements file(s):
 
-  .. code-block:: console
+.. code-block:: console
 
-    pip install -r requirements_DeepRC.txt
-    pip install -r requirements_TCRdist.txt
-    pip install -r requirements_KerasSequenceCNN.txt
+  pip install -r requirements_DeepRC.txt
+  pip install -r requirements_TCRdist.txt
+  pip install -r requirements_KerasSequenceCNN.txt
 
 4. If not setting up the project in PyCharm, it might be necessary to manually add the root project folder to PYTHONPATH.
 The syntax for Unix-based systems is the following:
 
-  .. code-block:: console
+.. code-block:: console
 
-    export PYTHONPATH=$PYTHONPATH:$(pwd)
+  export PYTHONPATH=$PYTHONPATH:$(pwd)
 
 
 Testing the development installation
@@ -88,15 +88,9 @@ Running Quickstart
 Running unit tests
 **********************************************
 
-For a thorough testing of the immuneML codebase, you can run the unit tests. Make sure the package :code:`unittest` is installed:
-
-  .. code-block:: console
-
-    pip install unittest
-
-This can reveal issues related to for instance missing or incompatible dependencies.
-All unit tests must pass before adding new features to the main immuneML codebase, so it is highly recommended to check if the tests pass before starting development.
-Note that it may take some time (up to 20~30 minutes) for all tests to complete.
+For a thorough testing of the immuneML codebase, you can run the unit tests. For that purpose, you can
+use :code:`unittest` or :code:`pytest` packages. Before running the tests, make sure the package is installed in your
+environment, as they are not listed as a dependency in the immuneML package.
 
 In PyCharm, unit tests can be run by right-clicking the folder named :code:`test` at the project root, and clicking "Run 'Python tests in test...'".
 
@@ -107,7 +101,7 @@ In PyCharm, unit tests can be run by right-clicking the folder named :code:`test
 
 Alternatively, unit tests can be run on the command line using the following command (see also: `the official unittest documentation <https://docs.python.org/3/library/unittest.html>`_):
 
-  .. code-block:: console
+.. code-block:: console
 
-    python -m unittest
+  python -m unittest
 

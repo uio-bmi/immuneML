@@ -1,6 +1,8 @@
 import numpy as np
 
 from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.SequenceParams import RegionType, Chain
+from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset, ReceptorDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
@@ -105,60 +107,74 @@ class SillyEncoder(DatasetEncoder):
             return self._get_encoded_repertoires(dataset)
 
     def _get_encoded_sequences(self, dataset: SequenceDataset) -> np.array:
-        encoded_sequences = []
 
+        # for sequence dataset, the data can be access as a list of ReceptorSequence objects:
         for sequence in dataset.get_data():
             # Each sequence is a ReceptorSequence object.
             # Different properties of the sequence can be retrieved here, examples:
-            identifier = sequence.get_id()
-            aa_seq = sequence.get_sequence() # gets the amino acid sequence by default (alternative: nucleotide)
-            v_gene = sequence.get_attribute("v_gene") # gets the v and j genes (without *allele)
-            j_gene = sequence.get_attribute("j_gene")
+            identifier = sequence.sequence_id
+            aa_seq = sequence.sequence_aa
+            v_gene = sequence.v_call
+            j_gene = sequence.j_call
 
-            # In this encoding, sequence information is ignored, random features are generated
-            random_encoding = np.random.rand(self.embedding_len)
-            encoded_sequences.append(random_encoding)
+        # alternatively, data can be accessed through the AIRRSequenceSet object
+        # (a bionumpy dataclass, similar to pandas dataframes):
 
-        return np.array(encoded_sequences)
+        all_cdr3_aa = dataset.data.cdr3_aa.tolist()  # a list of strings of all sequences in the dataset
+        all_v_call = dataset.data.v_call.tolist()  # a list of strings of all v genes in the dataset
+
+        # it can also be accessed as a bionumpy dataclass object:
+        cdr3_aa = dataset.data.cdr3_aa  # useful for faster computations
+
+        # in this example, we just return a random matrix of n_examples x n_features
+        return np.random.rand(dataset.element_count, self.embedding_len)
 
     def _get_encoded_receptors(self, dataset: ReceptorDataset) -> np.array:
-        encoded_receptors = []
 
+        # for receptor dataset, the data can be access as a list of Receptor objects:
         for receptor in dataset.get_data():
-            # Each receptor is a Receptor subclass object (e.g., TCABReceptor, BCReceptor)
             # A Receptor contains two paired ReceptorSequence objects
-            identifier = receptor.get_id()
+            identifier = receptor.receptor_id
             chain1, chain2 = receptor.get_chains()
             sequence1 = receptor.get_chain(chain1)
             sequence2 = receptor.get_chain(chain2)
 
             # Properties of the specific ReceptorSequences can be retrieved, examples:
-            aa_seq1 = sequence1.get_sequence() # gets the amino acid sequence by default (alternative: nucleotide)
-            v_gene_seq1 = sequence1.get_attribute("v_gene") # gets the v and j genes (without *allele)
-            j_gene_seq1 = sequence1.get_attribute("j_gene")
+            aa_seq1 = sequence1.sequence_aa # gets the amino acid sequence by default (alternative: nucleotide)
+            v_gene_seq1 = sequence1.v_call # gets the v and j genes
+            j_gene_seq1 = sequence1.j_call
 
-            # It's also possible to retrieve this information for both chains at the Receptor level:
-            aa_seq1, aa_seq2 = receptor.get_attribute("sequence_aa")
-            v_gene_seq1, v_gene_seq2 = receptor.get_attribute("v_gene")
+        # data can be also accessed through the AIRRSequenceSet object
+        # (a bionumpy dataclass, similar to pandas dataframes)
+        # this is useful when speed is important
 
-            # In this encoding, sequence information is ignored, random features are generated
-            random_encoding = np.random.rand(self.embedding_len)
-            encoded_receptors.append(random_encoding)
+        # all cdr3 aa sequences of the beta chain
+        cdr3_aa_beta = dataset.data.cdr3_aa[dataset.data.locus == Chain.BETA.to_string()].tolist()
+        # all cdr3 aa sequences of the alpha chain
+        cdr3_aa_alpha = dataset.data.cdr3_aa[dataset.data.locus == Chain.ALPHA.to_string()].tolist()
 
-        return np.array(encoded_receptors)
+        # here we just return a random matrix of n_examples x n_features
+        return np.random.rand(dataset.element_count, self.embedding_len)
 
     def _get_encoded_repertoires(self, dataset: RepertoireDataset) -> np.array:
         encoded_repertoires = []
 
         for repertoire in dataset.get_data():
             # Each repertoire is a Repertoire object.
-            # Different properties of the repertoire can be retrieved here, examples:
-            identifiers = repertoire.get_sequence_identifiers(as_list=True)
-            aa_sequences = repertoire.get_sequence_aas(as_list=True)
-            v_genes = repertoire.get_v_genes() # gets the v and j genes (without *allele)
-            j_genes = repertoire.get_j_genes()
-            sequence_counts = repertoire.get_counts()
-            chains = repertoire.get_chains()
+            # Receptor sequences from the repertoire objects can be retrieved as objects for the given region type:
+            for sequence in repertoire.sequences(region_type=RegionType.IMGT_CDR3):
+                assert isinstance(sequence, ReceptorSequence) # each sequence is an object of ReceptorSequence class
+                seq_id = sequence.sequence_id
+                aa_seq = sequence.sequence_aa
+                v_call = sequence.v_call
+
+            # alternatively, the sequences can be retrieved as AIRRSequenceSet objects (bionumpy dataclasses,
+            # similar to pandas dataframes):
+            all_aa_sequences = repertoire.data.cdr3_aa.tolist()  # a list of strings of all sequences in the repertoire
+            all_aa_sequences = repertoire.data.cdr3_aa  # a bionumpy dataclass object containing all sequences in the repertoire
+
+            # other properties can also be accessed in the same way:
+            v_calls = repertoire.data.v_call.tolist()  # a list of strings of all v genes in the repertoire
 
             # In this encoding, repertoire information is ignored, random features are generated
             random_encoding = np.random.rand(self.embedding_len)

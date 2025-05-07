@@ -3,10 +3,10 @@ import yaml
 import numpy as np
 from pathlib import Path
 
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Label import Label
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
 
 
 class SillyClassifier(MLMethod):
@@ -37,7 +37,8 @@ class SillyClassifier(MLMethod):
         self.silly_model_fitted = False
 
     def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
-        # Since the silly classifier makes random predictions and ignores training data, no model is fitted during training.
+        # Since the silly classifier makes random predictions and ignores training data,
+        # no model is fitted during training.
         # For any other method, model fitting should be implemented here.
         self.silly_model_fitted = True
 

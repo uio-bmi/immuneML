@@ -11,7 +11,9 @@ immuneML execution flow
 
 immuneML is run by providing the analysis specification and the output path. This section
 describes what happens internally when immuneML is run.
-Note: this is advanced developer documentation, these details are not crucial to understand for adding new components (MLMethod, Encoder, Report classes) to immuneML.
+
+Note: this is advanced developer documentation, these details are not crucial to understand for adding new components
+(MLMethod, Encoder, Report classes) to immuneML.
 
 .. figure:: ../_static/images/dev_docs/running_immuneML.png
   :width: 70%
@@ -26,10 +28,12 @@ running the specified analyses and constructing the HTML output.
 Parsing the specification
 ---------------------------
 
-To parse the specification file, :code:`ImmuneMLApp` calls :code:`ImmunMLParser` from the dsl (domain-specific language) package. All parsing functionality is
+To parse the specification file, :code:`ImmuneMLApp` calls :code:`ImmuneMLParser` from the :code:`immuneML.dsl`
+(domain-specific language) package. All parsing functionality is
 located in that package. Parsing consists of two major steps again: parsing the definitions component (motifs, signals, encodings, datasets,
 ML methods, reports, etc) and parsing the instructions (concrete analyses to be performed using the parsed components). This maps to two classes:
 :code:`DefinitionParser` and :code:`InstructionParser`.
+
 :code:`DefinitionParser` parses each of the components and invokes a separate parser class (e.g., :code:`EncodingParser`, :code:`MLParser`) for each component.
 Parsing entails reading the YAML, and determining which analysis components are specified with which parameters.
 The result is a set of objects and classes which are stored in a :code:`SymbolTable`.
@@ -59,9 +63,9 @@ Creating the semantic model and running instructions
 Once the YAML specification is parsed, all instruction objects are extracted and forwarded to the semantic model. The object of the :code:`SemanticModel`
 class will then run all instructions one by one, collect their states as the output of each instruction and use them to generate the presentation for
 the user. Each instruction class is a subclass of Instruction class and implements `run()` method and returns the instruction's state object as output.
-The instruction state objects consist of input data and parameters for the instruction and during the execution of the instruction the results are
-also added to the state. This is then used as input for the presentation part where the results are shown to the user. The cod for the presentation
-part is located in the `presentation` package and are grouped by presentation format. The only format supported at the moment is HTML.
+The instruction state objects consist of input data and parameters for the instruction and the instruction results (added to the state during the execution).
+This is then used as input for the presentation part where the results are shown to the user. The code for the presentation
+part is located in the :code:`immuneML.presentation` package and are grouped by presentation format. The only format supported at the moment is HTML.
 
 
 Constructing the HTML output

@@ -8,8 +8,8 @@ stored result is retrieved from the file and returned.
 We recommend applying caching to methods which are computationally expensive and may be called
 multiple times in the same way. For example, encoders are a good target for caching as they
 may take long to compute and can be called multiple times on the same data when combined
-with different ML methods. But ML methods typically do not require caching, as you would
-want to apply ML methods with different parameters or to differently encoded data.
+with different ML methods. ML methods typically do not require caching, as you would
+want to fit ML methods with different parameters or to differently encoded data.
 
 
 Any method call in immuneML can be cached as follows:
@@ -21,13 +21,13 @@ Any method call in immuneML can be cached as follows:
 
 The :code:`CacheHandler.memo_by_params` method does the following:
 
-- Using the caching parameters, a unique cache key (random string) is created.
+- Using the caching parameters, a unique cache key (string) is created.
 - CacheHandler checks if there already exists a previously computed result that is associated with this key.
 - If the result exists, the result is returned without (re)computing the method.
 - If the result does not exist, the method is computed, its result is stored using the cache key, and the result is returned.
 
 
-The :code:`lambda` function call simply calls the method to be cached, using any required parameters.
+The :code:`lambda` function call simply calls the method whose results will be cached, using any required parameters.
 The :code:`cache_params` represent the unique, immutable parameters used to compute the cache key.
 It should have the following properties:
 
@@ -59,4 +59,4 @@ caching parameters as follows:
 The construction of caching parameters must be done carefully, as caching bugs are extremely difficult
 to discover. Rather add 'too much' information than too little.
 A missing parameter will not lead to an error, but can result in silently copying over
-results from previous method calls.
+results from previous method calls that do not match the current call.
