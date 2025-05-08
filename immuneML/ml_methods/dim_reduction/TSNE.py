@@ -1,6 +1,7 @@
 import logging
 from typing import List
 
+import numpy as np
 from sklearn.manifold import TSNE as SklearnTSNE
 
 from immuneML.data_model.datasets.Dataset import Dataset
@@ -34,16 +35,10 @@ class TSNE(DimRedMethod):
         self.method_kwargs = kwargs
         self.method = SklearnTSNE(**self.method_kwargs)
 
-    def fit(self, dataset: Dataset):
-        self.method.fit(dataset.encoded_data.examples)
-
-    def transform(self, dataset: Dataset):
+    def transform(self, dataset: Dataset = None, design_matrix: np.ndarray = None):
         logging.warning(f"{TSNE.__name__}: calling transform method of TSNE, but it only supports fit_transform. "
                         f"Fitting the model and returning the transformed data...")
-        return self.method.fit_transform(dataset.encoded_data.examples)
-
-    def fit_transform(self, dataset: Dataset):
-        return self.method.fit_transform(dataset.encoded_data.examples)
+        return super().transform(dataset, design_matrix)
 
     def get_dimension_names(self) -> List[str]:
         return [f"tSNE_dimension_{i+1}" for i in range(self.method.n_components)]

@@ -2,7 +2,6 @@ from typing import List
 
 from sklearn.decomposition import KernelPCA as SklearnPCA
 
-from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 
 
@@ -32,15 +31,6 @@ class KernelPCA(DimRedMethod):
         super().__init__(name)
         self.method_kwargs = kwargs
         self.method = SklearnPCA(**self.method_kwargs)
-
-    def fit(self, dataset: Dataset):
-        self.method.fit(dataset.encoded_data.examples)
-
-    def transform(self, dataset: Dataset):
-        return self.method.transform(dataset.encoded_data.examples)
-
-    def fit_transform(self, dataset: Dataset):
-        return self.method.fit_transform(dataset.encoded_data.get_examples_as_np_matrix())
 
     def get_dimension_names(self) -> List[str]:
         return [f"PC{i+1}" for i in range(self.method.n_components)]

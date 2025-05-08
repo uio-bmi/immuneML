@@ -228,7 +228,7 @@ class RandomDatasetGenerator:
         sequences = [ReceptorSequence(uuid.uuid4().hex, None,
                                       "".join(random.choices(alphabet,
                                                              k=random.choices(list(length_probabilities.keys()),
-                                                                              list(length_probabilities.values())[0]))),
+                                                                              list(length_probabilities.values()))[0])),
                                       locus=chain, v_call=chain + "V1-1*01", j_call=chain + "J1-1*01",
                                       duplicate_count=random.randint(1, 10),
                                       metadata={
