@@ -25,7 +25,8 @@ class VAESummary(GenModelReport):
     """
     This report provides the summary of the train SimpleVAE and shows the following:
 
-    - plots of the latent space after applying PCA to reduce the data to 2 dimensions, highlighted by V and J gene
+    - plots of the latent space after applying a dimensionality reduction method to reduce the data to 2 dimensions,
+      highlighted by V and J gene
     - plots the histogram for each latent dimension
     - plots loss per epoch
 
