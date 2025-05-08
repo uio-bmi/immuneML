@@ -3,8 +3,6 @@ import shutil
 from immuneML.data_model.SequenceParams import RegionType, Chain
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.dim_reduction.PCA import PCA
-from immuneML.ml_methods.dim_reduction.TSNE import TSNE
-from immuneML.ml_methods.dim_reduction.UMAP import UMAP
 from immuneML.ml_methods.generative_models.SimpleVAE import SimpleVAE
 from immuneML.reports.gen_model_reports.VAESummary import VAESummary
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
