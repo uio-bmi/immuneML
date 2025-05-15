@@ -4,8 +4,8 @@ from typing import Tuple, List
 import pandas as pd
 
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, ElementDataset
 from immuneML.data_model.SequenceParams import RegionType, Chain
+from immuneML.data_model.datasets.ElementDataset import ElementDataset
 
 
 class TCRdistHelper:
@@ -83,10 +83,6 @@ class TCRdistHelper:
 
     @staticmethod
     def prepare_tcr_dist_dataframe(dataset: ElementDataset, label_names: list) -> Tuple[pd.DataFrame, List[str]]:
-        if len(label_names) > 1:
-            raise NotImplementedError(
-                f"TCRdist: multiple labels specified ({str(label_names)[1:-1]}), but only single label binary class "
-                f"is currently supported in immuneML.")
 
         df = dataset.data.topandas()
 
