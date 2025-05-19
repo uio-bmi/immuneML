@@ -15,15 +15,16 @@ from immuneML.util.PathBuilder import PathBuilder
 class EncoderHelper:
 
     @staticmethod
-    def prepare_training_ids(dataset: Dataset, params: EncoderParams):
-        PathBuilder.build(params.result_path)
+    def prepare_training_ids(dataset: Dataset, params: EncoderParams, result_path=None):
+        res_path = result_path if result_path else params.result_path
+        PathBuilder.build(res_path)
         if params.learn_model:
             training_ids = dataset.get_example_ids()
-            training_ids_path = params.result_path / "training_ids.pickle"
+            training_ids_path = res_path / "training_ids.pickle"
             with training_ids_path.open("wb") as file:
                 pickle.dump(training_ids, file)
         else:
-            training_ids_path = params.result_path / "training_ids.pickle"
+            training_ids_path = res_path / "training_ids.pickle"
             with training_ids_path.open("rb") as file:
                 training_ids = pickle.load(file)
         return training_ids

@@ -2,6 +2,7 @@
 
 import abc
 import logging
+import uuid
 from dataclasses import fields
 from multiprocessing import Pool
 from pathlib import Path
@@ -277,6 +278,9 @@ class DataImport(metaclass=abc.ABCMeta):
         return df
 
     def preprocess_file(self, df: pd.DataFrame) -> pd.DataFrame:
+        if 'sequence_id' in df.columns:
+            missing_seq_ids = df['sequence_id'].isnull() | df['sequence_id'].eq('')
+            df.loc[missing_seq_ids, 'sequence_id'] = [uuid.uuid4().hex for _ in range(missing_seq_ids.sum())]
         return df
 
     def load_file(self, filename: Path) -> pd.DataFrame:

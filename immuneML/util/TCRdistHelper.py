@@ -53,23 +53,6 @@ class TCRdistHelper:
                          deduplicate=False,
                          compute_distances=False)
 
-        if 'region_type' not in dataset.labels:
-            logging.warning(
-                f"{TCRdistHelper.__name__}: Parameter 'region_type' was not set for dataset {dataset.name}, keeping default tcrdist "
-                f"values for parameters 'ntrim' and 'ctrim'. For more information, see tcrdist3 documentation. To avoid this warning, "
-                f"set the region type when importing the dataset.")
-        elif dataset.labels['region_type'] == RegionType.IMGT_CDR3:
-            if 'alpha' in chains:
-                tcr_rep.kargs_a['cdr3_a_aa']['ntrim'] = 2
-                tcr_rep.kargs_a['cdr3_a_aa']['ctrim'] = 1
-            if 'beta' in chains:
-                tcr_rep.kargs_b['cdr3_b_aa']['ntrim'] = 2
-                tcr_rep.kargs_b['cdr3_b_aa']['ctrim'] = 1
-        elif dataset.labels['region_type'] != RegionType.IMGT_JUNCTION:
-            raise RuntimeError(
-                f"{TCRdistHelper.__name__}: TCRdist metric can be computed only if IMGT_CDR3 or IMGT_JUNCTION are used as region "
-                f"types, but for dataset {dataset.name}, it is set to {dataset.labels['region_type']} instead.")
-
         tcr_rep.compute_distances()
 
         return tcr_rep

@@ -3,12 +3,12 @@ import numbers
 from pathlib import Path
 from typing import Tuple
 
-import numpy as np
 import pandas as pd
-from sklearn.neighbors import NearestCentroid, KNeighborsClassifier
+from sklearn.neighbors import NearestCentroid
 
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
+from immuneML.ml_methods.helper_methods.FurthestNeighborClassifier import FurthestNeighborClassifier
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.clustering.ClusteringReportHandler import ClusteringReportHandler
@@ -149,9 +149,9 @@ def get_complementary_classifier(cl_setting: ClusteringSetting):
             if clustering_method.model.linkage == 'ward':
                 return NearestCentroid()
             elif clustering_method.model.linkage == 'complete':
-                def custom_weights(distances):
-                    return np.eye(len(distances))[:, -1]
-
-                return KNeighborsClassifier(weights=custom_weights)
+                if cl_setting.encoder.__class__.__name__ == 'TCRdistEncoder':
+                    return FurthestNeighborClassifier(metric='precomputed')
+                else:
+                    return FurthestNeighborClassifier()
 
     return NearestCentroid()

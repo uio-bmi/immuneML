@@ -5,6 +5,7 @@ from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.util.EncoderHelper import EncoderHelper
+from immuneML.util.Logger import print_log
 
 
 class TCRdistEncoder(DatasetEncoder):
@@ -46,6 +47,7 @@ class TCRdistEncoder(DatasetEncoder):
         self.cores = cores
         self.distance_matrix = None
         self.context = None
+        self._tmp_results_path = None
 
     @staticmethod
     def build_object(dataset, **params):
@@ -59,7 +61,11 @@ class TCRdistEncoder(DatasetEncoder):
         return self
 
     def encode(self, dataset, params: EncoderParams):
-        train_receptor_ids = EncoderHelper.prepare_training_ids(dataset, params)
+        if self._tmp_results_path is None and params.learn_model:
+            self._tmp_results_path = params.result_path
+
+        train_receptor_ids = EncoderHelper.prepare_training_ids(dataset, params, self._tmp_results_path)
+
         if params.learn_model:
             self._build_tcr_dist_matrix(dataset, params.label_config.get_labels_by_name())
 
@@ -67,9 +73,8 @@ class TCRdistEncoder(DatasetEncoder):
         labels = self._build_labels(dataset, params) if params.encode_labels else None
 
         encoded_dataset = dataset.clone()
-        encoded_dataset.encoded_data = EncodedData(examples=distance_matrix, labels=labels, example_ids=distance_matrix.index.values,
+        encoded_dataset.encoded_data = EncodedData(examples=distance_matrix.values, labels=labels, example_ids=distance_matrix.index.values,
                                                    encoding=TCRdistEncoder.__name__)
-
         return encoded_dataset
 
     def _build_tcr_dist_matrix(self, dataset: ElementDataset, label_names):
