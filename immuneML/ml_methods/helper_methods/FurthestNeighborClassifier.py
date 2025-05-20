@@ -1,26 +1,20 @@
 import numpy as np
-from sklearn.neighbors import NearestNeighbors
+import pandas as pd
+from sklearn.metrics import DistanceMetric
 
 
 class FurthestNeighborClassifier:
-    def __init__(self, n_neighbors=5, metric='euclidean', precomputed=False, **kwargs):
-        """
-        Parameters
-        ----------
-        n_neighbors : int
-            Number of neighbors to consider.
-        metric : str
-            Distance metric or 'precomputed' for precomputed distance matrix.
-        precomputed : bool
-            If True, input X is a distance matrix.
-        """
-        super().__init__(**kwargs)
-        self.n_neighbors = n_neighbors
-        self.metric = metric
-        self.precomputed = precomputed
-        self.distance_matrix = None
+    """
+    Furthest Neighbor Classifier for clustering tasks. It predicts the label (cluster) of an example as the label
+    corresponding to the minimal maximum distance across all labels in training data. The metric used for distance
+    computation can be any metric supported by sklearn.metrics.DistanceMetric, or precomputed (e.g., when using
+    TCRdistEncoder).
 
-        self.nn = None
+    """
+    def __init__(self, metric: str = 'precomputed', **kwargs):
+        super().__init__(**kwargs)
+        self.metric = metric
+
         self.X_train = None
         self.y_train = None
         self.classes_ = None
@@ -28,48 +22,28 @@ class FurthestNeighborClassifier:
     def fit(self, X, y):
         self.y_train = y
         self.classes_ = np.unique(y)
+        self.X_train = X
 
-        if not self.precomputed:
-            self.X_train = X
-            self.nn = NearestNeighbors(n_neighbors=self.n_neighbors, metric=self.metric)
-            self.nn.fit(X)
-        else:
-            # When precomputed, X is distance matrix
-            self.X_train = None
-            self.distance_matrix = X  # store full train-train distances
-            if X.shape[0] != len(y):
-                raise ValueError("Distance matrix size does not match number of training samples")
+        if self.metric == 'precomputed':
+            assert X.shape[0] == X.shape[1], \
+                (f"{FurthestNeighborClassifier.__name__}: distance matrix must be square for precomputed metric, "
+                 f"got: {X.shape}.")
 
         return self
 
     def predict(self, X):
-        # TODO: check if this makes any sense
-        predictions = []
-
-        if not self.precomputed:
-            if self.nn is None:
-                raise RuntimeError("You must fit the model before predicting")
-            distances, indices = self.nn.kneighbors(X, return_distance=True)
+        if self.metric != 'precomputed':
+            try:
+                distance_metric = DistanceMetric.get_metric(self.metric)
+            except Exception as e:
+                raise ValueError(f"{FurthestNeighborClassifier.__name__}: Metric '{self.metric}' couldn't be "
+                                 f"computed. Full error: {e}")
+            distances = distance_metric.pairwise(X, self.X_train)
         else:
-            # X is test-train distance matrix, shape (n_test, n_train)
             distances = X
-            # Find indices of k smallest distances for each test point
-            indices = np.argpartition(distances, self.n_neighbors, axis=1)[:, :self.n_neighbors]
 
-            # Sort neighbors per row by distance
-            sorted_idx = np.argsort(distances[np.arange(distances.shape[0])[:, None], indices], axis=1)
-            indices = indices[np.arange(indices.shape[0])[:, None], sorted_idx]
-            distances = distances[np.arange(distances.shape[0])[:, None], indices]
+        max_dist_per_cluster = pd.DataFrame(
+            {cluster: distances[:, self.y_train == cluster].max(axis=1) for cluster in self.classes_})
+        predictions = max_dist_per_cluster.idxmin(axis=1).values
 
-        for dist_row, idx_row in zip(distances, indices):
-            labels = self.y_train[idx_row]
-            class_to_max_dist = {}
-            for c in self.classes_:
-                class_dists = dist_row[labels == c]
-                if len(class_dists) > 0:
-                    class_to_max_dist[c] = np.max(class_dists)
-
-            pred_class = min(class_to_max_dist, key=class_to_max_dist.get)
-            predictions.append(pred_class)
-
-        return np.array(predictions)
+        return predictions

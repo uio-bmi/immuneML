@@ -152,6 +152,6 @@ def get_complementary_classifier(cl_setting: ClusteringSetting):
                 if cl_setting.encoder.__class__.__name__ == 'TCRdistEncoder':
                     return FurthestNeighborClassifier(metric='precomputed')
                 else:
-                    return FurthestNeighborClassifier()
+                    return FurthestNeighborClassifier(metric='euclidean')
 
     return NearestCentroid()
