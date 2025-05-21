@@ -63,6 +63,9 @@ class FeatureDistribution(FeatureReport):
 
     - plot_all_features (bool): whether to plot all (might be slow for large number of features)
 
+    - error_function (str): which error function to use for the error bar. Options are 'std' (standard deviation) or
+      'sem' (standard error of the mean). Default: std.
+
 
     **YAML specification:**
 
@@ -87,11 +90,11 @@ class FeatureDistribution(FeatureReport):
     def __init__(self, dataset: Dataset = None, result_path: Path = None, color_grouping_label: str = None,
                  row_grouping_label=None, column_grouping_label=None,
                  mode: str = 'auto', x_title: str = None, y_title: str = None, number_of_processes: int = 1,
-                 name: str = None,
+                 name: str = None, error_function: str = None,
                  plot_top_n: int = None, plot_bottom_n: int = None, plot_all_features: bool = True):
         super().__init__(dataset=dataset, result_path=result_path, color_grouping_label=color_grouping_label,
                          row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label,
-                         number_of_processes=number_of_processes, name=name)
+                         number_of_processes=number_of_processes, name=name, error_function=error_function)
         self.x_title = x_title if x_title is not None else self.x
         self.y_title = y_title if y_title is not None else "value"
         self.mode = mode
@@ -147,14 +150,17 @@ class FeatureDistribution(FeatureReport):
             .sort_values(by=self.x) \
             .reset_index(drop=True)
 
+        plotting_data_filtered.sort_values([self.color], ascending=[False], inplace=True)
+
         figure = px.violin(plotting_data_filtered, x=self.x, y="value", color=self.color,
                            facet_row=self.facet_row, facet_col=self.facet_column,
                            labels={
                                "value": self.y_title,
                                self.x: self.x_title,
                            }, template='plotly_white',
-                           category_orders={self.color: sorted(plotting_data_filtered[self.color].unique())},
                            color_discrete_sequence=px.colors.diverging.Tealrose)
+        figure.update_layout(xaxis={'categoryorder': 'total descending'})
+
 
         file_path = self.result_path / f"{self.result_name}_{key}.html"
         plotting_data.to_csv(self.result_path / f"{self.result_name}_{key}.csv", index=False)

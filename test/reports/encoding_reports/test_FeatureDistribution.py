@@ -114,7 +114,7 @@ class TestFeatureDistribution(TestCase):
 
         report = FeatureDistribution.build_object(**{"dataset": dataset,
                                                      "result_path": path,
-                                                     "mode": "sparse",
+                                                     "mode": "sparse", "error_function": "sem",
                                                      "color_grouping_label": "l1",
                                                      "plot_all_features": True,
                                                      "plot_top_n": 10,

@@ -17,12 +17,13 @@ class FeatureReport(EncodingReport):
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None,
                  color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
-                 name: str = None, number_of_processes: int = 1):
+                 name: str = None, number_of_processes: int = 1, error_function: str = None):
         super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
         self.x = "feature"
         self.color = color_grouping_label
         self.facet_row = row_grouping_label
         self.facet_column = column_grouping_label
+        self.error_function = error_function
 
     def _generate_report_result(self) -> ReportResult:
         PathBuilder.build(self.result_path)
@@ -47,15 +48,29 @@ class FeatureReport(EncodingReport):
     def std(self, x):
         return x.std(ddof=0)
 
+    def sem(self, x):
+        return x.std(ddof=0) / (len(x) ** 0.5)
+
     @abc.abstractmethod
     def _plot(self, data_long_format) -> ReportOutput:
         pass
 
+    def _get_error_function(self):
+        if self.error_function == 'std':
+            return self.std
+        elif self.error_function == 'sem':
+            return self.sem
+        else:
+            logging.warning(f"{self.__class__.__name__}: unknown error function '{self.error_function}'. "
+                            f"Using 'std' as default.")
+            return self.std
+
     def _get_grouped_data(self, data_long_format, cols_list):
+        error_function = self._get_error_function()
         cols_list = [i for i in cols_list if i]
         cols_list = list(set(cols_list))
         grouped_data = data_long_format.groupby(cols_list, as_index=False).agg(
-            {"value": ['mean', self.std]})
+            {"value": ['mean', error_function]})
         grouped_data.columns = grouped_data.columns.map(''.join)
         return grouped_data
 
