@@ -39,7 +39,7 @@ class VAESummary(GenModelReport):
       dim_dist_cols has to be set, or both)
 
     - dim_red_method (dict): which dimensionality reduction method to use along with its parameters; the method has to
-      return 2 dimensions; see :ref:`Dimensionality reduction methods` for available options;
+      return 2 dimensions; see :ref:`**Dimensionality reduction methods**` for available options;
       default is PCA with 2 components
 
     **YAML specification:**

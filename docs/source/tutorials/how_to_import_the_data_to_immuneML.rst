@@ -20,7 +20,7 @@ The first step of any immuneML analysis is to import the dataset that will be us
 - **Receptor datasets** are the paired variant of sequence datasets, and should be used to make a prediction for each receptor chain pair.
 
 A broad range of different import formats can be specified, including AIRR, MiXCR, VDJdb, ImmunoSEQ (Adaptive Biotechnologies),
-10xGenomics, OLGA and IGoR. For the complete list of supported data formats, and extensive documentation see :ref:`Datasets`.
+10xGenomics, OLGA and IGoR. For the complete list of supported data formats, and extensive documentation see :ref:`Dataset parameters`.
 If you are using a custom format, or your preferred format is not yet supported, any type of tabular file can also be imported
 using :ref:`Generic` import. When possible, using format-specific importers is preferred over Generic import, as they require
 less options to be set and might take care of automatic reformatting of certain fields.
@@ -55,7 +55,7 @@ The format is as follows:
 The columns :code:`filename` and :code:`subject_id` are mandatory. The column :code:`identifier` is recommended to
 easily identify which results are associated with which repertoire. If no identifiers are supplied, random identifiers are generated.
 Any other columns may be defined by the user and will serve as repertoire :code:`labels`, such as for example disease state, HLA type, age or sex.
-These labels may be used as prediction targets of ML models, or as additional information when running specific analysis :ref:`Reports`.
+These labels may be used as prediction targets of ML models, or as additional information when running specific analysis :ref:`Report parameters`.
 
 For an example of a metadata file, `see here the metadata file <https://ns9999k.webs.sigma2.no/10.11582_2021.00008/cmv_metadata.csv>`_ used to
 replicate the analysis by `Emerson et al. 2017 <https://doi.org/10.1038/ng.3822>`_.
@@ -66,7 +66,7 @@ YAML specification for importing data from files
 
 Data import must be defined as a part of the YAML specification. The name is defined by the user. It can consist of letters, numbers and underscores.
 Under the dataset name key, the :code:`format` of the data must be specified, as well as additional parameters under a key named :code:`params`.
-Under :code:`format`, any of the formats listed under :ref:`Datasets` may be filled in. Under :code:`params`, the parameter :code:`path` is always
+Under :code:`format`, any of the formats listed under :ref:`Dataset parameters` may be filled in. Under :code:`params`, the parameter :code:`path` is always
 required when importing data from files. All the files must be stored in a single folder, and this folder must set through the
 parameter :code:`path`.
 
@@ -95,7 +95,7 @@ For more details on structuring the metadata file, see :ref:`What should the met
 Note that only the repertoire files that are present in the metadata file will be imported.
 
 Other parameters that are specific to the format may be specified under :code:`params` as well, and are explained in more detail for each format
-under :ref:`Datasets`.
+under :ref:`Dataset parameters`.
 
 A complete specification for importing a repertoire dataset from AIRR format with default parameters may look like this:
 
