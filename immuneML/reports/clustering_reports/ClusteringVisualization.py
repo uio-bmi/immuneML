@@ -23,7 +23,7 @@ class ClusteringVisualization(ClusteringReport):
 
     Specification arguments:
         dim_red_method (dict): specification of which dimensionality reduction to perform; valid options are presented
-        under :ref:`Dimensionality reduction methods` and should be specified with the name of the method and its
+        under :ref:`**Dimensionality reduction methods**` and should be specified with the name of the method and its
         parameters, see the example below
 
     YAML specification:

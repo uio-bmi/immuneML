@@ -89,7 +89,8 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
 
     def _get_caching_params(self, dataset, params: EncoderParams, step: str = None):
         return (dataset.identifier, tuple(params.label_config.get_labels_by_name()), self.scale_to_zero_mean,
-                self.scale_to_unit_variance, step, self.region_type.name, tuple(self.layers), self._get_encoding_name())
+                self.scale_to_unit_variance, step, self.region_type.name, tuple(self.layers), self._get_encoding_name(),
+                params.learn_model)
 
     def _get_model_and_tokenizer(self, log_location):
         from transformers import BertModel, BertTokenizer

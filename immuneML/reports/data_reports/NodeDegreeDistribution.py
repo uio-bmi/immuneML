@@ -8,6 +8,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from immuneML.data_model.SequenceParams import RegionType
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.reports.ReportOutput import ReportOutput
@@ -26,12 +27,6 @@ class NodeDegreeDistribution(DataReport):
 
     **Specification arguments**:
 
-    - dataset (SequenceDataset): The dataset to analyze.
-
-    - result_path (Path): The path to store the results.
-
-    - name (str): The name of the report.
-
     - compairr_path (str): The path to the CompAIRR executable.
 
     - region_type (str): The region type to analyze. Can be either "IMGT_CDR3" or "IMGT_JUNCTION".
@@ -43,21 +38,20 @@ class NodeDegreeDistribution(DataReport):
     - hamming_distance (int): The Hamming distance to use for the analysis. Default is 1.
 
     - per_repertoire (bool): Whether to compute the node degree distribution for each repertoire separately. Only
-    applicable when using a RepertoireDataset. Default is False.
+      applicable when using a RepertoireDataset. Default is False.
 
     - per_label (bool): Whether to compute the node degree distribution for each label separately. Only applicable
-    when using a RepertoireDataset. Default is False.
+      when using a RepertoireDataset. Default is False.
 
     - threads (int): The number of threads to use for the analysis. Default is 4.
 
-    **Yaml specification**:
+    YAML specification:
+
     .. indent with spaces
     .. code-block:: yaml
+
         NodeDegreeDistribution:
-            dataset: <dataset_name>
-            result_path: <path_to_result>
-            name: name
-            compairr_path: <path_to_compairr>
+            compairr_path: /path/to/compairr
             region_type: IMGT_JUNCTION
             indels: False
             ignore_genes: False
@@ -71,13 +65,13 @@ class NodeDegreeDistribution(DataReport):
     @classmethod
     def build_object(cls, **kwargs):
         ParameterValidator.assert_region_type(kwargs)
-
         return NodeDegreeDistribution(**{**kwargs, 'region_type': RegionType[kwargs['region_type'].upper()]})
 
-    def __init__(self, dataset: [SequenceDataset | RepertoireDataset] = None, result_path: Path = None,
+    def __init__(self, dataset: Dataset = None, result_path: Path = None,
                  name: str = None, compairr_path: str = None, region_type: RegionType = RegionType.IMGT_JUNCTION,
                  indels: bool = False, ignore_genes: bool = False, hamming_distance: int = 1,
                  per_repertoire: bool = False, per_label=False, threads: int = 4):
+
         super().__init__(dataset=dataset, result_path=result_path, name=name)
         self.compairr_path = compairr_path
         self.region_type = region_type

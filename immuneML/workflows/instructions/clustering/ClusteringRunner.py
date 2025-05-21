@@ -106,7 +106,7 @@ class ClusteringRunner:
                 internal_performances[metric] = [metric_fn(dense_features,
                                                            predictions[f'predictions_{cl_setting.get_key()}'].values)]
             except ValueError as e:
-                logging.info(f"Error calculating metric {metric}: {e}")
+                logging.warning(f"Error calculating metric {metric}: {e}")
                 internal_performances[metric] = [np.nan]
 
         pd.DataFrame(internal_performances).to_csv(str(cl_setting.path / 'internal_performances.csv'), index=False)
@@ -126,7 +126,7 @@ class ClusteringRunner:
                                                                          predictions[
                                                                              f'predictions_{cl_setting.get_key()}'].values)
                     except ValueError as e:
-                        logging.info(f"Error calculating metric {metric}: {e}")
+                        logging.warning(f"Error calculating metric {metric}: {e}")
                         external_performances[label][metric] = np.nan
 
             (pd.DataFrame(external_performances).reset_index().rename(columns={'index': 'metric'})

@@ -64,7 +64,7 @@ although different colors (i.e., nucleotide or amino acid sequences) may occur i
 
 
 Repertoire classification overview
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. figure:: ../_static/images/repertoire_classification_overview.png
   :width: 70%

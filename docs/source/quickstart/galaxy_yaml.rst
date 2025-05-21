@@ -126,10 +126,10 @@ The YAML specification consists of:
 
 The complete YAML specification for this analysis looks like this and can be downloaded here: :download:`quickstart.yaml <../_static/files/quickstart/galaxy/quickstart.yaml>`.
 
-    .. collapse:: quickstart.yaml
+.. collapse:: quickstart.yaml
 
-        .. literalinclude:: ../_static/files/quickstart/galaxy/quickstart.yaml
-           :language: yaml
+    .. literalinclude:: ../_static/files/quickstart/galaxy/quickstart.yaml
+       :language: yaml
 
 The YAML specification can either be saved to a local file and uploaded to Galaxy, or pasted directly as a new entry.
 This can be done by clicking 'Upload Data' in the left-hand menu, and choosing either 'Choose local files' or 'Paste/Fetch data'.
@@ -174,12 +174,12 @@ the implanted disease signal 'VLEQ', meaning the ML model learned the correct si
    :alt: coefficients report
    :width: 600
 
-The next item, 'Archive: ML model training' contains a downloadable archive of the complete immuneML ouput (including
+The next item, "Archive: ML model training" contains a downloadable archive of the complete immuneML ouput (including
 the files available through the other history elements).
 
-Finally, history element 'optimal_ml_settings.zip' is a .zip file containing the configuration of the optimal ML settings,
+Finally, history element "optimal_ml_settings.zip" is a .zip file containing the configuration of the optimal ML settings,
 including settings for the encoding and machine learning method. This .zip file can be used to apply a previously
-trained ML model to a new dataset, which can currently only be done :ref:`How to apply previously trained ML models to a new dataset`<using the command-line interface>.
+trained ML model to a new dataset, which can currently only be done :ref:`How to apply previously trained ML models to a new dataset <using the command-line interface>`_.
 
 
 What's next?
@@ -190,6 +190,6 @@ If you want to try running immuneML on your own dataset, be sure to check out :r
 Other tutorials for how to use each of the immuneML Galaxy tools can be found under :ref:`immuneML & Galaxy`.
 
 The Galaxy interface is intended to make it easy for users to try out immuneML quickly, but for large-scale analyses,
-please :ref:`install immuneML <Installing immuneML>` locally or on a private server. YAML specifications are defined equivalently in
+please :ref:`install immuneML <Installing immuneML>`_ locally or on a private server. YAML specifications are defined equivalently in
 Galaxy and the command-line interface.
 

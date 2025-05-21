@@ -19,9 +19,7 @@ import sys
 
 from immuneML.environment import Constants
 
-print(os.getcwd())
 os.chdir(os.path.join(os.getcwd(), "../../"))
-print(f"new working dir: {os.getcwd()}")
 
 # -- Project information -----------------------------------------------------
 
@@ -73,7 +71,10 @@ napoleon_include_init_with_doc = True
 
 # autodoc
 
-autodoc_mock_imports = ["pandas", "sklearn", "numpy", "pystache", "torch"]
+autodoc_mock_imports = ["pandas", "scikit-learn", "numpy", "pystache", "torch", 'sentencepiece', 'transformers',
+                        'esm', 'pyyaml', 'bionumpy', 'airr', 'pystache', 'matplotlib', 'editdistance', 'regex',
+                        'tzlocal', 'dill', 'plotly', 'matplotlib-venn', 'scipy', 'umap-learn', 'fisher', 'fishersapi',
+                        'olga', 'stitchr', 'IMGTgeneDL', 'sentencepiece', 'psutil', 'kaleido']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -165,10 +166,10 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (master_doc, 'immuneML.tex', 'immuneML Documentation',
-     'Authors', 'manual'),
-]
+# latex_documents = [
+#     (master_doc, 'immuneML.tex', 'immuneML Documentation',
+#      'Authors', 'manual'),
+# ]
 
 
 # -- Options for manual page output ------------------------------------------

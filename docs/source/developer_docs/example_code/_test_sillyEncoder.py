@@ -3,11 +3,11 @@ import shutil
 import unittest
 
 from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.encodings.silly.SillyEncoder import SillyEncoder
 from immuneML.environment.Label import Label
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator

@@ -4,11 +4,11 @@ The class docstrings are used to automatically generate the documentation web pa
 
 #. A short, general description of the functionality
 
-#. Optional extended description, including any references or specific cases that should bee considered. For instance: if a class can only be used for a particular dataset type. Compatibility between Encoders, MLMethods and Reports should also be described.
+#. Optional extended description, including any references or specific cases that should be considered. For instance: if a class can only be used for a particular dataset type. Compatibility between Encoders, MLMethods and Reports should also be described.
 
 #. For encoders, the appropriate dataset type(s). For example:
 
-   .. code::
+.. code-block:: yaml
 
      **Dataset type:**
 
@@ -18,21 +18,20 @@ The class docstrings are used to automatically generate the documentation web pa
 
 #. A list of arguments, when applicable. This should follow the format below:
 
-   .. code::
+.. code-block:: yaml
 
-     **Specification arguments:**
+      **Specification arguments:**
 
-     - parameter_name (type): a short description
+      - parameter_name (type): a short description
 
-     - other_paramer_name (type): a short description
+      - other_paramer_name (type): a short description
 
 #. A YAML snippet, to show an example of how the new component should be called. Make sure to test your YAML snippet in an immuneML run to ensure it is specified correctly. The following formatting should be used to ensure the YAML snippet is rendered correctly:
 
-   .. code::
+.. code-block:: yaml
 
       **YAML specification:**
 
-      .. indent with spaces
       .. code-block:: yaml
 
           definitions:

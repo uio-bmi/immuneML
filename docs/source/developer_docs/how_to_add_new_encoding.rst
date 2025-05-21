@@ -16,8 +16,9 @@ Adding an example encoder to the immuneML codebase
 ------------------------------------------------------
 
 
-This tutorial describes how to add a new  :py:obj:`~immuneML.encodings.DatasetEncoder.DatasetEncoder` class to immuneML,
-using a simple example encoder. We highly recommend completing this tutorial to get a better understanding of the immuneML
+This tutorial describes how to add a new encoder to immuneML. That task is performed by implementing a subclass of
+:py:obj:`~immuneML.encodings.DatasetEncoder.DatasetEncoder` shown here on the example of a simple encoder. We highly
+recommend completing this tutorial to get a better understanding of the immuneML
 interfaces before continuing to :ref:`implement your own encoder <Implementing a new encoder>`.
 
 
@@ -27,10 +28,10 @@ Step-by-step tutorial
 For this tutorial, we provide a :code:`SillyEncoder` (:download:`download here <./example_code/SillyEncoder.py>` or view below), in order to test adding a new Encoder file to immuneML.
 This encoder ignores the data of the input examples, and generates a few random features per example.
 
-        .. collapse:: SillyEncoder.py
+.. collapse:: SillyEncoder.py
 
-          .. literalinclude:: ./example_code/SillyEncoder.py
-             :language: python
+  .. literalinclude:: ./example_code/SillyEncoder.py
+     :language: python
 
 
 
@@ -45,20 +46,21 @@ This encoder ignores the data of the input examples, and generates a few random 
    The default parameters file is automatically discovered based on the name of the class using the base name (without 'Encoder' suffix) converted to snake case, and with an added '_params.yaml' suffix.
    For the :code:`SillyEncoder`, this is :code:`silly_params.yaml`, which could for example contain the following:
 
-   .. code:: yaml
+.. code:: yaml
 
-      random_seed: 1
-      embedding_len: 5
+        random_seed: 1
+        embedding_len: 5
 
-   In rare cases where classes have unconventional names that do not translate well to CamelCase (e.g., MiXCR, VDJdb), this needs to be accounted for in :py:meth:`~immuneML.dsl.DefaultParamsLoader.convert_to_snake_case`.
+   In rare cases where classes have unconventional names that do not translate well to CamelCase (e.g., MiXCR, VDJdb),
+   this needs to be accounted for in :py:meth:`~immuneML.dsl.DefaultParamsLoader.convert_to_snake_case`.
 
 #. **Use the automated script** `check_new_encoder.py <https://github.com/uio-bmi/immuneML/blob/master/scripts/check_new_encoder.py>`_ **to test the newly added encoder.**
    This script will throw errors or warnings if the DatasetEncoder class implementation is incorrect or if files are put in the wrong place.
    Example command to test the :code:`SillyEncoder` for sequence datasets:
 
-   .. code:: bash
+.. code:: bash
 
-      python3 ./scripts/check_new_encoder.py -e ./immuneML/encodings/silly/SillyEncoder.py -d sequence
+        python3 ./scripts/check_new_encoder.py -e ./immuneML/encodings/silly/SillyEncoder.py -d sequence
 
 #. If a compatible ML method is already available, add the new encoder class to the list of compatible encoders returned by the
    :code:`get_compatible_encoders()` method of the :py:obj:`~immuneML.ml_methods.MLMethod.MLMethod` of interest.
@@ -71,39 +73,39 @@ If you want to use immuneML directly to test run your encoder, the YAML example 
 This example analysis creates a randomly generated dataset, encodes the data using the :code:`SillyEncoder`
 and exports the encoded data as a csv file.
 
-           .. collapse:: test_run_silly_encoder.yaml
+.. collapse:: test_run_silly_encoder.yaml
 
-              .. code:: yaml
+        .. code:: yaml
 
-                 definitions:
-                   datasets:
-                     my_dataset:
-                       format: RandomSequenceDataset
-                       params:
-                         sequence_count: 100
-                         labels:
-                           binds_epitope:
-                             True: 0.6
-                             False: 0.4
+         definitions:
+           datasets:
+             my_dataset:
+               format: RandomSequenceDataset
+               params:
+                 sequence_count: 100
+                 labels:
+                   binds_epitope:
+                     True: 0.6
+                     False: 0.4
 
-                   encodings:
-                     my_silly_encoder:
-                       Silly:
-                         random_seed: 3
+           encodings:
+             my_silly_encoder:
+               Silly:
+                 random_seed: 3
 
-                   reports:
-                     my_design_matrix: DesignMatrixExporter
+           reports:
+             my_design_matrix: DesignMatrixExporter
 
-                 instructions:
-                   my_instruction:
-                     type: ExploratoryAnalysis
-                     analyses:
-                       my_analysis_1:
-                         dataset: my_dataset
-                         encoding: my_silly_encoder
-                         report: my_design_matrix
-                         labels:
-                         - binds_epitope
+         instructions:
+           my_instruction:
+             type: ExploratoryAnalysis
+             analyses:
+               my_analysis_1:
+                 dataset: my_dataset
+                 encoding: my_silly_encoder
+                 report: my_design_matrix
+                 labels:
+                 - binds_epitope
 
 
 Adding a Unit test for a DatasetEncoder
@@ -111,10 +113,10 @@ Adding a Unit test for a DatasetEncoder
 
 Add a unit test for the new SillyEncoder (:download:`download <./example_code/_test_sillyEncoder.py>` the example testfile or view below):
 
-        .. collapse:: test_sillyEncoder.py
+.. collapse:: test_sillyEncoder.py
 
-          .. literalinclude:: ./example_code/_test_sillyEncoder.py
-             :language: python
+  .. literalinclude:: ./example_code/_test_sillyEncoder.py
+     :language: python
 
 
 #. Add a new package to the :code:`test.encodings` package which matches the package name of your encoder code. In this case, the new package would be :code:`test.encodings.silly`.

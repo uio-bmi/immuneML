@@ -14,7 +14,6 @@ from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.clustering.ClusteringRunner import get_features
 from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringState
 from immuneML.workflows.instructions.clustering.ValidationHandler import get_complementary_classifier
-from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringSetting
 
 
 class ClusteringStabilityReport(ClusteringReport):

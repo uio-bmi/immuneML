@@ -10,6 +10,8 @@ import plotly.express as px
 from sklearn.decomposition import PCA
 
 from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.dsl.definition_parsers.MLParser import MLParser
+from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.ml_methods.generative_models.SimpleVAE import SimpleVAE
 from immuneML.reports.ReportOutput import ReportOutput
@@ -23,7 +25,8 @@ class VAESummary(GenModelReport):
     """
     This report provides the summary of the train SimpleVAE and shows the following:
 
-    - plots of the latent space after applying PCA to reduce the data to 2 dimensions, highlighted by V and J gene
+    - plots of the latent space after applying a dimensionality reduction method to reduce the data to 2 dimensions,
+      highlighted by V and J gene
     - plots the histogram for each latent dimension
     - plots loss per epoch
 
@@ -34,6 +37,10 @@ class VAESummary(GenModelReport):
 
     - dim_dist_rows (int): how many rows to use to plot the histogram of latent dimensions (either this or
       dim_dist_cols has to be set, or both)
+
+    - dim_red_method (dict): which dimensionality reduction method to use along with its parameters; the method has to
+      return 2 dimensions; see :ref:`**Dimensionality reduction methods**` for available options;
+      default is PCA with 2 components
 
     **YAML specification:**
 
@@ -46,25 +53,41 @@ class VAESummary(GenModelReport):
                     VAESummary:
                         dim_dist_cols: 4
                         dim_dist_rows: None
+                        dim_red_method:
+                            PCA:
+                                n_components: 2
 
     """
     @classmethod
     def build_object(cls, **kwargs):
         name = kwargs["name"] if "name" in kwargs else "VAESummary"
 
-        ParameterValidator.assert_keys_present(list(kwargs.keys()), ['dim_dist_cols', 'dim_dist_rows'],
+        ParameterValidator.assert_keys_present(list(kwargs.keys()), ['dim_dist_cols', 'dim_dist_rows', 'dim_red_method'],
                                                VAESummary.__name__, 'parameters')
+
+        cls_name = list(kwargs['dim_red_method'].keys())[0]
+        method = MLParser.parse_any_model("dim_red_method", kwargs['dim_red_method'], cls_name)[0]
+        assert len(method.get_dimension_names()) == 2, \
+            (f"{VAESummary.__name__}: dimensionality reduction method has to return 2 dimensions, got "
+             f"{len(method.get_dimension_names())} instead.")
+
         assert ((kwargs['dim_dist_cols'] is not None and isinstance(kwargs['dim_dist_cols'], int)) or
                 (kwargs['dim_dist_rows'] is not None and isinstance(kwargs['dim_dist_rows'], int))), \
             f"{cls.__name__}: at least one of dim_dist_cols or dim_dist_rows has to be set."
 
-        return VAESummary(name=name, dim_dist_cols=kwargs['dim_dist_cols'], dim_dist_rows=kwargs['dim_dist_rows'])
+        return VAESummary(name=name, dim_dist_cols=kwargs['dim_dist_cols'], dim_dist_rows=kwargs['dim_dist_rows'],
+                          dim_red_method=method)
 
     def __init__(self, dim_dist_rows: int, dim_dist_cols: int, dataset: Dataset = None, model: SimpleVAE = None,
-                 result_path: Path = None, name: str = None):
+                 result_path: Path = None, name: str = None, dim_red_method: DimRedMethod = None):
         super().__init__(dataset, model, result_path, name)
         self.dim_dist_rows = dim_dist_rows
         self.dim_dist_cols = dim_dist_cols
+        self.dim_red_method = dim_red_method
+
+    @property
+    def dim_red_method_name(self) -> str:
+        return self.dim_red_method.__class__.__name__
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
@@ -100,15 +123,13 @@ class VAESummary(GenModelReport):
         return embeddings
 
     def _prepare_latent_space(self, embeddings) -> ReportOutput:
+        embeddings = self.dim_red_method.fit_transform(design_matrix=embeddings.numpy())
 
-        pca = PCA(n_components=2)
-        embeddings = pca.fit_transform(embeddings.numpy())
-
-        df = pd.DataFrame(data=embeddings, columns=['PC1', 'PC2'])
+        df = pd.DataFrame(data=embeddings, columns=self.dim_red_method.get_dimension_names())
         df['v_gene'] = [v_call.split("*")[0] for v_call in self.dataset.data.v_call.tolist()]
         df['j_gene'] = [j_call.split("*")[0] for j_call in self.dataset.data.j_call.tolist()]
 
-        path = self.result_path / 'latent_space_2_component_PCA.csv'
+        path = self.result_path / f'latent_space_{self.dim_red_method_name}.csv'
 
         df.to_csv(str(path), index=False)
 
@@ -123,26 +144,30 @@ class VAESummary(GenModelReport):
     def _plot_latent_space(self, latent_space_table: ReportOutput) -> ReportOutput:
 
         encoded_data = pd.read_csv(latent_space_table.path)
+        dim_names = self.dim_red_method.get_dimension_names()
 
         fig = make_subplots(rows=2, cols=1, shared_xaxes=True, shared_yaxes=True, subplot_titles=['V genes', 'J genes'],
-                            x_title='PC1', y_title='PC2')
+                            x_title=dim_names[0], y_title=dim_names[1])
+
         for gene in self.model.unique_v_genes:
             tmp_df = encoded_data[encoded_data['v_gene'] == gene]
             fig.add_trace(
-                go.Scatter(x=tmp_df['PC1'].values, y=tmp_df['PC2'].values, mode='markers', opacity=0.5, name=gene,
-                           marker=dict(colorscale='Viridis', line_width=1), legendgroup=1,
+                go.Scatter(x=tmp_df[dim_names[0]].values, y=tmp_df[dim_names[1]].values, mode='markers', opacity=0.5,
+                           name=gene,
+                           marker=dict(colorscale='Viridis'), legendgroup=1,
                            legendgrouptitle_text='V genes'), row=1, col=1)
         for gene in self.model.unique_j_genes:
             tmp_df = encoded_data[encoded_data['j_gene'] == gene]
             fig.add_trace(
-                go.Scatter(x=tmp_df['PC1'].values, y=tmp_df['PC2'].values, mode='markers', opacity=0.5, name=gene,
-                           marker=dict(colorscale='Viridis', line_width=1),
+                go.Scatter(x=tmp_df[dim_names[0]].values, y=tmp_df[dim_names[1]].values, mode='markers', opacity=0.5,
+                           name=gene,
+                           marker=dict(colorscale='Viridis'),
                            legendgroup=2, legendgrouptitle_text='J genes'), row=2, col=1)
 
         fig.update_layout(template='plotly_white', legend_tracegroupgap=30)
-        fig.write_html(self.result_path / 'latent_space_PCA.html')
+        fig.write_html(self.result_path / f'latent_space_{self.dim_red_method_name}.html')
 
-        return ReportOutput(self.result_path / 'latent_space_PCA.html',
+        return ReportOutput(self.result_path / f'latent_space_{self.dim_red_method_name}.html',
                             f'principal component analysis on the data embedded into {self.model.latent_dim} '
                             f'dimensional space')
 

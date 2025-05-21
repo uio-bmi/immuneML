@@ -6,7 +6,7 @@ The YAML definition consists of three components: motif, signal and simulation d
 - :code:`motifs`: defined by either a (gapped) k-mer (see: :ref:`SeedMotif`) and how it might vary or by a
   position weight matrix (see: :ref:`PWM`).
 
-- :code:`signals` (see: :ref:`Signal`): defined as a union of a set of motifs and AIR-specific information, such
+- :code:`signals` (see: :ref:`Signals`): defined as a union of a set of motifs and AIR-specific information, such
   as V or J gene or IMGT position of the motif in the CDR3 sequence. Immune signals correspond to e.g., antigen-specificity.
 
 - :code:`immune_events`: immune events are sets of immune signals and their proportion in an AIRR. They correspond to

@@ -172,6 +172,7 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
     def _get_model_link(self) -> str:
         pass
 
-    @abstractmethod
     def _get_caching_params(self, dataset, params: EncoderParams, step: str = None) -> tuple:
-        pass
+        return (dataset.identifier, tuple(params.label_config.get_labels_by_name()), self.scale_to_zero_mean,
+                self.scale_to_unit_variance, step, self.region_type.name, self._get_encoding_name(),
+                params.learn_model)

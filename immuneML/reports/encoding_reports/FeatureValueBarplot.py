@@ -58,6 +58,9 @@ class FeatureValueBarplot(FeatureReport):
 
     - plot_all_features (bool): whether to plot all (might be slow for large number of features)
 
+    - error_function (str): which error function to use for the error bar. Options are 'std' (standard deviation) or
+      'sem' (standard error of the mean). Default: std.
+
 
     **YAML specification:**
 
@@ -83,11 +86,12 @@ class FeatureValueBarplot(FeatureReport):
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None,
                  color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
-                 x_title: str = None, y_title: str = None, show_error_bar=True, name: str = None, plot_all_features: bool = True,
+                 x_title: str = None, y_title: str = None, show_error_bar=True, name: str = None,
+                 plot_all_features: bool = True, error_function: str = None,
                  number_of_processes: int = 1, plot_top_n: int = None, plot_bottom_n: int = None):
         super().__init__(dataset=dataset, result_path=result_path, color_grouping_label=color_grouping_label,
                          row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label,
-                         name=name, number_of_processes=number_of_processes)
+                         name=name, number_of_processes=number_of_processes, error_function=error_function)
         self.show_error_bar = show_error_bar
         self.x_title = x_title if x_title is not None else self.x
         self.y_title = y_title if y_title is not None else "value"
@@ -110,7 +114,7 @@ class FeatureValueBarplot(FeatureReport):
 
         plotting_data_dict = {'all': data_groupedby_labels} if self.plot_all_features else {}
 
-        error_y = "valuestd" if self.show_error_bar else None
+        error_y = f"value{self.error_function}" if self.show_error_bar else None
         output_figures = []
         output_tables = []
 

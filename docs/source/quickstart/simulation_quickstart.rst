@@ -1,5 +1,5 @@
 LIgO simulation quickstart
-=======================
+============================
 
 As LIgO is now a part of immuneML, it can be directly used for simulation.
 
@@ -14,7 +14,7 @@ You can run LIgO in command line using the following command:
 
 Where
 
-* **specs.yaml** — simulation parameters described by the user in a yaml file. Please see :doc:`specification` for more information about LIgO parameters.
+* **specs.yaml** — simulation parameters described by the user in a yaml file. Please see :ref:`YAML parameter details` for more information about LIgO parameters.
 * **output_folder** — output folder name defined by the user (should not exist before the run).
 
 How to explore LIgO results
@@ -48,9 +48,9 @@ Step 1: YAML specification
 
 We need to define the YAML file describing the simulation parameters.
 
-- First, we define the immune signals 1 and 2 in the **definitions** section.. You can read more about the yaml file parameters in :doc:`specification`.
-- Second, we define the number of TRBs per each signal in the **simulations** section. You can read more about the yaml file parameters in :doc:`specification`.
-- Finally, we define technical parameters of the simulation in the **instructions** section. You can read more about the yaml file parameters in :doc:`specification`.
+- First, we define the immune signals 1 and 2 in the **definitions** section.. You can read more about the yaml file parameters in :ref:`YAML parameter details`.
+- Second, we define the number of TRBs per each signal in the **simulations** section. You can read more about the yaml file parameters in :ref:`YAML parameter details`.
+- Finally, we define technical parameters of the simulation in the **instructions** section. You can read more about the yaml file parameters in :ref:`YAML parameter details`.
 
 
 Here is the complete YAML specification for the simulation:
@@ -181,7 +181,7 @@ Some of the columns are shown in the table below:
 Next steps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You can find more information about yaml parameters in :doc:`specification`. Other tutorials for how to use LIgO can be found under :doc:`tutorials`.
+You can find more information about yaml parameters in :ref:`YAML parameter details`. Other tutorials for how to use LIgO can be found under :ref:`Tutorials`.
 
 How to use LIgO for repertoire-level simulation
 -------------------------------------------------
@@ -196,9 +196,9 @@ Step 1: YAML specification
 
 LIgO simulation starts with defining the YAML file with the simulation parameters.
 
-- First, we define the immune signals 1 and 2 in the **definitions** section. You can read more about the yaml file parameters in :doc:`specification`.
-- Second, we define the immune events and the repertoire parameters, such as the number of repertoires and the number of BCRs in therepertoire, in the **simulations** section. You can read more about the yaml file parameters in :doc:`specification`.
-- Finally, we define technical parameters of the simulation in the **instructions** section. You can read more about the yaml file parameters in :doc:`specification`.
+- First, we define the immune signals 1 and 2 in the **definitions** section. You can read more about the yaml file parameters in :ref:`YAML parameter details`.
+- Second, we define the immune events and the repertoire parameters, such as the number of repertoires and the number of BCRs in therepertoire, in the **simulations** section. You can read more about the yaml file parameters in :ref:`YAML parameter details`.
+- Finally, we define technical parameters of the simulation in the **instructions** section. You can read more about the yaml file parameters in :ref:`YAML parameter details`.
 
 
 
@@ -286,4 +286,4 @@ All results will be located in quickstart_output_repertoire. Note that the outpu
 Next steps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You can find more information about yaml parameters in :doc:`specification`. Other tutorials for how to use LIgO can be found under :doc:`tutorials`.
+You can find more information about yaml parameters in :ref:`YAML parameter details`. Other tutorials for how to use LIgO can be found under :ref:`Tutorials`.

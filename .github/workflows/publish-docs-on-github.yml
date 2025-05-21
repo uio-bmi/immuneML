@@ -1,42 +1,45 @@
-name: Sphinx Documentation
+name: build_docs
 
 on:
+
   push:
-    branches:
-      - main
+    branches: [ development ]
   workflow_dispatch:
 
+
 jobs:
+
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.11
 
-      - name: Install Sphinx
+      - name: install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install -r requirements_generative_models.txt
-          pip install sphinx furo sphinx-sitemap
-
-      - name: Build Documentation
+          pip install -r requirements_sphinx.txt
+          pip install torch
+      - name: make html & commit the changes
         run: |
-          cd docs
-          make html
+          export PYTHONPATH=.
+          python scripts/specs_docs_generation.py
+          sphinx-build -b html ./docs/source ./docs
+          git config --global user.email "github@action.com"
+          git config user.name "pavlovicmilena"
+          git add -f ./docs
+          git commit -m 'update docs'
 
-      - name: List Files in Publish Directory
-        run: |
-          ls -la docs/ # Add this line to list the files in the publish directory
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: push changes to gh-pages to show automatically
+        uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: build/html
+          branch: gh-pages
+          force: true

@@ -40,25 +40,37 @@ class FeatureComparison(FeatureReport):
 
     **Specification arguments:**
 
-    - comparison_label (str): Mandatory label. This label is used to split the encoded data matrix and define the x and y axes of the plot.
-      This label is only allowed to have 2 classes (for example: sick and healthy, binding and non-binding).
+    - comparison_label (str): Mandatory label. This label is used to split the encoded data matrix and define the x
+      and y axes of the plot. This label is only allowed to have 2 classes (for example: sick and healthy, binding and
+      non-binding).
 
-    - color_grouping_label (str): Optional label that is used to color the points in the scatterplot. This can not be the same as comparison_label.
+    - color_grouping_label (str): Optional label that is used to color the points in the scatterplot. This can not be
+      the same as comparison_label.
 
-    - row_grouping_label (str): Optional label that is used to group scatterplots into different row facets. This can not be the same as comparison_label.
+    - row_grouping_label (str): Optional label that is used to group scatterplots into different row facets.
+      This can not be the same as comparison_label.
 
-    - column_grouping_label (str): Optional label that is used to group scatterplots into different column facets. This can not be the same as comparison_label.
+    - column_grouping_label (str): Optional label that is used to group scatterplots into different column facets.
+      This can not be the same as comparison_label.
 
-    - show_error_bar (bool): Whether to show the error bar (standard deviation) for the points, both in the x and y dimension.
+    - show_error_bar (bool): Whether to show the error bar (standard deviation) for the points, both in the x and y
+      dimension.
 
-    - log_scale (bool): Whether to plot the x and y axes in log10 scale (log_scale = True) or continuous scale (log_scale = False). By default, log_scale is False.
+    - log_scale (bool): Whether to plot the x and y axes in log10 scale (log_scale = True) or continuous scale
+      (log_scale = False). By default, log_scale is False.
 
-    - keep_fraction (float): The total number of features may be very large and only the features differing significantly across
-      comparison labels may be of interest. When the keep_fraction parameter is set below 1, only the fraction of features that
-      differs the most across comparison labels is kept for plotting (note that the produced .csv file still contains all data).
-      By default, keep_fraction is 1, meaning that all features are plotted.
+    - keep_fraction (float): The total number of features may be very large and only the features differing
+      significantly across comparison labels may be of interest. When the keep_fraction parameter is set below 1, only
+      the fraction of features that differs the most across comparison labels is kept for plotting (note that the
+      produced .csv file still contains all data). By default, keep_fraction is 1, meaning that all features are
+      plotted.
 
-    - opacity (float): a value between 0 and 1 setting the opacity for data points making it easier to see if there are overlapping points
+    - opacity (float): a value between 0 and 1 setting the opacity for data points making it easier to see if there are
+      overlapping points
+
+    - error_function (str): which error function to use for the error bar. Options are 'std' (standard deviation) or
+      'sem' (standard error of the mean). Default: std.
+
 
 
     **YAML specification:**
@@ -94,11 +106,12 @@ class FeatureComparison(FeatureReport):
         return FeatureComparison(**kwargs)
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, comparison_label: str = None,
-                 color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None, opacity: float = 0.7,
-                 show_error_bar=True, log_scale: bool = False, keep_fraction: int = 1, number_of_processes: int = 1, name: str = None):
+                 color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
+                 opacity: float = 0.7, error_function: str = 'std', name: str = None,
+                 show_error_bar=True, log_scale: bool = False, keep_fraction: int = 1, number_of_processes: int = 1):
         super().__init__(dataset=dataset, result_path=result_path, color_grouping_label=color_grouping_label,
                          row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label,
-                         number_of_processes=number_of_processes, name=name)
+                         number_of_processes=number_of_processes, name=name, error_function=error_function)
         self.comparison_label = comparison_label
         self.show_error_bar = show_error_bar
         self.log_scale = log_scale
@@ -119,7 +132,7 @@ class FeatureComparison(FeatureReport):
         groupby_cols = [i for i in groupby_cols if i]
         groupby_cols = list(set(groupby_cols))
         plotting_data = data_long_format.groupby(groupby_cols, as_index=False).agg(
-            {"value": ['mean', self.std]})
+            {"value": ['mean', self._get_error_function()]})
 
         plotting_data.columns = plotting_data.columns.map(''.join)
 
@@ -140,8 +153,8 @@ class FeatureComparison(FeatureReport):
 
         plotting_data = self._filter_keep_fraction(plotting_data) if self.keep_fraction < 1 else plotting_data
 
-        error_x = "valuestd_x" if self.show_error_bar else None
-        error_y = "valuestd_y" if self.show_error_bar else None
+        error_x = f"value{self.error_function}_x" if self.show_error_bar else None
+        error_y = f"value{self.error_function}_y" if self.show_error_bar else None
 
         figure = px.scatter(plotting_data, x="valuemean_x", y="valuemean_y", error_x=error_x, error_y=error_y,
                             color=self.color, facet_row=self.facet_row, facet_col=self.facet_column, hover_name="feature",

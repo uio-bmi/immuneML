@@ -77,6 +77,7 @@ class RandomDatasetGenerator:
             coeliac: # next label with classes that will be assigned to repertoires independently of the previous label or any other parameter
                 1: 0.3 # 30% of the generated repertoires will have class 1
                 0: 0.7 # 70% of the generated repertoires will have class 0
+
         """
         RandomDatasetGenerator._check_rep_dataset_generation_params(repertoire_count, sequence_count_probabilities,
                                                                     sequence_length_probabilities,
@@ -87,9 +88,9 @@ class RandomDatasetGenerator:
 
         sequences = [["".join(random.choices(alphabet,
                                              k=random.choices(list(sequence_length_probabilities.keys()),
-                                                              sequence_length_probabilities.values())[0]))
+                                                              list(sequence_length_probabilities.values()))[0]))
                       for seq_count in range(
-                random.choices(list(sequence_count_probabilities.keys()), sequence_count_probabilities.values())[0])]
+                random.choices(list(sequence_count_probabilities.keys()), list(sequence_count_probabilities.values()))[0])]
                      for rep in range(repertoire_count)]
 
         processed_labels, dataset_params = RandomDatasetGenerator._make_labels(labels, repertoire_count)
@@ -150,6 +151,7 @@ class RandomDatasetGenerator:
             epitope2: # next label with classes that will be assigned to receptors independently of the previous label or other parameters
                 1: 0.3 # 30% of the generated receptors will have class 1
                 0: 0.7 # 70% of the generated receptors will have class 0
+
         """
         RandomDatasetGenerator._check_receptor_dataset_generation_params(receptor_count, chain_1_length_probabilities,
                                                                          chain_2_length_probabilities, labels, path)
@@ -226,7 +228,7 @@ class RandomDatasetGenerator:
         sequences = [ReceptorSequence(uuid.uuid4().hex, None,
                                       "".join(random.choices(alphabet,
                                                              k=random.choices(list(length_probabilities.keys()),
-                                                                              length_probabilities.values())[0])),
+                                                                              list(length_probabilities.values()))[0])),
                                       locus=chain, v_call=chain + "V1-1*01", j_call=chain + "J1-1*01",
                                       duplicate_count=random.randint(1, 10),
                                       metadata={

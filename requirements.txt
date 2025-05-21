@@ -20,8 +20,6 @@ fishersapi
 olga>=1.2.4
 stitchr
 IMGTgeneDL
-sentencepiece
-transformers
-esm
 psutil
 kaleido
+logomaker

@@ -24,9 +24,9 @@ class MLMethod(metaclass=abc.ABCMeta):
     """
     DOCS_TITLE = "Classifiers"
 
-    def __init__(self):
-        self.name = None
-        self.label = None
+    def __init__(self, name: str = None, label: Label = None):
+        self.name = name
+        self.label = label
         self.class_mapping = None
         self.feature_names = None
         self.optimization_metric = None

@@ -1,2 +1,5 @@
 dim_dist_cols: 2
 dim_dist_rows: null
+dim_red_method:
+  PCA:
+    n_components: 2

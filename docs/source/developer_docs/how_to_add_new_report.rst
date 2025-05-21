@@ -49,28 +49,28 @@ Test running the new report with a YAML specification
 If you want to use immuneML directly to test run your report, the YAML example below may be used.
 This example analysis creates a randomly generated dataset, and runs the :code:`RandomDataPlot` (which ignores the dataset).
 
-   .. collapse:: test_run_random_data_report.yaml
+ .. collapse:: test_run_random_data_report.yaml
 
-      .. code:: yaml
+    .. code:: yaml
 
-         definitions:
-           datasets:
-             my_dataset:
-               format: RandomSequenceDataset
-               params:
-                 sequence_count: 100
+       definitions:
+         datasets:
+           my_dataset:
+             format: RandomSequenceDataset
+             params:
+               sequence_count: 100
 
-           reports:
-             my_random_report: RandomDataPlot:
-               n_points_to_plot: 10
+         reports:
+           my_random_report: RandomDataPlot:
+             n_points_to_plot: 10
 
-         instructions:
-           my_instruction:
-             type: ExploratoryAnalysis
-             analyses:
-               my_analysis_1:
-                 dataset: my_dataset
-                 report: my_random_report
+       instructions:
+         my_instruction:
+           type: ExploratoryAnalysis
+           analyses:
+             my_analysis_1:
+               dataset: my_dataset
+               reports: [my_random_report]
 
 
 
@@ -79,10 +79,10 @@ Adding a unit test for a Report
 
 Add a unit test for the new :code:`RandomDataPlot` (:download:`download <./example_code/_test_randomDataPlot.py>` the example testfile or view below)
 
-    .. collapse:: test_randomDataPlot.py
+.. collapse:: test_randomDataPlot.py
 
-      .. literalinclude:: ./example_code/_test_randomDataPlot.py
-         :language: python
+  .. literalinclude:: ./example_code/_test_randomDataPlot.py
+     :language: python
 
 
 #. Add a new file to :py:mod:`~test.reports.data_reports` package named test_randomDataPlot.py.
@@ -140,11 +140,11 @@ are more advanced and require understanding of the :code:`TrainMLModelInstructio
 exporting information about one trained ML model. This report can be executed on any trained ML model (:code:`MLMethod` subclass object), both in the assessment and selection loop of
 the :ref:`TrainMLModel`. An :code:`MLReport` has the following attributes:
 
-  #. train_dataset: a Dataset (e.g., RepertoireDataset) object containing the training data used for the given classifier
-  #. test_dataset: similar to train_dataset, but containing the test data
-  #. method: the MLMethod object containing trained classifiers for each of the labels.
-  #. label: the label that the report is executed for (the same report may be executed several times when training classifiers for multiple labels), can be used to retrieve relevant information from the MLMethod object.
-  #. hp_setting: the :py:obj:`~immuneML.hyperparameter_optimization.HPSetting.HPSetting` object, containing all information about which preprocessing, encoding, and ML methods were used up to this point. This parameter can usually be ignored unless specific information from previous analysis steps is needed.
+#. train_dataset: a Dataset (e.g., RepertoireDataset) object containing the training data used for the given classifier
+#. test_dataset: similar to train_dataset, but containing the test data
+#. method: the MLMethod object containing trained classifiers for each of the labels.
+#. label: the label that the report is executed for (the same report may be executed several times when training classifiers for multiple labels), can be used to retrieve relevant information from the MLMethod object.
+#. hp_setting: the :py:obj:`~immuneML.hyperparameter_optimization.HPSetting.HPSetting` object, containing all information about which preprocessing, encoding, and ML methods were used up to this point. This parameter can usually be ignored unless specific information from previous analysis steps is needed.
 
 In contrast, :code:`TrainMLModelReport` is used to compare several [optimal] ML models. This report has access to the attribute state: a :py:obj:`~immuneML.hyperparameter_optimization.states.TrainMLModelState.TrainMLModelState`
 object, containing information that has been collected through the execution of the :code:`TrainMLModelInstruction`. This includes all datasets, trained
@@ -161,11 +161,11 @@ Input and output of the _generate() method
 The abstract method `_generate()` must be implemented,
 which has the following responsibilities:
 
-  - It should create the report results, for example, compute the data or create the plots that should be returned by the report.
-  - It should write the report results to the folder given at the variable :code:`self.result_path`.
-  - It should return a :code:`ReportResult` object, which contains lists of :code:`ReportOutput` objects. These :code:`ReportOutput` objects simply contain the path to a figure, table, text, or another type of result.
-    One report can have multiple outputs, as long as they are all referred to in the returned :code:`ReportResult` object. This is used to format the summary of the results in the HTML output file.
-  - When the main result of the report is a plot, it is good practice to also make the raw data available to the user, for example as a csv file.
+- It should create the report results, for example, compute the data or create the plots that should be returned by the report.
+- It should write the report results to the folder given at the variable :code:`self.result_path`.
+- It should return a :code:`ReportResult` object, which contains lists of :code:`ReportOutput` objects. These :code:`ReportOutput` objects simply contain the path to a figure, table, text, or another type of result.
+  One report can have multiple outputs, as long as they are all referred to in the returned :code:`ReportResult` object. This is used to format the summary of the results in the HTML output file.
+- When the main result of the report is a plot, it is good practice to also make the raw data available to the user, for example as a csv file.
 
 
 Creating plots
@@ -204,8 +204,8 @@ whether the prerequisites are met, and print a warning message to the user when 
 :code:`check_prerequisites()` returns true. This method should not be used to raise exceptions. Instead, it is used to prevent exceptions from happening
 during execution, as this might cause lost results. Situations to consider are:
 
-  - When implementing an EncodingReport, use this function to check that the data has been encoded and that the correct encoder has been used.
-  - Similarly, when creating an MLReport or TrainMLModelReport, check that the appropriate ML methods have been used.
+- When implementing an EncodingReport, use this function to check that the data has been encoded and that the correct encoder has been used.
+- Similarly, when creating an MLReport or TrainMLModelReport, check that the appropriate ML methods have been used.
 
 .. note::
 
