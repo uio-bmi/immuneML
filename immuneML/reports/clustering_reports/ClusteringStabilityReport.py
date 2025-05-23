@@ -6,6 +6,7 @@ import pandas as pd
 from sklearn import metrics
 from sklearn.metrics import jaccard_score
 
+from immuneML.ml_metrics import ClusteringMetric
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.clustering_reports.ClusteringReport import ClusteringReport
@@ -53,11 +54,11 @@ class ClusteringStabilityReport(ClusteringReport):
     def build_object(cls, **kwargs):
         location = "ClusteringStabilityReport"
         name = kwargs["name"] if "name" in kwargs else None
-        similarity_metric = kwargs.get("similarity_metric", "ari")
+        similarity_metric = kwargs.get("metric", cls.DEFAULT_METRIC)
 
-        ParameterValidator.assert_type_and_value(similarity_metric, str, location, "similarity_metric")
-        ParameterValidator.assert_in_valid_list(similarity_metric.lower(), ["ari", "jaccard"], location,
-                                                "similarity_metric")
+        ParameterValidator.assert_type_and_value(similarity_metric, str, location, "metric")
+        assert ClusteringMetric.is_valid_metric(similarity_metric), f"Invalid metric '{similarity_metric}' provided. " \
+            f"Please use a valid clustering evaluation metric from sklearn.metrics."
 
         return ClusteringStabilityReport(name=name, similarity_metric=similarity_metric)
 
@@ -72,14 +73,7 @@ class ClusteringStabilityReport(ClusteringReport):
     def _get_similarity_metric(self, metric_name: str) -> Tuple[Callable, str]:
         try:
             metric_func = getattr(metrics, metric_name)
-            if callable(metric_func):
-                if metric_name == 'jaccard_score':
-                    def jaccard_weighted(x, y):
-                        return jaccard_score(x, y, average='weighted')
-
-                    metric_func = jaccard_weighted
-                    logging.info(f"Using Jaccard metric for clustering stability analysis with weighted average")
-                return metric_func, metric_name
+            return metric_func, metric_name
         except AttributeError:
             logging.warning(f"Invalid similarity metric '{metric_name}', defaulting to {self.DEFAULT_METRIC}")
             return getattr(metrics, self.DEFAULT_METRIC), self.DEFAULT_METRIC

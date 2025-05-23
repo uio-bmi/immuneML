@@ -62,7 +62,7 @@ def test_clustering_workflow():
                                 "n_components": 2, 'kernel': 'rbf'}}}},
                 'stability':
                     {'ClusteringStabilityReport': {
-                        'metric': 'adjusted_rand_score'
+                        'metric': 'mutual_info_score'
                     }},
                 'external_labels_summary': {
                     'ExternalLabelClusterSummary': {
@@ -108,4 +108,4 @@ def test_clustering_workflow():
 
     ImmuneMLApp(path / 'specs.yaml', path / 'output').run()
 
-    shutil.rmtree(path)
+    # shutil.rmtree(path)
