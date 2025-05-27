@@ -6,7 +6,7 @@ import uuid
 from dataclasses import fields
 from multiprocessing import Pool
 from pathlib import Path
-from typing import List, Tuple, Type
+from typing import Type
 
 import pandas as pd
 from bionumpy import AminoAcidEncoding
@@ -14,7 +14,7 @@ from bionumpy import AminoAcidEncoding
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet, AminoAcidXEncoding, DNANEncoding
 from immuneML.data_model.SequenceSet import Repertoire, build_dynamic_airr_sequence_set_dataclass
-from immuneML.data_model.bnp_util import bnp_write_to_file, write_yaml, read_yaml, write_dataset_yaml
+from immuneML.data_model.bnp_util import bnp_write_to_file, read_yaml, write_dataset_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset, ReceptorDataset, ElementDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
@@ -308,6 +308,7 @@ class DataImport(metaclass=abc.ABCMeta):
 
         df = ImportHelper.standardize_bool_values(df)
         df = ImportHelper.standardize_none_values(df)
+        df = ImportHelper.standardize_string_values(df, filename.name)
 
         df = self._convert_types(df)
 

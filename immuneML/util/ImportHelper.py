@@ -18,6 +18,19 @@ class ImportHelper:
     INVALID_COLNAME_CHARS = [" ", "#", "&", "."]
 
     @staticmethod
+    def standardize_string_values(df: pd.DataFrame, filename: str) -> pd.DataFrame:
+        for column in df.columns:
+            if df[column].dtype == 'object':
+                df[column] = df[column].str.strip()
+            if column in ['sequence', 'sequence_aa', 'cdr3', 'cdr3_aa', 'junction', 'junction_aa']:
+                df[column] = df[column].astype(str).str.upper()
+                if df[column].str.contains("#").any():
+                    logging.warning(f"Some sequences in {filename} contain '#' characters. "
+                                    f"These characters are automatically removed.")
+                    df[column] = df[column].str.replace("#", "")
+        return df
+
+    @staticmethod
     def make_new_metadata_file(repertoires: list, metadata: pd.DataFrame, result_path: Path, dataset_name: str) -> Path:
         new_metadata = metadata.copy()
         new_metadata.loc[:, "filename"] = [repertoire.data_filename.name for repertoire in repertoires]
