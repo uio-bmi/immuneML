@@ -9,6 +9,36 @@ from immuneML.encodings.EncoderParams import EncoderParams
 
 
 class ShannonDiversityEncoder(DatasetEncoder):
+    """
+    ShannonDiversity encoder calculates the Shannon diversity index for each repertoire in a dataset. The diversity is
+    computed as:
+
+    .. math::
+
+        diversity = - \\sum_{i=1}^{n} p_i \\log(p_i)
+
+    where :math:`p_i` is the clonal count for each unique sequence in the repertoire (from duplicate_count field)
+    divided by the total clonal counts, and :math:`n` is the total number of clonotypes (sequences) in the repertoire.
+
+
+    **Dataset type:**
+
+    - RepertoireDataset
+
+    **Specification arguments:**
+
+    No arguments are needed for this encoder.
+
+    **YAML specification:**
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        definitions:
+            encodings:
+                shannon_div_enc: ShannonDiversity
+
+    """
 
     def __init__(self, name: str = None):
         super().__init__(name=name)
