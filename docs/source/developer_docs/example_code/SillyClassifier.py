@@ -81,7 +81,7 @@ class SillyClassifier(MLMethod):
         from immuneML.encodings.abundance_encoding.KmerAbundanceEncoder import KmerAbundanceEncoder
         from immuneML.encodings.atchley_kmer_encoding.AtchleyKmerEncoder import AtchleyKmerEncoder
         from immuneML.encodings.distance_encoding.DistanceEncoder import DistanceEncoder
-        from immuneML.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
+        from immuneML.encodings.diversity_encoding.EvennessProfileEncoder import EvennessProfileEncoder
         from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
         from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
         from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder

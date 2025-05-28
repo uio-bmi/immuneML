@@ -246,7 +246,7 @@ class SklearnMethod(MLMethod):
         return Util.get_immuneML_version() + '; scikit-learn ' + pkg_resources.get_distribution('scikit-learn').version
 
     def get_compatible_encoders(self):
-        from immuneML.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
+        from immuneML.encodings.diversity_encoding.EvennessProfileEncoder import EvennessProfileEncoder
         from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
         from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
         from immuneML.encodings.word2vec.Word2VecEncoder import Word2VecEncoder

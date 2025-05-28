@@ -1,0 +1,44 @@
+import numpy as np
+
+from immuneML.caching.CacheHandler import CacheHandler
+from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.encodings.DatasetEncoder import DatasetEncoder
+from immuneML.encodings.EncoderParams import EncoderParams
+
+
+class ShannonDiversityEncoder(DatasetEncoder):
+
+    def __init__(self, name: str = None):
+        super().__init__(name=name)
+
+    @staticmethod
+    def build_object(dataset: Dataset, **params):
+        assert isinstance(dataset, RepertoireDataset), \
+            f"{ShannonDiversityEncoder.__name__}: Dataset must be of type RepertoireDataset, but got {type(dataset)}."
+        return ShannonDiversityEncoder(**params)
+
+    def encode(self, dataset, params: EncoderParams) -> Dataset:
+        assert isinstance(dataset, RepertoireDataset), \
+            f"{ShannonDiversityEncoder.__name__}: Dataset must be of type RepertoireDataset, but got {type(dataset)}."
+
+        examples = CacheHandler.memo_by_params((dataset.identifier, ShannonDiversityEncoder.__name__,
+                                                params.label_config.get_labels_by_name()),
+                                               lambda: self._encode(dataset, params))
+
+        encoded_dataset = dataset.clone()
+        encoded_dataset.encoded_data = EncodedData(examples=examples,
+                                                   labels=dataset.get_metadata(params.label_config.get_labels_by_name()),
+                                                   example_ids=dataset.get_example_ids(),
+                                                   encoding=ShannonDiversityEncoder.__name__)
+        return encoded_dataset
+
+    def _encode(self, dataset: RepertoireDataset, params: EncoderParams) -> np.ndarray:
+        entropies = []
+        for repertoire in dataset.repertoires:
+            data = repertoire.data
+            probabilities = data.duplicate_count / np.sum(data.duplicate_count)
+            entropy = -1. * np.sum(probabilities * np.log(probabilities))
+            entropies.append(entropy)
+        return np.array(entropies)
