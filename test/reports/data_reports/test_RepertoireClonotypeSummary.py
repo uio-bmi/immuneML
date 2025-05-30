@@ -10,11 +10,12 @@ def test_generate():
 
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'repertoire_clonotype_summary')
 
-    dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {3: 0.33, 4: 0.07, 5: 0.2, 6: 0.2, 7: 0.2}, {2: 1.},
-                                                                 {"celiac": {True: 0.5, False: 0.5}}, path / 'dataset')
+    dataset = RandomDatasetGenerator.generate_repertoire_dataset(20, {3: 0.33, 4: 0.07, 5: 0.2, 6: 0.2, 7: 0.2}, {2: 1.},
+                                                                 {"celiac": {True: 0.5, False: 0.5},
+                                                                  'hla': {'hla1': 0.5, 'hla2': 0.5}}, path / 'dataset')
 
     report = RepertoireClonotypeSummary.build_object(result_path=PathBuilder.build(path / 'report'), dataset=dataset, name='test_clonotype_report',
-                                                     split_by_label=True, label=None)
+                                                     color_label=None, facet_label='celiac')
 
     result = report._generate()
 

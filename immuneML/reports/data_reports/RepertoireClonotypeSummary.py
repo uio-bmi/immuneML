@@ -22,8 +22,9 @@ class RepertoireClonotypeSummary(DataReport):
 
     **Specification arguments:**
 
-    - label (str): name of the label to use to color the plot, e.g., could be disease label, or None
-    - split_by_label (bool): if True, the plot will be colored by the label specified in the label argument. Default is False.
+    - color_label (str): the label to color the bar plot by (optional, default: None)
+
+    - facet_label (str): the label to facet the bar plot by (optional, default: None)
 
     **YAML specification:**
 
@@ -34,45 +35,65 @@ class RepertoireClonotypeSummary(DataReport):
             reports:
                 my_clonotype_summary_rep:
                     RepertoireClonotypeSummary:
-                        label: celiac
-                        split_by_label: true
+                        color_label: celiac
+                        facet_label: hla
+
 
     """
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, name: str = None, number_of_processes: int = 1,
-                 split_by_label: bool = None, label: str = None):
+                 color_label: str = None, facet_label: str = None):
         super().__init__(dataset, result_path, name, number_of_processes)
-        self.split_by_label = split_by_label
-        self.label_name = label
-
-    def _set_label_name(self):
-        if self.split_by_label:
-            if self.label_name is None:
-                self.label_name = list(self.dataset.get_label_names())[0]
-        else:
-            self.label_name = None
+        self.color_label = color_label
+        self.facet_label = facet_label
 
     @classmethod
     def build_object(cls, **kwargs):
-        ReportUtil.update_split_by_label_kwargs(kwargs, RepertoireClonotypeSummary.__name__)
-
         return RepertoireClonotypeSummary(**kwargs)
 
     def _generate(self) -> ReportResult:
-        self._set_label_name()
         PathBuilder.build(self.result_path)
         return self._safe_plot()
 
+    def add_labels(self, df: pd.DataFrame) -> pd.DataFrame:
+        column_names = []
+        if self.color_label:
+            column_names.append(self.color_label)
+        if self.facet_label:
+            column_names.append(self.facet_label)
+
+        if len(column_names) > 0:
+            metadata = self.dataset.get_metadata(column_names, return_df=True)
+            return pd.concat([df, metadata], axis=1)
+        else:
+            return df
+
     def _plot(self) -> ReportResult:
-        clonotypes = pd.DataFrame.from_records(sorted([self._get_clonotype_count_with_label(repertoire) for repertoire in self.dataset.get_data()],
-                                                      key=lambda x: x[0]), columns=['clonotype_count', self.label_name])
-        clonotypes['repertoire'] = list(range(1, self.dataset.get_example_count()+1))
+        clonotypes = pd.DataFrame({'clonotype_count': [self._get_clonotype_count(repertoire)
+                                   for repertoire in self.dataset.get_data()]})
+
         clonotypes['repertoire_id'] = self.dataset.get_example_ids()
-        fig = px.bar(clonotypes, x='repertoire', y='clonotype_count', color=self.label_name,
-                     title='Clonotype count per repertoire',
+        clonotypes = self.add_labels(clonotypes)
+        clonotypes.sort_values(by='clonotype_count', ascending=True, inplace=True)
+        clonotypes['repertoire_index'] = clonotypes.groupby(self.facet_label).cumcount() if self.facet_label else list(range(clonotypes.shape[0]))
+
+        fig = px.bar(clonotypes, x='repertoire_index', y='clonotype_count', facet_row=self.facet_label,
+                     color=self.color_label, title='Clonotype count per repertoire',
                      color_discrete_sequence=px.colors.diverging.Tealrose)
         fig.update_layout(template="plotly_white", yaxis_title='clonotype count',
                           xaxis_title='repertoires sorted by clonotype count')
+
+        if self.facet_label:
+            facet_label_counts = {str(k): v for k, v in clonotypes[self.facet_label].value_counts().to_dict().items()}
+            for annotation in fig.layout.annotations:
+                group_label = annotation.text
+                if '=' in group_label:
+                    group = group_label.split('=')[1]
+                    count = facet_label_counts.get(group, 0)
+                    annotation.text = f"{group_label} (n={count})"
+
+            fig.update_xaxes(matches=None)
+
         clonotypes.to_csv(self.result_path / 'clonotype_count_per_repertoire.csv', index=False)
         fig.write_html(str(self.result_path / 'clonotype_count_per_repertoire.html'))
 
@@ -82,7 +103,7 @@ class RepertoireClonotypeSummary(DataReport):
                             output_tables=[ReportOutput(self.result_path / 'clonotype_count_per_repertoire.csv',
                                                         name='Clonotype count per repertoire')])
 
-    def _get_clonotype_count_with_label(self, repertoire: Repertoire) -> Tuple[int, str]:
+    def _get_clonotype_count(self, repertoire: Repertoire) -> int:
 
         sequences = repertoire.data.topandas()
 
@@ -93,7 +114,7 @@ class RepertoireClonotypeSummary(DataReport):
                             f"there are {sequence_count} sequences, but {unique_sequence_count} unique (CDR3 amino acid"
                             f" sequence, V call, J call) combinations.")
 
-        return unique_sequence_count, repertoire.metadata[self.label_name] if self.split_by_label else None
+        return unique_sequence_count
 
     def check_prerequisites(self) -> bool:
         if isinstance(self.dataset, RepertoireDataset):
