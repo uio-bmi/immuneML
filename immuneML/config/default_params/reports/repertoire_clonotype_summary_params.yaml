@@ -1,2 +1,3 @@
-split_by_label: False
-label: null
+facet_label: null
+color_label: null
+number_of_processes: 1

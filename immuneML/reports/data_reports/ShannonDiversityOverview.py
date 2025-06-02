@@ -81,7 +81,7 @@ class ShannonDiversityOverview(DataReport):
                             output_tables=[table_output])
 
     def prepare_data(self, encoded_dataset) -> Tuple[pd.DataFrame, ReportOutput]:
-        labels = ['subject_id']
+        labels = ['subject_id'] if 'subject_id' in self.dataset.labels.keys() else []
         for label in [self.color_label, self.facet_row_label, self.facet_col_label]:
             if label is not None:
                 labels.append(label)
@@ -107,16 +107,18 @@ class ShannonDiversityOverview(DataReport):
         encoded_df['repertoire_index'] = encoded_df.groupby(facet_labels).cumcount() \
             if len(facet_labels) > 0 else list(range(encoded_df.shape[0]))
 
+        hover_data_cols = ['repertoire_id'] + (['subject_id'] if 'subject_id' in encoded_df.columns else [])
+
         fig = px.bar(encoded_df, x='repertoire_index', y='shannon_diversity', facet_row=self.facet_row_label,
                      color=self.color_label, title='Shannon diversity per repertoire', facet_col=self.facet_col_label,
-                     color_discrete_sequence=px.colors.diverging.Tealrose, hover_data=['repertoire_id', 'subject_id'])
+                     color_discrete_sequence=px.colors.diverging.Tealrose, hover_data=hover_data_cols)
         fig.update_layout(template="plotly_white", yaxis_title='Shannon diversity',
                           xaxis_title='Repertoires sorted by Shannon diversity')
 
         fig.update_traces(
             hovertemplate=(
-                "Repertoire id: %{customdata[0]}<br>"
-                "Subject id: %{customdata[1]}<br>"
+                "Repertoire id: %{customdata[0]}<br>" +
+                "Subject id: %{customdata[1]}<br>" if 'subject_id' in encoded_df.columns else "" +
                 "Shannon diversity: %{y}<extra></extra>"
             )
         )
