@@ -71,7 +71,7 @@ class RepertoireClonotypeSummary(DataReport):
 
         clonotypes['repertoire_id'] = self.dataset.get_example_ids()
         clonotypes = self.add_labels(clonotypes)
-        clonotypes.sort_values(by='clonotype_count', ascending=True, inplace=True)
+        clonotypes.sort_values(by='clonotype_count', ascending=False, inplace=True)
         clonotypes['repertoire_index'] = clonotypes.groupby(self.facet_label).cumcount() if self.facet_label else list(range(clonotypes.shape[0]))
 
         fig = px.bar(clonotypes, x='repertoire_index', y='clonotype_count', facet_row=self.facet_label,
@@ -88,8 +88,6 @@ class RepertoireClonotypeSummary(DataReport):
                     group = group_label.split('=')[1]
                     count = facet_label_counts.get(group, 0)
                     annotation.text = f"{group_label} (n={count})"
-
-            fig.update_xaxes(matches=None)
 
         clonotypes.to_csv(self.result_path / 'clonotype_count_per_repertoire.csv', index=False)
         fig.write_html(str(self.result_path / 'clonotype_count_per_repertoire.html'))
