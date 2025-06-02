@@ -54,12 +54,12 @@ class ShannonDiversityEncoder(DatasetEncoder):
             f"{ShannonDiversityEncoder.__name__}: Dataset must be of type RepertoireDataset, but got {type(dataset)}."
 
         examples = CacheHandler.memo_by_params((dataset.identifier, ShannonDiversityEncoder.__name__,
-                                                params.label_config.get_labels_by_name()),
+                                                params.label_config.get_labels_by_name() if params.encode_labels else ''),
                                                lambda: self._encode(dataset, params))
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=examples,
-                                                   labels=dataset.get_metadata(params.label_config.get_labels_by_name()),
+                                                   labels=dataset.get_metadata(params.label_config.get_labels_by_name()) if params.encode_labels else {},
                                                    example_ids=dataset.get_example_ids(),
                                                    encoding=ShannonDiversityEncoder.__name__)
         return encoded_dataset

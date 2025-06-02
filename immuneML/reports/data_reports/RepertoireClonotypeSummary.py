@@ -1,8 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Tuple
 
-import numpy as np
 import pandas as pd
 import plotly.express as px
 
@@ -11,7 +9,6 @@ from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
-from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.util.PathBuilder import PathBuilder
 
