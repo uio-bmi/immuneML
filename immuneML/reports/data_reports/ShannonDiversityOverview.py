@@ -12,6 +12,7 @@ from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class ShannonDiversityOverview(DataReport):
@@ -71,6 +72,8 @@ class ShannonDiversityOverview(DataReport):
     def _generate(self) -> ReportResult:
         encoded_dataset = (ShannonDiversityEncoder.build_object(self.dataset)
                            .encode(self.dataset, EncoderParams(self.result_path, encode_labels=False)))
+
+        PathBuilder.build(self.result_path)
 
         df, table_output = self.prepare_data(encoded_dataset)
 
