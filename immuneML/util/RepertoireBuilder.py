@@ -79,7 +79,7 @@ class RepertoireBuilder:
             bnp_dc_obj, _ = build_dynamic_bnp_dataclass_obj(df.to_dict(orient='list'))
 
             repertoire = Repertoire(rep_path / f"rep_{rep_index}.tsv", rep_path / f"rep_{rep_index}.yaml", metadata,
-                                    _bnp_dataclass=type(bnp_dc_obj), identifier=uuid.uuid4().hex)
+                                    identifier=uuid.uuid4().hex)
             repertoires.append(repertoire)
 
         df = pd.DataFrame({**{"filename": [repertoire.data_filename for repertoire in repertoires],

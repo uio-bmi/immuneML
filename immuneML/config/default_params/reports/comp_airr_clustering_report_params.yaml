@@ -1,0 +1,8 @@
+ignore_genes: false
+indels: false
+ignore_counts: true
+linkage_method: single
+is_cdr3: true
+clustering_criterion: distance
+clustering_threshold: 0.5
+labels: []

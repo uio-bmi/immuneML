@@ -32,7 +32,8 @@ class DataImport(metaclass=abc.ABCMeta):
     def import_dataset(self) -> Dataset:
 
         if self.params.dataset_file is not None:
-            assert self.params.dataset_file.is_file(), f"DataImport: dataset_file was specified but not found: {self.params.dataset_file}"
+            assert self.params.dataset_file.is_file(), \
+                f"DataImport: dataset_file was specified but not found: {self.params.dataset_file}"
             dataset = self.import_dataset_from_yaml()
         else:
             if self.params.is_repertoire is None and self.params.metadata_file is not None:
@@ -72,28 +73,34 @@ class DataImport(metaclass=abc.ABCMeta):
             if self.params.metadata_file is None:
                 self.params.metadata_file = self.params.dataset_file.parent / imported_dataset_yaml['metadata_file']
 
-            imported_identifier = imported_dataset_yaml['identifier']
-            imported_labels = imported_dataset_yaml['labels']
+            labels = imported_dataset_yaml['labels']
+            metadata = self.import_repertoire_metadata(self.params.metadata_file)
+            repertoires = []
+            for index, row in metadata.iterrows():
+                filename = ImportHelper.get_repertoire_filename_from_metadata_row(row, self.params)
+                metadata_filename = filename.with_suffix('.yaml')
+                repertoires.append(Repertoire(data_filename=filename, metadata_filename=metadata_filename,
+                                              metadata=read_yaml(metadata_filename), identifier=row['identifier']))
 
-            # type_dict = imported_dataset_yaml['type_dict']
+            new_metadata_file = self.params.metadata_file
+            dataset_filename = self.params.dataset_file
+            dataset_yaml = imported_dataset_yaml
+
         else:
-            imported_labels = None
-            imported_identifier = None
+            metadata = self.import_repertoire_metadata(self.params.metadata_file)
+            repertoires = self.load_repertoires(metadata)
+            new_metadata_file = ImportHelper.make_new_metadata_file(repertoires, metadata, self.params.result_path,
+                                                                    self.dataset_name)
+            # type_dict = self.determine_repertoire_type_dict(repertoires)
+            labels = self.determine_repertoire_dataset_labels(metadata)
+            identifier = None
 
-        metadata = self.import_repertoire_metadata(self.params.metadata_file)
-        repertoires = self.load_repertoires(metadata)
-        new_metadata_file = ImportHelper.make_new_metadata_file(repertoires, metadata, self.params.result_path,
-                                                                self.dataset_name)
-        # type_dict = self.determine_repertoire_type_dict(repertoires)
-        labels = self.determine_repertoire_dataset_labels(metadata, imported_labels=imported_labels)
-
-        dataset_filename = self.params.result_path / f"{self.dataset_name}.yaml"
-        dataset_yaml = RepertoireDataset.create_metadata_dict(metadata_file=new_metadata_file,
-                                                              # type_dict=type_dict,
-                                                              labels=labels,
-                                                              name=self.dataset_name,
-                                                              identifier=imported_identifier)
-        write_dataset_yaml(dataset_filename, dataset_yaml)
+            dataset_filename = PathBuilder.build(self.params.result_path) / f"{self.dataset_name}.yaml"
+            dataset_yaml = RepertoireDataset.create_metadata_dict(metadata_file=new_metadata_file,
+                                                                  labels=labels,
+                                                                  name=self.dataset_name,
+                                                                  identifier=identifier)
+            write_dataset_yaml(dataset_filename, dataset_yaml)
 
         return RepertoireDataset(labels=labels,
                                  repertoires=repertoires, metadata_file=new_metadata_file, name=self.dataset_name,
@@ -248,7 +255,8 @@ class DataImport(metaclass=abc.ABCMeta):
 
             if repertoire.get_element_count() == 0:
                 logging.warning(
-                    f"Repertoire {repertoire.identifier} contains 0 sequences. It is recommended to remove this repertoire from the dataset. ")
+                    f"Repertoire {repertoire.identifier} contains 0 sequences. It is recommended to remove this "
+                    f"repertoire from the dataset. ")
 
             return repertoire
         except Exception as e:
