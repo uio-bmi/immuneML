@@ -78,6 +78,7 @@ class SklearnMethod(MLMethod):
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         super(SklearnMethod, self).__init__()
         self.model = None
+        self.random_cv_obj = None
 
         if parameter_grid is not None and "show_warnings" in parameter_grid:
             self.show_warnings = parameter_grid.pop("show_warnings")[0]
@@ -105,7 +106,8 @@ class SklearnMethod(MLMethod):
 
     def _predict_proba(self, encoded_data: EncodedData):
         if self.can_predict_proba():
-            probabilities = self.apply_with_weights(self.model.predict_proba, encoded_data.example_weights, X=encoded_data.examples)
+            probabilities = self.apply_with_weights(self.model.predict_proba, encoded_data.example_weights,
+                                                    X=encoded_data.examples)
             class_names = Util.map_to_old_class_values(self.model.classes_, self.class_mapping)
 
             return {self.label.name: {class_name: probabilities[:, i] for i, class_name in enumerate(class_names)}}
@@ -116,8 +118,10 @@ class SklearnMethod(MLMethod):
     def _fit_model(self, X, y, w=None, cores_for_training: int = 1):
         self.model = self._get_ml_model(cores_for_training, X)
 
-        if w is not None and not self._check_method_supports_example_weight(self.model.fit) and not self._check_method_supports_example_weight(self.model.predict):
-            logging.warning(f"{self.__class__.__name__}: cannot fit this classifier with example weights, fitting without example weights instead... Example weights will still be applied when computing evaluation metrics after fitting.")
+        if w is not None and not self._check_method_supports_example_weight(
+                self.model.fit) and not self._check_method_supports_example_weight(self.model.predict):
+            logging.warning(
+                f"{self.__class__.__name__}: cannot fit this classifier with example weights, fitting without example weights instead... Example weights will still be applied when computing evaluation metrics after fitting.")
 
         if not self.show_warnings:
             warnings.simplefilter("ignore")
@@ -152,14 +156,18 @@ class SklearnMethod(MLMethod):
 
     def check_is_fitted(self, label_name: str):
         if self.label.name == label_name or label_name is None:
-            return check_is_fitted(self.model, ["estimators_", "coef_", "estimator", "_fit_X", "dual_coef_", "classes_"], all_or_any=any)
+            return check_is_fitted(self.model,
+                                   ["estimators_", "coef_", "estimator", "_fit_X", "dual_coef_", "classes_"],
+                                   all_or_any=any)
 
     def _fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int, cores_for_training: int):
 
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
-        self.model = self._fit_model_by_cross_validation(X=encoded_data.examples, y=mapped_y, w=encoded_data.example_weights,
-                                                         number_of_splits=number_of_splits, cores_for_training=cores_for_training)
+        self.model = self._fit_model_by_cross_validation(X=encoded_data.examples, y=mapped_y,
+                                                         w=encoded_data.example_weights,
+                                                         number_of_splits=number_of_splits,
+                                                         cores_for_training=cores_for_training)
 
     def _fit_model_by_cross_validation(self, X, y, w, number_of_splits: int, cores_for_training: int):
 
@@ -175,16 +183,17 @@ class SklearnMethod(MLMethod):
             warnings.simplefilter("ignore")
             os.environ["PYTHONWARNINGS"] = "ignore"
 
-        self.model = RandomizedSearchCV(model, param_distributions=self._parameter_grid, cv=number_of_splits, n_jobs=cores_for_training,
-                                        scoring=scoring, refit=True)
+        self.random_cv_obj = RandomizedSearchCV(model, param_distributions=self._parameter_grid, cv=number_of_splits,
+                                                n_jobs=cores_for_training,
+                                                scoring=scoring, refit=True)
 
-        self.model = self.apply_with_weights(self.model.fit, w, X=X, y=y)
+        self.random_cv_obj = self.apply_with_weights(self.random_cv_obj.fit, w, X=X, y=y)
 
         if not self.show_warnings:
             del os.environ["PYTHONWARNINGS"]
             warnings.simplefilter("always")
 
-        self.model = self.model.best_estimator_  # do not leave RandomSearchCV object to be in models, use the best estimator instead
+        self.model = self.random_cv_obj.best_estimator_
 
         return self.model
 
@@ -202,6 +211,7 @@ class SklearnMethod(MLMethod):
                 "feature_names": self.get_feature_names(),
                 "classes": self.model.classes_.tolist(),
                 "class_mapping": self.class_mapping,
+                "internal_cv_results": self.random_cv_obj.cv_results_ if self.random_cv_obj is not None else None,
             }
 
             if self.label is not None:
@@ -239,7 +249,8 @@ class SklearnMethod(MLMethod):
 
     @abc.abstractmethod
     def get_params(self):
-        """Returns the model parameters in a readable yaml-friendly way (consisting of lists, dictionaries and strings)."""
+        """Returns the model parameters in a readable yaml-friendly way (consisting of lists, dictionaries and
+        strings)."""
         pass
 
     def get_package_info(self) -> str:
