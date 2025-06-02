@@ -82,6 +82,10 @@ class DataImport(metaclass=abc.ABCMeta):
                 repertoires.append(Repertoire(data_filename=filename, metadata_filename=metadata_filename,
                                               metadata=read_yaml(metadata_filename), identifier=row['identifier']))
 
+                if repertoires[-1].get_element_count() == 0:
+                    logging.warning(f"Repertoire {repertoires[-1].data_filename} contains 0 sequences. It is "
+                                    f"recommended to remove this repertoire from the dataset.")
+
             new_metadata_file = self.params.metadata_file
             dataset_filename = self.params.dataset_file
             dataset_yaml = imported_dataset_yaml
@@ -255,7 +259,7 @@ class DataImport(metaclass=abc.ABCMeta):
 
             if repertoire.get_element_count() == 0:
                 logging.warning(
-                    f"Repertoire {repertoire.identifier} contains 0 sequences. It is recommended to remove this "
+                    f"Repertoire {repertoire.data_filename} contains 0 sequences. It is recommended to remove this "
                     f"repertoire from the dataset. ")
 
             return repertoire
