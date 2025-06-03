@@ -36,4 +36,5 @@ If you are getting started with your own dataset for the analysis, see :ref:`Ana
   tutorials/how_to_perform_exploratory_analysis
   tutorials/motif_recovery
   tutorials/clustering_tutorial
+  tutorials/how_to_train_and_apply_gen_model
 
