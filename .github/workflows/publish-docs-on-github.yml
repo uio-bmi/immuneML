@@ -17,14 +17,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python with uv
-        uses: astral-sh/setup-uv@v1
-        with:
-          python-version: 3.11
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
 
       - name: Create a virtual env and install dependencies with uv
         run: |
-            python -m venv .venv
+            uv venv --python 3.11
             source .venv/bin/activate
           
             uv pip install -r requirements.txt
