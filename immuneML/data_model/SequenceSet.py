@@ -234,6 +234,7 @@ def build_dynamic_airr_sequence_set_dataclass(all_fields_dict: Dict[str, Any]):
 
 def make_sequences_from_data(data, dynamic_fields: dict, region_type: RegionType = RegionType.IMGT_CDR3):
     seqs = []
+    dynamic_fields_internal = dynamic_fields if dynamic_fields is not None else {}
     for el in data.to_iter():
         seq, seq_aa = get_sequence_value(el, region_type)
         seqs.append(ReceptorSequence(sequence_id=el.sequence_id, sequence=seq, sequence_aa=seq_aa,
@@ -243,7 +244,7 @@ def make_sequences_from_data(data, dynamic_fields: dict, region_type: RegionType
                                      c_call=getattr(el, 'c_call', ''),
                                      j_call=el.j_call, duplicate_count=el.duplicate_count,
                                      metadata={dynamic_field: getattr(el, dynamic_field)
-                                               for dynamic_field in dynamic_fields.keys()}))
+                                               for dynamic_field in dynamic_fields_internal.keys()}))
     return seqs
 
 

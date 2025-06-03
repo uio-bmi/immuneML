@@ -73,8 +73,8 @@ class DimensionalityReduction(EncodingReport):
         super().__init__(dataset=dataset, result_path=result_path, name=name)
         self._labels = labels
         self._dim_red_method = dim_red_method
-        self._dimension_names = ['dimension_1',
-                                 'dimension_2'] if self._dim_red_method else self._dim_red_method.get_dimension_names()
+        self._dimension_names = ['dimension_1', 'dimension_2'] if self._dim_red_method is None \
+            else self._dim_red_method.get_dimension_names()
         self.info = ("This report visualizes the encoded data after applying dimensionality reduction dim_red,"
                      " optionally colored by labels of interest.")
 
@@ -91,7 +91,9 @@ class DimensionalityReduction(EncodingReport):
             assert self.dataset.encoded_data.dimensionality_reduced_data is not None
             dim_reduced_data = self.dataset.encoded_data.dimensionality_reduced_data
 
-        assert dim_reduced_data.shape[1] == 2
+        assert dim_reduced_data.shape[1] == 2, \
+            (f"{DimensionalityReduction.__name__}: {self.name}: dimensionality reduced data is not 2d (got: "
+             f"{dim_reduced_data.shape}, so it cannot be plotted.")
         data_labels = None
 
         try:
