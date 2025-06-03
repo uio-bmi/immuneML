@@ -148,7 +148,14 @@ class RepertoireDataset(Dataset):
             (f"RepertoireDataset: for dataset {self.name} (id: {self.identifier}) metadata file is not set properly. "
              f"The metadata file points to {self.metadata_file}.")
 
-        df = pd.read_csv(self.metadata_file, sep=",", usecols=field_names, comment=Constants.COMMENT_SIGN)
+        try:
+            df = pd.read_csv(self.metadata_file, sep=",", usecols=field_names, comment=Constants.COMMENT_SIGN)
+        except ValueError:
+            df = pd.read_csv(self.metadata_file, sep=",", comment=Constants.COMMENT_SIGN)
+            df.drop(columns=[col for col in df.columns if col not in field_names], inplace=True)
+            logging.warning(f"RepertoireDataset: metadata file {self.metadata_file} does not contain the "
+                            f"following fields: {[col for col in field_names if col not in df.columns]}. ")
+
         if return_df:
             return df
         else:

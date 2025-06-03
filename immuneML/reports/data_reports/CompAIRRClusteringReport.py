@@ -287,7 +287,7 @@ class CompAIRRClusteringReport(DataReport):
             Dictionary mapping repertoire_ids to their labels/categories
         """
         output_path = self.result_path / "dendrogram.html"
-        repertoire_ids = metadata['subject_id'].tolist()
+        repertoire_ids = metadata['subject_id'].tolist() if 'subject_id' in metadata.columns else self.dataset.get_example_ids()
 
         # Create dummy data array for dendrogram
         n = distance_matrix.shape[0]
