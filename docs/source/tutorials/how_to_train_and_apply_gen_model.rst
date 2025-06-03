@@ -83,7 +83,9 @@ To train an LSTM, the following YAML configuration may be used:
       training_percentage: 0.7
 
 To explore the dataset with original and generated sequences, we could encode them using k-mer frequencies and visualize
-with feature value barplots:
+with feature value barplots. The exported dataset from the previous instruction will contain both the original and
+generated sequences, and the column 'dataset_split' will indicate which sequences are original and used for training,
+which are original, but not used during training (test) and which are generated.
 
 .. code-block:: yaml
 
@@ -142,3 +144,16 @@ with feature value barplots:
 Using Trained VAE to Generate New Sequences
 -----------------------------------------------
 
+To generate new sequences using the trained LSTM, we can also use the :ref:`ApplyGenModel` instruction:
+
+.. code-block:: yaml
+
+  definitions:
+    reports:
+      data_report: SequenceLengthDistribution
+  instructions:
+    my_apply_gen_model_inst:
+        type: ApplyGenModel
+        gen_examples_count: 100
+        ml_config_path: ./config.zip
+        reports: [data_report]

@@ -1,2 +1,5 @@
 sequence_type: amino_acid
 region_type: IMGT_CDR3
+split_by_label: false
+plot_frequencies: true
+label: null
