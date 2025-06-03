@@ -177,10 +177,26 @@ class CompAIRRClusteringReport(DataReport):
             columns=[rep.identifier for rep in self.dataset.repertoires]
         )
 
+    def _make_clean_rep_files(self, rep: Repertoire, tmp_file_path: Path):
+        df = pd.read_csv(rep.data_filename, sep="\t")[['cdr3_aa', 'v_call', 'j_call', 'duplicate_count']]
+        if (df['duplicate_count'] == -1).any() or df['duplicate_count'].isna().any():
+            logging.warning(f"CompAIRRClusteringReport: Duplicate count -1 or NA found in repertoire {rep.identifier}. "
+                            "Setting to 1, but it should be rechecked.")
+            df['duplicate_count'] = df['duplicate_count'].replace(-1, 1)
+            df['duplicate_count'] = df['duplicate_count'].replace(pd.NA, 1)
+
+        df.to_csv(tmp_file_path, sep="\t", index=False)
+
     def _run_compairr(self, rep1: Repertoire, rep2: Repertoire, similarity_matrix: pd.DataFrame):
         output_file = self.result_path / f"overlap_{rep1.identifier}_{rep2.identifier}.tsv"
 
-        cmd_args = [str(self.compairr_path), "--matrix", str(rep1.data_filename), str(rep2.data_filename),
+        tmp_rep_file1 = self.result_path / f"{rep1.identifier}_tmp.tsv"
+        tmp_rep_file2 = self.result_path / f"{rep2.identifier}_tmp.tsv"
+
+        self._make_clean_rep_files(rep1, tmp_rep_file1)
+        self._make_clean_rep_files(rep2, tmp_rep_file2)
+
+        cmd_args = [str(self.compairr_path), "--matrix", str(tmp_rep_file1), str(tmp_rep_file2),
                     "-o", str(output_file)]
         if self.indels:
             cmd_args.append("-i")
@@ -193,14 +209,20 @@ class CompAIRRClusteringReport(DataReport):
         cmd_args.extend(["-t", str(self.threads)])
         cmd_args.extend(["-s", 'Jaccard'])
 
-        subprocess.run(cmd_args, capture_output=True, text=True)
+        result = subprocess.run(cmd_args, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"CompAIRRClusteringReport: Error running CompAIRR for repertoires {rep1.identifier} and "
+                f"{rep2.identifier}:\n{result.stderr}")
 
-        if output_file.is_file():
+        elif output_file.is_file():
             similarity = pd.read_csv(output_file, sep="\t").iloc[0, 1]
             similarity_matrix.loc[rep1.identifier, rep2.identifier] = similarity
             similarity_matrix.loc[rep2.identifier, rep1.identifier] = similarity
 
             os.remove(str(output_file))
+            os.remove(str(tmp_rep_file1))
+            os.remove(str(tmp_rep_file2))
 
         return similarity_matrix
 

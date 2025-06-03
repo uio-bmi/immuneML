@@ -215,7 +215,7 @@ class VJGeneDistribution(DataReport):
         zmax = max(chain_df[value_to_plot]) if zmax is None else zmax
 
         chain_df = chain_df.pivot(index="v_genes", columns="j_genes", values=value_to_plot).round(decimals=2)
-        figure = px.imshow(chain_df, labels=dict(x="V genes", y="J genes", color=color_name),
+        figure = px.imshow(chain_df, labels=dict(x="J genes", y="V genes", color=color_name),
                            text_auto=True, zmin=0, zmax=zmax, aspect="auto")
 
         figure.update_traces(hoverongaps=False)
