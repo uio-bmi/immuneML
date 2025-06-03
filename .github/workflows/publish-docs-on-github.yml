@@ -26,25 +26,18 @@ jobs:
         run: |
             python -m venv .venv
             source .venv/bin/activate
+          
             uv pip install -r requirements.txt
             uv pip install -r requirements_sphinx.txt
             uv pip install torch
-        env:
-          VIRTUAL_ENV: .venv
-          PATH: .venv/bin:${{ env.PATH }}
-
-      - name: make html & commit the changes
-        run: |
-          python scripts/specs_docs_generation.py
-          sphinx-build -b html ./docs/source ./docs
-          git config --global user.email "github@action.com"
-          git config user.name "pavlovicmilena"
-          git add -f ./docs
-          git commit -m 'update docs'
-        env:
-          VIRTUAL_ENV: .venv
-          PATH: .venv/bin:${{ env.PATH }}
-          PYTHONPATH: .
+          
+            python scripts/specs_docs_generation.py
+            sphinx-build -b html ./docs/source ./docs
+          
+            git config --global user.email "github@action.com"
+            git config user.name "pavlovicmilena"
+            git add -f ./docs
+            git commit -m 'update docs'
 
       - name: push changes to gh-pages to show automatically
         uses: ad-m/github-push-action@master
