@@ -22,9 +22,10 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Install dependencies with uv
+      - name: Create a virtual env and install dependencies with uv
         run: |
             python -m venv .venv
+            source .venv/bin/activate
             uv pip install -r requirements.txt
             uv pip install -r requirements_sphinx.txt
             uv pip install torch
