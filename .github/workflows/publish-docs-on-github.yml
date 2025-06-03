@@ -29,6 +29,8 @@ jobs:
             uv pip install -r requirements_sphinx.txt
             uv pip install torch
           
+            export PYTHONPATH=.
+          
             python scripts/specs_docs_generation.py
             sphinx-build -b html ./docs/source ./docs
           
