@@ -40,7 +40,10 @@ with different feature representations:
 - :ref:`DimensionalityReduction` to compare encoded sequences after applying dimensionality reduction
   (see :ref:`***Dimensionality reduction methods***`) and coloring the points by labels (e.g., generated vs original sequences).
 
-Full Example with VAE
+Full Training Example with VAE
 ---------------------------------
 
+
+Using Trained VAE to Generate New Sequences
+-----------------------------------------------
 
