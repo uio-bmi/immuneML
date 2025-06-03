@@ -17,50 +17,68 @@ definitions section are defined in the same manner as for all other instructions
 
 
 The instruction consists of a list of analyses to be performed. Each analysis should
-contain at least a :code:`dataset` and a :code:`report`. Optionally, the analysis may also contain an
-:code:`encoding` along with :code:`labels` if applicable.
+contain at least a :code:`dataset` and a :code:`reports` sections. Optionally, the analysis may also contain an
+:code:`encoding`, :code:`dim_reduction`, and :code:`labels` if applicable.
 In the example below, two analyses are done:
 
 - :code:`my_analysis_1` runs report :code:`my_seq_lengths` directly on dataset :code:`my_dataset`
 
 - :code:`my_analysis_2` first encodes :code:`my_dataset` using :code:`my_regex_matches` before running report :code:`my_matches`.
 
-    .. collapse:: exploratory_analysis.yaml
+- :code:`my_dim_red_analysis` first encodes :code:`my_dataset` with 3-mer frequencies, performs dimensionality reduction using tSNE, and then runs report :code:`my_dim_red_report`.
 
-        .. highlight:: yaml
-        .. code-block:: yaml
+.. collapse:: exploratory_analysis.yaml
 
-          definitions:
-            datasets:
-              # imported datasets
-              my_dataset: # user-defined dataset name
-                format: AIRR
-                params:
-                  metadata_file: path/to/metadata.csv
-                  path: path/to/data/
+.. highlight:: yaml
+.. code-block:: yaml
 
-            encodings:
-              my_regex_matches:
-                MatchedRegex:
-                  motif_filepath: path/to/regex_file.tsv
+  definitions:
+    datasets:
+      # imported datasets
+      my_dataset: # user-defined dataset name
+        format: AIRR
+        params:
+          metadata_file: path/to/metadata.csv
+          path: path/to/data/
 
-            reports:
-              my_seq_lengths: SequenceLengthDistribution # reports without parameters
-              my_matches: Matches
+    encodings:
+      my_regex_matches:
+        MatchedRegex:
+          motif_filepath: path/to/regex_file.tsv
+      3mer_freq: KmerFrequency
 
-          instructions:
-            my_instruction: # user-defined instruction name
-              type: ExploratoryAnalysis
-              analyses:
-                my_analysis_1: # user-defined analysis name
-                  dataset: my_dataset
-                  report: my_seq_lengths
-                my_analysis_2:
-                  dataset: my_dataset
-                  encoding: my_regex_matches
-                  report: my_matches
+    ml_methods:
+      my_dim_red_method: # user-defined method name
+        TSNE:
+          n_components: 2
+          init: pca
 
-Where the file :download:`regex_file.tsv <../_static/files/regex_file.tsv>` must be a tab-separated file, which may contain the following contents:
+    reports:
+      my_seq_lengths: SequenceLengthDistribution # reports without parameters
+      my_matches: Matches
+      dim_red_report:
+        DimensionalityReduction:
+          labels: [disease_label] # a list of labels to be used for coloring the points in the plot (a separate plot will be made for each label)
+
+  instructions:
+    my_instruction: # user-defined instruction name
+      type: ExploratoryAnalysis
+      analyses:
+        my_analysis_1: # user-defined analysis name
+          dataset: my_dataset
+          reports: [my_seq_lengths]
+        my_analysis_2:
+          dataset: my_dataset
+          encoding: my_regex_matches
+          reports: [my_matches]
+        my_dim_red_analysis:
+          dataset: my_dataset
+          encoding: 3mer_freq
+          dim_reduction: my_dim_red_method
+          reports: [dim_red_report]
+
+Note that for analysis 2, the file :download:`regex_file.tsv <../_static/files/regex_file.tsv>` must be a tab-separated
+file, which may contain the following contents:
 
 ====  ==========
 id    TRB_regex
