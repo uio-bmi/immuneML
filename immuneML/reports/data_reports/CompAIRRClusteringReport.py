@@ -163,6 +163,9 @@ class CompAIRRClusteringReport(DataReport):
                 rep2 = self.dataset.repertoires[j]
                 similarity_matrix = self._run_compairr(rep1, rep2, similarity_matrix)
 
+            logging.info(f"CompAIRRClusteringReport: Finished processing repertoire "
+                         f"{rep1.identifier} ({i + 1}/{n_repertoires})")
+
         return similarity_matrix
 
     def check_label(self):
@@ -288,6 +291,7 @@ class CompAIRRClusteringReport(DataReport):
         """
         output_path = self.result_path / "dendrogram.html"
         repertoire_ids = metadata['subject_id'].tolist() if 'subject_id' in metadata.columns else self.dataset.get_example_ids()
+        metadata['subject_id'] = repertoire_ids
 
         # Create dummy data array for dendrogram
         n = distance_matrix.shape[0]

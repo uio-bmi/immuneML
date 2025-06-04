@@ -30,10 +30,10 @@ class RepertoireDataset(Dataset):
         assert len(kwargs['repertoires']) > 0, "Cannot to construct a repertoire dataset without repertories."
 
         metadata_df = pd.DataFrame.from_records(
-            [{**rep.metadata, **{'filename': rep.data_filename.name}} for rep in kwargs['repertoires']])
+            [{**rep.metadata, **{'filename': rep.data_filename.name, 'identifier': rep.identifier}}
+             for rep in kwargs['repertoires']])
 
-        if 'field_list' in metadata_df.columns:
-            metadata_df.drop(columns=['field_list'], inplace=True)
+        metadata_df.drop(columns=['field_list', 'type_dict_dynamic_fields'], inplace=True, errors='ignore')
 
         metadata_path = PathBuilder.build(kwargs['path']) / 'metadata.csv'
         metadata_df.to_csv(metadata_path, index=False)

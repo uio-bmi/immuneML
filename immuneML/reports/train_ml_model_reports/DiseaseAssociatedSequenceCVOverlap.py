@@ -49,7 +49,10 @@ class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
 
         definitions:
             reports:
-                my_overlap_report: DiseaseAssociatedSequenceCVOverlap # report has no parameters
+                my_overlap_report:
+                    DiseaseAssociatedSequenceCVOverlap:
+                        compare_in_selection: false
+                        compare_in_assessment: true
 
     """
     COMPATIBLE_ENCODERS = (SequenceAbundanceEncoder, CompAIRRSequenceAbundanceEncoder, KmerAbundanceEncoder)
