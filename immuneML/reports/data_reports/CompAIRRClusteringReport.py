@@ -158,10 +158,17 @@ class CompAIRRClusteringReport(DataReport):
         # Compare repertoires pairwise
         for i in range(n_repertoires):
             rep1 = self.dataset.repertoires[i]
+            tmp_rep_file1 = self.result_path / f"{rep1.identifier}_tmp.tsv"
+            self._make_clean_rep_files(rep1, tmp_rep_file1)
+
             similarity_matrix.loc[rep1.identifier, rep1.identifier] = 1
             for j in range(i + 1, n_repertoires):
                 rep2 = self.dataset.repertoires[j]
-                similarity_matrix = self._run_compairr(rep1, rep2, similarity_matrix)
+
+                tmp_rep_file2 = self.result_path / f"{rep2.identifier}_tmp.tsv"
+                self._make_clean_rep_files(rep2, tmp_rep_file2)
+
+                similarity_matrix = self._run_compairr(rep1, rep2, tmp_rep_file1, tmp_rep_file2, similarity_matrix)
 
             logging.info(f"CompAIRRClusteringReport: Finished processing repertoire "
                          f"{rep1.identifier} ({i + 1}/{n_repertoires})")
@@ -190,14 +197,9 @@ class CompAIRRClusteringReport(DataReport):
 
         df.to_csv(tmp_file_path, sep="\t", index=False)
 
-    def _run_compairr(self, rep1: Repertoire, rep2: Repertoire, similarity_matrix: pd.DataFrame):
+    def _run_compairr(self, rep1: Repertoire, rep2: Repertoire, tmp_rep_file1: Path, tmp_rep_file2: Path,
+                      similarity_matrix: pd.DataFrame):
         output_file = self.result_path / f"overlap_{rep1.identifier}_{rep2.identifier}.tsv"
-
-        tmp_rep_file1 = self.result_path / f"{rep1.identifier}_tmp.tsv"
-        tmp_rep_file2 = self.result_path / f"{rep2.identifier}_tmp.tsv"
-
-        self._make_clean_rep_files(rep1, tmp_rep_file1)
-        self._make_clean_rep_files(rep2, tmp_rep_file2)
 
         cmd_args = [str(self.compairr_path), "--matrix", str(tmp_rep_file1), str(tmp_rep_file2),
                     "-o", str(output_file)]

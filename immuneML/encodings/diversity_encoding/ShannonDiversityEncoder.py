@@ -71,4 +71,4 @@ class ShannonDiversityEncoder(DatasetEncoder):
             probabilities = data.duplicate_count / np.sum(data.duplicate_count)
             entropy = -1. * np.sum(probabilities * np.log(probabilities))
             entropies.append(entropy)
-        return np.array(entropies)
+        return np.array(entropies).reshape(-1, 1)
