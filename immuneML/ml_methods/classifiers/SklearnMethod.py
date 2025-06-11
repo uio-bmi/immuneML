@@ -7,7 +7,7 @@ from pathlib import Path
 
 import dill
 import numpy as np
-import pkg_resources
+import pandas as pd
 import yaml
 from sklearn.metrics import get_scorer_names
 from sklearn.model_selection import RandomizedSearchCV
@@ -205,13 +205,20 @@ class SklearnMethod(MLMethod):
 
         params_path = path / f"{self._get_model_filename()}.yaml"
 
+        try:
+            if self.random_cv_obj is not None:
+                pd.DataFrame(self.random_cv_obj.cv_results_).to_csv(path / f"{self._get_model_filename()}_cv_results.csv",
+                                                                    index=False)
+        except Exception as e:
+            logging.warning(f"SklearnMethod: could not save cross-validation results in {self._get_model_filename()}: "
+                            f"{e}")
+
         with params_path.open("w") as file:
             desc = {
                 **(self.get_params()),
                 "feature_names": self.get_feature_names(),
                 "classes": self.model.classes_.tolist(),
                 "class_mapping": self.class_mapping,
-                "internal_cv_results": self.random_cv_obj.cv_results_ if self.random_cv_obj is not None else None,
             }
 
             if self.label is not None:
@@ -254,7 +261,14 @@ class SklearnMethod(MLMethod):
         pass
 
     def get_package_info(self) -> str:
-        return Util.get_immuneML_version() + '; scikit-learn ' + pkg_resources.get_distribution('scikit-learn').version
+        sklearn_version = ""
+        try:
+            from sklearn import __version__ as version
+            sklearn_version = f"; scikit-learn: {version}"
+        except Exception as e:
+            logging.warning("Could not get scikit-learn version: " + str(e))
+
+        return Util.get_immuneML_version() + sklearn_version
 
     def get_compatible_encoders(self):
         from immuneML.encodings.diversity_encoding.EvennessProfileEncoder import EvennessProfileEncoder

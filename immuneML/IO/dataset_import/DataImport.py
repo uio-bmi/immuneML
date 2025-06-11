@@ -298,10 +298,10 @@ class DataImport(metaclass=abc.ABCMeta):
     def load_file(self, filename: Path) -> pd.DataFrame:
         try:
             df = pd.read_csv(str(filename), sep=self.params.separator, iterator=False,
-                             usecols=self.params.columns_to_load)
+                             usecols=self.params.columns_to_load, engine='python')
         except ValueError:
 
-            df = pd.read_csv(str(filename), sep=self.params.separator, iterator=False)
+            df = pd.read_csv(str(filename), sep=self.params.separator, iterator=False, engine='python')
 
             expected = [e for e in self.params.columns_to_load if e not in list(df.columns)]
             df = df[[col for col in self.params.columns_to_load if col in df.columns]]
