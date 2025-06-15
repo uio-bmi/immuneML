@@ -120,7 +120,7 @@ def get_region_type(sequences) -> RegionType:
         raise RuntimeError(f"The region types could not be obtained.")
 
 
-def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annotated_dc, sim_item_name: str = None,
+def annotate_sequences(sequences: BackgroundSequences, is_amino_acid: bool, all_signals: list, annotated_dc, sim_item_name: str = None,
                        region_type: RegionType = RegionType.IMGT_CDR3):
     encoding = AminoAcidEncoding if is_amino_acid else DNAEncoding
     sequence_array = sequences.sequence_aa if is_amino_acid else sequences.sequence
