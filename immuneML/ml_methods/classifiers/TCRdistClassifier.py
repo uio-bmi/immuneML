@@ -59,8 +59,8 @@ class TCRdistClassifier(SklearnMethod):
         # make an object of KNN class with precomputed metric
         return KNeighborsClassifier(n_neighbors=self.k, weights=weights_func, metric='precomputed', n_jobs=cores_for_training)
 
-    def get_params(self):
-        return {**self.model.get_params(deep=True), **copy.deepcopy(vars(self))}
+    def get_params(self, for_refitting=False):
+        return {**self.model.get_params(), **copy.deepcopy(vars(self))}
 
     def can_predict_proba(self) -> bool:
         return True

@@ -99,6 +99,26 @@ class SequenceDataset(ElementDataset):
                                bnp_dataclass=bnp_dc)
 
     @classmethod
+    def build_from_dataclass_object(cls, dc_object, path: Path, name: str = None, labels: dict = None):
+        name = name if name is not None else uuid4().hex
+        filename = path / f"{name}.tsv"
+
+        bnp_write_to_file(filename, dc_object)
+
+        dataset_metadata = cls.create_metadata_dict(dataset_class=cls.__name__,
+                                                    filename=filename,
+                                                    type_dict=dc_object.get_dynamic_fields(),
+                                                    name=name,
+                                                    labels=labels)
+
+        metadata_filename = path / f'{name}.yaml'
+        write_dataset_yaml(metadata_filename, dataset_metadata)
+
+        return SequenceDataset(filename=filename, name=name, labels=labels, dynamic_fields=dc_object.get_dynamic_fields(),
+                               dataset_file=metadata_filename, bnp_dataclass=dc_object.__class__,
+                               identifier=dataset_metadata["identifier"])
+
+    @classmethod
     def build_from_objects(cls, sequences: List[ReceptorSequence], path: Path, name: str = None,
                            labels: dict = None, region_type: RegionType = RegionType.IMGT_CDR3):
         name = name if name is not None else uuid4().hex

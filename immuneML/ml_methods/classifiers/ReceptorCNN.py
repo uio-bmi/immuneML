@@ -294,9 +294,14 @@ class ReceptorCNN(MLMethod):
         self.CNN = RCNN(kernel_count=self.kernel_count, kernel_size=self.kernel_size, positional_channels=self.positional_channels,
                         sequence_type=self.sequence_type, background_probabilities=self.background_probabilities, chain_names=self.chain_names)
 
-    def get_params(self):
+    def get_params(self, for_refitting=False):
         params = copy.deepcopy(vars(self))
-        params["CNN"] = copy.deepcopy(self.CNN).state_dict()
+        if for_refitting:
+            del params['CNN']
+            del params['chain_names']
+            del params['background_probabilities']
+        else:
+            params["CNN"] = copy.deepcopy(self.CNN).state_dict()
         return params
 
     def can_predict_proba(self) -> bool:

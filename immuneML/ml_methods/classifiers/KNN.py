@@ -50,8 +50,8 @@ class KNN(SklearnMethod):
         params["n_jobs"] = cores_for_training
         return KNeighborsClassifier(**params)
 
-    def get_params(self):
-        return self.model.get_params(deep=True)
+    def get_params(self, for_refitting=False):
+        return self.model.get_params()
 
     def can_predict_proba(self) -> bool:
         return True

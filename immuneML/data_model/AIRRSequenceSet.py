@@ -199,3 +199,8 @@ class AIRRSequenceSet:
                              for field_name, field_type in field_type_map.items()]
         new_class = self.__class__.extend(fields_with_types)
         return new_class(**{**vars(self), **fields})
+
+    @classmethod
+    def get_dynamic_fields(cls):
+        standard_fields = [f.name for f in fields(AIRRSequenceSet)]
+        return {f.name: f.type for f in fields(cls) if f not in standard_fields}

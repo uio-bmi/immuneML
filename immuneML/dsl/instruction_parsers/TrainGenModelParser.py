@@ -11,20 +11,28 @@ class TrainGenModelParser:
 
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> TrainGenModelInstruction:
         valid_keys = [k for k in inspect.signature(TrainGenModelInstruction.__init__).parameters.keys()
-                      if k not in ['result_path', 'name', 'self']] + ['type']
+                      if k not in ['result_path', 'name', 'self']] + ['type', 'method']
 
-        ParameterValidator.assert_keys(instruction.keys(), valid_keys, TrainGenModelParser.__name__, key)
+        ParameterValidator.assert_all_in_valid_list(list(instruction.keys()), valid_keys, TrainGenModelParser.__name__, key)
 
         dataset = symbol_table.get(instruction['dataset'])
-        model = symbol_table.get(instruction['method'])
+
+        assert ("method" in instruction) ^ ("methods" in instruction), \
+            f"{TrainGenModelParser.__name__}: either 'method' or 'methods' key must be specified in the instruction."
+
+        if 'method' in instruction:
+            methods = [symbol_table.get(instruction['method'])]
+        else:
+            methods = [symbol_table.get(method_id) for method_id in instruction['methods']]
 
         assert type(dataset).__name__ in ['SequenceDataset', 'ReceptorDataset'], \
             (f'{TrainGenModelParser.__name__}: TrainGenModel instruction can for now be used only with '
              f'Sequence/Receptor datasets; Repertoire datasets are not supported.')
 
-        assert model.__class__.__name__ not in ['ExperimentalImport', 'OLGA'], \
-            (f"{TrainGenModelParser.__name__}: ExperimentalImport and OLGA cannot be used with TrainGenModel "
-             f"instruction. Please specify some of the other generative models.")
+        for method in methods:
+            assert method.__class__.__name__ not in ['ExperimentalImport', 'OLGA'], \
+                (f"{TrainGenModelParser.__name__}: ExperimentalImport and OLGA cannot be used with TrainGenModel "
+                 f"instruction. Please specify some of the other generative models.")
 
         ParameterValidator.assert_type_and_value(instruction['gen_examples_count'], int, TrainGenModelParser.__name__,
                                                  'gen_examples_count', 0)
@@ -47,5 +55,5 @@ class TrainGenModelParser:
 
         reports = [symbol_table.get(report_id) for report_id in instruction['reports']]
 
-        return TrainGenModelInstruction(**{**{k: v for k, v in instruction.items() if k != 'type'},
-                                           **{'dataset': dataset, 'method': model, 'name': key, 'reports': reports}})
+        return TrainGenModelInstruction(**{**{k: v for k, v in instruction.items() if k not in ['type', 'method']},
+                                           **{'dataset': dataset, 'methods': methods, 'name': key, 'reports': reports}})

@@ -242,11 +242,14 @@ class MLMethod(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def get_params(self) -> dict:
+    def get_params(self, for_refitting=False) -> dict:
         """
         Returns the model parameters and their values in a readable yaml-friendly way (a dictionary consisting of ints, floats, strings, lists and dictionaries).
         This may simply be vars(self), but if an internal (sklearn) model is fitted, the parameters of the internal model should
         be included as well.
+
+        Args:
+            for_refitting:
         """
         pass
 

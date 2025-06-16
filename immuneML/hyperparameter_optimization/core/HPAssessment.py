@@ -138,7 +138,7 @@ class HPAssessment:
 
             if len(hp_items) > 1:
                 optimal_params = {hp_item.performance[state.optimization_metric.name.lower()]:
-                                      HPAssessment._get_only_hyperparams(hp_item.method.get_params())
+                                      HPAssessment._get_only_hyperparams(hp_item.method.get_params(for_refitting=True))
                                   for hp_item in hp_items}
                 updated_hp_setting.ml_params[updated_hp_setting.ml_method.__class__.__name__] = optimal_params[
                     comp_func(optimal_params.keys())]
@@ -156,7 +156,8 @@ class HPAssessment:
 
     @staticmethod
     def _get_only_hyperparams(params: dict):
-        return copy.deepcopy({k: v for k, v in params.items() if k not in ['intercept', 'coefficients']})
+        return copy.deepcopy({k: v for k, v in params.items()
+                              if k not in ['intercept', 'coefficients', 'feature_importances']})
 
     @staticmethod
     def create_assessment_path(state, split_index):

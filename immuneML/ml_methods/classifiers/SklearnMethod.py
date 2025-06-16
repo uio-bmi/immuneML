@@ -164,10 +164,10 @@ class SklearnMethod(MLMethod):
 
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
-        self.model = self._fit_model_by_cross_validation(X=encoded_data.examples, y=mapped_y,
-                                                         w=encoded_data.example_weights,
-                                                         number_of_splits=number_of_splits,
-                                                         cores_for_training=cores_for_training)
+        self._fit_model_by_cross_validation(X=encoded_data.examples, y=mapped_y,
+                                            w=encoded_data.example_weights,
+                                            number_of_splits=number_of_splits,
+                                            cores_for_training=cores_for_training)
 
     def _fit_model_by_cross_validation(self, X, y, w, number_of_splits: int, cores_for_training: int):
 
@@ -207,8 +207,9 @@ class SklearnMethod(MLMethod):
 
         try:
             if self.random_cv_obj is not None:
-                pd.DataFrame(self.random_cv_obj.cv_results_).to_csv(path / f"{self._get_model_filename()}_cv_results.csv",
-                                                                    index=False)
+                pd.DataFrame(self.random_cv_obj.cv_results_).to_csv(
+                    path / f"{self._get_model_filename()}_cv_results.csv",
+                    index=False)
         except Exception as e:
             logging.warning(f"SklearnMethod: could not save cross-validation results in {self._get_model_filename()}: "
                             f"{e}")
@@ -255,9 +256,12 @@ class SklearnMethod(MLMethod):
         pass
 
     @abc.abstractmethod
-    def get_params(self):
+    def get_params(self, for_refitting=False):
         """Returns the model parameters in a readable yaml-friendly way (consisting of lists, dictionaries and
-        strings)."""
+        strings).
+
+        Args:
+            for_refitting: """
         pass
 
     def get_package_info(self) -> str:

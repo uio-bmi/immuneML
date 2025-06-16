@@ -101,11 +101,11 @@ class SillyClassifier(MLMethod):
         with params_path.open('w') as file:
             yaml.dump(class_parameters, file)
 
-    def get_params(self) -> dict:
+    def get_params(self, for_refitting=False) -> dict:
         # Returns a yaml-friendly dictionary (only simple types, no objects) with all parameters of this ML method
         params = copy.deepcopy(vars(self))
 
-        if self.label:
+        if self.label and not for_refitting:
             # the 'Label' object must be converted to a yaml-friendly version
             params["label"] = self.label.get_desc_for_storage()
 

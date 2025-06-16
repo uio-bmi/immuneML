@@ -1,6 +1,6 @@
 import copy
-import pickle
 import logging
+import pickle
 from pathlib import Path
 from typing import Tuple
 
@@ -14,7 +14,6 @@ from scipy.stats import betabinom as beta_binomial
 from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Label import Label
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
-from immuneML.ml_methods.util.Util import Util
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -407,8 +406,14 @@ class ProbabilisticBinaryClassifier(MLMethod):
             raise FileNotFoundError(f"{self.__class__.__name__} model could not be loaded from {file_path}. "
                                     f"Check if the path to the {file_path.name} file is properly set.")
 
-    def get_params(self):
-        return vars(self)
+    def get_params(self, for_refitting=False):
+        if for_refitting:
+            return {
+                'max_iterations': self.max_iterations, 'update_rate': self.update_rate,
+                'likelihood_threshold': self.likelihood_threshold
+            }
+        else:
+            return vars(self)
 
     def can_predict_proba(self) -> bool:
         return True

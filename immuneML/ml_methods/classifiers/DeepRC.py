@@ -350,7 +350,7 @@ class DeepRC(MLMethod):
         logging.warning("DeepRC: cross-validation on this classifier is not defined: fitting one model instead...")
         self.fit(encoded_data, label)
 
-    def get_params(self):
+    def get_params(self, for_refitting=False):
         return {name: param.data.tolist() for name, param in self.model.named_parameters()}
 
     def check_is_fitted(self, label_name: str):

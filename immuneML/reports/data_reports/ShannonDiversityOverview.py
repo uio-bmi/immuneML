@@ -89,7 +89,7 @@ class ShannonDiversityOverview(DataReport):
             if label is not None:
                 labels.append(label)
 
-        df = pd.DataFrame({'shannon_diversity': encoded_dataset.encoded_data.examples,
+        df = pd.DataFrame({'shannon_diversity': encoded_dataset.encoded_data.examples.flatten(),
                            'repertoire_id': encoded_dataset.get_example_ids(),
                            **self.dataset.get_metadata(labels)})
 

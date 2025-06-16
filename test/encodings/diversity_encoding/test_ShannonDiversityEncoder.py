@@ -44,7 +44,7 @@ def test_encode():
         label_config=lc,
     ))
 
-    assert np.allclose(np.round(d1.encoded_data.examples, 3), np.array([0.353, 1.099])), \
-        "Encoded examples do not match expected values."
+    assert np.allclose(np.round(d1.encoded_data.examples, 3), np.array([[0.353], [1.099]])), \
+        f"Encoded examples do not match expected values: {np.round(d1.encoded_data.examples, 3)}"
 
     shutil.rmtree(path)
