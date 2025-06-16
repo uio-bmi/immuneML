@@ -189,4 +189,4 @@ class SoNNia(GenerativeModel):
         with open(path / 'model' / 'model.json', 'w') as json_file:
             json.dump(model_data, json_file)
 
-        return Path(shutil.make_archive(str(path / 'trained_model'), "zip", str(path / 'model'))).absolute()
+        return Path(shutil.make_archive(str(path / f'trained_model_{self.name}'), "zip", str(path / 'model'))).absolute()

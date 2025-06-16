@@ -269,5 +269,5 @@ class OLGA(GenerativeModel):
                     'region_type': self.region_type.name})
 
         shutil.copytree(str(self.model_path), str(path / 'model'), dirs_exist_ok=True)
-        return Path(shutil.make_archive(str(path / 'trained_model'), "zip", str(path / 'model'))).absolute()
+        return Path(shutil.make_archive(str(path / f'trained_model_{self.name}'), "zip", str(path / 'model'))).absolute()
 

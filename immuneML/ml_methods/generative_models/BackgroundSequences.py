@@ -1,13 +1,13 @@
 from bionumpy import AminoAcidEncoding
 from bionumpy.bnpdataclass import bnpdataclass
 
-from immuneML.data_model.AIRRSequenceSet import DNANEncoding
+from immuneML.data_model.AIRRSequenceSet import DNANEncoding, AminoAcidXEncoding
 from immuneML.environment.SequenceType import SequenceType
 
 
 @bnpdataclass
 class BackgroundSequences:
-    sequence_aa: AminoAcidEncoding
+    sequence_aa: AminoAcidXEncoding
     sequence: DNANEncoding
     v_call: str
     j_call: str

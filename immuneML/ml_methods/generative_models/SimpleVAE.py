@@ -432,7 +432,7 @@ class SimpleVAE(GenerativeModel):
 
         store_weights(self.model, model_path / 'state_dict.yaml')
 
-        return Path(shutil.make_archive(str(path / 'trained_model'), 'zip', str(model_path))).absolute()
+        return Path(shutil.make_archive(str(path / f'trained_model_{self.name}'), 'zip', str(model_path))).absolute()
 
 
 def get_pytorch_seq_dataset_class():

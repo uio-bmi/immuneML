@@ -1,6 +1,7 @@
 from typing import List
 
 import pandas as pd
+import bionumpy as bnp
 
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.bnp_util import get_sequence_field_name
@@ -16,7 +17,7 @@ def annotate_sequence_dataset(dataset: SequenceDataset, signals: List[Signal],
                               sequence_type: SequenceType = SequenceType.AMINO_ACID) -> pd.DataFrame:
     data = dataset.data
     sequences = BackgroundSequences(sequence_aa=getattr(data, get_sequence_field_name(region_type,
-                                                                                      SequenceType.AMINO_ACID)),
+                                                                            SequenceType.AMINO_ACID)),
                                     sequence=getattr(data,
                                                      get_sequence_field_name(region_type, SequenceType.NUCLEOTIDE)),
                                     v_call=data.v_call, j_call=data.j_call,

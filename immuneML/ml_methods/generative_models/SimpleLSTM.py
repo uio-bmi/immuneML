@@ -324,4 +324,4 @@ class SimpleLSTM(GenerativeModel):
 
         store_weights(self._model, model_path / 'state_dict.yaml')
 
-        return Path(shutil.make_archive(str(path / 'trained_model'), 'zip', str(model_path))).absolute()
+        return Path(shutil.make_archive(str(path / f'trained_model_{self.name}'), 'zip', str(model_path))).absolute()

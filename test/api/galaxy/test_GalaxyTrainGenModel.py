@@ -61,7 +61,7 @@ def test_train_gen_model_run():
 
     run_immuneML(Namespace(**{"specification_path": specs_path, "result_path": result_path, 'tool': "GalaxyTrainGenModel"}))
 
-    assert os.path.exists(result_path / "exported_models/trained_model.zip")
+    assert os.path.exists(result_path / "exported_models/trained_model_sonnia.zip")
     assert os.path.exists(result_path / "index.html")
 
     shutil.rmtree(path)

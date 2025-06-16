@@ -170,4 +170,4 @@ class PWM(GenerativeModel):
                    yaml_dict={'type': 'PWM', 'locus': self.locus.name, 'sequence_type': self.sequence_type.name,
                               'region_type': self.region_type.name})
 
-        return Path(shutil.make_archive(str(path / 'trained_model'), "zip", str(path / 'model'))).absolute()
+        return Path(shutil.make_archive(str(path / f'trained_model_{self.name}'), "zip", str(path / 'model'))).absolute()

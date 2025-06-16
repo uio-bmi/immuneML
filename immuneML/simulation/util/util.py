@@ -16,7 +16,6 @@ from npstructures import RaggedArray
 from scipy.stats import zipf
 
 from immuneML import Constants
-from immuneML.data_model.AIRRSequenceSet import AminoAcidEncodingClean
 from immuneML.data_model.SequenceParams import RegionType, Chain
 from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.data_model.bnp_util import make_full_airr_seq_set_df

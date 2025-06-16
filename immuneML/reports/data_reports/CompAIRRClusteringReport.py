@@ -170,6 +170,10 @@ class CompAIRRClusteringReport(DataReport):
 
                 similarity_matrix = self._run_compairr(rep1, rep2, tmp_rep_file1, tmp_rep_file2, similarity_matrix)
 
+                os.remove(str(tmp_rep_file2))
+
+            os.remove(str(tmp_rep_file1))
+
             logging.info(f"CompAIRRClusteringReport: Finished processing repertoire "
                          f"{rep1.identifier} ({i + 1}/{n_repertoires})")
 
@@ -226,8 +230,6 @@ class CompAIRRClusteringReport(DataReport):
             similarity_matrix.loc[rep2.identifier, rep1.identifier] = similarity
 
             os.remove(str(output_file))
-            os.remove(str(tmp_rep_file1))
-            os.remove(str(tmp_rep_file2))
 
         return similarity_matrix
 
