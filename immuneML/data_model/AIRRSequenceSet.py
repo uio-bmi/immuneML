@@ -7,7 +7,7 @@ from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.encodings import AlphabetEncoding
 from numpy._typing import ArrayLike
 
-AminoAcidXEncoding = AlphabetEncoding('ACDEFGHIKLMNPQRSTVWXY*')
+AminoAcidEncodingClean = AlphabetEncoding('ACDEFGHIKLMNPQRSTVWXY')
 DNANEncoding = AlphabetEncoding("ACGTN")
 
 
@@ -16,7 +16,7 @@ class AIRRSequenceSet:
     sequence_id: str = ''
     sequence: DNANEncoding = ''
     quality: str = ''
-    sequence_aa: AminoAcidXEncoding = ''
+    sequence_aa: AminoAcidEncoding = ''
     rev_comp: str = ''
     productive: str = ''
     vj_in_frame: str = ''
@@ -35,27 +35,27 @@ class AIRRSequenceSet:
     germline_alignment: str = ''
     germline_alignment_aa: str = ''
     junction: DNANEncoding = None
-    junction_aa: AminoAcidXEncoding = None
+    junction_aa: AminoAcidEncoding = None
     np1: DNANEncoding = None
-    np1_aa: AminoAcidXEncoding = None
+    np1_aa: AminoAcidEncoding = None
     np2: DNANEncoding = None
-    np2_aa: AminoAcidXEncoding = None
+    np2_aa: AminoAcidEncoding = None
     np3: DNANEncoding = None
-    np3_aa: AminoAcidXEncoding = None
+    np3_aa: AminoAcidEncoding = None
     cdr1: DNANEncoding = None
-    cdr1_aa: AminoAcidXEncoding = None
+    cdr1_aa: AminoAcidEncoding = None
     cdr2: DNANEncoding = None
-    cdr2_aa: AminoAcidXEncoding = None
+    cdr2_aa: AminoAcidEncoding = None
     cdr3: DNANEncoding = None
-    cdr3_aa: AminoAcidXEncoding = None
+    cdr3_aa: AminoAcidEncoding = None
     fwr1: DNANEncoding = None
-    fwr1_aa: AminoAcidXEncoding = None
+    fwr1_aa: AminoAcidEncoding = None
     fwr2: DNANEncoding = None
-    fwr2_aa: AminoAcidXEncoding = None
+    fwr2_aa: AminoAcidEncoding = None
     fwr3: DNANEncoding = None
-    fwr3_aa: AminoAcidXEncoding = None
+    fwr3_aa: AminoAcidEncoding = None
     fwr4: DNANEncoding = None
-    fwr4_aa: AminoAcidXEncoding = None
+    fwr4_aa: AminoAcidEncoding = None
     v_score: float = None
     v_identity: float = None
     v_support: float = None
@@ -172,17 +172,16 @@ class AIRRSequenceSet:
 
     STR_TO_TYPE = {'str': str, 'int': int, 'float': float, 'bool': bool,
                    'AminoAcidEncoding': bnp.encodings.AminoAcidEncoding,
-                   'AminoAcidXEncoding': AminoAcidXEncoding,
                    'DNANEncoding': DNANEncoding}
 
     TYPE_TO_STR = {**{val: key for key, val in STR_TO_TYPE.items()},
                    **{AlphabetEncoding('ACDEFGHIKLMNPQRSTVWY*'): 'AminoAcidEncoding',
                       AlphabetEncoding('ACGTN'): 'DNANEncoding',
-                      AlphabetEncoding('ACDEFGHIKLMNPQRSTVWXY*'): 'AminoAcidXEncoding'}}
+                      AlphabetEncoding('ACDEFGHIKLMNPQRSTVWXY*'): 'AminoAcidEncoding'}}
 
     @classmethod
     def get_neutral_value(cls, field_type):
-        neutral_values = {str: '', int: -1, DNANEncoding: '', AminoAcidEncoding: '', AminoAcidXEncoding: '', float: -1.,
+        neutral_values = {str: '', int: -1, DNANEncoding: '', AminoAcidEncoding: '', float: -1.,
                           bool: ''}
         return neutral_values[field_type]
 

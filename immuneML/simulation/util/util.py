@@ -5,10 +5,9 @@ from pathlib import Path
 from typing import List, Dict, Union
 
 import bionumpy as bnp
-import dill
 import numpy as np
 import pandas as pd
-from bionumpy import AminoAcidEncoding, DNAEncoding, get_motif_scores
+from bionumpy import DNAEncoding, get_motif_scores, AminoAcidEncoding
 from bionumpy.bnpdataclass import bnpdataclass, BNPDataClass
 from bionumpy.encodings import BaseEncoding
 from bionumpy.io import delimited_buffers
@@ -17,6 +16,7 @@ from npstructures import RaggedArray
 from scipy.stats import zipf
 
 from immuneML import Constants
+from immuneML.data_model.AIRRSequenceSet import AminoAcidEncodingClean
 from immuneML.data_model.SequenceParams import RegionType, Chain
 from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.data_model.bnp_util import make_full_airr_seq_set_df
@@ -240,7 +240,8 @@ def match_motif(motif: Union[str, LigoPWM], encoding, sequence_array):
         matcher = RegexMatcher(motif, encoding=encoding)
         matches = matcher.rolling_window(sequence_array, mode='same')
     else:
-        matches = get_motif_scores(sequence_array, motif.pwm_matrix) > motif.threshold
+        matches = get_motif_scores(bnp.as_encoded_array(sequence_array, motif.pwm_matrix._encoding),
+                                   motif.pwm_matrix) > motif.threshold
         matches = pad_ragged_array(matches, sequence_array.shape, False)
     return matches
 
