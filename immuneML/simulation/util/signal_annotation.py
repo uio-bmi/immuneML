@@ -42,4 +42,8 @@ def annotate_sequence_dataset(dataset: SequenceDataset, signals: List[Signal],
     annotated_sequences.rename(columns={'sequence_aa': get_sequence_field_name(region_type, SequenceType.AMINO_ACID),
                                         'sequence': get_sequence_field_name(region_type, SequenceType.NUCLEOTIDE)},
                                inplace=True)
+
+    if hasattr(data, 'data_origin'):
+        annotated_sequences['data_origin'] = data.data_origin.tolist()
+
     return annotated_sequences
