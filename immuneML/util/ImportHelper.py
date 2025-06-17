@@ -197,11 +197,8 @@ class ImportHelper:
             sequence_name = sequence_type.name.lower().replace("_", " ")
 
             if sequence_colname in dataframe.columns:
-                try:
-                    empty = dataframe[sequence_colname].isnull() | (dataframe[sequence_colname] == '')
-                    n_empty = sum(empty)
-                except Exception as e:
-                    raise e
+                empty = dataframe[sequence_colname].isnull() | (dataframe[sequence_colname] == '')
+                n_empty = sum(empty)
 
                 if n_empty > 0:
                     dataframe = dataframe.loc[~empty]

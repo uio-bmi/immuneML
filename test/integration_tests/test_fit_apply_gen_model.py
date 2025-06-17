@@ -116,7 +116,7 @@ def fit_and_apply_gen_model(gen_model):
                 "type": "ApplyGenModel",
                 "gen_examples_count": 100,
                 "reports": ['sld_rep', 'aa_freq', 'kl_gen_model'],
-                "ml_config_path": str(generated_model_path / "output/inst1/trained_model_gen_model/trained_model.zip"),
+                "ml_config_path": str(generated_model_path / "output/inst1/trained_model_gen_model/trained_model_gen_model.zip"),
             }
         }
     }

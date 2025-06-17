@@ -71,7 +71,7 @@ class ImmuneMLApp:
                      f"packages are installed correctly. See the log above for more details.")
         except Exception as e:
             traceback.print_exc()
-            raise e
+            raise
 
 
 def run_immuneML(namespace: argparse.Namespace):

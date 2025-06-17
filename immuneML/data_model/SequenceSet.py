@@ -52,7 +52,7 @@ class ReceptorSequence:
         except KeyError as e:
             logging.error(f"ReceptorSequence object has no attribute {e}. In metadata, "
                           f"it has: {list(self.metadata.keys()) if isinstance(self.metadata, dict) else []}")
-            raise e
+            raise
 
     def __post_init__(self):
         if self.sequence_id is None or self.sequence_id == "":

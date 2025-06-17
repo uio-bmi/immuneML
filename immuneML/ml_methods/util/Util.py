@@ -23,7 +23,7 @@ class Util:
             logging.exception(
                 "MLMethod util: error occurred when predicting the class assignment due to mismatch of class types.\n"
                 f"Classes: {y}\nMapping:{class_mapping}")
-            raise e
+            raise
 
     @staticmethod
     def map_to_new_class_values(y, class_mapping: dict):
@@ -37,7 +37,7 @@ class Util:
         except Exception as e:
             logging.exception(f"MLMethod util: error occurred when fitting the model due to mismatch of class types.\n"
                               f"Classes: {y}\nMapping:{class_mapping}")
-            raise e
+            raise
 
     @staticmethod
     def make_class_mapping(y, label: Label) -> dict:

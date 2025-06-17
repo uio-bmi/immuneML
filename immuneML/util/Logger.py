@@ -18,7 +18,7 @@ def log(func):
                                     f" with parameters: {args}.\n\nFor more details on how to write the specification, "
                                     f"see the documentation. For technical description of the error, see the log above.").with_traceback(e.__traceback__)
                 else:
-                    raise e
+                    raise
         finally:
             logging.info("--- Exiting: %s" % (func.__name__))
 
