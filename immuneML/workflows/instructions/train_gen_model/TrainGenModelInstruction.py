@@ -9,6 +9,8 @@ from immuneML.data_model.bnp_util import merge_dataclass_objects, bnp_write_to_f
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.hyperparameter_optimization.config.ManualSplitConfig import ManualSplitConfig
+from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.reports.ReportResult import ReportResult
@@ -36,6 +38,8 @@ class TrainGenModelState:
     train_dataset: Dataset = None
     test_dataset: Dataset = None
     training_percentage: float = None
+    split_strategy: SplitType = None
+    split_config: ManualSplitConfig = None
 
 
 class TrainGenModelInstruction(Instruction):
@@ -67,10 +71,18 @@ class TrainGenModelInstruction(Instruction):
       and generating gen_examples_count examples; these can be data reports (to be run on generated examples), ML
       reports (to be run on the fitted model)
 
-    - training_percentage (float): percentage of the dataset to use for training the generative model. If set to 1, the
+    - split_strategy (str): strategy to use for splitting the dataset into training and test datasets; valid options are
+      RANDOM and MANUAL (in which case train and test set are fixed); default is RANDOM
+
+    - training_percentage (float): percentage of the dataset to use for training the generative model if split_strategy
+      parameter is RANDOM. If set to 1, the
       full dataset will be used for training and the test dataset will be the same as the training dataset. Default
       value is 0.7. When export_combined_dataset is set to True, the splitting of sequences into train, test, and
       generated will be shown in column dataset_split.
+
+    - manual_config (dict): if split_strategy is set to MANUAL, this parameter can be used to specify the ids of examples
+      that should be in train and test sets; the paths to csv files with ids for train and test data should be provided
+      under keys 'train_metadata_path' and 'test_metadata_path'
 
     **YAML specification:**
 
@@ -85,6 +97,20 @@ class TrainGenModelInstruction(Instruction):
                 gen_examples_count: 100
                 number_of_processes: 4
                 training_percentage: 0.7
+                split_strategy: RANDOM # optional, default is RANDOM
+                export_generated_dataset: True
+                export_combined_dataset: False
+                reports: [data_rep1, ml_rep2]
+
+            my_train_gen_model_with_manual_split: # another instruction example
+                type: TrainGenModel
+                dataset: d1 # defined previously under definitions/datasets
+                methods: [m1, m2]
+                gen_examples_count: 100
+                split_strategy: MANUAL
+                split_config:
+                    train_metadata_path: path/to/train_metadata.csv # path to csv file with ids of examples in train set
+                    test_metadata_path: path/to/test_metadata.csv # path to csv file with ids of examples in test set
                 export_generated_dataset: True
                 export_combined_dataset: False
                 reports: [data_rep1, ml_rep2]
@@ -96,15 +122,16 @@ class TrainGenModelInstruction(Instruction):
     def __init__(self, dataset: Dataset = None, methods: List[GenerativeModel] = None,
                  number_of_processes: int = 1, gen_examples_count: int = 100, result_path: Path = None,
                  name: str = None, reports: list = None, export_generated_dataset: bool = True,
-                 export_combined_dataset: bool = False, training_percentage: float = None):
-        self.state = TrainGenModelState(result_path, name, gen_examples_count)
+                 export_combined_dataset: bool = False, training_percentage: float = None,
+                 split_strategy: SplitType = SplitType.RANDOM, split_config: ManualSplitConfig = None):
+        self.state = TrainGenModelState(result_path, name, gen_examples_count, training_percentage=training_percentage,
+                                        split_config= split_config, split_strategy=split_strategy)
         self.methods = methods
         self.reports = reports
         self.dataset = dataset
         self.number_of_processes = number_of_processes
         self.export_generated_dataset = export_generated_dataset
         self.export_combined_dataset = export_combined_dataset
-        self.state.training_percentage = training_percentage
         self.generated_datasets = {}
 
     def run(self, result_path: Path) -> TrainGenModelState:
@@ -121,20 +148,32 @@ class TrainGenModelInstruction(Instruction):
         return self.state
 
     def _split_dataset(self):
-        if self.state.training_percentage != 1:
-            split_params = DataSplitterParams(dataset=self.dataset, split_strategy=SplitType.RANDOM, split_count=1,
-                                              training_percentage=self.state.training_percentage,
-                                              paths=[self.state.result_path])
-            train_datasets, test_datasets = DataSplitter.run(split_params)
+        if self.state.split_strategy == SplitType.RANDOM:
+            if self.state.training_percentage != 1:
+                split_params = DataSplitterParams(dataset=self.dataset, split_strategy=SplitType.RANDOM, split_count=1,
+                                                  training_percentage=self.state.training_percentage,
+                                                  paths=[self.state.result_path])
+                train_datasets, test_datasets = DataSplitter.run(split_params)
+                self.state.train_dataset = train_datasets[0]
+                self.state.test_dataset = test_datasets[0]
+            else:
+                logging.info(f"{TrainGenModelInstruction.__name__}: training_percentage was set to 1 meaning that the full "
+                             f"dataset will be used for fitting the generative model. All resulting comparison reports "
+                             f"will then use the full original dataset as opposed to independent test dataset if the "
+                             f"training percentage was less than 1.")
+                self.state.train_dataset = self.dataset
+                self.state.test_dataset = self.dataset
+        elif self.state.split_strategy == SplitType.MANUAL:
+            split_params = DataSplitterParams(self.dataset, self.state.split_strategy, 1,
+                                              paths=[self.state.result_path],
+                                              split_config=SplitConfig(self.state.split_strategy, split_count=1,
+                                                                       manual_config=self.state.split_config))
+            train_datasets, test_datasets = DataSplitter.manual_split(split_params)
             self.state.train_dataset = train_datasets[0]
             self.state.test_dataset = test_datasets[0]
         else:
-            logging.info(f"{TrainGenModelInstruction.__name__}: training_percentage was set to 1 meaning that the full "
-                         f"dataset will be used for fitting the generative model. All resulting comparison reports "
-                         f"will then use the full original dataset as opposed to independent test dataset if the "
-                         f"training percentage was less than 1.")
-            self.state.train_dataset = self.dataset
-            self.state.test_dataset = self.dataset
+            raise ValueError(f"{TrainGenModelInstruction.__name__}: {self.state.name}: "
+                             f"split_strategy {self.state.split_strategy} is not supported for TrainGenModel instruction.")
 
     def _fit_model(self):
         for ind, method in enumerate(self.methods):
