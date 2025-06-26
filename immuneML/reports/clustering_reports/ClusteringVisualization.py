@@ -97,7 +97,7 @@ class ClusteringVisualization(ClusteringReport):
 
     def _make_plot(self, cl_item: ClusteringItem, run_idx: int, analysis_type: str, setting_key: str, result_path: Path)\
             -> Path:
-        transformed_data = self.dim_red_method.fit_transform(cl_item.dataset)
+        transformed_data = self.dim_red_method.fit_transform(dataset=cl_item.dataset)
         ext_label_names = self.state.config.label_config.get_labels_by_name()
 
         df = pd.DataFrame(transformed_data, columns=self._dimension_names)
@@ -110,6 +110,8 @@ class ClusteringVisualization(ClusteringReport):
                          hover_data=ext_label_names)
 
         fig.update_layout(template="plotly_white")
+
+        df.to_csv(result_path / f"run_{run_idx}_{analysis_type}_{setting_key}.csv", index=False)
 
         plot_path = PlotlyUtil.write_image_to_file(fig,
                                                    result_path / f"run_{run_idx}_{analysis_type}_{setting_key}.html",

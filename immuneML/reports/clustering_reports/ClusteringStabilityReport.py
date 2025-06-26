@@ -4,7 +4,6 @@ from typing import Callable, Tuple
 
 import pandas as pd
 from sklearn import metrics
-from sklearn.metrics import jaccard_score
 
 from immuneML.ml_metrics import ClusteringMetric
 from immuneML.reports.ReportOutput import ReportOutput
@@ -141,7 +140,8 @@ class ClusteringStabilityReport(ClusteringReport):
 
         return ReportResult(
             name=f"{self.desc} ({self.name})",
-            info=f"Analysis of clustering stability between discovery and validation datasets using {self.metric}.",
+            info=f"Analysis of clustering stability between clusters found in discovery and validation datasets "
+                 f"using {self.metric}.",
             output_tables=[table_output]
         )
 
