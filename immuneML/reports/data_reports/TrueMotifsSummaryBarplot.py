@@ -171,7 +171,7 @@ class TrueMotifsSummaryBarplot(DataReport):
             figure.update_layout(
                 xaxis_title='Data Origin',
                 yaxis_title='Sequence Count',
-                bargap=0.2
+                bargap=0.2, template='plotly_white'
             )
 
             for idx, row in seq_count_with_signals.iterrows():
