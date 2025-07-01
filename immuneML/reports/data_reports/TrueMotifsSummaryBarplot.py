@@ -4,7 +4,10 @@ from pathlib import Path
 import pandas as pd
 import plotly.express as px
 
+from immuneML.data_model import bnp_util
+from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -43,13 +46,14 @@ class TrueMotifsSummaryBarplot(DataReport):
             reports:
                 my_motif_report:
                     TrueMotifsSummaryBarplot:
+                        region_type: IMGT_CDR3
                         implanted_motifs_per_signal:
-                            signal1:
+                            my_signal1:
                                 seeds:
                                 - DEQ
                                 gap_sizes:
                                 - 0
-                            signal2:
+                            my_signal2:
                                 seeds:
                                 - AS/G
                                 gap_sizes:
@@ -58,51 +62,44 @@ class TrueMotifsSummaryBarplot(DataReport):
     """
     @classmethod
     def build_object(cls, **kwargs):
+        location = TrueMotifsSummaryBarplot.__name__
         ParameterValidator.assert_keys_present(list(kwargs.keys()),
-                                               ["implanted_motifs_per_signal"],
-                                               "TrueMotifsSummaryBarplot",
-                                               "TrueMotifsSummaryBarplot report")
+                                               ["implanted_motifs_per_signal", "region_type"],
+                                               location, "TrueMotifsSummaryBarplot report")
+        ParameterValidator.assert_region_type(kwargs, location)
         implanted_motifs_per_signal = kwargs["implanted_motifs_per_signal"]
 
         ParameterValidator.assert_type_and_value(implanted_motifs_per_signal, dict,
-                                                 "TrueMotifsSummaryBarplot",
-                                                 f"implanted_motifs_per_signal")
+                                                 location, f"implanted_motifs_per_signal")
 
         for signal in implanted_motifs_per_signal.keys():
-            ParameterValidator.assert_type_and_value(implanted_motifs_per_signal[signal], dict,
-                                                     "TrueMotifsSummaryBarplot",
-                                                     f"implanted_motifs_per_signal/{signal}")
-
-            ParameterValidator.assert_type_and_value(implanted_motifs_per_signal[signal], dict,
-                                                     "TrueMotifsSummaryBarplot",
+            ParameterValidator.assert_type_and_value(implanted_motifs_per_signal[signal], dict, location,
                                                      f"implanted_motifs_per_signal/{signal}")
 
             ParameterValidator.assert_keys_present(implanted_motifs_per_signal[signal].keys(),
-                                                   ["seeds", "gap_sizes"],
-                                                   "TrueMotifsSummaryBarplot",
+                                                   ["seeds", "gap_sizes"], location,
                                                    f"implanted_motifs_per_signal/{signal}")
-            ParameterValidator.assert_type_and_value(implanted_motifs_per_signal[signal]["gap_sizes"], list,
-                                                     "TrueMotifsSummaryBarplot",
+            ParameterValidator.assert_type_and_value(implanted_motifs_per_signal[signal]["gap_sizes"], list, location,
                                                      f"implanted_motifs_per_signal/{signal}/gap_sizes")
-            ParameterValidator.assert_type_and_value(implanted_motifs_per_signal[signal]["seeds"], list,
-                                                     "TrueMotifsSummaryBarplot",
+            ParameterValidator.assert_type_and_value(implanted_motifs_per_signal[signal]["seeds"], list, location,
                                                      f"implanted_motifs_per_signal/{signal}/seeds")
             for gap_size in implanted_motifs_per_signal[signal]["gap_sizes"]:
-                ParameterValidator.assert_type_and_value(gap_size, int, "TrueMotifsSummaryBarplot",
+                ParameterValidator.assert_type_and_value(gap_size, int, location,
                                                          f"implanted_motifs_per_signal/{signal}/gap_sizes",
                                                          min_inclusive=0)
             for seed in implanted_motifs_per_signal[signal]["seeds"]:
-                ParameterValidator.assert_type_and_value(seed, str, "TrueMotifsSummaryBarplot",
-                                                             f"implanted_motifs_per_signal/{signal}/seeds")
+                ParameterValidator.assert_type_and_value(seed, str, location,
+                                                         f"implanted_motifs_per_signal/{signal}/seeds")
 
-        return TrueMotifsSummaryBarplot(**kwargs)
+        return TrueMotifsSummaryBarplot(**{**kwargs, 'region_type': RegionType[kwargs['region_type'].upper()]})
 
     def __init__(self, implanted_motifs_per_signal, dataset: Dataset = None, result_path: Path = None, name: str = None,
-                 number_of_processes: int = 1):
+                 number_of_processes: int = 1, region_type: RegionType = RegionType.IMGT_CDR3):
         super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
         self.implanted_motifs_per_signal = implanted_motifs_per_signal
         self.dataset = dataset
         self.result_path = result_path
+        self.region_type = region_type
 
     def _generate(self):
         PathBuilder.build(self.result_path)
@@ -120,8 +117,59 @@ class TrueMotifsSummaryBarplot(DataReport):
 
     def _get_plotting_data(self):
         signals = self._get_implanted_signals()
-        annotated_sequences = annotate_sequence_dataset(self.dataset, signals=signals,)
+        annotated_sequences = annotate_sequence_dataset(self.dataset, signals=signals, region_type=self.region_type)
+        annotated_sequences = self._add_novelty_memorization_label(annotated_sequences)
         return annotated_sequences
+
+    def _add_novelty_memorization_label(self, plotting_data):
+        sequence_column = bnp_util.get_sequence_field_name(self.region_type, SequenceType.AMINO_ACID)
+        train_set = set(plotting_data.loc[plotting_data['data_origin'] == 'original_train', sequence_column])
+
+        for index, row in plotting_data.iterrows():
+            if row['data_origin'] in ['original_train', 'original_test']:
+                plotting_data.at[index, 'novelty_memorization'] = 'original'
+            else:
+                seq = row[sequence_column]
+                if seq in train_set:
+                    plotting_data.at[index, 'novelty_memorization'] = 'memorized'
+                else:
+                    plotting_data.at[index, 'novelty_memorization'] = 'novel'
+
+        return plotting_data
+
+    @staticmethod
+    def _get_sequence_counts(plotting_data, signal_names):
+        signal_mask = plotting_data[signal_names].sum(axis=1) > 0
+        seq_count_with_signals = plotting_data[signal_mask].groupby('data_origin').size().reset_index(
+                                                                        name='seq_count_with_signal')
+        seq_count_with_signals['label'] = seq_count_with_signals.apply(
+            lambda row: f"{row['data_origin']}<br>Total count = {row['seq_count_with_signal']}", axis=1)
+        seq_count_total = plotting_data.groupby('data_origin').size().reset_index(name='total_sequences')
+        return seq_count_with_signals, seq_count_total
+
+    @staticmethod
+    def _prepare_and_sort_plotting_data(plotting_data, signal_names, sorted_data_origins, seq_count_total,
+                                        seq_count_with_signals):
+        df_grouped = plotting_data.groupby(['data_origin', 'novelty_memorization'])[signal_names].sum().reset_index()
+        df_grouped['total_count'] = df_grouped[signal_names].sum(axis=1)
+
+        df_melted = df_grouped.drop(columns='total_count').melt(id_vars=['data_origin', 'novelty_memorization'],
+                                                                var_name='signal',
+                                                                value_name='count')
+        df_melted['data_origin'] = pd.Categorical(df_melted['data_origin'],
+                                                  categories=sorted_data_origins,
+                                                  ordered=True)
+
+        df_melted = df_melted.sort_values(['data_origin', 'novelty_memorization', 'signal'])
+        df_melted = df_melted.merge(seq_count_total, on='data_origin', how='left')
+        df_melted['frequency'] = df_melted.groupby(['data_origin', 'signal'])['count'].transform(
+            lambda x: x / df_melted['total_sequences'])
+
+        df_melted = df_melted.merge(seq_count_with_signals[['data_origin', 'label']],
+                                    on='data_origin',
+                                    how='left')
+
+        return df_melted
 
     def _plot(self, plotting_data, output_name):
         if plotting_data.empty:
@@ -129,61 +177,35 @@ class TrueMotifsSummaryBarplot(DataReport):
         else:
             filename = self.result_path / f"{output_name}.html"
 
+            plotting_data = plotting_data[plotting_data['data_origin'] != 'original_test']
             signal_names = list(self.implanted_motifs_per_signal.keys())
-            signal_mask = plotting_data[signal_names].sum(axis=1) > 0
-            seq_count_with_signals = plotting_data[signal_mask].groupby('data_origin').size().reset_index(
-                                                                        name='seq_count_with_signal')
+
+            seq_count_with_signals, seq_count_total = self._get_sequence_counts(plotting_data, signal_names)
             sorted_data_origins = seq_count_with_signals.sort_values('seq_count_with_signal',
                                                                      ascending=False)['data_origin']
 
-            df_grouped = plotting_data.groupby('data_origin')[signal_names].sum().reset_index()
-            df_grouped['total'] = df_grouped[signal_names].sum(axis=1)
-            df_grouped['data_origin'] = pd.Categorical(df_grouped['data_origin'],
-                                                       categories=sorted_data_origins,
-                                                       ordered=True)
-            df_grouped = df_grouped.sort_values('data_origin')
-
-            df_melted = df_grouped.drop(columns='total').melt(
-                                        id_vars='data_origin',
-                                        var_name='signal',
-                                        value_name='total_count'
-                                        )
-            df_melted['signal'] = pd.Categorical(df_melted['signal'], categories=signal_names, ordered=True)
-            df_melted['data_origin'] = pd.Categorical(df_melted['data_origin'], categories=sorted_data_origins,
-                                                                                ordered=True)
-            df_melted = df_melted.sort_values(['data_origin', 'signal'])
-
-            seq_count_with_signals['data_origin'] = pd.Categorical(seq_count_with_signals['data_origin'],
-                                                                   categories=sorted_data_origins, ordered=True)
-            seq_count_with_signals = seq_count_with_signals.sort_values('data_origin')
+            df_melted = self._prepare_and_sort_plotting_data(plotting_data, signal_names, sorted_data_origins,
+                                                             seq_count_total, seq_count_with_signals)
 
             figure = px.bar(
                 df_melted,
-                x='data_origin',
-                y='total_count',
-                color='signal',
+                x='signal',
+                y='frequency',
+                color='novelty_memorization',
+                facet_col='label',
                 color_discrete_sequence=px.colors.diverging.Tealrose,
-                barmode='group',
-                title='Number of sequences containing signals per dataset (Total counts on top: number of sequences '
-                      'containing at least one signal)'
+                barmode='stack',
+                title='Percentage of sequences containing signals per dataset (Total counts on top: number of '
+                      'sequences containing at least one signal)'
             )
+
+            figure.for_each_annotation(lambda a: a.update(text=a.text.replace("label=", "")))
 
             figure.update_layout(
-                xaxis_title='Data Origin',
-                yaxis_title='Sequence Count',
+                xaxis_title='Signal',
+                yaxis_title='Frequency',
                 bargap=0.2, template='plotly_white'
             )
-
-            for idx, row in seq_count_with_signals.iterrows():
-                max_y = df_melted[df_melted['data_origin'] == row['data_origin']]['total_count'].max()
-                figure.add_annotation(
-                    x=row['data_origin'],
-                    y=max_y + 2,
-                    text="Total count = " + str(row['seq_count_with_signal']),
-                    showarrow=False,
-                    font=dict(size=12, color="black"),
-                    yanchor='bottom'
-                )
 
             figure.write_html(str(filename))
 
@@ -201,7 +223,7 @@ class TrueMotifsSummaryBarplot(DataReport):
         return signals
 
     def check_prerequisites(self):
-        location = "TrueMotifSummary"
+        location = "TrueMotifSummaryBarplot"
 
         run_report = True
 

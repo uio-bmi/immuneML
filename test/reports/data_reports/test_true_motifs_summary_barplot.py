@@ -6,7 +6,6 @@ from immuneML.data_model.bnp_util import write_yaml
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.reports.data_reports.TrueMotifsSummaryBarplot import TrueMotifsSummaryBarplot
-from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -14,14 +13,8 @@ def test_true_motifs_summary_barplot_report():
 
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "true_motif_summary")
 
-    sequence_dataset = RandomDatasetGenerator.generate_sequence_dataset(100,
-                                                                        {20: 1.},
-                                                                        {'model': {'A': 0.5, 'B': 0.5}},
-                                                                        path,
-                                                                        region_type="IMGT_JUNCTION",)
-
-    gen_model = {"SimpleVAE": {'num_epochs': 10,
-                                'latent_dim': 8,
+    gen_model = {"SimpleVAE": {'num_epochs': 1,
+                                'latent_dim': 2,
                                 'pretrains': 1,
                                 'warmup_epochs': 1}}
 
@@ -71,13 +64,16 @@ def test_true_motifs_summary_barplot_report():
     combined_sequence_dataset = AIRRImport(params, "airr_sequence_dataset").import_dataset()
 
     report = TrueMotifsSummaryBarplot.build_object(**{"dataset": combined_sequence_dataset,
-                                              "implanted_motifs_per_signal": {"signal1": {"seeds": ['DE'], "gap_sizes": [0]},
-                                                                              "signal2": {"seeds": ['ET'], "gap_sizes": [0]},
-                                                                              "signal3": {"seeds": ['S/Y'], "gap_sizes": [1]}},
+                                              "implanted_motifs_per_signal": {"my_s1": {"seeds": ['DE'], "gap_sizes": [0]},
+                                                                              "my_s2": {"seeds": ['ET'], "gap_sizes": [0]},
+                                                                              "my_s3": {"seeds": ['S/Y'], "gap_sizes": [1]}},
                                               "result_path": path / "result",
-                                              "name": "Test True Motif Summary Report"}
+                                              "name": "Test True Motif Summary Report",
+                                              "region_type": "IMGT_CDR3",}
                                                    )
 
     result = report._generate()
+    assert all(output.path.is_file() for output in result.output_figures)
+    assert all(output.path.is_file() for output in result.output_tables)
 
     shutil.rmtree(path)
