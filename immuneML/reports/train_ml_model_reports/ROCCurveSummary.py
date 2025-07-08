@@ -1,7 +1,6 @@
 import logging
 
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 from sklearn.metrics import roc_curve
 
@@ -72,14 +71,16 @@ class ROCCurveSummary(TrainMLModelReport):
     def _make_roc_curve(self, hp_item: HPItem, label: Label, proba_name: str) -> dict:
         df = pd.read_csv(hp_item.test_predictions_path)
 
-        true_y = df[f"{label.name}_true_class"].values
+        label_mapping = {label.positive_class: 1, label.get_binary_negative_class(): 0}
+
+        true_y = [label_mapping[val] for val in df[f"{label.name}_true_class"].values]
 
         if hp_item.method.can_predict_proba():
             predicted_y = df[proba_name].values
         else:
-            predicted_y = df[f"{label.name}_predicted_class"].values
+            predicted_y = [label_mapping[val] for val in df[f"{label.name}_predicted_class"].values]
 
-        fpr, tpr, _ = roc_curve(y_true=true_y, y_score=predicted_y, pos_label=label.positive_class)
+        fpr, tpr, _ = roc_curve(y_true=true_y, y_score=predicted_y)
 
         return {
             "FPR": fpr,
