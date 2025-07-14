@@ -20,12 +20,15 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TrueMotifsSummaryBarplot(DataReport):
     """
-    This report can be used to show how well motifs (for example, through the Simulation instruction) are learned
-    across different generative models. The report shows a bar plot with the number of sequences in each dataset that
-    contain the given motifs. Bars are grouped by the dataset origin (e.g., train, test, PWM, VAE, LSTM) and the
-    signals provided. The report also shows the total count of sequences containing at least one signal for each dataset.
+    This report can be used to show how well motifs (for example, motifs introduced using the Simulation instruction)
+    are learned across different generative models. The report shows a bar plot with the proportion of sequences in each
+    dataset that contain the given motifs. Bars are grouped by the dataset origin (e.g., train, PWM, VAE, LSTM)
+    and the signals provided. The report also shows how many of the sequences are memorized (seen in train data) and
+    how many are novel (not seen in train data).
 
     **Specification arguments:**
+
+    - region_type (str): which part of the sequence to check; e.g., IMGT_CDR3
 
     - implanted_motifs_per_signal (dict): a nested dictionary that specifies the motif seeds that were implanted in the
       given dataset. The first level of keys in this dictionary represents the different signals. In the inner
@@ -142,14 +145,17 @@ class TrueMotifsSummaryBarplot(DataReport):
         signal_mask = plotting_data[signal_names].sum(axis=1) > 0
         seq_count_with_signals = plotting_data[signal_mask].groupby('data_origin').size().reset_index(
                                                                         name='seq_count_with_signal')
-        seq_count_with_signals['label'] = seq_count_with_signals.apply(
-            lambda row: f"{row['data_origin']}<br>Total count = {row['seq_count_with_signal']}", axis=1)
+
         seq_count_total = plotting_data.groupby('data_origin').size().reset_index(name='total_sequences')
-        return seq_count_with_signals, seq_count_total
+        seq_counts_df = seq_count_with_signals.merge(seq_count_total, on='data_origin', how='left')
+        seq_counts_df['signal_specific_percent'] = seq_counts_df['seq_count_with_signal'] / seq_counts_df['total_sequences'] * 100
+        seq_counts_df['label'] = seq_counts_df.apply(
+            lambda row: f"{row['data_origin']}<br>Signal-specific sequences: {row['signal_specific_percent']:.2f}%", axis=1)
+
+        return seq_counts_df
 
     @staticmethod
-    def _prepare_and_sort_plotting_data(plotting_data, signal_names, sorted_data_origins, seq_count_total,
-                                        seq_count_with_signals):
+    def _prepare_and_sort_plotting_data(plotting_data, signal_names, sorted_data_origins, seq_counts_df):
         df_grouped = plotting_data.groupby(['data_origin', 'novelty_memorization'])[signal_names].sum().reset_index()
         df_grouped['total_count'] = df_grouped[signal_names].sum(axis=1)
 
@@ -161,13 +167,9 @@ class TrueMotifsSummaryBarplot(DataReport):
                                                   ordered=True)
 
         df_melted = df_melted.sort_values(['data_origin', 'novelty_memorization', 'signal'])
-        df_melted = df_melted.merge(seq_count_total, on='data_origin', how='left')
+        df_melted = df_melted.merge(seq_counts_df, on='data_origin', how='left')
         df_melted['frequency'] = df_melted.groupby(['data_origin', 'signal'])['count'].transform(
             lambda x: x / df_melted['total_sequences'])
-
-        df_melted = df_melted.merge(seq_count_with_signals[['data_origin', 'label']],
-                                    on='data_origin',
-                                    how='left')
 
         return df_melted
 
@@ -180,12 +182,12 @@ class TrueMotifsSummaryBarplot(DataReport):
             plotting_data = plotting_data[plotting_data['data_origin'] != 'original_test']
             signal_names = list(self.implanted_motifs_per_signal.keys())
 
-            seq_count_with_signals, seq_count_total = self._get_sequence_counts(plotting_data, signal_names)
-            sorted_data_origins = seq_count_with_signals.sort_values('seq_count_with_signal',
+            seq_counts_df = self._get_sequence_counts(plotting_data, signal_names)
+            sorted_data_origins = seq_counts_df.sort_values('signal_specific_percent',
                                                                      ascending=False)['data_origin']
 
             df_melted = self._prepare_and_sort_plotting_data(plotting_data, signal_names, sorted_data_origins,
-                                                             seq_count_total, seq_count_with_signals)
+                                                             seq_counts_df)
 
             figure = px.bar(
                 df_melted,
@@ -195,8 +197,7 @@ class TrueMotifsSummaryBarplot(DataReport):
                 facet_col='label',
                 color_discrete_sequence=px.colors.diverging.Tealrose,
                 barmode='stack',
-                title='Percentage of sequences containing signals per dataset (Total counts on top: number of '
-                      'sequences containing at least one signal)'
+                title='Percentage of sequences containing signals across different generated datasets',
             )
 
             figure.for_each_annotation(lambda a: a.update(text=a.text.replace("label=", "")))
