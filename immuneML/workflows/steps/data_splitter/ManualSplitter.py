@@ -1,5 +1,6 @@
 import logging
 import os
+import random
 
 import numpy as np
 import pandas as pd
@@ -51,6 +52,7 @@ class ManualSplitter:
         metadata_df = ManualSplitter._get_metadata(metadata_path, dataset_type, col_name)
         indices_of_interest = metadata_df[col_name].astype(str).values.tolist()
         indices = [i for i in range(len(example_ids)) if str(example_ids[i]) in indices_of_interest]
+        random.shuffle(indices)
 
         logging.info(f"{ManualSplitter.__name__}: Making {dataset_type} dataset subset with {len(indices)} elements.")
 
