@@ -183,8 +183,10 @@ class TrueMotifsSummaryBarplot(DataReport):
             signal_names = list(self.implanted_motifs_per_signal.keys())
 
             seq_counts_df = self._get_sequence_counts(plotting_data, signal_names)
-            sorted_data_origins = seq_counts_df.sort_values('signal_specific_percent',
-                                                                     ascending=False)['data_origin']
+            seq_counts_df['sort_key'] = seq_counts_df['data_origin'].apply(
+                lambda x: (0, 0) if x == 'original_train' else (
+                    1, -seq_counts_df.loc[seq_counts_df['data_origin'] == x, 'signal_specific_percent'].iloc[0]))
+            sorted_data_origins = seq_counts_df.sort_values('sort_key')['data_origin'].tolist()
 
             df_melted = self._prepare_and_sort_plotting_data(plotting_data, signal_names, sorted_data_origins,
                                                              seq_counts_df)
