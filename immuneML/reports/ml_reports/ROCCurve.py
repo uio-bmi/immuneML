@@ -47,7 +47,6 @@ class ROCCurve(MLReport):
         fpr, tpr, _ = roc_curve(true_y, predicted_y)
         roc_auc = auc(fpr, tpr)
 
-
         trace1 = go.Scatter(x=fpr, y=tpr,
                             mode='lines',
                             line=dict(color='darkorange', width=2),
@@ -77,8 +76,8 @@ class ROCCurve(MLReport):
     def check_prerequisites(self):
         if not hasattr(self, "result_path") or self.result_path is None:
             logging.warning(f"{self.__class__.__name__} requires an output"
-                          f" 'path' to be set. {self.__class__.__name__}"
-                          f" report will not be created.")
+                            f" 'path' to be set. {self.__class__.__name__}"
+                            f" report will not be created.")
             return False
 
         if self.test_dataset.encoded_data is None:
