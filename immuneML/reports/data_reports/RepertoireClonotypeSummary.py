@@ -78,7 +78,7 @@ class RepertoireClonotypeSummary(DataReport):
                      color=self.color_label, title='Clonotype count per repertoire',
                      color_discrete_sequence=px.colors.diverging.Tealrose)
         fig.update_layout(template="plotly_white", yaxis_title='clonotype count',
-                          xaxis_title='repertoires sorted by clonotype count')
+                          xaxis_title='repertoires')
 
         if self.facet_label:
             facet_label_counts = {str(k): v for k, v in clonotypes[self.facet_label].value_counts().to_dict().items()}
@@ -87,7 +87,24 @@ class RepertoireClonotypeSummary(DataReport):
                 if '=' in group_label:
                     group = group_label.split('=')[1]
                     count = facet_label_counts.get(group, 0)
-                    annotation.text = f"{group_label} (n={count})"
+                    annotation.text = f"{group_label}<br>(n={count})"
+
+        fig.add_annotation(
+            text="clonotype counts",  # Your y-axis label
+            xref="paper", yref="paper",  # Use paper coordinates (0–1)
+            x=-0.07, y=0.5,  # Position to the left and centered vertically
+            showarrow=False,
+            textangle=-90,  # Vertical orientation
+            font=dict(size=14)
+        )
+
+        fig.update_layout(margin=dict(l=80))
+        fig.update_yaxes(
+            showticklabels=False,
+            showline=False,
+            ticks='',
+            title=''
+        )
 
         clonotypes.to_csv(self.result_path / 'clonotype_count_per_repertoire.csv', index=False)
         fig.write_html(str(self.result_path / 'clonotype_count_per_repertoire.html'))
