@@ -99,12 +99,7 @@ class RepertoireClonotypeSummary(DataReport):
         )
 
         fig.update_layout(margin=dict(l=80))
-        fig.update_yaxes(
-            showticklabels=False,
-            showline=False,
-            ticks='',
-            title=''
-        )
+        fig.update_yaxes(title='')
 
         clonotypes.to_csv(self.result_path / 'clonotype_count_per_repertoire.csv', index=False)
         fig.write_html(str(self.result_path / 'clonotype_count_per_repertoire.html'))
