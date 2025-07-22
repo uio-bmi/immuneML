@@ -79,8 +79,10 @@ class DataImport(metaclass=abc.ABCMeta):
             for index, row in metadata.iterrows():
                 filename = ImportHelper.get_repertoire_filename_from_metadata_row(row, self.params)
                 metadata_filename = filename.with_suffix('.yaml')
+                metadata_from_file = read_yaml(metadata_filename) if metadata_filename.is_file() else {}
+                rep_metadata = {**metadata_from_file, **row.to_dict()}
                 repertoires.append(Repertoire(data_filename=filename, metadata_filename=metadata_filename,
-                                              metadata=read_yaml(metadata_filename), identifier=row['identifier']))
+                                              metadata=rep_metadata, identifier=row['identifier']))
 
                 if repertoires[-1].get_element_count() == 0:
                     logging.warning(f"Repertoire {repertoires[-1].data_filename} contains 0 sequences. It is "
@@ -114,7 +116,7 @@ class DataImport(metaclass=abc.ABCMeta):
         try:
             metadata = pd.read_csv(metadata_file_path, sep=",")
             if "identifier" in metadata.columns:
-                assert len(list(metadata["identifier"])) == len(set(list(metadata["identifier"]))), \
+                assert metadata['identifier'].is_unique, \
                     (f"DataImport: if the field 'identifier' is supplied, each repertoire must have "
                      f"a unique identifier (found {len(set(list(metadata['identifier'])))} unique "
                      f"identifiers for {len(list(metadata['identifier']))} repertoires).")
