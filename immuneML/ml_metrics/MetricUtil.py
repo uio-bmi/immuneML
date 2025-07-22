@@ -20,7 +20,7 @@ class MetricUtil:
         return fn
 
     @staticmethod
-    def score_for_metric(metric: ClassificationMetric, predicted_y, predicted_proba_y, true_y, classes):
+    def score_for_metric(metric: ClassificationMetric, predicted_y, predicted_proba_y, true_y, classes, pos_class=None):
         """
         Note: when providing label classes, make sure the 'positive class' is sorted last.
         This sorting should be done automatically when accessing Label.values
@@ -43,7 +43,10 @@ class MetricUtil:
                 predictions = predicted_y
 
             if 'labels' in inspect.getfullargspec(fn).kwonlyargs or 'labels' in inspect.getfullargspec(fn).args:
-                score = fn(true_y, predictions, labels=classes)
+                if 'pos_label' in inspect.getfullargspec(fn).kwonlyargs or 'pos_label' in inspect.getfullargspec(fn).args:
+                    score = fn(true_y, predictions, labels=classes, pos_label=pos_class if pos_class is not None else classes[-1])
+                else:
+                    score = fn(true_y, predictions, labels=classes)
             else:
                 score = fn(true_y, predictions)
 

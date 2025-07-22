@@ -2,6 +2,10 @@ import numpy as np
 from sklearn import metrics
 
 
+def brier_score_loss(true_y, predicted_y, sample_weight=None, labels=None):
+    return metrics.brier_score_loss(true_y, predicted_y, sample_weight=sample_weight)
+
+
 def f1_score_weighted(true_y, predicted_y, sample_weight=None):
     return metrics.f1_score(true_y, predicted_y, average="weighted", sample_weight=sample_weight)
 

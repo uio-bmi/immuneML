@@ -89,7 +89,7 @@ class TrainingPerformance(MLReport):
         for metric in self.metrics_set:
             _score = MetricUtil.score_for_metric(metric=ClassificationMetric.get_metric(metric),
                                                  predicted_y=predicted_y, predicted_proba_y=predicted_proba_y,
-                                                 true_y=true_y, classes=classes)
+                                                 true_y=true_y, classes=classes, pos_class=self.label.positive_class)
 
             if metric == 'CONFUSION_MATRIX':
                 self._generate_heatmap(classes, classes, _score, metric, output)

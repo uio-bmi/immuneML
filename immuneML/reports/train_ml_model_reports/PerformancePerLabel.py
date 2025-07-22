@@ -145,7 +145,8 @@ class PerformancePerLabel(TrainMLModelReport):
                     true_y=true,
                     predicted_y=predicted,
                     predicted_proba_y=proba,
-                    classes=label.values
+                    classes=label.values,
+                    pos_class=label.positive_class
                 )
             else:
                 performance = float('nan')
@@ -265,7 +266,8 @@ class PerformancePerLabel(TrainMLModelReport):
             true_y=true,
             predicted_y=predicted,
             predicted_proba_y=proba,
-            classes=label.values
+            classes=label.values,
+            pos_class=label.positive_class
         )
 
     def _write_split_results(self, data: Dict[str, pd.DataFrame], name_suffix: str, label_name: str):

@@ -58,7 +58,8 @@ class MLMethodAssessment(Step):
                                                 predicted_y=predicted_y[label.name],
                                                 true_y=true_y[label.name],
                                                 classes=label.values,
-                                                predicted_proba_y=predicted_proba_y)
+                                                predicted_proba_y=predicted_proba_y,
+                                                pos_class=label.positive_class)
             results[f"{label.name}_{metric.name.lower()}"] = score
             scores[metric.name.lower()] = score
 
