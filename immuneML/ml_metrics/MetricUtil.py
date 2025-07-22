@@ -28,7 +28,8 @@ class MetricUtil:
 
         fn = MetricUtil.get_metric_fn(metric)
 
-        true_y, predicted_y = Util.binarize_label_classes(true_y=true_y, predicted_y=predicted_y, classes=classes)
+        if metric in ClassificationMetric.get_binary_only_metrics():
+            true_y, predicted_y = Util.binarize_label_classes(true_y=true_y, predicted_y=predicted_y, classes=classes)
 
         try:
             if metric in ClassificationMetric.get_probability_based_metric_types():
