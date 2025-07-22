@@ -329,7 +329,7 @@ class VJGeneDistribution(DataReport):
         rep_df["norm_counts"] = rep_df["counts"] / rep_df["repertoire_size"]
 
         if not self.is_sequence_label and self.label_name is not None:
-            rep_df[self.label_name] = repertoire.metadata[self.label_name]
+            rep_df[self.label_name] = repertoire.metadata[self.label_name] if self.label_name in repertoire.metadata else ''
 
     def _write_repertoire_tables(self, v_df, j_df, vj_df):
         tables = []
