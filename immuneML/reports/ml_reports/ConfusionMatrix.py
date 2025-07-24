@@ -76,7 +76,7 @@ class ConfusionMatrix(MLReport):
             colorscale="Viridis",
             showscale=True
         )
-        fig.update_layout(title_text="Confusion Matrix", xaxis_title="Predicted", yaxis_title="Actual",
+        fig.update_layout(title_text="Confusion Matrix", xaxis_title="Predicted class", yaxis_title="True class",
                           template="plotly_white")
 
         filename = self.result_path / "confusion_matrix.html"

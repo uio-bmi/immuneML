@@ -6,6 +6,30 @@ def brier_score_loss(true_y, predicted_y, sample_weight=None, labels=None):
     return metrics.brier_score_loss(true_y, predicted_y, sample_weight=sample_weight)
 
 
+def precision_score_micro(true_y, predicted_y, sample_weight=None, labels=None):
+    return metrics.precision_score(true_y, predicted_y, average="micro", sample_weight=sample_weight, labels=labels)
+
+
+def precision_score_macro(true_y, predicted_y, sample_weight=None, labels=None):
+    return metrics.precision_score(true_y, predicted_y, average="macro", sample_weight=sample_weight, labels=labels)
+
+
+def precision_score_weighted(true_y, predicted_y, sample_weight=None, labels=None):
+    return metrics.precision_score(true_y, predicted_y, average="weighted", sample_weight=sample_weight, labels=labels)
+
+
+def recall_score_micro(true_y, predicted_y, sample_weight=None, labels=None):
+    return metrics.recall_score(true_y, predicted_y, average="micro", sample_weight=sample_weight, labels=labels)
+
+
+def recall_score_macro(true_y, predicted_y, sample_weight=None, labels=None):
+    return metrics.recall_score(true_y, predicted_y, average="macro", sample_weight=sample_weight, labels=labels)
+
+
+def recall_score_weighted(true_y, predicted_y, sample_weight=None, labels=None):
+    return metrics.recall_score(true_y, predicted_y, average="weighted", sample_weight=sample_weight, labels=labels)
+
+
 def f1_score_weighted(true_y, predicted_y, sample_weight=None):
     return metrics.f1_score(true_y, predicted_y, average="weighted", sample_weight=sample_weight)
 

@@ -27,8 +27,9 @@ class TestRandomDatasetWorkflow(TestCase):
                             "result_path": str(path),
                             "labels": {
                                 "cmv": {
-                                    'a': 0.5,
-                                    'b': 0.5
+                                    'a': 0.3,
+                                    'b': 0.4,
+                                    'c': 0.3
                                 },
                                 "batch": {
                                     'b1': 0.4,
@@ -74,7 +75,8 @@ class TestRandomDatasetWorkflow(TestCase):
                             'compute_for_assessment': True
                         }
                     },
-                    'roc': "ROCCurveSummary"
+                    'roc': "ROCCurveSummary",
+                    'conf_mat': 'ConfusionMatrix'
                 }
 
             },
@@ -91,6 +93,9 @@ class TestRandomDatasetWorkflow(TestCase):
                         "split_strategy": "random",
                         "split_count": 1,
                         "training_percentage": 0.7,
+                        'reports': {
+                            'models': ['conf_mat']
+                        }
                     },
                     "selection": {
                         "split_strategy": "random",
@@ -100,7 +105,7 @@ class TestRandomDatasetWorkflow(TestCase):
                     "labels": [{"cmv": {'positive_class': 'a'}}],
                     "dataset": "d1",
                     "strategy": "GridSearch",
-                    "metrics": ["accuracy"],
+                    "metrics": ["auc_ovo", "auc_ovr", 'recall_weighted', 'precision_weighted'],
                     "number_of_processes": 4,
                     "reports": ['rep1', 'rep2', 'roc'],
                     "optimization_metric": "balanced_accuracy",
