@@ -18,21 +18,18 @@ class LogRegressionCustomPenalty(MLMethod):
 
     **Specification arguments**:
 
-    - penalty (str): Type of penalty to use, either 'l1' for Lasso or 'l2' for Ridge.
-
-    - random_state (int): Random seed for reproducibility.
-
     - non_penalized_features (list): List of feature names that should not be penalized.
 
+    Other supported arguments are inherited from LogitNet of python-glmnet package and will be directly passed to it.
+    n_jobs will be overwritten to use the number of CPUs specified for the instruction (e.g. in TrainMLModel).
+
     """
-    def __init__(self, penalty: str = 'l1', random_state: int = None, non_penalized_features: list = None,
-                 name: str = None, label: Label = None):
+    def __init__(self, non_penalized_features: list = None, name: str = None, label: Label = None, **kwargs):
         super().__init__(name=name, label=label)
-        self.penalty = penalty
-        self.random_state = random_state
         self.non_penalized_features = non_penalized_features if non_penalized_features is not None else []
         self.model = None
         self.feature_names = None
+        self.kwargs = kwargs
 
     def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
         X = encoded_data.examples
@@ -46,16 +43,7 @@ class LogRegressionCustomPenalty(MLMethod):
             if feature in self.non_penalized_features:
                 penalty_factor[idx] = 0.0
 
-        alpha = 1 if self.penalty == 'l1' else 0.0
-
-        self.model = LogitNet(
-            alpha=alpha,
-            lambda_path=None,
-            n_lambda=100,
-            standardize=False,  # already standardized in the encoder
-            random_state=self.random_state,
-            n_jobs=cores_for_training
-        )
+        self.model = LogitNet(**self.kwargs, **{'n_jobs': cores_for_training})
         self.model.fit(X, y, relative_penalties=penalty_factor)
 
     def _predict(self, encoded_data: EncodedData):
@@ -72,8 +60,6 @@ class LogRegressionCustomPenalty(MLMethod):
         with open(path / 'model.pkl', 'wb') as f:
             pickle.dump({
                 'model': self.model,
-                'penalty': self.penalty,
-                'random_state': self.random_state,
                 'non_penalized_features': self.non_penalized_features,
                 'feature_names': self.feature_names
             }, f)
@@ -82,9 +68,6 @@ class LogRegressionCustomPenalty(MLMethod):
         with open(path / 'model.pkl', 'rb') as f:
             model = pickle.load(f)
             self.model = model['model']
-            self.penalty = model['penalty']
-            self.C = model['C']
-            self.random_state = model['random_state']
             self.non_penalized_features = model['non_penalized_features']
             self.feature_names = model['feature_names']
 
