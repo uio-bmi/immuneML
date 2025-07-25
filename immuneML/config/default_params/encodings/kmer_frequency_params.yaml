@@ -10,3 +10,4 @@ max_gap: 0  # maximum gap for gapped k-mers
 min_gap: 0  # minimum gap for gapped k-mers
 sequence_type: amino_acid # whether to perform analysis on amino acid or nucleotide level
 region_type: imgt_cdr3
+metadata_fields_to_include: null
