@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 import pandas as pd
-import plotly.figure_factory as ff
+import plotly.graph_objects as go
 import yaml
 from sklearn.metrics import confusion_matrix
 
@@ -56,10 +56,10 @@ class ConfusionMatrix(MLReport):
 
         cm_df = pd.DataFrame(cm, index=labels, columns=labels)
 
-        table_path = self.result_path / "confusion_matrix.csv"
-        cm_df.to_csv(table_path)
-
         heatmap_path = self._plot_confusion_matrix(cm_df)
+
+        table_path = self.result_path / "confusion_matrix.csv"
+        cm_df.rename_axis('true/predicted').reset_index().to_csv(table_path, index=False)
 
         self._write_settings()
 
@@ -69,13 +69,15 @@ class ConfusionMatrix(MLReport):
                             output_figures=[ReportOutput(heatmap_path)])
 
     def _plot_confusion_matrix(self, cm_df: pd.DataFrame):
-        fig = ff.create_annotated_heatmap(
-            z=cm_df.values,
-            x=cm_df.columns.tolist(),
-            y=cm_df.index.tolist(),
-            colorscale="Viridis",
-            showscale=True
-        )
+
+        fig = go.Figure(go.Heatmap(z=cm_df.values, texttemplate="%{text}", text=cm_df.values, colorscale='Viridis',
+                                   hovertemplate="True value: %{y}<br>Predicted value: %{x}"
+                                                 "<br>Count: %{z}<extra></extra>",
+                                   x=[str(lbl) for lbl in cm_df.index.tolist()],
+                                   y=[str(lbl) for lbl in cm_df.columns.tolist()]))
+
+        print(f"Confusion matrix:\n{cm_df}")
+
         fig.update_layout(title_text="Confusion Matrix", xaxis_title="Predicted class", yaxis_title="True class",
                           template="plotly_white")
 
