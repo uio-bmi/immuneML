@@ -1,3 +1,4 @@
+import os
 import json
 import shutil
 from pathlib import Path
@@ -47,6 +48,8 @@ class SoNNia(GenerativeModel):
 
     - seed (int): random seed for the model or None
 
+    - num_threads (int): number of threads to use when fitting the model and generating sequences. Default is 1.
+
 
      **YAML specification:**
 
@@ -93,7 +96,7 @@ class SoNNia(GenerativeModel):
 
     def __init__(self, locus=None, batch_size: int = None, epochs: int = None, deep: bool = False, name: str = None,
                  default_model_name: str = None, n_gen_seqs: int = None, include_joint_genes: bool = True,
-                 custom_model_path: str = None, seed: int = None):
+                 custom_model_path: str = None, seed: int = None, num_threads: int = 1):
 
         if locus is not None:
             super().__init__(Chain.get_chain(str(locus)), region_type=RegionType.IMGT_JUNCTION, seed=seed)
@@ -108,6 +111,7 @@ class SoNNia(GenerativeModel):
         self._model = None
         self.name = name
         self.default_model_name = default_model_name
+        self.num_threads = num_threads
         if custom_model_path is None or custom_model_path == '':
             self._model_path = Path(
                 load_model.__file__).parent / f"default_models/{OLGA.DEFAULT_MODEL_FOLDER_MAP[self.default_model_name]}"
@@ -115,6 +119,7 @@ class SoNNia(GenerativeModel):
             self._model_path = custom_model_path
 
     def fit(self, dataset: Dataset, path: Path = None):
+        os.environ["OMP_NUM_THREADS"] = str(self.num_threads)
         from sonnia.sonnia import SoNNia as InternalSoNNia
 
         print_log(f"{SoNNia.__name__}: fitting a selection model...", True)
@@ -139,6 +144,7 @@ class SoNNia(GenerativeModel):
         raise NotImplementedError
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
+        os.environ["OMP_NUM_THREADS"] = str(self.num_threads)
         from sonia.sequence_generation import SequenceGeneration
 
         gen_model = SequenceGeneration(self._model)
