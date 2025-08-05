@@ -1,6 +1,5 @@
 import io
 import os
-import statistics
 from pathlib import Path
 
 import pandas as pd
@@ -19,7 +18,6 @@ from immuneML.presentation.TemplateParser import TemplateParser
 from immuneML.presentation.html.Util import Util
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.util.PathBuilder import PathBuilder
-from immuneML.util.StringHelper import StringHelper
 
 
 class HPHTMLBuilder:
@@ -74,28 +72,6 @@ class HPHTMLBuilder:
     def _make_selection(state: TrainMLModelState, assessment_index: int, label_name: str, base_path):
         selection_state = state.assessment_states[assessment_index].label_states[label_name].selection_state
 
-        hp_settings = []
-        optimal = selection_state.optimal_hp_setting.get_key()
-
-        for hp_setting, hp_items in selection_state.hp_items.items():
-            hp_splits = []
-            for hp_item in hp_items:
-                hp_splits.append(HPHTMLBuilder._print_metric(hp_item.performance, state.optimization_metric))
-            hp_settings.append({
-                "hp_setting": hp_setting,
-                "hp_splits": hp_splits,
-                "optimal": hp_setting == optimal
-            })
-
-            if len(hp_splits) > 1:
-                hp_settings[-1]["average"] = round(statistics.mean(perf for perf in hp_splits if [isinstance(perf, float)]), HPHTMLBuilder.NUM_DIGITS)
-                hp_settings[-1]["show_average"] = True
-            else:
-                hp_settings[-1]["average"] = None
-                hp_settings[-1]["show_average"] = False
-
-            hp_settings[-1]["hp_splits"] = [{"optimization_metric_val": val} for val in hp_settings[-1]["hp_splits"]]
-
         has_other_metrics = len([metric for metric in state.metrics if metric != state.optimization_metric]) > 0 and \
                             not (state.selection.split_strategy == SplitType.RANDOM and state.selection.training_percentage == 1)
 
@@ -110,8 +86,9 @@ class HPHTMLBuilder:
             "metrics": [{"performance": HPHTMLBuilder._extract_selection_performance_per_metric(selection_state, metric, state.selection.split_count),
                          "metric": HPHTMLBuilder._get_heading_metric_name(metric.name.lower())}
                         for metric in state.metrics if metric != state.optimization_metric] if has_other_metrics else None,
-            "hp_settings": hp_settings,
-            "show_average": any(hps["show_average"] for hps in hp_settings),
+            "hp_settings": HPHTMLBuilder._extract_selection_performance_per_metric(selection_state,
+                                                                                   state.optimization_metric,
+                                                                                   state.selection.split_count),
             "data_split_reports": [
                 {'split_index': index + 1,
                  'train': Util.to_dict_recursive(selection_state.train_data_reports[index], base_path)
@@ -366,20 +343,29 @@ class HPHTMLBuilder:
 
     @staticmethod
     def _extract_selection_performance_per_metric(selection_state: HPSelectionState, metric: ClassificationMetric, split_count):
-        performance = {"setting": [], **{f"split {i + 1}": [] for i in range(split_count)}}
+        performance = {"setting": [], **{f"Split {i + 1}": [] for i in range(split_count)}}
         for hp_setting, hp_item_list in selection_state.hp_items.items():
             performance['setting'].append(str(hp_setting))
             for index, hp_item in enumerate(hp_item_list):
-                performance[f'split {index + 1}'].append(HPHTMLBuilder._print_metric(hp_item.performance, metric))
+                performance[f'Split {index + 1}'].append(HPHTMLBuilder._print_metric(hp_item.performance, metric))
 
-        s = io.StringIO()
-        pd.DataFrame(performance).rename(columns={"setting": 'Hyperparameter settings (preprocessing, encoding, ML method)'}).to_csv(s, sep="\t",
-                                                                                                                                     index=False)
-        return Util.get_table_string_from_csv_string(s.getvalue(), separator="\t")
+        df = pd.DataFrame(performance).rename(columns={"setting": 'Hyperparameter settings (preprocessing, encoding, ML method)'})
+        df['Average'] = df.iloc[:, 1:].mean(axis=1).round(HPHTMLBuilder.NUM_DIGITS).astype(str)
+        best_value = ClassificationMetric.get_search_criterion(metric)(df['Average'])
+
+        def highlight_table_row(row):
+            if row.Average == best_value:
+                return ['font-weight: bold'] * len(row)
+            else:
+                return [''] * len(row)
+
+        return df.astype(str).style.apply(highlight_table_row, axis=1).hide(axis='index').to_html(index=False, index_names=False)
 
     @staticmethod
     def _get_heading_metric_name(metric: str):
-        if metric != "auc":
-            return " ".join(metric.split("_")).title()
-        else:
-            return metric.upper()
+        name = metric
+        if "_" in metric:
+            name = " ".join(metric.split("_")).title()
+
+        name = name.replace('Auc', 'AUC').replace("Ovr", "One-vs-rest").replace("Ovo", "One-vs-one")
+        return name
