@@ -76,8 +76,6 @@ class ConfusionMatrix(MLReport):
                                    x=[str(lbl) for lbl in cm_df.index.tolist()],
                                    y=[str(lbl) for lbl in cm_df.columns.tolist()]))
 
-        print(f"Confusion matrix:\n{cm_df}")
-
         fig.update_layout(title_text="Confusion Matrix", xaxis_title="Predicted class", yaxis_title="True class",
                           template="plotly_white")
 
