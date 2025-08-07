@@ -145,7 +145,7 @@ class SoNNia(GenerativeModel):
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
         from sonia.sequence_generation import SequenceGeneration
 
-        gen_model = SequenceGeneration(self._model)
+        gen_model = SequenceGeneration(self._model, processes=self.num_processes)
         sequences = gen_model.generate_sequences_post(count)
 
         df = pd.DataFrame({
