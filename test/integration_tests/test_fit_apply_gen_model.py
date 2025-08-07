@@ -86,7 +86,8 @@ def test_fit_apply_gen_model():
                 'default_model_name': 'humanTRB',
                 'deep': False,
                 'include_joint_genes': True,
-                'n_gen_seqs': 100
+                'n_gen_seqs': 100,
+                'num_processes': 4
             }
         },
         {

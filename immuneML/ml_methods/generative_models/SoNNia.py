@@ -47,6 +47,8 @@ class SoNNia(GenerativeModel):
 
     - seed (int): random seed for the model or None
 
+    - num_processes (int): number of processes to use for sequence generation (default: 4)
+
 
      **YAML specification:**
 
@@ -93,7 +95,7 @@ class SoNNia(GenerativeModel):
 
     def __init__(self, locus=None, batch_size: int = None, epochs: int = None, deep: bool = False, name: str = None,
                  default_model_name: str = None, n_gen_seqs: int = None, include_joint_genes: bool = True,
-                 custom_model_path: str = None, seed: int = None):
+                 custom_model_path: str = None, seed: int = None, num_processes: int = 1):
 
         if locus is not None:
             super().__init__(Chain.get_chain(str(locus)), region_type=RegionType.IMGT_JUNCTION, seed=seed)
@@ -107,6 +109,7 @@ class SoNNia(GenerativeModel):
         self.n_gen_seqs = n_gen_seqs
         self._model = None
         self.name = name
+        self.num_processes = max(num_processes, 1)
         self.default_model_name = default_model_name
         if custom_model_path is None or custom_model_path == '':
             self._model_path = Path(
@@ -129,7 +132,8 @@ class SoNNia(GenerativeModel):
                                      include_joint_genes=self.include_joint_genes,
                                      include_indep_genes=not self.include_joint_genes)
 
-        self._model.add_generated_seqs(num_gen_seqs=self.n_gen_seqs, custom_model_folder=self._model_path)
+        self._model.add_generated_seqs(num_gen_seqs=self.n_gen_seqs, custom_model_folder=self._model_path,
+                                       processes=self.num_processes)
 
         self._model.infer_selection(epochs=self.epochs, batch_size=self.batch_size, verbose=1)
 
