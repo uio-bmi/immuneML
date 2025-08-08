@@ -24,12 +24,12 @@ class TCRdistHelper:
         return [str(Chain.get_chain(el)).lower() for el in set(dataset.data.locus.tolist())]
 
     @staticmethod
-    def compute_tcr_dist(dataset: ElementDataset, label_names: list, cores: int = 1):
+    def compute_tcr_dist(dataset: ElementDataset, label_names: list, cores: int = 1, cdr3_only: bool = False):
         return CacheHandler.memo_by_params((('dataset_identifier', dataset.identifier), ("type", "TCRrep")),
-                                           lambda: TCRdistHelper._compute_tcr_dist(dataset, label_names, cores))
+                                           lambda: TCRdistHelper._compute_tcr_dist(dataset, label_names, cores, cdr3_only))
 
     @staticmethod
-    def _compute_tcr_dist(dataset: ElementDataset, label_names: list, cores: int):
+    def _compute_tcr_dist(dataset: ElementDataset, label_names: list, cores: int, cdr3_only: bool = False):
         """
         Computes the tcrdist distances by creating a TCRrep object and calling compute_distances() function.
 
@@ -50,8 +50,13 @@ class TCRdistHelper:
 
         df, chains = TCRdistHelper.prepare_tcr_dist_dataframe(dataset, label_names)
         tcr_rep = TCRrep(cell_df=df, chains=chains, organism=dataset.labels["organism"], cpus=cores,
-                         deduplicate=False,
-                         compute_distances=False)
+                         deduplicate=False, compute_distances=False)
+
+        if cdr3_only:
+            for chain in chains:
+                for attr_prefix in ['metrics', 'kargs', 'weights']:
+                    setattr(tcr_rep, f'{attr_prefix}_{chain[0]}',
+                            {key: value for key, value in getattr(tcr_rep, f'{attr_prefix}_{chain[0]}').items() if 'cdr3' in key})
 
         tcr_rep.compute_distances()
 

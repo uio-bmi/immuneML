@@ -60,7 +60,7 @@ def test_generate():
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "tcrdist_motif_discovery/")
     dataset = _create_dataset(PathBuilder.build(path / 'dataset'))
 
-    dataset = TCRdistEncoder(8).encode(dataset,
+    dataset = TCRdistEncoder(8, False).encode(dataset,
                                        EncoderParams(path / "result", LabelConfiguration([Label("epitope", None)])))
 
     report = TCRdistMotifDiscovery(train_dataset=dataset, test_dataset=dataset, result_path=path / "report",
