@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List
 
 from immuneML.reports.Report import Report
+from immuneML.reports.clustering_method_reports.ClusteringMethodReport import ClusteringMethodReport
 from immuneML.reports.clustering_reports.ClusteringReport import ClusteringReport
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.util.Logger import print_log
@@ -39,10 +40,15 @@ class ClusteringReportHandler:
         report_path = PathBuilder.build(path / f'reports/')
         report_results = []
         for report in self.reports:
+            tmp_report = copy.deepcopy(report)
+            print(type(tmp_report))
+            tmp_report.result_path = PathBuilder.build(report_path / tmp_report.name)
             if isinstance(report, EncodingReport):
-                tmp_report = copy.deepcopy(report)
-                tmp_report.result_path = PathBuilder.build(report_path / tmp_report.name)
                 tmp_report.dataset = cl_item.dataset
+                rep_result = tmp_report.generate_report()
+                report_results.append(rep_result)
+            elif isinstance(report, ClusteringMethodReport):
+                tmp_report.item = cl_item
                 rep_result = tmp_report.generate_report()
                 report_results.append(rep_result)
 

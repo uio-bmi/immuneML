@@ -127,7 +127,6 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
         ))
 
         fig.update_layout(
-            title=f"{metric.replace('_', ' ')} values by clustering method and external labels",
             template='plotly_white'
         )
 

@@ -197,8 +197,7 @@ class ClusteringHTMLBuilder:
                             formatted_report["output_tables"].append({
                                 "name": table.name,
                                 "download_link": os.path.relpath(table.path, base_path),
-                                "file_name": os.path.basename(table.path),
-                                "table": df.to_html(border=0, justify='left', max_rows=None, index=False)
+                                "file_name": os.path.basename(table.path)
                             })
                         except Exception as e:
                             logging.warning(f"Error processing table {table.name}: {e}")

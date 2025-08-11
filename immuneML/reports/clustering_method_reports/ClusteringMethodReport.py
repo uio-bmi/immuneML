@@ -1,9 +1,8 @@
 from abc import ABC
 from pathlib import Path
 
-from immuneML.data_model.datasets.Dataset import Dataset
-from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod
 from immuneML.reports.Report import Report
+from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringItem
 
 
 class ClusteringMethodReport(Report, ABC):
@@ -13,8 +12,6 @@ class ClusteringMethodReport(Report, ABC):
 
     DOCS_TITLE = "Clustering method reports"
 
-    def __init__(self, dataset: Dataset = None, model: ClusteringMethod = None, result_path: Path = None,
-                 name: str = None):
+    def __init__(self, result_path: Path = None, name: str = None, clustering_item: ClusteringItem = None):
         super().__init__(name=name, result_path=result_path)
-        self.dataset = dataset
-        self.model = model
+        self.item = clustering_item
