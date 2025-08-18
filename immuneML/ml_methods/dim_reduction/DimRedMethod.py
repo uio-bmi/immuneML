@@ -1,4 +1,5 @@
 import abc
+import logging
 from typing import List
 
 import numpy as np
@@ -39,6 +40,13 @@ class DimRedMethod:
             return self.method.fit_transform(design_matrix)
         else:
             return self.method.fit_transform(dataset.encoded_data.get_examples_as_np_matrix())
+
+    def inverse_transform(self, transformed_data):
+        try:
+            return self.method.inverse_transform(transformed_data)
+        except Exception:
+            logging.warning(f"{self.__class__.__name__}: inverse transformation is not supported by this method.")
+            return None
 
     @abc.abstractmethod
     def get_dimension_names(self) -> List[str]:
