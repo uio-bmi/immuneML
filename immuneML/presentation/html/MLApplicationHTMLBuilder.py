@@ -17,7 +17,7 @@ class MLApplicationHTMLBuilder:
     def build(state: MLApplicationState = None) -> str:
         base_path = PathBuilder.build(state.path / "../HTML_output/")
         html_map = MLApplicationHTMLBuilder.make_html_map(state, base_path)
-        result_file = base_path / "MLModelTraining_{state.name}.html"
+        result_file = base_path / f"MLModelTraining_{state.name}.html"
         TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "MLApplication.html",
                              template_map=html_map, result_path=result_file)
         return result_file
