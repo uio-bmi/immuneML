@@ -16,7 +16,7 @@ class Label:
         if not isinstance(other, Label):
             return False
 
-        return self.name == other.name and self.values == other.values and \
+        return self.name == other.name and sorted(self.values) == sorted(other.values) and \
             self.positive_class == other.positive_class and self.auxiliary_label_names == other.auxiliary_label_names
 
     @property
