@@ -37,7 +37,7 @@ class TestDataSimulationTool(TestCase):
             }
         },
             "instructions": {
-                "inst1": {"type": "DatasetExport", "export_formats": ["AIRR"], "datasets": ["dataset"]}
+                "inst1": {"type": "DatasetExport", "datasets": ["dataset"]}
             }
         }
 
@@ -72,7 +72,7 @@ class TestDataSimulationTool(TestCase):
             }
         },
             "instructions": {
-                "inst1": {"type": "DatasetExport", "export_formats": ["AIRR"], "datasets": ["dataset"]}
+                "inst1": {"type": "DatasetExport", "datasets": ["dataset"]}
             }
         }
 

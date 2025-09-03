@@ -21,8 +21,7 @@ class TestDatasetExportInstruction(TestCase):
         filter = CountPerSequenceFilter(low_count_limit=1, remove_without_count=True, remove_empty_repertoires=True,
                                         batch_size=100)
         instruction = DatasetExportInstruction(datasets=[dataset], preprocessing_sequence=[filter],
-                                               exporters=[AIRRExporter], name="export_instr",
-                                               number_of_processes=2)
+                                               name="export_instr", number_of_processes=2)
 
         result_path = path / "generated/"
         state = instruction.run(result_path=result_path)

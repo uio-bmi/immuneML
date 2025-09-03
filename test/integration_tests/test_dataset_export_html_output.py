@@ -45,7 +45,7 @@ class TestDatasetExportHTMLOutput(TestCase):
                 }
             },
             "instructions": {
-                "instr1": {"type": "DatasetExport", "export_formats": ["AIRR"], "datasets": ["d1"], "preprocessing_sequence": "p1"}},
+                "instr1": {"type": "DatasetExport", "datasets": ["d1"], "preprocessing_sequence": "p1"}},
             "output": {"format": "HTML"}
         }
 
@@ -82,7 +82,7 @@ class TestDatasetExportHTMLOutput(TestCase):
                     }
                 }
             },
-            "instructions": {"instr1": {"type": "DatasetExport", "export_formats": ["AIRR"], "datasets": ["receptordataset"]}},
+            "instructions": {"instr1": {"type": "DatasetExport", "datasets": ["receptordataset"]}},
             "output": {"format": "HTML"}
         }
 
@@ -116,7 +116,7 @@ class TestDatasetExportHTMLOutput(TestCase):
                     }
                 }
             },
-            "instructions": {"instr1": {"type": "DatasetExport", "export_formats": ["AIRR"],
+            "instructions": {"instr1": {"type": "DatasetExport",
                                         "datasets": ["sequencedataset"]}},
             "output": {"format": "HTML"}
         }

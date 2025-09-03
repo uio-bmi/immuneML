@@ -40,26 +40,28 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     **Specification arguments:**
 
-    - sequence_encoding (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType`): The type
-      of k-mers that are used. The simplest sequence_encoding is
-      :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.CONTINUOUS_KMER`, which uses
-      contiguous subsequences of length k to represent the k-mers. Alternatively, these subsequences could be represented
-      together with the v gene of the sequence they belong to using
-      :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.V_GENE_CONT_KMER`.When gapped
-      k-mers are used
-      (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`,
-      :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`),
-      the k-mers may contain gaps with a size between min_gap and max_gap, and the k-mer length is defined as a
-      combination of k_left and k_right. When IMGT k-mers are used
-      (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_CONTINUOUS_KMER`,
-      :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_GAPPED_KMER`), IMGT
-      positional information is taken into account (i.e. the same sequence in a different position is considered to be
-      a different k-mer). When the identity representation is used
-      (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IDENTITY`), the k-mers just
-      correspond to the original sequences.
+    - sequence_encoding (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType`):
+      Sequence encoding determines how the sequences are decomposed into k-mers. It includes:
+
+      - CONTINUOUS_KMER: contiguous overlapping k-mers of length k (e.g., ACDE -> {ACD, CDE} for k=3) - default value
+      - GAPPED_KMER: k-mers of length k_left + k_right with a gap of size between min_gap and max_gap in between
+        (e.g., ACDE -> {AC, A.D, CD, C.E} for k_left=1, k_right=1, min_gap=0, max_gap=1)
+      - IMGT_CONTINUOUS_KMER: contiguous k-mers of length k with IMGT positional information
+        (e.g., AHCDE -> {'AHC_105', 'HCD_106', 'CDE_107'} for k=3)
+      - IMGT_GAPPED_KMER: k-mers of length k_left + k_right with a gap of size between min_gap and max_gap in
+        between, annotated by the starting IMGT position (e.g., AHCDE -> {'AH_105', 'HC_106', 'CD_107', 'DE_116',
+        'A.C_105', 'H.D_106', 'C.E_107'} for k_left=1, k_right=1, min_gap=0, max_gap=1)
+      - V_GENE_CONT_KMER: contiguous k-mers of length k, annotated by the V gene of the sequence they belong to
+        (e.g., ACDE -> {V1-1_ACD, V1-1_CDE} for k=3 and V gene V1-1)
+      - V_GENE_IMGT_KMER: contiguous k-mers of length k, annotated by the V gene of the sequence they belong to,
+        annotated by the starting IMGT position (e.g., AHCDE -> {V1-1_AHC_105, V1-1_HCD_106, V1-1_CDE_107} for k=3 and
+        V gene V1-1)
+      - IDENTITY: the k-mers correspond to the original sequences
 
     - normalization_type (:py:mod:`~immuneML.analysis.data_manipulation.NormalizationType`): The way in which the
-      k-mer frequencies should be normalized. The default value for normalization_type is l2.
+      k-mer frequencies should be normalized to unit norm; options are: binary, relative_frequency (also known as l1,
+      default value), l2, max, none. For more information, see scikit-learn's documentation on
+      `normalization <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.normalize.html#sklearn.preprocessing.normalize>`_.
 
     - reads (:py:mod:`~immuneML.util.ReadsType`): Reads type signify whether the counts of the sequences in the
       repertoire will be taken into account. If :py:mod:`~immuneML.util.ReadsType.UNIQUE`, only unique sequences
@@ -91,6 +93,11 @@ class KmerFrequencyEncoder(DatasetEncoder):
       Setting this argument to True might improve the subsequent classifier's performance depending on the type of the
       classifier. However, if the original design matrix was sparse, setting this argument to True will destroy the
       sparsity and will increase the memory consumption. The default value for scale_to_zero_mean is false.
+
+    - region_type (:py:mod:`~immuneML.data_model.SequenceParams.RegionType): the part of the receptor sequence to use
+      in the analysis. The default value is IMGT_CDR3. Other values: IMGT_CDR1, IMGT_CDR2, IMGT_CDR3, IMGT_FR1,
+      IMGT_FR2, IMGT_FR3, IMGT_FR4, IMGT_JUNCTION, FULL_SEQUENCE. Note that if an IMGT-based sequence encoding is
+      used, the region_type has to be IMGT_CDR3 or IMGT_JUNCTION.
 
 
     **YAML specification:**
@@ -135,9 +142,10 @@ class KmerFrequencyEncoder(DatasetEncoder):
         "ReceptorDataset": "KmerFreqReceptorEncoder"
     }
 
-    def __init__(self, normalization_type: NormalizationType, reads: ReadsType, sequence_encoding: SequenceEncodingType, k: int = 0,
-                 k_left: int = 0, k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None,
-                 name: str = None, scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False, sequence_type: SequenceType = None,
+    def __init__(self, normalization_type: NormalizationType, reads: ReadsType, sequence_encoding: SequenceEncodingType,
+                 k: int = 0, k_left: int = 0, k_right: int = 0, min_gap: int = 0, max_gap: int = 0,
+                 metadata_fields_to_include: list = None, name: str = None, scale_to_unit_variance: bool = False,
+                 scale_to_zero_mean: bool = False, sequence_type: SequenceType = None,
                  region_type: RegionType = RegionType.IMGT_CDR3):
         super().__init__(name=name)
         self.normalization_type = normalization_type

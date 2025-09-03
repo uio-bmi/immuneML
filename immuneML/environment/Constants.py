@@ -3,7 +3,7 @@ class Constants:
     VERSION = "3.0.15"
 
     # encoding constants
-    FEATURE_DELIMITER = "-"
+    FEATURE_DELIMITER = "_"
 
     # importing constants
     UNKNOWN = ''

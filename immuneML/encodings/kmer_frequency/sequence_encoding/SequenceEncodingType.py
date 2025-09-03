@@ -8,3 +8,4 @@ class SequenceEncodingType(Enum):
     IDENTITY = "IdentitySequenceEncoder"
     IMGT_GAPPED_KMER = "IMGTGappedKmerEncoder"
     V_GENE_CONT_KMER = "VGeneContKmerEncoder"
+    V_GENE_IMGT_KMER = 'VGeneIMGTKmerEncoder'

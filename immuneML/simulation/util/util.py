@@ -239,7 +239,7 @@ def match_motif(motif: Union[str, LigoPWM], encoding, sequence_array):
         matcher = RegexMatcher(motif, encoding=encoding)
         matches = matcher.rolling_window(sequence_array, mode='same')
     else:
-        matches = get_motif_scores(bnp.as_encoded_array(sequence_array, motif.pwm_matrix._encoding),
+        matches = get_motif_scores(bnp.as_encoded_array(sequence_array.tolist(), motif.pwm_matrix._encoding),
                                    motif.pwm_matrix) > motif.threshold
         matches = pad_ragged_array(matches, sequence_array.shape, False)
     return matches

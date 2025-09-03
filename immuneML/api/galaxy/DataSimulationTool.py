@@ -20,7 +20,6 @@ class DataSimulationTool(GalaxyTool):
         self.expected_instruction = DatasetExportInstruction.__name__[:-11]
         self.instruction_name = None
         self.dataset_name = None
-        self.export_format = None
 
     def _run(self):
         self.prepare_specs()
@@ -38,7 +37,6 @@ class DataSimulationTool(GalaxyTool):
             specs = yaml.safe_load(file)
 
         self.instruction_name = Util.check_instruction_type(specs, DataSimulationTool.__name__, self.expected_instruction)
-        self.export_format = Util.check_export_format(specs, DataSimulationTool.__name__, self.instruction_name)
 
         ParameterValidator.assert_keys_present(specs["definitions"], ["datasets"], DataSimulationTool.__name__, "definitions/datasets")
         ParameterValidator.assert_type_and_value(specs['definitions']['datasets'], dict, DataSimulationTool.__name__, "definitions/datasets")

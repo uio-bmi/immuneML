@@ -26,6 +26,7 @@ class ClassificationMetric(Enum):
 
     @staticmethod
     def get_binary_only_metrics():
+        """Metrics that required binarized labels"""
         return {
             ClassificationMetric.AUC,
             ClassificationMetric.AVERAGE_PRECISION,

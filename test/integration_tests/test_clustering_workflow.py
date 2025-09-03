@@ -98,7 +98,7 @@ def test_clustering_workflow():
                 },
                 'reports': ['rep1', 'stability', 'external_labels_summary', 'cluster_vis',
                             'external_label_metric_heatmap'],
-                'number_of_processes': 4,
+                'number_of_processes': 8,
                 'validation_type': ['result_based', 'method_based']
             }
         }
@@ -108,4 +108,4 @@ def test_clustering_workflow():
 
     ImmuneMLApp(path / 'specs.yaml', path / 'output').run()
 
-    shutil.rmtree(path)
+    # shutil.rmtree(path)

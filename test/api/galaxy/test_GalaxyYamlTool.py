@@ -37,7 +37,6 @@ class TestGalaxyYamlTool(TestCase):
                 "inst1": {
                     "type": "DatasetExport",
                     "datasets": ["new_d1"],
-                    "export_formats": ["AIRR"]
                 }
             }
         }
