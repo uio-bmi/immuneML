@@ -1,3 +1,5 @@
+from scipy.sparse import issparse
+
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod, get_data_for_clustering
 from sklearn.cluster import AgglomerativeClustering as SklearnAgglomerativeClustering
@@ -29,10 +31,14 @@ class AgglomerativeClustering(ClusteringMethod):
 
     def fit(self, dataset: Dataset):
         data = get_data_for_clustering(dataset)
+        if issparse(data):
+            data = data.toarray()
         self.model.fit(data)
 
     def fit_predict(self, dataset: Dataset):
         data = get_data_for_clustering(dataset)
+        if issparse(data):
+            data = data.toarray()
         return self.model.fit_predict(data)
 
     def predict(self, dataset: Dataset):

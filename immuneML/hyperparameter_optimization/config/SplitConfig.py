@@ -106,6 +106,9 @@ class SplitConfig:
             desc = f"stratified {self.split_count}-fold CV"
         return desc
 
+    def is_with_test_set(self):
+        return not(self.split_strategy.RANDOM and self.training_percentage == 1.)
+
     @staticmethod
     def get_documentation():
         doc = str(SplitConfig.__doc__)

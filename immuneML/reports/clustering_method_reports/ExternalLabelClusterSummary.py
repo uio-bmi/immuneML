@@ -3,16 +3,13 @@ from typing import List
 
 import pandas as pd
 import plotly.graph_objects as go
-import plotly.express as px
 
 from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.clustering_method_reports.ClusteringMethodReport import ClusteringMethodReport
-from immuneML.reports.clustering_reports.ClusteringReport import ClusteringReport
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
-from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringState
 from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringItem
 
 

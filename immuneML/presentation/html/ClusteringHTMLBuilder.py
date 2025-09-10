@@ -7,6 +7,7 @@ import pandas as pd
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.util.Util import Util as MLUtil
+from immuneML.ml_metrics import ClusteringMetric
 from immuneML.ml_metrics.ClusteringMetric import is_internal, is_external
 from immuneML.presentation.TemplateParser import TemplateParser
 from immuneML.presentation.html.Util import Util
@@ -149,10 +150,10 @@ class ClusteringHTMLBuilder:
                     "predictions_path": os.path.relpath(state.predictions_paths[split_id][analysis_type], base_path),
                     "internal_performance": item_result.item.internal_performance.get_df().to_html(border=0,
                         justify='left', max_rows=None,
-                        index=False) if item_result.item.internal_performance else None,
+                        index=False) if item_result.item.internal_performance and any(ClusteringMetric.is_internal(metric) for metric in state.config.metrics) else None,
                     "external_performance": item_result.item.external_performance.get_df().to_html(border=0,
                         justify='left', max_rows=None,
-                        index=False) if item_result.item.external_performance else None,
+                        index=False) if item_result.item.external_performance and any(ClusteringMetric.is_external(metric) for metric in state.config.metrics) else None,
                     "reports": ClusteringHTMLBuilder._format_reports(item_result.report_results, base_path)
                 }
         return None

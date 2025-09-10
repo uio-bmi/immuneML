@@ -5,15 +5,12 @@ import plotly
 import plotly.express as px
 
 from immuneML.dsl.definition_parsers.MLParser import MLParser
-from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.clustering_method_reports.ClusteringMethodReport import ClusteringMethodReport
-from immuneML.reports.clustering_reports.ClusteringReport import ClusteringReport
 from immuneML.util.PathBuilder import PathBuilder
-from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringState
 from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringItem
 
 

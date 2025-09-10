@@ -15,6 +15,7 @@ from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod
 from immuneML.ml_metrics.ClusteringMetric import is_external, is_internal
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
@@ -64,7 +65,8 @@ class ClusteringRunner:
                                      encoder)
 
         # Run clustering
-        predictions = self._fit_and_predict(enc_dataset, cl_setting)
+        method = copy.deepcopy(cl_setting.clustering_method)
+        predictions = self._fit_and_predict(enc_dataset, method)
         predictions_df[f'predictions_{cl_setting.get_key()}'] = predictions
 
         print_log(f"{cl_setting.get_key()}: clustering method fitted and predictions made.")
@@ -78,6 +80,7 @@ class ClusteringRunner:
             dataset=enc_dataset,
             predictions=predictions,
             encoder=encoder,
+            method=method,
             external_performance=DataFrameWrapper(path=performance_paths['external']),
             internal_performance=DataFrameWrapper(path=performance_paths['internal'])
         )
@@ -88,13 +91,13 @@ class ClusteringRunner:
 
         return ClusteringItemResult(cl_item, report_results), predictions_df
 
-    def _fit_and_predict(self, dataset: Dataset, cl_setting: ClusteringSetting) -> np.ndarray:
+    def _fit_and_predict(self, dataset: Dataset, method: ClusteringMethod) -> np.ndarray:
         """Fit clustering method and get predictions."""
-        if hasattr(cl_setting.clustering_method, 'fit_predict'):
-            return cl_setting.clustering_method.fit_predict(dataset)
+        if hasattr(method, 'fit_predict'):
+            return method.fit_predict(dataset)
         else:
-            cl_setting.clustering_method.fit(dataset)
-            return cl_setting.clustering_method.predict(dataset)
+            method.fit(dataset)
+            return method.predict(dataset)
 
     def _eval_internal_metrics(self, predictions: pd.DataFrame, cl_setting: ClusteringSetting, features) -> Path:
         internal_performances = {}
