@@ -143,6 +143,7 @@ class Util:
                 f"{dataset_key}_type": StringHelper.camel_case_to_word_string(type(dataset).__name__),
                 f"{dataset_key}_size": f"{dataset.get_example_count()} {type(dataset).__name__.replace('Dataset', 's').lower()}",
                 f"{dataset_key}_labels": [{f"{dataset_key}_label_name": label_name,
-                                           f"{dataset_key}_label_classes": ", ".join(str(class_name) for class_name in dataset.labels[label_name])}
+                                           f"{dataset_key}_label_classes": ", ".join(str(class_name)
+                                                                                     for class_name in dataset.labels.get(label_name, []))}
                                                 for label_name in dataset.get_label_names()],
                 f"show_{dataset_key}_labels": len(dataset.get_label_names()) > 0}

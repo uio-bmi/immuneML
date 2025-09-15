@@ -47,7 +47,7 @@ class LabelOverlap(DataReport):
                                                'LabelOverlap')
         ParameterValidator.assert_type_and_value(kwargs["column_label"], str, "LabelOverlap", "column_label")
         ParameterValidator.assert_type_and_value(kwargs["row_label"], str, "LabelOverlap", "row_label")
-        return LabelOverlap(column_label=kwargs["column_label"], row_label=kwargs["row_label"])
+        return LabelOverlap(column_label=kwargs["column_label"], row_label=kwargs["row_label"], name=kwargs.get("name", "LabelOverlap"))
 
     def check_prerequisites(self):
         if self.column_label not in self.dataset.get_label_names() or self.row_label not in self.dataset.get_label_names():
