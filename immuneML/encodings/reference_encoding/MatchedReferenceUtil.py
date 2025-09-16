@@ -24,11 +24,13 @@ class MatchedReferenceUtil:
 
             seq_import_params = reference_params["params"] if "params" in reference_params else {}
 
-            assert os.path.isfile(seq_import_params["path"]), f"{location}: the file {seq_import_params['path']} does not exist. " \
-                                                              f"Specify the correct path under reference."
+            assert os.path.isfile(
+                seq_import_params["path"]), f"{location}: the file {seq_import_params['path']} does not exist. " \
+                                            f"Specify the correct path under reference."
 
             if "is_repertoire" in seq_import_params:
-                assert seq_import_params["is_repertoire"] is False, f"{location}: is_repertoire must be False for SequenceImport"
+                assert seq_import_params[
+                           "is_repertoire"] is False, f"{location}: is_repertoire must be False for SequenceImport"
             else:
                 seq_import_params["is_repertoire"] = False
 
@@ -48,17 +50,33 @@ class MatchedReferenceUtil:
             params = {**default_params, **seq_import_params}
 
             path = Path(reference_params['params']['path'])
-            params['result_path'] = PathBuilder.build(path.parent / 'iml_imported' if path.is_file() else path / 'iml_imported')
+            params['result_path'] = PathBuilder.build(
+                path.parent / 'iml_imported' if path.is_file() else path / 'iml_imported')
 
             if format_str == "SingleLineReceptor":
                 receptors = list(import_class(params, 'tmp_receptor_dataset').import_dataset().get_data())
             else:
                 receptors = list(import_class(params=params, dataset_name="tmp_dataset").import_dataset().get_data())
 
-            assert len(receptors) > 0, f"MatchedReferenceUtil: The total number of imported reference {'receptors' if paired else 'sequences'} is 0, please ensure that reference import is specified correctly."
-            logging.info(f"MatchedReferenceUtil: successfully imported {len(receptors)} reference {'receptors' if paired else 'sequences'}.")
+            assert len(
+                receptors) > 0, f"MatchedReferenceUtil: The total number of imported reference {'receptors' if paired else 'sequences'} is 0, please ensure that reference import is specified correctly."
+
+            check_for_duplicates(paired, receptors, seq_import_params)
+
+            logging.info(
+                f"MatchedReferenceUtil: successfully imported {len(receptors)} reference {'receptors' if paired else 'sequences'}.")
 
             return receptors
         except Exception as e:
             print_log(f"MatchedReferenceUtil: Error while preparing reference: {e}", logging.ERROR)
-            raise
+            raise e
+
+
+def check_for_duplicates(paired, receptors, seq_import_params):
+    if not paired:
+        all_sequences = [f'{seq.v_call}_{seq.get_sequence()}_{seq.j_call}' for seq in receptors]
+        unique_sequences = set(all_sequences)
+        if len(unique_sequences) < len(receptors):
+            logging.warning(f"MatchedReferenceUtil: The reference sequences ({seq_import_params['path']}) "
+                            f"contain duplicates: {len(all_sequences) - len(unique_sequences)} sequences are "
+                            f"not unique. This will result in duplicate features.")

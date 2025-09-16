@@ -20,7 +20,10 @@ from immuneML.util.ReadsType import ReadsType
 
 class MatchedSequencesEncoder(DatasetEncoder):
     """
-    Encodes the dataset based on the matches between a RepertoireDataset and a reference sequence dataset.
+    Encodes the dataset based on the matches between a RepertoireDataset and a reference sequence dataset. The feature
+    names are derived from the reference sequences: "v_call_sequence_j_call" (e.g., "TRBV12-3_CASSLGTDTQYF_TRBJ2-7"). If
+    there are duplicates in the feature names but sequences have different sequence IDs, the sequence ID is appended to
+    the feature name to make it unique.
 
     This encoding can be used in combination with the :ref:`Matches` report.
 
