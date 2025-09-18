@@ -43,7 +43,7 @@ Additional useful reports to be applied on encoded datasets:
   scatterplot, allowing us to visually inspect which features differ the most between the label values.
 
 - :ref:`DimensionalityReduction`: uses a dimensionality reduction method (e.g., PCA, tSNE, UMAP) to visualize the encoded
-  dataset and optionally colors the points (each corresponding to one example from the dataset) by the label of interest.
+  dataset and optionally colors the points (each corresponding to one example from the dataset) by label(s) of interest.
 
 Encodings useful for exploratory analyses:
 
@@ -126,16 +126,9 @@ The analysis specification to run these reports:
                   opacity: 0.6
                   show_error_bar: False
 
-              dim_red_disease:
+              dim_red:
                 DimensionalityReduction:
-                  label: disease
-                  dim_red_method:
-                    KernelPCA:
-                      n_components: 2
-
-              dim_red_batch:
-                DimensionalityReduction:
-                  label: batch
+                  labels: [disease, batch]
                   dim_red_method:
                     KernelPCA:
                       n_components: 2
@@ -150,7 +143,7 @@ The analysis specification to run these reports:
                 encoded_data_analysis:
                   dataset: dataset
                   encoding: 3mer_freq
-                  reports: [feature_comparison, dim_red_disease, dim_red_batch]
+                  reports: [feature_comparison, dim_red]
 
 
 Run the exploratory analysis from the command line:
