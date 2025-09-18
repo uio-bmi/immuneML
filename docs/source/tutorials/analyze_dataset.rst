@@ -29,6 +29,9 @@ useful reports and visualizations:
 - :ref:`VJGeneDistribution`: shows how frequently each of the V and J gene occurs in the dataset; shows joint V and J gene
   distributions as well; here the report can also be split by a label of interest
 
+- :ref:`LabelDist`: shows the distribution for a list of labels of interest (e.g., disease, batch, age, sex); useful to
+  see if the dataset is balanced or if some unexpected values are present
+
 Some useful reports specifically for repertoire datasets (with one repertoire per patient):
 
 - :ref:`RepertoireClonotypeSummary`: shows the number of distinct clonotypes per repertoire; the clonotype counts can be
