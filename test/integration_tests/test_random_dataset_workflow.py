@@ -178,6 +178,11 @@ class TestRandomDatasetWorkflow(TestCase):
                         },
 
                     },
+                    'label_dist': {
+                        "LabelDist": {
+                            'labels': ['cmv_epitope', 'batch']
+                        }
+                    },
                     "rep2": {
                         "ConfusionMatrixPerLabel": {
                             'alternative_label': 'batch',
@@ -214,7 +219,7 @@ class TestRandomDatasetWorkflow(TestCase):
                         "split_count": 3,
                         "training_percentage": 0.7,
                         "reports": {
-                            'data_splits': ['lbl']
+                            'data_splits': ['lbl', 'label_dist']
                         }
                     },
                     "selection": {
