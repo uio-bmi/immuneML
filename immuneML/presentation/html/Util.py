@@ -3,7 +3,8 @@ import os
 import shutil
 from enum import Enum
 from pathlib import Path
-import numpy as np
+
+import pandas as pd
 
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -63,7 +64,7 @@ class Util:
             filename = "_".join(Path(os.path.relpath(str(path_to_zip), str(base_path)).replace(".", "")).parts)
 
         PathBuilder.build(base_path / "zip")
-        zip_file_path = shutil.make_archive(base_name=base_path / f"zip/{filename}", format="zip", root_dir=str(path_to_zip))
+        zip_file_path = shutil.make_archive(base_name=str(base_path / f"zip/{filename}"), format="zip", root_dir=str(path_to_zip))
         return zip_file_path
 
     @staticmethod
@@ -98,25 +99,12 @@ class Util:
         return path_str
 
     @staticmethod
-    def get_table_string_from_csv_string(csv_string: str, separator: str = ",", has_header: bool = True) -> str:
-        table_string = "<table>\n"
-        for index, line in enumerate(csv_string.splitlines()):
-            if index == 0 and has_header:
-                table_string += "<thead>\n"
-            table_string += "<tr>\n"
-            for col in line.split(separator):
-                table_string += f"<td>{col}</td>\n"
-            table_string += "</tr>\n"
-            if index == 0 and has_header:
-                table_string += "</thead>\n"
-        table_string += "</table>\n"
-        return table_string
+    def get_table_string_from_csv(csv_path: Path, separator: str = ",", has_header: bool = True) -> str:
+        return Util.get_table_from_dataframe(pd.read_csv(csv_path, sep=separator, header=0 if has_header else None))
 
     @staticmethod
-    def get_table_string_from_csv(csv_path: Path, separator: str = ",", has_header: bool = True) -> str:
-        with csv_path.open("r") as file:
-            table_string = Util.get_table_string_from_csv_string(file.read())
-        return table_string
+    def get_table_from_dataframe(df: pd.DataFrame):
+        return df.to_html(index_names=False, index=False).replace('<table border="1" class="dataframe">', '<table>')
 
     @staticmethod
     def update_report_paths(report_result: ReportResult, path: Path) -> ReportResult:

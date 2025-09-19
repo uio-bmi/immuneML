@@ -1,12 +1,13 @@
 import os
 from pathlib import Path
 
+import pandas as pd
+
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.util.Util import Util as MLUtil
 from immuneML.presentation.TemplateParser import TemplateParser
 from immuneML.presentation.html.Util import Util
 from immuneML.util.PathBuilder import PathBuilder
-from immuneML.util.StringHelper import StringHelper
 from immuneML.workflows.instructions.ml_model_application.MLApplicationState import MLApplicationState
 
 
@@ -33,7 +34,7 @@ class MLApplicationHTMLBuilder:
             "label": state.label_config.get_labels_by_name()[0],
             "labels": [{"name": label_name, "values": str(state.label_config.get_label_values(label_name))[1:-1]}
                        for label_name in state.label_config.get_labels_by_name()],
-            "predictions": Util.get_table_string_from_csv(state.predictions_path),
+            "predictions": Util.get_table_string_from_csv(state.predictions_path) if state.predictions_path is not None else None,
             "predictions_download_link": os.path.relpath(state.predictions_path, base_path),
             "show_metrics": state.metrics_path is not None,
             "metrics": Util.get_table_string_from_csv(state.metrics_path) if state.metrics_path is not None else None,

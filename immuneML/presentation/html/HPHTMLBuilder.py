@@ -1,4 +1,3 @@
-import io
 import os
 from pathlib import Path
 
@@ -200,11 +199,8 @@ class HPHTMLBuilder:
             for metric in sorted(state.metrics, key=lambda metric: metric.name.lower()):
                 performance_metric[metric.name.lower()].append(HPHTMLBuilder._print_metric(hp_item.performance, metric))
 
-        s = io.StringIO()
-        pd.DataFrame(performance_metric).rename(
-            columns={"setting": 'Hyperparameter settings (preprocessing, encoding, ML method)'}) \
-            .to_csv(s, sep="\t", index=False)
-        return Util.get_table_string_from_csv_string(s.getvalue(), separator="\t")
+        return Util.get_table_from_dataframe(pd.DataFrame(performance_metric).rename(
+            columns={"setting": 'Hyperparameter settings (preprocessing, encoding, ML method)'}))
 
     @staticmethod
     def _make_assessment_reports(state, i, hp_setting_key, assessment_state, label_name: str, base_path: Path):
@@ -288,7 +284,7 @@ class HPHTMLBuilder:
                 table_data = {
                     "name": table.name if hasattr(table, "name") else None,
                     "path": str(table_path),
-                    "table": Util.get_table_string_from_csv(table.path) if table.path.suffix == '.csv' else None
+                    "table": pd.read_csv(table.path).to_html(index=False, index_names=False) if table.path.suffix == '.csv' else None
                 }
                 tables.append(table_data)
         return tables
@@ -392,14 +388,7 @@ class HPHTMLBuilder:
         )
         best_value = ClassificationMetric.get_search_criterion(metric)(df['Average'])
 
-        def highlight_table_row(row):
-            if row.Average == best_value:
-                return ['font-weight: bold'] * len(row)
-            else:
-                return [''] * len(row)
-
-        return df.astype(str).style.apply(highlight_table_row, axis=1).hide(axis='index').to_html(index=False,
-                                                                                                  index_names=False)
+        return to_html_with_row_highlight(df, best_value, 'Average')
 
     @staticmethod
     def _get_heading_metric_name(metric: str):
@@ -409,3 +398,24 @@ class HPHTMLBuilder:
 
         name = name.replace('Auc', 'AUC').replace("Ovr", "One-vs-rest").replace("Ovo", "One-vs-one")
         return name
+
+
+def to_html_with_row_highlight(df, best_value, col_name):
+    def row_style(row, col_name):
+        if row[col_name] == best_value:
+            return "font-weight: bold;"
+        else:
+            return ""
+
+    parts = Util.get_table_from_dataframe(df).split("<tr>")
+    out = [parts[0]]
+    for i, part in enumerate(parts[1:]):
+        if i == 0:
+            out.append("<tr>" + part)
+        else:
+            style = row_style(df.iloc[i-1], col_name)
+            if style:
+                out.append(f'<tr style="{style}">' + part)
+            else:
+                out.append("<tr>" + part)
+    return "".join(out)
