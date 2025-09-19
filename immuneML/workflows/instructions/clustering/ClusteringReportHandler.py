@@ -41,7 +41,6 @@ class ClusteringReportHandler:
         report_results = []
         for report in self.reports:
             tmp_report = copy.deepcopy(report)
-            print(type(tmp_report))
             tmp_report.result_path = PathBuilder.build(report_path / tmp_report.name)
             if isinstance(report, EncodingReport):
                 tmp_report.dataset = cl_item.dataset
