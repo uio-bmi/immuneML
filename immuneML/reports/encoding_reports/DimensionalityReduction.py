@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from typing import List
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 
@@ -18,7 +19,10 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class DimensionalityReduction(EncodingReport):
     """
-    This report visualizes the data obtained by dimensionality reduction.
+    This report visualizes the data obtained by dimensionality reduction. The data points can be highlighted by label of
+    interest. It is also possible to specify labels that contain lists of values (e.g., HLA), in which case the data points
+    will be duplicated (so that each point refers to one HLA allele) and jittered slightly to improve visibility
+    before being highlighted by the concrete HLA allele values.
 
     **Specification arguments:**
 
@@ -106,6 +110,10 @@ class DimensionalityReduction(EncodingReport):
         df = pd.DataFrame({'example_id': self.dataset.get_example_ids(),
                            self._dimension_names[0]: dim_reduced_data[:, 0],
                            self._dimension_names[1]: dim_reduced_data[:, 1]})
+
+        if hasattr(self.dataset, 'get_metadata_fields') and 'subject_id' in self.dataset.get_metadata_fields():
+            df['subject_id'] = self.dataset.get_metadata(['subject_id'], return_df=True)['subject_id']
+
         if self._labels:
             df[self._labels] = data_labels
         df.to_csv(self.result_path / 'dimensionality_reduced_data.csv', index=False)
@@ -124,16 +132,26 @@ class DimensionalityReduction(EncodingReport):
         outputs = []
         if self._labels:
             for label in self._labels:
-                unique_values = df[label].unique()
+
+                df_copy = self._parse_labels_with_lists(df, label)
+
+                unique_values = df_copy[label].unique()
+
+                hover_data = self._dimension_names + self._labels
+                if 'subject_id' in df_copy.columns:
+                    hover_data += ['subject_id']
+                elif 'example_id' in df_copy.columns:
+                    hover_data += ['example_id']
+
                 if len(unique_values) <= 3:
-                    df[label] = df[label].astype('category')
-                    figure = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1], color=label,
+                    df_copy[label] = df_copy[label].astype('category')
+                    figure = px.scatter(df_copy, x=self._dimension_names[0], y=self._dimension_names[1], color=label,
                                         color_discrete_sequence=px.colors.qualitative.Set1,
-                                        hover_data=self._dimension_names + self._labels,
+                                        hover_data=hover_data,
                                         category_orders={label: sorted(unique_values)})
                 else:
-                    figure = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1], color=label,
-                                        hover_data=self._dimension_names + self._labels)
+                    figure = px.scatter(df_copy, x=self._dimension_names[0], y=self._dimension_names[1], color=label,
+                                        hover_data=hover_data)
 
                 figure.update_layout(template="plotly_white", showlegend=True)
                 figure.update_traces(opacity=.6)
@@ -154,3 +172,33 @@ class DimensionalityReduction(EncodingReport):
             outputs.append(ReportOutput(path=file_path, name="Data visualization after dimensionality reduction"))
 
         return outputs
+
+    def _parse_labels_with_lists(self, df: pd.DataFrame, label: str) -> pd.DataFrame:
+        df_long = df.copy()
+
+        df_long[label] = df_long[label].apply(parse_list_column)
+
+        if isinstance(df_long[label].iloc[0], (list, tuple)):
+            df_long = df_long.explode(label)
+
+            # Compute jitter based on the range of each axis
+            x_range = df_long[self._dimension_names[0]].max() - df_long[self._dimension_names[0]].min()
+            y_range = df_long[self._dimension_names[1]].max() - df_long[self._dimension_names[1]].min()
+            jitter_strength = 0.005 * min(x_range, y_range)
+
+            # Apply jitter
+            df_long[self._dimension_names[0]] += np.random.uniform(-jitter_strength, jitter_strength, size=len(df_long))
+            df_long[self._dimension_names[1]] += np.random.uniform(-jitter_strength, jitter_strength, size=len(df_long))
+
+        return df_long
+
+
+def parse_list_column(value):
+    """Parses a string representation of a list or tuple into an actual list."""
+    if isinstance(value, str):
+        value = value.strip()
+        if (value.startswith('[') and value.endswith(']')) or (value.startswith('(') and value.endswith(')')):
+            value = value[1:-1]
+            items = [item.strip() for item in value.split(',') if item.strip()]
+            return items
+    return value

@@ -41,4 +41,4 @@ class TSNE(DimRedMethod):
         return super().transform(dataset, design_matrix)
 
     def get_dimension_names(self) -> List[str]:
-        return [f"tSNE_dimension_{i+1}" for i in range(self.method.n_components)]
+        return [f"tSNE_{i+1}" for i in range(self.method.n_components)]
