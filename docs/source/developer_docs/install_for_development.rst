@@ -16,7 +16,9 @@ Prerequisites
 
 - System requirements: at least 4GB of RAM memory and 15GB of disk space.
 
-- A Python virtual environment using **at least Python version 3.9** (newest version of Python is usually recommended). This can be created through `Python venv <https://docs.python.org/3/library/venv.html>`_ or `conda venv <https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html>`_.
+- A Python virtual environment using **at least Python version 3.9** (newest version of Python is usually recommended).
+  This can be created through `Python venv <https://docs.python.org/3/library/venv.html>`_ or
+  `conda venv <https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html>`_.
 
 - Under Windows, the Microsoft Visual C++ 14.0 or greater is required to install from requirements.txt.
 
@@ -44,28 +46,35 @@ Alternatively to using PyCharm, the following steps describe how to perform the 
 
 1. Create a directory where the code should be located and navigate to that directory.
 
-2. Execute the command to clone the repository:
+2. Create and activate a virtual environment with Python 3.9 or later (if not already created). For example, using venv:
 
 .. code-block:: console
 
-  git clone https://github.com/uio-bmi/immuneML.git
+  python3 -m venv ./immuneml_venv/
+  source ./immuneml_venv/bin/activate
+
+2. Execute the command to clone the repository from the development branch:
+
+.. code-block:: console
+
+  git clone https://github.com/uio-bmi/immuneML.git@development
 
 3. From the project folder (immuneML folder created when the repository was cloned
 from GitHub), install the requirements from the requirements.txt file (this file can be found in the immuneML root folder):
 
 .. code-block:: console
 
-  pip install -r requirements.txt
   pip install -e .
 
 
-If you want to install optional requirements (DeepRC, TCRdist, KerasSequenceCNN), install the relevant requirements file(s):
+If you want to install optional requirements install the relevant requirements file(s):
 
 .. code-block:: console
 
   pip install -r requirements_DeepRC.txt
   pip install -r requirements_TCRdist.txt
   pip install -r requirements_KerasSequenceCNN.txt
+  pip install -r requirements_generative_models.txt
 
 4. If not setting up the project in PyCharm, it might be necessary to manually add the root project folder to PYTHONPATH.
 The syntax for Unix-based systems is the following:
