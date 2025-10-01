@@ -29,6 +29,19 @@ class LogRegressionCustomPenalty(MLMethod):
     Other supported arguments are inherited from LogitNet of python-glmnet package and will be directly passed to it.
     n_jobs will be overwritten to use the number of CPUs specified for the instruction (e.g. in TrainMLModel).
 
+    **YAML specification:**
+
+    .. code-block:: yaml
+
+        ml_methods:
+            custom_log_reg:
+                LogRegressionCustomPenalty:
+                    alpha: 1
+                    n_lambda: 100
+                    non_penalized_features: []
+                    non_penalized_encodings: ['MetadataEncoder']
+                    random_state: 42
+
     """
     def __init__(self, non_penalized_features: list = None, name: str = None, label: Label = None,
                  non_penalized_encodings: list = None, **kwargs):
@@ -45,8 +58,8 @@ class LogRegressionCustomPenalty(MLMethod):
 
         self.feature_names = encoded_data.feature_names
 
-        if encoded_data.encoding == 'CompositeEncoder' and 'non_penalized_encodings' in self.kwargs:
-            features_from_non_penalized_encodings = encoded_data.feature_annotations[encoded_data.feature_annotations['encoding'].str.isin(self.non_penalized_encodings)]['features'].tolist()
+        if encoded_data.encoding == 'CompositeEncoder' and self.non_penalized_encodings:
+            features_from_non_penalized_encodings = encoded_data.feature_annotations[encoded_data.feature_annotations['encoder'].isin(self.non_penalized_encodings)]['feature'].tolist()
             non_penalized_features = list(set(features_from_non_penalized_encodings))
             non_penalized_features.extend(self.non_penalized_features)
             self.non_penalized_features = list(set(non_penalized_features))

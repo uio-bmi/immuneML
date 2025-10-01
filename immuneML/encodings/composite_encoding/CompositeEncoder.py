@@ -79,18 +79,13 @@ class CompositeEncoder(DatasetEncoder):
 
         for encoder in self.encoders:
             encoded_dataset = encoder.encode(dataset, params)
-            if examples is None:
-                examples = [encoded_dataset.encoded_data.examples]
-                feature_names = encoded_dataset.encoded_data.feature_names
-                feature_annotations = encoded_dataset.encoded_data.feature_annotations
-                feature_annotations['encoder'] = encoder.name
-                feature_annotations.append(feature_annotations)
-                info = {f'encoder_{encoder.name}': encoded_dataset.encoded_data.info}
-            else:
-                examples.append(encoded_dataset.encoded_data.examples)
-                feature_names += encoded_dataset.encoded_data.feature_names
-                feature_annotations.append(encoded_dataset.encoded_data.feature_annotations)
-                info[f'encoder_{encoder.name}'] = encoded_dataset.encoded_data.info
+            tmp_feature_annotations = encoded_dataset.encoded_data.feature_annotations
+            tmp_feature_annotations['encoder'] = type(encoder).__name__
+            tmp_feature_annotations['encoder_name'] = encoder.name
+            feature_annotations.append(tmp_feature_annotations)
+            examples.append(encoded_dataset.encoded_data.examples)
+            feature_names.extend(encoded_dataset.encoded_data.feature_names)
+            info[f'encoder_{encoder.name}'] = encoded_dataset.encoded_data.info
 
         examples = NumpyHelper.concat_arrays_rowwise(examples, use_memmap=True)
         feature_annotations = pd.concat(feature_annotations, ignore_index=True)
@@ -98,6 +93,7 @@ class CompositeEncoder(DatasetEncoder):
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=np.array(examples), feature_names=feature_names,
                                                    feature_annotations=feature_annotations, info=info,
-                                                   labels=dataset.get_metadata(params.label_config.get_labels_by_name()))
+                                                   labels=dataset.get_metadata(params.label_config.get_labels_by_name()),
+                                                   encoding=type(self).__name__)
 
         return encoded_dataset

@@ -109,7 +109,7 @@ class TestRandomDatasetWorkflow(TestCase):
             }
         }
 
-    def test_dataset_generation(self):
+    def test_run(self):
 
         path = EnvironmentSettings.tmp_test_path / "composite_enc_custom_penalty/"
 
