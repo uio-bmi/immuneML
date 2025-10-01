@@ -14,7 +14,7 @@ setup(
     author="immuneML Team",
     author_email="milenpa@student.matnat.uio.no",
     url="https://github.com/uio-bmi/immuneML",
-    install_requires=["numpy<=1.26.4", "pandas>=2.1.0", "PyYAML>=5.3", "scikit-learn>=0.23",
+    install_requires=["numpy<=1.26.4", "pandas>=2.1.0", "PyYAML>=5.3", "scikit-learn>=0.23", "python-glmnet",
                       "matplotlib>=3.1", "editdistance", "regex", "tzlocal", "airr>=1,<1.4",
                       "pystache", "dill>=0.3", "plotly>=4", "matplotlib-venn>=0.11", "scipy<=1.12.0", "bionumpy==1.0.12",
                       "umap-learn", "olga>=1.2.4", "psutil", 'kaleido', 'logomaker', 'python-glmnet'],

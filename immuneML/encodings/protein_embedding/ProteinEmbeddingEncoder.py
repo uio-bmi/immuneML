@@ -17,6 +17,7 @@ from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.util.NumpyHelper import NumpyHelper
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -144,18 +145,7 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
                 self._get_caching_params(dataset, params, step='scaled'),
                 lambda: FeatureScaler.standard_scale(self.scaler, examples, with_mean=self.scale_to_zero_mean))
 
-        return self._create_memmap_array(examples.shape, examples)
-
-    def _create_memmap_array(self, shape: tuple, data: np.ndarray = None) -> np.ndarray:
-        """Creates a memory-mapped array and optionally initializes it with data."""
-        import uuid
-        dir_path = PathBuilder.build(EnvironmentSettings.get_cache_path() / "memmap_storage")
-        memmap_path = dir_path / f"temp_{uuid.uuid4()}.mmap"
-        
-        memmap_array = np.memmap(memmap_path, dtype='float32', mode='w+', shape=shape)
-        if data is not None:
-            memmap_array[:] = data[:]
-        return memmap_array
+        return NumpyHelper.create_memmap_array_in_cache(examples.shape, examples)
 
     def _avg_sequence_set_embedding(self, embedding: np.ndarray) -> np.ndarray:
         return embedding.mean(axis=0)

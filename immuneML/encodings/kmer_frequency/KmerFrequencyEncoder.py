@@ -1,18 +1,15 @@
 import abc
-from pathlib import Path
 from typing import List
 
 import pandas as pd
-from scipy.sparse import csr_matrix, hstack
 from sklearn.feature_extraction import DictVectorizer
-from sklearn.preprocessing import StandardScaler, MultiLabelBinarizer
+from sklearn.preprocessing import StandardScaler
 
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.EncodedData import EncodedData
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.SequenceSet import ReceptorSequence
-from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
@@ -101,10 +98,6 @@ class KmerFrequencyEncoder(DatasetEncoder):
       IMGT_FR2, IMGT_FR3, IMGT_FR4, IMGT_JUNCTION, FULL_SEQUENCE. Note that if an IMGT-based sequence encoding is
       used, the region_type has to be IMGT_CDR3 or IMGT_JUNCTION.
 
-    - metadata_fields_to_include (list): A list of metadata fields to include in the encoded data. If not specified, no
-      metadata fields will be included. This is an experimental feature and will for now only allow one-hot encoding of
-      different values.
-
 
     **YAML specification:**
 
@@ -134,7 +127,6 @@ class KmerFrequencyEncoder(DatasetEncoder):
                         max_gap: 3
                         scale_to_unit_variance: True
                         scale_to_zero_mean: False
-                        metadata_fields_to_include: [HLA]
 
     """
 
@@ -151,13 +143,14 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     def __init__(self, normalization_type: NormalizationType, reads: ReadsType, sequence_encoding: SequenceEncodingType,
                  k: int = 0, k_left: int = 0, k_right: int = 0, min_gap: int = 0, max_gap: int = 0,
-                 metadata_fields_to_include: list = None, name: str = None, scale_to_unit_variance: bool = False,
-                 scale_to_zero_mean: bool = False, sequence_type: SequenceType = None,
+                 name: str = None, scale_to_unit_variance: bool = False,
+                 scale_to_zero_mean: bool = False, sequence_type: SequenceType = None, include_v_genes: str = None,
                  region_type: RegionType = RegionType.IMGT_CDR3):
         super().__init__(name=name)
         self.normalization_type = normalization_type
         self.reads = reads
         self.sequence_encoding = sequence_encoding
+        self.include_v_genes = include_v_genes
         self.sequence_type = sequence_type
         self.region_type = region_type
         self.k = k
@@ -165,7 +158,6 @@ class KmerFrequencyEncoder(DatasetEncoder):
         self.k_right = k_right
         self.min_gap = min_gap
         self.max_gap = max_gap
-        self.metadata_fields_to_include = metadata_fields_to_include if metadata_fields_to_include is not None else []
         self.scale_to_unit_variance = scale_to_unit_variance
         self.scale_to_zero_mean = scale_to_zero_mean
         self.scaler = None
@@ -173,7 +165,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     @staticmethod
     def _prepare_parameters(normalization_type: str, reads: str, sequence_encoding: str, k: int = 0, k_left: int = 0,
-                            k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None, name: str = None,
+                            k_right: int = 0, min_gap: int = 0, max_gap: int = 0, name: str = None,
                             scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False,
                             sequence_type: str = SequenceType.AMINO_ACID.name,
                             region_type: str = RegionType.IMGT_CDR3.name):
@@ -209,7 +201,6 @@ class KmerFrequencyEncoder(DatasetEncoder):
             "scale_to_zero_mean": scale_to_zero_mean, "scale_to_unit_variance": scale_to_unit_variance,
             'sequence_type': SequenceType[sequence_type.upper()],
             'region_type': RegionType[region_type.upper()],
-            'metadata_fields_to_include': metadata_fields_to_include,
             **vars_to_check
         }
 
@@ -248,7 +239,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
             lambda: self._encode_examples(dataset, params))
 
         self._initialize_vectorizer(params)
-        vectorized_examples = self._vectorize_encoded(examples=encoded_example_list, params=params)
+        vectorized_examples = self._vectorize_encoded(examples=encoded_example_list, params=params,
+                                                      vectorizer=self.vectorizer)
         feature_names = self.vectorizer.feature_names_
         normalized_examples = FeatureScaler.normalize(vectorized_examples, self.normalization_type)
 
@@ -256,8 +248,6 @@ class KmerFrequencyEncoder(DatasetEncoder):
             examples = self.scale_normalized(params, dataset, normalized_examples)
         else:
             examples = normalized_examples
-
-        examples, feature_names = self._add_metadata_features(examples, feature_names, dataset)
 
         feature_annotations = self._get_feature_annotations(feature_names, feature_annotation_names)
 
@@ -270,68 +260,6 @@ class KmerFrequencyEncoder(DatasetEncoder):
                                    info={"sequence_type": self.sequence_type, 'region_type': self.region_type})
 
         return encoded_data
-
-    def _add_metadata_features(self, examples, feature_names, dataset: Dataset):
-        """
-        Adds metadata features to the encoded examples if metadata fields are specified.
-        """
-        if self.metadata_fields_to_include:
-            metadata = dataset.get_metadata(self.metadata_fields_to_include, return_df=True)
-
-            additional_features = None
-            classes = []
-
-            for feature in self.metadata_fields_to_include:
-                flattened, mlb = self.flatten_comma_separated_mlb(metadata, feature)
-                classes += [f"{feature}_{c}" for c in mlb.classes_.tolist()]
-                if additional_features is None:
-                    additional_features = flattened
-                else:
-                    additional_features = pd.concat([additional_features, flattened], axis=1)
-
-            # Convert to sparse matrix
-            onehot_sparse = csr_matrix(additional_features)
-
-            # Combine sparse matrices horizontally
-            examples = hstack([examples, onehot_sparse])
-
-            feature_names = feature_names + classes
-
-        return examples, feature_names
-
-    def flatten_comma_separated_mlb(self, df, column_name):
-        """
-        Flatten comma-separated values using MultiLabelBinarizer.
-
-        Parameters:
-        -----------
-        df : pandas DataFrame
-            Input dataframe
-        column_name : str
-            Name of column containing comma-separated values
-
-        Returns:
-        --------
-        pandas DataFrame with original columns + one-hot encoded columns
-        """
-
-        # Split comma-separated values into lists
-        split_values = df[column_name].str.split(',').tolist()
-
-        # Remove whitespace from each element
-        split_values = [[item.strip() for item in row if item.strip()] for row in split_values]
-
-        # Create binary matrix
-        mlb = MultiLabelBinarizer()
-        binary_matrix = mlb.fit_transform(split_values)
-
-        # Create new column names
-        new_columns = [f"{column_name}_{label}" for label in mlb.classes_]
-
-        # Create DataFrame with binary columns
-        binary_df = pd.DataFrame(binary_matrix, columns=new_columns, index=df.index)
-
-        return binary_df, mlb
 
     def scale_normalized(self, params, dataset, normalized_examples):
 
@@ -359,12 +287,12 @@ class KmerFrequencyEncoder(DatasetEncoder):
         if self.vectorizer is None or params.learn_model:
             self.vectorizer = DictVectorizer(sparse=True, dtype=float)
 
-    def _vectorize_encoded(self, examples: list, params: EncoderParams):
+    def _vectorize_encoded(self, examples: list, params: EncoderParams, vectorizer: DictVectorizer):
 
         if params.learn_model:
-            vectorized_examples = self.vectorizer.fit_transform(examples)
+            vectorized_examples = vectorizer.fit_transform(examples)
         else:
-            vectorized_examples = self.vectorizer.transform(examples)
+            vectorized_examples = vectorizer.transform(examples)
 
         return vectorized_examples
 

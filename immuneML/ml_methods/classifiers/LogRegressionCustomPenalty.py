@@ -1,3 +1,4 @@
+import logging
 import pickle
 from pathlib import Path
 
@@ -20,13 +21,20 @@ class LogRegressionCustomPenalty(MLMethod):
 
     - non_penalized_features (list): List of feature names that should not be penalized.
 
+    - non_penalized_encodings (list): List of encoding names (class names) whose features should not be penalized. This
+      parameter can be used only in combination with CompositeEncoder. None fo the features from the specified encodings
+      will be penalized. If both non_penalized_features and non_penalized_encodings are provided, the union of the two
+      will be used.
+
     Other supported arguments are inherited from LogitNet of python-glmnet package and will be directly passed to it.
     n_jobs will be overwritten to use the number of CPUs specified for the instruction (e.g. in TrainMLModel).
 
     """
-    def __init__(self, non_penalized_features: list = None, name: str = None, label: Label = None, **kwargs):
+    def __init__(self, non_penalized_features: list = None, name: str = None, label: Label = None,
+                 non_penalized_encodings: list = None, **kwargs):
         super().__init__(name=name, label=label)
         self.non_penalized_features = non_penalized_features if non_penalized_features is not None else []
+        self.non_penalized_encodings = non_penalized_encodings if non_penalized_encodings is not None else []
         self.model = None
         self.feature_names = None
         self.kwargs = kwargs
@@ -36,6 +44,14 @@ class LogRegressionCustomPenalty(MLMethod):
         y = encoded_data.labels[self.label.name]
 
         self.feature_names = encoded_data.feature_names
+
+        if encoded_data.encoding == 'CompositeEncoder' and 'non_penalized_encodings' in self.kwargs:
+            features_from_non_penalized_encodings = encoded_data.feature_annotations[encoded_data.feature_annotations['encoding'].str.isin(self.non_penalized_encodings)]['features'].tolist()
+            non_penalized_features = list(set(features_from_non_penalized_encodings))
+            non_penalized_features.extend(self.non_penalized_features)
+            self.non_penalized_features = list(set(non_penalized_features))
+
+            logging.info(f"{self.__class__.__name__}: inferred non-penalized features: {self.non_penalized_features}")
 
         # Create penalty factor vector
         penalty_factor = np.ones(X.shape[1])
@@ -73,9 +89,9 @@ class LogRegressionCustomPenalty(MLMethod):
 
     def get_params(self, for_refitting=False) -> dict:
         return {
-            'penalty': self.penalty,
-            'C': self.C,
-            'random_state': self.random_state,
+            'penalty': self.model.penalty,
+            'C': self.model.C,
+            'random_state': self.model.random_state,
             'non_penalized_features': self.non_penalized_features
         }
 
@@ -86,5 +102,5 @@ class LogRegressionCustomPenalty(MLMethod):
         return False  # LogitNet does not support sample weights
 
     def get_compatible_encoders(self):
-        from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
-        return [KmerFrequencyEncoder]
+        from immuneML.encodings.composite_encoding.CompositeEncoder import CompositeEncoder
+        return [CompositeEncoder]

@@ -1,0 +1,4 @@
+genes: ['v', 'j']
+normalization_type: 'relative_frequency'
+scale_to_zero_mean: true
+scale_to_unit_variance: true
