@@ -1,6 +1,5 @@
 import os
 import shutil
-from pathlib import Path
 from unittest import TestCase
 
 import yaml
@@ -124,4 +123,4 @@ class TestRandomDatasetWorkflow(TestCase):
 
         app = ImmuneMLApp(specs_filename, path / "result/")
         app.run()
-        # shutil.rmtree(path)
+        shutil.rmtree(path)
