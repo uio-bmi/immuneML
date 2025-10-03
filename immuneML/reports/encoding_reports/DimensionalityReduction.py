@@ -195,10 +195,12 @@ class DimensionalityReduction(EncodingReport):
 
 def parse_list_column(value):
     """Parses a string representation of a list or tuple into an actual list."""
+    if not value or pd.isna(value):
+        return 'unknown'
     if isinstance(value, str):
         value = value.strip()
-        if (value.startswith('[') and value.endswith(']')) or (value.startswith('(') and value.endswith(')')):
+        if (value.startswith('"') and value.endswith('"')) or (value.startswith('\'') and value.endswith('\'')):
             value = value[1:-1]
-            items = [item.strip() for item in value.split(',') if item.strip()]
+            items = [item.strip().replace('\'', '') for item in value.split(',') if item.strip()]
             return items
     return value
