@@ -7,6 +7,7 @@ from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.protein_embedding.ProteinEmbeddingEncoder import ProteinEmbeddingEncoder
+from immuneML.util.NumpyHelper import NumpyHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.Logger import log_memory_usage
 
@@ -133,7 +134,7 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
         total_dim = len(self.layers) * self.embedding_dim if self.method != "pool" else self.embedding_dim
         
         # Create memory-mapped array for embeddings
-        embeddings = self._create_memmap_array((n_sequences, total_dim))
+        embeddings = NumpyHelper.create_memmap_array_in_cache((n_sequences, total_dim))
         
         chunks = [seqs[i: i + self.batch_size] for i in range(0, n_sequences, self.batch_size)]
         chunks_pair = [None] * len(chunks)  # Create matching None pairs for zip_longest

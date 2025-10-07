@@ -26,7 +26,12 @@ class KmerFrequencyEncoder(DatasetEncoder):
     """
     The KmerFrequencyEncoder class encodes a repertoire, sequence or receptor by frequencies of k-mers it contains.
     A k-mer is a sequence of letters of length k into which an immune receptor sequence can be decomposed.
-    K-mers can be defined in different ways, as determined by the sequence_encoding.
+    K-mers can be defined in different ways, as determined by the sequence_encoding. If a dataset contains receptor
+    sequences from multiple loci (e.g., TRA and TRB), the k-mer frequencies will be computed per locus and then combined
+    into a single feature vector per sample. The k-mer frequencies can be normalized in different ways, as determined by
+    the normalization_type. The design matrix can optionally be scaled to unit variance and/or to zero mean. The k-mer
+    frequencies can be computed based on unique sequences (clonotypes) or taking into account the counts of the
+    sequences in the repertoire.
 
     **Dataset type:**
 
@@ -306,9 +311,9 @@ class KmerFrequencyEncoder(DatasetEncoder):
         sequence_encoder = ReflectionHandler.get_class_by_name(class_name, "encodings/")
         return sequence_encoder
 
-    def _encode_sequence(self, sequence: ReceptorSequence, params: EncoderParams, sequence_encoder, counts):
+    def _encode_sequence(self, sequence: ReceptorSequence, params: EncoderParams, sequence_encoder, counts, encode_locus: bool):
         params.model = vars(self)
-        features = sequence_encoder.encode_sequence(sequence, params)
+        features = sequence_encoder.encode_sequence(sequence, params, encode_locus)
         if features is not None:
             for i in features:
                 if self.reads == ReadsType.UNIQUE:
@@ -316,6 +321,10 @@ class KmerFrequencyEncoder(DatasetEncoder):
                 elif self.reads == ReadsType.ALL:
                     counts[i] += sequence.duplicate_count
         return counts
+
+    @abc.abstractmethod
+    def _encode_locus(self, dataset):
+        pass
 
     def get_additional_files(self) -> List[str]:
         return []

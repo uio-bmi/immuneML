@@ -10,13 +10,16 @@ from immuneML.util.KmerHelper import KmerHelper
 class IMGTKmerSequenceEncoder(SequenceEncodingStrategy):
 
     @staticmethod
-    def encode_sequence(sequence: ReceptorSequence, params: EncoderParams):
+    def encode_sequence(sequence: ReceptorSequence, params: EncoderParams, encode_locus=False):
         """
         creates overlapping continuous k-mers from a sequence as features for use in KmerFrequencyEncoder
         object of type EncoderParams, same object as passed into KmerFrequencyEncoder
         :param sequence: ReceptorSequence
         :param params: EncoderParams (where params["model"]["k"] is used)
         :return: SequenceEncodingResult consisting of features and feature information names
+
+        Args:
+            encode_locus:
         """
         k = params.model["k"]
         sequence_type = params.model.get('sequence_type', params.sequence_type)
@@ -31,6 +34,8 @@ class IMGTKmerSequenceEncoder(SequenceEncodingStrategy):
                                                                                         params.region_type))
 
         kmers = [Constants.FEATURE_DELIMITER.join([str(mer) for mer in kmer]) for kmer in kmers]
+        if encode_locus:
+            kmers = [Constants.FEATURE_DELIMITER.join([sequence.locus, kmer]) for kmer in kmers]
 
         return kmers
 

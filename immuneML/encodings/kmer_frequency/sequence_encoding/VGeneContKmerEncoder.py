@@ -1,5 +1,6 @@
 import logging
 
+from immuneML import Constants
 from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingStrategy import SequenceEncodingStrategy
@@ -9,11 +10,12 @@ from immuneML.util.KmerHelper import KmerHelper
 class VGeneContKmerEncoder(SequenceEncodingStrategy):
 
     @staticmethod
-    def encode_sequence(sequence: ReceptorSequence, params: EncoderParams):
+    def encode_sequence(sequence: ReceptorSequence, params: EncoderParams, encode_locus=False):
         """
         Encodes a receptor sequence into a sequence of k-mers
 
         Args:
+            encode_locus:
             sequence: ReceptorSequence object
             params: EncoderParams object with information on k-mer length
 
@@ -28,7 +30,10 @@ class VGeneContKmerEncoder(SequenceEncodingStrategy):
             return None
 
         kmers = KmerHelper.create_kmers_from_sequence(sequence=sequence, k=k, sequence_type=params.sequence_type)
-        kmers = [f"{sequence.v_gene}_{kmer}" for kmer in kmers]
+        kmers = [f"{sequence.v_gene}{Constants.FEATURE_DELIMITER}{kmer}" for kmer in kmers]
+
+        if encode_locus:
+            kmers = [f"{sequence.locus}{Constants.FEATURE_DELIMITER}{kmer}" for kmer in kmers]
 
         return kmers
 

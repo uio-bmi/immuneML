@@ -62,8 +62,6 @@ class MyTestCase(unittest.TestCase):
         shutil.rmtree(path)
 
     def test_get_sequence_enc_type(self):
-        self.assertEqual(get_sequence_enc_type(sequence_type="complete", position_type=None, gap_type=None),
-                         SequenceEncodingType.IDENTITY.name)
         self.assertEqual(get_sequence_enc_type(sequence_type="subsequence", position_type="positional", gap_type="gapped"),
                          SequenceEncodingType.IMGT_GAPPED_KMER.name)
         self.assertEqual(get_sequence_enc_type(sequence_type="subsequence", position_type="invariant", gap_type="gapped"),
@@ -75,36 +73,34 @@ class MyTestCase(unittest.TestCase):
 
     def test_build_encodings_specs(self):
         args = DummyArguments
-        args.sequence_type = ["complete", "subsequence", "subsequence", "subsequence", "subsequence"]
-        args.position_type = [None, "positional", "invariant", "positional", "invariant"]
-        args.gap_type = [None, "gapped", "gapped", "ungapped", "ungapped"]
-        args.k = [None, None, None, 3, 4]
-        args.k_left = [None, 2, 3, None, None]
-        args.k_right = [None, 1, 5, None, None]
-        args.min_gap = [None, 0, 5, None, None]
-        args.max_gap = [None, 5, 10, None, None]
-        args.reads = ["unique", "unique", "all", "all", "all"]
+        args.sequence_type = ["subsequence", "subsequence", "subsequence", "subsequence"]
+        args.position_type = ["positional", "invariant", "positional", "invariant"]
+        args.gap_type = ["gapped", "gapped", "ungapped", "ungapped"]
+        args.k = [None, None, 3, 4]
+        args.k_left = [2, 3, None, None]
+        args.k_right = [1, 5, None, None]
+        args.min_gap = [0, 5, None, None]
+        args.max_gap = [5, 10, None, None]
+        args.reads = ["unique", "all", "all", "all"]
 
         result = build_encodings_specs(DummyArguments)
 
-        correct = {"encoding_1": {"KmerFrequency": {"sequence_encoding": "IDENTITY",
-                                                    "reads": "unique"}},
-                   "encoding_2": {"KmerFrequency": {"sequence_encoding": "IMGT_GAPPED_KMER",
+        correct = {"encoding_1": {"KmerFrequency": {"sequence_encoding": "IMGT_GAPPED_KMER",
                                                     "reads": "unique",
                                                     "k_left": 2,
                                                     "k_right": 1,
                                                     "min_gap": 0,
                                                     "max_gap": 5}},
-                   "encoding_3": {"KmerFrequency": {"sequence_encoding": "GAPPED_KMER",
+                   "encoding_2": {"KmerFrequency": {"sequence_encoding": "GAPPED_KMER",
                                                     "reads": "all",
                                                     "k_left": 3,
                                                     "k_right": 5,
                                                     "min_gap": 5,
                                                     "max_gap": 10}},
-                   "encoding_4": {"KmerFrequency": {"sequence_encoding": "IMGT_CONTINUOUS_KMER",
+                   "encoding_3": {"KmerFrequency": {"sequence_encoding": "IMGT_CONTINUOUS_KMER",
                                                     "reads": "all",
                                                     "k": 3}},
-                   "encoding_5": {"KmerFrequency": {"sequence_encoding": "CONTINUOUS_KMER",
+                   "encoding_4": {"KmerFrequency": {"sequence_encoding": "CONTINUOUS_KMER",
                                                     "reads": "all",
                                                     "k": 4}}}
 

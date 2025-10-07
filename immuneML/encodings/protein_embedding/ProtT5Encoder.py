@@ -8,6 +8,7 @@ from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.protein_embedding.ProteinEmbeddingEncoder import ProteinEmbeddingEncoder
 from immuneML.util.Logger import log_memory_usage
+from immuneML.util.NumpyHelper import NumpyHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 
 
@@ -112,7 +113,7 @@ class ProtT5Encoder(ProteinEmbeddingEncoder):
         n_sequences = len(sequences)
 
         # Create memory-mapped array for embeddings
-        embeddings = self._create_memmap_array((n_sequences, self.embedding_dim))
+        embeddings = NumpyHelper.create_memmap_array_in_cache((n_sequences, self.embedding_dim))
 
         for i in range(0, n_sequences, self.batch_size):
             batch_end = min(i + self.batch_size, n_sequences)

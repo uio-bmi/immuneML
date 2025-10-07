@@ -47,11 +47,9 @@ class TestIMGTKmerSequenceEncoder(TestCase):
 
         self.assertEqual(len(result), len(sequence.sequence_aa) - 3 + 1)
         self.assertEqual(
-            VGeneIMGTKmerEncoder.encode_sequence(
-                sequence,
-                EncoderParams(model={"k": 25}, region_type=RegionType.IMGT_CDR3,
-                              label_config=LabelConfiguration(),
-                              result_path="")
-            ),
+            VGeneIMGTKmerEncoder.encode_sequence(sequence,
+                                                 EncoderParams(model={"k": 25}, region_type=RegionType.IMGT_CDR3,
+                                                               label_config=LabelConfiguration(),
+                                                               result_path="")),
             None
         )

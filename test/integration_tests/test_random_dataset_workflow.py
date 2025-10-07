@@ -54,17 +54,14 @@ class TestRandomDatasetWorkflow(TestCase):
                 "encodings": {
                     "kmer_freq": {
                         "KmerFrequency": {
-                            "k": 3,
-                            'metadata_fields_to_include': ['hla']
+                            "k": 3
                         }
                     }
                 },
                 "ml_methods": {
                     "logistic_regression": {
-                        "LogRegressionCustomPenalty": {
-                            "alpha": 1,
-                            'n_lambda': 100,
-                            'non_penalized_features': ['hla_a1', 'hla_a2', 'hla_a3', 'hla_a4']
+                        "LogisticRegression": {
+                            'penalty': 'l1',
                         }
                     }
                 },

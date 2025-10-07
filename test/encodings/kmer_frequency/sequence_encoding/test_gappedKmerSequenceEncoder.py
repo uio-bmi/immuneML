@@ -21,10 +21,11 @@ class TestGappedKmerSequenceEncoder(TestCase):
                                                                            region_type=RegionType.IMGT_CDR3))
         self.assertEqual({'sequence'}, set(result))
 
-        self.assertEqual(GappedKmerSequenceEncoder.encode_sequence(sequence, EncoderParams(model={"k_left": 10, "max_gap": 1},
-                                                                                           label_config=LabelConfiguration(),
-                                                                                           result_path="")),
-                         None)
+        self.assertEqual(
+            GappedKmerSequenceEncoder.encode_sequence(sequence, EncoderParams(model={"k_left": 10, "max_gap": 1},
+                                                                              label_config=LabelConfiguration(),
+                                                                              result_path="")),
+            None)
 
         sequence.sequence_aa = "ABCDEFG"
         result = GappedKmerSequenceEncoder.encode_sequence(sequence, EncoderParams(model={"k_left": 3, "max_gap": 1},
@@ -36,19 +37,19 @@ class TestGappedKmerSequenceEncoder(TestCase):
                                                                            result_path=""))
         self.assertEqual({'sequence'}, set(result))
 
-        self.assertEqual(GappedKmerSequenceEncoder.encode_sequence(sequence, EncoderParams(model={"k_left": 10, "max_gap": 1},
-                                                                                           label_config=LabelConfiguration(),
-                                                                                           result_path="")),
-                         None)
+        self.assertEqual(
+            GappedKmerSequenceEncoder.encode_sequence(sequence, EncoderParams(model={"k_left": 10, "max_gap": 1},
+                                                                              label_config=LabelConfiguration(),
+                                                                              result_path="")),
+            None)
 
         sequence.sequence_aa = "ABCDEFG"
-        result = GappedKmerSequenceEncoder.encode_sequence(sequence,
-                                                           EncoderParams(model={"k_left": 2,
-                                                                                "max_gap": 1,
-                                                                                "min_gap": 1,
-                                                                                "k_right": 3},
-                                                                         label_config=LabelConfiguration(),
-                                                                         result_path=""))
+        result = GappedKmerSequenceEncoder.encode_sequence(sequence, EncoderParams(model={"k_left": 2,
+                                                                                          "max_gap": 1,
+                                                                                          "min_gap": 1,
+                                                                                          "k_right": 3},
+                                                                                   label_config=LabelConfiguration(),
+                                                                                   result_path=""))
         self.assertEqual({'AB.DEF', 'BC.EFG'}, set(result))
         result = GappedKmerSequenceEncoder.get_feature_names(EncoderParams(model={"k_left": 2,
                                                                                   "max_gap": 1,
