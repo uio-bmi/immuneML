@@ -65,7 +65,7 @@ values, we can use the following YAML specification:
       LogRegressionCustomPenalty:
         alpha: 1
         n_lambda: 100
-        non_penalized_encodings: ['MetadataEncoder']
+        non_penalized_encodings: ['Metadata']
         random_state: 42
 
 In this case, we do not penalize the coefficients corresponding to the HLA metadata values because they will be
@@ -109,7 +109,7 @@ Here is the complete YAML specification that combines all of the above to create
         LogRegressionCustomPenalty:
           alpha: 1
           n_lambda: 100
-          non_penalized_encodings: ['MetadataEncoder']
+          non_penalized_encodings: ['Metadata']
           random_state: 42
 
     reports:

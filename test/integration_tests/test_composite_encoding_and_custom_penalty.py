@@ -81,7 +81,7 @@ class TestRandomDatasetWorkflow(TestCase):
                         "LogRegressionCustomPenalty": {
                             "alpha": 1,
                             'n_lambda': 100,
-                            'non_penalized_encodings': ['MetadataEncoder'],
+                            'non_penalized_encodings': ['Metadata'],
                         }
                     }
                 },

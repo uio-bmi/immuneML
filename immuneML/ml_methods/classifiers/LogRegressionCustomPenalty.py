@@ -39,7 +39,7 @@ class LogRegressionCustomPenalty(MLMethod):
                     alpha: 1
                     n_lambda: 100
                     non_penalized_features: []
-                    non_penalized_encodings: ['MetadataEncoder']
+                    non_penalized_encodings: ['Metadata']
                     random_state: 42
 
     """
@@ -48,6 +48,11 @@ class LogRegressionCustomPenalty(MLMethod):
         super().__init__(name=name, label=label)
         self.non_penalized_features = non_penalized_features if non_penalized_features is not None else []
         self.non_penalized_encodings = non_penalized_encodings if non_penalized_encodings is not None else []
+
+        for ind, encoding in enumerate(self.non_penalized_encodings):
+            if 'Encoder' not in encoding:
+                self.non_penalized_encodings[ind] = encoding + 'Encoder'
+
         self.model = None
         self.feature_names = None
         self.kwargs = kwargs
