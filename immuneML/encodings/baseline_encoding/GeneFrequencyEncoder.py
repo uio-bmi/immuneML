@@ -65,7 +65,7 @@ class GeneFrequencyEncoder(DatasetEncoder):
     @staticmethod
     def build_object(dataset: Dataset, **params):
         valid_keys = ['genes', 'normalization_type', 'scale_to_zero_mean', 'scale_to_unit_variance', 'name']
-        ParameterValidator.assert_keys(params.keys(), valid_keys, "GeneFrequencyEncoder", "parameters", exclusive=True)
+        ParameterValidator.assert_keys(params.keys(), valid_keys, "GeneFrequencyEncoder", "parameters", exclusive=False)
         ParameterValidator.assert_all_in_valid_list(params['genes'], ['V', 'J'], "GeneFrequencyEncoder", "genes")
         ParameterValidator.assert_type_and_value(params['scale_to_zero_mean'], bool, "GeneFrequencyEncoder",
                                                  "scale_to_zero_mean")

@@ -63,6 +63,14 @@ class TestRandomDatasetWorkflow(TestCase):
                                     'Metadata': {
                                         'metadata_fields': ['hla', 'batch']
                                     }
+                                },
+                                {
+                                    'GeneFrequency': {
+                                        'genes': ['V'],
+                                        'normalization_type': 'relative_frequency',
+                                        'scale_to_unit_variance': True,
+                                        'scale_to_zero_mean': True,
+                                    }
                                 }
                             ]
                         }
