@@ -258,7 +258,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
                                    labels=encoded_labels,
                                    feature_names=feature_names,
                                    example_ids=example_ids,
-                                   feature_annotations=None,
+                                   feature_annotations=pd.DataFrame({'features': feature_names}),
                                    encoding=KmerFrequencyEncoder.__name__,
                                    info={"sequence_type": self.sequence_type, 'region_type': self.region_type})
 

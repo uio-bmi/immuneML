@@ -51,12 +51,10 @@ class NumpyHelper:
         """Creates a memory-mapped array and optionally initializes it with data."""
         import uuid
         dir_path = PathBuilder.build(EnvironmentSettings.get_cache_path() / "memmap_storage")
-        memmap_path = dir_path / f"temp_{uuid.uuid4()}.mmap"
+        memmap_path = dir_path / f"temp_{uuid.uuid4()}.npy"
+        np.save(memmap_path, data)
 
-        memmap_array = np.memmap(memmap_path, dtype='float32', mode='w+', shape=shape)
-        if data is not None:
-            memmap_array[:] = data[:]
-        return memmap_array
+        return np.memmap(memmap_path, dtype='float32', mode='r+', shape=shape)
 
     @staticmethod
     def concat_arrays_rowwise(arrays: list, force='auto', dense_max_mb=100, use_memmap=False):

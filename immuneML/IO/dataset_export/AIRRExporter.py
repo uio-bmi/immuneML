@@ -46,8 +46,13 @@ class AIRRExporter(DataExporter):
                 if dataset.dataset_file and dataset.dataset_file.is_file():
                     shutil.copyfile(dataset.dataset_file, path / dataset.dataset_file.name)
                 else:
+
+                    new_metadata_df = pd.read_csv(path / f"{dataset.name}.csv")
+                    labels = {label: list(new_metadata_df[label].unique())
+                              for label in dataset.get_label_names(refresh=True)}
+
                     dataset_yaml = RepertoireDataset.create_metadata_dict(metadata_file=path / dataset.metadata_file.name,
-                                                                          labels=dataset.labels,
+                                                                          labels=labels,
                                                                           name=dataset.name,
                                                                           identifier=dataset.identifier)
                     write_dataset_yaml(path / f"{dataset.name}.yaml", dataset_yaml)
