@@ -1,4 +1,5 @@
 import json
+import logging
 from enum import Enum
 
 import numpy as np
@@ -78,7 +79,8 @@ class NumpyHelper:
         from scipy import sparse
         if any(sparse.issparse(array) for array in arrays):
             # Convert all to sparse (CSR for efficiency)
-            matrices = [array if sparse.issparse(array) else sparse.csr_matrix(array) for array in arrays]
+            matrices = [array.astype(np.float32) if sparse.issparse(array)
+                        else sparse.csr_matrix(array).astype(np.float32) for array in arrays]
             result = sparse.hstack(matrices, format="csr")
 
             # Estimate dense memory size
@@ -88,6 +90,11 @@ class NumpyHelper:
         else:
             # All are numpy arrays
             result = np.hstack(arrays)
+
+        if np.isnan(result).any():
+            import inspect
+            logging.error(f"NumpyHelper: NaN values found in concatenated array; called from {inspect.stack()[1].function}")
+            raise RuntimeError('NumpyHelper: NaN values found in concatenated array')
 
         if force == "dense" and sparse.issparse(result):
             result = result.toarray()
