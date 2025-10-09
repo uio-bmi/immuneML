@@ -33,8 +33,8 @@ class TestRandomDatasetWorkflow(TestCase):
                             },
                             "labels": {
                                 "cmv": {
-                                    True: 0.5,
-                                    False: 0.5,
+                                    'plus': 0.5,
+                                    'minus': 0.5,
                                 },
                                 "batch": {
                                     'b1': 0.4,
@@ -106,7 +106,7 @@ class TestRandomDatasetWorkflow(TestCase):
                         "split_count": 1,
                         "training_percentage": 0.7
                     },
-                    "labels": ['cmv'],
+                    "labels": [{'cmv': {'positive_class': 'plus'}}],
                     "dataset": "d1",
                     "strategy": "GridSearch",
                     "metrics": ['precision', 'recall'],

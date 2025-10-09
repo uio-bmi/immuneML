@@ -3,7 +3,7 @@ from pathlib import Path
 import logging
 
 from immuneML.data_model.EncodedData import EncodedData
-from immuneML.environment import Label
+from immuneML.environment.Label import Label
 from immuneML.ml_methods.util.Util import Util
 
 

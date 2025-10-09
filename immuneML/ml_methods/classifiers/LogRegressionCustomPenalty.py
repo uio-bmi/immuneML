@@ -59,7 +59,7 @@ class LogRegressionCustomPenalty(MLMethod):
 
     def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
         X = encoded_data.examples
-        y = encoded_data.labels[self.label.name]
+        y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
         self.feature_names = encoded_data.feature_names
 
@@ -81,7 +81,8 @@ class LogRegressionCustomPenalty(MLMethod):
         self.model.fit(X, y, relative_penalties=penalty_factor)
 
     def _predict(self, encoded_data: EncodedData):
-        return {self.label.name: self.model.predict(encoded_data.examples)}
+        predictions = self.model.predict(encoded_data.examples)
+        return {self.label.name: Util.map_to_old_class_values(np.array(predictions), self.class_mapping)}
 
     def _predict_proba(self, encoded_data: EncodedData):
         class_names = Util.map_to_old_class_values(self.model.classes_, self.class_mapping)
