@@ -7,7 +7,7 @@ import pandas as pd
 
 from immuneML.IO.dataset_export.DataExporter import DataExporter
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
-from immuneML.data_model.bnp_util import read_yaml, write_yaml
+from immuneML.data_model.bnp_util import read_yaml, write_yaml, write_dataset_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import ElementDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
@@ -45,6 +45,12 @@ class AIRRExporter(DataExporter):
                 shutil.copyfile(dataset.metadata_file, path / dataset.metadata_file.name)
                 if dataset.dataset_file and dataset.dataset_file.is_file():
                     shutil.copyfile(dataset.dataset_file, path / dataset.dataset_file.name)
+                else:
+                    dataset_yaml = RepertoireDataset.create_metadata_dict(metadata_file=path / dataset.metadata_file.name,
+                                                                          labels=dataset.labels,
+                                                                          name=dataset.name,
+                                                                          identifier=dataset.identifier)
+                    write_dataset_yaml(path / f"{dataset.name}.yaml", dataset_yaml)
 
             elif isinstance(dataset, ElementDataset):
                 AIRRExporter.process_and_store_data_file(dataset.filename, path / dataset.filename.name)
