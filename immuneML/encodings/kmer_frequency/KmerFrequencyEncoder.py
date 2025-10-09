@@ -239,7 +239,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
                 ("encoding_params", tuple(vars(self).items())))
 
     def _encode_data(self, dataset, params: EncoderParams) -> EncodedData:
-        encoded_example_list, example_ids, encoded_labels, feature_annotation_names = CacheHandler.memo_by_params(
+        encoded_example_list, example_ids, encoded_labels = CacheHandler.memo_by_params(
             self._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_ENCODED),
             lambda: self._encode_examples(dataset, params))
 
@@ -254,13 +254,11 @@ class KmerFrequencyEncoder(DatasetEncoder):
         else:
             examples = normalized_examples
 
-        feature_annotations = self._get_feature_annotations(feature_names, feature_annotation_names)
-
         encoded_data = EncodedData(examples=examples,
                                    labels=encoded_labels,
                                    feature_names=feature_names,
                                    example_ids=example_ids,
-                                   feature_annotations=feature_annotations,
+                                   feature_annotations=None,
                                    encoding=KmerFrequencyEncoder.__name__,
                                    info={"sequence_type": self.sequence_type, 'region_type': self.region_type})
 
@@ -300,11 +298,6 @@ class KmerFrequencyEncoder(DatasetEncoder):
             vectorized_examples = vectorizer.transform(examples)
 
         return vectorized_examples
-
-    def _get_feature_annotations(self, feature_names, feature_annotation_names):
-        feature_annotations = pd.DataFrame({"feature": feature_names})
-        feature_annotations[feature_annotation_names] = feature_annotations['feature'].str.split(Constants.FEATURE_DELIMITER, expand=True)
-        return feature_annotations
 
     def _prepare_sequence_encoder(self):
         class_name = self.sequence_encoding.value

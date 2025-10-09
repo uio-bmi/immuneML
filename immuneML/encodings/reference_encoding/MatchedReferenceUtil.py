@@ -80,7 +80,7 @@ def check_imported_references(paired, receptors, seq_import_params):
 def check_genes(paired, receptors, seq_import_params):
     import re
 
-    pattern = re.compile(r'^[A-Za-z]+[0-9]+(?:-[0-9]+)?(?:\*[0-9]+)?$')
+    pattern = re.compile(r'^[A-Za-z]+[0-9]+(?:-[0-9]+)?(?:\*[0-9]+)?(?:/[A-Za-z]+[0-9]+)?$')
 
     if not paired:
         all_v_genes = set(seq.v_call for seq in receptors if seq.v_call is not None)

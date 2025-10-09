@@ -35,13 +35,11 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
         with Pool(params.pool_size) as pool:
             repertoires = pool.starmap(self.get_encoded_repertoire, arguments)
 
-        encoded_repertoire_list, repertoire_names, labels, feature_annotation_names = zip(*repertoires)
+        encoded_repertoire_list, repertoire_names, labels = zip(*repertoires)
 
         encoded_labels = {k: [dic[k] for dic in labels] for k in labels[0]} if params.encode_labels else None
 
-        feature_annotation_names = feature_annotation_names[0]
-
-        return list(encoded_repertoire_list), list(repertoire_names), encoded_labels, feature_annotation_names
+        return list(encoded_repertoire_list), list(repertoire_names), encoded_labels
 
     def get_encoded_repertoire(self, repertoire, params: EncoderParams, encode_locus: bool = False):
 
@@ -60,7 +58,6 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
     def encode_repertoire(self, repertoire, params: EncoderParams, encode_locus=False):
         counts = Counter()
         sequence_encoder = self._prepare_sequence_encoder()
-        feature_names = sequence_encoder.get_feature_names(params)
         params.region_type = self.region_type
 
         for sequence in repertoire.sequences(params.region_type):
@@ -75,4 +72,4 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
                 labels[label_name] = label
 
         # TODO: refactor this not to return 4 values but e.g. a dict or split into different functions?
-        return counts, repertoire.identifier, labels, feature_names
+        return counts, repertoire.identifier, labels

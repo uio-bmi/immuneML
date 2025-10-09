@@ -29,7 +29,6 @@ class KmerFreqReceptorEncoder(KmerFrequencyEncoder):
         encode_locus = self._encode_locus(dataset)
 
         sequence_encoder = self._prepare_sequence_encoder()
-        feature_names = ['locus'] + sequence_encoder.get_feature_names(params)
         for receptor in dataset.get_data(region_type=self.region_type):
             chains = [Chain.get_chain(chain).name.lower() for chain in receptor.chain_pair.value]
             counts = {chain: Counter() for chain in chains}
@@ -44,4 +43,4 @@ class KmerFreqReceptorEncoder(KmerFrequencyEncoder):
                     label = receptor.metadata[label_name]
                     labels[label_name].append(label)
 
-        return encoded_receptors_counts, receptor_ids, labels, feature_names
+        return encoded_receptors_counts, receptor_ids, labels

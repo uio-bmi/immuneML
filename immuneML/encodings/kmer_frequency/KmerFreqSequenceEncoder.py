@@ -29,7 +29,6 @@ class KmerFreqSequenceEncoder(KmerFrequencyEncoder):
         encode_locus = self._encode_locus(dataset)
 
         sequence_encoder = self._prepare_sequence_encoder()
-        feature_names = sequence_encoder.get_feature_names(params)
         params.region_type = self.region_type
         for sequence in dataset.get_data(region_type=self.region_type):
             counts = self._encode_sequence(sequence, params, sequence_encoder, Counter(), encode_locus)
@@ -41,4 +40,4 @@ class KmerFreqSequenceEncoder(KmerFrequencyEncoder):
                     label = sequence.metadata[label_name]
                     labels[label_name].append(label)
 
-        return encoded_sequences, sequence_ids, labels, feature_names
+        return encoded_sequences, sequence_ids, labels
