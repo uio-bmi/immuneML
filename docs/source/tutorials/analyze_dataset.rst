@@ -127,6 +127,7 @@ The analysis specification to run these reports:
                   dim_red_method:
                     KernelPCA:
                       n_components: 2
+                      kernel: rbf
 
           instructions:
             exploratory_analysis:
