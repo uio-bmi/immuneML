@@ -22,13 +22,14 @@ setup(
         'word2vec': ['gensim>=4'],
         'fisher': ['fisher>=0.1.9', 'fishersapi'],
         "TCRdist": ["tcrdist3>=0.1.6"],
-        "gen_models": ['sonnia', 'torch'],
+        "gen_models": ['sonnia', 'torch', 'transformers', 'datasets', 'tokenizers'],
         "embeddings": ['transformers', 'torch', 'sentencepiece', 'esm'],
         "ligo": ['stitchr', 'IMGTgeneDL'],
         "DL": ['torch', 'keras', 'tensorflow', 'logomaker', 'gensim'],
         "KerasSequenceCNN": ["keras==2.11.0", "tensorflow==2.11.0"],
-        "all": ['tcrdist3>=0.1.6', 'sonnia', 'torch', 'stitchr', 'IMGTgeneDL', 'keras', 'tensorflow', 'fisher>=0.1.9', 'logomaker',
-                'fishersapi', 'gensim>=4', 'transformers', 'sentencepiece']
+        "all": ['tcrdist3>=0.1.6', 'sonnia', 'torch', 'stitchr', 'IMGTgeneDL', 'keras',
+                'fisher>=0.1.9', 'logomaker', 'fishersapi', 'gensim>=4', 'transformers', 'sentencepiece', 'datasets',
+                'tokenizers']
     },
     classifiers=[
         "Programming Language :: Python :: 3",
