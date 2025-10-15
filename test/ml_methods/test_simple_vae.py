@@ -15,8 +15,8 @@ def test_simple_vae():
     dataset = RandomDatasetGenerator.generate_sequence_dataset(20, {10: 1.},
                                                                {}, path / 'dataset', region_type="IMGT_JUNCTION")
 
-    vae = SimpleVAE('beta', 0.75, 20, 75, 50, 10, 2,
-                    2, 1, 21, 2, 5, 10, 'cpu', 0.01)
+    vae = SimpleVAE('beta', 0.75, 20, 75, 50, 10, 1,
+                    2, 5, 10, 'cpu', 0.01)
 
     vae.fit(dataset, path / 'model')
     vae.generate_sequences(7, 1, path / 'generated_dataset', SequenceType.AMINO_ACID, False)
