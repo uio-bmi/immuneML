@@ -383,8 +383,8 @@ class HPHTMLBuilder:
             columns={"setting": 'Hyperparameter settings (preprocessing, encoding, ML method)'})
         df['Average'] = (
             df.iloc[:, 1:]
-            .apply(pd.to_numeric, errors='coerce').mean(axis=1).round(HPHTMLBuilder.NUM_DIGITS).astype(str)
-            .where(~(df.iloc[:, 1:] == Constants.NOT_COMPUTED).any(axis=1), 'not computed')
+            .apply(pd.to_numeric, errors='coerce').mean(axis=1).round(HPHTMLBuilder.NUM_DIGITS)
+            .where(~(df.iloc[:, 1:] == Constants.NOT_COMPUTED).any(axis=1), Constants.NOT_COMPUTED)
         )
         best_value = ClassificationMetric.get_search_criterion(metric)(df['Average'])
 
@@ -402,7 +402,7 @@ class HPHTMLBuilder:
 
 def to_html_with_row_highlight(df, best_value, col_name):
     def row_style(row, col_name):
-        if row[col_name] == best_value:
+        if row[col_name] == best_value and best_value != "not computed":
             return "font-weight: bold;"
         else:
             return ""
@@ -413,7 +413,7 @@ def to_html_with_row_highlight(df, best_value, col_name):
         if i == 0:
             out.append("<tr>" + part)
         else:
-            style = row_style(df.iloc[i-1], col_name)
+            style = row_style(df.iloc[i], col_name)
             if style:
                 out.append(f'<tr style="{style}">' + part)
             else:
