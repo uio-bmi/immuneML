@@ -7,7 +7,7 @@ import pandas as pd
 
 from immuneML.IO.dataset_export.DataExporter import DataExporter
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
-from immuneML.data_model.bnp_util import read_yaml, write_yaml
+from immuneML.data_model.bnp_util import read_yaml, write_yaml, write_dataset_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import ElementDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
@@ -42,9 +42,20 @@ class AIRRExporter(DataExporter):
                                                              repertoire_path / repertoire.data_filename.name)
                     shutil.copyfile(repertoire.metadata_filename, repertoire_path / repertoire.metadata_filename.name)
 
-                shutil.copyfile(dataset.metadata_file, path / dataset.metadata_file.name)
+                shutil.copyfile(dataset.metadata_file, path / f"{dataset.name}.csv")
                 if dataset.dataset_file and dataset.dataset_file.is_file():
                     shutil.copyfile(dataset.dataset_file, path / dataset.dataset_file.name)
+                else:
+
+                    new_metadata_df = pd.read_csv(path / f"{dataset.name}.csv")
+                    labels = {label: list(new_metadata_df[label].unique())
+                              for label in dataset.get_label_names(refresh=True)}
+
+                    dataset_yaml = RepertoireDataset.create_metadata_dict(metadata_file=path / dataset.metadata_file.name,
+                                                                          labels=labels,
+                                                                          name=dataset.name,
+                                                                          identifier=dataset.identifier)
+                    write_dataset_yaml(path / f"{dataset.name}.yaml", dataset_yaml)
 
             elif isinstance(dataset, ElementDataset):
                 AIRRExporter.process_and_store_data_file(dataset.filename, path / dataset.filename.name)

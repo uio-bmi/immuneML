@@ -8,7 +8,7 @@ class SequenceEncodingStrategy(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def encode_sequence(sequence: ReceptorSequence, params: EncoderParams):
+    def encode_sequence(sequence: ReceptorSequence, params: EncoderParams, encode_locus=False):
         pass
 
     @staticmethod

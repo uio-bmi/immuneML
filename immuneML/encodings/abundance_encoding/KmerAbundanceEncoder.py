@@ -111,8 +111,6 @@ class KmerAbundanceEncoder(DatasetEncoder):
         ParameterValidator.assert_type_and_value(p_value_threshold, float, "KmerAbundanceEncoder", "p_value_threshold", min_inclusive=0,
                                                  max_inclusive=1)
 
-        assert sequence_encoding.upper() != SequenceEncodingType.IDENTITY.name, "KmerAbundanceEncoder: sequence encoding type 'identity' is not a valid option for this encoder. To encode a dataset based on the presence or absence of complete sequences, please use SequenceAbundanceEncoder or CompAIRRSequenceAbundanceEncoder instead."
-
         kmerfreq_params = KmerFrequencyEncoder._prepare_parameters(normalization_type="binary", reads="unique",
                                                                    sequence_encoding=sequence_encoding,
                                                                    k=k, k_left=k_left, k_right=k_right, min_gap=min_gap,

@@ -80,17 +80,17 @@ def check_imported_references(paired, receptors, seq_import_params):
 def check_genes(paired, receptors, seq_import_params):
     import re
 
-    pattern = re.compile(r'^[A-Za-z]+[0-9]+(?:-[0-9]+)?(?:\*[0-9]+)?$')
+    pattern = re.compile(r'^[A-Za-z]+[0-9]+(?:-[0-9]+)?(?:\*[0-9]+)?(?:/[A-Za-z]+[0-9]+)?$')
 
     if not paired:
-        all_v_genes = set(seq.v_call for seq in receptors if seq.v_call is not None)
-        all_j_genes = set(seq.j_call for seq in receptors if seq.j_call is not None)
+        all_v_genes = set(seq.v_call for seq in receptors if seq.v_call is not None and seq.v_call != '')
+        all_j_genes = set(seq.j_call for seq in receptors if seq.j_call is not None and seq.j_call != '')
     else:
-        all_v_genes = (set(receptor.chain_1.v_call for receptor in receptors if receptor.chain_1.v_call is not None)
+        all_v_genes = (set(receptor.chain_1.v_call for receptor in receptors if receptor.chain_1.v_call is not None and receptor.chain_1.v_call != '')
                        .union(set(receptor.chain_2.v_call for receptor in receptors if receptor.chain_2.v_call
-                                  is not None)))
-        all_j_genes = set(receptor.chain_1.j_call for receptor in receptors if receptor.chain_1.j_call is not None).union(
-            set(receptor.chain_2.j_call for receptor in receptors if receptor.chain_2.j_call is not None))
+                                  is not None and receptor.chain2.v_call != '')))
+        all_j_genes = set(receptor.chain_1.j_call for receptor in receptors if receptor.chain_1.j_call is not None and receptor.chain_1.j_call != '').union(
+            set(receptor.chain_2.j_call for receptor in receptors if receptor.chain_2.j_call is not None and receptor.chain_2.j_call != ''))
 
     for gene_name, gene_list in [('V', all_v_genes), ('J', all_j_genes)]:
         if len(gene_list) > 0:

@@ -109,15 +109,10 @@ The analysis specification to run these reports:
                   split_by_label: true
                   label: batch
 
-              clonotype_summary_disease:
+              clonotype_summary:
                 RepertoireClonotypeSummary:
-                  split_by_label: true
-                  label: disease
-
-              clonotype_summary_batch:
-                RepertoireClonotypeSummary:
-                  split_by_label: true
-                  label: batch
+                  color_label: batch
+                  facet_label: disease
 
               feature_comparison:
                 FeatureComparison:
@@ -132,6 +127,7 @@ The analysis specification to run these reports:
                   dim_red_method:
                     KernelPCA:
                       n_components: 2
+                      kernel: rbf
 
           instructions:
             exploratory_analysis:
@@ -139,7 +135,7 @@ The analysis specification to run these reports:
               analyses:
                 raw_data_analysis:
                   dataset: dataset
-                  reports: [aa_dist, label_overlap, seq_len_dist_for_disease, seq_len_dist_for_batch, gene_dist_disease, gene_dist_batch, clonotype_summary_disease, clonotype_summary_batch]
+                  reports: [aa_dist, label_overlap, seq_len_dist_for_disease, seq_len_dist_for_batch, gene_dist_disease, gene_dist_batch, clonotype_summary]
                 encoded_data_analysis:
                   dataset: dataset
                   encoding: 3mer_freq

@@ -5,7 +5,6 @@ import numpy as np
 from immuneML.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
 from immuneML.analysis.criteria_matches.CriteriaTypeInstantiator import CriteriaTypeInstantiator
 from immuneML.data_model.datasets.Dataset import Dataset
-from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.preprocessing.filters.Filter import Filter
 from immuneML.util.PathBuilder import PathBuilder
 

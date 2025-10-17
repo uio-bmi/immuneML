@@ -25,15 +25,27 @@ class TestRandomDatasetWorkflow(TestCase):
                         "format": "RandomRepertoireDataset",
                         "params": {
                             "result_path": str(path),
+                            'repertoire_count': 100,
+                            'sequence_length_probabilities': {
+                                5: 1.
+                            },
+                            'sequence_count_probabilities': {
+                                10: 1.
+                            },
                             "labels": {
                                 "cmv": {
-                                    'a': 0.3,
-                                    'b': 0.4,
-                                    'c': 0.3
+                                    True: 0.5,
+                                    False: 0.5,
                                 },
                                 "batch": {
                                     'b1': 0.4,
                                     'b2': 0.6
+                                },
+                                'hla': {
+                                    'a1': 0.25,
+                                    'a2': 0.25,
+                                    'a3': 0.25,
+                                    'a4': 0.25,
                                 }
                             }
                         }
@@ -42,33 +54,29 @@ class TestRandomDatasetWorkflow(TestCase):
                 "encodings": {
                     "kmer_freq": {
                         "KmerFrequency": {
-                            "k": 3,
-                            "sequence_encoding": "continuous_kmer",
-                            "normalization_type": "relative_frequency",
-                            "reads": "unique"
+                            "k": 3
                         }
                     }
                 },
                 "ml_methods": {
                     "logistic_regression": {
                         "LogisticRegression": {
-                            "C": 100,
-                            "penalty": "l1"
+                            'penalty': 'l1',
                         }
                     }
                 },
                 "reports": {
-                    "rep1": {
+                    "performance_per_label": {
                         "PerformancePerLabel": {
-                            'alternative_label': 'batch',
+                            'alternative_label': 'hla',
                             'metric': 'balanced_accuracy',
-                            'compute_for_selection': True,
+                            'compute_for_selection': False,
                             'compute_for_assessment': True
                         }
                     },
-                    "rep2": {
+                    "conf_matrix_per_label": {
                         "ConfusionMatrixPerLabel": {
-                            'alternative_label': 'batch',
+                            'alternative_label': 'hla',
                             'plot_on_train': False,
                             'plot_on_test': True,
                             'compute_for_selection': False,
@@ -76,7 +84,8 @@ class TestRandomDatasetWorkflow(TestCase):
                         }
                     },
                     'roc': "ROCCurveSummary",
-                    'conf_mat': 'ConfusionMatrix'
+                    'conf_mat': 'ConfusionMatrix',
+                    'design_matrix_exporter': 'DesignMatrixExporter',
                 }
 
             },
@@ -94,7 +103,8 @@ class TestRandomDatasetWorkflow(TestCase):
                         "split_count": 1,
                         "training_percentage": 0.7,
                         'reports': {
-                            'models': ['conf_mat']
+                            'models': ['conf_mat'],
+                            'encoding': ['design_matrix_exporter'],
                         }
                     },
                     "selection": {
@@ -102,12 +112,12 @@ class TestRandomDatasetWorkflow(TestCase):
                         "split_count": 1,
                         "training_percentage": 0.7
                     },
-                    "labels": [{"cmv": {'positive_class': 'a'}}],
+                    "labels": ['cmv'],
                     "dataset": "d1",
                     "strategy": "GridSearch",
-                    "metrics": ["auc_ovo", "auc_ovr", 'recall_weighted', 'precision_weighted'],
+                    "metrics": ['precision', 'recall'],
                     "number_of_processes": 4,
-                    "reports": ['rep1', 'rep2', 'roc'],
+                    "reports": ['conf_matrix_per_label', 'performance_per_label', 'roc'],
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False,
                 }

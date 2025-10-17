@@ -1,7 +1,12 @@
 import json
+import logging
 from enum import Enum
 
 import numpy as np
+
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
+
 
 class NumpyHelper:
 
@@ -41,3 +46,63 @@ class NumpyHelper:
     @staticmethod
     def is_nan_or_empty(value):
         return value == 'nan' or value is None or (not isinstance(value, str) and np.isnan(value)) or value == ''
+
+    @staticmethod
+    def create_memmap_array_in_cache(shape: tuple, data: np.ndarray = None) -> np.ndarray:
+        """Creates a memory-mapped array and optionally initializes it with data."""
+        import uuid
+        dir_path = PathBuilder.build(EnvironmentSettings.get_cache_path() / "memmap_storage")
+        memmap_path = dir_path / f"temp_{uuid.uuid4()}.npy"
+        np.save(memmap_path, data)
+
+        return np.memmap(memmap_path, dtype='float32', mode='r+', shape=shape)
+
+    @staticmethod
+    def concat_arrays_rowwise(arrays: list, force='auto', dense_max_mb=100, use_memmap=False):
+        """
+        Concatenate 2D numpy arrays or sparse matrices row-wise.
+
+        Parameters
+        ----------
+        arrays : list of np.ndarray or scipy.sparse matrices
+        force : {"auto", "dense", "sparse"}
+            - "auto": use memory-based heuristic (default)
+            - "dense": always return numpy.ndarray
+            - "sparse": always return scipy.sparse.csr_matrix
+        dense_max_mb : int
+            Threshold for converting sparse -> dense in "auto" mode.
+        use_memmap: bool
+        """
+        if not arrays:
+            raise ValueError("No matrices provided")
+
+        from scipy import sparse
+        if any(sparse.issparse(array) for array in arrays):
+            # Convert all to sparse (CSR for efficiency)
+            matrices = [array.astype(np.float32) if sparse.issparse(array)
+                        else sparse.csr_matrix(array).astype(np.float32) for array in arrays]
+            result = sparse.hstack(matrices, format="csr")
+
+            # Estimate dense memory size
+            size_in_mb = result.shape[0] * result.shape[1] * result.dtype.itemsize / (1024 * 1024)
+            if size_in_mb <= dense_max_mb:
+                result = result.toarray()
+        else:
+            # All are numpy arrays
+            result = np.hstack(arrays)
+
+        if np.isnan(result).any():
+            import inspect
+            logging.error(f"NumpyHelper: NaN values found in concatenated array; called from {inspect.stack()[1].function}")
+            raise RuntimeError('NumpyHelper: NaN values found in concatenated array')
+
+        if force == "dense" and sparse.issparse(result):
+            result = result.toarray()
+        elif force == "sparse" and not sparse.issparse(result):
+            result = sparse.csr_matrix(result)
+
+        if use_memmap:
+            result = NumpyHelper.create_memmap_array_in_cache(result.shape, result)
+
+        return result
+

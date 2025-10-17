@@ -77,6 +77,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
                             params:
                                 path: path/to/file.txt
                         max_edit_distance: 1
+
     """
 
     def __init__(self, max_edit_distance: int, reference: List[ReceptorSequence], reads: ReadsType, sum_matches: bool,

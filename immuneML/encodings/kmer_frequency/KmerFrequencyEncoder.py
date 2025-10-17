@@ -1,5 +1,4 @@
 import abc
-from pathlib import Path
 from typing import List
 
 import pandas as pd
@@ -27,7 +26,12 @@ class KmerFrequencyEncoder(DatasetEncoder):
     """
     The KmerFrequencyEncoder class encodes a repertoire, sequence or receptor by frequencies of k-mers it contains.
     A k-mer is a sequence of letters of length k into which an immune receptor sequence can be decomposed.
-    K-mers can be defined in different ways, as determined by the sequence_encoding.
+    K-mers can be defined in different ways, as determined by the sequence_encoding. If a dataset contains receptor
+    sequences from multiple loci (e.g., TRA and TRB), the k-mer frequencies will be computed per locus and then combined
+    into a single feature vector per sample. The k-mer frequencies can be normalized in different ways, as determined by
+    the normalization_type. The design matrix can optionally be scaled to unit variance and/or to zero mean. The k-mer
+    frequencies can be computed based on unique sequences (clonotypes) or taking into account the counts of the
+    sequences in the repertoire.
 
     **Dataset type:**
 
@@ -144,13 +148,14 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     def __init__(self, normalization_type: NormalizationType, reads: ReadsType, sequence_encoding: SequenceEncodingType,
                  k: int = 0, k_left: int = 0, k_right: int = 0, min_gap: int = 0, max_gap: int = 0,
-                 metadata_fields_to_include: list = None, name: str = None, scale_to_unit_variance: bool = False,
-                 scale_to_zero_mean: bool = False, sequence_type: SequenceType = None,
+                 name: str = None, scale_to_unit_variance: bool = False,
+                 scale_to_zero_mean: bool = False, sequence_type: SequenceType = None, include_v_genes: str = None,
                  region_type: RegionType = RegionType.IMGT_CDR3):
         super().__init__(name=name)
         self.normalization_type = normalization_type
         self.reads = reads
         self.sequence_encoding = sequence_encoding
+        self.include_v_genes = include_v_genes
         self.sequence_type = sequence_type
         self.region_type = region_type
         self.k = k
@@ -158,7 +163,6 @@ class KmerFrequencyEncoder(DatasetEncoder):
         self.k_right = k_right
         self.min_gap = min_gap
         self.max_gap = max_gap
-        self.metadata_fields_to_include = metadata_fields_to_include if metadata_fields_to_include is not None else []
         self.scale_to_unit_variance = scale_to_unit_variance
         self.scale_to_zero_mean = scale_to_zero_mean
         self.scaler = None
@@ -166,7 +170,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     @staticmethod
     def _prepare_parameters(normalization_type: str, reads: str, sequence_encoding: str, k: int = 0, k_left: int = 0,
-                            k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None, name: str = None,
+                            k_right: int = 0, min_gap: int = 0, max_gap: int = 0, name: str = None,
                             scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False,
                             sequence_type: str = SequenceType.AMINO_ACID.name,
                             region_type: str = RegionType.IMGT_CDR3.name):
@@ -235,12 +239,13 @@ class KmerFrequencyEncoder(DatasetEncoder):
                 ("encoding_params", tuple(vars(self).items())))
 
     def _encode_data(self, dataset, params: EncoderParams) -> EncodedData:
-        encoded_example_list, example_ids, encoded_labels, feature_annotation_names = CacheHandler.memo_by_params(
+        encoded_example_list, example_ids, encoded_labels = CacheHandler.memo_by_params(
             self._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_ENCODED),
             lambda: self._encode_examples(dataset, params))
 
         self._initialize_vectorizer(params)
-        vectorized_examples = self._vectorize_encoded(examples=encoded_example_list, params=params)
+        vectorized_examples = self._vectorize_encoded(examples=encoded_example_list, params=params,
+                                                      vectorizer=self.vectorizer)
         feature_names = self.vectorizer.feature_names_
         normalized_examples = FeatureScaler.normalize(vectorized_examples, self.normalization_type)
 
@@ -249,13 +254,11 @@ class KmerFrequencyEncoder(DatasetEncoder):
         else:
             examples = normalized_examples
 
-        feature_annotations = self._get_feature_annotations(feature_names, feature_annotation_names)
-
         encoded_data = EncodedData(examples=examples,
                                    labels=encoded_labels,
                                    feature_names=feature_names,
                                    example_ids=example_ids,
-                                   feature_annotations=feature_annotations,
+                                   feature_annotations=pd.DataFrame({'features': feature_names}),
                                    encoding=KmerFrequencyEncoder.__name__,
                                    info={"sequence_type": self.sequence_type, 'region_type': self.region_type})
 
@@ -287,28 +290,23 @@ class KmerFrequencyEncoder(DatasetEncoder):
         if self.vectorizer is None or params.learn_model:
             self.vectorizer = DictVectorizer(sparse=True, dtype=float)
 
-    def _vectorize_encoded(self, examples: list, params: EncoderParams):
+    def _vectorize_encoded(self, examples: list, params: EncoderParams, vectorizer: DictVectorizer):
 
         if params.learn_model:
-            vectorized_examples = self.vectorizer.fit_transform(examples)
+            vectorized_examples = vectorizer.fit_transform(examples)
         else:
-            vectorized_examples = self.vectorizer.transform(examples)
+            vectorized_examples = vectorizer.transform(examples)
 
         return vectorized_examples
-
-    def _get_feature_annotations(self, feature_names, feature_annotation_names):
-        feature_annotations = pd.DataFrame({"feature": feature_names})
-        feature_annotations[feature_annotation_names] = feature_annotations['feature'].str.split(Constants.FEATURE_DELIMITER, expand=True)
-        return feature_annotations
 
     def _prepare_sequence_encoder(self):
         class_name = self.sequence_encoding.value
         sequence_encoder = ReflectionHandler.get_class_by_name(class_name, "encodings/")
         return sequence_encoder
 
-    def _encode_sequence(self, sequence: ReceptorSequence, params: EncoderParams, sequence_encoder, counts):
+    def _encode_sequence(self, sequence: ReceptorSequence, params: EncoderParams, sequence_encoder, counts, encode_locus: bool):
         params.model = vars(self)
-        features = sequence_encoder.encode_sequence(sequence, params)
+        features = sequence_encoder.encode_sequence(sequence, params, encode_locus)
         if features is not None:
             for i in features:
                 if self.reads == ReadsType.UNIQUE:
@@ -316,6 +314,10 @@ class KmerFrequencyEncoder(DatasetEncoder):
                 elif self.reads == ReadsType.ALL:
                     counts[i] += sequence.duplicate_count
         return counts
+
+    @abc.abstractmethod
+    def _encode_locus(self, dataset):
+        pass
 
     def get_additional_files(self) -> List[str]:
         return []

@@ -23,9 +23,8 @@ class TestKmerSequenceEncoder(TestCase):
 
         self.assertEqual(7, len(result))
         self.assertEqual(
-            KmerSequenceEncoder.encode_sequence(
-                ReceptorSequence(sequence_aa="AC"),
-                EncoderParams(model={"k": 3}, label_config=LabelConfiguration(), result_path="", pool_size=4)
-            ),
+            KmerSequenceEncoder.encode_sequence(ReceptorSequence(sequence_aa="AC"),
+                                                EncoderParams(model={"k": 3}, label_config=LabelConfiguration(),
+                                                              result_path="", pool_size=4)),
             None
         )

@@ -10,11 +10,12 @@ from immuneML.util.KmerHelper import KmerHelper
 class VGeneIMGTKmerEncoder(SequenceEncodingStrategy):
 
     @staticmethod
-    def encode_sequence(sequence: ReceptorSequence, params: EncoderParams):
+    def encode_sequence(sequence: ReceptorSequence, params: EncoderParams, encode_locus=False):
         """
         Encodes a receptor sequence into a sequence of k-mers
 
         Args:
+            encode_locus:
             sequence: ReceptorSequence object
             params: EncoderParams object with information on k-mer length
 
@@ -35,6 +36,8 @@ class VGeneIMGTKmerEncoder(SequenceEncodingStrategy):
                                                                                         params.region_type))
 
         kmers = [Constants.FEATURE_DELIMITER.join([sequence.v_gene] + [str(mer) for mer in kmer]) for kmer in kmers]
+        if encode_locus:
+            kmers = [f"{sequence.locus}{Constants.FEATURE_DELIMITER}{kmer}" for kmer in kmers]
 
         return kmers
 

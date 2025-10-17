@@ -24,9 +24,6 @@ class DatasetExportInstruction(Instruction):
     - preprocessing_sequence (list): which preprocessing sequence to use on the dataset(s), this item is optional and does not have to be specified.
       When specified, the same preprocessing sequence will be applied to all datasets.
 
-    - exporters (list): a list of formats in which to export the datasets. Valid formats are class names of any
-      non-abstract class inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`.
-
     - number_of_processes (int): how many processes to use during repertoire export (not used for sequence datasets)
 
     **YAML specification:**
@@ -56,6 +53,7 @@ class DatasetExportInstruction(Instruction):
     def run(self, result_path: Path) -> DatasetExportState:
         self.result_path = result_path / self.name
         paths = {}
+        export_format = 'AIRR'
 
         for dataset in self.datasets:
             dataset_name = dataset.name if dataset.name is not None else dataset.identifier
@@ -72,7 +70,6 @@ class DatasetExportInstruction(Instruction):
                         f"- Labels: {dataset.get_label_names()}", True)
 
             paths[dataset_name] = {}
-            export_format = 'AIRR'
             path = self.result_path / dataset_name / export_format
             AIRRExporter.export(dataset, path, number_of_processes=self.number_of_processes)
             paths[dataset_name][export_format] = path
