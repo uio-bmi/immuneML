@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -8,7 +9,7 @@ from tokenizers import Tokenizer
 from transformers import PreTrainedTokenizerFast, DataCollatorForLanguageModeling, TrainingArguments, Trainer
 
 from immuneML.data_model.SequenceParams import RegionType
-from immuneML.data_model.bnp_util import get_sequence_field_name
+from immuneML.data_model.bnp_util import get_sequence_field_name, write_yaml, read_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.environment.SequenceType import SequenceType
@@ -22,7 +23,22 @@ from immuneML.util.PathBuilder import PathBuilder
 class ProGen(GenerativeModel):
     @classmethod
     def load_model(cls, path: Path):
-        pass
+        assert path.exists(), f"{cls.__name__}: {path} does not exist."
+
+        model_overview_file = path / 'model_overview.yaml'
+        assert model_overview_file.exists(), f"{cls.__name__}: {model_overview_file} is not a file."
+
+        model_overview = read_yaml(model_overview_file)
+        progen = ProGen(**{k: v for k, v in model_overview.items()})
+
+        config = ProGenConfig.from_pretrained(path)
+        model = ProGenForCausalLM.from_pretrained(path,
+                                                  config=config,
+                                                  torch_dtype=torch.float32 if not progen.fp16 else torch.float16)
+
+        progen.model = model.to(progen.device).eval()
+
+        return progen
 
     def __init__(self, locus, tokenizer_path: Path, trained_model_path: Path, num_frozen_layers: int, num_epochs: int,
                  learning_rate: int, device: str, fp16: bool = False, prefix_text: str = "", suffix_text: str = "",
@@ -49,8 +65,8 @@ class ProGen(GenerativeModel):
         self.remove_affixes = remove_affixes
         self.model = None
 
-        self.tokenizer = Tokenizer.from_file(self.tokenizer_path)
-        self.hf_tokenizer = PreTrainedTokenizerFast(tokenizer_object=self.tokenizer)
+        tokenizer = Tokenizer.from_file(self.tokenizer_path)
+        self.hf_tokenizer = PreTrainedTokenizerFast(tokenizer_object=tokenizer)
         self.hf_tokenizer.pad_token = "<|pad|>"
         self.hf_tokenizer.eos_token = "<|eos|>"
         self.hf_tokenizer.bos_token = "<|bos|>"
@@ -115,15 +131,21 @@ class ProGen(GenerativeModel):
         print_log(f"{self.name or ProGen.__name__}: starting ProGen fine-tuning.", True)
         trainer.train()
         print_log(f"{self.name or ProGen.__name__}: finished ProGen fine-tuning.", True)
-        trainer.save_model(output_dir=str(output_dir))
-        trained_model = trainer.model
-        trained_model.to(self.device)
-        trained_model.eval()
-        self.model = trained_model
+        self.model = trainer.model.to(self.device).eval()
 
     def save_model(self, path: Path) -> Path:
-        # Progen model is saved during fit()
-        pass
+        model_path = PathBuilder.build(path / 'model')
+        self.model.save_pretrained(model_path, safe_serialization=False)
+        shutil.copy(self.tokenizer_path, model_path / Path(self.tokenizer_path).name)
+
+        skip_export_keys = {"model", "tokenizer", "hf_tokenizer", 'region_type', 'sequence_type'}
+
+        write_yaml(filename=model_path / 'model_overview.yaml',
+                   yaml_dict={**{k: v for k, v in vars(self).items() if k not in skip_export_keys},
+                              **{'type': self.__class__.__name__,
+                                 'locus': self.locus.name}})
+
+        return Path(shutil.make_archive(str(path / f'trained_model_{self.name}'), 'zip', str(model_path))).absolute()
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType,
                            compute_p_gen: bool) -> Dataset:
@@ -154,14 +176,16 @@ class ProGen(GenerativeModel):
             print_log(f"{self.name or ProGen.__name__}: {(i + 1) * num_current_sequences} sequences generated.", True)
 
         if self.remove_affixes:
-            prefix_text = self.hf_tokenizer.decode(self.hf_tokenizer(self.prefix_text).input_ids, skip_special_tokens=True)
-            suffix_text = self.hf_tokenizer.decode(self.hf_tokenizer(self.suffix_text).input_ids, skip_special_tokens=True)
+            prefix_text = self.hf_tokenizer.decode(self.hf_tokenizer(self.prefix_text).input_ids,
+                                                   skip_special_tokens=True)
+            suffix_text = self.hf_tokenizer.decode(self.hf_tokenizer(self.suffix_text).input_ids,
+                                                   skip_special_tokens=True)
             gen_sequences = [seq.replace(prefix_text, '').replace(suffix_text, '') for seq in
                              gen_sequences]
 
         gen_sequences_df = pd.DataFrame({get_sequence_field_name(self.region_type, self.sequence_type): gen_sequences,
-                           'locus': [self.locus.to_string() for _ in range(count)],
-                           'gen_model_name': [self.name for _ in range(count)]})
+                                         'locus': [self.locus.to_string() for _ in range(count)],
+                                         'gen_model_name': [self.name for _ in range(count)]})
 
         return SequenceDataset.build_from_partial_df(gen_sequences_df, PathBuilder.build(path),
                                                      'synthetic_dataset', {'gen_model_name': [self.name]},
