@@ -22,6 +22,88 @@ from immuneML.util.PathBuilder import PathBuilder
 
 
 class ProGen(GenerativeModel):
+    """
+    ProGen is a transformer-based language model for protein sequences. This class allows fine-tuning of a pre-trained
+    ProGen model on immune receptor sequences and generating new sequences. It is based on the ProGen2 implementation
+    available at https://github.com/salesforce/progen. It uses the sequences as given in "junction_aa" field in the
+    input dataset.
+
+    References:
+
+    Nijkamp, E., Ruffolo, J. A., Weinstein, E. N., Naik, N., & Madani, A. (2023).
+    Exploring the boundaries of protein language models. Cell Systems, 14(11), 968–978.e3.
+    https://doi.org/10.1016/j.cels.2023.10.002
+
+    **Specification arguments:**
+
+    - locus (str): which locus the sequence come from, e.g., TRB
+
+    - tokenizer_path (Path): path to the ProGen tokenizer file (tokenizer.json)
+
+    - trained_model_path (Path): path to the pre-trained ProGen model directory
+
+    - num_frozen_layers (int): number of transformer layers to freeze during fine-tuning
+
+    - num_epochs (int): number of epochs for fine-tuning
+
+    - learning_rate (float): learning rate for fine-tuning
+
+    - device (str): device to use for training and inference ("cpu" or "cuda")
+
+    - fp16 (bool): whether to use mixed precision training
+
+    - prefix_text (str): text to prepend to each sequence during fine-tuning
+
+    - suffix_text (str): text to append to each sequence during fine-tuning
+
+    - max_new_tokens (int): maximum number of new tokens to generate
+
+    - temperature (float): sampling temperature for sequence generation
+
+    - top_p (float): nucleus sampling parameter for sequence generation
+
+    - prompt (str): prompt text to start the generation
+
+    - num_gen_batches (int): number of batches to split generation into
+
+    - per_device_train_batch_size (int): batch size per device during fine-tuning
+
+    - remove_affixes (bool): whether to remove prefix and suffix from generated sequences
+
+    - seed (int): random seed for reproducibility
+
+
+    **YAML specification:**
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        definitions:
+            ml_methods:
+                progen_model:
+                    ProGen:
+                        locus: 'beta'
+                        tokenizer_path: '/path/to/tokenizer.json'
+                        trained_model_path: '/path/to/pretrained/progen/model'
+                        num_frozen_layers: 27
+                        num_epochs: 3
+                        learning_rate: 0.00004
+                        device: 'cuda'
+                        fp16: False
+                        prefix_text: '<|bos|>1'
+                        suffix_text: '2<|eos|>'
+                        max_new_tokens: 1024
+                        temperature: 1.0
+                        top_p: 0.9
+                        prompt: '1'
+                        num_gen_batches: 1
+                        per_device_train_batch_size: 2
+                        remove_affixes: True
+                        name: 'progen_finetuned_model'
+                        region_type: 'IMGT_JUNCTION'
+                        seed: 42
+
+    """
     @classmethod
     def load_model(cls, path: Path):
         assert path.exists(), f"{cls.__name__}: {path} does not exist."

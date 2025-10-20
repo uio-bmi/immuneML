@@ -14,6 +14,7 @@
 # limitations under the License.
 
 # Modified configuration implementation based on https://github.com/huggingface/transformers/blob/main/src/transformers/models/gptj/configuration_gptj.py
+# Modified for ImmuneML. Original code from https://github.com/salesforce/progen
 
 from transformers.configuration_utils import PretrainedConfig
 from transformers.utils import logging

@@ -14,6 +14,7 @@
 # limitations under the License.
 
 # Modified forward-pass implementation based on https://github.com/huggingface/transformers/blob/main/src/transformers/models/gptj/modeling_gptj.py
+# Modified for ImmuneML. Original code from https://github.com/salesforce/progen
 
 from typing import Tuple
 
