@@ -30,7 +30,7 @@ from transformers.modeling_outputs import BaseModelOutputWithPast, CausalLMOutpu
 from transformers.modeling_utils import PreTrainedModel
 from transformers.utils import logging
 from transformers.utils.model_parallel_utils import assert_device_map, get_device_map
-from .configuration_progen import ProGenConfig
+from .ProGenConfig import ProGenConfig
 
 
 logger = logging.get_logger(__name__)
@@ -59,6 +59,10 @@ def apply_rotary_pos_emb(x, sincos, offset=0):
 
 
 class ProGenAttention(nn.Module):
+    # Shared attention mask buffers are deterministic and replicated across layers; skip them when exporting to avoid shared-tensor errors.
+    _keys_to_ignore_on_save = ["bias", "masked_bias"]
+    _keys_to_ignore_on_load_missing = ["bias", "masked_bias"]
+
     def __init__(self, config):
         super().__init__()
 

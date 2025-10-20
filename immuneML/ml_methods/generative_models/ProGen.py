@@ -1,5 +1,4 @@
 from pathlib import Path
-import shutil
 
 import numpy as np
 import pandas as pd
@@ -9,13 +8,13 @@ from tokenizers import Tokenizer
 from transformers import PreTrainedTokenizerFast, DataCollatorForLanguageModeling, TrainingArguments, Trainer
 
 from immuneML.data_model.SequenceParams import RegionType
-from immuneML.data_model.bnp_util import get_sequence_field_name, write_yaml
+from immuneML.data_model.bnp_util import get_sequence_field_name
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
-from immuneML.ml_methods.generative_models.progen.configuration_progen import ProGenConfig
-from immuneML.ml_methods.generative_models.progen.modeling_progen import ProGenForCausalLM
+from immuneML.ml_methods.generative_models.progen.ProGenConfig import ProGenConfig
+from immuneML.ml_methods.generative_models.progen.ProGenForCausalLM import ProGenForCausalLM
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -28,8 +27,8 @@ class ProGen(GenerativeModel):
     def __init__(self, locus, tokenizer_path: Path, trained_model_path: Path, num_frozen_layers: int, num_epochs: int,
                  learning_rate: int, device: str, fp16: bool = False, prefix_text: str = "", suffix_text: str = "",
                  max_new_tokens: int = 1024, temperature: float = 1.0, top_p: float = 0.9, prompt: str = "1",
-                 num_gen_batches: int = 1, name: str = None, region_type: str = RegionType.IMGT_JUNCTION.name,
-                 seed: int = None, per_device_train_batch_size: int = 2):
+                 num_gen_batches: int = 1, per_device_train_batch_size: int = 2, remove_affixes: bool = True,
+                 name: str = None, region_type: str = RegionType.IMGT_JUNCTION.name, seed: int = None, ):
         super().__init__(locus, seed=seed, name=name, region_type=RegionType.get_object(region_type))
         self.sequence_type = SequenceType.AMINO_ACID
         self.tokenizer_path = tokenizer_path
@@ -47,6 +46,7 @@ class ProGen(GenerativeModel):
         self.prompt = prompt
         self.num_gen_batches = num_gen_batches
         self.per_device_train_batch_size = per_device_train_batch_size
+        self.remove_affixes = remove_affixes
         self.model = None
 
         self.tokenizer = Tokenizer.from_file(self.tokenizer_path)
@@ -102,7 +102,7 @@ class ProGen(GenerativeModel):
             save_safetensors=False,
             logging_dir=str(logs_dir),
             save_total_limit=1,
-            save_strategy="epoch"
+            save_strategy="no"
         )
 
         trainer = Trainer(
@@ -122,40 +122,8 @@ class ProGen(GenerativeModel):
         self.model = trained_model
 
     def save_model(self, path: Path) -> Path:
-        if self.model is None:
-            raise RuntimeError("ProGen model must be fitted before it can be saved.")
-
-        base_path = PathBuilder.build(path)
-        model_path = PathBuilder.build(base_path / 'model')
-        hf_model_dir = PathBuilder.build(model_path / 'hf_model')
-        tokenizer_dir = PathBuilder.build(model_path / 'tokenizer')
-
-        # Hugging Face expects CPU tensors when exporting; move temporarily.
-        self.model.to('cpu')
-        self.model.save_pretrained(str(hf_model_dir))
-        self.model.to(self.device)
-        self.hf_tokenizer.save_pretrained(str(tokenizer_dir))
-
-        meta_fields = (
-            'name', 'num_frozen_layers', 'num_epochs', 'learning_rate', 'device', 'fp16',
-            'prefix_text', 'suffix_text', 'max_new_tokens', 'temperature', 'top_p',
-            'prompt', 'num_gen_batches', 'per_device_train_batch_size'
-        )
-        metadata = {
-            'type': self.__class__.__name__,
-            'locus': self.locus.name,
-            'region_type': self.region_type.name,
-            'sequence_type': self.sequence_type.name,
-            **{field: getattr(self, field) for field in meta_fields}
-        }
-
-        write_yaml(model_path / 'model_overview.yaml', metadata)
-
-        archive_path = Path(
-            shutil.make_archive(str(base_path / f'trained_model_{self.name}'), 'zip', str(model_path))
-        ).absolute()
-
-        return archive_path
+        # Progen model is saved during fit()
+        pass
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType,
                            compute_p_gen: bool) -> Dataset:
@@ -184,6 +152,12 @@ class ProGen(GenerativeModel):
             gen_sequences.extend(self.hf_tokenizer.batch_decode(output, skip_special_tokens=True))
 
             print_log(f"{self.name or ProGen.__name__}: {(i + 1) * num_current_sequences} sequences generated.", True)
+
+        if self.remove_affixes:
+            prefix_text = self.hf_tokenizer.decode(self.hf_tokenizer(self.prefix_text).input_ids, skip_special_tokens=True)
+            suffix_text = self.hf_tokenizer.decode(self.hf_tokenizer(self.suffix_text).input_ids, skip_special_tokens=True)
+            gen_sequences = [seq.replace(prefix_text, '').replace(suffix_text, '') for seq in
+                             gen_sequences]
 
         gen_sequences_df = pd.DataFrame({get_sequence_field_name(self.region_type, self.sequence_type): gen_sequences,
                            'locus': [self.locus.to_string() for _ in range(count)],
