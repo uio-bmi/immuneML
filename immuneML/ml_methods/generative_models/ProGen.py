@@ -1,5 +1,6 @@
 import shutil
 from pathlib import Path
+from zipfile import ZipFile, ZIP_STORED
 
 import numpy as np
 import pandas as pd
@@ -28,13 +29,14 @@ class ProGen(GenerativeModel):
         model_overview_file = path / 'model_overview.yaml'
         assert model_overview_file.exists(), f"{cls.__name__}: {model_overview_file} is not a file."
 
+        # Uses ProGen weights/tokenizer paths from training. Override in model_overview.yaml if needed.
         model_overview = read_yaml(model_overview_file)
-        progen = ProGen(**{k: v for k, v in model_overview.items()})
+        progen = ProGen(**{k: v for k, v in model_overview.items() if k != 'type'})
 
         config = ProGenConfig.from_pretrained(path)
         model = ProGenForCausalLM.from_pretrained(path,
                                                   config=config,
-                                                  torch_dtype=torch.float32 if not progen.fp16 else torch.float16)
+                                                  dtype=torch.float32 if not progen.fp16 else torch.float16)
 
         progen.model = model.to(progen.device).eval()
 
@@ -74,39 +76,13 @@ class ProGen(GenerativeModel):
     def fit(self, data, path: Path = None):
         assert path is not None, "ProGen.fit requires a target directory path for training outputs."
 
-        base_path = Path(path)
-        base_path.mkdir(parents=True, exist_ok=True)
-        output_dir = base_path / "model"
-        output_dir.mkdir(parents=True, exist_ok=True)
-        logs_dir = base_path / "logs"
-        logs_dir.mkdir(parents=True, exist_ok=True)
+        logs_dir, output_dir = self._prepare_training_paths(path)
+        tokenized_dataset = self._preprocess_dataset(data)
 
-        df = data.data.topandas()
-        df["text"] = self.prefix_text + df["junction_aa"].astype(str).fillna("") + self.suffix_text
-        hf_dataset = HFDataset.from_pandas(df[["text"]], preserve_index=False)
-
-        def tokenize_function(examples):
-            return self.hf_tokenizer(examples["text"], truncation=True)
-
-        tokenized_dataset = hf_dataset.map(tokenize_function, batched=True, remove_columns=["text"])
-
-        data_collator = DataCollatorForLanguageModeling(
-            tokenizer=self.hf_tokenizer,
-            mlm=False
-        )
-
+        data_collator = DataCollatorForLanguageModeling(tokenizer=self.hf_tokenizer, mlm=False)
         config = ProGenConfig.from_pretrained(self.trained_model_path)
         model = ProGenForCausalLM.from_pretrained(self.trained_model_path, config=config)
-
-        for layer in model.transformer.h[:self.num_frozen_layers]:
-            for param in layer.parameters():
-                param.requires_grad = False
-
-        for param in model.transformer.ln_f.parameters():
-            param.requires_grad = True
-
-        for param in model.lm_head.parameters():
-            param.requires_grad = True
+        self._freeze_model_layers(model)
 
         training_args = TrainingArguments(
             output_dir=str(output_dir),
@@ -128,10 +104,42 @@ class ProGen(GenerativeModel):
             tokenizer=self.hf_tokenizer,
             data_collator=data_collator
         )
+
         print_log(f"{self.name or ProGen.__name__}: starting ProGen fine-tuning.", True)
         trainer.train()
         print_log(f"{self.name or ProGen.__name__}: finished ProGen fine-tuning.", True)
         self.model = trainer.model.to(self.device).eval()
+
+    def _freeze_model_layers(self, model):
+        for layer in model.transformer.h[:self.num_frozen_layers]:
+            for param in layer.parameters():
+                param.requires_grad = False
+        for param in model.transformer.ln_f.parameters():
+            param.requires_grad = True
+        for param in model.lm_head.parameters():
+            param.requires_grad = True
+
+    def _preprocess_dataset(self, data):
+        data_df = data.data.topandas()
+        data_df["junction_aa"] = self.prefix_text + data_df["junction_aa"].astype(str).fillna("") + self.suffix_text
+        hf_dataset = HFDataset.from_pandas(data_df[["junction_aa"]], preserve_index=False)
+        tokenized_dataset = hf_dataset.map(
+            self.hf_tokenizer,
+            batched=True,
+            input_columns="junction_aa",
+            fn_kwargs={"truncation": True},
+            remove_columns=["junction_aa"],
+        )
+        return tokenized_dataset
+
+    def _prepare_training_paths(self, path):
+        base_path = Path(path)
+        base_path.mkdir(parents=True, exist_ok=True)
+        output_dir = base_path / "model"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        logs_dir = base_path / "logs"
+        logs_dir.mkdir(parents=True, exist_ok=True)
+        return logs_dir, output_dir
 
     def save_model(self, path: Path) -> Path:
         model_path = PathBuilder.build(path / 'model')
@@ -139,13 +147,17 @@ class ProGen(GenerativeModel):
         shutil.copy(self.tokenizer_path, model_path / Path(self.tokenizer_path).name)
 
         skip_export_keys = {"model", "tokenizer", "hf_tokenizer", 'region_type', 'sequence_type'}
-
         write_yaml(filename=model_path / 'model_overview.yaml',
                    yaml_dict={**{k: v for k, v in vars(self).items() if k not in skip_export_keys},
                               **{'type': self.__class__.__name__,
                                  'locus': self.locus.name}})
 
-        return Path(shutil.make_archive(str(path / f'trained_model_{self.name}'), 'zip', str(model_path))).absolute()
+        archive_path = path / f"trained_model_{self.name}.zip"
+        with ZipFile(archive_path, "w", compression=ZIP_STORED) as archive:
+            for file_path in (fp for fp in model_path.rglob("*") if fp.is_file()):
+                archive.write(file_path, file_path.relative_to(model_path))
+
+        return archive_path.resolve()
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType,
                            compute_p_gen: bool) -> Dataset:
@@ -154,8 +166,8 @@ class ProGen(GenerativeModel):
         prompt_attention_mask = prompt_encoding.attention_mask.to(self.device)
         gen_sequences = []
 
+        num_sequences_per_batch = count // self.num_gen_batches
         for i in range(self.num_gen_batches):
-            num_sequences_per_batch = count // self.num_gen_batches
             num_current_sequences = num_sequences_per_batch if i < self.num_gen_batches - 1 else count - (
                     num_sequences_per_batch * (self.num_gen_batches - 1))
             with torch.inference_mode():
@@ -176,12 +188,7 @@ class ProGen(GenerativeModel):
             print_log(f"{self.name or ProGen.__name__}: {(i + 1) * num_current_sequences} sequences generated.", True)
 
         if self.remove_affixes:
-            prefix_text = self.hf_tokenizer.decode(self.hf_tokenizer(self.prefix_text).input_ids,
-                                                   skip_special_tokens=True)
-            suffix_text = self.hf_tokenizer.decode(self.hf_tokenizer(self.suffix_text).input_ids,
-                                                   skip_special_tokens=True)
-            gen_sequences = [seq.replace(prefix_text, '').replace(suffix_text, '') for seq in
-                             gen_sequences]
+            gen_sequences = self._remove_affixes(gen_sequences)
 
         gen_sequences_df = pd.DataFrame({get_sequence_field_name(self.region_type, self.sequence_type): gen_sequences,
                                          'locus': [self.locus.to_string() for _ in range(count)],
@@ -190,6 +197,15 @@ class ProGen(GenerativeModel):
         return SequenceDataset.build_from_partial_df(gen_sequences_df, PathBuilder.build(path),
                                                      'synthetic_dataset', {'gen_model_name': [self.name]},
                                                      {'gen_model_name': str})
+
+    def _remove_affixes(self, gen_sequences):
+        prefix_text = self.hf_tokenizer.decode(self.hf_tokenizer(self.prefix_text).input_ids,
+                                               skip_special_tokens=True)
+        suffix_text = self.hf_tokenizer.decode(self.hf_tokenizer(self.suffix_text).input_ids,
+                                               skip_special_tokens=True)
+        gen_sequences = [seq.replace(prefix_text, '').replace(suffix_text, '') for seq in
+                         gen_sequences]
+        return gen_sequences
 
     def is_same(self, model) -> bool:
         raise NotImplementedError
