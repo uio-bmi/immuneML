@@ -68,6 +68,7 @@ class PlotlyUtil:
 
         """
         figure.write_html(str(file_path))
+        figure.write_json(str(file_path.with_suffix('.json')))
         if dataset_size > EnvironmentSettings.max_points_on_plot:
             plot_path = file_path.with_suffix(".png")
             figure.write_image(str(plot_path))
