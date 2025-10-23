@@ -1,9 +1,7 @@
-import logging
 from pathlib import Path
 from typing import Tuple, List
 
 import numpy as np
-import pandas as pd
 import plotly.express as px
 
 from immuneML.data_model.datasets.Dataset import Dataset

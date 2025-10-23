@@ -166,7 +166,7 @@ class TestFeatureDistribution(TestCase):
 
         content = pd.read_csv(path / "feature_values.csv")
         self.assertListEqual(list(content.columns),
-                             ["l1", "example_id", "feature", "sequence", "value"])
+                             ["l1", "example_id", "feature", "value"])
 
         report = FeatureDistribution.build_object(**{"dataset": SequenceDataset(),
                                                      "result_path": path})

@@ -53,9 +53,11 @@ class NumpyHelper:
         import uuid
         dir_path = PathBuilder.build(EnvironmentSettings.get_cache_path() / "memmap_storage")
         memmap_path = dir_path / f"temp_{uuid.uuid4()}.npy"
-        np.save(memmap_path, data)
-
-        return np.memmap(memmap_path, dtype='float32', mode='r+', shape=shape)
+        if data is not None:
+            data.astype('float32').tofile(memmap_path)
+            return np.memmap(memmap_path, dtype='float32', mode='r+', shape=shape)
+        else:
+            return np.memmap(memmap_path, dtype='float32', mode='w+', shape=shape)
 
     @staticmethod
     def concat_arrays_rowwise(arrays: list, force='auto', dense_max_mb=100, use_memmap=False):

@@ -88,7 +88,7 @@ def check_genes(paired, receptors, seq_import_params):
     else:
         all_v_genes = (set(receptor.chain_1.v_call for receptor in receptors if receptor.chain_1.v_call is not None and receptor.chain_1.v_call != '')
                        .union(set(receptor.chain_2.v_call for receptor in receptors if receptor.chain_2.v_call
-                                  is not None and receptor.chain2.v_call != '')))
+                                  is not None and receptor.chain_2.v_call != '')))
         all_j_genes = set(receptor.chain_1.j_call for receptor in receptors if receptor.chain_1.j_call is not None and receptor.chain_1.j_call != '').union(
             set(receptor.chain_2.j_call for receptor in receptors if receptor.chain_2.j_call is not None and receptor.chain_2.j_call != ''))
 

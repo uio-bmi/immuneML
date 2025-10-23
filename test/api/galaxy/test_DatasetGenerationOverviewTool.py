@@ -110,7 +110,7 @@ rep2.tsv,2""")
                 run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path / 'output',
                                           'tool': "DatasetGenerationOverviewTool"}))
 
-                self.assertTrue(os.path.isfile(result_path / "output/galaxy_dataset/dataset_metadata.csv"))
+                self.assertTrue(os.path.isfile(result_path / "output/galaxy_dataset/dataset.csv"))
                 self.assertTrue(os.path.isfile(result_path / "output/galaxy_dataset/dataset.yaml"))
                 self.assertEqual(4, len([name for name in os.listdir(result_path / "output/galaxy_dataset/repertoires/")
                                          if os.path.isfile(

@@ -9,6 +9,7 @@ from immuneML.encodings.reference_encoding.MatchedReceptorsEncoder import Matche
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
@@ -72,7 +73,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         for reads in ["all", "unique"]:
             for normalize in [True, False]:
 
-                path = EnvironmentSettings.tmp_test_path / "matched_receptors_encoder_all/"
+                path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "matched_receptors_encoder_all/")
 
                 dataset, label_config, reference_receptors, labels = self.create_dummy_data(path)
 
@@ -121,7 +122,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         for reads in ["all", "unique"]:
             for normalize in [True, False]:
 
-                path = EnvironmentSettings.tmp_test_path / "matched_receptors_encoder_all_sum/"
+                path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "matched_receptors_encoder_all_sum/")
 
                 dataset, label_config, reference_receptors, labels = self.create_dummy_data(path)
 

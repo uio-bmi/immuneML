@@ -15,7 +15,7 @@ from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
-def test_metadata_encoder():
+def test_composite_encoder():
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'test_metadata_encoder')
 
     dataset = RepertoireBuilder.build_dataset([['AA', 'CC'], ['CC'], ['TT']],

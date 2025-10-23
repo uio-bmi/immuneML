@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Union
 
 import numpy as np
 from sklearn.preprocessing import StandardScaler
@@ -15,10 +14,8 @@ from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
-from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.NumpyHelper import NumpyHelper
-from immuneML.util.PathBuilder import PathBuilder
 
 
 class ProteinEmbeddingEncoder(DatasetEncoder, ABC):

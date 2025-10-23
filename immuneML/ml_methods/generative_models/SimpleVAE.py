@@ -319,16 +319,16 @@ class SimpleVAE(GenerativeModel):
 
         encoded_v_genes = one_hot(
             torch.as_tensor([self.unique_v_genes.index(v_gene.split("*")[0]) for v_gene in data['v_call']],
-                            device=self.device),
+                            device=self.device, dtype=torch.long),
             num_classes=len(self.unique_v_genes))
         encoded_j_genes = one_hot(
             torch.as_tensor([self.unique_j_genes.index(j_gene.split("*")[0]) for j_gene in data['j_call']],
-                            device=self.device),
+                            device=self.device, dtype=torch.long),
             num_classes=len(self.unique_j_genes))
         padded_encoded_cdr3s = one_hot(torch.as_tensor([
             [self.vocab.index(letter) for letter in
              StringHelper.pad_sequence_in_the_middle(seq, self.max_cdr3_len, Constants.GAP_LETTER)]
-            for seq in data[seq_col]], device=self.device), num_classes=self.vocab_size)
+            for seq in data[seq_col]], device=self.device, dtype=torch.long), num_classes=self.vocab_size)
 
         PyTorchSequenceDataset = get_pytorch_seq_dataset_class()
         pytorch_dataset = PyTorchSequenceDataset({'v_gene': encoded_v_genes, 'j_gene': encoded_j_genes,

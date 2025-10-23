@@ -69,6 +69,8 @@ class DatasetExportInstruction(Instruction):
                         f"- Example count: {dataset.get_example_count()}\n"
                         f"- Labels: {dataset.get_label_names()}", True)
 
+            dataset.name = dataset_name
+
             paths[dataset_name] = {}
             path = self.result_path / dataset_name / export_format
             AIRRExporter.export(dataset, path, number_of_processes=self.number_of_processes)
