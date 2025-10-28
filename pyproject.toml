@@ -7,7 +7,6 @@ name = "immuneML"
 version = "0.0.0"  # dynamically set below
 description = "immuneML is a software platform for machine learning analysis of immune receptor repertoires."
 readme = "README.md"
-readme-content-type = "text/markdown"
 authors = [
     { name = "immuneML Team", email = "milenpa@uio.no" }
 ]
