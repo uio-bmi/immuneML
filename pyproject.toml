@@ -87,4 +87,4 @@ immuneML = [
 ]
 
 [tool.setuptools.dynamic]
-version = { attr = "immuneML.environment.Constants.Constants.VERSION" }
+version = { attr = "immuneML.environment.Constants.VERSION" }
