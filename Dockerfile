@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
 # Copy files
-COPY setup.py /home/ubuntu/immuneML/
+COPY pyproject.toml /home/ubuntu/immuneML/
 COPY requirements.txt /home/ubuntu/immuneML/
 COPY requirements_TCRdist.txt /home/ubuntu/immuneML/
 COPY requirements_DeepRC.txt /home/ubuntu/immuneML/

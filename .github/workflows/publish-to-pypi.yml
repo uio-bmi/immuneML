@@ -22,8 +22,7 @@ jobs:
         run: >-
           python3 -m
           pip install
-          build
-          --user
+          build setuptools wheel
       - name: Build a binary wheel and a source tarball
         run: python3 -m build
       - name: Store the distribution packages

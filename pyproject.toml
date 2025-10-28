@@ -1,0 +1,91 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "immuneML"
+version = "0.0.0"  # dynamically set below
+description = "immuneML is a software platform for machine learning analysis of immune receptor repertoires."
+readme = "README.md"
+readme-content-type = "text/markdown"
+authors = [
+    { name = "immuneML Team", email = "milenpa@uio.no" }
+]
+license = { text = "GNU Affero General Public License v3" }
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+]
+
+dependencies = [
+    "numpy<=1.26.4",
+    "pandas>=2.1.0",
+    "PyYAML>=5.3",
+    "scikit-learn>=0.23",
+    "python-glmnet",
+    "matplotlib>=3.1",
+    "editdistance",
+    "regex",
+    "tzlocal",
+    "airr>=1.5.1",
+    "pystache",
+    "dill>=0.3",
+    "plotly>=4",
+    "matplotlib-venn>=0.11",
+    "scipy<=1.12.0",
+    "bionumpy>=1.0.12",
+    "umap-learn",
+    "olga>=1.2.4",
+    "psutil",
+    "kaleido",
+    "logomaker",
+    "python-glmnet"
+]
+
+[project.optional-dependencies]
+word2vec = ["gensim>=4"]
+fisher = ["fisher>=0.1.9", "fishersapi"]
+TCRdist = ["tcrdist3>=0.1.6"]
+gen_models = ["sonnia", "torch"]
+embeddings = ["transformers", "torch", "sentencepiece", "esm"]
+ligo = ["stitchr", "IMGTgeneDL"]
+DL = ["torch", "keras", "tensorflow", "logomaker", "gensim"]
+all = [
+    "tcrdist3>=0.1.6",
+    "sonnia",
+    "torch",
+    "stitchr",
+    "IMGTgeneDL",
+    "keras",
+    "tensorflow",
+    "fisher>=0.1.9",
+    "logomaker",
+    "fishersapi",
+    "gensim>=4",
+    "transformers",
+    "sentencepiece"
+]
+
+[project.urls]
+Homepage = "https://github.com/uio-bmi/immuneML"
+
+[project.scripts]
+immune-ml = "immuneML.app.ImmuneMLApp:main"
+immune-ml-quickstart = "immuneML.workflows.instructions.quickstart:main"
+ligo = "immuneML.app.LigoApp:main"
+
+[tool.setuptools.packages.find]
+exclude = ["test", "test.*"]
+
+[tool.setuptools.package-data]
+immuneML = [
+    "IO/dataset_import/conversion/*.csv",
+    "presentation/html/templates/*.html",
+    "presentation/html/templates/css/*.css",
+    "encodings/atchley_kmer_encoding/*.csv",
+    "config/default_params/*/*.yaml"
+]
+
+[tool.setuptools.dynamic]
+version = { attr = "immuneML.environment.Constants.VERSION" }
