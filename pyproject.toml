@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "immuneML"
-version = "0.0.0"  # dynamically set below
 description = "immuneML is a software platform for machine learning analysis of immune receptor repertoires."
 readme = "README.md"
 authors = [
     { name = "immuneML Team", email = "milenpa@uio.no" }
 ]
+dynamic = ["version"]
 license = { text = "GNU Affero General Public License v3" }
 requires-python = ">=3.7"
 classifiers = [
