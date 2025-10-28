@@ -8,6 +8,7 @@ from immuneML.data_model import bnp_util
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -210,7 +211,7 @@ class TrueMotifsSummaryBarplot(DataReport):
                 bargap=0.2, template='plotly_white'
             )
 
-            figure.write_html(str(filename))
+            filename = PlotlyUtil.write_image_to_file(figure, filename)
 
             return ReportOutput(filename,
                                 f"Summary of motif recovery for {self.name}",)

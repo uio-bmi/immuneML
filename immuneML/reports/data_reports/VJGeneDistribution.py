@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ReportUtil import ReportUtil
@@ -172,7 +173,7 @@ class VJGeneDistribution(DataReport):
                              barmode="group")
 
         file_path = self.result_path / filename
-        figure.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(figure, file_path)
         return ReportOutput(path=file_path, name=title)
 
     def _get_combo_gene_results_from_attributes(self, dataset_attributes):
@@ -222,7 +223,7 @@ class VJGeneDistribution(DataReport):
         figure.update_layout(template='plotly_white', xaxis=dict(showgrid=False), yaxis=dict(showgrid=False))
 
         file_path = self.result_path / filename
-        figure.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(figure, file_path)
         return ReportOutput(path=file_path, name=title)
 
     def _get_repertoire_results(self):
@@ -358,7 +359,7 @@ class VJGeneDistribution(DataReport):
         figure.update_layout(template="plotly_white")
 
         file_path = self.result_path / filename
-        figure.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(figure, file_path)
         return ReportOutput(path=file_path, name=title)
 
     def check_prerequisites(self):

@@ -10,12 +10,11 @@ import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
-import scipy
 from scipy.cluster.hierarchy import linkage, fcluster
-from sklearn.cluster import AgglomerativeClustering
 
 from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -260,9 +259,9 @@ class CompAIRRClusteringReport(DataReport):
                           yaxis_title='repertoire')
         fig.update_xaxes(showgrid=False)
         fig.update_yaxes(showgrid=False, autorange='reversed')
-        fig.write_html(self.result_path / f"{name}_heatmap.html")
+        file_path = PlotlyUtil.write_image_to_file(fig, self.result_path / f"{name}_heatmap.html", matrix_text.shape[0])
 
-        return ReportOutput(path=self.result_path / f"{name}_heatmap.html", name=f"{name} heatmap")
+        return ReportOutput(path=file_path, name=f"{name} heatmap")
 
     def _store_cluster_assignments(self, repertoire_ids, clusters) -> ReportOutput:
         output_path = self.result_path / "cluster_assignments.tsv"
@@ -418,6 +417,6 @@ class CompAIRRClusteringReport(DataReport):
             }
         })
 
-        fig.write_html(str(output_path))
+        output_path = PlotlyUtil.write_image_to_file(fig, output_path, metadata.shape[0])
 
         return ReportOutput(path=output_path, name="hierarchical_clustering_of_repertoires")

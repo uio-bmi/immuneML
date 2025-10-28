@@ -129,7 +129,7 @@ class MLSettingsPerformance(TrainMLModelReport):
             figure = self._plot_rescalable(plotting_data, "ML method", f"Performance<br>({metric_name})")
 
         file_path = self.result_path / f"{self.result_name}.html"
-        figure.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(figure, file_path)
 
         return ReportOutput(path=file_path)
 

@@ -11,6 +11,7 @@ from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import Seque
 from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
@@ -130,5 +131,5 @@ class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
                            template='plotly_white')
         figure.update_traces(hovertemplate="Overlap of disease-associated<br>sequences between<br>%{x} and %{y}:<br>%{z}%<extra></extra>")
         figure_path = self.result_path / f"{filename}.html"
-        figure.write_html(str(figure_path))
+        figure_path = PlotlyUtil.write_image_to_file(figure, figure_path)
         return ReportOutput(figure_path, " ".join(filename.split('_')))

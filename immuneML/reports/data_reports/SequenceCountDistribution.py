@@ -7,6 +7,7 @@ import plotly.express as px
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ReportUtil import ReportUtil
@@ -141,5 +142,5 @@ class SequenceCountDistribution(DataReport):
         PathBuilder.build(self.result_path)
 
         file_path = self.result_path / "sequence_count_distribution.html"
-        figure.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(figure, file_path)
         return ReportOutput(path=file_path, name="Sequence duplicate count distribution")

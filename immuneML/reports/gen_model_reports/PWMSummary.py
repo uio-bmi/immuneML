@@ -61,8 +61,8 @@ class PWMSummary(GenModelReport):
         fig.update_layout(xaxis=dict(tickmode='array', tickvals=df["sequence_length"]),
                           template="plotly_white")
         fig.update_traces(marker_color=px.colors.diverging.Tealrose[0])
-        fig.write_html(self.result_path / 'length_probs.html')
-        len_figure = ReportOutput(path=self.result_path / 'length_probs.html', name="Sequence length probabilities")
+        file_path = PlotlyUtil.write_image_to_file(fig, self.result_path / 'length_probs.html')
+        len_figure = ReportOutput(path=file_path, name="Sequence length probabilities")
 
         return len_figure, len_table
 
@@ -79,7 +79,7 @@ class PWMSummary(GenModelReport):
             figure.update_layout(showlegend=False)
 
             fig_path = self.result_path / f"pwm_len_{seq_len}.html"
-            figure.write_html(str(fig_path))
+            fig_path = PlotlyUtil.write_image_to_file(figure, fig_path)
             figure_outputs.append(ReportOutput(fig_path, f"PWM (sequence length = {seq_len})"))
 
             table_path = self.result_path / f"pwm_len_{seq_len}.csv"

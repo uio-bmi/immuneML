@@ -14,6 +14,7 @@ from immuneML.dsl.definition_parsers.MLParser import MLParser
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.ml_methods.generative_models.SimpleVAE import SimpleVAE
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.gen_model_reports.GenModelReport import GenModelReport
@@ -165,9 +166,9 @@ class VAESummary(GenModelReport):
                            legendgroup=2, legendgrouptitle_text='J genes'), row=2, col=1)
 
         fig.update_layout(template='plotly_white', legend_tracegroupgap=30)
-        fig.write_html(self.result_path / f'latent_space_{self.dim_red_method_name}.html')
+        file_path = PlotlyUtil.write_image_to_file(fig, self.result_path / f'latent_space_{self.dim_red_method_name}.html')
 
-        return ReportOutput(self.result_path / f'latent_space_{self.dim_red_method_name}.html',
+        return ReportOutput(file_path,
                             f'principal component analysis on the data embedded into {self.model.latent_dim} '
                             f'dimensional space')
 
@@ -192,19 +193,18 @@ class VAESummary(GenModelReport):
                 i += 1
 
         fig.update_layout(template='plotly_white')
-        fig.write_html(self.result_path / 'latent_dim_dist.html')
+        file_path = PlotlyUtil.write_image_to_file(fig, self.result_path / 'latent_dim_dist.html')
 
-        return ReportOutput(path=self.result_path / 'latent_dim_dist.html',
+        return ReportOutput(path=file_path,
                             name=f'latent dimension distribution for examples from dataset {self.dataset.name}')
 
     def _plot_training_progress(self, training_progress_table: ReportOutput) -> ReportOutput:
         df = pd.read_csv(str(training_progress_table.path))
         fig = px.line(df, x='epoch', y='loss', markers=True)
         fig.update_layout(template='plotly_white')
-        fig.write_html(self.result_path / 'loss_per_epoch.html')
+        file_path = PlotlyUtil.write_image_to_file(fig, self.result_path / 'loss_per_epoch.html')
 
-        return ReportOutput(path=self.result_path / 'loss_per_epoch.html',
-                            name='loss per epoch')
+        return ReportOutput(path=file_path, name='loss per epoch')
 
     def check_prerequisites(self) -> bool:
         return isinstance(self.model, SimpleVAE)

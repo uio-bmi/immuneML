@@ -74,4 +74,6 @@ def test_clustering_workflow():
 
     ImmuneMLApp(path / 'specs.yaml', path / 'output').run()
 
+    assert (path / 'output/clustering/split_1/discovery/kmer_hierarchical/reports/rep1/dendrogram.html').is_file()
+
     shutil.rmtree(path)

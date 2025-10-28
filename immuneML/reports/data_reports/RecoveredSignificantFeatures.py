@@ -11,6 +11,7 @@ from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -200,7 +201,7 @@ class RecoveredSignificantFeatures(DataReport):
 
         file_path = self.result_path / f"{column_of_interest}_features_figure.html"
 
-        figure.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(figure, file_path)
 
         return ReportOutput(file_path, name=y_label)
 

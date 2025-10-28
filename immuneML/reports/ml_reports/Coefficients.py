@@ -14,6 +14,7 @@ from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.classifiers.RandomForestClassifier import RandomForestClassifier
 from immuneML.ml_methods.classifiers.SVC import SVC
 from immuneML.ml_methods.classifiers.SVM import SVM
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
@@ -200,8 +201,7 @@ class Coefficients(MLReport):
                                   f"{' '.join(output_name.split('_'))}")
             figure.update_traces(marker_color=px.colors.sequential.Teal[3])
 
-            with filename.open("w") as file:
-                figure.write_html(file)
+            filename = PlotlyUtil.write_image_to_file(figure, filename, 1)
 
             return ReportOutput(filename)
 

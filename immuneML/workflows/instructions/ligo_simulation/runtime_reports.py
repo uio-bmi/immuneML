@@ -4,6 +4,8 @@ import numpy as np
 import plotly.graph_objects as go
 import yaml
 
+from immuneML.reports.PlotlyUtil import PlotlyUtil
+
 
 def make_p_gen_histogram_plot(hist_data: np.ndarray, hist_bin_edges: np.ndarray, path: Path, p_gen_text: str):
 
@@ -14,4 +16,4 @@ def make_p_gen_histogram_plot(hist_data: np.ndarray, hist_bin_edges: np.ndarray,
     fig.update_layout(template='plotly_white',
                       xaxis_title_text=f'log10 generation probability histogram<br>(sequences with log10 Pgen '
                                        f'outside this range have probability of {p_gen_text})')
-    fig.write_html(str(path / 'p_gen_histogram.html'))
+    PlotlyUtil.write_image_to_file(fig, path / 'p_gen_histogram.html')

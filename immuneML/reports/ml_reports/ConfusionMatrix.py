@@ -138,7 +138,8 @@ class ConfusionMatrix(MLReport):
                           template="plotly_white")
 
         filename = self.result_path / "confusion_matrix.html"
-        fig.write_html(str(filename))
+        filename = PlotlyUtil.write_image_to_file(fig, filename)
+
         return filename
 
     def _write_settings(self):

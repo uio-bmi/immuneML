@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 
 from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
@@ -116,7 +117,7 @@ class CVFeaturePerformance(TrainMLModelReport):
         fig.update_layout(hovermode="x unified")
 
         file_path = self.result_path / f"{self.result_name}.html"
-        fig.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(fig, file_path)
 
         return ReportOutput(path=file_path)
 

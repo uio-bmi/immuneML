@@ -10,6 +10,7 @@ from plotly.subplots import make_subplots
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.classifiers.ReceptorCNN import ReceptorCNN
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
@@ -89,9 +90,9 @@ class KernelSequenceLogo(MLReport):
         table.cells.format = [[None], ['.3f']]
         fig.add_trace(table, row=1, col=2)
         fig.update_layout(template="plotly_white")
-        fig.write_html(str(self.result_path / "fully_connected_layer_weights.html"))
+        output_path = PlotlyUtil.write_image_to_file(fig, self.result_path / "fully_connected_layer_weights.html")
 
-        return ReportOutput(self.result_path / "fully_connected_layer_weights.html", "fully-connected layer weights")
+        return ReportOutput(output_path, "fully-connected layer weights")
 
     def _store_fc_table(self, df, bias):
         new_df = pd.concat([df, pd.DataFrame({"weights": bias, "names": "bias"})], ignore_index=True)

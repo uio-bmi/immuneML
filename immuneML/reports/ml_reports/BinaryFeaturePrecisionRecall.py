@@ -12,6 +12,7 @@ from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.classifiers.BinaryFeatureClassifier import BinaryFeatureClassifier
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
@@ -130,7 +131,7 @@ class BinaryFeaturePrecisionRecall(MLReport):
 
         file_path = self.result_path / f"{dataset_type}_precision_recall.html"
 
-        fig.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(fig, file_path)
 
         return ReportOutput(path=file_path,
                             name=f"Precision and recall scores on the {dataset_type} set for motif subsets")

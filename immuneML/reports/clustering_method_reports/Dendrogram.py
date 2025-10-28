@@ -34,6 +34,7 @@ class Dendrogram(ClusteringMethodReport):
                     labels:
                         - disease_status
                         - age_group
+
     """
 
     def __init__(self, labels: list, result_path: Path = None, name: str = None,
@@ -121,28 +122,8 @@ class Dendrogram(ClusteringMethodReport):
 
         return fig
 
-    def _add_distance_heatmap(self, linkage_matrix, dendro_leaves, fig):
-        # Reorder the distance matrix according to dendrogram leaves
-        dist_matrix = cophenet(linkage_matrix)
-        heat_data = squareform(dist_matrix)
-        heat_data = heat_data[np.ix_(dendro_leaves, dendro_leaves)]
-
-        # Create Heatmap with custom hover template
-        fig.add_trace(
-            go.Heatmap(
-                x=fig['layout']['xaxis']['tickvals'],
-                y=fig['layout']['xaxis']['tickvals'],
-                z=heat_data,
-                colorscale=px.colors.sequential.Blues,
-                showlegend=False,
-                showscale=False,
-                hovertemplate='Distance: %{z}<extra></extra>'
-            )
-        )
-
-        return fig
-
     def _update_layout(self, fig, example_ids):
+
         fig.update_layout({
             'height': 700 + len(example_ids) / 10 + len(self.labels) * 20,
             # Adjust height based on number of labels and number of examples
@@ -150,7 +131,16 @@ class Dendrogram(ClusteringMethodReport):
             'hovermode': 'closest',
             'template': 'plotly_white',
             'xaxis': {
-                'domain': [0, 1],
+                'domain': [0.15, 1],
+                'mirror': False,
+                'showgrid': False,
+                'showline': False,
+                'zeroline': False,
+                'ticks': "",
+                'showticklabels': False
+            },
+            'xaxis2': {
+                'domain': [0, 0.145],  # Side dendrogram
                 'mirror': False,
                 'showgrid': False,
                 'showline': False,
@@ -180,31 +170,6 @@ class Dendrogram(ClusteringMethodReport):
 
         return fig
 
-    def _make_dendrogram(self, example_ids, linkage_matrix):
-        dummy_data = np.zeros((len(example_ids), 2))
-        fig = ff.create_dendrogram(
-            dummy_data, orientation='bottom', colorscale=['#7393B3' for _ in range(8)],
-            labels=example_ids, linkagefun=lambda x: linkage_matrix,
-            distfun=lambda x: linkage_matrix[:, 2]
-        )
-
-        # Remove trace numbers from dendrogram hover
-        for trace in fig['data']:
-            trace['yaxis'] = 'y2'
-            trace['hovertemplate'] = None
-            trace['showlegend'] = False
-
-        return fig
-
-    def _make_dendro_leaves_and_ordered_indices(self, example_ids, fig):
-        label_to_idx = {label: idx for idx, label in enumerate(example_ids)}
-
-        # Get the ordering of leaves from the top dendrogram and convert to indices
-        dendro_leaves = [label_to_idx[label] for label in fig['layout']['xaxis']['ticktext']]
-        ordered_ids = [example_ids[idx] for idx in dendro_leaves]
-
-        return dendro_leaves, ordered_ids
-
     def _create_full_dendrogram(self, output_path):
         linkage_matrix = self._get_linkage_matrix()
         example_ids = self.item.dataset.get_example_ids()
@@ -214,17 +179,61 @@ class Dendrogram(ClusteringMethodReport):
 
         self._save_data(linkage_matrix, metadata)
 
-        fig = self._make_dendrogram(example_ids, linkage_matrix)
+        fig, dendro_leaves, dendro_side = self._make_dendrograms(example_ids, linkage_matrix)
+        fig, ordered_ids = self._add_distance_heatmap(example_ids, linkage_matrix, dendro_leaves, dendro_side, fig)
 
-        dendro_leaves, ordered_ids = self._make_dendro_leaves_and_ordered_indices(example_ids, fig)
-
-        annotation_start, annotation_end = 0.66, 0.8
+        annotation_start, annotation_end = 0.65, 0.8
         annotation_height = (annotation_end - annotation_start) / len(self.labels)
 
         fig = self._add_annotations(fig, annotation_start, annotation_height, metadata, ordered_ids)
-        fig = self._add_distance_heatmap(linkage_matrix, dendro_leaves, fig)
         fig = self._update_layout(fig, example_ids)
 
         fig_path = PlotlyUtil.write_image_to_file(fig, output_path, len(example_ids))
 
         return fig_path
+
+    def _add_distance_heatmap(self, example_ids, linkage_matrix, dendro_leaves, dendro_side, fig):
+        ordered_ids = [example_ids[idx] for idx in dendro_leaves]
+        heat_data = squareform(cophenet(linkage_matrix))
+        heat_data = heat_data[dendro_leaves, :]
+        heat_data = heat_data[:, dendro_leaves]
+
+        heatmap = go.Heatmap(x=dendro_leaves, y=dendro_leaves, z=heat_data, colorscale=px.colors.sequential.Blues,
+                             showlegend=False, showscale=False,
+                             hovertemplate='Distance: %{z}<extra></extra>')
+
+        heatmap['x'] = fig['layout']['xaxis']['tickvals']
+        heatmap['y'] = dendro_side['layout']['yaxis']['tickvals']
+
+        fig.add_trace(heatmap)
+
+        return fig, ordered_ids
+
+
+    def _make_dendrograms(self, example_ids, linkage_matrix):
+
+        fig = ff.create_dendrogram(np.zeros(len(example_ids)), orientation='bottom',
+                                   colorscale=['#7393B3' for _ in range(8)],
+                                   labels=example_ids, linkagefun=lambda x: linkage_matrix,
+                                   distfun=lambda x: linkage_matrix[:, 2])
+
+        for i in range(len(fig['data'])):
+            fig['data'][i]['yaxis'] = 'y2'
+            fig['data'][i]['hovertemplate'] = None
+            fig['data'][i]['showlegend'] = False
+
+        dendro_side = ff.create_dendrogram(np.zeros(len(example_ids)), orientation='right',
+                                           linkagefun=lambda x: linkage_matrix, distfun=lambda x: linkage_matrix[:, 2],
+                                           colorscale=['#7393B3' for _ in range(8)])
+        for i in range(len(dendro_side['data'])):
+            dendro_side['data'][i]['xaxis'] = 'x2'
+            dendro_side['data'][i]['hovertemplate'] = None
+            dendro_side['data'][i]['showlegend'] = False
+
+        for data in dendro_side['data']:
+            fig.add_trace(data)
+
+        dendro_leaves = dendro_side['layout']['yaxis']['ticktext']
+        dendro_leaves = list(map(int, dendro_leaves))
+
+        return fig, dendro_leaves, dendro_side

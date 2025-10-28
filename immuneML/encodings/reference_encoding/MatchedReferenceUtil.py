@@ -74,7 +74,7 @@ class MatchedReferenceUtil:
 
 def check_imported_references(paired, receptors, seq_import_params):
     check_for_duplicates(paired, receptors, seq_import_params)
-    check_genes(paired, receptors, seq_import_params)
+    # check_genes(paired, receptors, seq_import_params)
 
 
 def check_genes(paired, receptors, seq_import_params):

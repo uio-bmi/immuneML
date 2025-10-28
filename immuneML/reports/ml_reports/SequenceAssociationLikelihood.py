@@ -9,6 +9,7 @@ from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.classifiers.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
@@ -81,7 +82,7 @@ class SequenceAssociationLikelihood(MLReport):
 
         output_path = self.result_path / f"{self.result_name}.html"
 
-        figure.write_html(str(output_path))
+        output_path = PlotlyUtil.write_image_to_file(figure, output_path)
 
         return ReportOutput(output_path)
 

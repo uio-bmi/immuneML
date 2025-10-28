@@ -11,6 +11,7 @@ from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -245,7 +246,7 @@ def _plot_node_degree_dist(result_path, node_degree_dist: pd.DataFrame, name: st
     fig.update_layout(xaxis_title="Degree",
                       yaxis_title="Count")
     output_path = result_path / f"{name}.html"
-    fig.write_html(output_path)
+    output_path = PlotlyUtil.write_image_to_file(fig, output_path)
 
     return ReportOutput(path=output_path, name=name)
 
@@ -264,7 +265,7 @@ def _plot_avg_node_degree_dist(result_path, node_degree_dists: list[pd.Series], 
 
     fig.update_layout(xaxis_title="Degree", yaxis_title="Average Count ± Std Dev")
     output_path = result_path / f"{name}.html"
-    fig.write_html(output_path)
+    output_path = PlotlyUtil.write_image_to_file(fig, output_path)
 
     return ReportOutput(path=output_path, name=f"{name}")
 

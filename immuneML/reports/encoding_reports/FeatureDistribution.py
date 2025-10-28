@@ -5,6 +5,7 @@ import numpy as np
 import plotly.express as px
 
 from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.encoding_reports.FeatureReport import FeatureReport
 
@@ -163,7 +164,7 @@ class FeatureDistribution(FeatureReport):
         file_path = self.result_path / f"{self.result_name}_{key}.html"
         plotting_data.to_csv(self.result_path / f"{self.result_name}_{key}.csv", index=False)
 
-        figure.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(figure, file_path)
         output_tables.append(
             ReportOutput(path=self.result_path / f"{self.result_name}_{key}.csv", name=f"{self.result_name} {key}"))
 
@@ -187,7 +188,7 @@ class FeatureDistribution(FeatureReport):
         file_path = self.result_path / f"{self.result_name}_{key}.html"
         plotting_data.to_csv(self.result_path / f"{self.result_name}_{key}.csv", index=False)
 
-        figure.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(figure, file_path)
         output_tables.append(
             ReportOutput(path=self.result_path / f"{self.result_name}_{key}.csv", name=f"{self.result_name} {key}"))
 

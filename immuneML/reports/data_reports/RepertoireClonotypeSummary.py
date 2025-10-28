@@ -7,6 +7,7 @@ import plotly.express as px
 from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -102,11 +103,11 @@ class RepertoireClonotypeSummary(DataReport):
         fig.update_yaxes(title='')
 
         clonotypes.to_csv(self.result_path / 'clonotype_count_per_repertoire.csv', index=False)
-        fig.write_html(str(self.result_path / 'clonotype_count_per_repertoire.html'))
+        fig_path = PlotlyUtil.write_image_to_file(fig, self.result_path / 'clonotype_count_per_repertoire.html',
+                                       self.dataset.get_example_count())
 
         return ReportResult(name=self.name, info="Clonotype count per repertoire",
-                            output_figures=[ReportOutput(self.result_path / 'clonotype_count_per_repertoire.html',
-                                            name='Clonotype count per repertoire')],
+                            output_figures=[ReportOutput(fig_path, name='Clonotype count per repertoire')],
                             output_tables=[ReportOutput(self.result_path / 'clonotype_count_per_repertoire.csv',
                                                         name='Clonotype count per repertoire')])
 
