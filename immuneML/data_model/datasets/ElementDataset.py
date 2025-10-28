@@ -63,6 +63,9 @@ class ElementDataset(Dataset, ABC):
     def data(self) -> AIRRSequenceSet:
         return bnp_read_from_file(self.filename, self.buffer_type, self.bnp_dataclass)
 
+    def get_locus(self):
+        return sorted(set(self.data.locus.tolist()))
+
     def clone(self, keep_identifier: bool = False):
         dataset = self.__class__(labels=self.labels, encoded_data=copy.deepcopy(self.encoded_data),
                                  filename=self.filename, bnp_dataclass=self.bnp_dataclass,
@@ -171,6 +174,7 @@ class SequenceDataset(ElementDataset):
 
     def get_data(self, batch_size: int = 1, region_type: RegionType = RegionType.IMGT_CDR3):
         return make_sequences_from_data(self.data, self.dynamic_fields, region_type)
+
 
     def get_example_ids(self):
         return self.data.sequence_id.tolist()
