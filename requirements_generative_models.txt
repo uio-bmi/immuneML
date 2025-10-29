@@ -1,6 +1,7 @@
 olga
 sonia<=0.1.3
 sonnia<=0.1.5
+sentencepiece
 keras
 tensorflow
 torch
