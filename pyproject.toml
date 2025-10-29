@@ -47,7 +47,7 @@ word2vec = ["gensim>=4"]
 fisher = ["fisher>=0.1.9", "fishersapi"]
 TCRdist = ["tcrdist3>=0.1.6"]
 gen_models = ["sonnia", "torch"]
-embeddings = ["transformers", "torch", "sentencepiece", "esm"]
+embeddings = ["transformers", "torch", "sentencepiece", "esm", 'httpx']
 ligo = ["stitchr", "IMGTgeneDL"]
 DL = ["torch", "keras", "tensorflow", "logomaker", "gensim"]
 all = [
@@ -63,7 +63,8 @@ all = [
     "fishersapi",
     "gensim>=4",
     "transformers",
-    "sentencepiece"
+    "sentencepiece",
+    'httpx'
 ]
 
 [project.urls]
