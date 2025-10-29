@@ -13,8 +13,6 @@ def parse_command_line_arguments(args):
 
     parser.add_argument("-e", "--gen_example_count", required=True,
                         help="Number of examples to generate.")
-    parser.add_argument("-c", "--chain_type", required=True, choices=["TRA", "TRB", "IGH", "IGK", "IGL", "TRD", "TRG"],
-                        help="Chain type of the sequences to generate.")
     parser.add_argument("-m", "--generative_method", choices=["SoNNia", "SimpleLSTM", "PWM", "SimpleVAE"],
                         required=True, help="Which generative model should be trained.")
 
@@ -48,7 +46,7 @@ def build_specs(parsed_args):
     if parsed_args.kl_gen_model_report == "True":
         reports['kl_kmer_comparison'] = "KLKmerComparison"
 
-    gen_model_args = {"locus": parsed_args.chain_type}
+    gen_model_args = dict()
 
     if parsed_args.generative_method == "SimpleVAE":
         reports['generative_model_overview'] = "VAESummary"
@@ -58,8 +56,8 @@ def build_specs(parsed_args):
     elif parsed_args.generative_method == "SimpleLSTM":
         gen_model_args['region_type'] = 'imgt_cdr3'
 
-    if parsed_args.generative_method == "SoNNia":
-        gen_model_args["default_model_name"] = f"human{parsed_args.chain_type}"
+    # if parsed_args.generative_method == "SoNNia":
+    #     gen_model_args["default_model_name"] = f"human{parsed_args.chain_type}"
 
     specs = {
         "definitions": {

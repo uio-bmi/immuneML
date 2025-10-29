@@ -10,7 +10,7 @@ def test_fit_apply_gen_model():
     gen_models = [
         {
             "PWM": {
-                'locus': 'beta',
+                # 'locus': 'beta',
                 'sequence_type': 'amino_acid',
                 'region_type': 'IMGT_JUNCTION'
             }
@@ -19,7 +19,7 @@ def test_fit_apply_gen_model():
             "SoNNia": {
                 "batch_size": 1e4,
                 "epochs": 5,
-                'default_model_name': 'humanTRB',
+                # 'default_model_name': 'humanTRB',
                 'deep': False,
                 'include_joint_genes': True,
                 'n_gen_seqs': 100
@@ -35,7 +35,7 @@ def test_fit_apply_gen_model():
         },
         {
             "SimpleLSTM": {
-                'locus': 'beta',
+                # 'locus': 'beta',
                 'sequence_type': 'amino_acid',
                 'num_epochs': 10,
                 'hidden_size': 8,

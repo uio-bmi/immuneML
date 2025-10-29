@@ -100,6 +100,8 @@ class SoNNia(GenerativeModel):
         elif default_model_name is not None:
             super().__init__(locus=Chain.get_chain(default_model_name[-3:]), region_type=RegionType.IMGT_JUNCTION,
                              seed=seed)
+        else:
+            super().__init__(locus=None, region_type=RegionType.IMGT_JUNCTION, seed=seed)
         self.epochs = epochs
         self.batch_size = int(batch_size)
         self.deep = deep
@@ -108,16 +110,25 @@ class SoNNia(GenerativeModel):
         self._model = None
         self.name = name
         self.default_model_name = default_model_name
-        if custom_model_path is None or custom_model_path == '':
-            self._model_path = Path(
-                load_model.__file__).parent / f"default_models/{OLGA.DEFAULT_MODEL_FOLDER_MAP[self.default_model_name]}"
-        else:
-            self._model_path = custom_model_path
+        self._model_path = custom_model_path
+
+        self.set_model_path(self.default_model_name)
+
+    def set_model_path(self, model_name: str):
+        if self._model_path is None or self._model_path == '':
+            if model_name is not None:
+                self.default_model_name = model_name
+                self._model_path = Path(
+                    load_model.__file__).parent / f"default_models/{OLGA.DEFAULT_MODEL_FOLDER_MAP[self.default_model_name]}"
 
     def fit(self, dataset: Dataset, path: Path = None):
         from sonnia.sonnia import SoNNia as InternalSoNNia
 
-        print_log(f"{SoNNia.__name__}: fitting a selection model...", True)
+        if self._model_path is None:
+            self.set_locus(dataset)
+            self.set_model_path(f"human{self.locus.value}")
+
+        print_log(f"{SoNNia.__name__}: fitting a selection model for {self.default_model_name}...", True)
 
         data = dataset.data.topandas()[['junction_aa', 'v_call', 'j_call']]
         data_seqs = data.to_records(index=False).tolist()
