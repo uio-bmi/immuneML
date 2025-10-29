@@ -32,7 +32,7 @@ def test_train_gen_model_run():
                     "SoNNia": {
                         "batch_size": 100,
                         "epochs": 3,
-                        'default_model_name': 'humanTRB',
+                        # 'default_model_name': 'humanTRB',
                         'deep': False,
                         'include_joint_genes': True,
                         'n_gen_seqs': 10

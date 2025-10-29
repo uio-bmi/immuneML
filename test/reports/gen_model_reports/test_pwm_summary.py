@@ -13,7 +13,7 @@ def test_pwm_summary():
     dataset = RandomDatasetGenerator.generate_sequence_dataset(10, {10: 0.5, 11: 0.5},
                                                                {}, path / 'dataset')
 
-    pwm = PWM('beta', 'amino_acid', 'IMGT_CDR3')
+    pwm = PWM(None, 'amino_acid', 'IMGT_CDR3')
 
     pwm.fit(dataset, path / 'model')
 
