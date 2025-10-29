@@ -215,6 +215,8 @@ class Repertoire:
             self.element_count = len(self.data)
         return self.element_count
 
+    def get_locus(self):
+        return sorted(set(self.data.locus.tolist()))
 
 def build_dynamic_airr_sequence_set_dataclass(all_fields_dict: Dict[str, Any]):
     sequence_field_names = {seq_field.name: seq_field.type for seq_field in fields(AIRRSequenceSet)}

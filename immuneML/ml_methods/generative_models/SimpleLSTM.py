@@ -93,7 +93,7 @@ class SimpleLSTM(GenerativeModel):
                  region_type: str = RegionType.IMGT_CDR3.name, prime_str: str = "C", window_size: int = 64,
                  seed: int = None, iter_to_report: int = 1):
 
-        super().__init__(Chain.get_chain(locus), region_type=RegionType.get_object(region_type), name=name, seed=seed)
+        super().__init__(locus, region_type=RegionType.get_object(region_type), name=name, seed=seed)
         self._model = None
         self.sequence_type = SequenceType[sequence_type.upper()] if sequence_type else SequenceType.AMINO_ACID
         self.hidden_size = hidden_size
@@ -140,6 +140,8 @@ class SimpleLSTM(GenerativeModel):
     def fit(self, data, path: Path = None):
         import torch
         from torch import nn, optim
+
+        self.set_locus(data)
 
         if self.seed is not None:
             torch.manual_seed(self.seed)

@@ -2,6 +2,7 @@ import abc
 from pathlib import Path
 
 import numpy as np
+import logging
 
 from immuneML.data_model.SequenceParams import RegionType, Chain
 from immuneML.data_model.datasets.Dataset import Dataset
@@ -22,7 +23,7 @@ class GenerativeModel:
     OUTPUT_COLUMNS = []
 
     def __init__(self, locus: Chain, name: str = None, region_type: RegionType = None, seed=None):
-        self.locus = Chain.get_chain(locus)
+        self.locus = Chain.get_chain(locus) if locus is not None else None
         self.name = name
         self.region_type = region_type
         self.seed = seed
@@ -70,3 +71,13 @@ class GenerativeModel:
     @abc.abstractmethod
     def load_model(cls, path: Path):
         pass
+
+    def set_locus(self, dataset: Dataset):
+        dataset_locus = dataset.get_locus()
+        if len(dataset_locus) > 0:
+            logging.info(f"GenerativeModel: input dataset has multiple loci, choosing: {dataset_locus}")
+
+        if self.locus is not None and dataset_locus[0] != self.locus.value:
+            logging.info(f"GenerativeModel: Overwriting default locus {self.locus.value} with dataset locus {dataset_locus[0]}")
+
+        self.locus = Chain.get_chain(dataset_locus[0])

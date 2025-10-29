@@ -116,6 +116,14 @@ class RepertoireDataset(Dataset):
     def get_data(self, batch_size: int = 1):
         return self.repertoires
 
+    def get_locus(self):
+        loci = set()
+
+        for repertoire in self.get_data():
+            loci.update(repertoire.get_locus())
+
+        return sorted(loci)
+
     def get_repertoire(self, index: int = -1, repertoire_identifier: str = "") -> Repertoire:
         assert index != -1 or repertoire_identifier != "", \
             "RepertoireDataset: cannot get repertoire since the index nor identifier are set."

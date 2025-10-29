@@ -5,3 +5,4 @@ include_joint_genes: True
 n_gen_seqs: 100
 seed: null
 num_processes: 4
+locus: null

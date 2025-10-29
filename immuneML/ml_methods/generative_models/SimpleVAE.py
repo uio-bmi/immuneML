@@ -182,6 +182,7 @@ class SimpleVAE(GenerativeModel):
 
     def fit(self, data, path: Path = None):
         import torch
+        self.set_locus(data)
         seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
         self._extract_data_characteristics(data, seq_col)
 
