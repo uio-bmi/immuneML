@@ -287,7 +287,7 @@ class AminoAcidFrequencyDistribution(DataReport):
             figure.update_yaxes(tickformat=",.0%", range=[0, 1])
 
         file_path = self.result_path / "amino_acid_frequency_distribution.html"
-        figure.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(figure, str(file_path), 20)
 
         return ReportOutput(path=file_path, name="Amino acid frequency distribution")
 
@@ -346,7 +346,7 @@ class AminoAcidFrequencyDistribution(DataReport):
         figure.update_yaxes(tickformat=",.0%")
 
         file_path = self.result_path / "frequency_change.html"
-        figure.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(figure, str(file_path), 20)
 
         return ReportOutput(path=file_path, name="Frequency difference between amino acid usage in the two classes")
 

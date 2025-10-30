@@ -1,11 +1,9 @@
 import numpy as np
 import pandas as pd
 
-from immuneML import Constants
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from immuneML.data_model.SequenceParams import RegionType, Chain
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.util.ImportHelper import ImportHelper
 
 
 class AdaptiveImportHelper:

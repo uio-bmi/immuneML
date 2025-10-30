@@ -4,3 +4,5 @@ reports: []
 export_generated_dataset: true
 export_combined_dataset: false
 training_percentage: 0.7
+split_strategy: random
+split_config: null

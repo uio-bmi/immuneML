@@ -24,7 +24,7 @@ class UMAP(DimRedMethod):
             ml_methods:
                 my_umap:
                     UMAP:
-                        # arguments as defined by scikit-learn
+                        # arguments as defined by umap-learn
                         n_components: 2
                         n_neighbors: 15
                         metric: euclidean

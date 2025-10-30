@@ -161,27 +161,30 @@ class ClusteringInstruction(Instruction):
             log_memory_usage(f"discovery in split {run_id + 1}", f"Clustering instruction {self.state.name}")
 
             # Run validations
-            print_log(f"Running validation for split {run_id + 1}.")
 
-            predictions_df = self._init_predictions_df(self.state.validation_datasets[run_id])
+            if self.state.config.split_config.is_with_test_set():
 
-            if "method_based" in self.state.config.validation_type:
-                self.state = self.validation_handler.run_method_based_validation(
-                    self.state.validation_datasets[run_id], run_id, PathBuilder.build(path / 'method_based_validation'),
-                    copy.deepcopy(predictions_df), self.state)
+                print_log(f"Running validation for split {run_id + 1}.")
 
-                log_memory_usage(f"method-based validation in split {run_id + 1}",
-                                 f"Clustering instruction {self.state.name}")
+                predictions_df = self._init_predictions_df(self.state.validation_datasets[run_id])
 
-            if "result_based" in self.state.config.validation_type:
-                self.state = self.validation_handler.run_result_based_validation(
-                    self.state.validation_datasets[run_id], run_id, PathBuilder.build(path / "result_based_validation"),
-                    copy.deepcopy(predictions_df), self.state)
+                if "method_based" in self.state.config.validation_type:
+                    self.state = self.validation_handler.run_method_based_validation(
+                        self.state.validation_datasets[run_id], run_id, PathBuilder.build(path / 'method_based_validation'),
+                        copy.deepcopy(predictions_df), self.state)
 
-                log_memory_usage(f"result-based validation in split {run_id + 1}",
-                                 f"Clustering instruction {self.state.name}")
+                    log_memory_usage(f"method-based validation in split {run_id + 1}",
+                                     f"Clustering instruction {self.state.name}")
 
-            print_log(f"Clustering for split {run_id + 1} finished.")
+                if "result_based" in self.state.config.validation_type:
+                    self.state = self.validation_handler.run_result_based_validation(
+                        self.state.validation_datasets[run_id], run_id, PathBuilder.build(path / "result_based_validation"),
+                        copy.deepcopy(predictions_df), self.state)
+
+                    log_memory_usage(f"result-based validation in split {run_id + 1}",
+                                     f"Clustering instruction {self.state.name}")
+
+                print_log(f"Clustering for split {run_id + 1} finished.")
 
         self.report_handler.run_clustering_reports(self.state)
         return self.state

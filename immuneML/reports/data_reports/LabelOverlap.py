@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -47,7 +48,7 @@ class LabelOverlap(DataReport):
                                                'LabelOverlap')
         ParameterValidator.assert_type_and_value(kwargs["column_label"], str, "LabelOverlap", "column_label")
         ParameterValidator.assert_type_and_value(kwargs["row_label"], str, "LabelOverlap", "row_label")
-        return LabelOverlap(column_label=kwargs["column_label"], row_label=kwargs["row_label"])
+        return LabelOverlap(column_label=kwargs["column_label"], row_label=kwargs["row_label"], name=kwargs.get("name", "LabelOverlap"))
 
     def check_prerequisites(self):
         if self.column_label not in self.dataset.get_label_names() or self.row_label not in self.dataset.get_label_names():
@@ -93,7 +94,7 @@ class LabelOverlap(DataReport):
 
         # Save plot
         plot_path = self.result_path / 'label_overlap.html'
-        fig.write_html(str(plot_path))
+        plot_path = PlotlyUtil.write_image_to_file(fig, plot_path)
 
         return ReportResult(
             name=self.name,

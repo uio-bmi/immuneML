@@ -1,16 +1,80 @@
 import shutil
 
+import pandas as pd
+
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
 from immuneML.data_model.bnp_util import write_yaml
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
+
+
+def test_fit_gen_model_with_manual_split():
+    base_path = PathBuilder.remove_old_and_build(
+        EnvironmentSettings.tmp_test_path / f"manual_fit_gen_model")
+
+    d1 = RandomDatasetGenerator.generate_sequence_dataset(10, {4: 1}, labels={}, path=base_path / 'dataset')
+
+    ids = d1.get_example_ids()
+
+    pd.DataFrame({'example_id': ids[:5]}).to_csv(base_path / 'dataset/train_metadata.csv', index=False)
+    pd.DataFrame({'example_id': ids[5:]}).to_csv(base_path / 'dataset/test_metadata.csv', index=False)
+
+    specs = {
+        "definitions": {
+            "datasets": {
+                "d1": {
+                    'format': 'AIRR',
+                    'params': {
+                        'dataset_file': str(base_path / 'dataset/sequence_dataset.yaml'),
+                        'path': str(base_path / 'dataset')
+                    }
+                }
+            },
+            "ml_methods": {
+                'gen_model': {
+                    'PWM': {
+                        'locus': 'beta',
+                        'sequence_type': 'amino_acid',
+                        'region_type': 'IMGT_JUNCTION'
+                    }
+                }
+            },
+            "reports": {
+                "sld_rep": {"SequenceLengthDistribution": {'region_type': 'IMGT_JUNCTION'}},
+                "aa_freq": "AminoAcidFrequencyDistribution",
+                "kl_gen_model": "KLKmerComparison"
+            }
+        },
+        "instructions": {
+            "inst1": {
+                "type": "TrainGenModel",
+                "gen_examples_count": 100,
+                "dataset": "d1",
+                "method": "gen_model",
+                "reports": ['sld_rep', 'aa_freq', 'kl_gen_model'],
+                'export_combined_dataset': True,
+                'split_strategy': 'manual',
+                'split_config': {
+                    'train_metadata_path': str(base_path / 'dataset/train_metadata.csv'),
+                    'test_metadata_path': str(base_path / 'dataset/test_metadata.csv')
+                }
+            }
+        }
+    }
+
+    write_yaml(base_path / 'specs.yaml', specs)
+
+    ImmuneMLApp(base_path / 'specs.yaml', base_path / 'output').run()
+
+    shutil.rmtree(base_path)
 
 
 def test_fit_apply_gen_model():
     gen_models = [
         {
             "PWM": {
-                'locus': 'beta',
+                # 'locus': 'beta',
                 'sequence_type': 'amino_acid',
                 'region_type': 'IMGT_JUNCTION'
             }
@@ -19,10 +83,11 @@ def test_fit_apply_gen_model():
             "SoNNia": {
                 "batch_size": 1e4,
                 "epochs": 5,
-                'default_model_name': 'humanTRB',
+                # 'default_model_name': 'humanTRB',
                 'deep': False,
                 'include_joint_genes': True,
-                'n_gen_seqs': 100
+                'n_gen_seqs': 100,
+                'num_processes': 4
             }
         },
         {
@@ -35,7 +100,7 @@ def test_fit_apply_gen_model():
         },
         {
             "SimpleLSTM": {
-                'locus': 'beta',
+                # 'locus': 'beta',
                 'sequence_type': 'amino_acid',
                 'num_epochs': 10,
                 'hidden_size': 8,
@@ -82,7 +147,7 @@ def fit_and_apply_gen_model(gen_model):
                 'gen_model': gen_model
             },
             "reports": {
-                "sld_rep": "SequenceLengthDistribution",
+                "sld_rep": {"SequenceLengthDistribution": {'region_type': 'IMGT_JUNCTION'}},
                 "aa_freq": "AminoAcidFrequencyDistribution",
                 "kl_gen_model": "KLKmerComparison"
             }
@@ -106,7 +171,7 @@ def fit_and_apply_gen_model(gen_model):
     specs = {
         "definitions": {
             "reports": {
-                "sld_rep": "SequenceLengthDistribution",
+                "sld_rep": {"SequenceLengthDistribution": {'region_type': 'IMGT_JUNCTION'}},
                 "aa_freq": "AminoAcidFrequencyDistribution",
                 "kl_gen_model": "KLKmerComparison"
             }
@@ -116,7 +181,8 @@ def fit_and_apply_gen_model(gen_model):
                 "type": "ApplyGenModel",
                 "gen_examples_count": 100,
                 "reports": ['sld_rep', 'aa_freq', 'kl_gen_model'],
-                "ml_config_path": str(generated_model_path / "output/inst1/trained_model/trained_model.zip"),
+                "ml_config_path": str(
+                    generated_model_path / "output/inst1/trained_model_gen_model/trained_model_gen_model.zip"),
             }
         }
     }

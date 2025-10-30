@@ -29,15 +29,19 @@
             <div class="dataset-info">
                 <table>
                     <tr>
-                        <td>Name</td>
+                        <td><b>Name</b></td>
                         <td>{{dataset_name}}</td>
                     </tr>
                     <tr>
-                        <td>Type</td>
+                        <td><b>Type</b></td>
                         <td>{{dataset_type}}</td>
                     </tr>
                     <tr>
-                        <td>Dataset size</td>
+                        <td><b>Locus</b></td>
+                        <td>{{dataset_locus}}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Dataset size</b></td>
                         <td>{{dataset_size}}</td>
                     </tr>
                 </table>
@@ -69,9 +73,6 @@
                     <div class="table-section">
                         <h4>{{name}}</h4>
                         <a href="{{download_link}}" download>Download {{file_name}}</a>
-                        <div class="table-container">
-                            {{{table}}}
-                        </div>
                     </div>
                     {{/output_tables}}
 

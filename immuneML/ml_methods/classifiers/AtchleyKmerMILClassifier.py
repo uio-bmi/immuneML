@@ -201,9 +201,10 @@ class AtchleyKmerMILClassifier(MLMethod):
     def _get_custom_params_path(self, path):
         return path / "custom_params.yaml"
 
-    def get_params(self):
+    def get_params(self, for_refitting=False):
         params = copy.deepcopy(vars(self))
-        params["logistic_regression"] = copy.deepcopy(self.logistic_regression).state_dict()
+        if not for_refitting:
+            params["logistic_regression"] = copy.deepcopy(self.logistic_regression).state_dict()
         return params
 
     def _predict_proba(self, encoded_data: EncodedData):

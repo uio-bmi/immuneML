@@ -7,6 +7,9 @@ from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequency
 
 class KmerFreqSequenceEncoder(KmerFrequencyEncoder):
 
+    def _encode_locus(self, dataset):
+        return len(set(dataset.data.locus.tolist())) > 1
+
     def _encode_new_dataset(self, dataset, params: EncoderParams):
 
         encoded_data = self._encode_data(dataset, params)
@@ -23,11 +26,12 @@ class KmerFreqSequenceEncoder(KmerFrequencyEncoder):
         label_config = params.label_config
         labels = {label: [] for label in label_config.get_labels_by_name()} if params.encode_labels else None
 
+        encode_locus = self._encode_locus(dataset)
+
         sequence_encoder = self._prepare_sequence_encoder()
-        feature_names = sequence_encoder.get_feature_names(params)
         params.region_type = self.region_type
         for sequence in dataset.get_data(region_type=self.region_type):
-            counts = self._encode_sequence(sequence, params, sequence_encoder, Counter())
+            counts = self._encode_sequence(sequence, params, sequence_encoder, Counter(), encode_locus)
             encoded_sequences.append(counts)
             sequence_ids.append(sequence.sequence_id)
 
@@ -36,4 +40,4 @@ class KmerFreqSequenceEncoder(KmerFrequencyEncoder):
                     label = sequence.metadata[label_name]
                     labels[label_name].append(label)
 
-        return encoded_sequences, sequence_ids, labels, feature_names
+        return encoded_sequences, sequence_ids, labels

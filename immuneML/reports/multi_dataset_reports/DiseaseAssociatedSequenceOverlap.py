@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.express as px
 
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.multi_dataset_reports.MultiDatasetReport import MultiDatasetReport
@@ -88,6 +89,6 @@ class DiseaseAssociatedSequenceOverlap(MultiDatasetReport):
                            template='plotly_white')
         figure.update_traces(hovertemplate="Overlap of disease-associated<br>sequences between datasets<br>%{x} and %{y}:<br>%{z}%<extra></extra>")
         figure_path = self.result_path / "sequence_overlap.html"
-        figure.write_html(str(figure_path))
+        figure_path = PlotlyUtil.write_image_to_file(figure, figure_path)
         return figure_path
 

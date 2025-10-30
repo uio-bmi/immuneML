@@ -29,6 +29,9 @@ useful reports and visualizations:
 - :ref:`VJGeneDistribution`: shows how frequently each of the V and J gene occurs in the dataset; shows joint V and J gene
   distributions as well; here the report can also be split by a label of interest
 
+- :ref:`LabelDist`: shows the distribution for a list of labels of interest (e.g., disease, batch, age, sex); useful to
+  see if the dataset is balanced or if some unexpected values are present
+
 Some useful reports specifically for repertoire datasets (with one repertoire per patient):
 
 - :ref:`RepertoireClonotypeSummary`: shows the number of distinct clonotypes per repertoire; the clonotype counts can be
@@ -40,7 +43,7 @@ Additional useful reports to be applied on encoded datasets:
   scatterplot, allowing us to visually inspect which features differ the most between the label values.
 
 - :ref:`DimensionalityReduction`: uses a dimensionality reduction method (e.g., PCA, tSNE, UMAP) to visualize the encoded
-  dataset and optionally colors the points (each corresponding to one example from the dataset) by the label of interest.
+  dataset and optionally colors the points (each corresponding to one example from the dataset) by label(s) of interest.
 
 Encodings useful for exploratory analyses:
 
@@ -106,15 +109,10 @@ The analysis specification to run these reports:
                   split_by_label: true
                   label: batch
 
-              clonotype_summary_disease:
+              clonotype_summary:
                 RepertoireClonotypeSummary:
-                  split_by_label: true
-                  label: disease
-
-              clonotype_summary_batch:
-                RepertoireClonotypeSummary:
-                  split_by_label: true
-                  label: batch
+                  color_label: batch
+                  facet_label: disease
 
               feature_comparison:
                 FeatureComparison:
@@ -123,19 +121,13 @@ The analysis specification to run these reports:
                   opacity: 0.6
                   show_error_bar: False
 
-              dim_red_disease:
+              dim_red:
                 DimensionalityReduction:
-                  label: disease
+                  labels: [disease, batch]
                   dim_red_method:
                     KernelPCA:
                       n_components: 2
-
-              dim_red_batch:
-                DimensionalityReduction:
-                  label: batch
-                  dim_red_method:
-                    KernelPCA:
-                      n_components: 2
+                      kernel: rbf
 
           instructions:
             exploratory_analysis:
@@ -143,11 +135,11 @@ The analysis specification to run these reports:
               analyses:
                 raw_data_analysis:
                   dataset: dataset
-                  reports: [aa_dist, label_overlap, seq_len_dist_for_disease, seq_len_dist_for_batch, gene_dist_disease, gene_dist_batch, clonotype_summary_disease, clonotype_summary_batch]
+                  reports: [aa_dist, label_overlap, seq_len_dist_for_disease, seq_len_dist_for_batch, gene_dist_disease, gene_dist_batch, clonotype_summary]
                 encoded_data_analysis:
                   dataset: dataset
                   encoding: 3mer_freq
-                  reports: [feature_comparison, dim_red_disease, dim_red_batch]
+                  reports: [feature_comparison, dim_red]
 
 
 Run the exploratory analysis from the command line:

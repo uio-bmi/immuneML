@@ -7,7 +7,7 @@ from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
+from immuneML.encodings.diversity_encoding.EvennessProfileEncoder import EvennessProfileEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration

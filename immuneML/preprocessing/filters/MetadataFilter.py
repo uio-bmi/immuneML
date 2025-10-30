@@ -5,7 +5,6 @@ import numpy as np
 from immuneML.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
 from immuneML.analysis.criteria_matches.CriteriaTypeInstantiator import CriteriaTypeInstantiator
 from immuneML.data_model.datasets.Dataset import Dataset
-from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.preprocessing.filters.Filter import Filter
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -68,6 +67,17 @@ class MetadataFilter(Filter):
     def __init__(self, criteria: dict, result_path: Path = None):
         super().__init__(result_path)
         self.criteria = CriteriaTypeInstantiator.instantiate(criteria)
+        self.column_names = extract_column_names(self.criteria)
+
+    @classmethod
+    def build_object(cls, **kwargs):
+        criteria = kwargs
+        if 'result_path' in criteria:
+            result_path = kwargs.get("result_path", None)
+            del criteria['result_path']
+        else:
+            result_path = None
+        return cls(criteria, result_path)
 
     def keeps_example_count(self) -> bool:
         return False
@@ -79,13 +89,21 @@ class MetadataFilter(Filter):
         return dataset.make_subset(indices, self.result_path, "filtered")
 
     def _get_matching_indices(self, dataset: Dataset):
-        if isinstance(dataset, SequenceDataset):
-            field_names = dataset.get_label_names()
-        else:
-            field_names = None
-        metadata = dataset.get_metadata(field_names, True)
+        metadata = dataset.get_metadata(self.column_names, True)
         matches = CriteriaMatcher().match(self.criteria, metadata)
         indices = np.where(matches)[0]
         return indices
 
 
+def extract_column_names(d):
+    results = []
+    if isinstance(d, dict):
+        for k, v in d.items():
+            if k == "column":
+                results.append(v)
+            else:
+                results.extend(extract_column_names(v))
+    elif isinstance(d, list):
+        for item in d:
+            results.extend(extract_column_names(item))
+    return results

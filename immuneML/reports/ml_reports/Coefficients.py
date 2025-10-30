@@ -8,11 +8,13 @@ import yaml
 
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
+from immuneML.ml_methods.classifiers.GradientBoosting import GradientBoosting
 from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.classifiers.RandomForestClassifier import RandomForestClassifier
 from immuneML.ml_methods.classifiers.SVC import SVC
 from immuneML.ml_methods.classifiers.SVM import SVM
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
@@ -154,7 +156,7 @@ class Coefficients(MLReport):
                             output_figures=[p for p in paths if p is not None])
 
     def _set_plotting_parameters(self):
-        if isinstance(self.method, RandomForestClassifier):
+        if isinstance(self.method, RandomForestClassifier) or isinstance(self.method, GradientBoosting):
             self._param_field = "feature_importances"
             self._y_axis_title = "Feature importance"
         else:
@@ -199,8 +201,7 @@ class Coefficients(MLReport):
                                   f"{' '.join(output_name.split('_'))}")
             figure.update_traces(marker_color=px.colors.sequential.Teal[3])
 
-            with filename.open("w") as file:
-                figure.write_html(file)
+            filename = PlotlyUtil.write_image_to_file(figure, filename, 1)
 
             return ReportOutput(filename)
 
@@ -208,7 +209,7 @@ class Coefficients(MLReport):
 
         run_report = True
 
-        if not any([isinstance(self.method, legal_method) for legal_method in (RandomForestClassifier, LogisticRegression, SVM, SVC)]):
+        if not any([isinstance(self.method, legal_method) for legal_method in (RandomForestClassifier, LogisticRegression, SVM, SVC, GradientBoosting)]):
             logging.warning(f"Coefficients report can only be created for RandomForestClassifier, LogisticRegression, SVC, or SVM, but got "
                             f"{type(self.method).__name__} instead. Coefficients report will not be created.")
             run_report = False

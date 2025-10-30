@@ -1,6 +1,4 @@
-import io
 import os
-import statistics
 from pathlib import Path
 
 import pandas as pd
@@ -19,7 +17,6 @@ from immuneML.presentation.TemplateParser import TemplateParser
 from immuneML.presentation.html.Util import Util
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.util.PathBuilder import PathBuilder
-from immuneML.util.StringHelper import StringHelper
 
 
 class HPHTMLBuilder:
@@ -50,15 +47,19 @@ class HPHTMLBuilder:
 
         for label_name in state.label_configuration.get_labels_by_name():
             for index, item in enumerate(HPHTMLBuilder._make_assessment_pages(state, base_path, label_name)):
-                TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "AssessmentSplitDetails.html",
-                                     template_map=item,
-                                     result_path=base_path / HPHTMLBuilder._make_assessment_split_path(index, state.name, label_name))
+                TemplateParser.parse(
+                    template_path=EnvironmentSettings.html_templates_path / "AssessmentSplitDetails.html",
+                    template_map=item,
+                    result_path=base_path / HPHTMLBuilder._make_assessment_split_path(index, state.name, label_name))
 
         for label_name in state.label_configuration.get_labels_by_name():
             for assessment_index in range(state.assessment.split_count):
                 TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "SelectionDetails.html",
-                                     template_map=HPHTMLBuilder._make_selection(state, assessment_index, label_name, base_path),
-                                     result_path=base_path / HPHTMLBuilder._make_selection_split_path(assessment_index, label_name, state.name))
+                                     template_map=HPHTMLBuilder._make_selection(state, assessment_index, label_name,
+                                                                                base_path),
+                                     result_path=base_path / HPHTMLBuilder._make_selection_split_path(assessment_index,
+                                                                                                      label_name,
+                                                                                                      state.name))
 
         return result_file
 
@@ -74,30 +75,9 @@ class HPHTMLBuilder:
     def _make_selection(state: TrainMLModelState, assessment_index: int, label_name: str, base_path):
         selection_state = state.assessment_states[assessment_index].label_states[label_name].selection_state
 
-        hp_settings = []
-        optimal = selection_state.optimal_hp_setting.get_key()
-
-        for hp_setting, hp_items in selection_state.hp_items.items():
-            hp_splits = []
-            for hp_item in hp_items:
-                hp_splits.append(HPHTMLBuilder._print_metric(hp_item.performance, state.optimization_metric))
-            hp_settings.append({
-                "hp_setting": hp_setting,
-                "hp_splits": hp_splits,
-                "optimal": hp_setting == optimal
-            })
-
-            if len(hp_splits) > 1:
-                hp_settings[-1]["average"] = round(statistics.mean(perf for perf in hp_splits if [isinstance(perf, float)]), HPHTMLBuilder.NUM_DIGITS)
-                hp_settings[-1]["show_average"] = True
-            else:
-                hp_settings[-1]["average"] = None
-                hp_settings[-1]["show_average"] = False
-
-            hp_settings[-1]["hp_splits"] = [{"optimization_metric_val": val} for val in hp_settings[-1]["hp_splits"]]
-
         has_other_metrics = len([metric for metric in state.metrics if metric != state.optimization_metric]) > 0 and \
-                            not (state.selection.split_strategy == SplitType.RANDOM and state.selection.training_percentage == 1)
+                            not (
+                                        state.selection.split_strategy == SplitType.RANDOM and state.selection.training_percentage == 1)
 
         return {
             "css_style": Util.get_css_content(HPHTMLBuilder.CSS_PATH),
@@ -107,20 +87,25 @@ class HPHTMLBuilder:
             "split_count": state.selection.split_count,
             "optimization_metric": state.optimization_metric.name.lower(),
             "has_other_metrics": has_other_metrics,
-            "metrics": [{"performance": HPHTMLBuilder._extract_selection_performance_per_metric(selection_state, metric, state.selection.split_count),
+            "metrics": [{"performance": HPHTMLBuilder._extract_selection_performance_per_metric(selection_state, metric,
+                                                                                                state.selection.split_count),
                          "metric": HPHTMLBuilder._get_heading_metric_name(metric.name.lower())}
-                        for metric in state.metrics if metric != state.optimization_metric] if has_other_metrics else None,
-            "hp_settings": hp_settings,
-            "show_average": any(hps["show_average"] for hps in hp_settings),
+                        for metric in state.metrics if
+                        metric != state.optimization_metric] if has_other_metrics else None,
+            "hp_settings": HPHTMLBuilder._extract_selection_performance_per_metric(selection_state,
+                                                                                   state.optimization_metric,
+                                                                                   state.selection.split_count),
             "data_split_reports": [
                 {'split_index': index + 1,
                  'train': Util.to_dict_recursive(selection_state.train_data_reports[index], base_path)
                  if len(selection_state.train_data_reports) == state.selection.split_count else None,
                  'test': Util.to_dict_recursive(selection_state.val_data_reports[index], base_path)
                  if len(selection_state.train_data_reports) == state.selection.split_count else None}
-                for index in range(state.selection.split_count)] if len(state.selection.reports.data_split_reports) > 0 else None,
+                for index in range(state.selection.split_count)] if len(
+                state.selection.reports.data_split_reports) > 0 else None,
             "has_data_split_reports": len(state.selection.reports.data_split_reports) > 0,
-            "has_reports_per_setting": len(state.selection.reports.encoding_reports) + len(state.selection.reports.model_reports) > 0,
+            "has_reports_per_setting": len(state.selection.reports.encoding_reports) + len(
+                state.selection.reports.model_reports) > 0,
             "reports_per_setting": [{
                 "hp_setting": hp_setting,
                 "reports": HPHTMLBuilder._make_selection_reports_for_item_list(hp_items, base_path)
@@ -141,7 +126,8 @@ class HPHTMLBuilder:
                     hp_item.encoding_train_results) > 0 else None,
                 "encoding_test_reports": Util.to_dict_recursive(hp_item.encoding_test_results, base_path) if len(
                     hp_item.encoding_test_results) > 0 else None,
-                "ml_reports": Util.to_dict_recursive(hp_item.model_report_results, base_path) if len(hp_item.model_report_results) > 0 else None,
+                "ml_reports": Util.to_dict_recursive(hp_item.model_report_results, base_path) if len(
+                    hp_item.model_report_results) > 0 else None,
             })
 
         return result if len(result) > 0 else None
@@ -156,27 +142,38 @@ class HPHTMLBuilder:
                                "optimization_metric": state.optimization_metric.name.lower(),
                                "split_index": assessment_state.split_index + 1,
                                "hp_settings": [],
-                               "has_reports": len(state.assessment.reports.model_reports) + len(state.assessment.reports.encoding_reports) > 0,
-                               "train_data_reports": Util.to_dict_recursive(assessment_state.train_val_data_reports, base_path),
-                               "test_data_reports": Util.to_dict_recursive(assessment_state.test_data_reports, base_path),
-                               "show_data_reports": len(assessment_state.train_val_data_reports) > 0 or len(assessment_state.test_data_reports) > 0}
+                               "has_reports": len(state.assessment.reports.model_reports) + len(
+                                   state.assessment.reports.encoding_reports) > 0,
+                               "train_data_reports": Util.to_dict_recursive(assessment_state.train_val_data_reports,
+                                                                            base_path),
+                               "test_data_reports": Util.to_dict_recursive(assessment_state.test_data_reports,
+                                                                           base_path),
+                               "show_data_reports": len(assessment_state.train_val_data_reports) > 0 or len(
+                                   assessment_state.test_data_reports) > 0}
 
-            if hasattr(assessment_state.train_val_dataset, "metadata_file") and assessment_state.train_val_dataset.metadata_file is not None:
-                assessment_item["train_metadata_path"] = os.path.relpath(str(assessment_state.train_val_dataset.metadata_file), str(base_path))
-                assessment_item["train_metadata"] = Util.get_table_string_from_csv(assessment_state.train_val_dataset.metadata_file)
+            if hasattr(assessment_state.train_val_dataset,
+                       "metadata_file") and assessment_state.train_val_dataset.metadata_file is not None:
+                assessment_item["train_metadata_path"] = os.path.relpath(
+                    str(assessment_state.train_val_dataset.metadata_file), str(base_path))
+                assessment_item["train_metadata"] = Util.get_table_string_from_csv(
+                    assessment_state.train_val_dataset.metadata_file)
             else:
                 assessment_item["train_metadata_path"] = None
 
-            if hasattr(assessment_state.test_dataset, "metadata_file") and assessment_state.test_dataset.metadata_file is not None:
-                assessment_item['test_metadata_path'] = os.path.relpath(assessment_state.test_dataset.metadata_file, base_path)
-                assessment_item["test_metadata"] = Util.get_table_string_from_csv(assessment_state.test_dataset.metadata_file)
+            if hasattr(assessment_state.test_dataset,
+                       "metadata_file") and assessment_state.test_dataset.metadata_file is not None:
+                assessment_item['test_metadata_path'] = os.path.relpath(assessment_state.test_dataset.metadata_file,
+                                                                        base_path)
+                assessment_item["test_metadata"] = Util.get_table_string_from_csv(
+                    assessment_state.test_dataset.metadata_file)
             else:
                 assessment_item["test_metadata_path"] = None
 
             assessment_item["label"] = label_name
             for hp_setting, item in assessment_state.label_states[label_name].assessment_items.items():
                 optimal = str(assessment_state.label_states[label_name].optimal_hp_setting.get_key())
-                reports_path = HPHTMLBuilder._make_assessment_reports(state, i, hp_setting, assessment_state, label_name, base_path)
+                reports_path = HPHTMLBuilder._make_assessment_reports(state, i, hp_setting, assessment_state,
+                                                                      label_name, base_path)
                 assessment_item["hp_settings"].append({
                     "optimal": str(hp_setting) == optimal,
                     "hp_setting": str(hp_setting),
@@ -186,24 +183,24 @@ class HPHTMLBuilder:
             assessment_item["show_non_optimal"] = len(assessment_item["hp_settings"]) > 1
 
             assessment_item["selection_path"] = HPHTMLBuilder._make_selection_split_path(i, label_name, state.name)
-            assessment_item['performances_per_metric'] = HPHTMLBuilder._extract_assessment_performances_per_metric(state, assessment_state, label_name)
+            assessment_item['performances_per_metric'] = HPHTMLBuilder._extract_assessment_performances_per_metric(
+                state, assessment_state, label_name)
 
             assessment_list.append(assessment_item)
 
         return assessment_list
 
     @staticmethod
-    def _extract_assessment_performances_per_metric(state: TrainMLModelState, assessment_state: HPAssessmentState, label_name: str) -> str:
+    def _extract_assessment_performances_per_metric(state: TrainMLModelState, assessment_state: HPAssessmentState,
+                                                    label_name: str) -> str:
         performance_metric = {"setting": [], **{metric.name.lower(): [] for metric in state.metrics}}
         for hp_setting, hp_item in assessment_state.label_states[label_name].assessment_items.items():
             performance_metric['setting'].append(str(hp_setting))
             for metric in sorted(state.metrics, key=lambda metric: metric.name.lower()):
                 performance_metric[metric.name.lower()].append(HPHTMLBuilder._print_metric(hp_item.performance, metric))
 
-        s = io.StringIO()
-        pd.DataFrame(performance_metric).rename(columns={"setting": 'Hyperparameter settings (preprocessing, encoding, ML method)'})\
-            .to_csv(s, sep="\t", index=False)
-        return Util.get_table_string_from_csv_string(s.getvalue(), separator="\t")
+        return Util.get_table_from_dataframe(pd.DataFrame(performance_metric).rename(
+            columns={"setting": 'Hyperparameter settings (preprocessing, encoding, ML method)'}))
 
     @staticmethod
     def _make_assessment_reports(state, i, hp_setting_key, assessment_state, label_name: str, base_path: Path):
@@ -226,7 +223,8 @@ class HPHTMLBuilder:
         }
 
         if data["has_ml_reports"] or data["has_encoding_reports"]:
-            TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "Reports.html", template_map=data, result_path=path)
+            TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "Reports.html",
+                                 template_map=data, result_path=path)
             return path.name
         else:
             return None
@@ -241,9 +239,11 @@ class HPHTMLBuilder:
                 results.append({
                     "index": assessment_state.split_index + 1,
                     "hp_setting": assessment_state.label_states[label_name].optimal_assessment_item.hp_setting,
-                    "optimization_metric_val": HPHTMLBuilder._print_metric(assessment_state.label_states[label_name].optimal_assessment_item.performance,
-                                                                           state.optimization_metric),
-                    "split_details_path": HPHTMLBuilder._make_assessment_split_path(assessment_state.split_index, state.name, label_name)
+                    "optimization_metric_val": HPHTMLBuilder._print_metric(
+                        assessment_state.label_states[label_name].optimal_assessment_item.performance,
+                        state.optimization_metric),
+                    "split_details_path": HPHTMLBuilder._make_assessment_split_path(assessment_state.split_index,
+                                                                                    state.name, label_name)
                 })
 
             mapping.append({"label": label_name, "assessment_results": results})
@@ -268,7 +268,8 @@ class HPHTMLBuilder:
         for label_name in state.label_configuration.get_labels_by_name():
             mapping.append({
                 "label": label_name,
-                "model_path": Path(os.path.relpath(path=str(state.optimal_hp_item_paths[label_name]), start=str(base_path)))
+                "model_path": Path(
+                    os.path.relpath(path=str(state.optimal_hp_item_paths[label_name]), start=str(base_path)))
             })
 
         return mapping
@@ -283,7 +284,7 @@ class HPHTMLBuilder:
                 table_data = {
                     "name": table.name if hasattr(table, "name") else None,
                     "path": str(table_path),
-                    "table": Util.get_table_string_from_csv(table.path) if table.path.suffix == '.csv' else None
+                    "table": pd.read_csv(table.path).to_html(index=False, index_names=False) if table.path.suffix == '.csv' else None
                 }
                 tables.append(table_data)
         return tables
@@ -294,7 +295,8 @@ class HPHTMLBuilder:
             "css_style": Util.get_css_content(HPHTMLBuilder.CSS_PATH),
             "full_specs": Util.get_full_specs_path(base_path),
             "logfile": Util.get_logfile_path(base_path),
-            "labels": [{"name": label.name, "values": str(label.values)[1:-1]} for label in state.label_configuration.get_label_objects()],
+            "labels": [{"name": label.name, "values": str(label.values)[1:-1]} for label in
+                       state.label_configuration.get_label_objects()],
             "optimization_metric": state.optimization_metric.name.lower(),
             "other_metrics": str([metric.name.lower() for metric in state.metrics])[1:-1].replace("'", ""),
             "metrics": [{"name": metric.name.lower()} for metric in state.metrics],
@@ -304,8 +306,10 @@ class HPHTMLBuilder:
             'hp_reports': [{
                 "name": report.name,
                 "info": report.info if hasattr(report, "info") else None,
-                "output_figures": Util.to_dict_recursive(report.output_figures, base_path) if hasattr(report, "output_figures") else None,
-                "output_tables": HPHTMLBuilder._process_report_tables(report, base_path) if hasattr(report, "output_tables") else None
+                "output_figures": Util.to_dict_recursive(report.output_figures, base_path) if hasattr(report,
+                                                                                                      "output_figures") else None,
+                "output_tables": HPHTMLBuilder._process_report_tables(report, base_path) if hasattr(report,
+                                                                                                    "output_tables") else None
             } for report in state.report_results] if state.report_results else None,
             "hp_per_label": HPHTMLBuilder._make_hp_per_label(state),
             'models_per_label': HPHTMLBuilder._make_model_per_label(state, base_path),
@@ -323,12 +327,14 @@ class HPHTMLBuilder:
                 for report_result in attribute_value:
                     new_attribute_values.append(Util.update_report_paths(report_result, path))
                 setattr(obj, attribute, new_attribute_values)
-            elif isinstance(attribute_value, list) and all(isinstance(item, HPAssessmentState) for item in attribute_value):
+            elif isinstance(attribute_value, list) and all(
+                    isinstance(item, HPAssessmentState) for item in attribute_value):
                 obj = HPHTMLBuilder._process_list_recursively(obj, attribute, attribute_value, path)
             elif isinstance(attribute_value, dict) and all(
                     isinstance(item, HPLabelState) or isinstance(item, HPItem) for item in attribute_value.values()):
                 obj = HPHTMLBuilder._process_dict_recursive(obj, attribute, attribute_value, path)
-            elif isinstance(attribute_value, dict) and all(isinstance(item, list) for item in attribute_value.values()) and all(
+            elif isinstance(attribute_value, dict) and all(
+                    isinstance(item, list) for item in attribute_value.values()) and all(
                     all(isinstance(item, HPItem) for item in item_list) for item_list in attribute_value.values()):
                 obj = HPHTMLBuilder._process_hp_items(obj, attribute, attribute_value, path)
             elif isinstance(attribute_value, HPSelectionState):
@@ -365,21 +371,51 @@ class HPHTMLBuilder:
         return obj
 
     @staticmethod
-    def _extract_selection_performance_per_metric(selection_state: HPSelectionState, metric: ClassificationMetric, split_count):
-        performance = {"setting": [], **{f"split {i + 1}": [] for i in range(split_count)}}
+    def _extract_selection_performance_per_metric(selection_state: HPSelectionState, metric: ClassificationMetric,
+                                                  split_count):
+        performance = {"setting": [], **{f"Split {i + 1}": [] for i in range(split_count)}}
         for hp_setting, hp_item_list in selection_state.hp_items.items():
             performance['setting'].append(str(hp_setting))
             for index, hp_item in enumerate(hp_item_list):
-                performance[f'split {index + 1}'].append(HPHTMLBuilder._print_metric(hp_item.performance, metric))
+                performance[f'Split {index + 1}'].append(HPHTMLBuilder._print_metric(hp_item.performance, metric))
 
-        s = io.StringIO()
-        pd.DataFrame(performance).rename(columns={"setting": 'Hyperparameter settings (preprocessing, encoding, ML method)'}).to_csv(s, sep="\t",
-                                                                                                                                     index=False)
-        return Util.get_table_string_from_csv_string(s.getvalue(), separator="\t")
+        df = pd.DataFrame(performance).rename(
+            columns={"setting": 'Hyperparameter settings (preprocessing, encoding, ML method)'})
+        df['Average'] = (
+            df.iloc[:, 1:]
+            .apply(pd.to_numeric, errors='coerce').mean(axis=1).round(HPHTMLBuilder.NUM_DIGITS)
+            .where(~(df.iloc[:, 1:] == Constants.NOT_COMPUTED).any(axis=1), Constants.NOT_COMPUTED)
+        )
+        best_value = ClassificationMetric.get_search_criterion(metric)(df['Average']) if all(df['Average'] != Constants.NOT_COMPUTED) else Constants.NOT_COMPUTED
+
+        return to_html_with_row_highlight(df, best_value, 'Average')
 
     @staticmethod
     def _get_heading_metric_name(metric: str):
-        if metric != "auc":
-            return " ".join(metric.split("_")).title()
+        name = metric
+        if "_" in metric:
+            name = " ".join(metric.split("_")).title()
+
+        name = name.replace('Auc', 'AUC').replace("Ovr", "One-vs-rest").replace("Ovo", "One-vs-one")
+        return name
+
+
+def to_html_with_row_highlight(df, best_value, col_name):
+    def row_style(row, col_name):
+        if row[col_name] == best_value and best_value != "not computed":
+            return "font-weight: bold;"
         else:
-            return metric.upper()
+            return ""
+
+    parts = Util.get_table_from_dataframe(df).split("<tr>")
+    out = [parts[0]]
+    for i, part in enumerate(parts[1:]):
+        if i == 0:
+            out.append("<tr>" + part)
+        else:
+            style = row_style(df.iloc[i], col_name)
+            if style:
+                out.append(f'<tr style="{style}">' + part)
+            else:
+                out.append("<tr>" + part)
+    return "".join(out)

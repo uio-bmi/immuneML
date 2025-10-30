@@ -170,7 +170,11 @@ class ExploratoryAnalysisInstruction(Instruction):
         return encoded_dataset
 
     def run_report(self, unit: ExploratoryAnalysisUnit, result_path: Path, report: Report) -> ReportResult:
-        report.result_path = result_path / f"report_{report.name}"
+        if (result_path / f"report_{report.name}").exists():
+            report_result_path = result_path / f"report_{report.name}_{len(list(result_path.glob(f'report_{report.name}*')))}"
+        else:
+            report_result_path = result_path / f"report_{report.name}"
+        report.result_path = report_result_path
         report.number_of_processes = unit.number_of_processes
 
         report.dataset = unit.dataset

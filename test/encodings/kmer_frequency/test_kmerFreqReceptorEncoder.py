@@ -32,8 +32,7 @@ class TestKmerFreqReceptorEncoder(TestCase):
                      Receptor(chain_1=ReceptorSequence(sequence_aa="AAA", locus='alpha', cell_id="2"),
                               chain_2=ReceptorSequence(sequence_aa="CCC", locus='beta', cell_id="2"),
                               receptor_id="2", cell_id="2", chain_pair=ChainPair.TRA_TRB),
-                     Receptor(chain_1=ReceptorSequence(sequence_aa="AAACCC",
-                                                       locus='alpha', cell_id="3"),
+                     Receptor(chain_1=ReceptorSequence(sequence_aa="AAACCC", locus='alpha', cell_id="3"),
                               chain_2=ReceptorSequence(sequence_aa="AAACCC", locus='beta', cell_id="3"),
                               receptor_id="3", cell_id="3", chain_pair=ChainPair.TRA_TRB),
                      Receptor(chain_1=ReceptorSequence(sequence_aa="AAA", locus='alpha', cell_id="4"),
@@ -68,7 +67,8 @@ class TestKmerFreqReceptorEncoder(TestCase):
         self.assertTrue(all(identifier in encoded_dataset.encoded_data.example_ids
                             for identifier in ['1', '2', '3', '4']))
         self.assertTrue(
-            numpy.array_equal(encoded_dataset.encoded_data.examples[0].A, encoded_dataset.encoded_data.examples[2].A))
+            numpy.array_equal(encoded_dataset.encoded_data.examples[0].toarray(), encoded_dataset.encoded_data.examples[2].toarray()))
+        print(encoded_dataset.encoded_data.feature_names)
         self.assertTrue(all(feature_name in encoded_dataset.encoded_data.feature_names for feature_name in
                             ["alpha_AAA", "alpha_AAC", "beta_CCC"]))
 

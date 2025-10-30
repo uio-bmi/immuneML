@@ -1,22 +1,32 @@
 from pathlib import Path
 
-from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.SequenceParams import Chain
+from immuneML.data_model.SequenceSet import Repertoire
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.preprocessing.filters.Filter import Filter
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class ChainRepertoireFilter(Filter):
     """
-    Removes all repertoires from the RepertoireDataset object which contain at least one sequence
-    with chain different than "keep_chain" parameter.
-    Note that this filter filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
+    This filter has two options: it can remove repertoires from the dataset which have any chain other than the
+    specified one (e.g., keep  only TRB) or it can remove the sequences from the repertoire which do not have the
+    desired chain.
 
-    Since the filter removes repertoires from the dataset (examples in machine learning setting), it cannot be used with :ref:`TrainMLModel`
-    instruction. If you want to filter out repertoires including a given chain, see :ref:`DatasetExport` instruction with preprocessing.
+    Since the filter may remove repertoires/sequences from the dataset (examples in machine learning setting), it
+    cannot be used with :ref:`TrainMLModel` instruction. If you want to filter out repertoires including a given chain,
+    see :ref:`DatasetExport` instruction with preprocessing.
+
+    **Dataset types:**
+
+    - RepertoireDataset
 
     **Specification arguments:**
 
     - keep_chain (str): Which chain should be kept, valid values are "TRA", "TRB", "IGH", "IGL", "IGK"
+
+    - remove_only_sequences (bool): Whether to remove only sequences with different chain than "keep_chain" (true) in
+      case of repertoire datasets; default is false
 
 
     **YAML specification:**
@@ -29,24 +39,41 @@ class ChainRepertoireFilter(Filter):
                 - my_filter:
                     ChainRepertoireFilter:
                         keep_chain: TRB
+                        remove_only_sequences: true
 
     """
 
-    def __init__(self, keep_chain, result_path: Path = None):
+    def __init__(self, keep_chain, remove_only_sequences: bool = False, result_path: Path = None):
         super().__init__(result_path)
         self.keep_chain = Chain.get_chain(keep_chain)
+        self.remove_only_sequences = remove_only_sequences
 
     def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1):
         self.check_dataset_type(dataset, [RepertoireDataset], "ChainRepertoireFilter")
         processed_dataset = dataset.clone()
-        self.result_path = result_path if result_path is not None else self.result_path
+        self.result_path = PathBuilder.build(result_path)
+        return self._filter_repertoire_dataset(processed_dataset)
+
+    def _filter_repertoire_dataset(self, processed_dataset: RepertoireDataset):
 
         repertoires = []
         indices = []
-        for index, repertoire in enumerate(dataset.get_data()):
-            if all([el == self.keep_chain.name or el == self.keep_chain.value for el in repertoire.data.locus.tolist()]):
-                repertoires.append(repertoire)
+        for index, repertoire in enumerate(processed_dataset.get_data()):
+
+            if self.remove_only_sequences:
+                data = repertoire.data
+                data = data[[Chain.get_chain(l).value == self.keep_chain.value for l in data.locus.tolist()]]
+                if len(data) == 0:
+                    continue
+
+                new_repertoire = Repertoire.build_from_dc_object(self.result_path, repertoire.metadata, data=data,
+                                                                 filename_base=repertoire.data_filename.stem + "filtered")
+                repertoires.append(new_repertoire)
                 indices.append(index)
+            else:
+                if all(Chain.get_chain(l).value == self.keep_chain.value for l in repertoire.data.locus.tolist()):
+                    repertoires.append(repertoire)
+                    indices.append(index)
 
         processed_dataset.repertoires = repertoires
         processed_dataset.metadata_file = self._build_new_metadata(processed_dataset, indices)

@@ -1,3 +1,5 @@
+import copy
+
 from sklearn.ensemble import RandomForestClassifier as RFC
 
 from immuneML.ml_methods.classifiers.SklearnMethod import SklearnMethod
@@ -51,7 +53,7 @@ class RandomForestClassifier(SklearnMethod):
         super(RandomForestClassifier, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
-        params = self._parameters.copy()
+        params = copy.deepcopy(self._parameters)
         params["n_jobs"] = cores_for_training
         return RFC(**params)
 
@@ -61,9 +63,10 @@ class RandomForestClassifier(SklearnMethod):
     def can_fit_with_example_weights(self) -> bool:
         return True
 
-    def get_params(self):
-        params = self.model.get_params(deep=True)
-        params["feature_importances"] = self.model.feature_importances_.tolist()
+    def get_params(self, for_refitting=False):
+        params = copy.deepcopy(self.model.get_params())
+        if not for_refitting:
+            params["feature_importances"] = self.model.feature_importances_.tolist()
         return params
 
     @staticmethod

@@ -10,9 +10,30 @@ class ClassificationMetric(Enum):
     F1_MACRO = "f1_score_macro"
     F1_WEIGHTED = "f1_score_weighted"
     PRECISION = "precision_score"
+    PRECISION_MICRO = "precision_score_micro"
+    PRECISION_MACRO = "precision_score_macro"
+    PRECISION_WEIGHTED = "precision_score_weighted"
+    RECALL_MICRO = "recall_score_micro"
+    RECALL_MACRO = "recall_score_macro"
+    RECALL_WEIGHTED = "recall_score_weighted"
+    AVERAGE_PRECISION = "average_precision_score"
+    BRIER_SCORE = "brier_score_loss"
     RECALL = "recall_score"
     AUC = "roc_auc_score"
+    AUC_OVO = "roc_auc_score_ovo"
+    AUC_OVR = "roc_auc_score_ovr"
     LOG_LOSS = "log_loss"
+
+    @staticmethod
+    def get_binary_only_metrics():
+        """Metrics that required binarized labels"""
+        return {
+            ClassificationMetric.AUC,
+            ClassificationMetric.AVERAGE_PRECISION,
+            ClassificationMetric.BRIER_SCORE,
+            ClassificationMetric.AUC_OVR,
+            ClassificationMetric.AUC_OVO
+        }
 
     @staticmethod
     def get_metric(metric_name: str):

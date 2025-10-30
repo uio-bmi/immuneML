@@ -229,7 +229,7 @@ class PositionalMotifFrequencies(EncodingReport):
         gap_size_fig.layout.yaxis.tickformat = ',.0%'
 
         gap_size_fig.update_layout(font={"size": 14}, xaxis={"tickmode": "linear"})
-        gap_size_fig.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(gap_size_fig, file_path)
 
         return ReportOutput(
             path=file_path,
@@ -255,7 +255,7 @@ class PositionalMotifFrequencies(EncodingReport):
         positional_aa_counts_fig.update_layout(
             showlegend=False, font={"size": 14}, xaxis={"tickmode": "linear"}
         )
-        positional_aa_counts_fig.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(positional_aa_counts_fig, file_path)
         return ReportOutput(
             path=file_path,
             name=f"Frequencies of amino acids found in the high-precision high-recall motifs",

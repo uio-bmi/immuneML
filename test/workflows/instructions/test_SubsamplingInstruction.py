@@ -50,7 +50,7 @@ class TestSubsamplingInstruction(TestCase):
 
         self.assertEqual(1, len(state.subsampled_datasets))
         self.assertEqual(100, state.subsampled_datasets[0].get_example_count())
-        self.assertEqual(5, state.subsampled_datasets[0].repertoires[0].element_count)
+        self.assertEqual(5, state.subsampled_datasets[0].repertoires[0].get_element_count())
 
         self.assertTrue(all(os.path.isfile(state.subsampled_dataset_paths[name]['airr'])
                             for name in [dataset.name for dataset in state.subsampled_datasets]))

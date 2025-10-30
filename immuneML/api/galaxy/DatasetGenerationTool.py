@@ -67,12 +67,11 @@ class DatasetGenerationTool(GalaxyTool):
     def _check_instruction(self, specs):
         instruction_name = Util.check_instruction_type(specs, DatasetGenerationTool.__name__, DatasetExportInstruction.__name__[:-11])
 
-        for key in ['datasets', 'export_formats']:
-            ParameterValidator.assert_keys_present(list(specs['instructions'][instruction_name].keys()), [key], DatasetGenerationTool.__name__,
-                                                   instruction_name)
-            ParameterValidator.assert_type_and_value(specs["instructions"][instruction_name][key], list, DatasetGenerationTool.__name__,
-                                                     f"{instruction_name}/{key}")
+        ParameterValidator.assert_keys_present(list(specs['instructions'][instruction_name].keys()), ['datasets'], DatasetGenerationTool.__name__,
+                                               instruction_name)
+        ParameterValidator.assert_type_and_value(specs["instructions"][instruction_name]['datasets'], list, DatasetGenerationTool.__name__,
+                                                 f"{instruction_name}/datasets")
 
-            assert len(specs['instructions'][instruction_name][key]) == 1, \
-                f"{DatasetGenerationTool.__name__}: this tool accepts only one item under {key}, got {specs['instructions'][instruction_name][key]} " \
-                f"instead."
+        assert len(specs['instructions'][instruction_name]['datasets']) == 1, \
+            f"{DatasetGenerationTool.__name__}: this tool accepts only one item under datasets, got {specs['instructions'][instruction_name]['datasets']} " \
+            f"instead."

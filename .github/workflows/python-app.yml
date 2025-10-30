@@ -16,21 +16,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.12
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest 
-        pip install -r requirements.txt -r requirements_TCRdist.txt -r requirements_DeepRC.txt -r requirements_generative_models.txt
-    - name: Install CompAIRR
-      run: |
-        git clone https://github.com/uio-bmi/compairr.git
-        make -C compairr
-    - name: Test with pytest
-      env:
-        PYTHONFAULTHANDLER: 1 
-      run: python -m pytest
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up virtual environment and run tests
+        run: |
+          uv venv --python 3.11
+          source .venv/bin/activate
+
+          uv pip install -r requirements.txt
+          uv pip install -r requirements_TCRdist.txt
+          uv pip install -r requirements_DeepRC.txt
+          uv pip install -r requirements_generative_models.txt
+          uv pip install pytest
+
+          export PYTHONPATH=.
+
+          git clone https://github.com/uio-bmi/compairr.git
+          make -C compairr
+          
+          python -m pytest

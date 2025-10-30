@@ -5,10 +5,9 @@ from pathlib import Path
 from typing import List, Dict, Union
 
 import bionumpy as bnp
-import dill
 import numpy as np
 import pandas as pd
-from bionumpy import AminoAcidEncoding, DNAEncoding, get_motif_scores
+from bionumpy import DNAEncoding, get_motif_scores, AminoAcidEncoding
 from bionumpy.bnpdataclass import bnpdataclass, BNPDataClass
 from bionumpy.encodings import BaseEncoding
 from bionumpy.io import delimited_buffers
@@ -120,7 +119,7 @@ def get_region_type(sequences) -> RegionType:
         raise RuntimeError(f"The region types could not be obtained.")
 
 
-def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list, annotated_dc, sim_item_name: str = None,
+def annotate_sequences(sequences: BackgroundSequences, is_amino_acid: bool, all_signals: list, annotated_dc, sim_item_name: str = None,
                        region_type: RegionType = RegionType.IMGT_CDR3):
     encoding = AminoAcidEncoding if is_amino_acid else DNAEncoding
     sequence_array = sequences.sequence_aa if is_amino_acid else sequences.sequence
@@ -240,7 +239,8 @@ def match_motif(motif: Union[str, LigoPWM], encoding, sequence_array):
         matcher = RegexMatcher(motif, encoding=encoding)
         matches = matcher.rolling_window(sequence_array, mode='same')
     else:
-        matches = get_motif_scores(sequence_array, motif.pwm_matrix) > motif.threshold
+        matches = get_motif_scores(bnp.as_encoded_array(sequence_array.tolist(), motif.pwm_matrix._encoding),
+                                   motif.pwm_matrix) > motif.threshold
         matches = pad_ragged_array(matches, sequence_array.shape, False)
     return matches
 

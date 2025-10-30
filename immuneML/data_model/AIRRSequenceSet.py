@@ -37,25 +37,25 @@ class AIRRSequenceSet:
     junction: DNANEncoding = None
     junction_aa: AminoAcidXEncoding = None
     np1: DNANEncoding = None
-    np1_aa: AminoAcidEncoding = None
+    np1_aa: AminoAcidXEncoding = None
     np2: DNANEncoding = None
-    np2_aa: AminoAcidEncoding = None
+    np2_aa: AminoAcidXEncoding = None
     np3: DNANEncoding = None
-    np3_aa: AminoAcidEncoding = None
+    np3_aa: AminoAcidXEncoding = None
     cdr1: DNANEncoding = None
-    cdr1_aa: AminoAcidEncoding = None
+    cdr1_aa: AminoAcidXEncoding = None
     cdr2: DNANEncoding = None
-    cdr2_aa: AminoAcidEncoding = None
+    cdr2_aa: AminoAcidXEncoding = None
     cdr3: DNANEncoding = None
     cdr3_aa: AminoAcidXEncoding = None
     fwr1: DNANEncoding = None
-    fwr1_aa: AminoAcidEncoding = None
+    fwr1_aa: AminoAcidXEncoding = None
     fwr2: DNANEncoding = None
-    fwr2_aa: AminoAcidEncoding = None
+    fwr2_aa: AminoAcidXEncoding = None
     fwr3: DNANEncoding = None
-    fwr3_aa: AminoAcidEncoding = None
+    fwr3_aa: AminoAcidXEncoding = None
     fwr4: DNANEncoding = None
-    fwr4_aa: AminoAcidEncoding = None
+    fwr4_aa: AminoAcidXEncoding = None
     v_score: float = None
     v_identity: float = None
     v_support: float = None
@@ -199,3 +199,8 @@ class AIRRSequenceSet:
                              for field_name, field_type in field_type_map.items()]
         new_class = self.__class__.extend(fields_with_types)
         return new_class(**{**vars(self), **fields})
+
+    @classmethod
+    def get_dynamic_fields(cls):
+        standard_fields = [f.name for f in fields(AIRRSequenceSet)]
+        return {f.name: f.type for f in fields(cls) if f not in standard_fields}

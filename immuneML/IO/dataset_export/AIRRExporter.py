@@ -7,7 +7,7 @@ import pandas as pd
 
 from immuneML.IO.dataset_export.DataExporter import DataExporter
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
-from immuneML.data_model.bnp_util import read_yaml, write_yaml
+from immuneML.data_model.bnp_util import read_yaml, write_yaml, write_dataset_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import ElementDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
@@ -34,18 +34,7 @@ class AIRRExporter(DataExporter):
         try:
 
             if isinstance(dataset, RepertoireDataset):
-                repertoire_folder = "repertoires/"
-                repertoire_path = PathBuilder.build(path / repertoire_folder)
-
-                for repertoire in dataset.repertoires:
-                    AIRRExporter.process_and_store_data_file(repertoire.data_filename,
-                                                             repertoire_path / repertoire.data_filename.name)
-                    shutil.copyfile(repertoire.metadata_filename, repertoire_path / repertoire.metadata_filename.name)
-
-                shutil.copyfile(dataset.metadata_file, path / dataset.metadata_file.name)
-                if dataset.dataset_file and dataset.dataset_file.is_file():
-                    shutil.copyfile(dataset.dataset_file, path / dataset.dataset_file.name)
-
+                AIRRExporter.export_repertoire_dataset(dataset, path, omit_columns=omit_columns)
             elif isinstance(dataset, ElementDataset):
                 AIRRExporter.process_and_store_data_file(dataset.filename, path / dataset.filename.name)
                 AIRRExporter.process_and_store_dataset_file(dataset.dataset_file, path / dataset.dataset_file.name)
@@ -54,6 +43,37 @@ class AIRRExporter(DataExporter):
             logging.warning(f"AIRRExporter: target and input path are the same. Skipping the copy operation...")
 
         # TODO: add here export of full sequence if possible
+
+    @staticmethod
+    def export_repertoire_dataset(dataset: RepertoireDataset, path: Path, omit_columns: list = None):
+        repertoire_folder = "repertoires/"
+        repertoire_path = PathBuilder.build(path / repertoire_folder)
+
+        AIRRExporter.export_repertoire_files(dataset, repertoire_path)
+
+        shutil.copyfile(dataset.metadata_file, path / f"{dataset.name}.csv")
+
+        if dataset.dataset_file and dataset.dataset_file.is_file():
+            dataset_yaml = read_yaml(dataset.dataset_file)
+            dataset_yaml['metadata_file'] = path / f"{dataset.name}.csv"
+        else:
+
+            new_metadata_df = pd.read_csv(path / f"{dataset.name}.csv")
+            labels = {label: list(new_metadata_df[label].unique())
+                      for label in dataset.get_label_names(refresh=True)}
+
+            dataset_yaml = RepertoireDataset.create_metadata_dict(metadata_file=path / f"{dataset.name}.csv",
+                                                                  labels=labels,
+                                                                  name=dataset.name,
+                                                                  identifier=dataset.identifier)
+        write_dataset_yaml(path / f"{dataset.name}.yaml", dataset_yaml)
+
+    @staticmethod
+    def export_repertoire_files(dataset: RepertoireDataset, repertoire_path: Path):
+        for repertoire in dataset.repertoires:
+            AIRRExporter.process_and_store_data_file(repertoire.data_filename,
+                                                     repertoire_path / repertoire.data_filename.name)
+            shutil.copyfile(repertoire.metadata_filename, repertoire_path / repertoire.metadata_filename.name)
 
     @staticmethod
     def process_and_store_dataset_file(input_filename, output_filename):

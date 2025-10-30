@@ -3,7 +3,6 @@ import logging
 from pathlib import Path
 
 import numpy as np
-import pkg_resources
 import torch
 import yaml
 from sklearn.exceptions import NotFittedError
@@ -258,7 +257,8 @@ class DeepRC(MLMethod):
                                                                  encoded_data.labels[self.label.name])
         self.max_seq_len = encoded_data.info["max_sequence_length"]
 
-        self._fit_for_label(encoded_data.info["metadata_filepath"], hdf5_filepath, train_indices, val_indices, self.label,
+        self._fit_for_label(encoded_data.info["metadata_filepath"], hdf5_filepath, train_indices, val_indices,
+                            self.label,
                             cores_for_training)
 
         return self.model
@@ -350,7 +350,7 @@ class DeepRC(MLMethod):
         logging.warning("DeepRC: cross-validation on this classifier is not defined: fitting one model instead...")
         self.fit(encoded_data, label)
 
-    def get_params(self):
+    def get_params(self, for_refitting=False):
         return {name: param.data.tolist() for name, param in self.model.named_parameters()}
 
     def check_is_fitted(self, label_name: str):
@@ -365,8 +365,8 @@ class DeepRC(MLMethod):
         negative_class = self.label.get_binary_negative_class()
 
         # TODO: check what is returned here and how it works with multiclass
-        return {label.name: [label.positive_class if probability > 0.5 else negative_class for probability in
-                             pos_class_probs]}
+        return {self.label.name: [self.label.positive_class if probability > 0.5 else negative_class for probability in
+                                  pos_class_probs]}
 
     def _predict_proba(self, encoded_data: EncodedData):
         from deeprc.dataset_readers import RepertoireDataset as DeepRCRepDataset
@@ -458,7 +458,7 @@ class DeepRC(MLMethod):
             yaml.dump(desc, file)
 
     def get_package_info(self) -> str:
-        return Util.get_immuneML_version() + '; deepRC ' + pkg_resources.get_distribution('DeepRC').version
+        return Util.get_immuneML_version()
 
     def can_predict_proba(self) -> bool:
         return True

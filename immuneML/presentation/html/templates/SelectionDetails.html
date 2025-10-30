@@ -18,43 +18,7 @@
         </p>
         <div class="padded">
             <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th rowspan="2">Hyperparameter settings (preprocessing, encoding, ML method)</th>
-                            <th colspan="{{split_count}}">Performance ({{optimization_metric}})</th>
-                            {{#show_average}}
-                            <th rowspan="2">Average</th>
-                            {{/show_average}}
-                        </tr>
-                        <tr>
-                            {{#splits}}
-                            <th>Split {{split_index}}</th>
-                            {{/splits}}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{#hp_settings}}
-                        <tr>
-                            <td>
-                                {{#optimal}}<b>{{/optimal}}
-                                {{hp_setting}}
-                                {{#optimal}}</b>{{/optimal}}
-                            </td>
-                            {{#hp_splits}}
-                            <td>{{optimization_metric_val}}</td>
-                            {{/hp_splits}}
-                            {{#show_average}}
-                            <td>
-                                {{#optimal}}<b>{{/optimal}}
-                                {{average}}
-                                {{#optimal}}</b>{{/optimal}}
-                            </td>
-                            {{/show_average}}
-                        </tr>
-                        {{/hp_settings}}
-                    </tbody>
-                </table>
+                {{{ hp_settings }}}
             </div>
         </div>
 
@@ -67,9 +31,11 @@
         <p>The tables below show the performance for each hyperparameter setting across selection splits for different metrics which were not
         used for optimization.</p>
         {{#metrics}}
-        <h4>{{metric}}</h4>
-        <div class="table-container padded">
-            {{{performance}}}
+        <div class="padded-left">
+            <h4>{{metric}}</h4>
+            <div class="table-container">
+                {{{performance}}}
+            </div>
         </div>
         {{/metrics}}
         {{/has_other_metrics}}

@@ -101,7 +101,13 @@ class TCRdistMotifDiscovery(MLReport):
         subsampled_dataset = self._extract_positive_example_dataset()
         reference_sequences = self._extract_reference_sequences()
         tcr_rep = TCRdistHelper.compute_tcr_dist(subsampled_dataset, [self.label.name], self.cores)
-        tcr_rep.hcluster_df, tcr_rep.Z = hcluster_diff(clone_df=tcr_rep.clone_df, pwmat=tcr_rep.pw_alpha + tcr_rep.pw_beta, x_cols=["epitope"],
+
+        import numpy as np
+        np.int = np.int64  # Fix for numpy deprecation warning for versions 1.20 and above
+
+        tcr_rep.hcluster_df, tcr_rep.Z = hcluster_diff(clone_df=tcr_rep.clone_df,
+                                                       pwmat=tcr_rep.pw_alpha + tcr_rep.pw_beta,
+                                                       x_cols=[self.label.name],
                                                        count_col='count')
 
         figures, tables = [], []

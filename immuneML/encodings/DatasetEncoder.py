@@ -46,6 +46,10 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
 
         Args:
 
+            dataset: Dataset object of the same class as the dataset to be encoded later; in case there are multiple
+                        dataset types supported by the encoder, the dataset should be of one of these types and the
+                        correct subclass of the encoder should be returned
+
             **params: keyword arguments that will be provided by users in the specification (if immuneML is used as a command line tool) or in the
              dictionary when calling the method from the code, and which should be used to create the Encoder object
 

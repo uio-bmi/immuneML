@@ -57,6 +57,7 @@ class ExploratoryAnalysisParser:
         loc = ExploratoryAnalysisParser.__name__
 
         if "encoding" in analysis:
+            ParameterValidator.assert_type_and_value(analysis["encoding"], str, loc, "encoding")
             params["encoder"] = symbol_table.get(analysis["encoding"]).build_object(dataset, **symbol_table.get_config(analysis["encoding"])["encoder_params"])
 
         if "labels" in analysis:

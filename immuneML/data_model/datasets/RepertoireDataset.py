@@ -30,10 +30,10 @@ class RepertoireDataset(Dataset):
         assert len(kwargs['repertoires']) > 0, "Cannot to construct a repertoire dataset without repertories."
 
         metadata_df = pd.DataFrame.from_records(
-            [{**rep.metadata, **{'filename': rep.data_filename.name}} for rep in kwargs['repertoires']])
+            [{**rep.metadata, **{'filename': rep.data_filename.name, 'identifier': rep.identifier}}
+             for rep in kwargs['repertoires']])
 
-        if 'field_list' in metadata_df.columns:
-            metadata_df.drop(columns=['field_list'], inplace=True)
+        metadata_df.drop(columns=['field_list', 'type_dict_dynamic_fields'], inplace=True, errors='ignore')
 
         metadata_path = PathBuilder.build(kwargs['path']) / 'metadata.csv'
         metadata_df.to_csv(metadata_path, index=False)
@@ -116,6 +116,14 @@ class RepertoireDataset(Dataset):
     def get_data(self, batch_size: int = 1):
         return self.repertoires
 
+    def get_locus(self):
+        loci = set()
+
+        for repertoire in self.get_data():
+            loci.update(repertoire.get_locus())
+
+        return sorted(loci)
+
     def get_repertoire(self, index: int = -1, repertoire_identifier: str = "") -> Repertoire:
         assert index != -1 or repertoire_identifier != "", \
             "RepertoireDataset: cannot get repertoire since the index nor identifier are set."
@@ -148,7 +156,14 @@ class RepertoireDataset(Dataset):
             (f"RepertoireDataset: for dataset {self.name} (id: {self.identifier}) metadata file is not set properly. "
              f"The metadata file points to {self.metadata_file}.")
 
-        df = pd.read_csv(self.metadata_file, sep=",", usecols=field_names, comment=Constants.COMMENT_SIGN)
+        try:
+            df = pd.read_csv(self.metadata_file, sep=",", usecols=field_names, comment=Constants.COMMENT_SIGN)
+        except ValueError:
+            df = pd.read_csv(self.metadata_file, sep=",", comment=Constants.COMMENT_SIGN)
+            df.drop(columns=[col for col in df.columns if col not in field_names], inplace=True)
+            logging.warning(f"RepertoireDataset: metadata file {self.metadata_file} does not contain the "
+                            f"following fields: {[col for col in field_names if col not in df.columns]}. ")
+
         if return_df:
             return df
         else:

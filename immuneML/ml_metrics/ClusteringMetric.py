@@ -10,3 +10,7 @@ def is_internal(metric: str):
 
 def is_external(metric: str):
     return metric in EXTERNAL_EVAL_METRICS
+
+
+def is_valid_metric(metric: str):
+    return metric in INTERNAL_EVAL_METRICS or metric in EXTERNAL_EVAL_METRICS

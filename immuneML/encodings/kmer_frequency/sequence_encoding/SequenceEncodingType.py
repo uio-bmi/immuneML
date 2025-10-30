@@ -5,6 +5,6 @@ class SequenceEncodingType(Enum):
     GAPPED_KMER = "GappedKmerSequenceEncoder"
     IMGT_CONTINUOUS_KMER = "IMGTKmerSequenceEncoder"
     CONTINUOUS_KMER = "KmerSequenceEncoder"
-    IDENTITY = "IdentitySequenceEncoder"
     IMGT_GAPPED_KMER = "IMGTGappedKmerEncoder"
     V_GENE_CONT_KMER = "VGeneContKmerEncoder"
+    V_GENE_IMGT_KMER = 'VGeneIMGTKmerEncoder'

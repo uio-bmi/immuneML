@@ -29,7 +29,7 @@ class GalaxyTrainGenModel(GalaxyTool):
         dataset = state.generated_dataset if state.combined_dataset is None else state.combined_dataset
         Util.export_galaxy_dataset(dataset, self.result_path)
 
-        model_locations = list(self.result_path.glob(f"{self.instruction_name}/trained_model/*.zip"))
+        model_locations = list(self.result_path.glob(f"{self.instruction_name}/trained_model_*/*.zip"))
         model_export_path = PathBuilder.build(self.result_path / 'exported_models/')
 
         for model_location in model_locations:

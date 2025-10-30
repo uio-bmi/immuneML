@@ -8,11 +8,11 @@ from immuneML.simulation.implants.MotifInstance import MotifInstance
 
 @dataclass
 class Motif:
-    '''
+    """
     Motifs are the objects which are implanted into sequences during simulation.
     They are defined under :code:`definitions/motifs`. There are several different motif types, each
     having their own parameters.
-    '''
+    """
 
 
     identifier: str

@@ -53,8 +53,8 @@ class PrecomputedKNN(SklearnMethod):
         params["metric"] = "precomputed"
         return KNeighborsClassifier(**params)
 
-    def get_params(self):
-        return self.model.get_params(deep=True)
+    def get_params(self, for_refitting=False):
+        return {**self.model.get_params(), **{"metric": "precomputed"}}
 
     def can_predict_proba(self) -> bool:
         return True

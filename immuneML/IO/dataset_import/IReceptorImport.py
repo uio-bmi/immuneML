@@ -1,4 +1,5 @@
 import json
+import logging
 import shutil
 import zipfile
 from pathlib import Path
@@ -142,7 +143,8 @@ class IReceptorImport(DataImport):
 
     @staticmethod
     def _unzip_files(path: Path, unzipped_path: Path, unzip_metadata=True):
-        for zip_filename in path.glob("*.zip"):
+        zipped_files = list(path.glob("*.zip")) if path.is_dir() else [path]
+        for zip_filename in zipped_files:
             with zipfile.ZipFile(zip_filename, "r") as zip_object:
                 for file in zip_object.filelist:
                     file.filename = f"{zip_filename.stem}_{file.filename}"
@@ -258,7 +260,12 @@ class IReceptorImport(DataImport):
 
     @staticmethod
     def _split_airr_files(airr_file: Path, metadata_df: pd.DataFrame, result_path: Path):
-        airr_df = airr.load_rearrangement(airr_file)
+        try:
+            airr_df = airr.load_rearrangement(airr_file)
+        except Exception as e:
+            logging.warning(f"Failed to load {airr_file} using airr package. Error: {e}. Trying with pandas instead.")
+            airr_df = pd.read_csv(airr_file, sep='\t').dropna(axis=1, how='all')
+
         files_written = []
 
         for filename, repertoire_id, sample_processing_id, data_processing_id in metadata_df[

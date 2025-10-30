@@ -10,12 +10,11 @@ import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
-import scipy
 from scipy.cluster.hierarchy import linkage, fcluster
-from sklearn.cluster import AgglomerativeClustering
 
 from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -158,10 +157,24 @@ class CompAIRRClusteringReport(DataReport):
         # Compare repertoires pairwise
         for i in range(n_repertoires):
             rep1 = self.dataset.repertoires[i]
+            tmp_rep_file1 = self.result_path / f"{rep1.identifier}_tmp.tsv"
+            self._make_clean_rep_files(rep1, tmp_rep_file1)
+
             similarity_matrix.loc[rep1.identifier, rep1.identifier] = 1
             for j in range(i + 1, n_repertoires):
                 rep2 = self.dataset.repertoires[j]
-                similarity_matrix = self._run_compairr(rep1, rep2, similarity_matrix)
+
+                tmp_rep_file2 = self.result_path / f"{rep2.identifier}_tmp.tsv"
+                self._make_clean_rep_files(rep2, tmp_rep_file2)
+
+                similarity_matrix = self._run_compairr(rep1, rep2, tmp_rep_file1, tmp_rep_file2, similarity_matrix)
+
+                os.remove(str(tmp_rep_file2))
+
+            os.remove(str(tmp_rep_file1))
+
+            logging.info(f"CompAIRRClusteringReport: Finished processing repertoire "
+                         f"{rep1.identifier} ({i + 1}/{n_repertoires})")
 
         return similarity_matrix
 
@@ -177,10 +190,21 @@ class CompAIRRClusteringReport(DataReport):
             columns=[rep.identifier for rep in self.dataset.repertoires]
         )
 
-    def _run_compairr(self, rep1: Repertoire, rep2: Repertoire, similarity_matrix: pd.DataFrame):
+    def _make_clean_rep_files(self, rep: Repertoire, tmp_file_path: Path):
+        df = pd.read_csv(rep.data_filename, sep="\t")[['cdr3_aa', 'v_call', 'j_call', 'duplicate_count']]
+        if (df['duplicate_count'] == -1).any() or df['duplicate_count'].isna().any():
+            logging.warning(f"CompAIRRClusteringReport: Duplicate count -1 or NA found in repertoire {rep.identifier}. "
+                            "Setting to 1, but it should be rechecked.")
+            df['duplicate_count'] = df['duplicate_count'].replace(-1, 1)
+            df['duplicate_count'] = df['duplicate_count'].replace(pd.NA, 1)
+
+        df.to_csv(tmp_file_path, sep="\t", index=False)
+
+    def _run_compairr(self, rep1: Repertoire, rep2: Repertoire, tmp_rep_file1: Path, tmp_rep_file2: Path,
+                      similarity_matrix: pd.DataFrame):
         output_file = self.result_path / f"overlap_{rep1.identifier}_{rep2.identifier}.tsv"
 
-        cmd_args = [str(self.compairr_path), "--matrix", str(rep1.data_filename), str(rep2.data_filename),
+        cmd_args = [str(self.compairr_path), "--matrix", str(tmp_rep_file1), str(tmp_rep_file2),
                     "-o", str(output_file)]
         if self.indels:
             cmd_args.append("-i")
@@ -193,9 +217,13 @@ class CompAIRRClusteringReport(DataReport):
         cmd_args.extend(["-t", str(self.threads)])
         cmd_args.extend(["-s", 'Jaccard'])
 
-        subprocess.run(cmd_args, capture_output=True, text=True)
+        result = subprocess.run(cmd_args, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"CompAIRRClusteringReport: Error running CompAIRR for repertoires {rep1.identifier} and "
+                f"{rep2.identifier}:\n{result.stderr}")
 
-        if output_file.is_file():
+        elif output_file.is_file():
             similarity = pd.read_csv(output_file, sep="\t").iloc[0, 1]
             similarity_matrix.loc[rep1.identifier, rep2.identifier] = similarity
             similarity_matrix.loc[rep2.identifier, rep1.identifier] = similarity
@@ -231,9 +259,9 @@ class CompAIRRClusteringReport(DataReport):
                           yaxis_title='repertoire')
         fig.update_xaxes(showgrid=False)
         fig.update_yaxes(showgrid=False, autorange='reversed')
-        fig.write_html(self.result_path / f"{name}_heatmap.html")
+        file_path = PlotlyUtil.write_image_to_file(fig, self.result_path / f"{name}_heatmap.html", matrix_text.shape[0])
 
-        return ReportOutput(path=self.result_path / f"{name}_heatmap.html", name=f"{name} heatmap")
+        return ReportOutput(path=file_path, name=f"{name} heatmap")
 
     def _store_cluster_assignments(self, repertoire_ids, clusters) -> ReportOutput:
         output_path = self.result_path / "cluster_assignments.tsv"
@@ -265,7 +293,8 @@ class CompAIRRClusteringReport(DataReport):
             Dictionary mapping repertoire_ids to their labels/categories
         """
         output_path = self.result_path / "dendrogram.html"
-        repertoire_ids = metadata['subject_id'].tolist()
+        repertoire_ids = metadata['subject_id'].tolist() if 'subject_id' in metadata.columns else self.dataset.get_example_ids()
+        metadata['subject_id'] = repertoire_ids
 
         # Create dummy data array for dendrogram
         n = distance_matrix.shape[0]
@@ -388,6 +417,6 @@ class CompAIRRClusteringReport(DataReport):
             }
         })
 
-        fig.write_html(str(output_path))
+        output_path = PlotlyUtil.write_image_to_file(fig, output_path, metadata.shape[0])
 
         return ReportOutput(path=output_path, name="hierarchical_clustering_of_repertoires")

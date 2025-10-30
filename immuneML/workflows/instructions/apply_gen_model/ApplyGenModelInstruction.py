@@ -1,15 +1,31 @@
+import copy
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Dict
 
-from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
-from immuneML.workflows.instructions.GenModelInstruction import GenModelInstruction
-from immuneML.workflows.instructions.GenModelInstruction import GenModelState
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
+from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.environment.SequenceType import SequenceType
+from immuneML.ml_methods.generative_models import GenerativeModel
+from immuneML.reports.data_reports.DataReport import DataReport
+from immuneML.reports.ml_reports.MLReport import MLReport
+from immuneML.util.Logger import print_log
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.workflows.instructions.Instruction import Instruction
 
 
-class ApplyGenModelState(GenModelState):
-    pass
+@dataclass
+class ApplyGenModelState:
+    result_path: Path
+    name: str
+    gen_examples_count: int
+    model_path: Path = None
+    generated_dataset: Dataset = None
+    exported_datasets: Dict[str, Path] = field(default_factory=dict)
+    report_results: dict = field(default_factory=lambda: {'data_reports': [], 'ml_reports': []})
 
 
-class ApplyGenModelInstruction(GenModelInstruction):
+class ApplyGenModelInstruction(Instruction):
     """
 
     ApplyGenModel instruction implements applying generative AIRR models on the sequence level.
@@ -42,11 +58,15 @@ class ApplyGenModelInstruction(GenModelInstruction):
                 reports: [data_rep1, ml_rep2]
 
     """
+
     def __init__(self, method: GenerativeModel = None, reports: list = None, result_path: Path = None,
                  name: str = None, gen_examples_count: int = None):
-        super().__init__(ApplyGenModelState(result_path, name, gen_examples_count), method, reports)
+        self.state = ApplyGenModelState(result_path, name, gen_examples_count)
+        self.method = method
+        self.reports = reports
+        self.generated_dataset = None
 
-    def run(self, result_path: Path) -> GenModelState:
+    def run(self, result_path: Path) -> ApplyGenModelState:
         self._set_path(result_path)
         self._gen_data()
         self._export_generated_dataset()
@@ -54,6 +74,44 @@ class ApplyGenModelInstruction(GenModelInstruction):
 
         return self.state
 
+    def _gen_data(self):
+        dataset = self.method.generate_sequences(self.state.gen_examples_count, 1,
+                                                 self.state.result_path / 'generated_sequences',
+                                                 SequenceType.AMINO_ACID, False)
+
+        self.generated_dataset = dataset
+        print_log(f"{self.state.name}: generated {self.state.gen_examples_count} examples from the fitted model",
+                  True)
+
+    def _export_generated_dataset(self):
+        AIRRExporter.export(self.state.generated_dataset, self.state.result_path / f'exported_gen_dataset')
+        self.state.exported_datasets['generated_dataset'] = self.state.result_path / 'exported_gen_dataset'
+
     def _run_reports(self):
-        super()._run_reports()
-        super()._print_report_summary_log()
+        report_path = self._get_reports_path()
+        for report in self.reports:
+            report.result_path = report_path
+            if isinstance(report, DataReport):
+                rep = copy.deepcopy(report)
+                rep.dataset = self.generated_dataset
+                rep.name = rep.name + " (generated dataset)"
+                self.state.report_results['data_reports'].append(rep.generate_report())
+            elif isinstance(report, MLReport):
+                rep = copy.deepcopy(report)
+                rep.method = self.method
+                rep.name = rep.name
+                self.state.report_results['ml_reports'].append(rep.generate_report())
+
+        self._print_report_summary_log()
+
+    def _print_report_summary_log(self):
+        if len(self.reports) > 0:
+            gen_rep_count = len(self.state.report_results['ml_reports']) + len(
+                self.state.report_results['data_reports'])
+            print_log(f"{self.state.name}: generated {gen_rep_count} reports.", True)
+
+    def _get_reports_path(self) -> Path:
+        return PathBuilder.build(self.state.result_path / 'reports')
+
+    def _set_path(self, result_path):
+        self.state.result_path = PathBuilder.build(result_path / self.state.name)

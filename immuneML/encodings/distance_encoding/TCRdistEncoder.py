@@ -28,6 +28,9 @@ class TCRdistEncoder(DatasetEncoder):
 
     - cores (int): number of processes to use for the computation
 
+    - cdr3_only (bool): whether to use only cdr3 or also v gene; if set to false, encoding will only compute the distances
+      between the CDR3 regions of the receptors
+
 
     **YAML specification:**
 
@@ -39,12 +42,14 @@ class TCRdistEncoder(DatasetEncoder):
                 my_tcr_dist_enc:
                     TCRdist:
                         cores: 4
+                        cdr3_only: false # default tcrdist behavior
 
     """
 
-    def __init__(self, cores: int, name: str = None):
+    def __init__(self, cores: int, cdr3_only: bool, name: str = None):
         super().__init__(name=name)
         self.cores = cores
+        self.cdr3_only = cdr3_only
         self.distance_matrix = None
         self.context = None
         self._tmp_results_path = None
@@ -83,7 +88,7 @@ class TCRdistEncoder(DatasetEncoder):
         chains = TCRdistHelper.get_chains(dataset)
 
         current_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
-        tcr_rep = TCRdistHelper.compute_tcr_dist(current_dataset, label_names, self.cores)
+        tcr_rep = TCRdistHelper.compute_tcr_dist(current_dataset, label_names, self.cores,self.cdr3_only)
 
         data = 0.
 

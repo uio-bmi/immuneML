@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Any, Dict, List
 from uuid import uuid4
 
-import dill
 from bionumpy import DNAEncoding, get_bufferclass_for_datatype, AminoAcidEncoding
 
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
@@ -53,7 +52,7 @@ class ReceptorSequence:
         except KeyError as e:
             logging.error(f"ReceptorSequence object has no attribute {e}. In metadata, "
                           f"it has: {list(self.metadata.keys()) if isinstance(self.metadata, dict) else []}")
-            raise e
+            raise
 
     def __post_init__(self):
         if self.sequence_id is None or self.sequence_id == "":
@@ -95,9 +94,7 @@ class Repertoire:
     metadata: dict = None
     identifier: str = None
     dynamic_fields: dict = None
-    _element_count: int = None
-    _bnp_dataclass: bytes = None
-    _buffer_type: bytes = None
+    element_count: int = None
 
     def __post_init__(self):
         if not self.identifier:
@@ -106,12 +103,8 @@ class Repertoire:
             self.metadata = read_yaml(self.metadata_filename)
         if not self.dynamic_fields and 'type_dict_dynamic_fields' in self.metadata:
             self.dynamic_fields = self.metadata.get('type_dict_dynamic_fields', {})
-
-    @property
-    def element_count(self):
-        if self._element_count is None:
-            self._element_count = len(self.data)
-        return self._element_count
+            for name, field_type in self.dynamic_fields.items():
+                self.dynamic_fields[name] = AIRRSequenceSet.STR_TO_TYPE.get(field_type, field_type)
 
     @classmethod
     def build_from_dc_object(cls, path: Path, metadata: dict, filename_base: str = None, identifier: str = None,
@@ -122,7 +115,7 @@ class Repertoire:
 
         bnp_write_to_file(data_filename, data)
 
-        metadata_filename = path / f"{filename_base}_metadata.yaml"
+        metadata_filename = path / f"{filename_base}.yaml"
         metadata = {} if metadata is None else metadata
 
         if not type_dict:
@@ -162,13 +155,13 @@ class Repertoire:
         data_filename = result_path / f"{filename_base}.tsv"
         bnp_write_to_file(data_filename, data)
 
-        metadata_filename = result_path / f"{filename_base}_metadata.yaml"
+        metadata_filename = result_path / f"{filename_base}.yaml"
         metadata = read_yaml(repertoire.metadata_filename)
         write_yaml(metadata_filename, metadata)
 
         repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier,
                                 dynamic_fields=repertoire.dynamic_fields)
-        repertoire._element_count = len(data)
+        repertoire.element_count = len(data)
         return repertoire
 
     @classmethod
@@ -185,42 +178,26 @@ class Repertoire:
         dynamic_fields = {f.name: f.type for f in fields(data)
                           if f not in [airr_f.name for airr_f in fields(AIRRSequenceSet)]}
 
-        metadata_filename = result_path / f"{filename_base}_metadata.yaml"
+        metadata_filename = result_path / f"{filename_base}.yaml"
         metadata = {} if metadata is None else metadata
         metadata['type_dict_dynamic_fields'] = dynamic_fields
         write_yaml(metadata_filename, metadata)
 
-        repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier,
-                                _bnp_dataclass=type(data), dynamic_fields=dynamic_fields)
-        repertoire._element_count = len(data)
+        repertoire = Repertoire(data_filename, metadata_filename, metadata, identifier, dynamic_fields=dynamic_fields)
+        repertoire.element_count = len(data)
 
         return repertoire
 
     @property
     def bnp_dataclass(self):
-        if not self._bnp_dataclass:
-            if self.dynamic_fields:
-                bnp_dc = extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(self.dynamic_fields.items()))
-                self._bnp_dataclass = dill.dumps(bnp_dc)
-                return bnp_dc
-            else:
-                self._bnp_dataclass = dill.dumps(AIRRSequenceSet)
-                return AIRRSequenceSet
-        elif isinstance(self._bnp_dataclass, bytes):
-            return dill.loads(self._bnp_dataclass)
+        if self.dynamic_fields:
+            return extend_dataclass_with_dynamic_fields(AIRRSequenceSet, list(self.dynamic_fields.items()))
         else:
-            return self._bnp_dataclass
+            return AIRRSequenceSet
 
     @property
     def buffer_type(self):
-        if not self._buffer_type:
-            buffer_type = get_bufferclass_for_datatype(self.bnp_dataclass, delimiter='\t', has_header=True)
-            self._buffer_type = dill.dumps(buffer_type)
-            return buffer_type
-        elif isinstance(self._buffer_type, bytes):
-            return dill.loads(self._buffer_type)
-        else:
-            return self._buffer_type
+        return get_bufferclass_for_datatype(self.bnp_dataclass, delimiter='\t', has_header=True)
 
     @property
     def data(self) -> AIRRSequenceSet:
@@ -238,6 +215,8 @@ class Repertoire:
             self.element_count = len(self.data)
         return self.element_count
 
+    def get_locus(self):
+        return sorted(set(self.data.locus.tolist()))
 
 def build_dynamic_airr_sequence_set_dataclass(all_fields_dict: Dict[str, Any]):
     sequence_field_names = {seq_field.name: seq_field.type for seq_field in fields(AIRRSequenceSet)}
@@ -257,6 +236,7 @@ def build_dynamic_airr_sequence_set_dataclass(all_fields_dict: Dict[str, Any]):
 
 def make_sequences_from_data(data, dynamic_fields: dict, region_type: RegionType = RegionType.IMGT_CDR3):
     seqs = []
+    dynamic_fields_internal = dynamic_fields if dynamic_fields is not None else {}
     for el in data.to_iter():
         seq, seq_aa = get_sequence_value(el, region_type)
         seqs.append(ReceptorSequence(sequence_id=el.sequence_id, sequence=seq, sequence_aa=seq_aa,
@@ -266,7 +246,7 @@ def make_sequences_from_data(data, dynamic_fields: dict, region_type: RegionType
                                      c_call=getattr(el, 'c_call', ''),
                                      j_call=el.j_call, duplicate_count=el.duplicate_count,
                                      metadata={dynamic_field: getattr(el, dynamic_field)
-                                               for dynamic_field in dynamic_fields.keys()}))
+                                               for dynamic_field in dynamic_fields_internal.keys()}))
     return seqs
 
 

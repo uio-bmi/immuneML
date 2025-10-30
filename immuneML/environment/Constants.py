@@ -1,9 +1,9 @@
 class Constants:
 
-    VERSION = "3.0.15"
+    VERSION = "3.0.16"
 
     # encoding constants
-    FEATURE_DELIMITER = "-"
+    FEATURE_DELIMITER = "_"
 
     # importing constants
     UNKNOWN = ''
@@ -19,3 +19,6 @@ class Constants:
 
     # plotting constants
     PLOTLY_BLACK = "#2A3F5E"
+
+
+VERSION = Constants.VERSION

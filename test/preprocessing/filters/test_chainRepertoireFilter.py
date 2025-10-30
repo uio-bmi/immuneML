@@ -20,7 +20,7 @@ class TestChainRepertoireFilter(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_process(self):
-        path = PathBuilder.remove_old_and_build(EnvironmentSettings.root_path / "test/tmp/chain_filter/")
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "chain_filter/")
 
         rep1 = Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="AAA", locus="ALPHA",
                                                                  sequence_id="1")], result_path=path)
@@ -46,5 +46,18 @@ class TestChainRepertoireFilter(TestCase):
 
         self.assertRaises(AssertionError, ChainRepertoireFilter(**{"keep_chain": "GAMMA"}).process_dataset, dataset,
                           path / "results")
+
+        rep1 = Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="AAA", locus="ALPHA",
+                                                                 sequence_id="1"),
+                                                ReceptorSequence(sequence_aa="AAA", locus="BETA",
+                                                                 sequence_id="1")
+                                                ], result_path=path)
+        rep2 = Repertoire.build_from_sequences([ReceptorSequence(sequence_aa="AAC", locus="BETA",
+                                                                 sequence_id="2")], result_path=path)
+
+        new_input_dataset = RepertoireDataset(repertoires=[rep1, rep2], metadata_file=path / "metadata.csv")
+
+        dataset3 = ChainRepertoireFilter(**{"keep_chain": "BETA", "remove_only_sequences": True}).process_dataset(new_input_dataset, path / "results2")
+        self.assertEqual(2, len(dataset3.get_data()))
 
         shutil.rmtree(path)

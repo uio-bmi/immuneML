@@ -2,6 +2,7 @@ from functools import partial
 from pathlib import Path
 import bionumpy as bnp
 from .TrainGenModelReport import TrainGenModelReport
+from ..PlotlyUtil import PlotlyUtil
 from ..ReportOutput import ReportOutput
 from ..ReportResult import ReportResult
 from ...data_model import bnp_util
@@ -153,13 +154,13 @@ class KLKmerComparison(TrainGenModelReport):
     def _plot_simulated(self, evaluator: KLEvaluator):
         file_path = self.result_path / "bad_simulated_sequences.html"
         figure = evaluator.simulated_plot()
-        figure.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(figure, file_path)
 
         return ReportOutput(path=file_path, name="Generated Sequences that contributes most to the KL divergence")
 
     def _plot_original(self, evaluator: KLEvaluator):
         file_path = self.result_path / "bad_original_sequences.html"
         figure = evaluator.original_plot()
-        figure.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(figure, file_path)
 
         return ReportOutput(path=file_path, name="Original Sequences that contributes most to the KL divergence")

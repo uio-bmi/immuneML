@@ -332,11 +332,11 @@ class BinaryFeatureClassifier(MLMethod):
     def _get_custom_params_path(self, path):
         return path / "custom_params.yaml"
 
-    def get_params(self):
+    def get_params(self, for_refitting=False):
         params = copy.deepcopy(vars(self))
         del params["result_path"]
 
-        if self.label:
+        if self.label and not for_refitting:
             params["label"] = self.label.get_desc_for_storage()
 
         return params

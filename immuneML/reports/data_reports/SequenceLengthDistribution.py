@@ -12,6 +12,7 @@ from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -219,7 +220,7 @@ class SequenceLengthDistribution(DataReport):
         PathBuilder.build(self.result_path)
 
         file_path = self.result_path / "sequence_length_distribution.html"
-        figure.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(figure, file_path)
         return ReportOutput(path=file_path, name="Sequence length distribution plot")
 
     def _get_label_name(self):

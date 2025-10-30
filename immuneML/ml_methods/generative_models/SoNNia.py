@@ -47,6 +47,8 @@ class SoNNia(GenerativeModel):
 
     - seed (int): random seed for the model or None
 
+    - num_processes (int): number of processes to use for sequence generation (default: 4)
+
 
      **YAML specification:**
 
@@ -93,13 +95,15 @@ class SoNNia(GenerativeModel):
 
     def __init__(self, locus=None, batch_size: int = None, epochs: int = None, deep: bool = False, name: str = None,
                  default_model_name: str = None, n_gen_seqs: int = None, include_joint_genes: bool = True,
-                 custom_model_path: str = None, seed: int = None):
+                 custom_model_path: str = None, seed: int = None, num_processes: int = 1):
 
         if locus is not None:
             super().__init__(Chain.get_chain(str(locus)), region_type=RegionType.IMGT_JUNCTION, seed=seed)
         elif default_model_name is not None:
             super().__init__(locus=Chain.get_chain(default_model_name[-3:]), region_type=RegionType.IMGT_JUNCTION,
                              seed=seed)
+        else:
+            super().__init__(locus=None, region_type=RegionType.IMGT_JUNCTION, seed=seed)
         self.epochs = epochs
         self.batch_size = int(batch_size)
         self.deep = deep
@@ -107,17 +111,27 @@ class SoNNia(GenerativeModel):
         self.n_gen_seqs = n_gen_seqs
         self._model = None
         self.name = name
+        self.num_processes = max(num_processes, 1)
         self.default_model_name = default_model_name
-        if custom_model_path is None or custom_model_path == '':
-            self._model_path = Path(
-                load_model.__file__).parent / f"default_models/{OLGA.DEFAULT_MODEL_FOLDER_MAP[self.default_model_name]}"
-        else:
-            self._model_path = custom_model_path
+        self._model_path = custom_model_path
+
+        self.set_model_path(self.default_model_name)
+
+    def set_model_path(self, model_name: str):
+        if self._model_path is None or self._model_path == '':
+            if model_name is not None:
+                self.default_model_name = model_name
+                self._model_path = Path(
+                    load_model.__file__).parent / f"default_models/{OLGA.DEFAULT_MODEL_FOLDER_MAP[self.default_model_name]}"
 
     def fit(self, dataset: Dataset, path: Path = None):
         from sonnia.sonnia import SoNNia as InternalSoNNia
 
-        print_log(f"{SoNNia.__name__}: fitting a selection model...", True)
+        if self._model_path is None:
+            self.set_locus(dataset)
+            self.set_model_path(f"human{self.locus.value}")
+
+        print_log(f"{SoNNia.__name__}: fitting a selection model for {self.default_model_name}...", True)
 
         data = dataset.data.topandas()[['junction_aa', 'v_call', 'j_call']]
         data_seqs = data.to_records(index=False).tolist()
@@ -129,7 +143,8 @@ class SoNNia(GenerativeModel):
                                      include_joint_genes=self.include_joint_genes,
                                      include_indep_genes=not self.include_joint_genes)
 
-        self._model.add_generated_seqs(num_gen_seqs=self.n_gen_seqs, custom_model_folder=self._model_path)
+        self._model.add_generated_seqs(num_gen_seqs=self.n_gen_seqs, custom_model_folder=self._model_path,
+                                       processes=self.num_processes)
 
         self._model.infer_selection(epochs=self.epochs, batch_size=self.batch_size, verbose=1)
 
@@ -141,7 +156,7 @@ class SoNNia(GenerativeModel):
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
         from sonia.sequence_generation import SequenceGeneration
 
-        gen_model = SequenceGeneration(self._model)
+        gen_model = SequenceGeneration(self._model, processes=self.num_processes)
         sequences = gen_model.generate_sequences_post(count)
 
         df = pd.DataFrame({
@@ -189,4 +204,4 @@ class SoNNia(GenerativeModel):
         with open(path / 'model' / 'model.json', 'w') as json_file:
             json.dump(model_data, json_file)
 
-        return Path(shutil.make_archive(str(path / 'trained_model'), "zip", str(path / 'model'))).absolute()
+        return Path(shutil.make_archive(str(path / f'trained_model_{self.name}'), "zip", str(path / 'model'))).absolute()

@@ -10,6 +10,7 @@ from immuneML.hyperparameter_optimization import HPSetting
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.ml_metrics.MetricUtil import MetricUtil
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
@@ -89,7 +90,7 @@ class TrainingPerformance(MLReport):
         for metric in self.metrics_set:
             _score = MetricUtil.score_for_metric(metric=ClassificationMetric.get_metric(metric),
                                                  predicted_y=predicted_y, predicted_proba_y=predicted_proba_y,
-                                                 true_y=true_y, classes=classes)
+                                                 true_y=true_y, classes=classes, pos_class=self.label.positive_class)
 
             if metric == 'CONFUSION_MATRIX':
                 self._generate_heatmap(classes, classes, _score, metric, output)
@@ -118,7 +119,7 @@ class TrainingPerformance(MLReport):
                         template='plotly_white', color_discrete_sequence=px.colors.diverging.Tealrose,
                         title=f"Evaluation metrics ({self.label})")
 
-        figure.write_html(str(path_html))
+        path_html = PlotlyUtil.write_image_to_file(figure, path_html)
 
         output['tables'].append(ReportOutput(path_csv, "training performance in csv"))
         output['figures'].append(ReportOutput(path_html, "training performance on selected metrics"))
@@ -152,7 +153,7 @@ class TrainingPerformance(MLReport):
             text=hovertext
         )
         fig = go.Figure(data=[trace], layout=layout)
-        fig.write_html(str(path_html))
+        path_html = PlotlyUtil.write_image_to_file(fig, path_html)
 
         z_df = pd.DataFrame(z)
         z_df.columns = f'{xlabel} (' + pd.Index(map(str, x)) + ')'

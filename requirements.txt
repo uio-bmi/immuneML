@@ -7,8 +7,8 @@ matplotlib>=3.1
 editdistance
 regex
 tzlocal
-airr>=1,<1.4
-pystache
+airr>=1
+pystache~=0.6.5
 dill>=0.3
 plotly>=4
 matplotlib-venn>=0.11
@@ -23,3 +23,10 @@ IMGTgeneDL
 psutil
 kaleido
 logomaker
+pytest
+gensim>=4
+torch
+tensorflow>=2.14.0
+keras
+python-glmnet
+httpx

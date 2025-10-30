@@ -209,7 +209,6 @@ embed {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-gap: 10px;
-    text-align: center;
 }
 
 .grid-item-full-width {
@@ -225,7 +224,6 @@ ul > li {
     display: grid;
     grid-template-columns: auto;
     grid-gap: 10px;
-    text-align: center;
   }
 }
 

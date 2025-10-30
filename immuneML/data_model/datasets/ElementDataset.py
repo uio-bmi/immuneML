@@ -63,6 +63,9 @@ class ElementDataset(Dataset, ABC):
     def data(self) -> AIRRSequenceSet:
         return bnp_read_from_file(self.filename, self.buffer_type, self.bnp_dataclass)
 
+    def get_locus(self):
+        return sorted(set(self.data.locus.tolist()))
+
     def clone(self, keep_identifier: bool = False):
         dataset = self.__class__(labels=self.labels, encoded_data=copy.deepcopy(self.encoded_data),
                                  filename=self.filename, bnp_dataclass=self.bnp_dataclass,
@@ -97,6 +100,26 @@ class SequenceDataset(ElementDataset):
         return SequenceDataset(name=name, filename=filename, dataset_file=metadata_filename,
                                dynamic_fields=dynamic_fields, labels=labels,
                                bnp_dataclass=bnp_dc)
+
+    @classmethod
+    def build_from_dataclass_object(cls, dc_object, path: Path, name: str = None, labels: dict = None):
+        name = name if name is not None else uuid4().hex
+        filename = path / f"{name}.tsv"
+
+        bnp_write_to_file(filename, dc_object)
+
+        dataset_metadata = cls.create_metadata_dict(dataset_class=cls.__name__,
+                                                    filename=filename,
+                                                    type_dict=dc_object.get_dynamic_fields(),
+                                                    name=name,
+                                                    labels=labels)
+
+        metadata_filename = path / f'{name}.yaml'
+        write_dataset_yaml(metadata_filename, dataset_metadata)
+
+        return SequenceDataset(filename=filename, name=name, labels=labels, dynamic_fields=dc_object.get_dynamic_fields(),
+                               dataset_file=metadata_filename, bnp_dataclass=dc_object.__class__,
+                               identifier=dataset_metadata["identifier"])
 
     @classmethod
     def build_from_objects(cls, sequences: List[ReceptorSequence], path: Path, name: str = None,
@@ -171,6 +194,7 @@ class SequenceDataset(ElementDataset):
 
     def get_data(self, batch_size: int = 1, region_type: RegionType = RegionType.IMGT_CDR3):
         return make_sequences_from_data(self.data, self.dynamic_fields, region_type)
+
 
     def get_example_ids(self):
         return self.data.sequence_id.tolist()

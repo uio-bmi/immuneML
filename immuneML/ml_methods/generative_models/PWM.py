@@ -86,12 +86,13 @@ class PWM(GenerativeModel):
         return pwm
 
     def __init__(self, locus, sequence_type: str, region_type: str, name: str = None):
-        super().__init__(Chain.get_chain(locus), name=name, region_type=RegionType[region_type.upper()])
+        super().__init__(locus, name=name, region_type=RegionType[region_type.upper()])
         self.sequence_type = SequenceType[sequence_type.upper()]
         self.pwm_matrix = None
         self.length_probs = None
 
     def fit(self, data: SequenceDataset, path: Path = None):
+        self.set_locus(data)
         sequences = data.get_attribute(get_sequence_field_name(self.region_type, self.sequence_type))
         lengths, counts = np.unique(sequences.lengths, return_counts=True)
 
@@ -170,4 +171,4 @@ class PWM(GenerativeModel):
                    yaml_dict={'type': 'PWM', 'locus': self.locus.name, 'sequence_type': self.sequence_type.name,
                               'region_type': self.region_type.name})
 
-        return Path(shutil.make_archive(str(path / 'trained_model'), "zip", str(path / 'model'))).absolute()
+        return Path(shutil.make_archive(str(path / f'trained_model_{self.name}'), "zip", str(path / 'model'))).absolute()

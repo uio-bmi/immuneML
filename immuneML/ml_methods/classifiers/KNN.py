@@ -50,8 +50,8 @@ class KNN(SklearnMethod):
         params["n_jobs"] = cores_for_training
         return KNeighborsClassifier(**params)
 
-    def get_params(self):
-        return self.model.get_params(deep=True)
+    def get_params(self, for_refitting=False):
+        return self.model.get_params()
 
     def can_predict_proba(self) -> bool:
         return True
@@ -61,7 +61,7 @@ class KNN(SklearnMethod):
 
     def get_compatible_encoders(self):
         from immuneML.encodings.distance_encoding.DistanceEncoder import DistanceEncoder
-        from immuneML.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
+        from immuneML.encodings.diversity_encoding.EvennessProfileEncoder import EvennessProfileEncoder
         from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
         from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
         from immuneML.encodings.abundance_encoding.KmerAbundanceEncoder import KmerAbundanceEncoder

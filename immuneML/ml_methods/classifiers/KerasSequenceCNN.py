@@ -221,17 +221,26 @@ class KerasSequenceCNN(MLMethod):
 
         self.model = keras.models.load_model(path / "model.keras")
 
-    def get_params(self):
-        params = dict()
+    def get_params(self, for_refitting=False):
 
-        # using 'deepcopy' on the model directly results in an error, therefore loop over all other items
-        for key, value in vars(self).items():
-            if key != "model":
-                params[key] = copy.deepcopy(value)
+        if for_refitting:
 
-        params["model"] = copy.deepcopy(self.model.get_config())
+            return {'units_per_layer': self.units_per_layer,
+                    'activation': self.activation,
+                    'training_percentage': self.training_percentage}
 
-        return params
+        else:
+
+            params = dict()
+
+            # using 'deepcopy' on the model directly results in an error, therefore loop over all other items
+            for key, value in vars(self).items():
+                if key != "model":
+                    params[key] = copy.deepcopy(value)
+
+            params["model"] = copy.deepcopy(self.model.get_config())
+
+            return params
 
     def can_predict_proba(self) -> bool:
         return True

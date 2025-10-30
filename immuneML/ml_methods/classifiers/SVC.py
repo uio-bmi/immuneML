@@ -54,10 +54,11 @@ class SVC(SklearnMethod):
     def can_fit_with_example_weights(self) -> bool:
         return True
 
-    def get_params(self):
+    def get_params(self, for_refitting=False):
         params = self.model.get_params()
-        params["coefficients"] = self.model.coef_[0].tolist()
-        params["intercept"] = self.model.intercept_.tolist()
+        if not for_refitting:
+            params["coefficients"] = self.model.coef_[0].tolist()
+            params["intercept"] = self.model.intercept_.tolist()
         return params
 
     @staticmethod

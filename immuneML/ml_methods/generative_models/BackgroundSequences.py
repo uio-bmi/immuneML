@@ -1,16 +1,14 @@
-from typing import List
-
-from bionumpy import AminoAcidEncoding, DNAEncoding
+from bionumpy import AminoAcidEncoding
 from bionumpy.bnpdataclass import bnpdataclass
 
-from immuneML.data_model.SequenceSet import ReceptorSequence
+from immuneML.data_model.AIRRSequenceSet import DNANEncoding, AminoAcidXEncoding
 from immuneML.environment.SequenceType import SequenceType
 
 
 @bnpdataclass
 class BackgroundSequences:
-    sequence_aa: AminoAcidEncoding
-    sequence: DNAEncoding
+    sequence_aa: AminoAcidXEncoding
+    sequence: DNANEncoding
     v_call: str
     j_call: str
     region_type: str

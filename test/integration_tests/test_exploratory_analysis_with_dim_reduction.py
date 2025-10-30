@@ -3,36 +3,45 @@ import shutil
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
 from immuneML.data_model.bnp_util import write_yaml
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
 
 
 def test_dimensionality_reduction():
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "dimensionality_reduction_integration")
 
+    dataset = RandomDatasetGenerator.generate_repertoire_dataset(20, {5: 1.}, {3: 0.5, 4: 0.5},
+                                                               {
+                                                                   'diseased': {
+                                                                       "diseased": 0.6,
+                                                                       "health": 0.4
+                                                                   },
+                                                                   'hla': {
+                                                                       "\"A01,A02\"": 0.3,
+                                                                       "\"A02,A03\"": 0.1,
+                                                                       "\"A04,A05\"": 0.2,
+                                                                       "": 0.4,
+                                                                   }
+                                                               }, path / 'dataset')
+
     specs = {
         "definitions": {
             "datasets": {
                 "d1": {
-                    "format": "RandomSequenceDataset",
+                    "format": "AIRR",
                     "params": {
-                        'length_probabilities': {
-                            3: 0.5,
-                            4: 0.5
-                        },
-                        'sequence_count': 20,
-                        'labels': {
-                            'diseased': {
-                                "diseased": 0.6,
-                                "health": 0.4
-                            }
-                        }
+                        'is_repertoire': True,
+                        'paired': False,
+                        'path': str(path / 'dataset'),
+                        'metadata_file': str(path / 'dataset/repertoire_dataset_metadata.csv'),
+                        'dataset_file': str(path / 'dataset/repertoire_dataset.yaml'),
                     }
                 }
             },
             "reports": {
                 "rep1": {
                     "DimensionalityReduction": {
-                        "labels": ["diseased"],
+                        "labels": ["diseased", 'hla'],
                         "dim_red_method": {"TSNE": {"n_components": 2, 'init': 'random', "perplexity": 5}}
                     }
                 },

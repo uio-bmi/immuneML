@@ -6,7 +6,7 @@ import uuid
 from dataclasses import fields
 from multiprocessing import Pool
 from pathlib import Path
-from typing import List, Tuple, Type
+from typing import Type
 
 import pandas as pd
 from bionumpy import AminoAcidEncoding
@@ -14,7 +14,7 @@ from bionumpy import AminoAcidEncoding
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet, AminoAcidXEncoding, DNANEncoding
 from immuneML.data_model.SequenceSet import Repertoire, build_dynamic_airr_sequence_set_dataclass
-from immuneML.data_model.bnp_util import bnp_write_to_file, write_yaml, read_yaml, write_dataset_yaml
+from immuneML.data_model.bnp_util import bnp_write_to_file, read_yaml, write_dataset_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset, ReceptorDataset, ElementDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
@@ -32,7 +32,8 @@ class DataImport(metaclass=abc.ABCMeta):
     def import_dataset(self) -> Dataset:
 
         if self.params.dataset_file is not None:
-            assert self.params.dataset_file.is_file(), f"DataImport: dataset_file was specified but not found: {self.params.dataset_file}"
+            assert self.params.dataset_file.is_file(), \
+                f"DataImport: dataset_file was specified but not found: {self.params.dataset_file}"
             dataset = self.import_dataset_from_yaml()
         else:
             if self.params.is_repertoire is None and self.params.metadata_file is not None:
@@ -72,28 +73,40 @@ class DataImport(metaclass=abc.ABCMeta):
             if self.params.metadata_file is None:
                 self.params.metadata_file = self.params.dataset_file.parent / imported_dataset_yaml['metadata_file']
 
-            imported_identifier = imported_dataset_yaml['identifier']
-            imported_labels = imported_dataset_yaml['labels']
+            labels = imported_dataset_yaml['labels']
+            metadata = self.import_repertoire_metadata(self.params.metadata_file)
+            repertoires = []
+            for index, row in metadata.iterrows():
+                filename = ImportHelper.get_repertoire_filename_from_metadata_row(row, self.params)
+                metadata_filename = filename.with_suffix('.yaml')
+                metadata_from_file = read_yaml(metadata_filename) if metadata_filename.is_file() else {}
+                rep_metadata = {**metadata_from_file, **row.to_dict()}
+                repertoires.append(Repertoire(data_filename=filename, metadata_filename=metadata_filename,
+                                              metadata=rep_metadata, identifier=row['identifier']))
 
-            # type_dict = imported_dataset_yaml['type_dict']
+                if repertoires[-1].get_element_count() == 0:
+                    logging.warning(f"Repertoire {repertoires[-1].data_filename} contains 0 sequences. It is "
+                                    f"recommended to remove this repertoire from the dataset.")
+
+            new_metadata_file = self.params.metadata_file
+            dataset_filename = self.params.dataset_file
+            dataset_yaml = imported_dataset_yaml
+
         else:
-            imported_labels = None
-            imported_identifier = None
+            metadata = self.import_repertoire_metadata(self.params.metadata_file)
+            repertoires = self.load_repertoires(metadata)
+            new_metadata_file = ImportHelper.make_new_metadata_file(repertoires, metadata, self.params.result_path,
+                                                                    self.dataset_name)
+            # type_dict = self.determine_repertoire_type_dict(repertoires)
+            labels = self.determine_repertoire_dataset_labels(metadata)
+            identifier = None
 
-        metadata = self.import_repertoire_metadata(self.params.metadata_file)
-        repertoires = self.load_repertoires(metadata)
-        new_metadata_file = ImportHelper.make_new_metadata_file(repertoires, metadata, self.params.result_path,
-                                                                self.dataset_name)
-        # type_dict = self.determine_repertoire_type_dict(repertoires)
-        labels = self.determine_repertoire_dataset_labels(metadata, imported_labels=imported_labels)
-
-        dataset_filename = self.params.result_path / f"{self.dataset_name}.yaml"
-        dataset_yaml = RepertoireDataset.create_metadata_dict(metadata_file=new_metadata_file,
-                                                              # type_dict=type_dict,
-                                                              labels=labels,
-                                                              name=self.dataset_name,
-                                                              identifier=imported_identifier)
-        write_dataset_yaml(dataset_filename, dataset_yaml)
+            dataset_filename = PathBuilder.build(self.params.result_path) / f"{self.dataset_name}.yaml"
+            dataset_yaml = RepertoireDataset.create_metadata_dict(metadata_file=new_metadata_file,
+                                                                  labels=labels,
+                                                                  name=self.dataset_name,
+                                                                  identifier=identifier)
+            write_dataset_yaml(dataset_filename, dataset_yaml)
 
         return RepertoireDataset(labels=labels,
                                  repertoires=repertoires, metadata_file=new_metadata_file, name=self.dataset_name,
@@ -103,7 +116,7 @@ class DataImport(metaclass=abc.ABCMeta):
         try:
             metadata = pd.read_csv(metadata_file_path, sep=",")
             if "identifier" in metadata.columns:
-                assert len(list(metadata["identifier"])) == len(set(list(metadata["identifier"]))), \
+                assert metadata['identifier'].is_unique, \
                     (f"DataImport: if the field 'identifier' is supplied, each repertoire must have "
                      f"a unique identifier (found {len(set(list(metadata['identifier'])))} unique "
                      f"identifiers for {len(list(metadata['identifier']))} repertoires).")
@@ -248,7 +261,8 @@ class DataImport(metaclass=abc.ABCMeta):
 
             if repertoire.get_element_count() == 0:
                 logging.warning(
-                    f"Repertoire {repertoire.identifier} contains 0 sequences. It is recommended to remove this repertoire from the dataset. ")
+                    f"Repertoire {repertoire.data_filename} contains 0 sequences. It is recommended to remove this "
+                    f"repertoire from the dataset. ")
 
             return repertoire
         except Exception as e:
@@ -286,10 +300,10 @@ class DataImport(metaclass=abc.ABCMeta):
     def load_file(self, filename: Path) -> pd.DataFrame:
         try:
             df = pd.read_csv(str(filename), sep=self.params.separator, iterator=False,
-                             usecols=self.params.columns_to_load)
+                             usecols=self.params.columns_to_load, engine='python')
         except ValueError:
 
-            df = pd.read_csv(str(filename), sep=self.params.separator, iterator=False)
+            df = pd.read_csv(str(filename), sep=self.params.separator, iterator=False, engine='python')
 
             expected = [e for e in self.params.columns_to_load if e not in list(df.columns)]
             df = df[[col for col in self.params.columns_to_load if col in df.columns]]
@@ -308,6 +322,7 @@ class DataImport(metaclass=abc.ABCMeta):
 
         df = ImportHelper.standardize_bool_values(df)
         df = ImportHelper.standardize_none_values(df)
+        df = ImportHelper.standardize_string_values(df, filename.name)
 
         df = self._convert_types(df)
 

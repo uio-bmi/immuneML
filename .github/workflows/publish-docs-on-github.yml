@@ -15,28 +15,31 @@ jobs:
     steps:
 
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: 3.11
+          enable-cache: true
 
-      - name: install dependencies
+      - name: Create a virtual env and install dependencies with uv
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements_sphinx.txt
-          pip install torch
-      - name: make html & commit the changes
-        run: |
-          export PYTHONPATH=.
-          python scripts/specs_docs_generation.py
-          sphinx-build -b html ./docs/source ./docs
-          git config --global user.email "github@action.com"
-          git config user.name "pavlovicmilena"
-          git add -f ./docs
-          git commit -m 'update docs'
+            uv venv --python 3.11
+            source .venv/bin/activate
+          
+            uv pip install -r requirements.txt
+            uv pip install -r requirements_sphinx.txt
+            uv pip install torch
+          
+            export PYTHONPATH=.
+          
+            python scripts/specs_docs_generation.py
+            sphinx-build -b html ./docs/source ./docs
+          
+            git config --global user.email "github@action.com"
+            git config user.name "pavlovicmilena"
+            git add -f ./docs
+            git commit -m 'update docs'
 
       - name: push changes to gh-pages to show automatically
         uses: ad-m/github-push-action@master

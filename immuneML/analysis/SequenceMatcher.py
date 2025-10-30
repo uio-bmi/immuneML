@@ -44,10 +44,12 @@ class SequenceMatcher:
         return matched
 
     def matches_gene(self, gene1, gene2):
-        if gene1 == gene2 or all(gene in ['', None] for gene in [gene1, gene2]):
-            return True
-        else:
-            return gene2.split("-", 1)[0] == gene1 or gene1.split("-", 1)[0] == gene2
+        """for two genes (e.g. "TRBV12-2,TRBV12-4" and "TRBV12-2") returns True if they share at least one gene
+        (here TRBV12-2)"""
+        genes1 = [g.split("*")[0] for g in gene1.split(",")] if gene1 not in ['', None] else []
+        genes2 = [g.split("*")[0] for g in gene2.split(",")] if gene2 not in ['', None] else []
+
+        return len(set(genes1).intersection(set(genes2))) > 0 or (len(genes1) == len(genes2) and len(genes1) == 0)
 
     def matches_sequence(self, original_sequence: ReceptorSequence, reference_sequence: ReceptorSequence, max_distance):
         """
@@ -62,12 +64,12 @@ class SequenceMatcher:
             and edit_distance(original_sequence.get_sequence(), reference_sequence.get_sequence()) <= max_distance
 
     def match_repertoire(self, repertoire: Repertoire, index: int, reference_sequences: list, max_distance: int,
-                         summary_type: SequenceMatchingSummaryType) -> dict:
+                         summary_type: SequenceMatchingSummaryType, num_processes: int = 1) -> dict:
 
         matched = {"sequences": [], "repertoire": repertoire.identifier, "repertoire_index": index}
         arguments = [(seq, reference_sequences, max_distance) for seq in repertoire.sequences()]
 
-        with Pool(SequenceMatcher.CORES) as pool:
+        with Pool(num_processes) as pool:
             matched["sequences"] = pool.starmap(self.match_sequence, arguments)
 
         if summary_type == SequenceMatchingSummaryType.CLONAL_PERCENTAGE:

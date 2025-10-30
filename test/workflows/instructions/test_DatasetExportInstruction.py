@@ -21,8 +21,7 @@ class TestDatasetExportInstruction(TestCase):
         filter = CountPerSequenceFilter(low_count_limit=1, remove_without_count=True, remove_empty_repertoires=True,
                                         batch_size=100)
         instruction = DatasetExportInstruction(datasets=[dataset], preprocessing_sequence=[filter],
-                                               exporters=[AIRRExporter], name="export_instr",
-                                               number_of_processes=2)
+                                               name="export_instr", number_of_processes=2)
 
         result_path = path / "generated/"
         state = instruction.run(result_path=result_path)
@@ -36,7 +35,7 @@ class TestDatasetExportInstruction(TestCase):
         self.assertEqual(2, len(list(glob(str(state.result_path / "*/")))))
         self.assertEqual(1, len(list(glob(str(state.result_path / f"{dataset.name}/*/")))))
         self.assertTrue(os.path.isdir(str(state.result_path / f"{dataset.name}/AIRR/")))
-        self.assertTrue(os.path.isfile(str(state.result_path / f"{dataset.name}/AIRR/metadata.csv")))
+        self.assertTrue(os.path.isfile(str(state.result_path / f"{dataset.name}/AIRR/d1.csv")))
         self.assertEqual(20, len(list(glob(str(state.result_path / f"{dataset.name}/AIRR/repertoires/*")))))
 
         shutil.rmtree(path)

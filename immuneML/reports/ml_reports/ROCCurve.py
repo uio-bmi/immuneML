@@ -4,6 +4,7 @@ import numpy as np
 import plotly.graph_objs as go
 from sklearn.metrics import roc_curve, auc
 
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
@@ -47,7 +48,6 @@ class ROCCurve(MLReport):
         fpr, tpr, _ = roc_curve(true_y, predicted_y)
         roc_auc = auc(fpr, tpr)
 
-
         trace1 = go.Scatter(x=fpr, y=tpr,
                             mode='lines',
                             line=dict(color='darkorange', width=2),
@@ -67,7 +67,7 @@ class ROCCurve(MLReport):
         path_htm = self.result_path / f"{self.name}.html"
         path_csv = self.result_path / f"{self.name}.csv"
         csv_result = np.concatenate((fpr.reshape(1, -1), tpr.reshape(1, -1)))
-        fig.write_html(str(path_htm))
+        path_htm = PlotlyUtil.write_image_to_file(fig, path_htm)
         np.savetxt(str(path_csv), csv_result, header="fpr,tpr")
         return ReportResult(self.name,
                             info="A report that plots the ROC curve for a binary classifier.",
@@ -77,8 +77,8 @@ class ROCCurve(MLReport):
     def check_prerequisites(self):
         if not hasattr(self, "result_path") or self.result_path is None:
             logging.warning(f"{self.__class__.__name__} requires an output"
-                          f" 'path' to be set. {self.__class__.__name__}"
-                          f" report will not be created.")
+                            f" 'path' to be set. {self.__class__.__name__}"
+                            f" report will not be created.")
             return False
 
         if self.test_dataset.encoded_data is None:

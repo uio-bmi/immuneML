@@ -49,7 +49,8 @@ class ReflectionHandler:
     def get_class_by_name(class_name: str, subdirectory: str = ""):
         filenames = ReflectionHandler._get_filenames(class_name, subdirectory)
 
-        assert len(filenames) == 1, f"ReflectionHandler could not find class named {class_name}. Check spelling and try again."
+        assert len(filenames) == 1, (f"ReflectionHandler could not find class named {class_name}. "
+                                     f"Found: {filenames}\nCheck spelling and try again.")
 
         return ReflectionHandler._import_class(filenames[0], class_name)
 

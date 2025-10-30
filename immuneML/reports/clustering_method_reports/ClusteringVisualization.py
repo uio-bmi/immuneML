@@ -5,26 +5,25 @@ import plotly
 import plotly.express as px
 
 from immuneML.dsl.definition_parsers.MLParser import MLParser
-from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
-from immuneML.reports.clustering_reports.ClusteringReport import ClusteringReport
+from immuneML.reports.clustering_method_reports.ClusteringMethodReport import ClusteringMethodReport
 from immuneML.util.PathBuilder import PathBuilder
-from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringState
 from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringItem
 
 
-class ClusteringVisualization(ClusteringReport):
+class ClusteringVisualization(ClusteringMethodReport):
     """
     A report that creates low-dimensional visualizations of clustering results using the specified dimensionality reduction method.
     For each dataset and clustering configuration, it creates a scatter plot where points are colored by their cluster assignments.
 
     Specification arguments:
-        dim_red_method (dict): specification of which dimensionality reduction to perform; valid options are presented
-        under :ref:`**Dimensionality reduction methods**` and should be specified with the name of the method and its
-        parameters, see the example below
+
+        - dim_red_method (dict): specification of which dimensionality reduction to perform; valid options are presented
+          under :ref:`**Dimensionality reduction methods**` and should be specified with the name of the method and its
+          parameters, see the example below
 
     YAML specification:
 
@@ -46,8 +45,8 @@ class ClusteringVisualization(ClusteringReport):
     """
 
     def __init__(self, dim_red_method: DimRedMethod = None, name: str = None,
-                 result_path: Path = None, number_of_processes: int = 1, state: ClusteringState = None):
-        super().__init__(name=name, result_path=result_path, number_of_processes=number_of_processes, state=state)
+                 result_path: Path = None, clustering_item: ClusteringItem = None):
+        super().__init__(name=name, result_path=result_path, clustering_item=clustering_item)
         self.dim_red_method = dim_red_method
         self.result_name = None
         self.desc = "Clustering Visualization"
@@ -58,8 +57,6 @@ class ClusteringVisualization(ClusteringReport):
         location = "ClusteringVisualization"
         name = kwargs["name"] if "name" in kwargs else None
         result_path = kwargs["result_path"] if "result_path" in kwargs else None
-        number_of_processes = kwargs["number_of_processes"] if "number_of_processes" in kwargs else None
-        state = kwargs["state"] if "state" in kwargs else None
 
         if "dim_red_method" in kwargs and kwargs["dim_red_method"]:
             method_name = list(kwargs["dim_red_method"].keys())[0]
@@ -68,51 +65,39 @@ class ClusteringVisualization(ClusteringReport):
             raise ValueError(f"{location}: dim_red_method must be specified.")
 
         return cls(dim_red_method=dim_red_method, name=name, result_path=result_path,
-                   number_of_processes=number_of_processes, state=state)
+                   clustering_item=kwargs['clustering_item'] if 'clustering_item' in kwargs else None,)
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
         self.result_name = f"clustering_{self.dim_red_method.__class__.__name__.lower()}_plots"
-        result_path = self.result_path / self.result_name
-        PathBuilder.build(result_path)
+        result_path = PathBuilder.build(self.result_path / self.result_name)
 
-        report_outputs = []
-
-        for run_idx, clustering_results in enumerate(self.state.clustering_items):
-            for analysis_type in ['discovery', 'method_based_validation', 'result_based_validation']:
-                run_results = getattr(clustering_results, analysis_type)
-                if run_results is not None:
-                    for setting_key, item_result in run_results.items.items():
-
-                        plot_path = self._make_plot(item_result.item, run_idx, analysis_type, setting_key, result_path)
-                        report_output = ReportOutput(plot_path,
-                                                     f"Clustering visualization for {setting_key} "
-                                                     f"({analysis_type} - split {run_idx + 1})")
-                        report_outputs.append(report_output)
+        plot_path = self._make_plot(result_path)
+        report_output = ReportOutput(plot_path,
+                                     f"Clustering visualization for {self.item.cl_setting.get_key()}")
 
         return ReportResult(f"{self.desc} ({self.name})",
-                            info=f"{self.dim_red_method.__class__.__name__} visualizations of clustering results "
-                                 f"across splits and discovery/validation datasets",
-                            output_figures=report_outputs)
+                            info=f"{self.dim_red_method.__class__.__name__} visualizations of clustering results",
+                            output_figures=[report_output])
 
-    def _make_plot(self, cl_item: ClusteringItem, run_idx: int, analysis_type: str, setting_key: str, result_path: Path)\
-            -> Path:
-        transformed_data = self.dim_red_method.fit_transform(cl_item.dataset)
-        ext_label_names = self.state.config.label_config.get_labels_by_name()
+    def _make_plot(self, result_path: Path) -> Path:
+        transformed_data = self.dim_red_method.fit_transform(dataset=self.item.dataset)
 
         df = pd.DataFrame(transformed_data, columns=self._dimension_names)
-        df['cluster'] = pd.Series(cl_item.predictions).astype(str)
-        df[ext_label_names] = cl_item.dataset.get_metadata(ext_label_names, return_df=True)
+        df['cluster'] = pd.Series(self.item.predictions).astype(str)
+        df['id'] = self.item.dataset.get_example_ids()
 
         fig = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1], color='cluster',
                          color_discrete_sequence=plotly.colors.qualitative.Set2,
                          category_orders={'cluster': sorted(df.cluster.unique())},
-                         hover_data=ext_label_names)
+                         hover_data=['id'])
 
         fig.update_layout(template="plotly_white")
 
+        df.to_csv(result_path / f"clustering_visualization_{self.dim_red_method.name}.csv", index=False)
+
         plot_path = PlotlyUtil.write_image_to_file(fig,
-                                                   result_path / f"run_{run_idx}_{analysis_type}_{setting_key}.html",
+                                                   result_path / f"clustering_visualization_{self.dim_red_method.name}.html",
                                                    df.shape[0])
 
         return plot_path

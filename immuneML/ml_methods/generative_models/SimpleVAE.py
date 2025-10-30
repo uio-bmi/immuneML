@@ -51,11 +51,11 @@ class SimpleVAE(GenerativeModel):
 
     - batch_size (int): how many examples to consider at the same time
 
-    - j_gene_embed_dim (int): dimension of J gene embedding
+    - j_gene_embed_dim (int or None): dimension of J gene embedding; if None, it defaults to the number of unique J genes in the training data
 
-    - v_gene_embed_dim (int): dimension of V gene embedding
+    - v_gene_embed_dim (int or None): dimension of V gene embedding; if None, it defaults to the number of unique V genes in the training data
 
-    - cdr3_embed_dim (int): dimension of the cdr3 embedding
+    - cdr3_embed_dim (int or None): dimension of the cdr3 embedding; if None, it defaults to the size of the amino-acid alphabet (including padding)
 
     - pretrains (int): how many times to attempt pretraining to initialize the weights and use warm-up for the beta hyperparameter before the main training process
 
@@ -123,11 +123,11 @@ class SimpleVAE(GenerativeModel):
 
         return vae
 
-    def __init__(self, locus, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, j_gene_embed_dim, pretrains,
-                 v_gene_embed_dim, cdr3_embed_dim, warmup_epochs, patience, iter_count_prob_estimation, device,
-                 learning_rate: float, validation_split=0.1, vocab=None, max_cdr3_len=None, unique_v_genes=None,
-                 unique_j_genes=None, name: str = None, region_type: str = RegionType.IMGT_JUNCTION.name,
-                 seed: int = None):
+    def __init__(self, locus, beta, latent_dim, linear_nodes_count, num_epochs, batch_size, pretrains, warmup_epochs,
+                 patience, iter_count_prob_estimation, device, learning_rate: float, validation_split=0.1,
+                 j_gene_embed_dim=None, v_gene_embed_dim=None, cdr3_embed_dim=None, vocab=None,  max_cdr3_len=None,
+                 unique_v_genes=None, unique_j_genes=None, name: str = None,
+                 region_type: str = RegionType.IMGT_JUNCTION.name, seed: int = None):
         super().__init__(locus, seed=seed, name=name, region_type=RegionType.get_object(region_type))
         self.sequence_type = SequenceType.AMINO_ACID
         self.iter_count_prob_estimation = iter_count_prob_estimation
@@ -139,7 +139,7 @@ class SimpleVAE(GenerativeModel):
         self.beta = beta
         self.warmup_epochs = warmup_epochs
         self.patience = patience
-        self.cdr3_embed_dim = cdr3_embed_dim
+        self.cdr3_embed_dim = cdr3_embed_dim if cdr3_embed_dim is not None else self.vocab_size
         self.latent_dim = latent_dim
         self.j_gene_embed_dim, self.v_gene_embed_dim = j_gene_embed_dim, v_gene_embed_dim
         self.linear_nodes_count = linear_nodes_count
@@ -182,6 +182,7 @@ class SimpleVAE(GenerativeModel):
 
     def fit(self, data, path: Path = None):
         import torch
+        self.set_locus(data)
         seq_col = get_sequence_field_name(self.region_type, self.sequence_type)
         self._extract_data_characteristics(data, seq_col)
 
@@ -247,6 +248,10 @@ class SimpleVAE(GenerativeModel):
             self.unique_j_genes = sorted(list(set([el.split("*")[0] for el in data['j_call']])))
         if self.max_cdr3_len is None:
             self.max_cdr3_len = max(len(el) for el in data[seq_col])
+        if self.v_gene_embed_dim is None:
+            self.v_gene_embed_dim = len(self.unique_v_genes)
+        if self.j_gene_embed_dim is None:
+            self.j_gene_embed_dim = len(self.unique_j_genes)
 
     def _pretrain(self, train_data_loader, validation_data_loader, path: Path):
         import torch
@@ -315,16 +320,16 @@ class SimpleVAE(GenerativeModel):
 
         encoded_v_genes = one_hot(
             torch.as_tensor([self.unique_v_genes.index(v_gene.split("*")[0]) for v_gene in data['v_call']],
-                            device=self.device),
+                            device=self.device, dtype=torch.long),
             num_classes=len(self.unique_v_genes))
         encoded_j_genes = one_hot(
             torch.as_tensor([self.unique_j_genes.index(j_gene.split("*")[0]) for j_gene in data['j_call']],
-                            device=self.device),
+                            device=self.device, dtype=torch.long),
             num_classes=len(self.unique_j_genes))
         padded_encoded_cdr3s = one_hot(torch.as_tensor([
             [self.vocab.index(letter) for letter in
              StringHelper.pad_sequence_in_the_middle(seq, self.max_cdr3_len, Constants.GAP_LETTER)]
-            for seq in data[seq_col]], device=self.device), num_classes=self.vocab_size)
+            for seq in data[seq_col]], device=self.device, dtype=torch.long), num_classes=self.vocab_size)
 
         PyTorchSequenceDataset = get_pytorch_seq_dataset_class()
         pytorch_dataset = PyTorchSequenceDataset({'v_gene': encoded_v_genes, 'j_gene': encoded_j_genes,
@@ -432,7 +437,7 @@ class SimpleVAE(GenerativeModel):
 
         store_weights(self.model, model_path / 'state_dict.yaml')
 
-        return Path(shutil.make_archive(str(path / 'trained_model'), 'zip', str(model_path))).absolute()
+        return Path(shutil.make_archive(str(path / f'trained_model_{self.name}'), 'zip', str(model_path))).absolute()
 
 
 def get_pytorch_seq_dataset_class():

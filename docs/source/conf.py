@@ -71,10 +71,7 @@ napoleon_include_init_with_doc = True
 
 # autodoc
 
-autodoc_mock_imports = ["pandas", "scikit-learn", "numpy", "pystache", "torch", 'sentencepiece', 'transformers',
-                        'esm', 'pyyaml', 'bionumpy', 'airr', 'pystache', 'matplotlib', 'editdistance', 'regex',
-                        'tzlocal', 'dill', 'plotly', 'matplotlib-venn', 'scipy', 'umap-learn', 'fisher', 'fishersapi',
-                        'olga', 'stitchr', 'IMGTgeneDL', 'sentencepiece', 'psutil', 'kaleido']
+autodoc_mock_imports = []
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

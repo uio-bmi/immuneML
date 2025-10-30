@@ -133,7 +133,7 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         AIRRExporter.export(dataset1, path_exported)
 
         params["path"] = path_exported
-        params["metadata_file"] = path_exported / dataset1.metadata_file.name
+        params["metadata_file"] = path_exported / f"{dataset1.name}.csv"
         params["result_path"] = path / "final_output"
         dataset2 = AIRRImport(params, "airr_repertoire_dataset2").import_dataset()
 

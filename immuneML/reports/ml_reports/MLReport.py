@@ -34,7 +34,8 @@ class MLReport(Report):
     DOCS_TITLE = "ML model reports"
 
     def __init__(self, train_dataset: Dataset = None, test_dataset: Dataset = None, method: MLMethod = None,
-                 result_path: Path = None, name: str = None, hp_setting: HPSetting = None, label: Label =None, number_of_processes: int = 1):
+                 result_path: Path = None, name: str = None, hp_setting: HPSetting = None, label: Label = None,
+                 number_of_processes: int = 1):
         """
         The arguments defined below are set at runtime by the instruction.
         Concrete classes inheriting MLReport may include additional parameters that will be set by the user in the form of input arguments.

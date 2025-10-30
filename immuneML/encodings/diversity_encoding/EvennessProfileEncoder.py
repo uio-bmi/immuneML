@@ -86,7 +86,7 @@ class EvennessProfileEncoder(DatasetEncoder):
 
         prepared_params = EvennessProfileEncoder._prepare_parameters(**params)
         encoder = ReflectionHandler.get_class_by_name(EvennessProfileEncoder.dataset_mapping[dataset.__class__.__name__],
-                                                          "evenness_profile/")(**prepared_params)
+                                                          "diversity_encoding/")(**prepared_params)
 
         return encoder
 
