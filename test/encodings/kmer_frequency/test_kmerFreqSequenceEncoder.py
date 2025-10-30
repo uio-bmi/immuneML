@@ -71,6 +71,6 @@ class TestKmerFreqSequenceEncoder(TestCase):
         self.assertEqual(9, encoded_dataset.encoded_data.examples.shape[0])
         self.assertTrue(all(identifier in encoded_dataset.encoded_data.example_ids
                             for identifier in ['1', '2', '3', '4', '5', '6', '7', '8', '9']))
-        self.assertTrue(numpy.array_equal(encoded_dataset.encoded_data.examples[0].A, encoded_dataset.encoded_data.examples[3].A))
+        self.assertTrue(numpy.array_equal(encoded_dataset.encoded_data.examples[0].toarray(), encoded_dataset.encoded_data.examples[3].toarray()))
 
         shutil.rmtree(path)
