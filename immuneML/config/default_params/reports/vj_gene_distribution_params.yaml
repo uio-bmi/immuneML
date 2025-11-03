@@ -1,3 +1,4 @@
-split_by_label: False
+split_by_label: false
 label: null
-is_sequence_label: False
+is_sequence_label: false
+show_joint_dist: true

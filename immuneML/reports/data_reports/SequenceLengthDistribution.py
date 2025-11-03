@@ -212,7 +212,7 @@ class SequenceLengthDistribution(DataReport):
                         facet_col=self.label_name if self.label_name in df.columns else None,
                         facet_row="chain" if isinstance(self.dataset, ReceptorDataset) else None)
         figure.update_layout(template="plotly_white")
-        figure.update_traces(marker_color=px.colors.diverging.Tealrose[0])
+        figure.update_traces(marker_color=px.colors.qualitative.Vivid[0])
 
         for annotation in figure.layout.annotations:
             annotation['font'] = {'size': 16}
