@@ -1,9 +1,11 @@
+import logging
 from pathlib import Path
 
 import pandas as pd
 import plotly
 import plotly.express as px
 
+from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.definition_parsers.MLParser import MLParser
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.reports.PlotlyUtil import PlotlyUtil
@@ -23,7 +25,9 @@ class ClusteringVisualization(ClusteringMethodReport):
 
         - dim_red_method (dict): specification of which dimensionality reduction to perform; valid options are presented
           under :ref:`**Dimensionality reduction methods**` and should be specified with the name of the method and its
-          parameters, see the example below
+          parameters, see the example below; if not specified, the report will use any dimensionality reduced data
+          present in the dataset's encoded data; if the dataset does not contain dimensionality reduced data, and the
+          encoded data has more than 2 dimensions, the report will be skipped.
 
     YAML specification:
 
@@ -42,6 +46,10 @@ class ClusteringVisualization(ClusteringMethodReport):
                         TSNE:
                             n_components: 2
                             init: pca
+            my_report_existing_dim_red:
+                ClusteringVisualization:
+                    dim_red_method: null
+
     """
 
     def __init__(self, dim_red_method: DimRedMethod = None, name: str = None,
@@ -50,7 +58,7 @@ class ClusteringVisualization(ClusteringMethodReport):
         self.dim_red_method = dim_red_method
         self.result_name = None
         self.desc = "Clustering Visualization"
-        self._dimension_names = self.dim_red_method.get_dimension_names()
+        self._dimension_names = self.dim_red_method.get_dimension_names() if self.dim_red_method else None
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -62,7 +70,9 @@ class ClusteringVisualization(ClusteringMethodReport):
             method_name = list(kwargs["dim_red_method"].keys())[0]
             dim_red_method = MLParser.parse_any_model("dim_red_method", kwargs["dim_red_method"], method_name)[0]
         else:
-            raise ValueError(f"{location}: dim_red_method must be specified.")
+            logging.warning(f"{location}: No dimensionality reduction method specified. "
+                            "If the encoded dataset includes dimensionality reduction, it will be used.")
+            dim_red_method = None
 
         return cls(dim_red_method=dim_red_method, name=name, result_path=result_path,
                    clustering_item=kwargs['clustering_item'] if 'clustering_item' in kwargs else None,)
@@ -77,11 +87,22 @@ class ClusteringVisualization(ClusteringMethodReport):
                                      f"Clustering visualization for {self.item.cl_setting.get_key()}")
 
         return ReportResult(f"{self.desc} ({self.name})",
-                            info=f"{self.dim_red_method.__class__.__name__} visualizations of clustering results",
+                            info=f"Visualizations of clustering results",
                             output_figures=[report_output])
 
     def _make_plot(self, result_path: Path) -> Path:
-        transformed_data = self.dim_red_method.fit_transform(dataset=self.item.dataset)
+        if self.dim_red_method is not None:
+            transformed_data = self.dim_red_method.fit_transform(dataset=self.item.dataset)
+        elif self.item.dataset.encoded_data.dimensionality_reduced_data is not None:
+            transformed_data = self.item.dataset.encoded_data.dimensionality_reduced_data
+            self._dimension_names = self.item.dataset.encoded_data.dim_names if self.item.dataset.encoded_data.dim_names else ['dim1', 'dim2']
+        elif self.item.dataset.encoded_data.examples.shape[1] <= 2:
+            transformed_data = self.item.dataset.encoded_data.get_examples_as_np_matrix()
+            self._dimension_names = self.item.dataset.encoded_data.feature_names
+        else:
+            raise ValueError("ClusteringVisualization: No dimensionality reduction method specified, and the dataset "
+                             "does not contain dimensionality reduced data. Please specify a dimensionality reduction "
+                             "method.")
 
         df = pd.DataFrame(transformed_data, columns=self._dimension_names)
         df['cluster'] = pd.Series(self.item.predictions).astype(str)
@@ -94,10 +115,20 @@ class ClusteringVisualization(ClusteringMethodReport):
 
         fig.update_layout(template="plotly_white")
 
-        df.to_csv(result_path / f"clustering_visualization_{self.dim_red_method.name}.csv", index=False)
+        df.to_csv(result_path / f"clustering_visualization_{self.dim_red_method.name if self.dim_red_method else ''}.csv", index=False)
 
         plot_path = PlotlyUtil.write_image_to_file(fig,
-                                                   result_path / f"clustering_visualization_{self.dim_red_method.name}.html",
+                                                   result_path / f"clustering_visualization_{self.dim_red_method.name if self.dim_red_method else ''}.html",
                                                    df.shape[0])
 
         return plot_path
+
+    def get_ids(self):
+        if isinstance(self.item.dataset, RepertoireDataset):
+            metadata = self.item.dataset.get_metadata(['subject_id'], return_df=True)
+            if 'subject_id' in metadata.columns:
+                return metadata['subject_id'].tolist()
+            else:
+                return self.item.dataset.get_example_ids()
+        else:
+            return self.item.dataset.get_example_ids()

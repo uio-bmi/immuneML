@@ -126,6 +126,7 @@ class ExploratoryAnalysisInstruction(Instruction):
     def _run_dimensionality_reduction(self, unit: ExploratoryAnalysisUnit):
         result = unit.dim_reduction.fit_transform(unit.dataset)
         unit.dataset.encoded_data.dimensionality_reduced_data = result
+        unit.dataset.encoded_data.dim_names = unit.dim_reduction.get_dimension_names()
 
     def preprocess_dataset(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> Dataset:
         if unit.preprocessing_sequence is not None and len(unit.preprocessing_sequence) > 0:

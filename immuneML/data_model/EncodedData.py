@@ -27,7 +27,7 @@ class EncodedData:
 
     def __init__(self, examples, labels: dict = None, example_ids: list = None, feature_names: list = None,
                  feature_annotations: pd.DataFrame = None, encoding: str = None, example_weights: list = None, info: dict = None,
-                 dimensionality_reduced_data: np.ndarray = None):
+                 dimensionality_reduced_data: np.ndarray = None, dim_names: list = None):
 
         assert feature_names is None or examples.shape[1] == len(feature_names), \
             (f"EncodedData: the length of feature_names ({len(feature_names)}) must match the feature dimension of the "
@@ -59,6 +59,7 @@ class EncodedData:
         self.encoding = encoding
         self.example_weights = example_weights
         self.info = info
+        self.dim_names = dim_names
         self.dimensionality_reduced_data = dimensionality_reduced_data
 
     def __getstate__(self):

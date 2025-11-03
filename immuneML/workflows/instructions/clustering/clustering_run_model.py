@@ -21,7 +21,7 @@ class DataFrameWrapper:
             df.to_csv(str(path), index=False)
 
     def get_df(self):
-        if self.df is None and self.path.exists():
+        if self.df is None and isinstance(self.path, Path) and self.path.exists():
             self.df = pd.read_csv(str(self.path))
         return self.df
 
