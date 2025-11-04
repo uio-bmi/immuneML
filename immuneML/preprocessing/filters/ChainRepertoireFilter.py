@@ -4,6 +4,7 @@ from immuneML.data_model.SequenceParams import Chain
 from immuneML.data_model.SequenceSet import Repertoire
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.preprocessing.filters.Filter import Filter
+from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -23,7 +24,7 @@ class ChainRepertoireFilter(Filter):
 
     **Specification arguments:**
 
-    - keep_chain (str): Which chain should be kept, valid values are "TRA", "TRB", "IGH", "IGL", "IGK"
+    - keep_chains (list): Which chains should be kept, valid values are "TRA", "TRB", "IGH", "IGL", "IGK"
 
     - remove_only_sequences (bool): Whether to remove only sequences with different chain than "keep_chain" (true) in
       case of repertoire datasets; default is false
@@ -38,14 +39,15 @@ class ChainRepertoireFilter(Filter):
             my_preprocessing:
                 - my_filter:
                     ChainRepertoireFilter:
-                        keep_chain: TRB
+                        keep_chains: [TRB]
                         remove_only_sequences: true
 
     """
 
-    def __init__(self, keep_chain, remove_only_sequences: bool = False, result_path: Path = None):
+    def __init__(self, keep_chains: list, remove_only_sequences: bool = False, result_path: Path = None):
         super().__init__(result_path)
-        self.keep_chain = Chain.get_chain(keep_chain)
+        ParameterValidator.assert_type_and_value(keep_chains, list, "ChainRepertoireFilter", "keep_chains")
+        self.keep_chains = [Chain.get_chain(keep_chain) for keep_chain in keep_chains]
         self.remove_only_sequences = remove_only_sequences
 
     def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1):
@@ -58,20 +60,21 @@ class ChainRepertoireFilter(Filter):
 
         repertoires = []
         indices = []
+        valid_chains = [chain.value for chain in self.keep_chains]
         for index, repertoire in enumerate(processed_dataset.get_data()):
 
             if self.remove_only_sequences:
                 data = repertoire.data
-                data = data[[Chain.get_chain(l).value == self.keep_chain.value for l in data.locus.tolist()]]
+                data = data[[Chain.get_chain(l).value in valid_chains for l in data.locus.tolist()]]
                 if len(data) == 0:
                     continue
 
                 new_repertoire = Repertoire.build_from_dc_object(self.result_path, repertoire.metadata, data=data,
-                                                                 filename_base=repertoire.data_filename.stem + "filtered")
+                                                                 filename_base=repertoire.data_filename.stem)
                 repertoires.append(new_repertoire)
                 indices.append(index)
             else:
-                if all(Chain.get_chain(l).value == self.keep_chain.value for l in repertoire.data.locus.tolist()):
+                if all(Chain.get_chain(l).value in valid_chains for l in repertoire.data.locus.tolist()):
                     repertoires.append(repertoire)
                     indices.append(index)
 
