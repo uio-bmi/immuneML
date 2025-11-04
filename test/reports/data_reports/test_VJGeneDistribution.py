@@ -106,4 +106,4 @@ class TestVJGeneDistribution(TestCase):
         self.assertTrue(os.path.isfile(path / "result/TRBVJ_gene_distribution_l1=a_averaged_across_repertoires.html"))
         self.assertTrue(os.path.isfile(path / "result/TRBVJ_gene_distribution_l1=b_averaged_across_repertoires.html"))
 
-        shutil.rmtree(path)
+        # shutil.rmtree(path)

@@ -190,7 +190,6 @@ class VJGeneDistribution(DataReport):
 
         vj_combo_count_df = self._get_vj_combo_count_df(dataset_attributes)
 
-
         for chain in set(dataset_attributes["locus"]):
             chain_df = vj_combo_count_df[vj_combo_count_df["locus"] == chain]
 
@@ -241,7 +240,7 @@ class VJGeneDistribution(DataReport):
 
         plots = []
 
-        for chain in set(vj_df["locus"]):
+        for chain in set(v_df["locus"]):
             plots.append(self._safe_plot(plot_callable="_plot_gene_distribution_across_repertoires",
                                          chain_df=v_df[v_df["locus"] == chain],
                                          title=f"{chain} V gene distribution per repertoire",
@@ -321,11 +320,9 @@ class VJGeneDistribution(DataReport):
             v_dfs.append(v_rep_df)
             j_dfs.append(j_rep_df)
 
-            if self.show_joint_dist:
-                vj_rep_df = self._get_vj_combo_count_df(repertoire_attributes, include_label=self.is_sequence_label)
-                self._supplement_repertoire_df(vj_rep_df, repertoire)
-                vj_dfs.append(vj_rep_df)
-
+            vj_rep_df = self._get_vj_combo_count_df(repertoire_attributes, include_label=self.is_sequence_label)
+            self._supplement_repertoire_df(vj_rep_df, repertoire)
+            vj_dfs.append(vj_rep_df)
 
         return pd.concat(v_dfs, ignore_index=True), \
             pd.concat(j_dfs, ignore_index=True), \

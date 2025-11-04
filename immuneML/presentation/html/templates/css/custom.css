@@ -17,7 +17,7 @@ body {
 :root {
     --primary-color: #2c3e50;
     --secondary-color: #34495e;
-    --accent-color: #009688;
+    --accent-color: #708090;
     --background-color: #f8f9fa;
     --text-color: #2c3e50;
 }
@@ -299,7 +299,7 @@ code {
 }
 
 .nested-list-container ul li ul li {
-    border-left: 1px solid #68b5b3;  /* Accent for nested items */
+    border-left: 1px solid #708090;  /* Accent for nested items */
     margin: 4px 0;
 }
 

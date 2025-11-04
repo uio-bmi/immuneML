@@ -59,7 +59,7 @@ class AIRRExporter(DataExporter):
         else:
 
             new_metadata_df = pd.read_csv(path / f"{dataset.name}.csv")
-            labels = {label: list(new_metadata_df[label].unique())
+            labels = {label: new_metadata_df[label].unique().tolist()
                       for label in dataset.get_label_names(refresh=True)}
 
             dataset_yaml = RepertoireDataset.create_metadata_dict(metadata_file=path / f"{dataset.name}.csv",

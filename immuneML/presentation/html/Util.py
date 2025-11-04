@@ -4,6 +4,7 @@ import shutil
 from enum import Enum
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from immuneML.reports.ReportOutput import ReportOutput
@@ -132,7 +133,22 @@ class Util:
                 f"{dataset_key}_locus": ", ".join(dataset.get_locus()),
                 f"{dataset_key}_size": f"{dataset.get_example_count()} {type(dataset).__name__.replace('Dataset', 's').lower()}",
                 f"{dataset_key}_labels": [{f"{dataset_key}_label_name": label_name,
-                                           f"{dataset_key}_label_classes": ", ".join(str(class_name)
-                                                                                     for class_name in dataset.labels.get(label_name, []))}
+                                           f"{dataset_key}_label_classes": get_label_values_to_show(dataset.labels.get(label_name, []), dataset.get_example_count())}
                                                 for label_name in dataset.get_label_names()],
                 f"show_{dataset_key}_labels": len(dataset.get_label_names()) > 0}
+
+def get_label_values_to_show(label_values: list, dataset_size: int):
+    if len(label_values) == dataset_size:
+        return "unique per example"
+    elif any(isinstance(label, float) and not label != np.nan for label in label_values):
+        try:
+            return f"{min(label_values):.2f} to {max(label_values):.2f}"
+        except Exception as e:
+            return 'mixed value types'
+    elif any(isinstance(label, int) for label in label_values):
+        try:
+            return f"{min(label_values)} to {max(label_values)}"
+        except Exception as e:
+            return 'mixed value types'
+    else:
+        return ", ".join(str(label) for label in label_values)
