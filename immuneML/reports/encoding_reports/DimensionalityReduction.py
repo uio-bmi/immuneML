@@ -144,10 +144,10 @@ class DimensionalityReduction(EncodingReport):
                 elif 'example_id' in df_copy.columns:
                     hover_data += ['example_id']
 
-                if len(unique_values) <= 3:
+                if len(unique_values) <= 15:
                     df_copy[label] = df_copy[label].astype('category')
                     figure = px.scatter(df_copy, x=self._dimension_names[0], y=self._dimension_names[1], color=label,
-                                        color_discrete_sequence=px.colors.qualitative.Set1,
+                                        color_discrete_sequence=px.colors.qualitative.Vivid,
                                         hover_data=hover_data,
                                         category_orders={label: sorted(unique_values)})
                 else:
