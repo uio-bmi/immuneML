@@ -1,5 +1,6 @@
 import copy
 import inspect
+import logging
 from pathlib import Path
 from typing import List
 
@@ -152,7 +153,13 @@ def parse_clustering_settings(key: str, instruction: dict, symbol_table: SymbolT
                                        instruction)
         settings_objs.append(setting_obj)
 
-    return settings_objs
+    unique_objs = list(set(settings_objs))
+
+    if len(unique_objs) < len(settings_objs):
+        logging.warning(f"Clustering parser: clustering_settings contains {len(settings_objs) - len(unique_objs)} "
+                        f"duplicate settings, keep the following: {[obj.get_key() for obj in unique_objs]}")
+
+    return unique_objs
 
 
 def make_setting_obj(setting, valid_encodings, valid_clusterings, valid_dim_red, symbol_table, instruction):
