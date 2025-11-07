@@ -191,17 +191,31 @@ class TrueMotifsSummaryBarplot(DataReport):
 
             df_melted = self._prepare_and_sort_plotting_data(plotting_data, signal_names, sorted_data_origins,
                                                              seq_counts_df)
+            df_melted['data_origin_novelty'] = df_melted['data_origin'] + ' - ' + df_melted['novelty_memorization']
 
             figure = px.bar(
                 df_melted,
                 x='signal',
                 y='frequency',
-                color='novelty_memorization',
+                color='data_origin_novelty',
                 facet_col='label',
-                color_discrete_sequence=px.colors.diverging.Tealrose,
+                color_discrete_sequence=px.colors.qualitative.Vivid,
                 barmode='stack',
                 title='Percentage of sequences containing signals across different generated datasets',
             )
+
+            # make bars grouped by data_origin and stacked by novelty
+            # figure.update_traces(offsetgroup=df_melted["data_origin"],  # group by data_origin
+            #                      opacity=1.0)
+
+            # now reduce opacity for each novelty_memorization level
+            color_map = {data_origin: px.colors.qualitative.Vivid[i]
+                         for i, data_origin in enumerate(plotting_data['data_origin'].unique())}
+            opacity_map = {"original": 1.0, "memorized": 1., "novel": 0.5}
+            for trace in figure.data:
+                data_origin, novelty = trace.name.split(' - ')
+                trace.opacity = opacity_map[novelty]
+                trace.marker.color = color_map[data_origin]
 
             figure.for_each_annotation(lambda a: a.update(text=a.text.replace("label=", "")))
 
