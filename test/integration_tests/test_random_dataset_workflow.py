@@ -75,16 +75,11 @@ class TestRandomDatasetWorkflow(TestCase):
                         }
                     },
                     "conf_matrix_per_label": {
-                        "ConfusionMatrixPerLabel": {
-                            'alternative_label': 'hla',
-                            'plot_on_train': False,
-                            'plot_on_test': True,
-                            'compute_for_selection': False,
-                            'compute_for_assessment': True
+                        "ConfusionMatrix": {
+                            'alternative_label': 'hla'
                         }
                     },
                     'roc': "ROCCurveSummary",
-                    'conf_mat': 'ConfusionMatrix',
                     'design_matrix_exporter': 'DesignMatrixExporter',
                 }
 
@@ -103,7 +98,7 @@ class TestRandomDatasetWorkflow(TestCase):
                         "split_count": 1,
                         "training_percentage": 0.7,
                         'reports': {
-                            'models': ['conf_mat'],
+                            'models': ['conf_matrix_per_label'],
                             'encoding': ['design_matrix_exporter'],
                         }
                     },
@@ -117,7 +112,7 @@ class TestRandomDatasetWorkflow(TestCase):
                     "strategy": "GridSearch",
                     "metrics": ['precision', 'recall'],
                     "number_of_processes": 4,
-                    "reports": ['conf_matrix_per_label', 'performance_per_label', 'roc'],
+                    "reports": ['performance_per_label', 'roc'],
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False,
                 }
@@ -194,12 +189,8 @@ class TestRandomDatasetWorkflow(TestCase):
                         }
                     },
                     "rep2": {
-                        "ConfusionMatrixPerLabel": {
-                            'alternative_label': 'batch',
-                            'plot_on_train': False,
-                            'plot_on_test': True,
-                            'compute_for_selection': False,
-                            'compute_for_assessment': True
+                        "ConfusionMatrix": {
+                            'alternative_label': 'batch'
                         }
                     },
                     'lbl': {
@@ -229,7 +220,8 @@ class TestRandomDatasetWorkflow(TestCase):
                         "split_count": 3,
                         "training_percentage": 0.7,
                         "reports": {
-                            'data_splits': ['lbl', 'label_dist']
+                            'data_splits': ['lbl', 'label_dist'],
+                            'models': ['rep2']
                         }
                     },
                     "selection": {
@@ -242,7 +234,7 @@ class TestRandomDatasetWorkflow(TestCase):
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
                     "number_of_processes": 4,
-                    "reports": ['rep1', 'rep2'],
+                    "reports": ['rep1'],
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False
                 }

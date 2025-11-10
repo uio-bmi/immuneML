@@ -35,7 +35,7 @@ class TestDatasetExportInstruction(TestCase):
         self.assertEqual(2, len(list(glob(str(state.result_path / "*/")))))
         self.assertEqual(1, len(list(glob(str(state.result_path / f"{dataset.name}/*/")))))
         self.assertTrue(os.path.isdir(str(state.result_path / f"{dataset.name}/AIRR/")))
-        self.assertTrue(os.path.isfile(str(state.result_path / f"{dataset.name}/AIRR/metadata.csv")))
+        self.assertTrue(os.path.isfile(str(state.result_path / f"{dataset.name}/AIRR/d1.csv")))
         self.assertEqual(20, len(list(glob(str(state.result_path / f"{dataset.name}/AIRR/repertoires/*")))))
 
         shutil.rmtree(path)

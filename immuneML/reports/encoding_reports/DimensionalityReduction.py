@@ -10,6 +10,7 @@ from immuneML.data_model.EncodedData import EncodedData
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.dsl.definition_parsers.MLParser import MLParser
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
@@ -157,7 +158,7 @@ class DimensionalityReduction(EncodingReport):
                 figure.update_traces(opacity=.6)
 
                 file_path = self.result_path / f"dimensionality_reduction_{label}.html"
-                figure.write_html(str(file_path))
+                file_path = PlotlyUtil.write_image_to_file(figure, file_path)
                 outputs.append(ReportOutput(path=file_path,
                                             name="Data visualization after dimensionality reduction "
                                                  "(highlighted by {})".format(label)))
@@ -168,7 +169,7 @@ class DimensionalityReduction(EncodingReport):
             figure.update_traces(opacity=.6)
 
             file_path = self.result_path / "dimensionality_reduction.html"
-            figure.write_html(str(file_path))
+            file_path = PlotlyUtil.write_image_to_file(figure, file_path)
             outputs.append(ReportOutput(path=file_path, name="Data visualization after dimensionality reduction"))
 
         return outputs

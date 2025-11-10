@@ -129,6 +129,7 @@ class Util:
     def make_dataset_html_map(dataset, dataset_key="dataset"):
         return {f"{dataset_key}_name": dataset.name,
                 f"{dataset_key}_type": StringHelper.camel_case_to_word_string(type(dataset).__name__),
+                f"{dataset_key}_locus": ", ".join(dataset.get_locus()),
                 f"{dataset_key}_size": f"{dataset.get_example_count()} {type(dataset).__name__.replace('Dataset', 's').lower()}",
                 f"{dataset_key}_labels": [{f"{dataset_key}_label_name": label_name,
                                            f"{dataset_key}_label_classes": ", ".join(str(class_name)

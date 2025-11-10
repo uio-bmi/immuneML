@@ -8,6 +8,7 @@ from immuneML.environment.Constants import Constants
 from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
 from immuneML.ml_metrics.ml_metrics import roc_auc_score
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
@@ -107,6 +108,6 @@ class ROCCurveSummary(TrainMLModelReport):
         figure.update_layout(legend=dict(yanchor="bottom", y=0.06, xanchor="right", x=0.99), font_size=15)
 
         file_path = self.result_path / figure_name.replace(" ", "_")
-        figure.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(figure, file_path)
 
         return ReportOutput(path=file_path, name=figure_name.split(".")[0])

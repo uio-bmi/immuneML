@@ -6,6 +6,7 @@ import pandas as pd
 
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -180,7 +181,7 @@ class GroundTruthMotifOverlap(EncodingReport):
         facet_barplot.update_layout(
             yaxis_title="Number of overlapping learned motifs",
         )
-        facet_barplot.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(facet_barplot, file_path)
 
         return ReportOutput(
             path=file_path, name="Amount of overlapping motifs per implant rate"

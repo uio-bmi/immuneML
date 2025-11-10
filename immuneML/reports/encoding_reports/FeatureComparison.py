@@ -6,6 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.encoding_reports.FeatureReport import FeatureReport
 from immuneML.util.ParameterValidator import ParameterValidator
@@ -170,7 +171,7 @@ class FeatureComparison(FeatureReport):
 
         file_path = self.result_path / f"{self.result_name}.html"
 
-        figure.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(figure, file_path, plotting_data.shape[0])
 
         return ReportOutput(path=file_path, name=f"Comparison of feature values across {self.comparison_label}")
 

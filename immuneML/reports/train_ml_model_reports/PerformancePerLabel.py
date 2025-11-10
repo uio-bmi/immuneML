@@ -12,6 +12,7 @@ from immuneML.hyperparameter_optimization.states.HPItem import HPItem
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.ml_metrics.MetricUtil import MetricUtil
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
@@ -310,7 +311,7 @@ class PerformancePerLabel(TrainMLModelReport):
     def _create_performance_plot(self, data: pd.DataFrame, dataset_desc: str, name_suffix, label_name: str):
         fig = self._create_figure(data, label_name)
         plot_path = self.result_path / f"{name_suffix}_performance_plot.html"
-        fig.write_html(str(plot_path))
+        plot_path = PlotlyUtil.write_image_to_file(fig, plot_path)
         return ReportOutput(plot_path,
                             self._get_desc_from_name_suffix(name_suffix, label_name, dataset_desc))
 

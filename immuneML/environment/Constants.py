@@ -19,3 +19,6 @@ class Constants:
 
     # plotting constants
     PLOTLY_BLACK = "#2A3F5E"
+
+
+VERSION = Constants.VERSION

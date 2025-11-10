@@ -23,8 +23,8 @@ class Quickstart:
                         "format": "AIRR",
                         "params": {
                             'path': f"{path}/../synthetic_dataset/result/simulation_instruction/exported_dataset/airr",
-                            "dataset_file": f"{path}/../synthetic_dataset/result/simulation_instruction/exported_dataset/airr/dataset.yaml",
-                            'metadata_file': f"{path}/../synthetic_dataset/result/simulation_instruction/exported_dataset/airr/metadata.csv",
+                            "dataset_file": f"{path}/../synthetic_dataset/result/simulation_instruction/exported_dataset/airr/simulated_dataset.yaml",
+                            'metadata_file': f"{path}/../synthetic_dataset/result/simulation_instruction/exported_dataset/airr/simulated_dataset.csv",
                             "import_illegal_characters": True,
                             'import_productive': False,
                             'import_out_of_frame': True

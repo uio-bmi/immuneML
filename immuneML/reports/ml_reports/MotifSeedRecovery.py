@@ -12,6 +12,7 @@ from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.classifiers.RandomForestClassifier import RandomForestClassifier
 from immuneML.ml_methods.classifiers.SVC import SVC
 from immuneML.ml_methods.classifiers.SVM import SVM
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
@@ -233,7 +234,7 @@ class MotifSeedRecovery(MLReport):
                 "coefficients": self._y_axis_title
             }, template='plotly_white', color_discrete_sequence=px.colors.diverging.Tealrose)
 
-            figure.write_html(str(filename))
+            filename = PlotlyUtil.write_image_to_file(figure, filename)
 
             return ReportOutput(filename, f"Overlap between implanted motif seeds and features versus {self._y_axis_title.lower()}")
 

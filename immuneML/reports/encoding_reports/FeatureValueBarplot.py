@@ -5,6 +5,7 @@ import numpy as np
 import plotly.express as px
 
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.encoding_reports.FeatureReport import FeatureReport
 
@@ -143,7 +144,7 @@ class FeatureValueBarplot(FeatureReport):
 
             file_path = self.result_path / f"{self.result_name}_{key}.html"
 
-            figure.write_html(str(file_path))
+            file_path = PlotlyUtil.write_image_to_file(figure, file_path)
             data.to_csv(self.result_path / f"{self.result_name}_{key}.csv", index=False)
             output_tables.append(ReportOutput(path=self.result_path / f"{self.result_name}_{key}.csv", name=f"{self.result_name} {key}"))
 

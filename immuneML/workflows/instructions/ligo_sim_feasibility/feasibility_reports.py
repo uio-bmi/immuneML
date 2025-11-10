@@ -6,6 +6,7 @@ import plotly.express as px
 
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.BackgroundSequences import BackgroundSequences
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 
@@ -16,7 +17,7 @@ def report_signal_frequencies(frequencies: pd.DataFrame, path: Path) -> ReportRe
 
     fig = px.bar(frequencies, x='signal', y='frequency', template='plotly_white', color_discrete_sequence=px.colors.diverging.Tealrose)
     fig_output = ReportOutput(path / 'signal_frequencies.html', 'signal frequencies bar chart')
-    fig.write_html(str(fig_output.path))
+    fig_output.path = PlotlyUtil.write_image_to_file(fig, fig_output.path)
 
     return ReportResult('signal frequencies', output_figures=[fig_output], output_tables=[csv_output])
 
@@ -29,7 +30,7 @@ def report_signal_cooccurrences(unique_values: np.ndarray, counts: np.ndarray, p
     fig = px.bar(df, x='signal_count', y='sequence_count', template='plotly_white', color_discrete_sequence=px.colors.diverging.Tealrose)
     fig.update_layout(xaxis_title_text='signal count', yaxis_title_text='sequence count', xaxis={"tickmode": 'linear', "tick0": 0, "dtick": 1})
     fig_output = ReportOutput(path / 'signal_counts_per_sequence.html', 'signal counts per sequence')
-    fig.write_html(str(fig_output.path))
+    fig_output.path = PlotlyUtil.write_image_to_file(fig, fig_output.path)
 
     return ReportResult('signal co-occurrences', output_figures=[fig_output], output_tables=[csv_output])
 
@@ -51,7 +52,7 @@ def report_signal_joint_probs(signal_matrix: np.ndarray, signal_names: list, pat
 
     fig = px.imshow(df, text_auto=True, color_continuous_scale='Aggrnyl')
     fig_output = ReportOutput(path / 'joint_probabilities_of_signals_co-occurring.html', "joint probabilities of signals co-occurring")
-    fig.write_html(str(fig_output.path))
+    fig_output.path = PlotlyUtil.write_image_to_file(fig, fig_output.path)
 
     return ReportResult('joint probabilities of signals co-occurring', output_figures=[fig_output], output_tables=[table_output])
 
@@ -81,7 +82,7 @@ def report_signal_cond_probs(signal_matrix: np.ndarray, signal_names: list, path
                       hovertemplate="%{customdata}<extra></extra>")
     fig.update_layout(template='plotly_white', xaxis_title='', yaxis_title='')
     fig_output = ReportOutput(path / 'cond_probabilities_of_signals_co-occurring.html', description)
-    fig.write_html(str(fig_output.path))
+    fig_output.path = PlotlyUtil.write_image_to_file(fig, fig_output.path)
 
     return ReportResult(description, output_figures=[fig_output], output_tables=[table_output])
 
@@ -98,13 +99,13 @@ def report_p_gen_histogram(sequences: BackgroundSequences, p_gen_bin_count: int,
                            color_discrete_sequence=px.colors.diverging.Tealrose, histnorm='probability density')
     fig_all.update_layout(xaxis_title_text="logarithm of generation probability")
     fig_output_all = ReportOutput(path / 'log10_p_gens.html', 'generation probabilities on log10 scale')
-    fig_all.write_html(str(fig_output_all.path))
+    fig_output_all.path = PlotlyUtil.write_image_to_file(fig_all, fig_output_all.path)
 
     fig_signal = px.histogram(p_gen_df, x='log_p_gen', nbins=p_gen_bin_count + 1, template='plotly_white', color='signal', opacity=0.7,
                               color_discrete_sequence=px.colors.diverging.Tealrose, histnorm='probability density')
     fig_signal.update_layout(xaxis_title_text="logarithm of generation probability")
     fig_output_signal = ReportOutput(path / 'log10_p_gens_per_signal.html', 'generation probabilities on log10 scale per signal')
-    fig_signal.write_html(str(fig_output_signal.path))
+    fig_output_signal.path = PlotlyUtil.write_image_to_file(fig_signal, fig_output_signal.path)
 
     return ReportResult('generation probabilities on log10 scale', output_figures=[fig_output_all, fig_output_signal], output_tables=[csv_output])
 
@@ -119,6 +120,6 @@ def report_seq_len_dist(sequences: BackgroundSequences, sequence_type: SequenceT
     fig = px.histogram(len_df, x='length', template='plotly_white', color_discrete_sequence=px.colors.diverging.Tealrose,
                        histnorm='probability density')
     fig_output = ReportOutput(path / 'sequence_length_hist.html', 'sequence length histogram')
-    fig.write_html(str(fig_output.path))
+    fig_output.path = PlotlyUtil.write_image_to_file(fig, fig_output.path)
 
     return ReportResult('sequence length distribution', output_tables=[csv_output], output_figures=[fig_output])

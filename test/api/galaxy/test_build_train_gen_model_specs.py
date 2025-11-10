@@ -28,7 +28,6 @@ def test_main():
         os.chdir(data_path)
 
         yamlbuilder_main(["-o", str(output_dir), "-f", output_filename,
-                          "-c", "TRA",
                           "-e", "10", "-m", "SoNNia", "-s", "True", "-q", "True",
                           "-k", "True", "-t", "70",
                           "-x", "generated_dataset"])

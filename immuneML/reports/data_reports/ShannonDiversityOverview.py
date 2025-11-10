@@ -9,6 +9,7 @@ from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.diversity_encoding.ShannonDiversityEncoder import ShannonDiversityEncoder
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -114,7 +115,7 @@ class ShannonDiversityOverview(DataReport):
 
         fig = px.bar(encoded_df, x='repertoire_index', y='shannon_diversity', facet_row=self.facet_row_label,
                      color=self.color_label, title='Shannon diversity per repertoire', facet_col=self.facet_col_label,
-                     color_discrete_sequence=px.colors.diverging.Tealrose, hover_data=hover_data_cols)
+                     color_discrete_sequence=px.colors.qualitative.Vivid, hover_data=hover_data_cols)
         fig.update_layout(template="plotly_white", yaxis_title='Shannon diversity',
                           xaxis_title='Repertoires sorted by Shannon diversity')
 
@@ -126,6 +127,6 @@ class ShannonDiversityOverview(DataReport):
             )
         )
 
-        fig.write_html(str(self.result_path / 'shannon_diversity.html'))
+        figure_path = PlotlyUtil.write_image_to_file(fig, self.result_path / 'shannon_diversity.html')
 
-        return ReportOutput(self.result_path / 'shannon_diversity.html', name='Shannon diversity')
+        return ReportOutput(figure_path, name='Shannon diversity')

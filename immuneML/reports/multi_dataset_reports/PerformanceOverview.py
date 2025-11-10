@@ -9,6 +9,7 @@ from sklearn.metrics import precision_recall_curve
 
 from immuneML.environment.Constants import Constants
 from immuneML.environment.Label import Label
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.multi_dataset_reports.MultiDatasetReport import MultiDatasetReport
@@ -103,7 +104,7 @@ class PerformanceOverview(MultiDatasetReport):
 
         figure_path = self.result_path / "roc_curve.html"
         figure.update_layout(template='plotly_white', xaxis_title='false positive rate', yaxis_title='true positive rate')
-        figure.write_html(str(figure_path))
+        figure_path = PlotlyUtil.write_image_to_file(figure, figure_path)
 
         return ReportOutput(figure_path, 'ROC curve'), report_data_outputs
 
@@ -127,6 +128,6 @@ class PerformanceOverview(MultiDatasetReport):
 
         figure_path = self.result_path / "precision_recall_curve.html"
         figure.update_layout(template='plotly_white', xaxis_title="recall", yaxis_title="precision")
-        figure.write_html(str(figure_path))
+        figure_path = PlotlyUtil.write_image_to_file(figure, figure_path)
 
         return ReportOutput(figure_path, 'precision-recall curve'), report_data_outputs

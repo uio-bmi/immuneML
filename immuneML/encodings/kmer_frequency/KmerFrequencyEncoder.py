@@ -14,7 +14,6 @@ from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
-from immuneML.environment.Constants import Constants
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
@@ -258,7 +257,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
                                    labels=encoded_labels,
                                    feature_names=feature_names,
                                    example_ids=example_ids,
-                                   feature_annotations=pd.DataFrame({'features': feature_names}),
+                                   feature_annotations=pd.DataFrame({'feature': feature_names}),
                                    encoding=KmerFrequencyEncoder.__name__,
                                    info={"sequence_type": self.sequence_type, 'region_type': self.region_type})
 

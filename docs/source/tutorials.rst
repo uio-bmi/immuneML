@@ -39,3 +39,9 @@ If you are getting started with your own dataset for the analysis, see :ref:`Ana
   tutorials/how_to_train_and_apply_gen_model
   tutorials/how_to_combine_multiple_encodings
 
+.. toctree::
+  :maxdepth: 1
+  :caption: Figures and plots
+
+  tutorials/getting_publication_ready_figures
+

@@ -66,6 +66,4 @@ class TestGroundTruthMotifOverlap(TestCase):
         if len(df) > 0:
             self.assertTrue(os.path.isfile(path / "result_path/motif_overlap.html"))
 
-        # shutil.rmtree(path)
-
-
+        shutil.rmtree(path)

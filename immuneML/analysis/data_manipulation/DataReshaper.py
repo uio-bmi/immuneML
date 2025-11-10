@@ -31,7 +31,7 @@ class DataReshaper:
             column_annotations = pd.DataFrame({'feature': dataset.encoded_data.feature_names})
 
         matrix = dataset.encoded_data.examples
-        matrix_1d = matrix.A.ravel() if issparse(matrix) else matrix.ravel()
+        matrix_1d = matrix.toarray().ravel() if issparse(matrix) else matrix.ravel()
 
         column_annotations = pd.concat([column_annotations]*matrix.shape[0], ignore_index=True)
         row_annotations = pd.DataFrame(row_annotations.values.repeat(matrix.shape[1], axis=0), columns=row_annotations.columns)

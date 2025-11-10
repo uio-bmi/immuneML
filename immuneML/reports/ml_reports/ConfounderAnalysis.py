@@ -10,6 +10,7 @@ from plotly.subplots import make_subplots
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
@@ -93,7 +94,7 @@ class ConfounderAnalysis(MLReport):
 
         plot.update_traces(marker_color=px.colors.sequential.Teal[3], showlegend=False)
         filename = self.result_path / "plots.html"
-        plot.write_html(str(filename))
+        filename = PlotlyUtil.write_image_to_file(plot, filename)
         report_output_fig = ReportOutput(filename)
         paths.append(report_output_fig)
 

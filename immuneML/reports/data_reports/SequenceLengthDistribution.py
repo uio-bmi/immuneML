@@ -12,6 +12,7 @@ from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -211,7 +212,7 @@ class SequenceLengthDistribution(DataReport):
                         facet_col=self.label_name if self.label_name in df.columns else None,
                         facet_row="chain" if isinstance(self.dataset, ReceptorDataset) else None)
         figure.update_layout(template="plotly_white")
-        figure.update_traces(marker_color=px.colors.diverging.Tealrose[0])
+        figure.update_traces(marker_color=px.colors.qualitative.Vivid[1])
 
         for annotation in figure.layout.annotations:
             annotation['font'] = {'size': 16}
@@ -219,7 +220,7 @@ class SequenceLengthDistribution(DataReport):
         PathBuilder.build(self.result_path)
 
         file_path = self.result_path / "sequence_length_distribution.html"
-        figure.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(figure, file_path)
         return ReportOutput(path=file_path, name="Sequence length distribution plot")
 
     def _get_label_name(self):

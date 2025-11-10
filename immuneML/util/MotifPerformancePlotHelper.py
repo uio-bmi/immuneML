@@ -6,6 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 
 
@@ -213,7 +214,7 @@ class MotifPerformancePlotHelper():
                           yaxis_title=f"Precision ({dataset_type})",
                           showlegend=True)
 
-        fig.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(fig, file_path)
 
         return ReportOutput(
             path=file_path,
@@ -260,7 +261,7 @@ class MotifPerformancePlotHelper():
         if min_recall is not None and min_recall > 0:
             fig.add_vline(x=min_recall, line_dash="dash")
 
-        fig.write_html(str(file_path))
+        file_path = PlotlyUtil.write_image_to_file(fig, file_path)
 
         return ReportOutput(
             path=file_path,

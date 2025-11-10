@@ -386,7 +386,7 @@ class HPHTMLBuilder:
             .apply(pd.to_numeric, errors='coerce').mean(axis=1).round(HPHTMLBuilder.NUM_DIGITS)
             .where(~(df.iloc[:, 1:] == Constants.NOT_COMPUTED).any(axis=1), Constants.NOT_COMPUTED)
         )
-        best_value = ClassificationMetric.get_search_criterion(metric)(df['Average'])
+        best_value = ClassificationMetric.get_search_criterion(metric)(df['Average']) if all(df['Average'] != Constants.NOT_COMPUTED) else Constants.NOT_COMPUTED
 
         return to_html_with_row_highlight(df, best_value, 'Average')
 

@@ -21,5 +21,6 @@ class TestSequenceDataset(TestCase):
 
         self.assertTrue(np.array_equal(['True', 'True'], dataset.get_metadata(['l1'])['l1']))
         self.assertTrue(np.array_equal(['2', '2'], dataset.get_metadata(['l1', 'l2'])['l2']))
+        self.assertTrue(dataset.get_locus() == ["TRB"])
 
         shutil.rmtree(path)

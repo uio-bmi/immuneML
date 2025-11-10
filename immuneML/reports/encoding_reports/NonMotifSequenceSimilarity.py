@@ -7,6 +7,7 @@ from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 
 from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
@@ -154,7 +155,7 @@ class NonMotifSequenceSimilarity(EncodingReport):
 
         output_path = self.result_path / "sequence_hamming_distances.html"
 
-        fig.write_html(str(output_path))
+        output_path = PlotlyUtil.write_image_to_file(fig, output_path)
 
         return ReportOutput(path=output_path, name="Hamming distances between sequences sharing the same motif")
 

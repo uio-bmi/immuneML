@@ -46,6 +46,10 @@ class Dataset:
         pass
 
     @abc.abstractmethod
+    def get_locus(self):
+        pass
+
+    @abc.abstractmethod
     def get_example_ids(self):
         pass
 

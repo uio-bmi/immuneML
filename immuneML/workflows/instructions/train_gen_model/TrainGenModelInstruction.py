@@ -17,6 +17,7 @@ from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.reports.ml_reports.MLReport import MLReport
 from immuneML.reports.train_gen_model_reports.TrainGenModelReport import TrainGenModelReport
+from immuneML.reports.gen_model_reports.GenModelReport import GenModelReport
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
@@ -33,7 +34,7 @@ class TrainGenModelState:
     generated_dataset: Dataset = None
     exported_datasets: Dict[str, Path] = field(default_factory=dict)
     report_results: Dict[str, List[ReportResult]] = field(
-        default_factory=lambda: {'data_reports': [], 'ml_reports': [], 'instruction_reports': []})
+        default_factory=lambda: {'data_reports': [], 'ml_reports': [], 'gen_ml_reports': [], 'instruction_reports': []})
     combined_dataset: Dataset = None
     train_dataset: Dataset = None
     test_dataset: Dataset = None
@@ -252,6 +253,14 @@ class TrainGenModelInstruction(Instruction):
                 rep.dataset = original_dataset
                 rep.name = rep.name + " (original dataset)"
                 self.state.report_results['data_reports'].append(rep.generate_report())
+            elif isinstance(report, GenModelReport):
+                for method in self.methods:
+                    rep = copy.deepcopy(report)
+                    rep.result_path = PathBuilder.build(rep.result_path.parent / f"{rep.result_path.name}_original_dataset")
+                    rep.dataset = original_dataset
+                    rep.model = method
+                    rep.name = rep.name + " (original dataset)"
+                    self.state.report_results['gen_ml_reports'].append(rep.generate_report())
 
         self._print_report_summary_log()
 
@@ -293,6 +302,8 @@ class TrainGenModelInstruction(Instruction):
                 for method in self.methods:
                     rep = copy.deepcopy(report)
                     rep.dataset = self.generated_datasets[method.name]
+                    rep.result_path = PathBuilder.build(
+                        rep.result_path.parent / f"{rep.result_path.name}_{method.name}")
                     rep.name = rep.name + " (generated dataset from " + method.name + ")"
                     self.state.report_results['data_reports'].append(rep.generate_report())
             elif isinstance(report, MLReport):
@@ -305,7 +316,7 @@ class TrainGenModelInstruction(Instruction):
     def _print_report_summary_log(self):
         if len(self.reports) > 0:
             gen_rep_count = len(self.state.report_results['ml_reports']) + len(
-                self.state.report_results['data_reports'])
+                self.state.report_results['data_reports']) + len(self.state.report_results['gen_ml_reports'])
             print_log(f"{self.state.name}: generated {gen_rep_count} reports.", True)
 
     def _get_reports_path(self) -> Path:

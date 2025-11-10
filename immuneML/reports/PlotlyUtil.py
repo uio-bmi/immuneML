@@ -56,7 +56,7 @@ class PlotlyUtil:
                 'C': 'rgb(188,128,189)', 'A': 'rgb(204,235,197)'}
 
     @staticmethod
-    def write_image_to_file(figure, file_path, dataset_size: int) -> Path:
+    def write_image_to_file(figure, file_path, dataset_size: int = None) -> Path:
         """
         Writes a plotly figure to an HTML and optionally an image file (if dataset_size is large).
         Returns the path to the image file if it was created, otherwise returns the path to the HTML file.
@@ -68,7 +68,8 @@ class PlotlyUtil:
 
         """
         figure.write_html(str(file_path))
-        if dataset_size > EnvironmentSettings.max_points_on_plot:
+        figure.write_json(str(file_path.with_suffix('.json')))
+        if dataset_size is not None and dataset_size > EnvironmentSettings.max_points_on_plot:
             plot_path = file_path.with_suffix(".png")
             figure.write_image(str(plot_path))
             return plot_path
