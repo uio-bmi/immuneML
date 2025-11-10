@@ -1,15 +1,16 @@
 import os
 import shutil
-import tarfile
 import urllib
 from pathlib import Path
 
 import pandas as pd
-import pytest
+from transformers import PreTrainedTokenizerFast
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.ProGen import ProGen
+from immuneML.ml_methods.generative_models.progen.ProGenConfig import ProGenConfig
+from immuneML.ml_methods.generative_models.progen.ProGenForCausalLM import ProGenForCausalLM
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -23,19 +24,39 @@ def download_file(url: str, dest: Path):
     return dest
 
 
-@pytest.mark.skip(reason="Disabled by default to avoid large downloads during testing. Enable manually when needed.")
+def make_dummy_progen_model(model_path: Path) -> Path:
+    model_path.mkdir(parents=True, exist_ok=True)
+
+    tokenizer_json = model_path / "tokenizer.json"
+    download_file(
+        "https://raw.githubusercontent.com/enijkamp/progen2/main/tokenizer.json",
+        tokenizer_json
+    )
+    tokenizer = PreTrainedTokenizerFast(tokenizer_file=str(tokenizer_json))
+    tokenizer.pad_token = tokenizer.eos_token
+
+    config = ProGenConfig(
+        vocab_size=len(tokenizer),
+        n_positions=256,
+        n_ctx=256,
+        n_embd=16,
+        n_layer=1,
+        n_head=8,
+    )
+
+    model = ProGenForCausalLM(config)
+    tokenizer.save_pretrained(model_path)
+    model.save_pretrained(model_path)
+
+    return model_path
+
+
 def test_progen():
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'progen')
     os.makedirs(path, exist_ok=True)
 
-    # Download ProGen2 model and tokenizer
-    tokenizer_json = path / "tokenizer.json"
-    model_tgz = path / "progen2-oas.tar.gz"
-    model_dir = path / "progen2-oas"
-    download_file("https://raw.githubusercontent.com/enijkamp/progen2/main/tokenizer.json", tokenizer_json)
-    download_file("https://storage.googleapis.com/sfr-progen-research/checkpoints/progen2-oas.tar.gz", model_tgz)
-    with tarfile.open(model_tgz, "r:gz") as tf:
-        tf.extractall(model_dir)
+    model_dir = make_dummy_progen_model(path / "dummy_model")
+    tokenizer_json = model_dir / "tokenizer.json"
 
     dataset = RandomDatasetGenerator.generate_sequence_dataset(20, {10: 1.},
                                                                {}, path / 'dataset', region_type="IMGT_JUNCTION")
@@ -43,15 +64,16 @@ def test_progen():
     progen = ProGen('beta',
                     str(tokenizer_json),
                     str(model_dir),
-                    27,
+                    1,
                     1,
                     5e-5,
                     'cpu',
-                    prefix_text='1',
-                    suffix_text='2',
+                    prefix_text='',
+                    suffix_text='',
                     name='progen_test',
                     region_type="IMGT_JUNCTION",
                     seed=42)
+
     progen.fit(dataset, path / 'model')
     progen.generate_sequences(7, 42, path / 'generated_dataset', SequenceType.AMINO_ACID, False)
 
