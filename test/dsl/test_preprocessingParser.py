@@ -10,14 +10,14 @@ class TestPreprocessingParser(TestCase):
             "seq1": [
                 {"filter_chain_B": {
                     "ChainRepertoireFilter": {
-                        "keep_chain": "A"
+                        "keep_chains": ["A"]
                     }
                 }}
             ],
             "seq2": [
                 {"filter_chain_A": {
                     "ChainRepertoireFilter": {
-                        "keep_chain": "B"
+                        "keep_chains": ["B"]
                     }
                 }}
             ]

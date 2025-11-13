@@ -4,10 +4,6 @@ from zipfile import ZipFile, ZIP_STORED
 
 import numpy as np
 import pandas as pd
-import torch
-from datasets import Dataset as HFDataset
-from tokenizers import Tokenizer
-from transformers import PreTrainedTokenizerFast, DataCollatorForLanguageModeling, TrainingArguments, Trainer
 
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.bnp_util import get_sequence_field_name, write_yaml, read_yaml
@@ -106,6 +102,7 @@ class ProGen(GenerativeModel):
     """
     @classmethod
     def load_model(cls, path: Path):
+        import torch
         assert path.exists(), f"{cls.__name__}: {path} does not exist."
 
         model_overview_file = path / 'model_overview.yaml'
@@ -125,7 +122,7 @@ class ProGen(GenerativeModel):
         return progen
 
     def __init__(self, locus, tokenizer_path: Path, trained_model_path: Path, num_frozen_layers: int, num_epochs: int,
-                 learning_rate: int, device: str, fp16: bool = False, prefix_text: str = "", suffix_text: str = "",
+                 learning_rate: float, device: str, fp16: bool = False, prefix_text: str = "", suffix_text: str = "",
                  max_new_tokens: int = 1024, temperature: float = 1.0, top_p: float = 0.9, prompt: str = "1",
                  num_gen_batches: int = 1, per_device_train_batch_size: int = 2, remove_affixes: bool = True,
                  name: str = None, region_type: str = RegionType.IMGT_JUNCTION.name, seed: int = None, ):
@@ -149,7 +146,10 @@ class ProGen(GenerativeModel):
         self.remove_affixes = remove_affixes
         self.model = None
 
-        tokenizer = Tokenizer.from_file(self.tokenizer_path)
+        from tokenizers import Tokenizer
+        from transformers import PreTrainedTokenizerFast
+
+        tokenizer = Tokenizer.from_file(str(self.tokenizer_path))
         self.hf_tokenizer = PreTrainedTokenizerFast(tokenizer_object=tokenizer)
         self.hf_tokenizer.pad_token = "<|pad|>"
         self.hf_tokenizer.eos_token = "<|eos|>"
@@ -161,11 +161,13 @@ class ProGen(GenerativeModel):
         logs_dir, output_dir = self._prepare_training_paths(path)
         tokenized_dataset = self._preprocess_dataset(data)
 
+        from transformers import DataCollatorForLanguageModeling
         data_collator = DataCollatorForLanguageModeling(tokenizer=self.hf_tokenizer, mlm=False)
         config = ProGenConfig.from_pretrained(self.trained_model_path)
         model = ProGenForCausalLM.from_pretrained(self.trained_model_path, config=config)
         self._freeze_model_layers(model)
 
+        from transformers import TrainingArguments
         training_args = TrainingArguments(
             output_dir=str(output_dir),
             per_device_train_batch_size=self.per_device_train_batch_size,
@@ -179,6 +181,7 @@ class ProGen(GenerativeModel):
             save_strategy="no"
         )
 
+        from transformers import Trainer
         trainer = Trainer(
             model=model,
             args=training_args,
@@ -202,6 +205,7 @@ class ProGen(GenerativeModel):
             param.requires_grad = True
 
     def _preprocess_dataset(self, data):
+        from datasets import Dataset as HFDataset
         data_df = data.data.topandas()
         data_df["junction_aa"] = self.prefix_text + data_df["junction_aa"].astype(str).fillna("") + self.suffix_text
         hf_dataset = HFDataset.from_pandas(data_df[["junction_aa"]], preserve_index=False)
@@ -243,6 +247,7 @@ class ProGen(GenerativeModel):
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType,
                            compute_p_gen: bool) -> Dataset:
+        import torch
         prompt_encoding = self.hf_tokenizer(self.prompt, return_tensors="pt")
         prompt_input_ids = prompt_encoding.input_ids.to(self.device)
         prompt_attention_mask = prompt_encoding.attention_mask.to(self.device)

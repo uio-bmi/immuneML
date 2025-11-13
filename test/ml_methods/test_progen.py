@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 from transformers import PreTrainedTokenizerFast
 
+from immuneML.data_model.SequenceParams import Chain
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.generative_models.ProGen import ProGen
@@ -61,9 +62,9 @@ def test_progen():
     dataset = RandomDatasetGenerator.generate_sequence_dataset(20, {10: 1.},
                                                                {}, path / 'dataset', region_type="IMGT_JUNCTION")
 
-    progen = ProGen('beta',
-                    str(tokenizer_json),
-                    str(model_dir),
+    progen = ProGen(Chain.get_chain('beta'),
+                    tokenizer_json,
+                    model_dir,
                     1,
                     1,
                     5e-5,

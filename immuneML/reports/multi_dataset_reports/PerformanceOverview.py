@@ -4,8 +4,7 @@ from typing import List, Tuple
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from sklearn import metrics
-from sklearn.metrics import precision_recall_curve
+from sklearn.metrics import precision_recall_curve, roc_curve, roc_auc_score
 
 from immuneML.environment.Constants import Constants
 from immuneML.environment.Label import Label
@@ -93,8 +92,8 @@ class PerformanceOverview(MultiDatasetReport):
                 df = pd.read_csv(item.test_predictions_path)
                 true_class = df[f"{label.name}_true_class"].values
                 predicted_class = df[f"{label.name}_{label.positive_class}_proba"].values
-                fpr, tpr, _ = metrics.roc_curve(y_true=true_class, y_score=predicted_class)
-                auc = metrics.roc_auc_score(true_class, predicted_class)
+                fpr, tpr, _ = roc_curve(y_true=true_class, y_score=predicted_class)
+                auc = roc_auc_score(y_true=true_class, y_score=predicted_class)
                 name = self.instruction_states[index].dataset.name + f' (AUC = {round(auc, 2)})'
                 figure.add_trace(go.Scatter(x=fpr, y=tpr, mode='lines', name=name, marker=dict(color=colors[index], line=dict(width=3)), hoverinfo="skip"))
 
