@@ -81,8 +81,8 @@ class ClusteringRunner:
             predictions=predictions,
             encoder=encoder,
             method=method,
-            external_performance=DataFrameWrapper(path=performance_paths['external']),
-            internal_performance=DataFrameWrapper(path=performance_paths['internal'])
+            external_performance=DataFrameWrapper(path=performance_paths['external']) if performance_paths['external'] else None,
+            internal_performance=DataFrameWrapper(path=performance_paths['internal']) if performance_paths['internal'] else None
         )
 
         report_results = self.report_handler.run_item_reports(cl_item, analysis_desc, run_id, cl_setting.path, state)
@@ -181,5 +181,6 @@ def encode_dataset_internal(dataset: Dataset, cl_setting: ClusteringSetting, num
     if cl_setting.dim_reduction_method:
         enc_dataset.encoded_data.dimensionality_reduced_data = cl_setting.dim_reduction_method.fit_transform(
             enc_dataset)
+        enc_dataset.encoded_data.dim_names = cl_setting.dim_reduction_method.get_dimension_names()
 
     return enc_dataset

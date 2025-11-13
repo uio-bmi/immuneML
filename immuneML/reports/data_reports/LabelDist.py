@@ -55,7 +55,7 @@ class LabelDist(DataReport):
 
         fig = make_subplots(rows=n_rows, cols=n_cols, subplot_titles=df.columns)
 
-        colors = px.colors.qualitative.Plotly * math.ceil(len(df.columns) / len(px.colors.qualitative.Plotly))
+        colors = px.colors.qualitative.Vivid * math.ceil(len(df.columns) / len(px.colors.qualitative.Vivid))
 
         for i, col in enumerate(df.columns):
             row = i // n_cols + 1

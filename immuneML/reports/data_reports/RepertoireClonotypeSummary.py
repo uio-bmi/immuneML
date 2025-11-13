@@ -77,7 +77,7 @@ class RepertoireClonotypeSummary(DataReport):
 
         fig = px.bar(clonotypes, x='repertoire_index', y='clonotype_count', facet_row=self.facet_label,
                      color=self.color_label, title='Clonotype count per repertoire',
-                     color_discrete_sequence=px.colors.diverging.Tealrose)
+                     color_discrete_sequence=px.colors.qualitative.Vivid)
         fig.update_layout(template="plotly_white", yaxis_title='clonotype count',
                           xaxis_title='repertoires')
 

@@ -32,8 +32,8 @@ class TestPerformanceOverview(TestCase):
                     "d1": {
                         "format": "RandomRepertoireDataset",
                         "params": {
-                            "repertoire_count": 50,
-                            "sequence_count_probabilities": {50: 1},
+                            "repertoire_count": 30,
+                            "sequence_count_probabilities": {5: 1},
                             "sequence_length_probabilities": {2: 1},
                             "result_path": str(Path(path / "d1")),
                             "labels": {
@@ -47,8 +47,8 @@ class TestPerformanceOverview(TestCase):
                     "d2": {
                         "format": "RandomRepertoireDataset",
                         "params": {
-                            "repertoire_count": 50,
-                            "sequence_count_probabilities": {50: 1},
+                            "repertoire_count": 30,
+                            "sequence_count_probabilities": {5: 1},
                             "sequence_length_probabilities": {2: 1},
                             "result_path": str(Path(path / "d2")),
                             "labels": {

@@ -115,7 +115,7 @@ class ShannonDiversityOverview(DataReport):
 
         fig = px.bar(encoded_df, x='repertoire_index', y='shannon_diversity', facet_row=self.facet_row_label,
                      color=self.color_label, title='Shannon diversity per repertoire', facet_col=self.facet_col_label,
-                     color_discrete_sequence=px.colors.diverging.Tealrose, hover_data=hover_data_cols)
+                     color_discrete_sequence=px.colors.qualitative.Vivid, hover_data=hover_data_cols)
         fig.update_layout(template="plotly_white", yaxis_title='Shannon diversity',
                           xaxis_title='Repertoires sorted by Shannon diversity')
 

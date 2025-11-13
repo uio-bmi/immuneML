@@ -43,6 +43,8 @@ class VJGeneDistribution(DataReport):
       (e.g., antigen binding versus non-binding across repertoires) or repertoire level (e.g., diseased repertoires versus healthy repertoires).
       By default, is_sequence_label is False. For Sequence- and ReceptorDatasets, this parameter is ignored.
 
+    - show_joint_dist (bool): whether to show the combined V and J gene distribution. Default is True.
+
 
     **YAML specification:**
 
@@ -54,6 +56,7 @@ class VJGeneDistribution(DataReport):
                 my_vj_gene_report:
                     VJGeneDistribution:
                         label: ag_binding
+                        show_joint_dist: false
 
     """
 
@@ -66,11 +69,13 @@ class VJGeneDistribution(DataReport):
         return VJGeneDistribution(**kwargs)
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, number_of_processes: int = 1,
-                 name: str = None, split_by_label: bool = None, label: str = None, is_sequence_label: bool = None):
+                 name: str = None, split_by_label: bool = None, label: str = None, is_sequence_label: bool = None,
+                 show_joint_dist: bool = True):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.split_by_label = split_by_label
         self.label_name = label
         self.is_sequence_label = is_sequence_label
+        self.show_joint_dist = show_joint_dist
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
@@ -99,7 +104,10 @@ class VJGeneDistribution(DataReport):
 
         v_tables, v_plots = self._get_single_gene_results_from_attributes(dataset_attributes, "v_call")
         j_tables, j_plots = self._get_single_gene_results_from_attributes(dataset_attributes, "j_call")
-        vj_tables, vj_plots = self._get_combo_gene_results_from_attributes(dataset_attributes)
+        if self.show_joint_dist:
+            vj_tables, vj_plots = self._get_combo_gene_results_from_attributes(dataset_attributes)
+        else:
+            vj_tables, vj_plots = [], []
 
         return ReportResult(name=self.name,
                             info="V and J gene distributions",
@@ -166,7 +174,7 @@ class VJGeneDistribution(DataReport):
         figure = px.bar(df, x="genes", y="counts", color=self.label_name,
                         labels={"genes": "Gene names",
                                 "counts": "Observed frequency"},
-                        color_discrete_sequence=px.colors.diverging.Tealrose)
+                        color_discrete_sequence=px.colors.qualitative.Vivid)
         figure.update_layout(xaxis=dict(tickmode='array', tickvals=df["genes"]),
                              yaxis=dict(tickmode='array', tickvals=df["counts"]),
                              template="plotly_white",
@@ -181,7 +189,6 @@ class VJGeneDistribution(DataReport):
         plots = []
 
         vj_combo_count_df = self._get_vj_combo_count_df(dataset_attributes)
-
 
         for chain in set(dataset_attributes["locus"]):
             chain_df = vj_combo_count_df[vj_combo_count_df["locus"] == chain]
@@ -233,7 +240,7 @@ class VJGeneDistribution(DataReport):
 
         plots = []
 
-        for chain in set(vj_df["locus"]):
+        for chain in set(v_df["locus"]):
             plots.append(self._safe_plot(plot_callable="_plot_gene_distribution_across_repertoires",
                                          chain_df=v_df[v_df["locus"] == chain],
                                          title=f"{chain} V gene distribution per repertoire",
@@ -244,13 +251,14 @@ class VJGeneDistribution(DataReport):
                                          title=f"{chain} J gene distribution per repertoire",
                                          filename=f"{chain}J_gene_distribution.html"))
 
-            mean_chain_vj_df = self._average_norm_counts_per_repertoire(chain_vj_df=vj_df[vj_df["locus"] == chain])
+            if self.show_joint_dist:
+                mean_chain_vj_df = self._average_norm_counts_per_repertoire(chain_vj_df=vj_df[vj_df["locus"] == chain])
 
-            tables.append(self._write_output_table(mean_chain_vj_df,
-                                                   file_path=self.result_path / f"{chain}VJ_gene_distribution_averaged_across_repertoires.tsv",
-                                                   name=f"Combined {chain} V+J gene distribution averaged across repertoires"))
+                tables.append(self._write_output_table(mean_chain_vj_df,
+                                                       file_path=self.result_path / f"{chain}VJ_gene_distribution_averaged_across_repertoires.tsv",
+                                                       name=f"Combined {chain} V+J gene distribution averaged across repertoires"))
 
-            plots.extend(self._get_repertoire_heatmaps(mean_chain_vj_df, chain))
+                plots.extend(self._get_repertoire_heatmaps(mean_chain_vj_df, chain))
 
         return ReportResult(name=self.name,
                             info="V and J gene distributions per repertoire",
@@ -295,10 +303,6 @@ class VJGeneDistribution(DataReport):
 
         for repertoire in self.dataset.repertoires:
             data = repertoire.data
-            if hasattr(data, "locus"):
-                assert len(set(data.locus.tolist())) == 1, (f"{VJGeneDistribution.__name__}: Repertoire {repertoire.identifier} of dataset {self.dataset.name} contained multiple loci: {set(data.locus.tolist())}. "
-                                                              f"This report can only be created for 1 locus per repertoire.")
-
 
             repertoire_attributes = {"v_call": data.v_call.tolist(),
                                      "j_call": data.j_call.tolist(),
@@ -309,19 +313,20 @@ class VJGeneDistribution(DataReport):
 
             v_rep_df = self._get_gene_count_df(repertoire_attributes, "v_call", include_label=self.is_sequence_label)
             j_rep_df = self._get_gene_count_df(repertoire_attributes, "j_call", include_label=self.is_sequence_label)
-            vj_rep_df = self._get_vj_combo_count_df(repertoire_attributes, include_label=self.is_sequence_label)
 
             self._supplement_repertoire_df(v_rep_df, repertoire)
             self._supplement_repertoire_df(j_rep_df, repertoire)
-            self._supplement_repertoire_df(vj_rep_df, repertoire)
 
             v_dfs.append(v_rep_df)
             j_dfs.append(j_rep_df)
+
+            vj_rep_df = self._get_vj_combo_count_df(repertoire_attributes, include_label=self.is_sequence_label)
+            self._supplement_repertoire_df(vj_rep_df, repertoire)
             vj_dfs.append(vj_rep_df)
 
         return pd.concat(v_dfs, ignore_index=True), \
             pd.concat(j_dfs, ignore_index=True), \
-            pd.concat(vj_dfs, ignore_index=True),
+            pd.concat(vj_dfs, ignore_index=True) if self.show_joint_dist else None
 
     def _supplement_repertoire_df(self, rep_df, repertoire):
         rep_df["repertoire_id"] = repertoire.identifier
@@ -344,9 +349,10 @@ class VJGeneDistribution(DataReport):
                                                    file_path=self.result_path / f"{chain}J_gene_distribution.tsv",
                                                    name=f"{chain}J gene distribution per repertoire"))
 
-            tables.append(self._write_output_table(vj_df[vj_df['locus'] == chain],
-                                                   file_path=self.result_path / f"{chain}VJ_gene_distribution.tsv",
-                                                   name=f"Combined {chain}V+J gene distribution"))
+            if self.show_joint_dist:
+                tables.append(self._write_output_table(vj_df[vj_df['locus'] == chain],
+                                                       file_path=self.result_path / f"{chain}VJ_gene_distribution.tsv",
+                                                       name=f"Combined {chain}V+J gene distribution"))
 
         return tables
 
@@ -355,7 +361,7 @@ class VJGeneDistribution(DataReport):
                         hover_data=["repertoire_id", "subject_id"],
                         labels={"genes": "Gene names",
                                 "norm_counts": "Fraction of the repertoire"},
-                        color_discrete_sequence=px.colors.diverging.Tealrose)
+                        color_discrete_sequence=px.colors.qualitative.Vivid)
         figure.update_layout(template="plotly_white")
 
         file_path = self.result_path / filename

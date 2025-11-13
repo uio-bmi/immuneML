@@ -3,7 +3,10 @@ sonia<=0.1.3
 sonnia<=0.1.5
 sentencepiece
 keras
-tensorflow
+tensorflow<=2.15.0
 torch
 transformers
 esm
+datasets
+tokenizers
+accelerate>=0.26.0

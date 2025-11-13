@@ -28,12 +28,6 @@ class ConfusionMatrix(MLReport):
       This may be useful to compare performance across different data subsets (e.g., batches, sources).
       If specified, separate confusion matrices will be generated for each value of the alternative label. Default is None.
 
-    Example output:
-
-    .. image:: ../../_static/images/reports/confusion_matrix_example.png
-       :alt: Confusion matrix report
-       :width: 650
-
     **YAML specification:**
 
     .. code-block:: yaml

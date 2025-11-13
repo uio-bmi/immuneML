@@ -1,0 +1,14 @@
+locus: beta
+device: cpu
+num_frozen_layers: 22
+num_epochs: 2
+learning_rate: 0.00004
+fp16: False
+prefix_text: '<|bos|>1'
+suffix_text: '2<|eos|>'
+max_new_tokens: 1024
+temperature: 1
+top_p: 0.9
+prompt: '1'
+num_gen_batches: 1
+per_device_train_batch_size: 2

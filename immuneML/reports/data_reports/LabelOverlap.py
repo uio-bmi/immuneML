@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.express as px
 
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.reports.PlotlyUtil import PlotlyUtil
@@ -73,7 +74,7 @@ class LabelOverlap(DataReport):
             z=overlap_matrix.values,
             x=overlap_matrix.columns,
             y=overlap_matrix.index,
-            colorscale=[[0, '#e5f6f6'], [0.5, '#66b2b2'], [1, '#006666']],  # Custom teal colorscale
+            colorscale=px.colors.sequential.Viridis,  # Custom teal colorscale
             text=overlap_matrix.values,
             texttemplate="%{text}",
             hovertemplate=f"{self.row_label}: " + "%{y}<br>" + f"{self.column_label}: "
@@ -89,7 +90,8 @@ class LabelOverlap(DataReport):
             xaxis_title=self.column_label,
             yaxis_title=self.row_label,
             template="plotly_white",
-            font=dict(size=12)
+            font=dict(size=12),
+            height=max(600, 40 * len(overlap_matrix.index) + 200),
         )
 
         # Save plot

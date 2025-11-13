@@ -115,9 +115,9 @@ class ClusteringStabilityReport(ClusteringReport):
 
     def make_figure(self, df: pd.DataFrame) -> ReportOutput:
         import plotly.express as px
-        fig = px.box(df, x='clustering_setting', y=self.metric, points='all',
-                     color_discrete_sequence=px.colors.qualitative.Set2)
-        fig.update_layout(xaxis_title="clustering setting",
+        fig = px.box(df, x='clustering_setting', y=self.metric, points='all', color='clustering_setting',
+                     color_discrete_sequence=px.colors.qualitative.Vivid)
+        fig.update_layout(xaxis_title="clustering setting", showlegend=False,
                           yaxis_title=self.metric,
                           template="plotly_white")
         fig.update_traces(marker=dict(opacity=0.5), jitter=0.3)
