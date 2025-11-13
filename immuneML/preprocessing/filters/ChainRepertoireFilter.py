@@ -29,7 +29,6 @@ class ChainRepertoireFilter(Filter):
     - remove_only_sequences (bool): Whether to remove only sequences with different chain than "keep_chain" (true) in
       case of repertoire datasets; default is false
 
-
     **YAML specification:**
 
     .. indent with spaces

@@ -108,4 +108,4 @@ def test_clustering_workflow():
 
     ImmuneMLApp(path / 'specs.yaml', path / 'output').run()
 
-    shutil.rmtree(path)
+    # shutil.rmtree(path)
