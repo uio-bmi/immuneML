@@ -46,7 +46,7 @@ dependencies = [
 word2vec = ["gensim>=4"]
 fisher = ["fisher>=0.1.9", "fishersapi"]
 TCRdist = ["tcrdist3>=0.1.6"]
-gen_models = ["sonnia", "torch"]
+gen_models = ["sonnia", "torch", 'transformers', 'datasets', 'tokenizers', 'tensorflow<=2.15.0', 'accelerate>=0.26.0']
 embeddings = ["transformers", "torch", "sentencepiece", "esm", 'httpx']
 ligo = ["stitchr", "IMGTgeneDL"]
 DL = ["torch", "keras", "tensorflow", "logomaker", "gensim"]
@@ -64,7 +64,11 @@ all = [
     "gensim>=4",
     "transformers",
     "sentencepiece",
-    'httpx'
+    'httpx',
+    'datasets',
+    'tokenizers',
+    'tensorflow<=2.15.0',
+    'accelerate>=0.26.0'
 ]
 
 [project.urls]
