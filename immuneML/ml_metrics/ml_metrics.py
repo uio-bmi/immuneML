@@ -1,5 +1,13 @@
 import numpy as np
 from sklearn import metrics
+from sklearn.metrics import confusion_matrix
+
+from immuneML import Constants
+
+
+def specificity_score(true_y, predicted_y, sample_weight=None, labels=None):
+    tn, fp, fn, tp = confusion_matrix(true_y, predicted_y, labels=labels, sample_weight=sample_weight).ravel()
+    return tn / (tn + fp) if tn + fp != 0 else Constants.NOT_COMPUTED
 
 
 def brier_score_loss(true_y, predicted_y, sample_weight=None, labels=None):
