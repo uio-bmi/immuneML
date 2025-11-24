@@ -56,6 +56,11 @@ class TestRandomDatasetWorkflow(TestCase):
                         "KmerFrequency": {
                             "k": 3
                         }
+                    },
+                    "kmer_freq2": {
+                        "KmerFrequency": {
+                            "k": 2
+                        }
                     }
                 },
                 "ml_methods": {
@@ -80,6 +85,7 @@ class TestRandomDatasetWorkflow(TestCase):
                         }
                     },
                     'roc': "ROCCurveSummary",
+                    'pr_curve': "PrecisionRecallCurveSummary",
                     'design_matrix_exporter': 'DesignMatrixExporter',
                 }
 
@@ -91,11 +97,15 @@ class TestRandomDatasetWorkflow(TestCase):
                         {
                             "encoding": "kmer_freq",
                             "ml_method": "logistic_regression"
+                        },
+                        {
+                            "encoding": "kmer_freq2",
+                            "ml_method": "logistic_regression"
                         }
                     ],
                     "assessment": {
                         "split_strategy": "random",
-                        "split_count": 1,
+                        "split_count": 3,
                         "training_percentage": 0.7,
                         'reports': {
                             'models': ['conf_matrix_per_label'],
@@ -112,7 +122,7 @@ class TestRandomDatasetWorkflow(TestCase):
                     "strategy": "GridSearch",
                     "metrics": ['precision', 'recall'],
                     "number_of_processes": 4,
-                    "reports": ['performance_per_label', 'roc'],
+                    "reports": ['performance_per_label', 'roc', 'pr_curve'],
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False,
                 }
