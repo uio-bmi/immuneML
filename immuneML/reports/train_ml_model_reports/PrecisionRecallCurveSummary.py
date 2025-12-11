@@ -1,11 +1,9 @@
 import logging
 
-import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from sklearn.metrics import precision_recall_curve, average_precision_score
 
-from immuneML import Constants
 from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
 from immuneML.reports.PlotlyUtil import PlotlyUtil
@@ -18,7 +16,8 @@ from immuneML.util.PathBuilder import PathBuilder
 class PrecisionRecallCurveSummary(TrainMLModelReport):
     """
     This report plots Precision-Recall curves for all trained ML settings ([preprocessing], encoding, ML model) in the outer loop of
-    cross-validation in the :ref:`TrainMLModel` instruction. If there are multiple splits in the outer loop, this report will make one
+    cross-validation in the :ref:`TrainMLModel` instruction. It also reports the average precision (AP) for each setting.
+     If there are multiple splits in the outer loop, this report will make one
     plot per split. This report is defined only for binary classification.
 
 
@@ -41,7 +40,7 @@ class PrecisionRecallCurveSummary(TrainMLModelReport):
         report_result = ReportResult(name=self.name,
                                      info="Plots Precision-Recall curves for all trained ML settings ([preprocessing], "
                                           "encoding, ML model) in the outer loop of cross-validation in the TrainMLModel "
-                                          "instruction")
+                                          "instruction and reports the average precision (AP) for each curve.",)
 
         PathBuilder.build(self.result_path)
 
@@ -84,7 +83,8 @@ class PrecisionRecallCurveSummary(TrainMLModelReport):
         else:
             predicted_y = [label_mapping[val] for val in df[f"{label.name}_predicted_class"].values]
 
-        precision, recall, _ = precision_recall_curve(y_true=true_y, probas_pred=predicted_y)
+        precision, recall, _ = precision_recall_curve(y_true=true_y, y_score=predicted_y,
+                                                      pos_label=label.positive_class)
 
         return {
             "Precision": precision,
