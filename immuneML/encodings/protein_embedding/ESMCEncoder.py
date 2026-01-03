@@ -1,13 +1,14 @@
-import numpy as np
 import logging
+
+import numpy as np
+
 from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
-from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.protein_embedding.ProteinEmbeddingEncoder import ProteinEmbeddingEncoder
+from immuneML.util.Logger import log_memory_usage
 from immuneML.util.NumpyHelper import NumpyHelper
 from immuneML.util.ParameterValidator import ParameterValidator
-from immuneML.util.Logger import log_memory_usage
 
 
 class ESMCEncoder(ProteinEmbeddingEncoder):

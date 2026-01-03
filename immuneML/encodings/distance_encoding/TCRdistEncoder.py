@@ -1,11 +1,10 @@
 import pandas as pd
 
-from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, ElementDataset, SequenceDataset
 from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, ElementDataset, SequenceDataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.util.EncoderHelper import EncoderHelper
-from immuneML.util.Logger import print_log
 
 
 class TCRdistEncoder(DatasetEncoder):

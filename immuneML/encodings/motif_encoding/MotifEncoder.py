@@ -3,21 +3,20 @@ from functools import partial
 from multiprocessing.pool import Pool
 from pathlib import Path
 
-import pandas as pd
 import numpy as np
-from sklearn.metrics import precision_score, recall_score, confusion_matrix
+import pandas as pd
+from sklearn.metrics import confusion_matrix
 
 from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.data_model.EncodedData import EncodedData
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
 from immuneML.encodings.motif_encoding.PositionalMotifParams import PositionalMotifParams
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
-
-from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
 from immuneML.util.PathBuilder import PathBuilder
 
 
