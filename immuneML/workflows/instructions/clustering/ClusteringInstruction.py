@@ -27,16 +27,12 @@ class ClusteringInstruction(Instruction):
     """
 
     Clustering instruction fits clustering methods to the provided encoded dataset and compares the combinations of
-    clustering method with its hyperparameters, and encodings across a pre-defined set of metrics. The dataset is split
-    into discovery and validation datasets and the clustering results are reported on both. Finally, it
+    clustering method with its hyperparameters, and encodings across a pre-defined set of metrics. Finally, it
     provides options to include a set of reports to visualize the results.
 
     See also: :ref:`How to perform clustering analysis`
 
-    For more details on choosing the clustering algorithm and its hyperparameters, see the paper:
-    Ullmann, T., Hennig, C., & Boulesteix, A.-L. (2022). Validation of cluster analysis results on validation
-    data: A systematic framework. WIREs Data Mining and Knowledge Discovery, 12(3), e1444.
-    https://doi.org/10.1002/widm.1444
+
 
 
     **Specification arguments:**
