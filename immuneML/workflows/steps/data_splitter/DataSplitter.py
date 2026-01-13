@@ -12,6 +12,7 @@ from immuneML.workflows.steps.data_splitter.Util import Util
 
 
 class DataSplitter(Step):
+    """DataSplitter step that splits datasets into training and test (or validation) based on specified strategies."""
 
     @staticmethod
     def run(input_params: DataSplitterParams = None):

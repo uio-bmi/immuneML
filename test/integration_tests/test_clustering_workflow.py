@@ -60,10 +60,6 @@ def test_clustering_workflow():
                         'dim_red_method': {
                             'KernelPCA': {
                                 "n_components": 2, 'kernel': 'rbf'}}}},
-                'stability':
-                    {'ClusteringStabilityReport': {
-                        'metric': 'mutual_info_score'
-                    }},
                 'external_labels_summary': {
                     'ExternalLabelClusterSummary': {
                         'external_labels': ['epitope']
@@ -88,18 +84,22 @@ def test_clustering_workflow():
                 'labels': ['epitope', 'source'],
                 'clustering_settings': [
                     {'encoding': 'kmer', 'method': 'kmeans2'},
-                    {'encoding': 'esmc', 'dim_reduction': 'pca', 'method': 'kmeans2'},
-                    {'encoding': 'prott5', 'dim_reduction': 'pca', 'method': 'kmeans3'}
+                    {'encoding': 'kmer', 'dim_reduction': 'pca', 'method': 'kmeans2'},
+                    {'encoding': 'kmer', 'dim_reduction': 'pca', 'method': 'kmeans3'}
                 ],
-                'split_config': {
-                    'split_strategy': 'random',
-                    'training_percentage': 0.5,
-                    "split_count": 2
+                'sample_config': {
+                    'split_count': 3,
+                    'percentage': 0.8,
+                    'random_seed': 42
                 },
-                'reports': ['rep1', 'stability', 'external_labels_summary', 'cluster_vis',
+                'stability_config': {
+                    'split_count': 3,
+                    'random_seed': 42
+                },
+                'reports': ['rep1', 'external_labels_summary', 'cluster_vis',
                             'external_label_metric_heatmap'],
                 'number_of_processes': 8,
-                'validation_type': ['result_based', 'method_based']
+                'random_labeling_count': 10
             }
         }
     }

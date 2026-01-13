@@ -4,13 +4,15 @@ from typing import List
 
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.workflows.instructions.Instruction import Instruction
-from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringItem
+from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringItem, ClusteringConfig
+from immuneML.workflows.instructions.clustering.ValidationHandler import ValidationHandler
 
 
 @dataclass
 class ValidateClusteringState:
     cl_item: ClusteringItem = None
     dataset: Dataset = None
+    metrics: List[str] = None
     validation_type: List[str] = None
     result_path: Path = None
 
@@ -32,6 +34,12 @@ class ValidateClusteringInstruction(Instruction):
 
     - dataset (str): name of the validation dataset to which the clustering will be applied, as defined under definitions
 
+    - metrics (list): a list of metrics to use for comparison of clustering algorithms and encodings (it can include
+      metrics for either internal evaluation if no labels are provided or metrics for external evaluation so that the
+      clusters can be compared against a list of predefined labels); some of the supported metrics include adjusted_rand_score,
+      completeness_score, homogeneity_score, silhouette_score; for the full list, see scikit-learn's documentation of
+      clustering metrics at https://scikit-learn.org/stable/api/sklearn.metrics.html#module-sklearn.metrics.cluster.
+
     - validation_type (list): how to perform validation; options are `method_based` validation (refit the clustering
       algorithm to the new dataset and compare the clusterings) and `result_based` validation (transfer the clustering
       from the original dataset to the validation dataset using a supervised classifier and compare the clusterings)
@@ -46,13 +54,17 @@ class ValidateClusteringInstruction(Instruction):
                 type: ValidateClustering
                 clustering_config_path: /path/to/clustering_config.yaml
                 dataset: val_dataset
+                metrics: [adjusted_rand_score, silhouette_score]
                 validation_type: [method_based, result_based]
 
     """
 
-    def __init__(self, clustering_item: ClusteringItem, dataset: Dataset, validation_type: List[str],
+    def __init__(self, clustering_item: ClusteringItem, dataset: Dataset, metrics: List[str], validation_type: List[str],
                  result_path: Path = None):
-        self._state = ValidateClusteringState(clustering_item, dataset, validation_type, result_path)
+        self._state = ValidateClusteringState(clustering_item, dataset, metrics, validation_type, result_path)
 
     def run(self, result_path: Path) -> ValidateClusteringState:
+
+        # ValidationHandler(ClusteringConfig(self._state.cl_item.cl_setting.get_key(), self._state.dataset, self._state.metrics, )
+
         return self._state

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>immuneML: Clustering overview</title>
+    <title>immuneML: Clustering Overview</title>
     <style>
         {{{css_style}}}
         .figures-grid {
@@ -15,87 +15,179 @@
                 grid-template-columns: 1fr;
             }
         }
+        .report-card {
+            margin: 1em 0;
+            padding: 1em;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .split-card {
+            margin: 1em 0;
+            padding: 1em;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .split-card h3 {
+            margin-top: 0;
+        }
+        .settings-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5em;
+            list-style: none;
+            padding: 0;
+        }
+        .settings-list li a {
+            display: inline-block;
+            padding: 0.5em 1em;
+            background: var(--accent-color, teal);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .settings-list li a:hover {
+            background: #006666;
+        }
+        .download-list {
+            list-style: none;
+            padding: 0;
+        }
+        .download-list li {
+            margin: 0.3em 0;
+        }
+        .download-list li a {
+            color: var(--accent-color, teal);
+        }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
     <div class="container">
         <div>
-            <h1>Clustering workflow: {{name}}</h1>
+            <h1>Clustering Workflow: {{name}}</h1>
             <p>immuneML version: {{immuneML_version}}</p>
             <p>Full specification is available <a href="{{{full_specs}}}">here</a>.</p>
             <p>Log file is available <a href="{{{logfile}}}">here</a>.</p>
 
-            <div class="dataset-info">
-                <table>
-                    <tr>
-                        <td><b>Name</b></td>
-                        <td>{{dataset_name}}</td>
-                    </tr>
-                    <tr>
-                        <td><b>Type</b></td>
-                        <td>{{dataset_type}}</td>
-                    </tr>
-                    <tr>
-                        <td><b>Locus</b></td>
-                        <td>{{dataset_locus}}</td>
-                    </tr>
-                    <tr>
-                        <td><b>Dataset size</b></td>
-                        <td>{{dataset_size}}</td>
-                    </tr>
-                </table>
+            <h2>Dataset Information</h2>
+            <div class="card">
+                <h3>General Information</h3>
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <td><b>Name</b></td>
+                            <td>{{dataset_name}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Type</b></td>
+                            <td>{{dataset_type}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Locus</b></td>
+                            <td>{{dataset_locus}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Dataset size</b></td>
+                            <td>{{dataset_size}}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3>Dataset Labels</h3>
+                {{#show_dataset_labels}}
+                <p>The following label(s) are available in this dataset:</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><b>Label name</b></th>
+                                <th><b>Label classes</b></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#dataset_labels}}
+                            <tr>
+                                <td>{{dataset_label_name}}</td>
+                                <td>{{dataset_label_classes}}</td>
+                            </tr>
+                            {{/dataset_labels}}
+                        </tbody>
+                    </table>
+                </div>
+                {{/show_dataset_labels}}
+                {{^show_dataset_labels}}
+                <p>This dataset does not have any available labels.</p>
+                {{/show_dataset_labels}}
+
+                {{#show_labels}}
+                <h3>Labels Used for External Evaluation</h3>
+                <p>The following label(s) are used for external clustering evaluation:</p>
+                <ul>
+                    {{#labels}}
+                    <li>{{name}}</li>
+                    {{/labels}}
+                </ul>
+                {{/show_labels}}
             </div>
 
             {{#clustering_reports.has_reports}}
             <h2>Clustering Analysis Reports</h2>
             {{#clustering_reports.reports}}
-            <details>
-                <summary>{{ name }}</summary>
-                <div class="report-section">
-                    {{#info}}<p>{{info}}</p>{{/info}}
+            <div class="report-card">
+                <h3>{{name}}</h3>
+                {{#show_info}}<p>{{info}}</p>{{/show_info}}
 
-                    <div class="figures-grid">
-                        {{#output_figures}}
-                        <div class="figure-container">
-                            <h4>{{name}}</h4>
-                            {{#is_embed}}
-                            <iframe src="{{path}}" width="100%" height="600px"></iframe>
-                            {{/is_embed}}
-                            {{^is_embed}}
-                            <img src="{{path}}" alt="{{name}}">
-                            {{/is_embed}}
-                        </div>
-                        {{/output_figures}}
-                    </div>
-
-                    {{#output_tables}}
-                    <div class="table-section">
+                <div class="figures-grid">
+                    {{#output_figures}}
+                    <div class="figure-container">
                         <h4>{{name}}</h4>
-                        <a href="{{download_link}}" download>Download {{file_name}}</a>
+                        {{#is_embed}}
+                        <iframe src="{{path}}" width="100%" height="500px" frameborder="0"></iframe>
+                        {{/is_embed}}
+                        {{^is_embed}}
+                        <img src="{{path}}" alt="{{name}}" style="max-width: 100%;">
+                        {{/is_embed}}
                     </div>
-                    {{/output_tables}}
-
-                    {{#output_text}}
-                    <div class="text-section">
-                        <h4>{{name}}</h4>
-                        <pre class="text-output">{{path}}</pre>
-                    </div>
-                    {{/output_text}}
+                    {{/output_figures}}
                 </div>
-            </details>
+
+                {{#show_tables}}
+                <h4>Data behind the plots:</h4>
+                <ul class="download-list">
+                    {{#output_tables}}
+                    <li><a href="{{download_link}}" download>{{file_name}}</a> - {{name}}</li>
+                    {{/output_tables}}
+                </ul>
+                {{/show_tables}}
+
+                {{#show_text}}
+                <h4>Text Reports</h4>
+                <ul class="download-list">
+                    {{#output_text}}
+                    <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                    {{/output_text}}
+                </ul>
+                {{/show_text}}
+            </div>
             {{/clustering_reports.reports}}
             {{/clustering_reports.has_reports}}
 
             <h2>Results by Split</h2>
-            <p>Splitting into multiple discovery and validation set pairs allows for stability analysis of
-                the clustering settings. Click on a split below to view detailed results:</p>
-            
-            <ul class="setting-links">
-                {{#splits}}
-                <li><a href="{{path}}">Split {{number}}</a></li>
-                {{/splits}}
-            </ul>
+            <p>The dataset was split into {{splits.length}} subsets to assess clustering performance across different
+                validation indices. Click on a clustering setting below to view detailed results for each split:</p>
+
+            {{#splits}}
+            <div class="split-card">
+                <h3>Split {{number}}</h3>
+                <ul class="settings-list">
+                    {{#settings}}
+                    <li><a href="{{path}}">{{name}}</a></li>
+                    {{/settings}}
+                </ul>
+            </div>
+            {{/splits}}
         </div>
     </div>
 </body>

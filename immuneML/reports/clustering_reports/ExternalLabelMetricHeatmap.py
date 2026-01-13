@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import List
 
+import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
@@ -11,7 +12,7 @@ from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.clustering_reports.ClusteringReport import ClusteringReport
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
-from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringState, ClusteringResultPerRun
+from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringState
 
 
 class ExternalLabelMetricHeatmap(ClusteringReport):
@@ -19,9 +20,10 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
     This report creates heatmaps comparing clustering methods against external labels for each metric.
     For each external label and metric combination, it creates:
 
-    1. A table showing the metric values for each combination of clustering method and external label
+    1. A table showing the mean and standard deviation of metric values across splits for each
+       combination of clustering method and external label
 
-    2. A heatmap visualization of these values
+    2. A heatmap visualization where the color represents the mean value and the text shows mean±std
 
     The external labels and metrics are automatically determined from the clustering instruction specification.
 
@@ -60,31 +62,7 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
         metrics = [metric for metric in self.state.config.metrics if ClusteringMetric.is_external(metric)]
 
         for metric in metrics:
-            # For each split in the clustering results
-            for split_idx, clustering_results in enumerate(self.state.clustering_items):
-                # Process discovery results
-                if clustering_results.discovery:
-                    report_outputs.extend(self._process_analysis_results(
-                        clustering_results.discovery,
-                        f"discovery_split_{split_idx + 1}",
-                        metric
-                    ))
-
-                # Process method-based validation results if available
-                if clustering_results.method_based_validation:
-                    report_outputs.extend(self._process_analysis_results(
-                        clustering_results.method_based_validation,
-                        f"method_based_validation_split_{split_idx + 1}",
-                        metric
-                    ))
-
-                # Process result-based validation results if available
-                if clustering_results.result_based_validation:
-                    report_outputs.extend(self._process_analysis_results(
-                        clustering_results.result_based_validation,
-                        f"result_based_validation_split_{split_idx + 1}",
-                        metric
-                    ))
+            report_outputs.extend(self._process_metric_across_splits(metric, external_labels))
 
         if not report_outputs:
             return ReportResult(
@@ -94,34 +72,54 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
 
         return ReportResult(
             name=f"{self.desc} ({self.name})",
-            info="Heatmaps of metric values for clustering methods versus external labels",
+            info="Heatmaps of metric values (mean±std across splits) for clustering methods versus external labels",
             output_tables=[output for output in report_outputs if output.path.suffix == '.csv'],
             output_figures=[output for output in report_outputs if output.path.suffix in ['.html', '.png']],
         )
 
-    def _process_analysis_results(self, analysis_results: ClusteringResultPerRun, analysis_name: str,
-                                  metric: ClusteringMetric) -> List[ReportOutput]:
+    def _process_metric_across_splits(self, metric: str, external_labels: List[str]) -> List[ReportOutput]:
         outputs = []
 
-        external_labels = self.state.config.label_config.get_labels_by_name()
+        # Get setting keys from the first split
+        setting_keys = list(self.state.clustering_items[0].items.keys())
 
-        # Create a DataFrame with metric values
-        df = pd.DataFrame(0, index=list(analysis_results.items.keys()), columns=external_labels)
+        # Collect metric values across all splits
+        # Shape: (n_splits, n_settings, n_labels)
+        all_values = []
 
-        for setting_key, item_result in analysis_results.items.items():
-            performance_df = item_result.item.external_performance.get_df()
-            for label in external_labels:
-                df.loc[setting_key, label] = performance_df[performance_df['metric'] == metric][label].values[0]
+        for clustering_results in self.state.clustering_items:
+            split_values = []
+            for setting_key in setting_keys:
+                item_result = clustering_results.items[setting_key]
+                performance_df = item_result.item.external_performance.get_df()
+                label_values = []
+                for label in external_labels:
+                    value = performance_df[performance_df['metric'] == metric][label].values[0]
+                    label_values.append(value)
+                split_values.append(label_values)
+            all_values.append(split_values)
 
-        # Create heatmap
+        all_values = np.array(all_values)  # (n_splits, n_settings, n_labels)
+
+        # Calculate mean and std across splits (axis=0)
+        mean_values = np.mean(all_values, axis=0)  # (n_settings, n_labels)
+        std_values = np.std(all_values, axis=0)    # (n_settings, n_labels)
+
+        # Create text annotations with mean±std format
+        text_annotations = np.empty(mean_values.shape, dtype=object)
+        for i in range(mean_values.shape[0]):
+            for j in range(mean_values.shape[1]):
+                text_annotations[i, j] = f"{mean_values[i, j]:.3f}±{std_values[i, j]:.3f}"
+
+        # Create heatmap with mean as color and mean±std as text
         fig = go.Figure(data=go.Heatmap(
-            z=df.values,
-            x=df.columns,  # label values
-            y=df.index,    # clustering methodsa
+            z=mean_values,
+            x=external_labels,
+            y=setting_keys,
             colorscale='Darkmint',
-            text=df.values,
-            texttemplate='%{text:.3f}',
-            hovertemplate=metric + ': %{z:.3f}<br>external label: %{x}<br>clustering setting: %{y}<extra></extra>',
+            text=text_annotations,
+            texttemplate='%{text}',
+            hovertemplate=metric + ' (mean): %{z:.3f}<br>external label: %{x}<br>clustering setting: %{y}<extra></extra>',
             textfont={"size": 15},
             hoverongaps=False
         ))
@@ -131,20 +129,23 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
         )
 
         # Save heatmap
-        heatmap_path = self.result_path / f"{analysis_name}_{metric}_heatmap.html"
-        plot_path = PlotlyUtil.write_image_to_file(fig, heatmap_path, df.shape[0])
+        heatmap_path = self.result_path / f"{metric}_heatmap.html"
+        plot_path = PlotlyUtil.write_image_to_file(fig, heatmap_path, len(setting_keys))
 
         outputs.append(ReportOutput(
             path=plot_path,
-            name=f"Heatmap for {metric.replace('_', ' ')} ({analysis_name.replace('_', ' ')})"
+            name=f"Heatmap for {metric.replace('_', ' ')} (mean±std across splits)"
         ))
 
-        # Save metric table
-        table_path = self.result_path / f"{analysis_name}_{metric}.csv"
-        df.reset_index().rename(columns={'index': 'clustering_setting'}).to_csv(table_path, index=False)
+        # Create a combined table with mean±std format
+        df_combined = pd.DataFrame(text_annotations, index=setting_keys, columns=external_labels)
+        df_combined = df_combined.reset_index().rename(columns={'index': 'clustering_setting'})
+
+        table_path = self.result_path / f"{metric}_mean_std.csv"
+        df_combined.to_csv(table_path, index=False)
         outputs.append(ReportOutput(
             path=table_path,
-            name=f"Metric values for {metric} ({analysis_name.replace('_', ' ')})"
+            name=f"Metric values (mean±std) for {metric}"
         ))
 
         return outputs

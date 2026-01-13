@@ -1,26 +1,34 @@
-import copy
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 
 import pandas as pd
+import plotly.express as px
 
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.hyperparameter_optimization.clustering.StabilityLange import StabilityLange
+from immuneML.hyperparameter_optimization.config.SampleConfig import SampleConfig
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
+from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
+from immuneML.ml_metrics.ClusteringMetric import is_internal, is_external
+from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.Report import Report
+from immuneML.reports.ReportOutput import ReportOutput
+from immuneML.reports.ReportResult import ReportResult
 from immuneML.util.Logger import print_log, log_memory_usage
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
+from immuneML.workflows.instructions.clustering import clustering_runner
 from immuneML.workflows.instructions.clustering.ClusteringReportHandler import ClusteringReportHandler
-from immuneML.workflows.instructions.clustering.ClusteringRunner import ClusteringRunner
-from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringConfig, ClusteringState, \
-    ClusteringResultPerRun
-from immuneML.workflows.instructions.clustering.ValidationHandler import ValidationHandler
+from immuneML.workflows.instructions.clustering.ClusteringState import (
+    ClusteringConfig, ClusteringState, ClusteringResultPerRun, StabilityConfig
+)
 from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringSetting
+from immuneML.workflows.steps.DataSampler import DataSamplerParams, DataSampler
 
 
 class ClusteringInstruction(Instruction):
@@ -30,10 +38,7 @@ class ClusteringInstruction(Instruction):
     clustering method with its hyperparameters, and encodings across a pre-defined set of metrics. Finally, it
     provides options to include a set of reports to visualize the results.
 
-    See also: :ref:`How to perform clustering analysis`
-
-
-
+    See also: :ref:`How to perform clustering analysis`.
 
     **Specification arguments:**
 
@@ -47,39 +52,34 @@ class ClusteringInstruction(Instruction):
 
     - labels (list): an optional list of labels to use for external evaluation of clustering
 
-    - split_config (SplitConfig): how to perform splitting of the original dataset into discovery and validation data;
-      for this parameter, specify: split_strategy (leave_one_out_stratification, manual, random), training percentage
-      if split_strategy is random, and defaults of manual or leave one out stratification config for corresponding split
-      strategy; all three options are illustrated here:
+    - sample_config (SampleConfig): configuration describing how to construct the data subsets to estimate different
+      clustering settings' performance with different internal and external validation indices; with parameters
+      `percentage`, `split_count`, `random_seed`:
 
-      .. indent with spaces
-      .. code-block:: yaml
+    .. indent with spaces
+    .. code-block:: yaml
 
-        split_config:
-            split_strategy: manual
-            manual_config:
-                discovery_data: file_with_ids_of_examples_for_discovery_data.csv
-                validation_data: file_with_ids_of_examples_for_validation_data.csv
+        sample_config: # make 5 subsets with 80% of the data each
+            split_count: 5
+            percentage: 0.8
+            random_seed: 42
 
-      .. indent with spaces
-      .. code-block:: yaml
+    - stability_config (StabilityConfig): configuration describing how to compute clustering stability;
+      currently, clustering stability is computed following approach by Lange et al. (2004) and only takes the number
+      of repetitions as a parameter. Other strategies to compute clustering stability will be added in the future.
 
-        split_config:
-            split_strategy: random
-            training_percentage: 0.5
-            split_count: 3 # repeat the random split 3 times -> 3 discovery and 3 validation datasets
+    .. indent with spaces
+    .. code-block:: yaml
 
-      .. indent with spaces
-      .. code-block:: yaml
-
-        split_config:
-            split_strategy: leave_one_out_stratification
-            leave_one_out_config:
-                parameter: subject_id # any name of the parameter for split, must be present in the metadata
-                min_count: 1 #  defines the minimum number of examples that can be present in the validation dataset.
+        stability_config:
+            split_count: 5 # number of times to repeat clustering for stability estimation
+            random_seed: 12
 
     - clustering_settings (list): a list where each element represents a :py:obj:`~immuneML.workflows.clustering.clustering_run_model.ClusteringSetting`; a combinations of encoding,
       optional dimensionality reduction algorithm, and the clustering algorithm that will be evaluated
+
+    - random_labeling_count (int): number of random labelings to use for computing normalization value for stability
+      assessment
 
     - reports (list): a list of reports to be run on the clustering results or the encoded data
 
@@ -90,9 +90,6 @@ class ClusteringInstruction(Instruction):
 
     - region_type (str): which part of the receptor sequence to analyze (e.g., IMGT_CDR3); this value is used only if
       nothing is specified on the encoder level
-
-    - validation_type (list): a list of validation types to use for comparison of clustering algorithms and encodings;
-      it can be method_based and/or result_based
 
     **YAML specification:**
 
@@ -107,13 +104,14 @@ class ClusteringInstruction(Instruction):
                 labels: [epitope, v_call]
                 sequence_type: amino_acid
                 region_type: imgt_cdr3
-                validation_type: [method_based, result_based]
-                split_config:
-                    split_count: 1
-                    split_strategy: manual
-                    manual_config:
-                        discovery_data: file_with_ids_of_examples_for_discovery_data.csv
-                        validation_data: file_with_ids_of_examples_for_validation_data.csv
+                random_labeling_count: 5
+                sample_config:
+                    split_count: 5
+                    percentage: 0.8
+                    random_seed: 42
+                stability_config:
+                    split_count: 5
+                    random_seed: 12
                 clustering_settings:
                     - encoding: e1
                       dim_reduction: pca
@@ -126,118 +124,270 @@ class ClusteringInstruction(Instruction):
 
     def __init__(self, dataset: Dataset, metrics: List[str], clustering_settings: List[ClusteringSetting],
                  name: str, label_config: LabelConfiguration = None, reports: List[Report] = None,
-                 number_of_processes: int = None, split_config: SplitConfig = None, sequence_type: SequenceType = None,
-                 region_type: RegionType = None, validation_type: List[str] = None):
+                 number_of_processes: int = None, sample_config: SampleConfig = None,
+                 stability_config: StabilityConfig = None, random_labeling_count: int = None,
+                 sequence_type: SequenceType = None, region_type: RegionType = None):
 
         config = ClusteringConfig(name=name, dataset=dataset, metrics=metrics, clustering_settings=clustering_settings,
-                                  label_config=label_config, split_config=split_config, sequence_type=sequence_type,
-                                  region_type=region_type, validation_type=validation_type)
+                                  label_config=label_config, sample_config=sample_config, sequence_type=sequence_type,
+                                  region_type=region_type, stability_config=stability_config,
+                                  random_labeling_count=random_labeling_count)
         self.number_of_processes = number_of_processes
         self.state = ClusteringState(config=config, name=name)
         self.report_handler = ClusteringReportHandler(reports)
-        self.cl_runner = ClusteringRunner(self.state.config, self.number_of_processes, self.report_handler)
-        self.validation_handler = ValidationHandler(self.state.config, self.cl_runner, self.report_handler,
-                                                    self.number_of_processes)
 
     def run(self, result_path: Path):
-        """Execute the clustering instruction workflow."""
+        """Main entry point: computes validation indices and estimates stability."""
+        self.state.result_path = PathBuilder.build(result_path / self.state.config.name)
+
         self._fix_max_processes()
-        self._setup_paths(result_path)
-        self._split_dataset()
 
-        for run_id in range(self.state.config.split_config.split_count):
+        # Step 1: Compute validation indices
+        self._compute_validation_indices()
 
+        # Step 2: Estimate clustering stability
+        self._compute_stability()
+
+        return self.state
+
+    def _compute_validation_indices(self):
+        """Compute internal and external validation indices across all datasets and settings."""
+        self._setup_paths()
+
+        # 1. Construct datasets (subsampling)
+        datasets = self._construct_datasets()
+
+        # 2. Run clustering settings on each dataset and collect predictions
+        all_results = self._run_clustering_on_all_datasets(datasets)
+
+        # 3. Aggregate and export index results
+        self._aggregate_internal_indices(all_results)
+        self._aggregate_external_indices(all_results)
+
+        # 4. Run any additional clustering reports
+        self.report_handler.run_clustering_reports(self.state)
+
+    def _construct_datasets(self) -> List[Dataset]:
+        """Construct subsampled datasets for validation."""
+        paths = [PathBuilder.build(f"{self.state.result_path}/split_{run_id + 1}/")
+                 for run_id in range(self.state.config.sample_config.split_count)]
+
+        self.state.subsampled_datasets = DataSampler.run(
+            DataSamplerParams(self.state.config.dataset, self.state.config.sample_config, paths)
+        )
+        return self.state.subsampled_datasets
+
+    def _run_clustering_on_all_datasets(self, datasets: List[Dataset]) -> List[Dict]:
+        """Run every clustering setting on each dataset and collect results."""
+        all_results = []
+
+        for run_id, dataset in enumerate(datasets):
             print_log(f"Running clustering for split {run_id + 1}.")
 
-            path = self.state.result_path / f"split_{run_id + 1}"
+            path = self.state.result_path / f"validation_indices/split_{run_id + 1}"
+            predictions_df = self._init_predictions_df(dataset)
 
-            # Run discovery
-            self._run_discovery(run_id, path / 'discovery')
+            clustering_items, predictions_df = clustering_runner.run_all_settings(
+                dataset=dataset, path=path, run_id=run_id, predictions_df=predictions_df, state=self.state,
+                report_handler=self.report_handler, number_of_processes=self.number_of_processes,
+                sequence_type=self.state.config.sequence_type, region_type=self.state.config.region_type,
+                clustering_settings=self.state.config.clustering_settings, metrics=self.state.config.metrics,
+                label_config=self.state.config.label_config
+            )
+
+            predictions_df.to_csv(self.state.predictions_paths[run_id], index=False)
+
+            cl_result = ClusteringResultPerRun(run_id, clustering_items)
+            self.state.add_cl_result_per_run(run_id, cl_result)
+
+            all_results.append({
+                'run_id': run_id,
+                'clustering_items': clustering_items,
+                'predictions_df': predictions_df
+            })
 
             log_memory_usage(f"discovery in split {run_id + 1}", f"Clustering instruction {self.state.name}")
 
-            # Run validations
+        return all_results
 
-            if self.state.config.split_config.is_with_test_set():
+    def _aggregate_internal_indices(self, all_results: List[Dict]):
+        """
+        Aggregate internal indices across all datasets and clustering settings.
+        Produces one CSV per internal index, then generates boxplots.
+        Creates ReportResult objects and adds them to state.
+        """
+        internal_metrics = [m for m in self.state.config.metrics if is_internal(m)]
+        if not internal_metrics:
+            return
 
-                print_log(f"Running validation for split {run_id + 1}.")
+        indices_path = PathBuilder.build(self.state.result_path / 'validation_indices' / 'internal')
+        figures, tables = [], []
 
-                predictions_df = self._init_predictions_df(self.state.validation_datasets[run_id])
+        for metric in internal_metrics:
+            metric_data = self._collect_internal_metric_data(all_results, metric)
 
-                if "method_based" in self.state.config.validation_type:
-                    self.state = self.validation_handler.run_method_based_validation(
-                        self.state.validation_datasets[run_id], run_id, PathBuilder.build(path / 'method_based_validation'),
-                        copy.deepcopy(predictions_df), self.state)
+            csv_path = indices_path / f'{metric}.csv'
+            metric_data.to_csv(csv_path, index=False)
+            tables.append(ReportOutput(path=csv_path, name=f'{metric} values per split'))
 
-                    log_memory_usage(f"method-based validation in split {run_id + 1}",
-                                     f"Clustering instruction {self.state.name}")
+            figures.append(self._create_internal_index_boxplot(metric_data, metric, indices_path))
 
-                if "result_based" in self.state.config.validation_type:
-                    self.state = self.validation_handler.run_result_based_validation(
-                        self.state.validation_datasets[run_id], run_id, PathBuilder.build(path / "result_based_validation"),
-                        copy.deepcopy(predictions_df), self.state)
+        # Create ReportResult and add to state
+        report_result = ReportResult(
+            name=f'Internal Validation Indices',
+            info=f'Internal validation indices ({", ".join(internal_metrics).replace(" ", "")}) computed '
+                 f'across all clustering settings and data splits.',
+            output_figures=figures,
+            output_tables=tables
+        )
+        self.state.clustering_report_results.append(report_result)
 
-                    log_memory_usage(f"result-based validation in split {run_id + 1}",
-                                     f"Clustering instruction {self.state.name}")
+    def _collect_internal_metric_data(self, all_results: List[Dict], metric: str) -> pd.DataFrame:
+        """Collect internal metric values for all datasets and clustering settings."""
+        rows = []
 
-                print_log(f"Clustering for split {run_id + 1} finished.")
+        for result in all_results:
+            row = {'split_id': result['run_id'] + 1}
 
-        self.report_handler.run_clustering_reports(self.state)
-        return self.state
+            for setting_key, cl_item_result in result['clustering_items'].items():
+                internal_perf = cl_item_result.item.internal_performance
+                if internal_perf is not None:
+                    perf_df = internal_perf.get_df()
+                    row[setting_key] = perf_df.loc[0, metric] if metric in perf_df.columns else None
+                else:
+                    row[setting_key] = None
 
-    def _run_discovery(self, run_id: int, path: Path):
-        """Run clustering on discovery data."""
+            rows.append(row)
 
-        print_log("Running clustering on discovery data.")
+        return pd.DataFrame(rows)
 
-        dataset = self.state.discovery_datasets[run_id]
-        analysis_desc = 'discovery'
+    def _create_internal_index_boxplot(self, metric_data: pd.DataFrame, metric: str, output_path: Path) -> ReportOutput:
+        """Create boxplot for internal index across clustering settings."""
+        melted = metric_data.melt(id_vars=['split_id'], var_name='clustering_setting', value_name=metric)
 
-        predictions_df = self._init_predictions_df(dataset)
-        clustering_items, predictions_df = self.cl_runner.run_all_settings(dataset, analysis_desc, path, run_id,
-                                                                           predictions_df, self.state)
+        fig = px.box(melted, x='clustering_setting', y=metric,
+                     labels={'clustering_setting': 'clustering setting', metric: metric},
+                     color='clustering_setting', points='all',
+                     color_discrete_sequence=px.colors.qualitative.Vivid)
+        fig.update_layout(template='plotly_white', showlegend=False)
 
-        predictions_df.to_csv(self.state.predictions_paths[run_id][analysis_desc], index=False)
-        cl_result = ClusteringResultPerRun(run_id, analysis_desc, clustering_items)
-        self.state.add_cl_result_per_run(run_id, analysis_desc, cl_result)
+        plot_path = PlotlyUtil.write_image_to_file(fig, output_path / f'{metric}_boxplot.html', melted.shape[0])
+        return ReportOutput(path=plot_path, name=f'{metric} across clustering settings')
 
-        print_log("Clustering on discovery data finished.")
+    def _aggregate_external_indices(self, all_results: List[Dict]):
+        """
+        Aggregate external indices across all datasets, labels, and clustering settings.
+        Produces one CSV per (label, external_index) combination, then generates boxplots.
+        Creates ReportResult objects and adds them to state.
+        """
+        external_metrics = [m for m in self.state.config.metrics if is_external(m)]
+        labels = self.state.config.label_config.get_labels_by_name() if self.state.config.label_config else []
 
-    def _split_dataset(self):
-        self.state.discovery_datasets, self.state.validation_datasets = HPUtil.split_data(
-            dataset=self.state.config.dataset,
-            split_config=self.state.config.split_config,
-            path=self.state.result_path,
-            label_config=self.state.config.label_config)
+        if not external_metrics or not labels:
+            return
 
-    def _setup_paths(self, result_path: Path):
-        self.state.result_path = PathBuilder.build(result_path / self.state.config.name)
+        indices_path = PathBuilder.build(self.state.result_path / 'validation_indices/external')
+        figures, tables = [], []
+
+        for label in labels:
+            for metric in external_metrics:
+                metric_data = self._collect_external_metric_data(all_results, label, metric)
+
+                csv_path = indices_path / f'{label}_{metric}.csv'
+                metric_data.to_csv(csv_path, index=False)
+                tables.append(ReportOutput(path=csv_path, name=f'{metric} values for label {label}'))
+
+                figures.append(self._create_external_index_boxplot(metric_data, label, metric, indices_path))
+
+
+        report_result = ReportResult(
+            name=f'External Validation Indices',
+            info=f'External validation indices ({", ".join(external_metrics).replace(" ", "")}) computed '
+                 f'with respect to labels "{", ".join(labels).replace(" ", "")}" across all clustering '
+                 f'settings and data splits.',
+            output_figures=figures,
+            output_tables=tables
+        )
+        self.state.clustering_report_results.append(report_result)
+
+    def _collect_external_metric_data(self, all_results: List[Dict], label: str, metric: str) -> pd.DataFrame:
+        """Collect external metric values for a specific label across all datasets and settings."""
+        rows = []
+
+        for result in all_results:
+            row = {'split_id': result['run_id'] + 1}
+
+            for setting_key, cl_item_result in result['clustering_items'].items():
+                external_perf = cl_item_result.item.external_performance
+                if external_perf is not None:
+                    perf_df = external_perf.get_df()
+                    # External performance is stored with metrics as rows, labels as columns
+                    metric_row = perf_df[perf_df['metric'] == metric]
+                    if not metric_row.empty and label in metric_row.columns:
+                        row[setting_key] = metric_row[label].values[0]
+                    else:
+                        row[setting_key] = None
+                else:
+                    row[setting_key] = None
+
+            rows.append(row)
+
+        return pd.DataFrame(rows)
+
+    def _create_external_index_boxplot(self, metric_data: pd.DataFrame, label: str, metric: str, output_path: Path) -> ReportOutput:
+        """Create boxplot for external index per label, grouped by clustering setting."""
+        melted = metric_data.melt(id_vars=['split_id'], var_name='clustering_setting', value_name=metric)
+
+        fig = px.box(melted, x='clustering_setting', y=metric,
+                     labels={'clustering_setting': 'clustering setting', metric: metric},
+                     color='clustering_setting', points='all',
+                     color_discrete_sequence=px.colors.qualitative.Vivid)
+        fig.update_layout(template='plotly_white', showlegend=False)
+
+        plot_path = PlotlyUtil.write_image_to_file(fig, output_path / f'{label}_{metric}_boxplot.html', melted.shape[0])
+        return ReportOutput(path=plot_path, name=f'{metric} for label "{label}" across clustering settings')
+
+    def _compute_stability(self):
+        """Compute clustering stability using the Lange et al. approach."""
+        discovery_datasets, tuning_datasets = HPUtil.split_data(
+            self.state.config.dataset,
+            SplitConfig(SplitType.RANDOM, self.state.config.stability_config.split_count, 0.5),
+            PathBuilder.build(self.state.result_path / 'stability'),
+            LabelConfiguration()
+        )
+
+        stab_lange = StabilityLange(
+            discovery_datasets, tuning_datasets, self.state.config.clustering_settings,
+            self.state.result_path / 'stability', self.number_of_processes, self.state.config.sequence_type,
+            self.state.config.region_type, self.state.config.random_labeling_count
+        )
+        report_result = stab_lange.run()
+        self.state.clustering_report_results.append(report_result)
+
+    def _setup_paths(self):
+        """Initialize result paths."""
         self.state.predictions_paths = [
-            {'discovery': PathBuilder.build(
-                self.state.result_path / f"split_{run_id + 1}") / 'predictions_discovery.csv',
-             'result_based_validation': self.state.result_path / f'split_{run_id + 1}/predictions_result_based_validation.csv',
-             'method_based_validation': self.state.result_path / f'split_{run_id + 1}/predictions_method_based_validation.csv'}
-            for run_id in range(self.state.config.split_config.split_count)]
+            PathBuilder.build(self.state.result_path / f"validation_indices/split_{run_id + 1}") / 'predictions.csv'
+            for run_id in range(self.state.config.sample_config.split_count)
+        ]
 
     def _init_predictions_df(self, dataset: Dataset) -> pd.DataFrame:
-
+        """Initialize predictions DataFrame with labels and example IDs."""
         if len(self.state.config.label_config.get_labels_by_name()) > 0:
             predictions_df = dataset.get_metadata(self.state.config.label_config.get_labels_by_name(), return_df=True)
         else:
             predictions_df = pd.DataFrame(index=range(dataset.get_example_count()))
 
         predictions_df['example_id'] = dataset.get_example_ids()
-
         return predictions_df
 
     def _fix_max_processes(self):
-
+        """Configure thread limits for parallelization."""
         if self.number_of_processes:
-
             try:
                 import torch
                 torch.set_num_threads(self.number_of_processes)
-            except ImportError as e:
+            except ImportError:
                 pass
 
             os.environ["OMP_NUM_THREADS"] = str(self.number_of_processes)

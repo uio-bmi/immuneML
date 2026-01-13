@@ -7,8 +7,6 @@ import pandas as pd
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.util.Util import Util as MLUtil
-from immuneML.ml_metrics import ClusteringMetric
-from immuneML.ml_metrics.ClusteringMetric import is_internal, is_external
 from immuneML.presentation.TemplateParser import TemplateParser
 from immuneML.presentation.html.Util import Util
 from immuneML.reports.ReportResult import ReportResult
@@ -28,12 +26,8 @@ class ClusteringHTMLBuilder:
         TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "Clustering.html",
                              template_map=html_map, result_path=result_file)
 
-        # Generate split pages
-        for split_id in range(state.config.split_config.split_count):
-            ClusteringHTMLBuilder._make_split_page(state, split_id, base_path)
-
         # Generate detail pages for each setting in each split
-        for split_id in range(state.config.split_config.split_count):
+        for split_id in range(state.config.sample_config.split_count):
             for setting in state.config.clustering_settings:
                 ClusteringHTMLBuilder._make_setting_details_page(state, split_id, setting, base_path)
 
@@ -48,122 +42,74 @@ class ClusteringHTMLBuilder:
             "full_specs": Util.get_full_specs_path(base_path),
             "logfile": Util.get_logfile_path(base_path),
             "clustering_reports": ClusteringHTMLBuilder._format_reports(state.clustering_report_results, base_path),
-            "splits": [{"number": i + 1, "path": f"split_{i + 1}.html"} for i in range(state.config.split_config.split_count)],
+            "splits": ClusteringHTMLBuilder._make_splits_with_settings(state, base_path),
+            "show_labels": state.config.label_config is not None and len(state.config.label_config.get_labels_by_name()) > 0,
+            "labels": [{"name": label} for label in state.config.label_config.get_labels_by_name()] if state.config.label_config else [],
             **Util.make_dataset_html_map(state.config.dataset)
         }
         return html_map
 
     @staticmethod
-    def _make_split_page(state: ClusteringState, split_id: int, base_path: Path):
-        split_map = {
-            "css_style": Util.get_css_content(ClusteringHTMLBuilder.CSS_PATH),
-            "name": state.config.name,
-            "split_number": split_id + 1,
-            "predictions": {
-                "discovery": {
-                    "path": os.path.relpath(state.predictions_paths[split_id]['discovery'], base_path),
-                    "data": ClusteringHTMLBuilder._format_predictions_file(
-                        state.predictions_paths[split_id]['discovery'])
-                }
-            },
-            "performance": {
-                "internal": {
-                    "show": any(is_internal(m) for m in state.config.metrics),
-                    "discovery": ClusteringHTMLBuilder._make_internal_performance_table(state, 'discovery', split_id)
-                },
-                "external": {
-                    "show": any(is_external(m) for m in state.config.metrics),
-                    "discovery": ClusteringHTMLBuilder._make_external_performance_tables(state, 'discovery', split_id)
-                }
-            },
-            "setting_details": ClusteringHTMLBuilder._make_setting_links(state, split_id, base_path),
-            "has_method_based": "method_based" in state.config.validation_type,
-            "has_result_based": "result_based" in state.config.validation_type,
-            "main_page_link": f"Clustering_{state.config.name}.html"
-        }
-
-        # Add validation results if present
-        if "method_based" in state.config.validation_type:
-            split_map["predictions"]["method_based"] = {
-                "path": os.path.relpath(state.predictions_paths[split_id]['method_based_validation'], base_path),
-                "data": ClusteringHTMLBuilder._format_predictions_file(
-                    state.predictions_paths[split_id]['method_based_validation'])
+    def _make_splits_with_settings(state: ClusteringState, base_path: Path) -> List[dict]:
+        """Create list of splits with their associated clustering settings."""
+        splits = []
+        for split_id in range(state.config.sample_config.split_count):
+            split_info = {
+                "number": split_id + 1,
+                "settings": [{
+                    "name": setting.get_key(),
+                    "path": f"split_{split_id + 1}_{setting.get_key()}.html"
+                } for setting in state.config.clustering_settings]
             }
-            split_map["performance"]["internal"]["method_based"] = ClusteringHTMLBuilder._make_internal_performance_table(
-                state, 'method_based_validation', split_id)
-            split_map["performance"]["external"]["method_based"] = ClusteringHTMLBuilder._make_external_performance_tables(
-                state, 'method_based_validation', split_id)
-
-        if "result_based" in state.config.validation_type:
-            split_map["predictions"]["result_based"] = {
-                "path": os.path.relpath(state.predictions_paths[split_id]['result_based_validation'], base_path),
-                "data": ClusteringHTMLBuilder._format_predictions_file(
-                    state.predictions_paths[split_id]['result_based_validation'])
-            }
-            split_map["performance"]["internal"]["result_based"] = ClusteringHTMLBuilder._make_internal_performance_table(
-                state, 'result_based_validation', split_id)
-            split_map["performance"]["external"]["result_based"] = ClusteringHTMLBuilder._make_external_performance_tables(
-                state, 'result_based_validation', split_id)
-
-        result_path = base_path / f"split_{split_id + 1}.html"
-        TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "ClusteringSplit.html",
-                             template_map=split_map, result_path=result_path)
-
-    @staticmethod
-    def _make_setting_links(state: ClusteringState, split_id: int, base_path: Path) -> List[dict]:
-        return [{
-            "name": setting.get_key(),
-            "path": f"split_{split_id + 1}_{setting.get_key()}.html"
-        } for setting in state.config.clustering_settings]
+            splits.append(split_info)
+        return splits
 
     @staticmethod
     def _make_setting_details_page(state: ClusteringState, split_id: int, setting, base_path: Path):
-        template_map = {"css_style": Util.get_css_content(ClusteringHTMLBuilder.CSS_PATH), "split_number": split_id + 1,
-                        "setting_name": setting.get_key(),
-                        "has_method_based": "method_based" in state.config.validation_type,
-                        "has_result_based": "result_based" in state.config.validation_type,
-                        "discovery": ClusteringHTMLBuilder._get_analysis_results(
-                            state, split_id, setting, "discovery", base_path)}
+        """Generate a details page for a specific clustering setting in a specific split."""
+        setting_key = setting.get_key()
 
-        # Add validation results if present
-        if "method_based" in state.config.validation_type:
-            template_map["method_based"] = ClusteringHTMLBuilder._get_analysis_results(
-                state, split_id, setting, "method_based_validation", base_path)
+        # Get clustering results for this split and setting
+        cl_result = state.clustering_items[split_id] if split_id < len(state.clustering_items) else None
+        item_result = cl_result.items.get(setting_key) if cl_result else None
 
-        if "result_based" in state.config.validation_type:
-            template_map["result_based"] = ClusteringHTMLBuilder._get_analysis_results(
-                state, split_id, setting, "result_based_validation", base_path)
+        template_map = {
+            "css_style": Util.get_css_content(ClusteringHTMLBuilder.CSS_PATH),
+            "split_number": split_id + 1,
+            "setting_name": setting_key,
+            "main_page_link": f"Clustering_{state.config.name}.html",
+            "predictions_path": os.path.relpath(state.predictions_paths[split_id], base_path) if state.predictions_paths else None,
+            "predictions_table": ClusteringHTMLBuilder._format_predictions_file(state.predictions_paths[split_id]) if state.predictions_paths else None,
+            "internal_performance": None,
+            "external_performance": None,
+            "reports": {"has_reports": False}
+        }
 
-        result_path = base_path / f"split_{split_id + 1}_{setting.get_key()}.html"
+        if item_result:
+            # Internal performance
+            if item_result.item.internal_performance:
+                template_map["internal_performance"] = item_result.item.internal_performance.get_df().to_html(
+                    border=0, justify='left', max_rows=None, index=False)
+
+            # External performance
+            if item_result.item.external_performance:
+                template_map["external_performance"] = item_result.item.external_performance.get_df().to_html(
+                    border=0, justify='left', max_rows=None, index=False)
+
+            # Reports
+            template_map["reports"] = ClusteringHTMLBuilder._format_reports(item_result.report_results, base_path)
+
+        result_path = base_path / f"split_{split_id + 1}_{setting_key}.html"
         TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "ClusteringSettingDetails.html",
                              template_map=template_map, result_path=result_path)
-
-    @staticmethod
-    def _get_analysis_results(state: ClusteringState, split_id: int, setting, analysis_type: str,
-                              base_path: Path) -> dict:
-        cl_result = state.clustering_items[split_id]
-        if hasattr(cl_result, analysis_type):
-            analysis_result = getattr(cl_result, analysis_type)
-            if analysis_result and setting.get_key() in analysis_result.items:
-                item_result = analysis_result.items[setting.get_key()]
-                return {
-                    "predictions_path": os.path.relpath(state.predictions_paths[split_id][analysis_type], base_path),
-                    "internal_performance": item_result.item.internal_performance.get_df().to_html(border=0,
-                        justify='left', max_rows=None,
-                        index=False) if item_result.item.internal_performance and any(ClusteringMetric.is_internal(metric) for metric in state.config.metrics) else None,
-                    "external_performance": item_result.item.external_performance.get_df().to_html(border=0,
-                        justify='left', max_rows=None,
-                        index=False) if item_result.item.external_performance and any(ClusteringMetric.is_external(metric) for metric in state.config.metrics) else None,
-                    "reports": ClusteringHTMLBuilder._format_reports(item_result.report_results, base_path)
-                }
-        return None
 
     @staticmethod
     def _format_predictions_file(file_path: Path) -> str:
         try:
             df = pd.read_csv(file_path)
-            return df.to_html(border=0, classes="prediction-table", max_rows=None, justify='left', index=False)
-        except:
+            return df.to_html(border=0, classes="prediction-table", max_rows=20, justify='left', index=False)
+        except Exception as e:
+            logging.warning(f"Error loading predictions: {e}")
             return "Error loading predictions"
 
     @staticmethod
@@ -177,13 +123,14 @@ class ClusteringHTMLBuilder:
                 formatted_report = {
                     "name": report.name,
                     "info": report.info if hasattr(report, "info") else None,
+                    "show_info": hasattr(report, "info") and report.info is not None and len(report.info) > 0,
                     "output_figures": [],
                     "output_tables": [],
                     "output_text": []
                 }
 
                 # Process figures
-                if hasattr(report, "output_figures"):
+                if hasattr(report, "output_figures") and report.output_figures:
                     formatted_report["output_figures"] = [{
                         "name": fig.name,
                         "path": os.path.relpath(fig.path, base_path),
@@ -191,10 +138,9 @@ class ClusteringHTMLBuilder:
                     } for fig in report.output_figures]
 
                 # Process tables
-                if hasattr(report, "output_tables"):
+                if hasattr(report, "output_tables") and report.output_tables:
                     for table in report.output_tables:
                         try:
-                            df = pd.read_csv(table.path)
                             formatted_report["output_tables"].append({
                                 "name": table.name,
                                 "download_link": os.path.relpath(table.path, base_path),
@@ -204,78 +150,19 @@ class ClusteringHTMLBuilder:
                             logging.warning(f"Error processing table {table.name}: {e}")
 
                 # Process text outputs
-                if hasattr(report, "output_text"):
+                if hasattr(report, "output_text") and report.output_text:
                     formatted_report["output_text"] = [{
                         "name": text.name,
                         "download_link": os.path.relpath(text.path, base_path),
-                        "file_name": os.path.basename(text.path),
-                        "is_download_link": True
+                        "file_name": os.path.basename(text.path)
                     } for text in report.output_text]
+
+                formatted_report["show_tables"] = len(formatted_report["output_tables"]) > 0
+                formatted_report["show_text"] = len(formatted_report["output_text"]) > 0
 
                 formatted_reports.append(formatted_report)
 
         return {
-            "has_reports": True,
+            "has_reports": len(formatted_reports) > 0,
             "reports": formatted_reports
         }
-
-    @staticmethod
-    def _make_internal_performance_table(state: ClusteringState, analysis_type: str, split_id: int) -> str:
-        cl_result = getattr(state.clustering_items[split_id], analysis_type, None)
-        if not cl_result:
-            return None
-
-        performance_data = {
-            "clustering setting": [],
-            **{metric: [] for metric in state.config.metrics if is_internal(metric)}
-        }
-
-        for setting in state.config.clustering_settings:
-            if setting.get_key() in cl_result.items:
-                item = cl_result.items[setting.get_key()].item
-                performance_data["clustering setting"].append(setting.get_key())
-                for metric in state.config.metrics:
-                    if is_internal(metric) and item.internal_performance:
-                        value = item.internal_performance.get_df()[metric].values[0]
-                        performance_data[metric].append(f"{value:.3f}")
-
-        if performance_data["clustering setting"]:
-            df = pd.DataFrame(performance_data)
-            return df.to_html(border=0, justify='left', max_rows=None, index=False)
-        return None
-
-    @staticmethod
-    def _make_external_performance_tables(state: ClusteringState, analysis_type: str, split_id: int) -> List[dict]:
-        if not state.config.label_config:
-            return []
-
-        cl_result = getattr(state.clustering_items[split_id], analysis_type, None)
-        if not cl_result:
-            return []
-
-        tables = []
-        for label in state.config.label_config.get_labels_by_name():
-            performance_data = {
-                "clustering setting": [],
-                **{metric: [] for metric in state.config.metrics if is_external(metric)}
-            }
-
-            for setting in state.config.clustering_settings:
-                if setting.get_key() in cl_result.items:
-                    item = cl_result.items[setting.get_key()].item
-                    if item.external_performance:
-                        performance_data["clustering setting"].append(setting.get_key())
-                        for metric in state.config.metrics:
-                            if is_external(metric):
-                                value = item.external_performance.get_df().set_index(['metric']).loc[
-                                    metric, label].item()
-                                performance_data[metric].append(f"{value:.3f}")
-
-            if performance_data["clustering setting"]:
-                df = pd.DataFrame(performance_data)
-                tables.append({
-                    "label": label,
-                    "performance_table": df.to_html(border=0, justify='left', max_rows=None, index=False)
-                })
-
-        return tables

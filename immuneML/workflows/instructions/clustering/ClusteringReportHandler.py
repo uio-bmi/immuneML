@@ -34,7 +34,7 @@ class ClusteringReportHandler:
 
         return state
 
-    def run_item_reports(self, cl_item: ClusteringItem, analysis_desc: str, run_id: int, path: Path,
+    def run_item_reports(self, cl_item: ClusteringItem, run_id: int, path: Path,
                          state: ClusteringState) -> list:
         """Generate reports for individual clustering items."""
         report_path = PathBuilder.build(path / f'reports/')
@@ -54,6 +54,6 @@ class ClusteringReportHandler:
         if len(self.reports) > 0:
             gen_rep_count = len(report_results)
             print_log(f"{state.config.name}: generated {gen_rep_count} reports for setting "
-                      f"{cl_item.cl_setting.get_key()} for {analysis_desc}, run id: {run_id + 1}.", True)
+                      f"{cl_item.cl_setting.get_key()}, run id: {run_id + 1}.", True)
 
         return report_results
