@@ -14,3 +14,15 @@ def is_external(metric: str):
 
 def is_valid_metric(metric: str):
     return metric in INTERNAL_EVAL_METRICS or metric in EXTERNAL_EVAL_METRICS
+
+def get_search_criterion(metric):
+    assert is_valid_metric(metric), f"Metric '{metric}' is not recognized as a valid clustering metric."
+
+    if metric in ['adjusted_mutual_info_score', 'adjusted_rand_score', 'calinski_harabasz_score', 'completeness_score',
+                  'fowlkes_mallows_score', 'homogeneity_score', 'mutual_info_score', 'normalized_mutual_info_score',
+                  'rand_score', 'silhouette_score', 'v_measure_score']:
+        return max
+    elif metric in ['davies_bouldin_score']:
+        return min
+    else:
+        raise ValueError(f"Metric '{metric}' is not recognized as a valid clustering metric.")

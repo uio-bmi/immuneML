@@ -45,8 +45,43 @@ class ClusteringHTMLBuilder:
             "splits": ClusteringHTMLBuilder._make_splits_with_settings(state, base_path),
             "show_labels": state.config.label_config is not None and len(state.config.label_config.get_labels_by_name()) > 0,
             "labels": [{"name": label} for label in state.config.label_config.get_labels_by_name()] if state.config.label_config else [],
-            **Util.make_dataset_html_map(state.config.dataset)
+            **Util.make_dataset_html_map(state.config.dataset),
+            **ClusteringHTMLBuilder._make_best_settings_html_map(state, base_path)
         }
+        return html_map
+
+    @staticmethod
+    def _make_best_settings_html_map(state: ClusteringState, base_path: Path) -> dict:
+        """Create HTML map entries for best settings exports and predictions."""
+        html_map = {
+            "show_best_settings": False,
+            "best_settings": [],
+            "show_final_predictions": False,
+            "final_predictions_table": None,
+            "final_predictions_path": None
+        }
+
+        # Add best settings zip files
+        if state.best_settings_zip_paths:
+            html_map["show_best_settings"] = True
+            html_map["best_settings"] = [
+                {
+                    "setting_key": setting_key,
+                    "zip_path": os.path.relpath(setting_data['path'], base_path),
+                    "zip_filename": os.path.basename(setting_data['path']),
+                    "metrics": ", ".join(setting_data['metrics'])
+                }
+                for setting_key, setting_data in state.best_settings_zip_paths.items()
+            ]
+
+        # Add final predictions preview and download link
+        if state.final_predictions_path and state.final_predictions_path.exists():
+            html_map["show_final_predictions"] = True
+            html_map["final_predictions_path"] = os.path.relpath(state.final_predictions_path, base_path)
+            html_map["final_predictions_table"] = ClusteringHTMLBuilder._format_predictions_file(
+                state.final_predictions_path
+            )
+
         return html_map
 
     @staticmethod

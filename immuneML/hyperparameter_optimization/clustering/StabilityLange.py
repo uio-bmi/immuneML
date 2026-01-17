@@ -55,15 +55,16 @@ class StabilityLange:
             performances[cl_setting.get_key()] = distances
 
         report_result = self._create_report_from_distances(performances)
-        return report_result
+        return report_result, report_result.output_tables[0].path
 
     def _create_report_from_distances(self, performances: Dict[str, np.ndarray]) -> ReportResult:
         df = pd.DataFrame(performances)
+        df['split_id'] = np.arange(1, df.shape[0] + 1)
         df.to_csv(self.result_path / 'normalized_distances_per_cl_setting.csv', index=False)
 
         figure = self.make_figure(df)
         return ReportResult(output_figures=[figure],
-                            output_tables=[ReportOutput(self.result_path / 'normalized_distances_per_cl_settings.csv',
+                            output_tables=[ReportOutput(self.result_path / 'normalized_distances_per_cl_setting.csv',
                                                         name="Normalized Distances per Clustering Setting")],
                             name="Clustering Stability Analysis",
                             info="Report on clustering stability analysis based on distances between clusterings on "

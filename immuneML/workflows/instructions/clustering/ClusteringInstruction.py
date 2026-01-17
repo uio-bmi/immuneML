@@ -1,10 +1,13 @@
+import logging
 import os
+from collections import defaultdict
 from pathlib import Path
 from typing import List, Dict
 
 import pandas as pd
 import plotly.express as px
 
+from immuneML.IO.ml_method.ClusteringExporter import ClusteringExporter
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.LabelConfiguration import LabelConfiguration
@@ -14,7 +17,7 @@ from immuneML.hyperparameter_optimization.config.SampleConfig import SampleConfi
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
-from immuneML.ml_metrics.ClusteringMetric import is_internal, is_external
+from immuneML.ml_metrics.ClusteringMetric import is_internal, is_external, get_search_criterion
 from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.Report import Report
 from immuneML.reports.ReportOutput import ReportOutput
@@ -148,6 +151,9 @@ class ClusteringInstruction(Instruction):
         # Step 2: Estimate clustering stability
         self._compute_stability()
 
+        # Step 3: Refit the best settings on full dataset
+        self._refit_best_settings_on_full_dataset()
+
         return self.state
 
     def _compute_validation_indices(self):
@@ -166,6 +172,43 @@ class ClusteringInstruction(Instruction):
 
         # 4. Run any additional clustering reports
         self.report_handler.run_clustering_reports(self.state)
+
+    def _refit_best_settings_on_full_dataset(self):
+        path = PathBuilder.build(self.state.result_path / "refitted_best_settings")
+
+        best_settings = defaultdict(list)
+        for metric_name, metric_path in self.state.metrics_performance_paths.items():
+            best_setting = pd.read_csv(metric_path).drop(columns=['split_id']).mean(axis=0)
+
+            if metric_name == 'stability_lange' or get_search_criterion(metric_name.split("__")[0]) == max:
+                best_setting_key = best_setting.idxmax()
+            else:
+                best_setting_key = best_setting.idxmin()
+
+            best_settings[best_setting_key].append(metric_path.stem)
+            print_log(f"Best setting for metric {metric_path.stem} is {best_setting_key}.")
+
+        predictions_df = self._init_predictions_df(self.state.config.dataset)
+        for best_setting_key, per_metrics in best_settings.items():
+            setting_path = path / best_setting_key
+            cl_setting = self.state.config.get_cl_setting_by_key(best_setting_key)
+            cl_item_res, predictions_df = clustering_runner.run_setting(dataset=self.state.config.dataset,
+                                                    cl_setting=cl_setting,
+                                                    path=setting_path, predictions_df=predictions_df,
+                                                    metrics=[], label_config=self.state.config.label_config,
+                                                    number_of_processes=self.number_of_processes,
+                                                    sequence_type=self.state.config.sequence_type, evaluate=False,
+                                                    region_type=self.state.config.region_type, state=self.state)
+            self.state.optimal_settings_on_discovery[best_setting_key] = cl_item_res
+
+            # Export the best setting as a zip file
+            zip_path = ClusteringExporter.export_zip(cl_item_res.item, setting_path, best_setting_key)
+            self.state.best_settings_zip_paths[best_setting_key] = {'path': zip_path, 'metrics': per_metrics}
+            logging.info(f"ClusteringInstruction: exported best setting {best_setting_key} to: {zip_path}")
+
+        predictions_df.to_csv(path / "best_settings_predictions_full_dataset.csv", index=False)
+        self.state.final_predictions_path = path / "best_settings_predictions_full_dataset.csv"
+
 
     def _construct_datasets(self) -> List[Dataset]:
         """Construct subsampled datasets for validation."""
@@ -228,6 +271,7 @@ class ClusteringInstruction(Instruction):
 
             csv_path = indices_path / f'{metric}.csv'
             metric_data.to_csv(csv_path, index=False)
+            self.state.metrics_performance_paths[metric] = csv_path
             tables.append(ReportOutput(path=csv_path, name=f'{metric} values per split'))
 
             figures.append(self._create_internal_index_boxplot(metric_data, metric, indices_path))
@@ -293,8 +337,9 @@ class ClusteringInstruction(Instruction):
             for metric in external_metrics:
                 metric_data = self._collect_external_metric_data(all_results, label, metric)
 
-                csv_path = indices_path / f'{label}_{metric}.csv'
+                csv_path = indices_path / f'{metric}__{label}.csv'
                 metric_data.to_csv(csv_path, index=False)
+                self.state.metrics_performance_paths[f"{metric}__{label}"] = csv_path
                 tables.append(ReportOutput(path=csv_path, name=f'{metric} values for label {label}'))
 
                 figures.append(self._create_external_index_boxplot(metric_data, label, metric, indices_path))
@@ -361,8 +406,9 @@ class ClusteringInstruction(Instruction):
             self.state.result_path / 'stability', self.number_of_processes, self.state.config.sequence_type,
             self.state.config.region_type, self.state.config.random_labeling_count
         )
-        report_result = stab_lange.run()
+        report_result, stability_path = stab_lange.run()
         self.state.clustering_report_results.append(report_result)
+        self.state.metrics_performance_paths['stability_lange'] = stability_path
 
     def _setup_paths(self):
         """Initialize result paths."""

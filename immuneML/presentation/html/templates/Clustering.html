@@ -174,6 +174,37 @@
             {{/clustering_reports.reports}}
             {{/clustering_reports.has_reports}}
 
+            {{#show_best_settings}}
+            <h2>Best Clustering Settings</h2>
+            <p>The following clustering settings were identified as optimal based on the validation metrics.
+               Each exported zip file contains the encoder, clustering method, and configuration needed to
+               apply the clustering to new data.</p>
+            <div class="card">
+                <h3>Exported Settings</h3>
+                <ul class="download-list">
+                    {{#best_settings}}
+                    <li>
+                        <strong>{{setting_key}}</strong>
+                        <span style="color: #666; font-size: 0.9em;">(best for: {{metrics}})</span>
+                        &mdash; <a href="{{zip_path}}" download>{{zip_filename}}</a>
+                    </li>
+                    {{/best_settings}}
+                </ul>
+            </div>
+            {{/show_best_settings}}
+
+            {{#show_final_predictions}}
+            <h2>Final Predictions on Full Dataset</h2>
+            <p>Cluster assignments from the best settings applied to the complete dataset.</p>
+            <div class="card">
+                <h3>Predictions Preview</h3>
+                <p><a href="{{final_predictions_path}}" download>Download full predictions CSV</a></p>
+                <div class="table-container" style="overflow-x: auto;">
+                    {{{final_predictions_table}}}
+                </div>
+            </div>
+            {{/show_final_predictions}}
+
             <h2>Results by Split</h2>
             <p>The dataset was split into {{splits.length}} subsets to assess clustering performance across different
                 validation indices. Click on a clustering setting below to view detailed results for each split:</p>
