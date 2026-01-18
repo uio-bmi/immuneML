@@ -199,6 +199,7 @@ class ClusteringInstruction(Instruction):
                                                     number_of_processes=self.number_of_processes,
                                                     sequence_type=self.state.config.sequence_type, evaluate=False,
                                                     region_type=self.state.config.region_type, state=self.state)
+            cl_item_res.item.classifier = clustering_runner.train_cluster_classifier(cl_item_res.item)
             self.state.optimal_settings_on_discovery[best_setting_key] = cl_item_res
 
             # Export the best setting as a zip file

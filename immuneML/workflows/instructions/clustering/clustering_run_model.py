@@ -6,6 +6,7 @@ import pandas as pd
 
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
+from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 
@@ -65,3 +66,4 @@ class ClusteringItem:
     external_performance: DataFrameWrapper = None
     predictions: np.ndarray = None
     cl_setting: ClusteringSetting = None
+    classifier: MLMethod = None

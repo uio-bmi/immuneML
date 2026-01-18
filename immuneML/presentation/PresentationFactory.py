@@ -9,9 +9,11 @@ from immuneML.presentation.html.LIgOSimulationHTMLBuilder import LIgOSimulationH
 from immuneML.presentation.html.MLApplicationHTMLBuilder import MLApplicationHTMLBuilder
 from immuneML.presentation.html.SubsamplingHTMLBuilder import SubsamplingHTMLBuilder
 from immuneML.presentation.html.GenModelHTMLBuilder import GenModelHTMLBuilder
+from immuneML.presentation.html.ValidateClusteringHTMLBuilder import ValidateClusteringHTMLBuilder
 from immuneML.simulation.LigoSimState import LigoSimState
 from immuneML.workflows.instructions.apply_gen_model.ApplyGenModelInstruction import ApplyGenModelState
 from immuneML.workflows.instructions.clustering.ClusteringInstruction import ClusteringState
+from immuneML.workflows.instructions.clustering.ValidateClusteringInstruction import ValidateClusteringState
 from immuneML.workflows.instructions.dataset_generation.DatasetExportState import DatasetExportState
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisState import ExploratoryAnalysisState
 from immuneML.workflows.instructions.ligo_sim_feasibility.FeasibilitySummaryInstruction import FeasibilitySummaryState
@@ -42,6 +44,8 @@ class PresentationFactory:
             return GenModelHTMLBuilder
         elif isinstance(state, ClusteringState) and presentation_format == PresentationFormat.HTML:
             return ClusteringHTMLBuilder
+        elif isinstance(state, ValidateClusteringState) and presentation_format == PresentationFormat.HTML:
+            return ValidateClusteringHTMLBuilder
         else:
             raise ValueError(f"PresentationFactory: state and format combination ({type(state).__name__}, "
                              f"{presentation_format.name}) is not supported.")
