@@ -10,7 +10,11 @@ from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.reports.Report import Report
 from immuneML.reports.ReportResult import ReportResult
+from immuneML.reports.clustering_method_reports.ClusteringMethodReport import ClusteringMethodReport
+from immuneML.reports.data_reports.DataReport import DataReport
+from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
@@ -36,6 +40,7 @@ class ValidateClusteringState:
     result_based_predictions_path: Path = None
     method_based_report_results: List[ReportResult] = field(default_factory=list)
     result_based_report_results: List[ReportResult] = field(default_factory=list)
+    data_report_results: List[ReportResult] = field(default_factory=list)
 
 
 class ValidateClusteringInstruction(Instruction):
@@ -65,6 +70,12 @@ class ValidateClusteringInstruction(Instruction):
       algorithm to the new dataset and compare the clusterings) and `result_based` validation (transfer the clustering
       from the original dataset to the validation dataset using a supervised classifier and compare the clusterings)
 
+    - reports (list): a list of reports to run on the validation results; supported report types include:
+
+      - ClusteringMethodReport: reports that analyze the clustering method results (e.g., ClusteringVisualization)
+      - EncodingReport: reports that analyze the encoded dataset
+      - DataReport: reports that analyze the raw dataset
+
 
     **YAML specification:**
 
@@ -77,19 +88,22 @@ class ValidateClusteringInstruction(Instruction):
                 dataset: val_dataset
                 metrics: [adjusted_rand_score, silhouette_score]
                 validation_type: [method_based, result_based]
+                reports: [cluster_vis, encoding_report]
 
     """
 
     def __init__(self, clustering_item: ClusteringItem, dataset: Dataset, metrics: List[str], validation_type: List[str],
                  label_config: LabelConfiguration = None, sequence_type: SequenceType = SequenceType.AMINO_ACID,
                  region_type: RegionType = RegionType.IMGT_CDR3, number_of_processes: int = 1,
-                 result_path: Path = None):
+                 reports: List[Report] = None, name: str = "validate_clustering", result_path: Path = None):
+        self._reports = reports if reports else []
         self._state = ValidateClusteringState(
             cl_item=clustering_item,
             dataset=dataset,
             metrics=metrics,
             validation_type=validation_type,
             result_path=result_path,
+            name=name,
             label_config=label_config if label_config else LabelConfiguration(),
             sequence_type=sequence_type,
             region_type=region_type,
@@ -97,9 +111,12 @@ class ValidateClusteringInstruction(Instruction):
         )
 
     def run(self, result_path: Path) -> ValidateClusteringState:
-        self._state.result_path = PathBuilder.build(result_path)
+        self._state.result_path = PathBuilder.build(result_path / self._state.name)
 
         print_log(f"ValidateClusteringInstruction: starting validation with types {self._state.validation_type}")
+
+        # Run data reports on the validation dataset
+        self._run_data_reports()
 
         # Initialize predictions DataFrame with example IDs and labels
         predictions_df = self._init_predictions_df()
@@ -155,6 +172,9 @@ class ValidateClusteringInstruction(Instruction):
         self._state.method_based_predictions_path = path / "method_based_predictions.csv"
         predictions_df.to_csv(self._state.method_based_predictions_path, index=False)
 
+        # Run reports for method-based validation
+        self._state.method_based_report_results = self._run_item_reports(cl_item_result.item, path, "method_based")
+
         print_log(f"ValidateClusteringInstruction: method-based validation completed. "
                   f"Predictions saved to {self._state.method_based_predictions_path}")
 
@@ -206,7 +226,54 @@ class ValidateClusteringInstruction(Instruction):
         self._state.result_based_result = cl_item
         self._state.result_based_predictions_path = path / "result_based_predictions.csv"
 
+        # Run reports for result-based validation
+        self._state.result_based_report_results = self._run_item_reports(cl_item, path, "result_based")
+
         print_log(f"ValidateClusteringInstruction: result-based validation completed. "
                   f"Predictions saved to {self._state.result_based_predictions_path}")
 
         return predictions_df
+
+    def _run_data_reports(self):
+        """Run data reports on the validation dataset."""
+        report_path = PathBuilder.build(self._state.result_path / "data_reports")
+
+        for report in self._reports:
+            if isinstance(report, DataReport):
+                tmp_report = copy.deepcopy(report)
+                tmp_report.result_path = PathBuilder.build(report_path / tmp_report.name)
+                tmp_report.dataset = self._state.dataset
+                tmp_report.number_of_processes = self._state.number_of_processes
+                result = tmp_report.generate_report()
+                if result is not None:
+                    self._state.data_report_results.append(result)
+
+        if self._state.data_report_results:
+            print_log(f"ValidateClusteringInstruction: generated {len(self._state.data_report_results)} data reports.")
+
+    def _run_item_reports(self, cl_item: ClusteringItem, path: Path, validation_type: str) -> List[ReportResult]:
+        """Run clustering method and encoding reports for a clustering item."""
+        report_path = PathBuilder.build(path / "reports")
+        report_results = []
+
+        for report in self._reports:
+            tmp_report = copy.deepcopy(report)
+            tmp_report.result_path = PathBuilder.build(report_path / tmp_report.name)
+
+            if isinstance(report, EncodingReport):
+                tmp_report.dataset = cl_item.dataset
+                tmp_report.number_of_processes = self._state.number_of_processes
+                result = tmp_report.generate_report()
+                if result is not None:
+                    report_results.append(result)
+
+            elif isinstance(report, ClusteringMethodReport):
+                tmp_report.item = cl_item
+                result = tmp_report.generate_report()
+                if result is not None:
+                    report_results.append(result)
+
+        if report_results:
+            print_log(f"ValidateClusteringInstruction: generated {len(report_results)} reports for {validation_type} validation.")
+
+        return report_results

@@ -96,6 +96,10 @@ def test_validate_clustering_workflow():
                         }
                     }
                 }
+            },
+            'reports': {
+                'cluster_vis': 'ClusteringVisualization',
+                'seq_len_dist': 'SequenceLengthDistribution'
             }
         },
         'instructions': {
@@ -105,7 +109,8 @@ def test_validate_clustering_workflow():
                 'dataset': 'validation_data',
                 'metrics': ['adjusted_rand_score', 'silhouette_score'],
                 'validation_type': ['method_based', 'result_based'],
-                'labels': ['epitope']
+                'labels': ['epitope'],
+                'reports': ['cluster_vis', 'seq_len_dist']
             }
         }
     }
@@ -131,5 +136,16 @@ def test_validate_clustering_workflow():
     result_predictions = list(validation_output.rglob('result_based_predictions.csv'))
     assert len(result_predictions) > 0, "Result-based predictions file not found"
 
+    # Check that reports were generated
+    data_reports_path = list(validation_output.rglob('data_reports'))
+    assert len(data_reports_path) > 0, "Data reports directory not found"
+
+    # Check ClusteringVisualization reports exist for both validation types
+    method_reports_path = list(validation_output.rglob('method_based_validation/reports'))
+    assert len(method_reports_path) > 0, "Method-based reports directory not found"
+
+    result_reports_path = list(validation_output.rglob('result_based_validation/reports'))
+    assert len(result_reports_path) > 0, "Result-based reports directory not found"
+
     # Clean up
-    # shutil.rmtree(path)
+    shutil.rmtree(path)
