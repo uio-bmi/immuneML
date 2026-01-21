@@ -142,7 +142,7 @@ class ClusteringHTMLBuilder:
     def _format_predictions_file(file_path: Path) -> str:
         try:
             df = pd.read_csv(file_path)
-            return df.to_html(border=0, classes="prediction-table", max_rows=20, justify='left', index=False)
+            return df.to_html(border=0, classes="prediction-table", max_rows=None, justify='left', index=False)
         except Exception as e:
             logging.warning(f"Error loading predictions: {e}")
             return "Error loading predictions"

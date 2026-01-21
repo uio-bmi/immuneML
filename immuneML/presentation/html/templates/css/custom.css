@@ -141,9 +141,14 @@ a:hover {
     background-color: var(--background-color);
 }
 
+.prediction-table-container {
+    overflow-y: scroll;
+    max-height: 500px;
+}
+
 /* Prediction table specific styling */
 .prediction-table {
-    max-height: 400px;
+    max-height: 300px;
     overflow-y: auto;
     margin: 1em 0;
     background: white;

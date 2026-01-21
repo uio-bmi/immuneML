@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>immuneML: Validate Clustering</title>
+    <style>
+        {{{css_style}}}
+        .figures-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2em;
+        }
+        @media (max-width: 1200px) {
+            .figures-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .report-card {
+            margin: 1em 0;
+            padding: 1em;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .validation-card {
+            margin: 1em 0;
+            padding: 1.5em;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+        }
+        .validation-card h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 0.5em;
+        }
+        .performance-section {
+            margin: 1.5em 0;
+        }
+        .download-list {
+            list-style: none;
+            padding: 0;
+        }
+        .download-list li {
+            margin: 0.3em 0;
+        }
+        .download-list li a {
+            color: var(--accent-color, teal);
+        }
+        .info-table {
+            margin: 1em 0;
+        }
+        .info-table td {
+            padding: 0.5em 1em 0.5em 0;
+        }
+        .info-table td:first-child {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div class="container">
+        <div>
+            <h1>Validate Clustering: {{name}}</h1>
+            <p>immuneML version: {{immuneML_version}}</p>
+            <p>Full specification is available <a href="{{{full_specs}}}">here</a>.</p>
+            <p>Log file is available <a href="{{{logfile}}}">here</a>.</p>
+
+            <h2>Validation Configuration</h2>
+            <div class="card">
+                <table class="info-table">
+                    <tr>
+                        <td><b>Clustering Setting</b></td>
+                        <td>{{setting_key}}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Validation Types</b></td>
+                        <td>{{validation_types}}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Metrics</b></td>
+                        <td>{{metrics}}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h2>Validation Dataset Information</h2>
+            <div class="card">
+                <h3>General Information</h3>
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <td><b>Name</b></td>
+                            <td>{{dataset_name}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Type</b></td>
+                            <td>{{dataset_type}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Locus</b></td>
+                            <td>{{dataset_locus}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Dataset size</b></td>
+                            <td>{{dataset_size}}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3>Dataset Labels</h3>
+                {{#show_dataset_labels}}
+                <p>The following label(s) are available in this dataset:</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><b>Label name</b></th>
+                                <th><b>Label classes</b></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#dataset_labels}}
+                            <tr>
+                                <td>{{dataset_label_name}}</td>
+                                <td>{{dataset_label_classes}}</td>
+                            </tr>
+                            {{/dataset_labels}}
+                        </tbody>
+                    </table>
+                </div>
+                {{/show_dataset_labels}}
+                {{^show_dataset_labels}}
+                <p>This dataset does not have any available labels.</p>
+                {{/show_dataset_labels}}
+
+                {{#show_labels}}
+                <h3>Labels Used for External Evaluation</h3>
+                <p>The following label(s) are used for external clustering evaluation:</p>
+                <ul>
+                    {{#labels}}
+                    <li>{{name}}</li>
+                    {{/labels}}
+                </ul>
+                {{/show_labels}}
+            </div>
+
+            {{#data_reports.has_reports}}
+            <h2>Data Reports</h2>
+            <p>Reports generated on the validation dataset.</p>
+            <div class="validation-card">
+                {{#data_reports.reports}}
+                <div class="report-card">
+                    <h5>{{name}}</h5>
+                    {{#show_info}}<p>{{info}}</p>{{/show_info}}
+
+                    <div class="figures-grid">
+                        {{#output_figures}}
+                        <div class="figure-container">
+                            <h6>{{name}}</h6>
+                            {{#is_embed}}
+                            <iframe src="{{path}}" width="100%" height="500px" frameborder="0"></iframe>
+                            {{/is_embed}}
+                            {{^is_embed}}
+                            <img src="{{path}}" alt="{{name}}" style="max-width: 100%;">
+                            {{/is_embed}}
+                        </div>
+                        {{/output_figures}}
+                    </div>
+
+                    {{#show_tables}}
+                    <h6>Data Files</h6>
+                    <ul class="download-list">
+                        {{#output_tables}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a> - {{name}}</li>
+                        {{/output_tables}}
+                    </ul>
+                    {{/show_tables}}
+
+                    {{#show_text}}
+                    <h6>Text Reports</h6>
+                    <ul class="download-list">
+                        {{#output_text}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/output_text}}
+                    </ul>
+                    {{/show_text}}
+                </div>
+                {{/data_reports.reports}}
+            </div>
+            {{/data_reports.has_reports}}
+
+            {{#show_method_based}}
+            <h2>Method-Based Validation</h2>
+            <p>Method-based validation refits the clustering algorithm to the validation dataset and evaluates the resulting clusters.</p>
+            <div class="validation-card">
+                <h3>Results</h3>
+
+                {{#method_based_internal_performance}}
+                <div class="performance-section">
+                    <h4>Internal Performance Metrics</h4>
+                    <div class="table-container">
+                        {{{method_based_internal_performance}}}
+                    </div>
+                </div>
+                {{/method_based_internal_performance}}
+
+                {{#method_based_external_performance}}
+                <div class="performance-section">
+                    <h4>External Performance Metrics</h4>
+                    <div class="table-container">
+                        {{{method_based_external_performance}}}
+                    </div>
+                </div>
+                {{/method_based_external_performance}}
+
+                {{#method_based_predictions_path}}
+                <div class="performance-section">
+                    <h4>Predictions</h4>
+                    <p><a href="{{method_based_predictions_path}}" download>Download predictions CSV</a></p>
+                    <div class="table-container" style="overflow-x: auto; overflow-y: scroll; max-height: 500px;">
+                        {{{method_based_predictions_table}}}
+                    </div>
+                </div>
+                {{/method_based_predictions_path}}
+
+                {{#method_based_reports.has_reports}}
+                <div class="performance-section">
+                    <h4>Reports</h4>
+                    {{#method_based_reports.reports}}
+                    <div class="report-card">
+                        <h5>{{name}}</h5>
+                        {{#show_info}}<p>{{info}}</p>{{/show_info}}
+
+                        <div class="figures-grid">
+                            {{#output_figures}}
+                            <div class="figure-container">
+                                <h6>{{name}}</h6>
+                                {{#is_embed}}
+                                <iframe src="{{path}}" width="100%" height="500px" frameborder="0"></iframe>
+                                {{/is_embed}}
+                                {{^is_embed}}
+                                <img src="{{path}}" alt="{{name}}" style="max-width: 100%;">
+                                {{/is_embed}}
+                            </div>
+                            {{/output_figures}}
+                        </div>
+
+                        {{#show_tables}}
+                        <h6>Data Files</h6>
+                        <ul class="download-list">
+                            {{#output_tables}}
+                            <li><a href="{{download_link}}" download>{{file_name}}</a> - {{name}}</li>
+                            {{/output_tables}}
+                        </ul>
+                        {{/show_tables}}
+
+                        {{#show_text}}
+                        <h6>Text Reports</h6>
+                        <ul class="download-list">
+                            {{#output_text}}
+                            <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                            {{/output_text}}
+                        </ul>
+                        {{/show_text}}
+                    </div>
+                    {{/method_based_reports.reports}}
+                </div>
+                {{/method_based_reports.has_reports}}
+            </div>
+            {{/show_method_based}}
+
+            {{#show_result_based}}
+            <h2>Result-Based Validation</h2>
+            <p>Result-based validation transfers cluster assignments from the discovery dataset to the validation dataset
+               using a trained classifier, then evaluates the predicted clusters.</p>
+            <div class="validation-card">
+                <h3>Results</h3>
+
+                {{#result_based_internal_performance}}
+                <div class="performance-section">
+                    <h4>Internal Performance Metrics</h4>
+                    <div class="table-container">
+                        {{{result_based_internal_performance}}}
+                    </div>
+                </div>
+                {{/result_based_internal_performance}}
+
+                {{#result_based_external_performance}}
+                <div class="performance-section">
+                    <h4>External Performance Metrics</h4>
+                    <div class="table-container">
+                        {{{result_based_external_performance}}}
+                    </div>
+                </div>
+                {{/result_based_external_performance}}
+
+                {{#result_based_predictions_path}}
+                <div class="performance-section">
+                    <h4>Predictions</h4>
+                    <p><a href="{{result_based_predictions_path}}" download>Download predictions CSV</a></p>
+                    <div class="table-container" style="overflow-x: auto; overflow-y: scroll; max-height: 500px;">
+                        {{{result_based_predictions_table}}}
+                    </div>
+                </div>
+                {{/result_based_predictions_path}}
+
+                {{#result_based_reports.has_reports}}
+                <div class="performance-section">
+                    <h4>Reports</h4>
+                    {{#result_based_reports.reports}}
+                    <div class="report-card">
+                        <h5>{{name}}</h5>
+                        {{#show_info}}<p>{{info}}</p>{{/show_info}}
+
+                        <div class="figures-grid">
+                            {{#output_figures}}
+                            <div class="figure-container">
+                                <h6>{{name}}</h6>
+                                {{#is_embed}}
+                                <iframe src="{{path}}" width="100%" height="500px" frameborder="0"></iframe>
+                                {{/is_embed}}
+                                {{^is_embed}}
+                                <img src="{{path}}" alt="{{name}}" style="max-width: 100%;">
+                                {{/is_embed}}
+                            </div>
+                            {{/output_figures}}
+                        </div>
+
+                        {{#show_tables}}
+                        <h6>Data Files</h6>
+                        <ul class="download-list">
+                            {{#output_tables}}
+                            <li><a href="{{download_link}}" download>{{file_name}}</a> - {{name}}</li>
+                            {{/output_tables}}
+                        </ul>
+                        {{/show_tables}}
+
+                        {{#show_text}}
+                        <h6>Text Reports</h6>
+                        <ul class="download-list">
+                            {{#output_text}}
+                            <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                            {{/output_text}}
+                        </ul>
+                        {{/show_text}}
+                    </div>
+                    {{/result_based_reports.reports}}
+                </div>
+                {{/result_based_reports.has_reports}}
+            </div>
+            {{/show_result_based}}
+
+            {{^show_method_based}}
+            {{^show_result_based}}
+            <h2>Validation Results</h2>
+            <p>No validation results available. Please check the log file for any errors.</p>
+            {{/show_result_based}}
+            {{/show_method_based}}
+        </div>
+    </div>
+</body>
+</html>
