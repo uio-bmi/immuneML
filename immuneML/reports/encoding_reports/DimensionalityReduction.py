@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -67,7 +67,7 @@ class DimensionalityReduction(EncodingReport):
             labels = [kwargs["label"]]
             del kwargs["label"]
         else:
-            ParameterValidator.assert_type_and_value(kwargs["labels"], list, location, "labels")
+            ParameterValidator.assert_type_and_value(kwargs["labels"], list, location, "labels", nullable=True)
             labels = kwargs["labels"]
             ParameterValidator.assert_all_type_and_value(labels, str, location, "labels")
 
@@ -88,6 +88,20 @@ class DimensionalityReduction(EncodingReport):
                 (self.dataset.encoded_data.dimensionality_reduced_data is not None or self._dim_red_method is not None))
 
     def _generate(self) -> ReportResult:
+
+        PathBuilder.build(self.result_path)
+
+        dim_reduced_data = self._get_dim_reduced_data()
+        df, report_output_table = self._make_plotting_df(dim_reduced_data)
+        report_output_figures = self._safe_plot(df=df, output_written=True)
+
+        dim_red_text = f" ({self._dim_red_method.__class__.__name__})" if self._dim_red_method else ""
+
+        return ReportResult(name=self.name, info=self.info.replace(" dim_red", dim_red_text),
+                            output_figures=report_output_figures,
+                            output_tables=[report_output_table])
+
+    def _get_dim_reduced_data(self):
         if self._dim_red_method:
             assert self.dataset.encoded_data.examples is not None, \
                 f"{DimensionalityReduction.__name__}: data not encoded, report will not be made."
@@ -99,34 +113,25 @@ class DimensionalityReduction(EncodingReport):
         assert dim_reduced_data.shape[1] == 2, \
             (f"{DimensionalityReduction.__name__}: {self.name}: dimensionality reduced data is not 2d (got: "
              f"{dim_reduced_data.shape}, so it cannot be plotted.")
-        data_labels = None
 
-        try:
-            data_labels = self.dataset.get_metadata(self._labels, return_df=True)[self._labels]
-        except (AttributeError, TypeError) as e:
-            logging.warning(f"Labels {self._labels} not found in the dataset. Skipping label coloring in the plot.")
+        return dim_reduced_data
 
-        PathBuilder.build(self.result_path)
-
+    def _make_plotting_df(self, dim_reduced_data: np.ndarray) -> Tuple[pd.DataFrame, ReportOutput]:
         df = pd.DataFrame({'example_id': self.dataset.get_example_ids(),
                            self._dimension_names[0]: dim_reduced_data[:, 0],
                            self._dimension_names[1]: dim_reduced_data[:, 1]})
 
+        try:
+            if self._labels:
+                df[self._labels] = self.dataset.get_metadata(self._labels, return_df=True)[self._labels]
+        except (AttributeError, TypeError) as e:
+            logging.warning(f"Labels {self._labels} not found in the dataset. Skipping label coloring in the plot.")
+
         if hasattr(self.dataset, 'get_metadata_fields') and 'subject_id' in self.dataset.get_metadata_fields():
             df['subject_id'] = self.dataset.get_metadata(['subject_id'], return_df=True)['subject_id']
 
-        if self._labels:
-            df[self._labels] = data_labels
         df.to_csv(self.result_path / 'dimensionality_reduced_data.csv', index=False)
-
-        report_output_figures = self._safe_plot(df=df, output_written=True)
-
-        dim_red_text = f" ({self._dim_red_method.__class__.__name__})" if self._dim_red_method else ""
-
-        return ReportResult(name=self.name, info=self.info.replace(" dim_red", dim_red_text),
-                            output_figures=report_output_figures,
-                            output_tables=[ReportOutput(self.result_path / 'dimensionality_reduced_data.csv',
-                                                        'data after dimensionality reduction')])
+        return df, ReportOutput(self.result_path / 'dimensionality_reduced_data.csv', 'data after dimensionality reduction')
 
     def _plot(self, df: pd.DataFrame) -> List[ReportOutput]:
         PathBuilder.build(self.result_path)
@@ -179,7 +184,7 @@ class DimensionalityReduction(EncodingReport):
 
         df_long[label] = df_long[label].apply(parse_list_column)
 
-        if isinstance(df_long[label].iloc[0], (list, tuple)):
+        if any(isinstance(df_long[label].iloc[i], (list, tuple)) for i in range(df_long.shape[0])):
             df_long = df_long.explode(label)
 
             # Compute jitter based on the range of each axis
