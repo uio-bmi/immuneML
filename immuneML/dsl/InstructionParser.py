@@ -91,8 +91,11 @@ class InstructionParser:
         inst_file_path = inst_path / "instructions.rst"
         with inst_file_path.open('w') as file:
             for key, item in inst_paths.items():
-                lines = f"{key}\n---------------------------\n.. include:: {os.path.relpath(item, EnvironmentSettings.source_docs_path)}\n"
-                file.writelines(lines)
+                with open(item, "r") as file2:
+                    content = ''.join(file2.readlines())
+                    lines = (f"{key}\n---------------------------\n\n"
+                             f"{content}\n\n")
+                    file.writelines(lines)
 
     @staticmethod
     def make_docs(instruction, name, path: Path):

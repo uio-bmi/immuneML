@@ -13,60 +13,24 @@ sections:
 
 **Machine learning:**
 
-- :ref:`TrainMLModel`
-- :ref:`MLApplication`
-- :ref:`TrainGenModel`
-- :ref:`ApplyGenModel`
+- :ref:`TrainMLModel`: select and fit a classifier,
+- :ref:`MLApplication`: apply fitted classifier to a new dataset,
+- :ref:`TrainGenModel`: train (multiple) generative model(s),
+- :ref:`ApplyGenModel`: apply a generative model to make new receptor sequences.
 
 **Data simulation:**
 
-- :ref:`LigoSim`
-- :ref:`FeasibilitySummary`
+- :ref:`LigoSim`: use LIgO tool to generate synthetic datasets with different immune events and signals,
+- :ref:`FeasibilitySummary`: check the feasibility of the simulation with provided parameters.
 
 **Data analysis, exploration and manipulation:**
 
-- :ref:`ExploratoryAnalysis`
-- :ref:`Clustering`
-- :ref:`DatasetExport`
-- :ref:`Subsampling`
+- :ref:`ExploratoryAnalysis`: various data summaries for both raw and encoded data,
+- :ref:`Clustering`: fit and compare multiple clustering settings,
+- :ref:`ValidateClustering`: validate a clustering setting on a new dataset,
+- :ref:`DatasetExport`: export a dataset,
+- :ref:`Subsampling`: subsample a dataset and export as a new dataset,
+- :ref:`SplitDataset`: split dataset into two (e.g., for discovery and validation datasets for clustering).
 
 
-TrainMLModel
----------------------------
-.. include:: ../../specs/instructions/TrainMLModel.rst
-
-MLApplication
----------------------------
-.. include:: ../../specs/instructions/MLApplication.rst
-
-TrainGenModel
----------------------------
-.. include:: ../../specs/instructions/TrainGenModel.rst
-
-ApplyGenModel
----------------------------
-.. include:: ../../specs/instructions/ApplyGenModel.rst
-
-ExploratoryAnalysis
----------------------------
-.. include:: ../../specs/instructions/ExploratoryAnalysis.rst
-
-LigoSim
----------------------------
-.. include:: ../../specs/instructions/LigoSim.rst
-
-FeasibilitySummary
----------------------------
-.. include:: ../../specs/instructions/FeasibilitySummary.rst
-
-Clustering
----------------------------
-.. include:: ../../specs/instructions/Clustering.rst
-
-DatasetExport
----------------------------
-.. include:: ../../specs/instructions/DatasetExport.rst
-
-Subsampling
----------------------------
-.. include:: ../../specs/instructions/Subsampling.rst
+.. include:: ../../specs/instructions/instructions.rst
