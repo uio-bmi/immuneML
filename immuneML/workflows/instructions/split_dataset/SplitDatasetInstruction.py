@@ -14,6 +14,7 @@ from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitt
 class SplitDatasetState:
     dataset: Dataset
     split_config: SplitConfig
+    name: str = None
     result_path: Path = None
     train_data_path: Path = None
     test_data_path: Path = None
@@ -55,7 +56,9 @@ class SplitDatasetInstruction(Instruction):
         self.state = state
 
     def run(self, result_path: Path) -> SplitDatasetState:
-        paths = [PathBuilder.build(result_path)]
+        self.state.result_path = PathBuilder.build(result_path / self.state.name)
+        paths = [self.state.result_path]
+
         splitter_params = DataSplitterParams(dataset=self.state.dataset, split_strategy=self.state.split_config.split_strategy,
                                              split_count=self.state.split_config.split_count,
                                              training_percentage=self.state.split_config.training_percentage,
@@ -63,8 +66,9 @@ class SplitDatasetInstruction(Instruction):
         train_dataset, test_dataset = DataSplitter.run(splitter_params)
         train_dataset, test_dataset = train_dataset[0], test_dataset[0]
 
-        self.state.train_data_path = result_path / 'train'
-        self.state.test_data_path = result_path / 'test'
+        self.state.train_data_path = self.state.result_path / 'train'
+        self.state.test_data_path = self.state.result_path / 'test'
+
         AIRRExporter.export(train_dataset, self.state.train_data_path)
         AIRRExporter.export(test_dataset, self.state.test_data_path)
 

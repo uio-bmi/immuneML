@@ -7,6 +7,7 @@ from immuneML.presentation.html.FeasibilitySummaryHTMLBuilder import Feasibility
 from immuneML.presentation.html.HPHTMLBuilder import HPHTMLBuilder
 from immuneML.presentation.html.LIgOSimulationHTMLBuilder import LIgOSimulationHTMLBuilder
 from immuneML.presentation.html.MLApplicationHTMLBuilder import MLApplicationHTMLBuilder
+from immuneML.presentation.html.SplitDatasetHTMLBuilder import SplitDatasetHTMLBuilder
 from immuneML.presentation.html.SubsamplingHTMLBuilder import SubsamplingHTMLBuilder
 from immuneML.presentation.html.GenModelHTMLBuilder import GenModelHTMLBuilder
 from immuneML.presentation.html.ValidateClusteringHTMLBuilder import ValidateClusteringHTMLBuilder
@@ -18,6 +19,7 @@ from immuneML.workflows.instructions.dataset_generation.DatasetExportState impor
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisState import ExploratoryAnalysisState
 from immuneML.workflows.instructions.ligo_sim_feasibility.FeasibilitySummaryInstruction import FeasibilitySummaryState
 from immuneML.workflows.instructions.ml_model_application.MLApplicationState import MLApplicationState
+from immuneML.workflows.instructions.split_dataset.SplitDatasetInstruction import SplitDatasetState
 from immuneML.workflows.instructions.subsampling.SubsamplingState import SubsamplingState
 from immuneML.workflows.instructions.train_gen_model.TrainGenModelInstruction import TrainGenModelState
 
@@ -46,6 +48,8 @@ class PresentationFactory:
             return ClusteringHTMLBuilder
         elif isinstance(state, ValidateClusteringState) and presentation_format == PresentationFormat.HTML:
             return ValidateClusteringHTMLBuilder
+        elif isinstance(state, SplitDatasetState) and presentation_format == PresentationFormat.HTML:
+            return SplitDatasetHTMLBuilder
         else:
             raise ValueError(f"PresentationFactory: state and format combination ({type(state).__name__}, "
                              f"{presentation_format.name}) is not supported.")

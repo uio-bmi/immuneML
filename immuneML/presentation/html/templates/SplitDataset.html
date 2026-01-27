@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>immuneML: Split Dataset</title>
+    <style>
+        {{{css_style}}}
+        .split-results {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2em;
+            margin-top: 1em;
+        }
+        @media (max-width: 900px) {
+            .split-results {
+                grid-template-columns: 1fr;
+            }
+        }
+        .split-dataset-box {
+            padding: 1.5em;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .split-dataset-box h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div class="container">
+        <div>
+            <h1>Split Dataset: {{name}}</h1>
+            <p>immuneML version: {{immuneML_version}} |
+               Full specification: <a href="{{{full_specs}}}">here</a> |
+               Log file: <a href="{{{logfile}}}">here</a></p>
+
+            <div class="card">
+                <div class="col-container">
+                    <div class="col">
+                        <h3>Split Configuration</h3>
+                        <div class="table-container">
+                            <table>
+                                <tr>
+                                    <td><b>Split Strategy</b></td>
+                                    <td>{{split_strategy}}</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Training Percentage</b></td>
+                                    <td>{{training_percentage}}</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Test Percentage</b></td>
+                                    <td>{{test_percentage}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h3>Original Dataset</h3>
+                        <div class="table-container">
+                            <table>
+                                <tr>
+                                    <td><b>Name</b></td>
+                                    <td>{{original_dataset_name}}</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Type</b></td>
+                                    <td>{{original_dataset_type}}</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Locus</b></td>
+                                    <td>{{original_dataset_locus}}</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Dataset size</b></td>
+                                    <td>{{original_dataset_size}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        {{#show_original_dataset_labels}}
+                        <h4>Labels</h4>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th><b>Label name</b></th>
+                                        <th><b>Label classes</b></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#original_dataset_labels}}
+                                    <tr>
+                                        <td>{{original_dataset_label_name}}</td>
+                                        <td>{{original_dataset_label_classes}}</td>
+                                    </tr>
+                                    {{/original_dataset_labels}}
+                                </tbody>
+                            </table>
+                        </div>
+                        {{/show_original_dataset_labels}}
+                    </div>
+                </div>
+            </div>
+
+            <h2>Split Results</h2>
+            <p>The dataset has been split into two subsets exported in AIRR format.</p>
+            <div class="split-results">
+                <div class="split-dataset-box">
+                    <h4>Training Dataset ({{training_percentage}})</h4>
+                    <p>Download: <a href="{{train_dataset_download_link}}" download>train_dataset.zip</a></p>
+                    <p><small>Location: <code>{{train_dataset_download_link}}</code></small></p>
+                </div>
+                <div class="split-dataset-box">
+                    <h4>Test Dataset ({{test_percentage}})</h4>
+                    <p>Download: <a href="{{test_dataset_download_link}}" download>test_dataset.zip</a></p>
+                    <p><small>Location: <code>{{test_dataset_download_link}}</code></small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

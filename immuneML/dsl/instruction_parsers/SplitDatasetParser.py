@@ -14,11 +14,11 @@ class SplitDatasetParser:
 
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> SplitDatasetInstruction:
 
-        ParameterValidator.assert_keys(list(instruction.keys()), ['dataset', 'split_config'], "SplitDatasetParser", key)
+        ParameterValidator.assert_keys(list(instruction.keys()), ['dataset', 'split_config', "type"], "SplitDatasetParser", key)
 
         dataset = symbol_table.get(instruction["dataset"])
         split_config = self._parse_config(key, instruction)
-        state = SplitDatasetState(dataset, split_config)
+        state = SplitDatasetState(dataset=dataset, split_config=split_config, name=key)
 
         return SplitDatasetInstruction(state)
 

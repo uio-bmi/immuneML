@@ -1,9 +1,15 @@
+import os
 import shutil
 
+import yaml
+
+from immuneML.app.ImmuneMLApp import ImmuneMLApp
+from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.dsl.instruction_parsers.SplitDatasetParser import SplitDatasetParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
+from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
@@ -22,7 +28,7 @@ def test_split_dataset_instruction():
         'split_strategy': 'RANDOM',
         'split_count': 1,
         'training_percentage': 0.5
-    }}, symbol_table, path)
+    }, 'type': 'SplitDataset'}, symbol_table, path)
 
     state = instruction.run(path / 'result')
 
