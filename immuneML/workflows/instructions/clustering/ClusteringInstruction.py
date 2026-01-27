@@ -38,10 +38,23 @@ class ClusteringInstruction(Instruction):
     """
 
     Clustering instruction fits clustering methods to the provided encoded dataset and compares the combinations of
-    clustering method with its hyperparameters, and encodings across a pre-defined set of metrics. Finally, it
+    clustering method with its hyperparameters, and encodings across a pre-defined set of metrics. It provides results
+    either for the full discovery dataset or for multiple subsets of discovery data as way to assess the stability
+    of different metrics (Liu et al., 2022; Dangl and Leisch, 2020; Lange et al. 2004). Finally, it
     provides options to include a set of reports to visualize the results.
 
-    See also: :ref:`How to perform clustering analysis`.
+    See also: :ref:`How to perform clustering analysis` for more details on the clustering procedure.
+
+    References:
+
+    Lange, T., Roth, V., Braun, M. L., & Buhmann, J. M. (2004). Stability-Based Validation of Clustering Solutions.
+    Neural Computation, 16(6), 1299–1323. https://doi.org/10.1162/089976604773717621
+
+    Dangl, R., & Leisch, F. (2020). Effects of Resampling in Determining the Number of Clusters in a Data Set.
+    Journal of Classification, 37(3), 558–583. https://doi.org/10.1007/s00357-019-09328-2
+
+    Liu, T., Yu, H., & Blair, R. H. (2022). Stability estimation for unsupervised clustering: A review. WIREs
+    Computational Statistics, 14(6), e1575. https://doi.org/10.1002/wics.1575
 
     **Specification arguments:**
 
@@ -81,9 +94,6 @@ class ClusteringInstruction(Instruction):
     - clustering_settings (list): a list where each element represents a :py:obj:`~immuneML.workflows.clustering.clustering_run_model.ClusteringSetting`; a combinations of encoding,
       optional dimensionality reduction algorithm, and the clustering algorithm that will be evaluated
 
-    - random_labeling_count (int): number of random labelings to use for computing normalization value for stability
-      assessment
-
     - reports (list): a list of reports to be run on the clustering results or the encoded data
 
     - number_of_processes (int): how many processes to use for parallelization
@@ -107,7 +117,6 @@ class ClusteringInstruction(Instruction):
                 labels: [epitope, v_call]
                 sequence_type: amino_acid
                 region_type: imgt_cdr3
-                random_labeling_count: 5
                 sample_config:
                     split_count: 5
                     percentage: 0.8
@@ -128,13 +137,11 @@ class ClusteringInstruction(Instruction):
     def __init__(self, dataset: Dataset, metrics: List[str], clustering_settings: List[ClusteringSetting],
                  name: str, label_config: LabelConfiguration = None, reports: List[Report] = None,
                  number_of_processes: int = None, sample_config: SampleConfig = None,
-                 stability_config: StabilityConfig = None, random_labeling_count: int = None,
-                 sequence_type: SequenceType = None, region_type: RegionType = None):
+                 stability_config: StabilityConfig = None, sequence_type: SequenceType = None, region_type: RegionType = None):
 
         config = ClusteringConfig(name=name, dataset=dataset, metrics=metrics, clustering_settings=clustering_settings,
                                   label_config=label_config, sample_config=sample_config, sequence_type=sequence_type,
-                                  region_type=region_type, stability_config=stability_config,
-                                  random_labeling_count=random_labeling_count)
+                                  region_type=region_type, stability_config=stability_config)
         self.number_of_processes = number_of_processes
         self.state = ClusteringState(config=config, name=name)
         self.report_handler = ClusteringReportHandler(reports)
@@ -159,6 +166,7 @@ class ClusteringInstruction(Instruction):
     def _compute_validation_indices(self):
         """Compute internal and external validation indices across all datasets and settings."""
         self._setup_paths()
+        print_log(f"{self.__class__.__name__} ({self.state.name}): computing validation indices.")
 
         # 1. Construct datasets (subsampling)
         datasets = self._construct_datasets()
@@ -172,8 +180,12 @@ class ClusteringInstruction(Instruction):
 
         # 4. Run any additional clustering reports
         self.report_handler.run_clustering_reports(self.state)
+        print_log(f"{self.__class__.__name__} ({self.state.name}): computed validation indices.")
+
 
     def _refit_best_settings_on_full_dataset(self):
+        print_log(f"{self.__class__.__name__} ({self.state.name}): refitting best settings.")
+
         path = PathBuilder.build(self.state.result_path / "refitted_best_settings")
 
         best_settings = defaultdict(list)
@@ -209,6 +221,7 @@ class ClusteringInstruction(Instruction):
 
         predictions_df.to_csv(path / "best_settings_predictions_full_dataset.csv", index=False)
         self.state.final_predictions_path = path / "best_settings_predictions_full_dataset.csv"
+        print_log(f"{self.__class__.__name__} ({self.state.name}): refitted best settings.")
 
 
     def _construct_datasets(self) -> List[Dataset]:
@@ -395,6 +408,8 @@ class ClusteringInstruction(Instruction):
 
     def _compute_stability(self):
         """Compute clustering stability using the Lange et al. approach."""
+        print_log(f"{self.__class__.__name__} ({self.state.name}): computing stability.")
+
         discovery_datasets, tuning_datasets = HPUtil.split_data(
             self.state.config.dataset,
             SplitConfig(SplitType.RANDOM, self.state.config.stability_config.split_count, 0.5),
@@ -405,11 +420,14 @@ class ClusteringInstruction(Instruction):
         stab_lange = StabilityLange(
             discovery_datasets, tuning_datasets, self.state.config.clustering_settings,
             self.state.result_path / 'stability', self.number_of_processes, self.state.config.sequence_type,
-            self.state.config.region_type, self.state.config.random_labeling_count
+            self.state.config.region_type
         )
         report_result, stability_path = stab_lange.run()
         self.state.clustering_report_results.append(report_result)
         self.state.metrics_performance_paths['stability_lange'] = stability_path
+
+        print_log(f"{self.__class__.__name__} ({self.state.name}): computed stability.")
+
 
     def _setup_paths(self):
         """Initialize result paths."""

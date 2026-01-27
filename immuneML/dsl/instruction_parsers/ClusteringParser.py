@@ -7,17 +7,12 @@ from typing import List
 import sklearn.metrics as sklearn_metrics
 
 from immuneML.data_model.SequenceParams import RegionType
-from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
-from immuneML.hyperparameter_optimization.config.LeaveOneOutConfig import LeaveOneOutConfig
-from immuneML.hyperparameter_optimization.config.ManualSplitConfig import ManualSplitConfig
 from immuneML.hyperparameter_optimization.config.SampleConfig import SampleConfig
-from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
-from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.reports.Report import Report
@@ -38,12 +33,9 @@ class ClusteringParser:
         ParameterValidator.assert_region_type(instruction, ClusteringParser.__name__)
         ParameterValidator.assert_sequence_type(instruction, ClusteringParser.__name__)
 
-        ParameterValidator.assert_type_and_value(instruction['random_labeling_count'], int, ClusteringParser.__name__, 'random_labeling_count', min_inclusive=1)
-
-
         dataset = symbol_table.get(instruction['dataset'])
         clustering_settings = parse_clustering_settings(key, instruction, symbol_table)
-        metrics = parse_metrics(key, instruction, symbol_table)
+        metrics = parse_metrics(key, instruction)
         label_config = parse_labels(key, instruction, dataset)
         reports = parse_reports(key, instruction, symbol_table)
         sample_config = parse_sample_config(instruction)
@@ -53,8 +45,7 @@ class ClusteringParser:
                                      name=key, label_config=label_config, reports=reports,
                                      sequence_type=SequenceType[instruction['sequence_type'].upper()],
                                      region_type=RegionType[instruction['region_type'].upper()],
-                                     sample_config=sample_config, random_labeling_count=instruction['random_labeling_count'],
-                                     stability_config=stability_config)
+                                     sample_config=sample_config, stability_config=stability_config)
 
 def parse_stability_config(instruction) -> StabilityConfig:
     ParameterValidator.assert_type_and_value(instruction['stability_config']['split_count'], int, StabilityConfig.__name__, 'stability_config:split_count', min_inclusive=1)
@@ -63,8 +54,8 @@ def parse_stability_config(instruction) -> StabilityConfig:
 
 
 def parse_sample_config(instruction) -> SampleConfig:
+    split_key = 'sample_config'
     try:
-        split_key = 'sample_config'
 
         valid_keys = [k for k in inspect.signature(SampleConfig.__init__).parameters.keys() if k not in ['self']]
 
@@ -98,18 +89,18 @@ def parse_reports(key, instruction, symbol_table) -> List[Report]:
     if 'reports' not in instruction or instruction['reports'] is None:
         return []
     else:
-        ParameterValidator.assert_type_and_value(instruction['reports'], list, 'ClusteringParser', 'reports')
+        ParameterValidator.assert_type_and_value(instruction['reports'], list, 'ClusteringParser', f'{key}:reports')
         valid_reports = symbol_table.get_keys_by_type(SymbolType.REPORT)
 
-        ParameterValidator.assert_all_type_and_value(instruction['reports'], str, 'ClusteringParser', 'reports')
+        ParameterValidator.assert_all_type_and_value(instruction['reports'], str, 'ClusteringParser', f'{key}:reports')
         ParameterValidator.assert_all_in_valid_list(instruction['reports'], valid_reports, 'ClusteringParser',
-                                                    'reports')
+                                                    f'{key}:reports')
 
         reports = [symbol_table.get(report_id) for report_id in instruction['reports']]
         return reports
 
 
-def parse_metrics(key: str, instruction: dict, symbol_table: SymbolTable) -> List[str]:
+def parse_metrics(key: str, instruction: dict) -> List[str]:
     ParameterValidator.assert_type_and_value(instruction['metrics'], list, 'ClusteringParser', f'{key}:metrics')
     ParameterValidator.assert_all_type_and_value(instruction['metrics'], str, 'ClusteringParser', f'{key}:metrics')
 

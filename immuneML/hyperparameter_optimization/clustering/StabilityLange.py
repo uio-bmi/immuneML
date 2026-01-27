@@ -43,7 +43,6 @@ class StabilityLange:
     number_of_processes: int
     sequence_type: SequenceType = SequenceType.AMINO_ACID
     region_type: RegionType = RegionType.IMGT_CDR3
-    random_labeling_count: int = 10
     clustering_items: Dict[str, ClItems] = None
 
     def run(self):
@@ -60,27 +59,26 @@ class StabilityLange:
     def _create_report_from_distances(self, performances: Dict[str, np.ndarray]) -> ReportResult:
         df = pd.DataFrame(performances)
         df['split_id'] = np.arange(1, df.shape[0] + 1)
-        df.to_csv(self.result_path / 'normalized_distances_per_cl_setting.csv', index=False)
+        df.to_csv(self.result_path / 'adjusted_rand_score_per_cl_setting.csv', index=False)
 
         figure = self.make_figure(df)
         return ReportResult(output_figures=[figure],
-                            output_tables=[ReportOutput(self.result_path / 'normalized_distances_per_cl_setting.csv',
+                            output_tables=[ReportOutput(self.result_path / 'adjusted_rand_score_per_cl_setting.csv',
                                                         name="Normalized Distances per Clustering Setting")],
                             name="Clustering Stability Analysis",
-                            info="Report on clustering stability analysis based on distances between clusterings on "
+                            info="Report on clustering stability analysis based on agreement between clusterings on "
                                  "discovery and tuning datasets. The clusterings are performed separately on the two "
                                  "datasets, then the clustering from discovery dataset is transferred in a supervised "
-                                 "manner to the tuning dataset and the distance between the two clusterings on the "
-                                 "tuning set is reported. The distances are normalized by the expected distance "
-                                 "between random clusterings to account for the potentially varying number of clusters.")
+                                 "manner to the tuning dataset and the adjusted Rand score between the two clusterings on the "
+                                 "tuning set is reported.")
 
     def make_figure(self, df: pd.DataFrame) -> ReportOutput:
         import plotly.express as px
-        df_long = df.melt(var_name='clustering_setting', value_name='normalized_distance')
-        fig = px.box(df_long, x='clustering_setting', y='normalized_distance', points='all', color='clustering_setting',
+        df_long = df[[col for col in df.columns if col != 'split_id']].melt(var_name='clustering_setting', value_name='adjusted_rand_score')
+        fig = px.box(df_long, x='clustering_setting', y='adjusted_rand_score', points='all', color='clustering_setting',
                      color_discrete_sequence=px.colors.qualitative.Vivid)
         fig.update_layout(xaxis_title="clustering setting", showlegend=False,
-                          yaxis_title='normalized distance', template="plotly_white")
+                          yaxis_title='adjusted Rand score', template="plotly_white")
         fig.update_traces(marker=dict(opacity=0.75), jitter=0.3)
 
         plot_path = PlotlyUtil.write_image_to_file(fig, self.result_path / f"stability_boxplot.html", df.shape[0])
@@ -91,7 +89,6 @@ class StabilityLange:
         cl_items = ClItems(cl_setting=cl_setting)
         distances = np.zeros(len(self.discovery_datasets))
         unique_clusters = set()
-        num_examples = self.discovery_datasets[0].get_example_count()
         path = PathBuilder.build(self.result_path / cl_setting.get_key())
 
         for i in range(len(self.discovery_datasets)):
@@ -116,7 +113,7 @@ class StabilityLange:
             cl_item_transferred = self.transfer_clustering(clr_disc.item, dataset=self.tuning_datasets[i], path=path,
                                                            run_id=i)
 
-            distances[i] = adjusted_rand_score(clr_disc.item.predictions, cl_item_transferred.predictions)
+            distances[i] = adjusted_rand_score(clr.item.predictions, cl_item_transferred.predictions)
 
         return distances
 
@@ -124,7 +121,7 @@ class StabilityLange:
         classifier = clustering_runner.train_cluster_classifier(cl_item)
 
         # Apply classifier to validation data
-        cl_item = clustering_runner.apply_cluster_classifier(
+        applied_cl_item = clustering_runner.apply_cluster_classifier(
             dataset=dataset,
             cl_setting=cl_item.cl_setting,
             classifier=classifier,
@@ -135,7 +132,7 @@ class StabilityLange:
             region_type=self.region_type
         )
 
-        return cl_item
+        return applied_cl_item
 
     def _fit_and_predict(self, dataset: Dataset, method: ClusteringMethod) -> np.ndarray:
         """Fit clustering method and get predictions."""

@@ -98,8 +98,7 @@ def test_clustering_workflow():
                 },
                 'reports': ['rep1', 'external_labels_summary', 'cluster_vis',
                             'external_label_metric_heatmap'],
-                'number_of_processes': 8,
-                'random_labeling_count': 10
+                'number_of_processes': 8
             }
         }
     }

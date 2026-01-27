@@ -1,9 +1,6 @@
 import copy
 import logging
-from collections import ChainMap
 from datetime import datetime
-import logging
-import uuid
 from pathlib import Path
 from uuid import uuid4
 
@@ -12,7 +9,7 @@ import pandas as pd
 from immuneML import Constants
 from immuneML.data_model.EncodedData import EncodedData
 from immuneML.data_model.SequenceSet import Repertoire
-from immuneML.data_model.bnp_util import write_yaml, write_dataset_yaml
+from immuneML.data_model.bnp_util import write_dataset_yaml
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
@@ -198,7 +195,7 @@ class RepertoireDataset(Dataset):
 
         metadata_file = self._build_new_metadata(example_indices, path / f"{dataset_type}_metadata.csv")
         new_dataset = RepertoireDataset(repertoires=[self.repertoires[i] for i in example_indices],
-                                        labels=copy.deepcopy(self.labels),
+                                        labels=copy.deepcopy(self.labels), name=f"{self.name}_{dataset_type}",
                                         metadata_file=metadata_file, identifier=str(uuid4()))
 
         return new_dataset

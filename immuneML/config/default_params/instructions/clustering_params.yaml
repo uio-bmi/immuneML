@@ -3,4 +3,10 @@ reports: []
 labels: null
 region_type: IMGT_CDR3
 sequence_type: AMINO_ACID
-random_labeling_count: 10
+sample_config:
+  split_count: 3
+  percentage: 0.7
+  random_seed: null
+stability_config:
+  split_count: 3
+  random_seed: null

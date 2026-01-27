@@ -30,7 +30,6 @@ class ClusteringConfig:
     region_type: RegionType = RegionType.IMGT_CDR3
     label_config: LabelConfiguration = None
     sequence_type: SequenceType = SequenceType.AMINO_ACID
-    random_labeling_count: int = None
 
     def get_cl_setting_by_key(self, key: str) -> ClusteringSetting:
         cl_setting = [cs for cs in self.clustering_settings if cs.get_key() == key]

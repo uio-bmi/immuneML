@@ -111,21 +111,66 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
             for j in range(mean_values.shape[1]):
                 text_annotations[i, j] = f"{mean_values[i, j]:.3f}±{std_values[i, j]:.3f}"
 
+        # Wrap long y-axis labels (clustering setting names) for better display
+        wrapped_setting_keys = [_wrap_label(key) for key in setting_keys]
+
+        # Calculate dynamic figure dimensions based on data size
+        n_settings = len(setting_keys)
+        n_labels = len(external_labels)
+
+        # Base dimensions with scaling factors
+        row_height = 40  # pixels per row
+        col_width = 100  # pixels per column
+        min_height, max_height = 400, 1200
+        min_width, max_width = 600, 1600
+
+        # Calculate margins based on label lengths
+        max_y_label_lines = max(key.count('<br>') + 1 for key in wrapped_setting_keys)
+        left_margin = 150 + (max_y_label_lines - 1) * 30
+
+        fig_height = max(min_height, min(max_height, n_settings * row_height + 150))
+        fig_width = max(min_width, min(max_width, n_labels * col_width + left_margin + 100))
+
         # Create heatmap with mean as color and mean±std as text
+        # Note on z, x, y mapping: z[i][j] corresponds to (y[i], x[j])
+        # mean_values shape is (n_settings, n_labels), so this is correct
         fig = go.Figure(data=go.Heatmap(
             z=mean_values,
             x=external_labels,
-            y=setting_keys,
+            y=wrapped_setting_keys,
             colorscale='Darkmint',
             text=text_annotations,
             texttemplate='%{text}',
-            hovertemplate=metric + ' (mean): %{z:.3f}<br>external label: %{x}<br>clustering setting: %{y}<extra></extra>',
-            textfont={"size": 15},
+            hovertemplate=(metric + ' (mean): %{z:.3f}<br>external label: %{x}<br>'
+                          'clustering setting: %{y}<extra></extra>'),
             hoverongaps=False
         ))
 
+        # Adjust text font size based on number of cells
+        total_cells = n_settings * n_labels
+        if total_cells > 50:
+            text_font_size = 9
+        elif total_cells > 30:
+            text_font_size = 10
+        else:
+            text_font_size = 11
+
+        fig.update_traces(textfont=dict(size=text_font_size))
+
         fig.update_layout(
-            template='plotly_white'
+            template='plotly_white',
+            width=fig_width,
+            height=fig_height,
+            margin=dict(l=left_margin, r=50, t=50, b=80),
+            yaxis=dict(
+                tickfont=dict(size=10),
+                automargin=True
+            ),
+            xaxis=dict(
+                tickfont=dict(size=10),
+                tickangle=-45 if n_labels > 5 else 0,
+                automargin=True
+            )
         )
 
         # Save heatmap
@@ -137,7 +182,7 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
             name=f"Heatmap for {metric.replace('_', ' ')} (mean±std across splits)"
         ))
 
-        # Create a combined table with mean±std format
+        # Create a combined table with mean±std format (use original keys for CSV)
         df_combined = pd.DataFrame(text_annotations, index=setting_keys, columns=external_labels)
         df_combined = df_combined.reset_index().rename(columns={'index': 'clustering_setting'})
 
@@ -161,3 +206,29 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
             return False
 
         return True
+    
+def _wrap_label(label: str, max_chars_per_line: int = 15) -> str:
+    """
+    Wrap a label by splitting on underscores to create multi-line text.
+    Attempts to keep each line under max_chars_per_line characters.
+    """
+    if len(label) <= max_chars_per_line:
+        return label
+
+    parts = label.split('_')
+    lines = []
+    current_line = ""
+
+    for part in parts:
+        if not current_line:
+            current_line = part
+        elif len(current_line) + 1 + len(part) <= max_chars_per_line:
+            current_line += "_" + part
+        else:
+            lines.append(current_line)
+            current_line = part
+
+    if current_line:
+        lines.append(current_line)
+
+    return "<br>".join(lines)
