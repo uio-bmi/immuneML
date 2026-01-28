@@ -294,7 +294,8 @@ class ClusteringInstruction(Instruction):
         report_result = ReportResult(
             name=f'Internal Validation Indices',
             info=f'Internal validation indices ({", ".join(internal_metrics).replace(" ", "")}) computed '
-                 f'across all clustering settings and data splits.',
+                 f'across all clustering settings and data splits describe the quality of the clustering with respect to'
+                 f' different criteria relying solely on the data used for clustering.',
             output_figures=figures,
             output_tables=tables
         )
@@ -361,9 +362,10 @@ class ClusteringInstruction(Instruction):
 
         report_result = ReportResult(
             name=f'External Validation Indices',
-            info=f'External validation indices ({", ".join(external_metrics).replace(" ", "")}) computed '
-                 f'with respect to labels "{", ".join(labels).replace(" ", "")}" across all clustering '
-                 f'settings and data splits.',
+            info=f'External validation indices ({", ".join(external_metrics)}) are computed '
+                 f'with respect to labels {", ".join(labels)} across all clustering '
+                 f'settings and data splits measuring the agreement between the clustering results and '
+                 f'the provided labels.',
             output_figures=figures,
             output_tables=tables
         )
