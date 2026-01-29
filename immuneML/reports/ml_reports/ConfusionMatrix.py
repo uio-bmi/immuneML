@@ -103,7 +103,7 @@ class ConfusionMatrix(MLReport):
 
             cm_df = pd.DataFrame(cm, index=labels, columns=labels)
 
-            fig.add_trace(go.Heatmap(z=cm_df.values, texttemplate="%{text}", text=cm_df.values, colorscale='Viridis',
+            fig.add_trace(go.Heatmap(z=cm_df.values, texttemplate="%{text}", text=cm_df.values, colorscale='Blues',
                                    hovertemplate="True value: %{y}<br>Predicted value: %{x}"
                                                  "<br>Count: %{z}<extra></extra>", showscale=False,
                                    x=[str(lbl) for lbl in cm_df.index.tolist()],
@@ -122,7 +122,7 @@ class ConfusionMatrix(MLReport):
 
     def _plot_confusion_matrix(self, cm_df: pd.DataFrame):
 
-        fig = go.Figure(go.Heatmap(z=cm_df.values, texttemplate="%{text}", text=cm_df.values, colorscale='Viridis',
+        fig = go.Figure(go.Heatmap(z=cm_df.values, texttemplate="%{text}", text=cm_df.values, colorscale='Blues',
                                    hovertemplate="True value: %{y}<br>Predicted value: %{x}"
                                                  "<br>Count: %{z}<extra></extra>", showscale=False,
                                    x=[str(lbl) for lbl in cm_df.index.tolist()],

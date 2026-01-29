@@ -74,7 +74,7 @@ class LabelOverlap(DataReport):
             z=overlap_matrix.values,
             x=overlap_matrix.columns,
             y=overlap_matrix.index,
-            colorscale=px.colors.sequential.Viridis,  # Custom teal colorscale
+            colorscale='Blues',
             text=overlap_matrix.values,
             texttemplate="%{text}",
             hovertemplate=f"{self.row_label}: " + "%{y}<br>" + f"{self.column_label}: "
