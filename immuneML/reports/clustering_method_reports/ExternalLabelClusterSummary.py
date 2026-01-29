@@ -101,7 +101,7 @@ class ExternalLabelClusterSummary(ClusteringMethodReport):
                 z=contingency_df.values,
                 x=contingency_df.columns,
                 y=contingency_df.index,
-                colorscale='Viridis',
+                colorscale='Blues',
                 text=contingency_df.values,
                 texttemplate='%{text}',
                 hovertemplate='count: %{z}<br>cluster: %{y}<br>' + label + ': %{x}<extra></extra>',

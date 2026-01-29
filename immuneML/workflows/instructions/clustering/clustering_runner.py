@@ -7,9 +7,6 @@ from typing import Tuple, Dict, List, Union
 import numpy as np
 import pandas as pd
 import sklearn
-from scipy.sparse import issparse
-from sklearn.neighbors import NearestCentroid, KNeighborsClassifier
-
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
@@ -18,15 +15,18 @@ from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod
+from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.ml_methods.helper_methods.FurthestNeighborClassifier import FurthestNeighborClassifier
 from immuneML.ml_metrics.ClusteringMetric import is_external, is_internal
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringItemResult
 from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringItem, DataFrameWrapper, \
     ClusteringSetting
-from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringItemResult
 from immuneML.workflows.steps.DataEncoder import DataEncoder
 from immuneML.workflows.steps.DataEncoderParams import DataEncoderParams
+from scipy.sparse import issparse
+from sklearn.neighbors import NearestCentroid, KNeighborsClassifier
 
 
 def run_all_settings(dataset: Dataset, clustering_settings: List[ClusteringSetting], path: Path,
@@ -57,7 +57,7 @@ def run_all_settings(dataset: Dataset, clustering_settings: List[ClusteringSetti
     clustering_items = {}
 
     for cl_setting in clustering_settings:
-        cl_item, predictions_df = run_setting(
+        cl_item_res, predictions_df = run_setting(
             dataset=dataset,
             cl_setting=cl_setting,
             path=path,
@@ -71,7 +71,7 @@ def run_all_settings(dataset: Dataset, clustering_settings: List[ClusteringSetti
             run_id=run_id,
             state=state
         )
-        clustering_items[cl_setting.get_key()] = cl_item
+        clustering_items[cl_setting.get_key()] = cl_item_res
 
     return clustering_items, predictions_df
 
@@ -104,12 +104,13 @@ def run_setting(dataset: Dataset, cl_setting: ClusteringSetting, path: Path,
     """
     print_log(f"Running clustering setting {cl_setting.get_key()}")
 
-    cl_setting.path = PathBuilder.build(path / f"{cl_setting.get_key()}")
+    cl_setting.path = path / f"{cl_setting.get_key()}"
 
     # Encode data
     encoder = copy.deepcopy(cl_setting.encoder)
-    enc_dataset = encode_dataset(dataset, cl_setting, number_of_processes, label_config,
-                                 True, sequence_type, region_type, encoder)
+    enc_dataset, fitted_encoder, dim_red_method = encode_dataset(dataset, cl_setting, number_of_processes, label_config,
+                                 True, sequence_type, region_type, encoder,
+                                 copy.deepcopy(cl_setting.dim_reduction_method) if cl_setting.dim_reduction_method else None)
 
     # Run clustering
     method = copy.deepcopy(cl_setting.clustering_method)
@@ -123,7 +124,8 @@ def run_setting(dataset: Dataset, cl_setting: ClusteringSetting, path: Path,
         cl_setting=cl_setting,
         dataset=enc_dataset,
         predictions=predictions,
-        encoder=encoder,
+        encoder=fitted_encoder,
+        dim_red_method=dim_red_method,
         method=method
     )
 
@@ -157,11 +159,12 @@ def get_features(dataset: Dataset, cl_setting: ClusteringSetting):
 
 def evaluate_clustering(predictions_df: pd.DataFrame, cl_setting: ClusteringSetting,
                         features, metrics: List[str], label_config: LabelConfiguration,
-                        cl_item: ClusteringItem) -> ClusteringItem:
+                        cl_item: ClusteringItem, predictions_col_name: str = None) -> ClusteringItem:
     """
     Evaluate clustering results using internal and external metrics.
 
     Args:
+        predictions_col_name: name of the predictions column in predictions_df
         predictions_df: DataFrame containing predictions and labels
         cl_setting: The clustering setting used
         features: Feature matrix for internal metrics
@@ -173,58 +176,44 @@ def evaluate_clustering(predictions_df: pd.DataFrame, cl_setting: ClusteringSett
         Updated ClusteringItem with performance CSV file paths
     """
 
-    cl_item.external_performance = DataFrameWrapper(path=eval_external_metrics(predictions_df, cl_setting, metrics, label_config))
-    cl_item.internal_performance = DataFrameWrapper(path=eval_internal_metrics(predictions_df, cl_setting, features, metrics))
+    cl_item.external_performance = DataFrameWrapper(path=eval_external_metrics(predictions_df, cl_setting, metrics, label_config, predictions_col_name))
+    cl_item.internal_performance = DataFrameWrapper(path=eval_internal_metrics(predictions_df, cl_setting, features, metrics, predictions_col_name))
 
     return cl_item
 
 
 def eval_internal_metrics(predictions_df: pd.DataFrame, cl_setting: ClusteringSetting,
-                          features, metrics: List[str]) -> Path:
-    """
-    Evaluate internal clustering metrics (based on features and predictions only).
+                          features, metrics: List[str], predictions_col_name: str = None) -> Path:
 
-    Args:
-        predictions_df: DataFrame containing predictions
-        cl_setting: The clustering setting used
-        features: Feature matrix
-        metrics: List of metric names to compute
+    if predictions_col_name is None:
+        predictions_col_name = f'predictions_{cl_setting.get_key()}'
 
-    Returns:
-        Path to the internal performances CSV file
-    """
+
     internal_performances = {}
     dense_features = features.toarray() if issparse(features) else features
 
     for metric in [m for m in metrics if is_internal(m)]:
         try:
             metric_fn = getattr(sklearn.metrics, metric)
-            internal_performances[metric] = [metric_fn(dense_features,
-                                                       predictions_df[f'predictions_{cl_setting.get_key()}'].values)]
+            internal_performances[metric] = [metric_fn(dense_features, predictions_df[predictions_col_name].values)]
         except ValueError as e:
             logging.warning(f"Error calculating metric {metric}: {e}")
             internal_performances[metric] = [np.nan]
 
+    PathBuilder.build(cl_setting.path)
     pd.DataFrame(internal_performances).to_csv(str(cl_setting.path / 'internal_performances.csv'), index=False)
     return cl_setting.path / 'internal_performances.csv'
 
 
 def eval_external_metrics(predictions_df: pd.DataFrame, cl_setting: ClusteringSetting,
-                          metrics: List[str], label_config: LabelConfiguration) -> Union[Path, None]:
-    """
-    Evaluate external clustering metrics (comparing predictions to ground truth labels).
+                          metrics: List[str], label_config: LabelConfiguration, predictions_col_name: str = None) \
+        -> Union[Path, None]:
 
-    Args:
-        predictions_df: DataFrame containing predictions and labels
-        cl_setting: The clustering setting used
-        metrics: List of metric names to compute
-        label_config: Label configuration with label names
-
-    Returns:
-        Path to the external performances CSV file, or None if no labels
-    """
     if label_config is not None and label_config.get_label_count() > 0:
         external_performances = {label: {} for label in label_config.get_labels_by_name()}
+
+        if predictions_col_name is None:
+            predictions_col_name = f"predictions_{cl_setting.get_key()}"
 
         for metric in [m for m in metrics if is_external(m)]:
             metric_fn = getattr(sklearn.metrics, metric)
@@ -232,12 +221,13 @@ def eval_external_metrics(predictions_df: pd.DataFrame, cl_setting: ClusteringSe
                 try:
                     external_performances[label][metric] = metric_fn(
                         predictions_df[label].values,
-                        predictions_df[f'predictions_{cl_setting.get_key()}'].values
+                        predictions_df[predictions_col_name].values
                     )
                 except ValueError as e:
                     logging.warning(f"Error calculating metric {metric}: {e}")
                     external_performances[label][metric] = np.nan
 
+        PathBuilder.build(cl_setting.path)
         (pd.DataFrame(external_performances).reset_index().rename(columns={'index': 'metric'})
          .to_csv(str(cl_setting.path / 'external_performances.csv'), index=False))
 
@@ -260,13 +250,12 @@ def train_cluster_classifier(cl_item: ClusteringItem):
 
 
 def apply_cluster_classifier(dataset: Dataset, cl_setting: ClusteringSetting, classifier, encoder: DatasetEncoder,
-                             predictions_path: Path, number_of_processes: int, sequence_type: SequenceType,
-                             region_type: RegionType) -> ClusteringItem:
-    """Apply trained classifier to validation data."""
+                             dim_red_method: DimRedMethod, predictions_path: Path, number_of_processes: int,
+                             sequence_type: SequenceType, region_type: RegionType) -> ClusteringItem:
 
     enc_dataset = encode_dataset(dataset, cl_setting, number_of_processes, LabelConfiguration(),
                                  learn_model=False, sequence_type=sequence_type,
-                                 region_type=region_type, encoder=encoder)
+                                 region_type=region_type, encoder=encoder, dim_red_method=dim_red_method)[0]
     features = get_features(enc_dataset, cl_setting)
 
     if isinstance(classifier, numbers.Number):
@@ -279,7 +268,11 @@ def apply_cluster_classifier(dataset: Dataset, cl_setting: ClusteringSetting, cl
     cl_item = ClusteringItem(
         cl_setting=cl_setting,
         dataset=enc_dataset,
-        predictions=predictions
+        predictions=predictions,
+        encoder=encoder,
+        dim_red_method=dim_red_method,
+        method=None, # not used here because of the transfer
+        classifier=classifier
     )
 
     pd.DataFrame({'predictions': predictions, 'example_id': dataset.get_example_ids()}).to_csv(
@@ -290,7 +283,7 @@ def apply_cluster_classifier(dataset: Dataset, cl_setting: ClusteringSetting, cl
 
 def encode_dataset(dataset: Dataset, cl_setting: ClusteringSetting, number_of_processes: int,
                    label_config: LabelConfiguration, learn_model: bool, sequence_type: SequenceType,
-                   region_type: RegionType, encoder: DatasetEncoder = None):
+                   region_type: RegionType, encoder: DatasetEncoder = None, dim_red_method: DimRedMethod = None):
     """
     Encode a dataset using the specified clustering setting's encoder.
     Results are cached based on parameters.
@@ -304,9 +297,10 @@ def encode_dataset(dataset: Dataset, cl_setting: ClusteringSetting, number_of_pr
         sequence_type: Sequence type for encoding
         region_type: Region type for encoding
         encoder: Optional pre-configured encoder
+        dim_red_method: Optional pre-configured dimensionality reduction method
 
     Returns:
-        Encoded dataset
+        Encoded dataset, encoder, and dimensionality reduction method
     """
     def dict_to_sorted_tuple(d: dict) -> tuple:
         return tuple(sorted(d.items(), key=lambda tup: tup[0])) if d is not None else None
@@ -316,12 +310,13 @@ def encode_dataset(dataset: Dataset, cl_setting: ClusteringSetting, number_of_pr
          sequence_type.name, region_type.name, cl_setting.dim_red_name, learn_model,
          dict_to_sorted_tuple(cl_setting.dim_red_params)),
         lambda: encode_dataset_internal(dataset, cl_setting, number_of_processes, label_config,
-                                        learn_model, sequence_type, region_type, encoder))
+                                        learn_model, sequence_type, region_type, encoder, dim_red_method))
 
 
 def encode_dataset_internal(dataset: Dataset, cl_setting: ClusteringSetting, number_of_processes: int,
                             label_config: LabelConfiguration, learn_model: bool, sequence_type: SequenceType,
-                            region_type: RegionType, encoder: DatasetEncoder = None):
+                            region_type: RegionType, encoder: DatasetEncoder = None, dim_red_method: DimRedMethod = None) \
+        -> Tuple[Dataset, DatasetEncoder, DimRedMethod]:
     """
     Internal function to encode a dataset (called by encode_dataset with caching).
 
@@ -334,6 +329,7 @@ def encode_dataset_internal(dataset: Dataset, cl_setting: ClusteringSetting, num
         sequence_type: Sequence type for encoding
         region_type: Region type for encoding
         encoder: Optional pre-configured encoder
+        dim_red_method: Optional pre-configured dimensionality reduction method
 
     Returns:
         Encoded dataset with optional dimensionality reduction
@@ -343,16 +339,26 @@ def encode_dataset_internal(dataset: Dataset, cl_setting: ClusteringSetting, num
                                learn_model=learn_model, encode_labels=False,
                                sequence_type=sequence_type,
                                region_type=region_type)
-    enc_dataset = DataEncoder.run(DataEncoderParams(dataset=dataset,
-                                                    encoder=cl_setting.encoder if encoder is None else encoder,
-                                                    encoder_params=enc_params))
+    internal_encoder = copy.deepcopy(cl_setting.encoder) if encoder is None else encoder
+
+    enc_dataset = DataEncoder.run(DataEncoderParams(dataset=dataset, encoder=internal_encoder, encoder_params=enc_params))
 
     if cl_setting.dim_reduction_method:
-        enc_dataset.encoded_data.dimensionality_reduced_data = cl_setting.dim_reduction_method.fit_transform(
-            enc_dataset)
-        enc_dataset.encoded_data.dim_names = cl_setting.dim_reduction_method.get_dimension_names()
+        if learn_model:
+            internal_dim_red = copy.deepcopy(cl_setting.dim_reduction_method)
+            enc_dataset.encoded_data.dimensionality_reduced_data = internal_dim_red.fit_transform(dataset=enc_dataset)
+            enc_dataset.encoded_data.dim_names = internal_dim_red.get_dimension_names()
+        elif dim_red_method is not None:
+            internal_dim_red = dim_red_method
+            enc_dataset.encoded_data.dimensionality_reduced_data = internal_dim_red.transform(dataset=enc_dataset)
+            enc_dataset.encoded_data.dim_names = internal_dim_red.get_dimension_names()
+        else:
+            raise ValueError("Dimensionality reduction method must be provided for transformation when "
+                             "learn_model is False.")
+    else:
+        internal_dim_red = None
 
-    return enc_dataset
+    return enc_dataset, internal_encoder, internal_dim_red
 
 def get_complementary_classifier(cl_setting: ClusteringSetting):
     """

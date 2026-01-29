@@ -44,6 +44,8 @@ class ValidateClusteringHTMLBuilder:
             "metrics": ", ".join(state.metrics) if state.metrics else "N/A",
             "show_labels": state.label_config is not None and len(state.label_config.get_labels_by_name()) > 0,
             "labels": [{"name": label} for label in state.label_config.get_labels_by_name()] if state.label_config else [],
+            'predictions_table': ValidateClusteringHTMLBuilder._format_predictions_file(state.predictions_path) if state.predictions_path else "N/A",
+            'predictions_path': os.path.relpath(state.predictions_path, base_path) if state.predictions_path else "N/A",
             **Util.make_dataset_html_map(state.dataset),
             **ValidateClusteringHTMLBuilder._make_method_based_html_map(state, base_path),
             **ValidateClusteringHTMLBuilder._make_result_based_html_map(state, base_path),
@@ -65,8 +67,6 @@ class ValidateClusteringHTMLBuilder:
         """Create HTML map entries for method-based validation results."""
         html_map = {
             "show_method_based": False,
-            "method_based_predictions_path": None,
-            "method_based_predictions_table": None,
             "method_based_internal_performance": None,
             "method_based_external_performance": None,
             "method_based_reports": {"has_reports": False}
@@ -74,15 +74,6 @@ class ValidateClusteringHTMLBuilder:
 
         if state.method_based_result is not None:
             html_map["show_method_based"] = True
-
-            # Predictions
-            if state.method_based_predictions_path and state.method_based_predictions_path.exists():
-                html_map["method_based_predictions_path"] = os.path.relpath(
-                    state.method_based_predictions_path, base_path
-                )
-                html_map["method_based_predictions_table"] = ValidateClusteringHTMLBuilder._format_predictions_file(
-                    state.method_based_predictions_path
-                )
 
             # Internal performance
             if state.method_based_result.internal_performance:
@@ -112,8 +103,6 @@ class ValidateClusteringHTMLBuilder:
         """Create HTML map entries for result-based validation results."""
         html_map = {
             "show_result_based": False,
-            "result_based_predictions_path": None,
-            "result_based_predictions_table": None,
             "result_based_internal_performance": None,
             "result_based_external_performance": None,
             "result_based_reports": {"has_reports": False}
@@ -121,16 +110,6 @@ class ValidateClusteringHTMLBuilder:
 
         if state.result_based_result is not None:
             html_map["show_result_based"] = True
-
-            # Predictions
-            if state.result_based_predictions_path and state.result_based_predictions_path.exists():
-                html_map["result_based_predictions_path"] = os.path.relpath(
-                    state.result_based_predictions_path, base_path
-                )
-                html_map["result_based_predictions_table"] = ValidateClusteringHTMLBuilder._format_predictions_file(
-                    state.result_based_predictions_path
-                )
-
             # Internal performance
             if state.result_based_result.internal_performance:
                 html_map["result_based_internal_performance"] = (

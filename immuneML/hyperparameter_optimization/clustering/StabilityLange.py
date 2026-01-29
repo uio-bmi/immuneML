@@ -89,11 +89,11 @@ class StabilityLange:
         cl_items = ClItems(cl_setting=cl_setting)
         distances = np.zeros(len(self.discovery_datasets))
         unique_clusters = set()
-        path = PathBuilder.build(self.result_path / cl_setting.get_key())
+        setting_path = self.result_path / cl_setting.get_key()
 
         for i in range(len(self.discovery_datasets)):
             clr_disc, _ = clustering_runner.run_setting(dataset=self.discovery_datasets[i], cl_setting=cl_setting,
-                                                        path=path / 'discovery', run_id=i, evaluate=False,
+                                                        path=setting_path / 'discovery', run_id=i, evaluate=False,
                                                         number_of_processes=self.number_of_processes,
                                                         sequence_type=self.sequence_type, region_type=self.region_type,
                                                         predictions_df=None, metrics=[],
@@ -104,13 +104,14 @@ class StabilityLange:
             cl_items.discovery.append(clr_disc.item)
 
             clr, _ = clustering_runner.run_setting(dataset=self.tuning_datasets[i], cl_setting=cl_setting,
-                                                   path=path / 'tuning', run_id=i, evaluate=False,
+                                                   path=setting_path / 'tuning', run_id=i, evaluate=False,
                                                    number_of_processes=self.number_of_processes,
                                                    sequence_type=self.sequence_type, region_type=self.region_type,
                                                    predictions_df=None, metrics=[], label_config=LabelConfiguration())
             cl_items.tuning.append(clr.item)
 
-            cl_item_transferred = self.transfer_clustering(clr_disc.item, dataset=self.tuning_datasets[i], path=path,
+            cl_item_transferred = self.transfer_clustering(clr_disc.item, dataset=self.tuning_datasets[i],
+                                                           path=setting_path,
                                                            run_id=i)
 
             distances[i] = adjusted_rand_score(clr.item.predictions, cl_item_transferred.predictions)
@@ -121,16 +122,13 @@ class StabilityLange:
         classifier = clustering_runner.train_cluster_classifier(cl_item)
 
         # Apply classifier to validation data
-        applied_cl_item = clustering_runner.apply_cluster_classifier(
-            dataset=dataset,
-            cl_setting=cl_item.cl_setting,
-            classifier=classifier,
-            encoder=cl_item.encoder,
-            predictions_path=path / f'predictions_run_{run_id + 1}_tuning_transferred.csv',
-            number_of_processes=self.number_of_processes,
-            sequence_type=self.sequence_type,
-            region_type=self.region_type
-        )
+        applied_cl_item = clustering_runner.apply_cluster_classifier(dataset=dataset, cl_setting=cl_item.cl_setting,
+                                                                     classifier=classifier, encoder=cl_item.encoder,
+                                                                     dim_red_method=cl_item.dim_red_method,
+                                                                     predictions_path=PathBuilder.build(path) / f'predictions_run_{run_id + 1}_tuning_transferred.csv',
+                                                                     number_of_processes=self.number_of_processes,
+                                                                     sequence_type=self.sequence_type,
+                                                                     region_type=self.region_type)
 
         return applied_cl_item
 

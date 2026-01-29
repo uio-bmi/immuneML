@@ -26,9 +26,8 @@ class ClusteringExporter:
             Path to the created zip file
         """
         state_path = path.absolute()
-        export_path = ClusteringExporter.export(cl_item, state_path / "exported")
-        filename = f"clustering_settings_{setting_key}"
-        abs_zip_path = Path(shutil.make_archive(state_path / "zip" / filename, "zip", str(export_path))).absolute()
+        export_path = ClusteringExporter.export(cl_item, state_path / "fitted")
+        abs_zip_path = Path(shutil.make_archive(str(state_path / setting_key), "zip", str(export_path))).absolute()
         return abs_zip_path
 
     @staticmethod
@@ -56,11 +55,11 @@ class ClusteringExporter:
         if cl_item.classifier is not None:
             classifier_filename = ClusteringExporter._store_classifier(cl_item.classifier, path).name
 
-        # Store dim reduction method if present
+        # Store dim reduction method if present (use the fitted one from cl_item)
         dim_red_filename = None
-        if cl_item.cl_setting and cl_item.cl_setting.dim_reduction_method is not None:
+        if cl_item.dim_red_method is not None:
             dim_red_filename = ClusteringExporter._store_dim_reduction(
-                cl_item.cl_setting.dim_reduction_method, path
+                cl_item.dim_red_method, path
             ).name
 
         # Create configuration
@@ -121,10 +120,10 @@ class ClusteringExporter:
                 'clustering_params': cl_item.cl_setting.clustering_params,
             })
 
-            if cl_item.cl_setting.dim_reduction_method is not None:
+            if cl_item.dim_red_method is not None:
                 config.update({
                     'dim_reduction_file': dim_red_filename,
-                    'dim_reduction_class': type(cl_item.cl_setting.dim_reduction_method).__name__,
+                    'dim_reduction_class': type(cl_item.dim_red_method).__name__,
                     'dim_reduction_name': cl_item.cl_setting.dim_red_name,
                     'dim_reduction_params': cl_item.cl_setting.dim_red_params,
                 })

@@ -62,6 +62,7 @@ class ClusteringItem:
     dataset: Dataset = None
     method: ClusteringMethod = None
     encoder: DatasetEncoder = None
+    dim_red_method: DimRedMethod = None
     internal_performance: DataFrameWrapper = None
     external_performance: DataFrameWrapper = None
     predictions: np.ndarray = None

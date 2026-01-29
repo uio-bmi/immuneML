@@ -36,8 +36,7 @@ class ValidateClusteringState:
     number_of_processes: int = 1
     method_based_result: ClusteringItem = None
     result_based_result: ClusteringItem = None
-    method_based_predictions_path: Path = None
-    result_based_predictions_path: Path = None
+    predictions_path: Path = None
     method_based_report_results: List[ReportResult] = field(default_factory=list)
     result_based_report_results: List[ReportResult] = field(default_factory=list)
     data_report_results: List[ReportResult] = field(default_factory=list)
@@ -127,9 +126,17 @@ class ValidateClusteringInstruction(Instruction):
         if 'result_based' in self._state.validation_type:
             predictions_df = self._run_result_based_validation(predictions_df)
 
+        self._save_predictions(predictions_df)
+
         print_log("ValidateClusteringInstruction: validation completed.")
 
         return self._state
+
+    def _save_predictions(self, predictions_df: pd.DataFrame):
+        """Save the predictions DataFrame to a CSV file."""
+        self._state.predictions_path = self._state.result_path / "validation_predictions.csv"
+        predictions_df.to_csv(self._state.predictions_path, index=False)
+        print_log(f"ValidateClusteringInstruction: saved predictions to {self._state.predictions_path}")
 
     def _init_predictions_df(self) -> pd.DataFrame:
         """Initialize predictions DataFrame with labels and example IDs."""
@@ -167,16 +174,15 @@ class ValidateClusteringInstruction(Instruction):
             region_type=self._state.region_type,
             evaluate=True
         )
+        predictions_df.rename(columns={f'predictions_{cl_setting.get_key()}': f"predictions_method_based_{cl_setting.get_key()}"}, inplace=True)
 
         self._state.method_based_result = cl_item_result.item
-        self._state.method_based_predictions_path = path / "method_based_predictions.csv"
-        predictions_df.to_csv(self._state.method_based_predictions_path, index=False)
 
         # Run reports for method-based validation
-        self._state.method_based_report_results = self._run_item_reports(cl_item_result.item, path, "method_based")
-
-        print_log(f"ValidateClusteringInstruction: method-based validation completed. "
-                  f"Predictions saved to {self._state.method_based_predictions_path}")
+        self._state.method_based_report_results = self._run_item_reports(
+            cl_item_result.item, path, "method_based"
+        )
+        print_log("ValidateClusteringInstruction: finished method-based validation.")
 
         return predictions_df
 
@@ -186,10 +192,9 @@ class ValidateClusteringInstruction(Instruction):
         Encoding is applied with learn_model=False to use the same transformation as discovery.
         """
         print_log("ValidateClusteringInstruction: running result-based validation")
-        path = PathBuilder.build(self._state.result_path / "result_based_validation")
 
         cl_setting = self._state.cl_item.cl_setting
-        cl_setting.path = path
+        cl_setting.path = PathBuilder.build(self._state.result_path / "result_based_validation")
         classifier = self._state.cl_item.classifier
 
         if classifier is None:
@@ -198,16 +203,13 @@ class ValidateClusteringInstruction(Instruction):
             return predictions_df
 
         # Apply the trained classifier to get cluster predictions
-        cl_item = clustering_runner.apply_cluster_classifier(
-            dataset=self._state.dataset,
-            cl_setting=cl_setting,
-            classifier=classifier,
-            encoder=self._state.cl_item.encoder,
-            predictions_path=path / "result_based_predictions.csv",
-            number_of_processes=self._state.number_of_processes,
-            sequence_type=self._state.sequence_type,
-            region_type=self._state.region_type
-        )
+        cl_item = clustering_runner.apply_cluster_classifier(dataset=self._state.dataset, cl_setting=cl_setting,
+                                                             classifier=classifier, encoder=self._state.cl_item.encoder,
+                                                             dim_red_method=self._state.cl_item.dim_red_method,
+                                                             predictions_path=cl_setting.path / "result_based_predictions.csv",
+                                                             number_of_processes=self._state.number_of_processes,
+                                                             sequence_type=self._state.sequence_type,
+                                                             region_type=self._state.region_type)
 
         # Add predictions to DataFrame
         predictions_df[f'predictions_result_based_{cl_setting.get_key()}'] = cl_item.predictions
@@ -220,17 +222,16 @@ class ValidateClusteringInstruction(Instruction):
             features=features,
             metrics=self._state.metrics,
             label_config=self._state.label_config,
-            cl_item=cl_item
+            cl_item=cl_item,
+            predictions_col_name=f'predictions_result_based_{cl_setting.get_key()}'
         )
 
         self._state.result_based_result = cl_item
-        self._state.result_based_predictions_path = path / "result_based_predictions.csv"
 
         # Run reports for result-based validation
-        self._state.result_based_report_results = self._run_item_reports(cl_item, path, "result_based")
+        self._state.result_based_report_results = self._run_item_reports(cl_item, cl_setting.path, "result_based")
 
-        print_log(f"ValidateClusteringInstruction: result-based validation completed. "
-                  f"Predictions saved to {self._state.result_based_predictions_path}")
+        print_log(f"ValidateClusteringInstruction: result-based validation completed.")
 
         return predictions_df
 
@@ -253,14 +254,13 @@ class ValidateClusteringInstruction(Instruction):
 
     def _run_item_reports(self, cl_item: ClusteringItem, path: Path, validation_type: str) -> List[ReportResult]:
         """Run clustering method and encoding reports for a clustering item."""
-        report_path = PathBuilder.build(path / "reports")
+        report_path = path / "reports"
         report_results = []
 
         for report in self._reports:
-            tmp_report = copy.deepcopy(report)
-            tmp_report.result_path = PathBuilder.build(report_path / tmp_report.name)
-
             if isinstance(report, EncodingReport):
+                tmp_report = copy.deepcopy(report)
+                tmp_report.result_path = PathBuilder.build(report_path / tmp_report.name)
                 tmp_report.dataset = cl_item.dataset
                 tmp_report.number_of_processes = self._state.number_of_processes
                 result = tmp_report.generate_report()
@@ -268,6 +268,8 @@ class ValidateClusteringInstruction(Instruction):
                     report_results.append(result)
 
             elif isinstance(report, ClusteringMethodReport):
+                tmp_report = copy.deepcopy(report)
+                tmp_report.result_path = PathBuilder.build(report_path / tmp_report.name)
                 tmp_report.item = cl_item
                 result = tmp_report.generate_report()
                 if result is not None:

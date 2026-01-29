@@ -45,7 +45,8 @@ class ClusteringImporter:
             encoder=encoder,
             method=clustering_method,
             cl_setting=cl_setting,
-            classifier=classifier
+            classifier=classifier,
+            dim_red_method=dim_reduction,
         )
 
         return cl_item, config
@@ -74,11 +75,12 @@ class ClusteringImporter:
     @staticmethod
     def _import_dim_reduction(config: dict, config_dir: Path):
         """Import the dimensionality reduction method if present."""
+        dim_red_model = None
         if config.get('dim_reduction_file'):
             dim_red_path = config_dir / config['dim_reduction_file']
             with dim_red_path.open('rb') as f:
-                return pickle.load(f)
-        return None
+                dim_red_model = pickle.load(f)
+        return dim_red_model
 
     @staticmethod
     def _import_classifier(config: dict, config_dir: Path):

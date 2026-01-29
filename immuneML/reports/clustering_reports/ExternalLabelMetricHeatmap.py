@@ -126,7 +126,7 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
 
         # Calculate margins based on label lengths
         max_y_label_lines = max(key.count('<br>') + 1 for key in wrapped_setting_keys)
-        left_margin = 150 + (max_y_label_lines - 1) * 30
+        left_margin = 50 + (max_y_label_lines - 1) * 30
 
         fig_height = max(min_height, min(max_height, n_settings * row_height + 150))
         fig_width = max(min_width, min(max_width, n_labels * col_width + left_margin + 100))
@@ -138,7 +138,7 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
             z=mean_values,
             x=external_labels,
             y=wrapped_setting_keys,
-            colorscale='Darkmint',
+            colorscale='Blues',
             text=text_annotations,
             texttemplate='%{text}',
             hovertemplate=(metric + ' (mean): %{z:.3f}<br>external label: %{x}<br>'

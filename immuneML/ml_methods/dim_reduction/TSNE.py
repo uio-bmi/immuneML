@@ -38,7 +38,8 @@ class TSNE(DimRedMethod):
     def transform(self, dataset: Dataset = None, design_matrix: np.ndarray = None):
         logging.warning(f"{TSNE.__name__}: calling transform method of TSNE, but it only supports fit_transform. "
                         f"Fitting the model and returning the transformed data...")
-        return super().transform(dataset, design_matrix)
+        data = dataset.encoded_data.get_examples_as_np_matrix() if dataset is not None else design_matrix
+        return self.method.fit_transform(data)
 
     def get_dimension_names(self) -> List[str]:
         return [f"tSNE_{i+1}" for i in range(self.method.n_components)]

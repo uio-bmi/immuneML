@@ -202,11 +202,10 @@ class ClusteringInstruction(Instruction):
 
         predictions_df = self._init_predictions_df(self.state.config.dataset)
         for best_setting_key, per_metrics in best_settings.items():
-            setting_path = path / best_setting_key
             cl_setting = self.state.config.get_cl_setting_by_key(best_setting_key)
             cl_item_res, predictions_df = clustering_runner.run_setting(dataset=self.state.config.dataset,
                                                     cl_setting=cl_setting,
-                                                    path=setting_path, predictions_df=predictions_df,
+                                                    path=path, predictions_df=predictions_df,
                                                     metrics=[], label_config=self.state.config.label_config,
                                                     number_of_processes=self.number_of_processes,
                                                     sequence_type=self.state.config.sequence_type, evaluate=False,
@@ -215,6 +214,7 @@ class ClusteringInstruction(Instruction):
             self.state.optimal_settings_on_discovery[best_setting_key] = cl_item_res
 
             # Export the best setting as a zip file
+            setting_path = path / best_setting_key
             zip_path = ClusteringExporter.export_zip(cl_item_res.item, setting_path, best_setting_key)
             self.state.best_settings_zip_paths[best_setting_key] = {'path': zip_path, 'metrics': per_metrics}
             logging.info(f"ClusteringInstruction: exported best setting {best_setting_key} to: {zip_path}")
@@ -358,7 +358,6 @@ class ClusteringInstruction(Instruction):
                 tables.append(ReportOutput(path=csv_path, name=f'{metric} values for label {label}'))
 
                 figures.append(self._create_external_index_boxplot(metric_data, label, metric, indices_path))
-
 
         report_result = ReportResult(
             name=f'External Validation Indices',

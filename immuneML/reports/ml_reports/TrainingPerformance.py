@@ -148,7 +148,7 @@ class TrainingPerformance(MLReport):
             x=x,
             y=y,
             hoverongaps = False,
-            colorscale = 'burgyl',
+            colorscale = 'Blues',
             hoverinfo='text',
             text=hovertext
         )

@@ -68,8 +68,7 @@ def test_validate_clustering_workflow():
                     'split_count': 2,
                     'random_seed': 42
                 },
-                'number_of_processes': 2,
-                'random_labeling_count': 5
+                'number_of_processes': 2
             }
         }
     }
@@ -78,7 +77,7 @@ def test_validate_clustering_workflow():
     ImmuneMLApp(path / 'discovery_specs.yaml', path / 'discovery_output').run()
 
     # Find the exported clustering zip file
-    exported_zip = list((path / 'discovery_output').rglob('clustering_settings_*.zip'))[0]
+    exported_zip = list((path / 'discovery_output').rglob('*.zip'))[0]
 
     # Step 2: Run ValidateClustering on validation dataset
     validation_specs = {
@@ -130,11 +129,8 @@ def test_validate_clustering_workflow():
     assert len(result_based_path) > 0, "Result-based validation output not found"
 
     # Check predictions files exist
-    method_predictions = list(validation_output.rglob('method_based_predictions.csv'))
-    assert len(method_predictions) > 0, "Method-based predictions file not found"
-
-    result_predictions = list(validation_output.rglob('result_based_predictions.csv'))
-    assert len(result_predictions) > 0, "Result-based predictions file not found"
+    predictions = list(validation_output.rglob('validation_predictions.csv'))
+    assert len(predictions) > 0, "Predictions file not found"
 
     # Check that reports were generated
     data_reports_path = list(validation_output.rglob('data_reports'))
