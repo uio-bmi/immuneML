@@ -108,9 +108,11 @@ class ClusteringVisualization(ClusteringMethodReport):
         df['cluster'] = pd.Series(self.item.predictions).astype(str)
         df['id'] = self.item.dataset.get_example_ids()
 
+        unique_clusters = sorted(df.cluster.astype(int).unique())
+        color_palette = self.get_color_palette(len(unique_clusters))
         fig = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1], color='cluster',
-                         color_discrete_sequence=plotly.colors.qualitative.Set2,
-                         category_orders={'cluster': sorted(df.cluster.unique())},
+                         color_discrete_sequence=color_palette,
+                         category_orders={'cluster': unique_clusters},
                          hover_data=['id'])
 
         fig.update_layout(template="plotly_white")
@@ -122,6 +124,16 @@ class ClusteringVisualization(ClusteringMethodReport):
                                                    df.shape[0])
 
         return plot_path
+
+    def get_color_palette(self, n_clusters):
+        if n_clusters <= 10:
+            return px.colors.qualitative.Vivid
+        elif n_clusters <= 20:
+            return px.colors.qualitative.Dark24
+        else:
+            logging.warning(f"ClusteringVisualization: number of clusters is {n_clusters}, which is commonly too many to "
+                            f"visualize effectively.")
+            return plotly.colors.sample_colorscale('Plasma', [i / n_clusters for i in range(n_clusters)])
 
     def get_ids(self):
         if isinstance(self.item.dataset, RepertoireDataset):
