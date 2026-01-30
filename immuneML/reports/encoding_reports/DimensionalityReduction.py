@@ -4,6 +4,7 @@ from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
+import plotly
 import plotly.express as px
 
 from immuneML.data_model.EncodedData import EncodedData
@@ -149,15 +150,20 @@ class DimensionalityReduction(EncodingReport):
                 elif 'example_id' in df_copy.columns:
                     hover_data += ['example_id']
 
-                if len(unique_values) <= 15:
+                if len(unique_values) <= 24:
+                    color_sequence = px.colors.qualitative.Vivid if len(unique_values) <= 12 else px.colors.qualitative.Dark24
                     df_copy[label] = df_copy[label].astype('category')
                     figure = px.scatter(df_copy, x=self._dimension_names[0], y=self._dimension_names[1], color=label,
-                                        color_discrete_sequence=px.colors.qualitative.Vivid,
+                                        color_discrete_sequence=color_sequence,
                                         hover_data=hover_data,
                                         category_orders={label: sorted(unique_values)})
+                elif df_copy[label].dtype.name == 'category' or df_copy[label].dtype == object:
+                    figure = px.scatter(df_copy, x=self._dimension_names[0], y=self._dimension_names[1], color=label,
+                                        hover_data=hover_data,
+                                        color_discrete_sequence=plotly.colors.sample_colorscale('Plasma', [i / len(unique_values) for i in range(len(unique_values))]),)
                 else:
                     figure = px.scatter(df_copy, x=self._dimension_names[0], y=self._dimension_names[1], color=label,
-                                        hover_data=hover_data)
+                                        hover_data=hover_data, color_continuous_scale='Plasma')
 
                 figure.update_layout(template="plotly_white", showlegend=True)
                 figure.update_traces(opacity=.6)
