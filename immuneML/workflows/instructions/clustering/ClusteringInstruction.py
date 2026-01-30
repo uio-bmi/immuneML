@@ -1,9 +1,11 @@
 import logging
 import os
+import random
 from collections import defaultdict
 from pathlib import Path
 from typing import List, Dict
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 
@@ -411,6 +413,8 @@ class ClusteringInstruction(Instruction):
         """Compute clustering stability using the Lange et al. approach."""
         print_log(f"{self.__class__.__name__} ({self.state.name}): computing stability.")
 
+        random.seed(self.state.config.stability_config.random_seed)
+        np.random.seed(self.state.config.stability_config.random_seed)
         discovery_datasets, tuning_datasets = HPUtil.split_data(
             self.state.config.dataset,
             SplitConfig(SplitType.RANDOM, self.state.config.stability_config.split_count, 0.5),
