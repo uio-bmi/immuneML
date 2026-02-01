@@ -122,7 +122,7 @@ class ESMCEncoder(ProteinEmbeddingEncoder):
                     sequence_id=sequence_id
                 )
 
-            batch_embeddings = output.embeddings.cpu().numpy().mean(axis=1)
+            batch_embeddings = output.embeddings.cpu().float().numpy().mean(axis=1)
             embeddings[i:batch_end] = batch_embeddings
 
             del output, tokens, sequence_id
