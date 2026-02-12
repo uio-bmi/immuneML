@@ -17,6 +17,7 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.ml_methods.helper_methods.FurthestNeighborClassifier import FurthestNeighborClassifier
+from immuneML.ml_metrics import ClusteringMetric
 from immuneML.ml_metrics.ClusteringMetric import is_external, is_internal
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
@@ -194,8 +195,9 @@ def eval_internal_metrics(predictions_df: pd.DataFrame, cl_setting: ClusteringSe
 
     for metric in [m for m in metrics if is_internal(m)]:
         try:
-            metric_fn = getattr(sklearn.metrics, metric)
-            internal_performances[metric] = [metric_fn(dense_features, predictions_df[predictions_col_name].values)]
+            internal_performances[metric] = [ClusteringMetric.compute(metric, dense_features,
+                                                                      predictions_df[predictions_col_name].values,
+                                                                      cl_setting.clustering_params.get('metric', None))]
         except ValueError as e:
             logging.warning(f"Error calculating metric {metric}: {e}")
             internal_performances[metric] = [np.nan]
