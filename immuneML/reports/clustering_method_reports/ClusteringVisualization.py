@@ -147,3 +147,11 @@ class ClusteringVisualization(ClusteringMethodReport):
                 return self.item.dataset.get_example_ids()
         else:
             return self.item.dataset.get_example_ids()
+
+    def check_prerequisites(self) -> bool:
+        """The results cannot be visualized in this report if the encoded data is precomputed distances"""
+
+        from immuneML.encodings.distance_encoding.DistanceEncoder import DistanceEncoder
+        from immuneML.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
+
+        return not isinstance(self.item.encoder, TCRdistEncoder) and not isinstance(self.item.encoder, DistanceEncoder)

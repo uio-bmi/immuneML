@@ -27,6 +27,7 @@ jobs:
             uv venv --python 3.11
             source .venv/bin/activate
           
+            uv pip install setuptools
             uv pip install -r requirements.txt
             uv pip install -r requirements_sphinx.txt
             uv pip install torch
