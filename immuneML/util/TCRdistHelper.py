@@ -90,7 +90,7 @@ class TCRdistHelper:
 
         if 'alpha' in unique_chains:
 
-            df_alpha = (df[df.locus == 'TRA'][cols_to_keep]
+            df_alpha = (df[[Chain.get_chain_value(el) == Chain.ALPHA.value for el in df.locus]][cols_to_keep]
                         .rename(columns={"cdr3_aa": "cdr3_a_aa", "cdr3": "cdr3_a_nucseq", "v_call": "v_a_gene",
                                          'j_call': "j_a_gene", "duplicate_count": "count"}))
             df_alpha.loc[:, 'count'] = [1 if el in [-1, None] else el for el in df_alpha['count']]
@@ -99,7 +99,7 @@ class TCRdistHelper:
 
         if 'beta' in unique_chains:
 
-            df_beta = (df[df.locus == 'TRB'][cols_to_keep].rename(
+            df_beta = (df[[Chain.get_chain_value(el) == Chain.BETA.value for el in df.locus]][cols_to_keep].rename(
                 columns={"cdr3_aa": "cdr3_b_aa", "cdr3": "cdr3_b_nucseq", "v_call": "v_b_gene",
                          'j_call': "j_b_gene", "duplicate_count": "count"}))
             df_beta.loc[:, 'count'] = [1 if el in [-1, None] else el for el in df_beta['count']]
