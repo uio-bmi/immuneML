@@ -40,6 +40,10 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
         pass
 
     def encode(self, dataset: Dataset, params: EncoderParams) -> Dataset:
+
+        import torch
+        torch.device(self.device)
+
         cache_params = self._get_caching_params(dataset, params)
         if isinstance(dataset, SequenceDataset):
             return CacheHandler.memo_by_params(cache_params, lambda: self._encode_sequence_dataset(dataset, params))
