@@ -16,7 +16,7 @@ def build_labels(labels_str):
 
 def parse_command_line_arguments(args):
     parser = argparse.ArgumentParser(
-        description="Tool for building specification for applying previously trained ML models in Galaxy")
+        description="Tool for building specification for clustering analysis in Galaxy")
 
     parser.add_argument("-l", "--labels", type=str, default="",
                         help="Which metadata labels should be predicted for the dataset (separated by comma).")
@@ -28,7 +28,22 @@ def parse_command_line_arguments(args):
     parser.add_argument("-n", "--n_clusters", type=int, required=True, help="")
     parser.add_argument("-d", "--dim_red_method", type=str, choices=["PCA", "UMAP", "TSNE", "None"], default="None",
                         help="External evaluation metrics to use for clustering, for these metrics, clusters are compared to a provided label.")
-    parser.add_argument("-t", "--training_percentage", type=int, default=100)
+
+    parser.add_argument("-s", "--split_count", type=int, default=5,
+                        help="Number of data subsets (splits) for computing validation indices.")
+    parser.add_argument("-p", "--percentage", type=float, default=0.8,
+                        help="Fraction of the data to use per subset (0-1).")
+    parser.add_argument("-r", "--random_seed", type=int, default=42,
+                        help="Random seed for reproducibility.")
+    parser.add_argument("--stability_split_count", type=int, default=5,
+                        help="Number of repetitions for stability estimation.")
+    parser.add_argument("--stability_random_seed", type=int, default=12,
+                        help="Random seed for stability estimation.")
+    parser.add_argument("--sequence_type", type=str, default="amino_acid",
+                        choices=["amino_acid", "nucleotide"],
+                        help="Whether to do analysis on the amino_acid or nucleotide level.")
+    parser.add_argument("--region_type", type=str, default="imgt_cdr3",
+                        help="Which part of the receptor sequence to analyze (e.g., imgt_cdr3).")
 
     parser.add_argument("-o", "--output_path", required=True,
                         help="Output location for the generated yaml file (directory).")
@@ -75,12 +90,19 @@ def build_specs(parsed_args):
                 "type": "Clustering",
                 "dataset": "dataset",
                 'metrics': parsed_args.eval_metrics,
+                'sequence_type': parsed_args.sequence_type,
+                'region_type': parsed_args.region_type,
                 'clustering_settings': [
                     {'encoding': 'kmer', "dim_reduction": "pca_2", 'method': 'kmeans'},
                 ],
-                'split_config': {
-                    'split_strategy': 'random',
-                    'training_percentage': parsed_args.training_percentage / 100
+                'sample_config': {
+                    'split_count': parsed_args.split_count,
+                    'percentage': parsed_args.percentage,
+                    'random_seed': parsed_args.random_seed
+                },
+                'stability_config': {
+                    'split_count': parsed_args.stability_split_count,
+                    'random_seed': parsed_args.stability_random_seed
                 }
             }
         }
