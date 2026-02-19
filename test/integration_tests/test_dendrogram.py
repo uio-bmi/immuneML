@@ -58,14 +58,17 @@ def test_clustering_workflow():
                 'clustering_settings': [
                     {'encoding': 'kmer', 'method': 'hierarchical'},
                 ],
-                'split_config': {
-                    'split_strategy': 'random',
-                    'training_percentage': 1.,
-                    "split_count": 1
+                'sample_config': {
+                    'split_count': 3,
+                    'percentage': 0.8,
+                    'random_seed': 42
+                },
+                'stability_config': {
+                    'split_count': 3,
+                    'random_seed': 42
                 },
                 'reports': ['rep1'],
                 'number_of_processes': 8,
-                'validation_type': []
             }
         }
     }
@@ -74,6 +77,6 @@ def test_clustering_workflow():
 
     ImmuneMLApp(path / 'specs.yaml', path / 'output').run()
 
-    assert (path / 'output/clustering/split_1/discovery/kmer_hierarchical/reports/rep1/dendrogram.html').is_file()
+    assert (path / 'output/clustering/validation_indices/split_1/kmer_hierarchical/reports/rep1/dendrogram.html').is_file()
 
     shutil.rmtree(path)

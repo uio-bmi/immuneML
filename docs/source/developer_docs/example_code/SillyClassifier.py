@@ -79,7 +79,6 @@ class SillyClassifier(MLMethod):
         # The SillyClassifier can in principle be used with any encoder, few examples are listed
         from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
         from immuneML.encodings.abundance_encoding.KmerAbundanceEncoder import KmerAbundanceEncoder
-        from immuneML.encodings.atchley_kmer_encoding.AtchleyKmerEncoder import AtchleyKmerEncoder
         from immuneML.encodings.distance_encoding.DistanceEncoder import DistanceEncoder
         from immuneML.encodings.diversity_encoding.EvennessProfileEncoder import EvennessProfileEncoder
         from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
@@ -87,7 +86,7 @@ class SillyClassifier(MLMethod):
         from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
 
         return [SequenceAbundanceEncoder, KmerAbundanceEncoder, DistanceEncoder, EvennessProfileEncoder,
-                AtchleyKmerEncoder, KmerFrequencyEncoder, MotifEncoder, OneHotEncoder]
+                KmerFrequencyEncoder, MotifEncoder, OneHotEncoder]
 
     def store(self, path: Path):
         # The most basic way of storing a model is to get the parameters in a yaml-friendly format (get_params)

@@ -7,6 +7,7 @@ import pandas as pd
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.util.Util import Util as MLUtil
+from immuneML.ml_metrics import ClusteringMetric
 from immuneML.presentation.TemplateParser import TemplateParser
 from immuneML.presentation.html.Util import Util
 from immuneML.reports.ReportResult import ReportResult
@@ -122,12 +123,12 @@ class ClusteringHTMLBuilder:
 
         if item_result:
             # Internal performance
-            if item_result.item.internal_performance:
+            if item_result.item.internal_performance and any(ClusteringMetric.is_internal(metric) for metric in state.config.metrics):
                 template_map["internal_performance"] = item_result.item.internal_performance.get_df().to_html(
                     border=0, justify='left', max_rows=None, index=False)
 
             # External performance
-            if item_result.item.external_performance:
+            if item_result.item.external_performance and any(ClusteringMetric.is_external(metric) for metric in state.config.metrics):
                 template_map["external_performance"] = item_result.item.external_performance.get_df().to_html(
                     border=0, justify='left', max_rows=None, index=False)
 
