@@ -1,0 +1,1567 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Report parameters" href="reports.html" /><link rel="prev" title="Encoding parameters" href="encodings.html" />
+        <link rel="canonical" href="https://docs.immuneml.uio.no/yaml_specs/ml_methods.html" />
+
+    <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>ML method parameters - immuneML 3.0.18 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/immuneml.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">immuneML 3.0.18 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">immuneML 3.0.18 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../quickstart.html">Quickstart</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Quickstart</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_simple.html">Quickstart: Galaxy with button-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_yaml.html">Quickstart: Galaxy with YAML-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/cli_yaml.html">Quickstart: command-line interface with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/simulation_quickstart.html">LIgO simulation quickstart</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installing immuneML</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Installing immuneML</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/install_with_package_manager.html">Install immuneML with a package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/installation_docker.html">Setting up immuneML with Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/cloud.html">Running immuneML in the cloud</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../specification.html">YAML specification</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of YAML specification</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how_to_specify_an_analysis_with_yaml.html">How to specify an analysis with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">Dataset parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="encodings.html">Encoding parameters</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">ML method parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reports.html">Report parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preprocessings.html">Preprocessing parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation.html">Simulation parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="instructions.html">Instruction parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Tutorials</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/analyze_dataset.html">Analyzing Your Own Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_import_the_data_to_immuneML.html">How to import data into immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_generate_a_random_repertoire_dataset.html">How to generate a dataset with random sequences</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tutorials/ligo_simulation_tutorials.html">Dataset simulation with LIgO</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Dataset simulation with LIgO</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/ligo_simulation_yaml.html">YAML specification of the LigoSim instruction for introducing immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/how_to_simulate_co-occuring_signals.html">How to simulate co-occuring immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/how_to_simulate_paired_chain_data.html">Paired chain simulations in LIgO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/simulation_with_custom_signal_functions.html">Simulation with custom signal functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_train_and_assess_a_receptor_or_repertoire_classifier.html">How to train and assess a receptor or repertoire-level ML classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_apply_to_new_data.html">How to apply previously trained ML models to a new dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_perform_exploratory_analysis.html">How to perform an exploratory data analysis</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tutorials/motif_recovery.html">How to find motifs associated with disease or antigen binding state</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of How to find motifs associated with disease or antigen binding state</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/discover_motifs_precision_recall.html">Discovering positional motifs using precision and recall thresholds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/discover_motifs_classifiers.html">Discovering motifs learned by classifiers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/recovering_simulated_motifs.html">Recovering simulated immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/comparing_baseline_motifs.html">Comparing baseline motif frequencies in repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/clustering_tutorial.html">How to perform clustering analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_train_and_apply_gen_model.html">How to train a generative model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_combine_multiple_encodings.html">How to combine multiple encodings to represent a dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/getting_publication_ready_figures.html">How to get publication-ready figures</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../galaxy.html">immuneML &amp; Galaxy</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of immuneML &amp; Galaxy</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_intro.html">Introduction to Galaxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_tools.html">immuneML Galaxy tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_immunologist_friendly.html">ML basics: Training classifiers with the simplified Galaxy interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../usecases.html">Use case examples</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Use case examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/emerson_reproduction.html">Manuscript use case 1: Reproduction of a published study inside immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/extendability_use_case.html">Manuscript use case 2: Extending immuneML with a deep learning component for predicting antigen specificity of paired receptor data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/benchmarking_use_case.html">Manuscript use case 3: Benchmarking ML methods on ground-truth synthetic data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immcantation_use_case.html">Integration use case: post-analysis of sequences with Immcantation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immunarch_use_case.html">Integration use case: post-analysis of sequences with immunarch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immunesim_use_case.html">Integration use case: Performing analysis on immuneSIM-generated repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Troubleshooting</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../developer_docs.html">Developer documentation</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Developer documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/info_new_developers.html">Information for new developers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/install_for_development.html">Set up immuneML for development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_encoding.html">How to add a new encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_ML_method.html">How to add a new machine learning method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_report.html">How to add a new report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_preprocessing.html">How to add a new preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/data_model.html">immuneML data model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/execution_flow.html">immuneML execution flow</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/yaml_specs/ml_methods.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="ml-method-parameters">
+<h1>ML method parameters<a class="headerlink" href="#ml-method-parameters" title="Link to this heading">¶</a></h1>
+<p>Under the <code class="code docutils literal notranslate"><span class="pre">definitions/ml_methods</span></code> component, the user can specify different ML methods to use on a given (encoded) dataset.</p>
+<p>From version 3, immuneML includes different types of ML methods:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#classifiers"><span class="std std-ref">Classifiers</span></a> which make predictions about labelled data.</p></li>
+<li><p><a class="reference internal" href="#clustering-methods"><span class="std std-ref">Clustering methods</span></a> which can cluster unlabelled data.</p></li>
+<li><p><a class="reference internal" href="#generative-models"><span class="std std-ref">Generative models</span></a> to generate new AIR sequences.</p></li>
+<li><p><a class="reference internal" href="#dimensionality-reduction-methods"><span class="std std-ref">Dimensionality reduction methods</span></a> to reduce the dimensionality of the data before analysing it.</p></li>
+</ul>
+<section id="classifiers">
+<h2><strong>Classifiers</strong><a class="headerlink" href="#classifiers" title="Link to this heading">¶</a></h2>
+<p>ML method classifiers are algorithms which can be trained to predict some label on immune
+repertoires, receptors or sequences.</p>
+<p>These methods can be trained using the <a class="reference internal" href="instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a> instruction, and previously trained
+models can be applied to new data using the <a class="reference internal" href="instructions.html#mlapplication"><span class="std std-ref">MLApplication</span></a> instruction.</p>
+<p>When choosing which ML method(s) are most suitable for your use-case, please consider the following table:</p>
+<div class="table-wrapper docutils container" id="id2">
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">ML methods properties</span><a class="headerlink" href="#id2" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>ML method</p></th>
+<th class="head"><p>binary classification</p></th>
+<th class="head"><p>multi-class classification</p></th>
+<th class="head"><p>sequence dataset</p></th>
+<th class="head"><p>receptor dataset</p></th>
+<th class="head"><p>repertoire dataset</p></th>
+<th class="head"><p>model selection CV</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>AtchleyKmerMILClassifier</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+</tr>
+<tr class="row-odd"><td><p>BinaryFeatureClassifier</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+</tr>
+<tr class="row-even"><td><p>DeepRC</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+</tr>
+<tr class="row-odd"><td><p>KNN</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>KerasSequenceCnn</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+</tr>
+<tr class="row-odd"><td><p>LogisticRegression</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>PrecomputedKNN</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>ProbabalisticBinaryClassifier</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+</tr>
+<tr class="row-even"><td><p>RandomForestClassifier</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>ReceptorCNN</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+</tr>
+<tr class="row-even"><td><p>SVC</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>SVM</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>TCRdistClassifier</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="binaryfeatureclassifier">
+<h3>BinaryFeatureClassifier<a class="headerlink" href="#binaryfeatureclassifier" title="Link to this heading">¶</a></h3>
+<p>A simple classifier that takes in encoded data containing features with only 1/0 or True/False values.</p>
+<p>This classifier gives a positive prediction if any of the binary features for an example are ‘true’.
+Optionally, the classifier can select an optimal subset of these features. In this case, the given data is split
+into a training and validation set, a minimal set of features is learned through greedy forward selection,
+and the validation set is used to determine when to stop growing the set of features (earlystopping).
+Earlystopping is reached when the optimization metric on the validation set no longer improves for a given number of features (patience).
+The optimization metric is the same metric as the one used for optimization in the <code class="xref py py-obj docutils literal notranslate"><span class="pre">TrainMLModelInstruction</span></code>.</p>
+<p>Currently, this classifier can be used in combination with two encoders:</p>
+<ul class="simple">
+<li><p>The classifier can be used in combination with the <code class="xref py py-obj docutils literal notranslate"><span class="pre">MotifEncoder</span></code>,
+such that sequences containing any of the positive class-associated motifs are classified as positive.
+A reduced subset of binding-associated motifs can be learned (when keep_all is false).
+This results in a set of complementary motifs, minimizing the redundant predictions made by different motifs.</p></li>
+<li><p>Alternatively, this classifier can be combined with the <code class="xref py py-obj docutils literal notranslate"><span class="pre">SimilarToPositiveSequenceEncoder</span></code>
+such that any sequence that falls within a given hamming distance from any of the positive class sequences in the training set
+are classified as positive. Parameter keep_all should be set to true, since this encoder creates only 1 feature.</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>training_percentage (float): What percentage of data to use for training (the rest will be used for validation); values between 0 and 1</p></li>
+<li><p>keep_all (bool): Whether to keep all the input features (true) or learn a reduced subset (false). By default, keep_all is false.</p></li>
+<li><p>random_seed (int): Random seed for splitting the data into training and validation sets when learning a minimal subset of features. This is only used when keep_all is false.</p></li>
+<li><p>max_features (int): The maximum number of features to allow in the reduced subset. When this number is reached, no more features are added even if the earlystopping criterion is not reached yet.
+This is only used when keep_all is false. By default, max_features is 100.</p></li>
+<li><p>patience (int): The patience for earlystopping. When earlystopping is reached, &lt;patience&gt; more features are added to the reduced set to test whether the optimization metric on the validation set improves again. By default, patience is 5.</p></li>
+<li><p>min_delta (float): The delta value used to test if there was improvement between the previous set of features and the new set of features (+1). By default, min_delta is 0, meaning the new set of features does not need to yield a higher optimization metric score on the validation set, but it needs to be at least equally high as the previous set.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_motif_classifier</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">MotifClassifier</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">training_percentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
+<span class="w">                </span><span class="nt">max_features</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">                </span><span class="nt">patience</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">                </span><span class="nt">min_delta</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">                </span><span class="nt">keep_all</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</pre></div>
+</div>
+</section>
+<section id="deeprc">
+<h3>DeepRC<a class="headerlink" href="#deeprc" title="Link to this heading">¶</a></h3>
+<p>This classifier uses the DeepRC method for repertoire classification. The DeepRC ML method should be used in combination
+with the DeepRC encoder. Also consider using the <a class="reference internal" href="reports.html#deeprcmotifdiscovery"><span class="std std-ref">DeepRCMotifDiscovery</span></a> report for interpretability.</p>
+<p>Notes:</p>
+<ul class="simple">
+<li><p>DeepRC uses PyTorch functionalities that depend on GPU. Therefore, DeepRC does not work on a CPU.</p></li>
+<li><p>This wrapper around DeepRC currently only supports binary classification.</p></li>
+</ul>
+<p>Reference:
+Michael Widrich, Bernhard Schäfl, Milena Pavlović, Geir Kjetil Sandve, Sepp Hochreiter, Victor Greiff, Günter Klambauer
+‘DeepRC: Immune repertoire classification with attention-based deep massive multiple instance learning’.
+bioRxiv preprint doi: <a class="reference external" href="https://doi.org/10.1101/2020.04.12.038158">https://doi.org/10.1101/2020.04.12.038158</a></p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>validation_part (float):  the part of the data that will be used for validation, the rest will be used for training.</p></li>
+<li><p>add_positional_information (bool): whether positional information should be included in the input features.</p></li>
+<li><p>kernel_size (int): the size of the 1D-CNN kernels.</p></li>
+<li><p>n_kernels (int): the number of 1D-CNN kernels in each layer.</p></li>
+<li><p>n_additional_convs (int): Number of additional 1D-CNN layers after first layer</p></li>
+<li><p>n_attention_network_layers (int): Number of attention layers to compute keys</p></li>
+<li><p>n_attention_network_units (int): Number of units in each attention layer</p></li>
+<li><p>n_output_network_units (int): Number of units in the output layer</p></li>
+<li><p>consider_seq_counts (bool): whether the input data should be scaled by the receptor sequence counts.</p></li>
+<li><p>sequence_reduction_fraction (float): Fraction of number of sequences to which to reduce the number of sequences per bag based on attention weights. Has to be in range [0,1].</p></li>
+<li><p>reduction_mb_size (int): Reduction of sequences per bag is performed using minibatches of reduction_mb_size` sequences to compute the attention weights.</p></li>
+<li><p>n_updates (int): Number of updates to train for</p></li>
+<li><p>n_torch_threads (int):  Number of parallel threads to allow PyTorch</p></li>
+<li><p>learning_rate (float): Learning rate for adam optimizer</p></li>
+<li><p>l1_weight_decay (float): l1 weight decay factor. l1 weight penalty will be added to loss, scaled by <cite>l1_weight_decay</cite></p></li>
+<li><p>l2_weight_decay (float): l2 weight decay factor. l2 weight penalty will be added to loss, scaled by <cite>l2_weight_decay</cite></p></li>
+<li><p>sequence_counts_scaling_fn: it can either be <cite>log</cite> (logarithmic scaling of sequence counts) or None</p></li>
+<li><p>sequence_counts_scaling_fn: it can either be <cite>log</cite> (logarithmic scaling of sequence counts) or None</p></li>
+<li><p>evaluate_at (int): Evaluate model on training and validation set every <cite>evaluate_at</cite> updates. This will also check for a new best model for early stopping.</p></li>
+<li><p>sample_n_sequences (int): Optional random sub-sampling of <cite>sample_n_sequences</cite> sequences per repertoire. Number of sequences per repertoire might be smaller than <cite>sample_n_sequences</cite> if repertoire is smaller or random indices have been drawn multiple times. If None, all sequences will be loaded for each repertoire.</p></li>
+<li><p>training_batch_size (int): Number of repertoires per minibatch during training.</p></li>
+<li><p>n_workers (int): Number of background processes to use for converting dataset to hdf5 container and training set data loader.</p></li>
+<li><p>pytorch_device_name (str): The name of the pytorch device to use. This name will be passed to  torch.device(self.pytorch_device_name). The default value is cuda:0</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_deeprc_method</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">DeepRC</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">validation_part</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
+<span class="w">                </span><span class="nt">add_positional_information</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">                </span><span class="nt">kernel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9</span>
+</pre></div>
+</div>
+</section>
+<section id="gradientboosting">
+<h3>GradientBoosting<a class="headerlink" href="#gradientboosting" title="Link to this heading">¶</a></h3>
+<p>Gradient Boosting classifier which wraps scikit-learn’s GradientBoostingClassifier.
+Input arguments for the method are the same as supported by scikit-learn (see <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingClassifier.html">GradientBoostingClassifier scikit-learn documentation</a> for details).</p>
+<p>Scikit-learn models can be trained in two modes:</p>
+<p>1. Creating a model using a given set of hyperparameters, and relying on the selection and assessment loop in the
+TrainMLModel instruction to select the optimal model.</p>
+<p>2. Passing a range of different hyperparameters to GradientBoosting, and using a third layer of nested cross-validation
+to find the optimal hyperparameters through grid search. In this case, only the GradientBoosting model with the optimal
+hyperparameter settings is further used in the inner selection loop of the TrainMLModel instruction.</p>
+<p>By default, mode 1 is used. In order to use mode 2, model_selection_cv and model_selection_n_folds must be set.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>GradientBoosting (dict): Under this key, hyperparameters can be specified that will be passed to the scikit-learn class.
+Any scikit-learn hyperparameters can be specified here. In mode 1, a single value must be specified for each of the scikit-learn
+hyperparameters. In mode 2, it is possible to specify a range of different hyperparameters values in a list. It is also allowed
+to mix lists and single values in mode 2, in which case the grid search will only be done for the lists, while the
+single-value hyperparameters will be fixed.
+In addition to the scikit-learn hyperparameters, parameter show_warnings (True/False) can be specified here. This determines
+whether scikit-learn warnings, such as convergence warnings, should be printed. By default show_warnings is True.</p></li>
+<li><p>model_selection_cv (bool): If any of the hyperparameters under GradientBoosting is a list and model_selection_cv is True,
+a grid search will be done over the given hyperparameters, using the number of folds specified in model_selection_n_folds.
+By default, model_selection_cv is False.</p></li>
+<li><p>model_selection_n_folds (int): The number of folds that should be used for the cross validation grid search if model_selection_cv is True.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_gradient_boosting</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">GradientBoosting</span><span class="p">:</span>
+<span class="w">                </span><span class="c1"># arguments as defined by scikit-learn</span>
+<span class="w">                </span><span class="nt">n_estimators</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">                </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="w">                </span><span class="nt">max_depth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">                </span><span class="nt">random_state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">42</span>
+</pre></div>
+</div>
+</section>
+<section id="knn">
+<h3>KNN<a class="headerlink" href="#knn" title="Link to this heading">¶</a></h3>
+<p>This is a wrapper of scikit-learn’s KNeighborsClassifier class.
+This ML method creates a distance matrix using the given encoded data. If the encoded data is already a distance
+matrix (for example, when using the <a class="reference internal" href="encodings.html#distance"><span class="std std-ref">Distance</span></a> or <a class="reference internal" href="encodings.html#compairrdistance"><span class="std std-ref">CompAIRRDistance</span></a> encoders), please use <a class="reference internal" href="#precomputedknn"><span class="std std-ref">PrecomputedKNN</span></a> instead.</p>
+<p>Please see the <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html">KNeighborsClassifier scikit-learn documentation</a>
+of KNeighborsClassifier for the parameters.</p>
+<p>Scikit-learn models can be trained in two modes:</p>
+<p>1. Creating a model using a given set of hyperparameters, and relying on the selection and assessment loop in the
+TrainMLModel instruction to select the optimal model.</p>
+<p>2. Passing a range of different hyperparameters to KNN, and using a third layer of nested cross-validation
+to find the optimal hyperparameters through grid search. In this case, only the KNN model with the optimal
+hyperparameter settings is further used in the inner selection loop of the TrainMLModel instruction.</p>
+<p>By default, mode 1 is used. In order to use mode 2, model_selection_cv and model_selection_n_folds must be set.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>KNN (dict): Under this key, hyperparameters can be specified that will be passed to the scikit-learn class.
+Any scikit-learn hyperparameters can be specified here. In mode 1, a single value must be specified for each of the scikit-learn
+hyperparameters. In mode 2, it is possible to specify a range of different hyperparameters values in a list. It is also allowed
+to mix lists and single values in mode 2, in which case the grid search will only be done for the lists, while the
+single-value hyperparameters will be fixed.
+In addition to the scikit-learn hyperparameters, parameter show_warnings (True/False) can be specified here. This determines
+whether scikit-learn warnings, such as convergence warnings, should be printed. By default show_warnings is True.</p></li>
+<li><p>model_selection_cv (bool): If any of the hyperparameters under KNN is a list and model_selection_cv is True,
+a grid search will be done over the given hyperparameters, using the number of folds specified in model_selection_n_folds.
+By default, model_selection_cv is False.</p></li>
+<li><p>model_selection_n_folds (int): The number of folds that should be used for the cross validation grid search if model_selection_cv is True.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_knn_method</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">KNN</span><span class="p">:</span>
+<span class="w">                </span><span class="c1"># sklearn parameters (same names as in original sklearn class)</span>
+<span class="w">                </span><span class="nt">weights</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">uniform</span><span class="w"> </span><span class="c1"># always use this setting for weights</span>
+<span class="w">                </span><span class="nt">n_neighbors</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">10</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">15</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># find the optimal number of neighbors</span>
+<span class="w">                </span><span class="c1"># Additional parameter that determines whether to print convergence warnings</span>
+<span class="w">                </span><span class="nt">show_warnings</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">            </span><span class="c1"># if any of the parameters under KNN is a list and model_selection_cv is True,</span>
+<span class="w">            </span><span class="c1"># a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,</span>
+<span class="w">            </span><span class="c1"># and the optimal model will be selected</span>
+<span class="w">            </span><span class="nt">model_selection_cv</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">            </span><span class="nt">model_selection_n_folds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">        </span><span class="c1"># alternative way to define ML method with default values:</span>
+<span class="w">        </span><span class="nt">my_default_knn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KNN</span>
+</pre></div>
+</div>
+</section>
+<section id="kerassequencecnn">
+<h3>KerasSequenceCNN<a class="headerlink" href="#kerassequencecnn" title="Link to this heading">¶</a></h3>
+<p>A CNN-based classifier for sequence datasets. Should be used in combination with <code class="xref py py-obj docutils literal notranslate"><span class="pre">source.encodings.onehot.OneHotEncoder.OneHotEncoder</span></code>.
+This classifier integrates the CNN proposed by Mason et al., the original code can be found at: <a class="reference external" href="https://github.com/dahjan/DMS_opt/blob/master/scripts/CNN.py">https://github.com/dahjan/DMS_opt/blob/master/scripts/CNN.py</a></p>
+<p>Note: make sure keras and tensorflow dependencies are installed (see installation instructions).</p>
+<p>Reference:
+Derek M. Mason, Simon Friedensohn, Cédric R. Weber, Christian Jordi, Bastian Wagner, Simon M. Men1, Roy A. Ehling,
+Lucia Bonati, Jan Dahinden, Pablo Gainza, Bruno E. Correia and Sai T. Reddy
+‘Optimization of therapeutic antibodies by predicting antigen specificity from antibody sequence via deep learning’.
+Nat Biomed Eng 5, 600–612 (2021). <a class="reference external" href="https://doi.org/10.1038/s41551-021-00699-9">https://doi.org/10.1038/s41551-021-00699-9</a></p>
+<p><strong>Specification arguments:</strong></p>
+<ul>
+<li><p>units_per_layer (list): A nested list specifying the layers of the CNN. The first element in each nested list defines the layer type, other elements define the layer parameters.
+Valid layer types are: CONV (keras.layers.Conv1D), DROP (keras.layers.Dropout), POOL (keras.layers.MaxPool1D), FLAT (keras.layers.Flatten), DENSE (keras.layers.Dense).
+The parameters per layer type are as follows:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>[CONV, &lt;filters&gt;, &lt;kernel_size&gt;, &lt;strides&gt;]</p></li>
+<li><p>[DROP, &lt;rate&gt;]</p></li>
+<li><p>[POOL, &lt;pool_size&gt;, &lt;strides&gt;]</p></li>
+<li><p>[FLAT]</p></li>
+<li><p>[DENSE, &lt;units&gt;]</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>activation (str): The Activation function to use in the convolutional or dense layers. Activation functions can be chosen from keras.activations. For example, rely or softmax. By default, relu is used.</p></li>
+<li><p>training_percentage (float): The fraction of sequences that will be randomly assigned to form the training set (the rest will be the validation set). Should be a value between 0 and 1. By default, training_percentage is 0.7.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_cnn</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">KerasSequenceCNN</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">training_percentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
+<span class="w">                </span><span class="nt">units_per_layer</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">CONV</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">400</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">DROP</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.5</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">POOL</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">FLAT</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">DENSE</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">50</span><span class="p p-Indicator">]]</span>
+<span class="w">                </span><span class="nt">activation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">relu</span>
+</pre></div>
+</div>
+</section>
+<section id="logregressioncustompenalty">
+<h3>LogRegressionCustomPenalty<a class="headerlink" href="#logregressioncustompenalty" title="Link to this heading">¶</a></h3>
+<p>Logistic Regression with custom penalty factors for specific features.</p>
+<p><strong>Specification arguments</strong>:</p>
+<ul class="simple">
+<li><p>non_penalized_features (list): List of feature names that should not be penalized.</p></li>
+<li><p>non_penalized_encodings (list): List of encoding names (class names) whose features should not be penalized. This
+parameter can be used only in combination with CompositeEncoder. None fo the features from the specified encodings
+will be penalized. If both non_penalized_features and non_penalized_encodings are provided, the union of the two
+will be used.</p></li>
+</ul>
+<p>Other supported arguments are inherited from LogitNet of python-glmnet package and will be directly passed to it.
+n_jobs will be overwritten to use the number of CPUs specified for the instruction (e.g. in TrainMLModel).</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">custom_log_reg</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">LogRegressionCustomPenalty</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">            </span><span class="nt">n_lambda</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">            </span><span class="nt">non_penalized_features</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">            </span><span class="nt">non_penalized_encodings</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;Metadata&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">            </span><span class="nt">random_state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">42</span>
+</pre></div>
+</div>
+</section>
+<section id="logisticregression">
+<h3>LogisticRegression<a class="headerlink" href="#logisticregression" title="Link to this heading">¶</a></h3>
+<p>This is a wrapper of scikit-learn’s LogisticRegression class. Please see the
+<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html">LogisticRegression scikit-learn documentation</a>
+of LogisticRegression for the parameters.</p>
+<p>Note: if you are interested in plotting the coefficients of the logistic regression model,
+consider running the <a class="reference internal" href="reports.html#coefficients"><span class="std std-ref">Coefficients</span></a> report.</p>
+<p>Scikit-learn models can be trained in two modes:</p>
+<p>1. Creating a model using a given set of hyperparameters, and relying on the selection and assessment loop in the
+TrainMLModel instruction to select the optimal model.</p>
+<p>2. Passing a range of different hyperparameters to LogisticRegression, and using a third layer of nested cross-validation
+to find the optimal hyperparameters through grid search. In this case, only the LogisticRegression model with the optimal
+hyperparameter settings is further used in the inner selection loop of the TrainMLModel instruction.</p>
+<p>By default, mode 1 is used. In order to use mode 2, model_selection_cv and model_selection_n_folds must be set.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>LogisticRegression (dict): Under this key, hyperparameters can be specified that will be passed to the scikit-learn class.
+Any scikit-learn hyperparameters can be specified here. In mode 1, a single value must be specified for each of the scikit-learn
+hyperparameters. In mode 2, it is possible to specify a range of different hyperparameters values in a list. It is also allowed
+to mix lists and single values in mode 2, in which case the grid search will only be done for the lists, while the
+single-value hyperparameters will be fixed.
+In addition to the scikit-learn hyperparameters, parameter show_warnings (True/False) can be specified here. This determines
+whether scikit-learn warnings, such as convergence warnings, should be printed. By default show_warnings is True.</p></li>
+<li><p>model_selection_cv (bool): If any of the hyperparameters under LogisticRegression is a list and model_selection_cv is True,
+a grid search will be done over the given hyperparameters, using the number of folds specified in model_selection_n_folds.
+By default, model_selection_cv is False.</p></li>
+<li><p>model_selection_n_folds (int): The number of folds that should be used for the cross validation grid search if model_selection_cv is True.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_logistic_regression</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined method name</span>
+<span class="w">            </span><span class="nt">LogisticRegression</span><span class="p">:</span><span class="w"> </span><span class="c1"># name of the ML method</span>
+<span class="w">                </span><span class="c1"># sklearn parameters (same names as in original sklearn class)</span>
+<span class="w">                </span><span class="nt">penalty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">l1</span><span class="w"> </span><span class="c1"># always use penalty l1</span>
+<span class="w">                </span><span class="nt">C</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.01</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">10</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">100</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># find the optimal value for C</span>
+<span class="w">                </span><span class="c1"># Additional parameter that determines whether to print convergence warnings</span>
+<span class="w">                </span><span class="nt">show_warnings</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">            </span><span class="c1"># if any of the parameters under LogisticRegression is a list and model_selection_cv is True,</span>
+<span class="w">            </span><span class="c1"># a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,</span>
+<span class="w">            </span><span class="c1"># and the optimal model will be selected</span>
+<span class="w">            </span><span class="nt">model_selection_cv</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">            </span><span class="nt">model_selection_n_folds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">        </span><span class="c1"># alternative way to define ML method with default values:</span>
+<span class="w">        </span><span class="nt">my_default_logistic_regression</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LogisticRegression</span>
+</pre></div>
+</div>
+</section>
+<section id="precomputedknn">
+<h3>PrecomputedKNN<a class="headerlink" href="#precomputedknn" title="Link to this heading">¶</a></h3>
+<p>This is a wrapper of scikit-learn’s KNeighborsClassifier class.
+This ML method takes a pre-computed distance matrix, as created by the <a class="reference internal" href="encodings.html#distance"><span class="std std-ref">Distance</span></a> or <a class="reference internal" href="encodings.html#compairrdistance"><span class="std std-ref">CompAIRRDistance</span></a> encoders.
+If you would like to use a different encoding in combination with KNN, please use <a class="reference internal" href="#knn"><span class="std std-ref">KNN</span></a> instead.</p>
+<p>Please see the <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html">KNN scikit-learn documentation</a>
+of KNeighborsClassifier for the parameters.</p>
+<p>Scikit-learn models can be trained in two modes:</p>
+<p>1. Creating a model using a given set of hyperparameters, and relying on the selection and assessment loop in the
+TrainMLModel instruction to select the optimal model.</p>
+<p>2. Passing a range of different hyperparameters to KNN, and using a third layer of nested cross-validation
+to find the optimal hyperparameters through grid search. In this case, only the KNN model with the optimal
+hyperparameter settings is further used in the inner selection loop of the TrainMLModel instruction.</p>
+<p>By default, mode 1 is used. In order to use mode 2, model_selection_cv and model_selection_n_folds must be set.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>KNN (dict): Under this key, hyperparameters can be specified that will be passed to the scikit-learn class.
+Any scikit-learn hyperparameters can be specified here. In mode 1, a single value must be specified for each of the scikit-learn
+hyperparameters. In mode 2, it is possible to specify a range of different hyperparameters values in a list. It is also allowed
+to mix lists and single values in mode 2, in which case the grid search will only be done for the lists, while the
+single-value hyperparameters will be fixed.
+In addition to the scikit-learn hyperparameters, parameter show_warnings (True/False) can be specified here. This determines
+whether scikit-learn warnings, such as convergence warnings, should be printed. By default show_warnings is True.</p></li>
+<li><p>model_selection_cv (bool): If any of the hyperparameters under KNN is a list and model_selection_cv is True,
+a grid search will be done over the given hyperparameters, using the number of folds specified in model_selection_n_folds.
+By default, model_selection_cv is False.</p></li>
+<li><p>model_selection_n_folds (int): The number of folds that should be used for the cross validation grid search if model_selection_cv is True.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_knn_method</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">PrecomputedKNN</span><span class="p">:</span>
+<span class="w">                </span><span class="c1"># sklearn parameters (same names as in original sklearn class)</span>
+<span class="w">                </span><span class="nt">weights</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">uniform</span><span class="w"> </span><span class="c1"># always use this setting for weights</span>
+<span class="w">                </span><span class="nt">n_neighbors</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">10</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">15</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># find the optimal number of neighbors</span>
+<span class="w">                </span><span class="c1"># Additional parameter that determines whether to print convergence warnings</span>
+<span class="w">                </span><span class="nt">show_warnings</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">            </span><span class="c1"># if any of the parameters under KNN is a list and model_selection_cv is True,</span>
+<span class="w">            </span><span class="c1"># a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,</span>
+<span class="w">            </span><span class="c1"># and the optimal model will be selected</span>
+<span class="w">            </span><span class="nt">model_selection_cv</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">            </span><span class="nt">model_selection_n_folds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">        </span><span class="c1"># alternative way to define ML method with default values:</span>
+<span class="w">        </span><span class="nt">my_default_knn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PrecomputedKNN</span>
+</pre></div>
+</div>
+</section>
+<section id="probabilisticbinaryclassifier">
+<h3>ProbabilisticBinaryClassifier<a class="headerlink" href="#probabilisticbinaryclassifier" title="Link to this heading">¶</a></h3>
+<p>ProbabilisticBinaryClassifier predicts the class assignment in binary classification case based on encoding examples by number of
+successful trials and total number of trials. It models this ratio by one beta distribution per class and predicts the class of the new
+examples using log-posterior odds ratio with threshold at 0.</p>
+<p>ProbabilisticBinaryClassifier is based on the paper (details on the classification can be found in the Online Methods section):
+Emerson, Ryan O., William S. DeWitt, Marissa Vignali, Jenna Gravley, Joyce K. Hu, Edward J. Osborne, Cindy Desmarais, et al.
+‘Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire’.
+Nature Genetics 49, no. 5 (May 2017): 659–65. <a class="reference external" href="https://doi.org/10.1038/ng.3822">doi.org/10.1038/ng.3822</a>.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>max_iterations (int): maximum number of iterations while optimizing the parameters of the beta distribution (same for both classes)</p></li>
+<li><p>update_rate (float): how much the computed gradient should influence the updated value of the parameters of the beta distribution</p></li>
+<li><p>likelihood_threshold (float): at which threshold to stop the optimization (default -1e-10)</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_probabilistic_classifier</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined name of the ML method</span>
+<span class="w">            </span><span class="nt">ProbabilisticBinaryClassifier</span><span class="p">:</span><span class="w"> </span><span class="c1"># method name</span>
+<span class="w">                </span><span class="nt">max_iterations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">                </span><span class="nt">update_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+</pre></div>
+</div>
+</section>
+<section id="randomforestclassifier">
+<h3>RandomForestClassifier<a class="headerlink" href="#randomforestclassifier" title="Link to this heading">¶</a></h3>
+<p>This is a wrapper of scikit-learn’s RandomForestClassifier class. Please see the
+<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html">RandomForestClassifier scikit-learn documentation</a>
+of RandomForestClassifier for the parameters.</p>
+<p>Note: if you are interested in plotting the coefficients of the random forest classifier model,
+consider running the <a class="reference internal" href="reports.html#coefficients"><span class="std std-ref">Coefficients</span></a> report.</p>
+<p>Scikit-learn models can be trained in two modes:</p>
+<p>1. Creating a model using a given set of hyperparameters, and relying on the selection and assessment loop in the
+TrainMLModel instruction to select the optimal model.</p>
+<p>2. Passing a range of different hyperparameters to RandomForestClassifier, and using a third layer of nested cross-validation
+to find the optimal hyperparameters through grid search. In this case, only the RandomForestClassifier model with the optimal
+hyperparameter settings is further used in the inner selection loop of the TrainMLModel instruction.</p>
+<p>By default, mode 1 is used. In order to use mode 2, model_selection_cv and model_selection_n_folds must be set.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>RandomForestClassifier (dict): Under this key, hyperparameters can be specified that will be passed to the scikit-learn class.
+Any scikit-learn hyperparameters can be specified here. In mode 1, a single value must be specified for each of the scikit-learn
+hyperparameters. In mode 2, it is possible to specify a range of different hyperparameters values in a list. It is also allowed
+to mix lists and single values in mode 2, in which case the grid search will only be done for the lists, while the
+single-value hyperparameters will be fixed.
+In addition to the scikit-learn hyperparameters, parameter show_warnings (True/False) can be specified here. This determines
+whether scikit-learn warnings, such as convergence warnings, should be printed. By default show_warnings is True.</p></li>
+<li><p>model_selection_cv (bool): If any of the hyperparameters under RandomForestClassifier is a list and model_selection_cv is True,
+a grid search will be done over the given hyperparameters, using the number of folds specified in model_selection_n_folds.
+By default, model_selection_cv is False.</p></li>
+<li><p>model_selection_n_folds (int): The number of folds that should be used for the cross validation grid search if model_selection_cv is True.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_random_forest_classifier</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined method name</span>
+<span class="w">            </span><span class="nt">RandomForestClassifier</span><span class="p">:</span><span class="w"> </span><span class="c1"># name of the ML method</span>
+<span class="w">                </span><span class="c1"># sklearn parameters (same names as in original sklearn class)</span>
+<span class="w">                </span><span class="nt">random_state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"> </span><span class="c1"># always use this value for random state</span>
+<span class="w">                </span><span class="nt">n_estimators</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">10</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">50</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">100</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># find the optimal number of trees in the forest</span>
+<span class="w">                </span><span class="c1"># Additional parameter that determines whether to print convergence warnings</span>
+<span class="w">                </span><span class="nt">show_warnings</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">            </span><span class="c1"># if any of the parameters under RandomForestClassifier is a list and model_selection_cv is True,</span>
+<span class="w">            </span><span class="c1"># a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,</span>
+<span class="w">            </span><span class="c1"># and the optimal model will be selected</span>
+<span class="w">            </span><span class="nt">model_selection_cv</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">            </span><span class="nt">model_selection_n_folds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">        </span><span class="c1"># alternative way to define ML method with default values:</span>
+<span class="w">        </span><span class="nt">my_default_random_forest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RandomForestClassifier</span>
+</pre></div>
+</div>
+</section>
+<section id="receptorcnn">
+<h3>ReceptorCNN<a class="headerlink" href="#receptorcnn" title="Link to this heading">¶</a></h3>
+<p>A CNN which separately detects motifs using CNN kernels in each chain of paired receptor data, combines the kernel activations into a unique
+representation of the receptor and uses this representation to predict the antigen binding.</p>
+<figure class="align-default" id="id3">
+<a class="reference internal image-reference" href="../_images/receptor_cnn_immuneML.png"><img alt="../_images/receptor_cnn_immuneML.png" src="../_images/receptor_cnn_immuneML.png" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The architecture of the CNN for paired-chain receptor data</span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>Requires one-hot encoded data as input (as produced by <a class="reference internal" href="encodings.html#onehot"><span class="std std-ref">OneHot</span></a> encoder), where use_positional_info must be set to True.</p>
+<p>Notes:</p>
+<ul class="simple">
+<li><p>ReceptorCNN can only be used with ReceptorDatasets, it does not work with SequenceDatasets</p></li>
+<li><p>ReceptorCNN can only be used for binary classification, not multi-class classification.</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>kernel_count (count): number of kernels that will look for motifs for one chain</p></li>
+<li><p>kernel_size (list): sizes of the kernels = how many amino acids to consider at the same time in the chain sequence, can be a tuple of values; e.g. for value [3, 4] of kernel_size, kernel_count*len(kernel_size) kernels will be created, with kernel_count kernels of size 3 and kernel_count kernels of size 4 per chain</p></li>
+<li><p>positional_channels (int): how many positional channels where included in one-hot encoding of the receptor sequences (<a class="reference internal" href="encodings.html#onehot"><span class="std std-ref">OneHot</span></a> encoder adds 3 positional channels positional information is enabled)</p></li>
+<li><p>sequence_type (SequenceType): type of the sequence</p></li>
+<li><p>device: which device to use for the model (cpu or gpu) - for more details see PyTorch documentation on device parameter</p></li>
+<li><p>number_of_threads (int): how many threads to use</p></li>
+<li><p>random_seed (int): number used as a seed for random initialization</p></li>
+<li><p>learning_rate (float): learning rate scaling the step size for optimization algorithm</p></li>
+<li><p>iteration_count (int): for how many iterations to train the model</p></li>
+<li><p>l1_weight_decay (float): weight decay l1 value for the CNN; encourages sparser representations</p></li>
+<li><p>l2_weight_decay (float): weight decay l2 value for the CNN; shrinks weight coefficients towards zero</p></li>
+<li><p>batch_size (int): how many receptors to process at once</p></li>
+<li><p>training_percentage (float): what percentage of data to use for training (the rest will be used for validation); values between 0 and 1</p></li>
+<li><p>evaluate_at (int): when to evaluate the model, e.g. every 100 iterations</p></li>
+<li><p>background_probabilities: used for rescaling the kernel values to produce information gain matrix; represents the background probability of each amino acid (without positional information); if not specified, uniform background is assumed</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_receptor_cnn</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">ReceptorCNN</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">kernel_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">                </span><span class="nt">kernel_size</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">3</span><span class="p p-Indicator">]</span>
+<span class="w">                </span><span class="nt">positional_channels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">                </span><span class="nt">sequence_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">amino_acid</span>
+<span class="w">                </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cpu</span>
+<span class="w">                </span><span class="nt">number_of_threads</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16</span>
+<span class="w">                </span><span class="nt">random_seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">                </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="w">                </span><span class="nt">iteration_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
+<span class="w">                </span><span class="nt">l1_weight_decay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">                </span><span class="nt">l2_weight_decay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">                </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span>
+</pre></div>
+</div>
+</section>
+<section id="svc">
+<h3>SVC<a class="headerlink" href="#svc" title="Link to this heading">¶</a></h3>
+<p>This is a wrapper of scikit-learn’s LinearSVC class. Please see the
+<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html">LinearSVC scikit-learn documentation</a>
+of SVC for the parameters.</p>
+<p>Note: if you are interested in plotting the coefficients of the SVC model,
+consider running the <a class="reference internal" href="reports.html#coefficients"><span class="std std-ref">Coefficients</span></a> report.</p>
+<p>Scikit-learn models can be trained in two modes:</p>
+<p>1. Creating a model using a given set of hyperparameters, and relying on the selection and assessment loop in the
+TrainMLModel instruction to select the optimal model.</p>
+<p>2. Passing a range of different hyperparameters to SVC, and using a third layer of nested cross-validation
+to find the optimal hyperparameters through grid search. In this case, only the SVC model with the optimal
+hyperparameter settings is further used in the inner selection loop of the TrainMLModel instruction.</p>
+<p>By default, mode 1 is used. In order to use mode 2, model_selection_cv and model_selection_n_folds must be set.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>SVC (dict): Under this key, hyperparameters can be specified that will be passed to the scikit-learn class.
+Any scikit-learn hyperparameters can be specified here. In mode 1, a single value must be specified for each of the scikit-learn
+hyperparameters. In mode 2, it is possible to specify a range of different hyperparameters values in a list. It is also allowed
+to mix lists and single values in mode 2, in which case the grid search will only be done for the lists, while the
+single-value hyperparameters will be fixed.
+In addition to the scikit-learn hyperparameters, parameter show_warnings (True/False) can be specified here. This determines
+whether scikit-learn warnings, such as convergence warnings, should be printed. By default show_warnings is True.</p></li>
+<li><p>model_selection_cv (bool): If any of the hyperparameters under SVC is a list and model_selection_cv is True,
+a grid search will be done over the given hyperparameters, using the number of folds specified in model_selection_n_folds.
+By default, model_selection_cv is False.</p></li>
+<li><p>model_selection_n_folds (int): The number of folds that should be used for the cross validation grid search if model_selection_cv is True.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_svc</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined method name</span>
+<span class="w">            </span><span class="nt">SVC</span><span class="p">:</span><span class="w"> </span><span class="c1"># name of the ML method</span>
+<span class="w">                </span><span class="c1"># sklearn parameters (same names as in original sklearn class)</span>
+<span class="w">                </span><span class="nt">C</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.01</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">10</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">100</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># find the optimal value for C</span>
+<span class="w">                </span><span class="c1"># Additional parameter that determines whether to print convergence warnings</span>
+<span class="w">                </span><span class="nt">show_warnings</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">            </span><span class="c1"># if any of the parameters under SVC is a list and model_selection_cv is True,</span>
+<span class="w">            </span><span class="c1"># a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,</span>
+<span class="w">            </span><span class="c1"># and the optimal model will be selected</span>
+<span class="w">            </span><span class="nt">model_selection_cv</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">            </span><span class="nt">model_selection_n_folds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">        </span><span class="c1"># alternative way to define ML method with default values:</span>
+<span class="w">        </span><span class="nt">my_default_svc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SVC</span>
+</pre></div>
+</div>
+</section>
+<section id="svm">
+<h3>SVM<a class="headerlink" href="#svm" title="Link to this heading">¶</a></h3>
+<p>This is a wrapper of scikit-learn’s SVC class. Please see the
+<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html">SVC scikit-learn documentation</a>
+of SVC for the parameters.</p>
+<p>Note: if you are interested in plotting the coefficients of the SVM model,
+consider running the <a class="reference internal" href="reports.html#coefficients"><span class="std std-ref">Coefficients</span></a> report.</p>
+<p>Scikit-learn models can be trained in two modes:</p>
+<p>1. Creating a model using a given set of hyperparameters, and relying on the selection and assessment loop in the
+TrainMLModel instruction to select the optimal model.</p>
+<p>2. Passing a range of different hyperparameters to SVM, and using a third layer of nested cross-validation
+to find the optimal hyperparameters through grid search. In this case, only the SVM model with the optimal
+hyperparameter settings is further used in the inner selection loop of the TrainMLModel instruction.</p>
+<p>By default, mode 1 is used. In order to use mode 2, model_selection_cv and model_selection_n_folds must be set.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>SVM (dict): Under this key, hyperparameters can be specified that will be passed to the scikit-learn class.
+Any scikit-learn hyperparameters can be specified here. In mode 1, a single value must be specified for each of the scikit-learn
+hyperparameters. In mode 2, it is possible to specify a range of different hyperparameters values in a list. It is also allowed
+to mix lists and single values in mode 2, in which case the grid search will only be done for the lists, while the
+single-value hyperparameters will be fixed.
+In addition to the scikit-learn hyperparameters, parameter show_warnings (True/False) can be specified here. This determines
+whether scikit-learn warnings, such as convergence warnings, should be printed. By default show_warnings is True.</p></li>
+<li><p>model_selection_cv (bool): If any of the hyperparameters under SVM is a list and model_selection_cv is True,
+a grid search will be done over the given hyperparameters, using the number of folds specified in model_selection_n_folds.
+By default, model_selection_cv is False.</p></li>
+<li><p>model_selection_n_folds (int): The number of folds that should be used for the cross validation grid search if model_selection_cv is True.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_svm</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined method name</span>
+<span class="w">            </span><span class="nt">SVM</span><span class="p">:</span><span class="w"> </span><span class="c1"># name of the ML method</span>
+<span class="w">                </span><span class="c1"># sklearn parameters (same names as in original sklearn class)</span>
+<span class="w">                </span><span class="nt">C</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.01</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">10</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">100</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># find the optimal value for C</span>
+<span class="w">                </span><span class="nt">kernel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">linear</span>
+<span class="w">                </span><span class="c1"># Additional parameter that determines whether to print convergence warnings</span>
+<span class="w">                </span><span class="nt">show_warnings</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">            </span><span class="c1"># if any of the parameters under SVM is a list and model_selection_cv is True,</span>
+<span class="w">            </span><span class="c1"># a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,</span>
+<span class="w">            </span><span class="c1"># and the optimal model will be selected</span>
+<span class="w">            </span><span class="nt">model_selection_cv</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">            </span><span class="nt">model_selection_n_folds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">        </span><span class="c1"># alternative way to define ML method with default values:</span>
+<span class="w">        </span><span class="nt">my_default_svm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SVM</span>
+</pre></div>
+</div>
+</section>
+<section id="tcrdistclassifier">
+<h3>TCRdistClassifier<a class="headerlink" href="#tcrdistclassifier" title="Link to this heading">¶</a></h3>
+<p>Implementation of a nearest neighbors classifier based on TCR distances as presented in
+Dash P, Fiore-Gartland AJ, Hertz T, et al. Quantifiable predictive features define epitope-specific T cell receptor repertoires.
+Nature. 2017; 547(7661):89-93. <a class="reference external" href="https://www.nature.com/articles/nature22383">doi:10.1038/nature22383</a>.</p>
+<p>This method is implemented using scikit-learn’s KNeighborsClassifier with k determined at runtime from the training dataset size and weights
+linearly scaled to decrease with the distance of examples.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>percentage (float): percentage of nearest neighbors to consider when determining receptor specificity based on known receptors (between 0 and 1)</p></li>
+<li><p>show_warnings (bool): whether to show warnings generated by scikit-learn, by default this is True.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_tcr_method</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">TCRdistClassifier</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">percentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="w">                </span><span class="nt">show_warnings</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="clustering-methods">
+<h2><strong>Clustering methods</strong><a class="headerlink" href="#clustering-methods" title="Link to this heading">¶</a></h2>
+<p>Clustering methods are algorithms which can be used to cluster repertoires, receptors or
+sequences without using external label information (such as disease or antigen binding state)</p>
+<p>These methods can be used in the <a class="reference internal" href="instructions.html#clustering"><span class="std std-ref">Clustering</span></a> instruction.</p>
+<section id="agglomerativeclustering">
+<h3>AgglomerativeClustering<a class="headerlink" href="#agglomerativeclustering" title="Link to this heading">¶</a></h3>
+<p>Agglomerative clustering method which wraps scikit-learn’s clustering of the same name.
+Input arguments for the method are the same as supported by scikit-learn (see <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html">AgglomerativeClustering scikit-learn documentation</a> for details).</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_agglomerative_clustering</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">AgglomerativeClustering</span><span class="p">:</span>
+<span class="w">                </span><span class="c1"># arguments as defined by scikit-learn</span>
+<span class="w">                </span><span class="nt">n_clusters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">                </span><span class="nt">linkage</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;ward&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="dbscan">
+<h3>DBSCAN<a class="headerlink" href="#dbscan" title="Link to this heading">¶</a></h3>
+<p>DBSCAN method which wraps scikit-learn’s clustering of the same name.
+Input arguments for the method are the same as supported by scikit-learn (see <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html">DBSCAN scikit-learn documentation</a> for details).</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_dbscan</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">DBSCAN</span><span class="p">:</span>
+<span class="w">                </span><span class="c1"># arguments as defined by scikit-learn</span>
+<span class="w">                </span><span class="nt">eps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w">                </span><span class="nt">min_samples</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+</pre></div>
+</div>
+</section>
+<section id="hdbscan">
+<h3>HDBSCAN<a class="headerlink" href="#hdbscan" title="Link to this heading">¶</a></h3>
+<p>HDBSCAN method which wraps scikit-learn’s clustering of the same name.
+Input arguments for the method are the same as supported by scikit-learn (see <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html">DBSCAN scikit-learn documentation</a> for details).</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_hdbscan</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">HDBSCAN</span><span class="p">:</span>
+<span class="w">                </span><span class="c1"># arguments as defined by scikit-learn</span>
+<span class="w">                </span><span class="nt">min_cluster_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+</pre></div>
+</div>
+</section>
+<section id="kmeans">
+<h3>KMeans<a class="headerlink" href="#kmeans" title="Link to this heading">¶</a></h3>
+<p>k-means clustering method which wraps scikit-learn’s KMeans. Input arguments for the method are the
+same as supported by scikit-learn (see <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html">KMeans scikit-learn documentation</a> for details).</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_kmeans</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">KMeans</span><span class="p">:</span>
+<span class="w">                </span><span class="c1"># arguments as defined by scikit-learn</span>
+<span class="w">                </span><span class="nt">n_clusters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="generative-models">
+<h2><strong>Generative models</strong><a class="headerlink" href="#generative-models" title="Link to this heading">¶</a></h2>
+<p>Generative models are algorithms which can be trained to learn patterns in existing datasets,
+and then be used to generate new synthetic datasets.</p>
+<p>These methods can be used in the <a class="reference internal" href="instructions.html#traingenmodel"><span class="std std-ref">TrainGenModel</span></a> instruction, and previously trained
+models can be used to generate data using the <a class="reference internal" href="instructions.html#applygenmodel"><span class="std std-ref">ApplyGenModel</span></a> instruction.</p>
+<section id="experimentalimport">
+<h3>ExperimentalImport<a class="headerlink" href="#experimentalimport" title="Link to this heading">¶</a></h3>
+<p>Allows to import existing experimental data and do annotations and simulations on top of them.
+This model should be used only for LIgO simulation and not with TrainGenModel instruction.</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">generative_model</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ExperimentalImport</span>
+<span class="w">            </span><span class="nt">import_format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AIRR</span>
+<span class="w">            </span><span class="nt">tmp_import_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./tmp/</span>
+<span class="w">            </span><span class="nt">import_params</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/files/</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span><span class="w"> </span><span class="c1"># what part of the sequence to import</span>
+<span class="w">                </span><span class="nt">column_mapping</span><span class="p">:</span><span class="w"> </span><span class="c1"># column mapping AIRR: immuneML</span>
+<span class="w">                    </span><span class="nt">junction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence</span>
+<span class="w">                    </span><span class="nt">junction_aa</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_aa</span>
+<span class="w">                    </span><span class="nt">locus</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chain</span>
+</pre></div>
+</div>
+</section>
+<section id="olga">
+<h3>OLGA<a class="headerlink" href="#olga" title="Link to this heading">¶</a></h3>
+<p>This is a wrapper for the OLGA package as described by Sethna et al. 2019 (OLGA package on PyPI or GitHub:
+<a class="reference external" href="https://github.com/statbiophys/OLGA">https://github.com/statbiophys/OLGA</a> ).
+This model should be used only for LIgO simulation and is not yet supported for use with TrainGenModel instruction.</p>
+<p>Reference:</p>
+<p>Zachary Sethna, Yuval Elhanati, Curtis G Callan, Jr, Aleksandra M Walczak, Thierry Mora, OLGA: fast computation of
+generation probabilities of B- and T-cell receptor amino acid sequences and motifs, Bioinformatics, Volume 35,
+Issue 17, 1 September 2019, Pages 2974–2981, <a class="reference external" href="https://doi.org/10.1093/bioinformatics/btz035">https://doi.org/10.1093/bioinformatics/btz035</a></p>
+<p>Note:</p>
+<ul class="simple">
+<li><p>OLGA generates sequences that correspond to IMGT junction and are used for matching as such. See the
+<a class="reference external" href="https://github.com/statbiophys/OLGA">https://github.com/statbiophys/OLGA</a> for more details.</p></li>
+<li><p>Gene names are as provided in OLGA (either in default models or in the user-specified model files). For
+simulation, one should use gene names in the same format.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While this is a generative model, in the current version of immuneML it cannot be used in combination with TrainGenModel or
+ApplyGenModel instruction. If you want to use OLGA for sequence simulation, see <a class="reference internal" href="../tutorials/ligo_simulation_tutorials.html#dataset-simulation-with-ligo"><span class="std std-ref">Dataset simulation with LIgO</span></a>.</p>
+</div>
+<p>`
+<strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>model_path (str): if not default model, this parameter should point to a folder where the four OLGA/IGOR format
+files are stored (could also be inferred from some experimental data)</p></li>
+<li><p>default_model_name (str): if not using custom models, one of the OLGA default models could be specified here;
+the value should be the same as it would be passed to command line in OLGA: e.g., humanTRB, human IGH</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">generative_model</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OLGA</span>
+<span class="w">            </span><span class="nt">model_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="w">            </span><span class="nt">default_model_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">humanTRB</span>
+</pre></div>
+</div>
+</section>
+<section id="pwm">
+<h3>PWM<a class="headerlink" href="#pwm" title="Link to this heading">¶</a></h3>
+<p>This is a baseline implementation of a positional weight matrix. It is estimated from a set of sequences for each
+of the different lengths that appear in the dataset.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>locus (str): which chain is generated (for now, it is only assigned to the generated sequences)</p></li>
+<li><p>sequence_type (str): amino_acid or nucleotide</p></li>
+<li><p>region_type (str): which region type to use (e.g., IMGT_CDR3), this is only assigned to the generated sequences</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_pwm</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">PWM</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">locus</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">beta</span>
+<span class="w">                </span><span class="nt">sequence_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">amino_acid</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span>
+</pre></div>
+</div>
+</section>
+<section id="progen">
+<h3>ProGen<a class="headerlink" href="#progen" title="Link to this heading">¶</a></h3>
+<p>ProGen is a transformer-based language model for protein sequences. This class allows fine-tuning of a pre-trained
+ProGen model on immune receptor sequences and generating new sequences. It is based on the ProGen2 implementation
+available at <a class="reference external" href="https://github.com/salesforce/progen">https://github.com/salesforce/progen</a>. It uses the sequences as given in “junction_aa” field in the
+input dataset.</p>
+<p>References:</p>
+<p>Nijkamp, E., Ruffolo, J. A., Weinstein, E. N., Naik, N., &amp; Madani, A. (2023).
+Exploring the boundaries of protein language models. Cell Systems, 14(11), 968–978.e3.
+<a class="reference external" href="https://doi.org/10.1016/j.cels.2023.10.002">https://doi.org/10.1016/j.cels.2023.10.002</a></p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>locus (str): which locus the sequence come from, e.g., TRB</p></li>
+<li><p>tokenizer_path (Path): path to the ProGen tokenizer file (tokenizer.json)</p></li>
+<li><p>trained_model_path (Path): path to the pre-trained ProGen model directory</p></li>
+<li><p>num_frozen_layers (int): number of transformer layers to freeze during fine-tuning</p></li>
+<li><p>num_epochs (int): number of epochs for fine-tuning</p></li>
+<li><p>learning_rate (float): learning rate for fine-tuning</p></li>
+<li><p>device (str): device to use for training and inference (“cpu” or “cuda”)</p></li>
+<li><p>fp16 (bool): whether to use mixed precision training</p></li>
+<li><p>prefix_text (str): text to prepend to each sequence during fine-tuning</p></li>
+<li><p>suffix_text (str): text to append to each sequence during fine-tuning</p></li>
+<li><p>max_new_tokens (int): maximum number of new tokens to generate</p></li>
+<li><p>temperature (float): sampling temperature for sequence generation</p></li>
+<li><p>top_p (float): nucleus sampling parameter for sequence generation</p></li>
+<li><p>prompt (str): prompt text to start the generation</p></li>
+<li><p>num_gen_batches (int): number of batches to split generation into</p></li>
+<li><p>per_device_train_batch_size (int): batch size per device during fine-tuning</p></li>
+<li><p>remove_affixes (bool): whether to remove prefix and suffix from generated sequences</p></li>
+<li><p>seed (int): random seed for reproducibility</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">progen_model</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">ProGen</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">locus</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;beta&#39;</span>
+<span class="w">                </span><span class="nt">tokenizer_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/tokenizer.json&#39;</span>
+<span class="w">                </span><span class="nt">trained_model_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/path/to/pretrained/progen/model&#39;</span>
+<span class="w">                </span><span class="nt">num_frozen_layers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">27</span>
+<span class="w">                </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">                </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.00004</span>
+<span class="w">                </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;cuda&#39;</span>
+<span class="w">                </span><span class="nt">fp16</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">                </span><span class="nt">prefix_text</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&lt;|bos|&gt;1&#39;</span>
+<span class="w">                </span><span class="nt">suffix_text</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2&lt;|eos|&gt;&#39;</span>
+<span class="w">                </span><span class="nt">max_new_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1024</span>
+<span class="w">                </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">                </span><span class="nt">top_p</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.9</span>
+<span class="w">                </span><span class="nt">prompt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;1&#39;</span>
+<span class="w">                </span><span class="nt">num_gen_batches</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">                </span><span class="nt">per_device_train_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">                </span><span class="nt">remove_affixes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;progen_finetuned_model&#39;</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;IMGT_JUNCTION&#39;</span>
+<span class="w">                </span><span class="nt">seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">42</span>
+</pre></div>
+</div>
+</section>
+<section id="simplelstm">
+<h3>SimpleLSTM<a class="headerlink" href="#simplelstm" title="Link to this heading">¶</a></h3>
+<p>This is a simple generative model for receptor sequences based on LSTM.</p>
+<p>Similar models have been proposed in:</p>
+<p>Akbar, R. et al. (2022). In silico proof of principle of machine learning-based antibody design at unconstrained scale. mAbs, 14(1), 2031482. <a class="reference external" href="https://doi.org/10.1080/19420862.2022.2031482">https://doi.org/10.1080/19420862.2022.2031482</a></p>
+<p>Saka, K. et al. (2021). Antibody design using LSTM based deep generative model from phage display library for affinity maturation. Scientific Reports, 11(1), Article 1. <a class="reference external" href="https://doi.org/10.1038/s41598-021-85274-7">https://doi.org/10.1038/s41598-021-85274-7</a></p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>sequence_type (str): whether the model should work on amino_acid or nucleotide level</p></li>
+<li><p>hidden_size (int): how many LSTM cells should exist per layer</p></li>
+<li><p>num_layers (int): how many hidden LSTM layers should there be</p></li>
+<li><p>num_epochs (int): for how many epochs to train the model</p></li>
+<li><p>learning_rate (float): what learning rate to use for optimization</p></li>
+<li><p>batch_size (int): how many examples (sequences) to use for training for one batch</p></li>
+<li><p>embed_size (int): the dimension of the sequence embedding</p></li>
+<li><p>temperature (float): a higher temperature leads to faster yet more unstable learning</p></li>
+<li><p>prime_str (str): the initial sequence to start generating from</p></li>
+<li><p>seed (int): random seed for the model or None</p></li>
+<li><p>iter_to_report (int): number of epochs between training progress reports</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_simple_lstm</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">sequence_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">amino_acid</span>
+<span class="w">            </span><span class="nt">hidden_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+<span class="w">            </span><span class="nt">num_layers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">            </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span>
+<span class="w">            </span><span class="nt">learning_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
+<span class="w">            </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">            </span><span class="nt">embed_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+</pre></div>
+</div>
+</section>
+<section id="simplevae">
+<h3>SimpleVAE<a class="headerlink" href="#simplevae" title="Link to this heading">¶</a></h3>
+<p>SimpleVAE is a generative model on sequence level that relies on variational autoencoder. This type of model was
+proposed by Davidsen et al. 2019, and this implementation is inspired by their original implementation available
+at <a class="reference external" href="https://github.com/matsengrp/vampire">https://github.com/matsengrp/vampire</a>. It uses the sequences as given in “junction_aa” field in the input dataset.</p>
+<p>References:</p>
+<p>Davidsen, K., Olson, B. J., DeWitt, W. S., III, Feng, J., Harkins, E., Bradley, P., &amp; Matsen, F. A., IV. (2019).
+Deep generative models for T cell receptor protein sequences. eLife, 8, e46935. <a class="reference external" href="https://doi.org/10.7554/eLife.46935">https://doi.org/10.7554/eLife.46935</a></p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>locus (str): which locus the sequence come from, e.g., TRB</p></li>
+<li><p>beta (float): VAE hyperparameter that balanced the reconstruction loss and latent dimension regularization</p></li>
+<li><p>latent_dim (int): latent dimension of the VAE</p></li>
+<li><p>linear_nodes_count (int): in linear layers, how many nodes to use</p></li>
+<li><p>num_epochs (int): how many epochs to use for training</p></li>
+<li><p>batch_size (int): how many examples to consider at the same time</p></li>
+<li><p>j_gene_embed_dim (int or None): dimension of J gene embedding; if None, it defaults to the number of unique J genes in the training data</p></li>
+<li><p>v_gene_embed_dim (int or None): dimension of V gene embedding; if None, it defaults to the number of unique V genes in the training data</p></li>
+<li><p>cdr3_embed_dim (int or None): dimension of the cdr3 embedding; if None, it defaults to the size of the amino-acid alphabet (including padding)</p></li>
+<li><p>pretrains (int): how many times to attempt pretraining to initialize the weights and use warm-up for the beta hyperparameter before the main training process</p></li>
+<li><p>warmup_epochs (int): how many epochs to use for training where beta hyperparameter is linearly increased from 0 up to its max value; this is in addition to num_epochs set above</p></li>
+<li><p>patience (int): number of epochs to wait before the training is stopped when the loss is not improving</p></li>
+<li><p>iter_count_prob_estimation (int): how many iterations to use to estimate the log probability of the generated sequence (the more iterations, the better the estimated log probability)</p></li>
+<li><p>vocab (list): which letters (amino acids) are allowed - this is automatically filled for new models (no need to set)</p></li>
+<li><p>max_cdr3_len (int): what is the maximum cdr3 length - this is automatically filled for new models (no need to set)</p></li>
+<li><p>unique_v_genes (list): list of allowed V genes (this will be automatically filled from the dataset if not provided here manually)</p></li>
+<li><p>unique_j_genes (list): list of allowed J genes (this will be automatically filled from the dataset if not provided here manually)</p></li>
+<li><p>device (str): name of the device where to train the model (e.g., cpu)</p></li>
+<li><p>learning_rate (float): learning rate for the optimizer (default is 0.001)</p></li>
+<li><p>validation_split (float): what percentage of the data to use for validation (default is 0.1)</p></li>
+<li><p>seed (int): random seed for the model or None</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_vae</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">SimpleVAE</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">locus</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">beta</span>
+<span class="w">                </span><span class="nt">beta</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.75</span>
+<span class="w">                </span><span class="nt">latent_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">                </span><span class="nt">linear_nodes_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">75</span>
+<span class="w">                </span><span class="nt">num_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span>
+<span class="w">                </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
+<span class="w">                </span><span class="nt">j_gene_embed_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">13</span>
+<span class="w">                </span><span class="nt">v_gene_embed_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">                </span><span class="nt">cdr3_embed_dim</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">21</span>
+<span class="w">                </span><span class="nt">pretrains</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">                </span><span class="nt">warmup_epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">                </span><span class="nt">patience</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">                </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cpu</span>
+</pre></div>
+</div>
+</section>
+<section id="sonnia">
+<h3>SoNNia<a class="headerlink" href="#sonnia" title="Link to this heading">¶</a></h3>
+<p>SoNNia models the selection process of T and B cell receptor repertoires. It is based on the SoNNia Python package.
+It supports SequenceDataset as input, but not RepertoireDataset.</p>
+<p>Original publication:
+Isacchini, G., Walczak, A. M., Mora, T., &amp; Nourmohammad, A. (2021). Deep generative selection models of T and B
+cell receptor repertoires with soNNia. Proceedings of the National Academy of Sciences, 118(14), e2023141118.
+<a class="reference external" href="https://doi.org/10.1073/pnas.2023141118">https://doi.org/10.1073/pnas.2023141118</a></p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>locus (str): The locus of the receptor chain.</p></li>
+<li><p>batch_size (int): number of sequences to use in each batch</p></li>
+<li><p>epochs (int): number of epochs to train the model</p></li>
+<li><p>deep (bool): whether to use a deep model</p></li>
+<li><p>include_joint_genes (bool)</p></li>
+<li><p>n_gen_seqs (int)</p></li>
+<li><p>custom_model_path (str): path for the custom OLGA model if used</p></li>
+<li><p>default_model_name (str): name of the default OLGA model if used</p></li>
+<li><p>seed (int): random seed for the model or None</p></li>
+<li><p>num_processes (int): number of processes to use for sequence generation (default: 4)</p></li>
+</ul>
+<blockquote>
+<div><p><strong>YAML specification:</strong></p>
+</div></blockquote>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_sonnia_model</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">SoNNia</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1e4</span>
+<span class="w">                </span><span class="nt">epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">                </span><span class="nt">default_model_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">humanTRB</span>
+<span class="w">                </span><span class="nt">deep</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">                </span><span class="nt">include_joint_genes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">                </span><span class="nt">n_gen_seqs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="dimensionality-reduction-methods">
+<h2><strong>Dimensionality reduction methods</strong><a class="headerlink" href="#dimensionality-reduction-methods" title="Link to this heading">¶</a></h2>
+<p>Dimensionality reduction methods are algorithms which can be used to reduce the dimensionality
+of encoded datasets, in order to uncover and analyze patterns present in the data.</p>
+<p>These methods can be used in the <a class="reference internal" href="instructions.html#exploratoryanalysis"><span class="std std-ref">ExploratoryAnalysis</span></a> and <a class="reference internal" href="instructions.html#clustering"><span class="std std-ref">Clustering</span></a> instructions.</p>
+<section id="kernelpca">
+<h3>KernelPCA<a class="headerlink" href="#kernelpca" title="Link to this heading">¶</a></h3>
+<p>Principal component analysis (PCA) method which wraps scikit-learn’s KernelPCA, allowing for non-linear dimensionality
+reduction. Input arguments for the method are the
+same as supported by scikit-learn (see <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.KernelPCA.html">KernelPCA scikit-learn documentation</a> for details).</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_kernel_pca</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">KernelPCA</span><span class="p">:</span>
+<span class="w">                </span><span class="c1"># arguments as defined by scikit-learn</span>
+<span class="w">                </span><span class="nt">n_components</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">                </span><span class="nt">kernel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbf</span>
+</pre></div>
+</div>
+</section>
+<section id="pca">
+<h3>PCA<a class="headerlink" href="#pca" title="Link to this heading">¶</a></h3>
+<p>Principal component analysis (PCA) method which wraps scikit-learn’s PCA. Input arguments for the method are the
+same as supported by scikit-learn (see <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html#sklearn.decomposition.PCA">PCA scikit-learn documentation</a> for details).</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_pca</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">PCA</span><span class="p">:</span>
+<span class="w">                </span><span class="c1"># arguments as defined by scikit-learn</span>
+<span class="w">                </span><span class="nt">n_components</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</pre></div>
+</div>
+</section>
+<section id="tsne">
+<h3>TSNE<a class="headerlink" href="#tsne" title="Link to this heading">¶</a></h3>
+<p>t-distributed Stochastic Neighbor Embedding (t-SNE) method which wraps scikit-learn’s TSNE. It can be useful for
+visualizing high-dimensional data. Input arguments for the method are the
+same as supported by scikit-learn (see <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html#sklearn.manifold.TSNE">TSNE scikit-learn documentation</a> for details).</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_tsne</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">TSNE</span><span class="p">:</span>
+<span class="w">                </span><span class="c1"># arguments as defined by scikit-learn</span>
+<span class="w">                </span><span class="nt">n_components</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">                </span><span class="nt">init</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pca</span>
+</pre></div>
+</div>
+</section>
+<section id="umap">
+<h3>UMAP<a class="headerlink" href="#umap" title="Link to this heading">¶</a></h3>
+<p>Uniform manifold approximation and projection (UMAP) method which wraps umap-learn’s UMAP. Input arguments for the method are the
+same as supported by umap-learn (see <a class="reference external" href="https://umap-learn.readthedocs.io/en/latest/">UMAP in the umap-learn documentation</a> for details).</p>
+<p>Note that when providing the arguments for UMAP in the immuneML’s specification, it is not possible to set
+functions as input values (e.g., for the metric parameter, it has to be one of the predefined metrics available
+in umap-learn).</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_umap</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">UMAP</span><span class="p">:</span>
+<span class="w">                </span><span class="c1"># arguments as defined by umap-learn</span>
+<span class="w">                </span><span class="nt">n_components</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">                </span><span class="nt">n_neighbors</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15</span>
+<span class="w">                </span><span class="nt">metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">euclidean</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="reports.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Report parameters</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="encodings.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Encoding parameters</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2021-2025, Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">ML method parameters</a><ul>
+<li><a class="reference internal" href="#classifiers"><strong>Classifiers</strong></a><ul>
+<li><a class="reference internal" href="#binaryfeatureclassifier">BinaryFeatureClassifier</a></li>
+<li><a class="reference internal" href="#deeprc">DeepRC</a></li>
+<li><a class="reference internal" href="#gradientboosting">GradientBoosting</a></li>
+<li><a class="reference internal" href="#knn">KNN</a></li>
+<li><a class="reference internal" href="#kerassequencecnn">KerasSequenceCNN</a></li>
+<li><a class="reference internal" href="#logregressioncustompenalty">LogRegressionCustomPenalty</a></li>
+<li><a class="reference internal" href="#logisticregression">LogisticRegression</a></li>
+<li><a class="reference internal" href="#precomputedknn">PrecomputedKNN</a></li>
+<li><a class="reference internal" href="#probabilisticbinaryclassifier">ProbabilisticBinaryClassifier</a></li>
+<li><a class="reference internal" href="#randomforestclassifier">RandomForestClassifier</a></li>
+<li><a class="reference internal" href="#receptorcnn">ReceptorCNN</a></li>
+<li><a class="reference internal" href="#svc">SVC</a></li>
+<li><a class="reference internal" href="#svm">SVM</a></li>
+<li><a class="reference internal" href="#tcrdistclassifier">TCRdistClassifier</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#clustering-methods"><strong>Clustering methods</strong></a><ul>
+<li><a class="reference internal" href="#agglomerativeclustering">AgglomerativeClustering</a></li>
+<li><a class="reference internal" href="#dbscan">DBSCAN</a></li>
+<li><a class="reference internal" href="#hdbscan">HDBSCAN</a></li>
+<li><a class="reference internal" href="#kmeans">KMeans</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#generative-models"><strong>Generative models</strong></a><ul>
+<li><a class="reference internal" href="#experimentalimport">ExperimentalImport</a></li>
+<li><a class="reference internal" href="#olga">OLGA</a></li>
+<li><a class="reference internal" href="#pwm">PWM</a></li>
+<li><a class="reference internal" href="#progen">ProGen</a></li>
+<li><a class="reference internal" href="#simplelstm">SimpleLSTM</a></li>
+<li><a class="reference internal" href="#simplevae">SimpleVAE</a></li>
+<li><a class="reference internal" href="#sonnia">SoNNia</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dimensionality-reduction-methods"><strong>Dimensionality reduction methods</strong></a><ul>
+<li><a class="reference internal" href="#kernelpca">KernelPCA</a></li>
+<li><a class="reference internal" href="#pca">PCA</a></li>
+<li><a class="reference internal" href="#tsne">TSNE</a></li>
+<li><a class="reference internal" href="#umap">UMAP</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=f1196aca"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    </body>
+</html>

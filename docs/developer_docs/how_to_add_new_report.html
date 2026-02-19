@@ -1,0 +1,879 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta content="summary" name="twitter:card" />
+<meta content="&#64;immuneml" name="twitter:site" />
+<meta content="immuneML dev docs: add a new analysis report" name="twitter:title" />
+<meta content="See how to add a new report to the immuneML platform." name="twitter:description" />
+<meta content="https://docs.immuneml.uio.no/_images/extending_immuneML.png" name="twitter:image" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="How to add a new preprocessing" href="how_to_add_new_preprocessing.html" /><link rel="prev" title="How to add a new machine learning method" href="how_to_add_new_ML_method.html" />
+        <link rel="canonical" href="https://docs.immuneml.uio.no/developer_docs/how_to_add_new_report.html" />
+
+    <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>How to add a new report - immuneML 3.0.18 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/immuneml.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">immuneML 3.0.18 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">immuneML 3.0.18 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../quickstart.html">Quickstart</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Quickstart</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_simple.html">Quickstart: Galaxy with button-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_yaml.html">Quickstart: Galaxy with YAML-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/cli_yaml.html">Quickstart: command-line interface with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/simulation_quickstart.html">LIgO simulation quickstart</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installing immuneML</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Installing immuneML</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/install_with_package_manager.html">Install immuneML with a package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/installation_docker.html">Setting up immuneML with Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/cloud.html">Running immuneML in the cloud</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../specification.html">YAML specification</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of YAML specification</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/how_to_specify_an_analysis_with_yaml.html">How to specify an analysis with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/datasets.html">Dataset parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/encodings.html">Encoding parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/ml_methods.html">ML method parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/reports.html">Report parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/preprocessings.html">Preprocessing parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/simulation.html">Simulation parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/instructions.html">Instruction parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Tutorials</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/analyze_dataset.html">Analyzing Your Own Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_import_the_data_to_immuneML.html">How to import data into immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_generate_a_random_repertoire_dataset.html">How to generate a dataset with random sequences</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tutorials/ligo_simulation_tutorials.html">Dataset simulation with LIgO</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Dataset simulation with LIgO</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/ligo_simulation_yaml.html">YAML specification of the LigoSim instruction for introducing immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/how_to_simulate_co-occuring_signals.html">How to simulate co-occuring immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/how_to_simulate_paired_chain_data.html">Paired chain simulations in LIgO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/simulation_with_custom_signal_functions.html">Simulation with custom signal functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_train_and_assess_a_receptor_or_repertoire_classifier.html">How to train and assess a receptor or repertoire-level ML classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_apply_to_new_data.html">How to apply previously trained ML models to a new dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_perform_exploratory_analysis.html">How to perform an exploratory data analysis</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tutorials/motif_recovery.html">How to find motifs associated with disease or antigen binding state</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of How to find motifs associated with disease or antigen binding state</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/discover_motifs_precision_recall.html">Discovering positional motifs using precision and recall thresholds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/discover_motifs_classifiers.html">Discovering motifs learned by classifiers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/recovering_simulated_motifs.html">Recovering simulated immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/comparing_baseline_motifs.html">Comparing baseline motif frequencies in repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/clustering_tutorial.html">How to perform clustering analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_train_and_apply_gen_model.html">How to train a generative model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_combine_multiple_encodings.html">How to combine multiple encodings to represent a dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/getting_publication_ready_figures.html">How to get publication-ready figures</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../galaxy.html">immuneML &amp; Galaxy</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of immuneML &amp; Galaxy</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_intro.html">Introduction to Galaxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_tools.html">immuneML Galaxy tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_immunologist_friendly.html">ML basics: Training classifiers with the simplified Galaxy interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../usecases.html">Use case examples</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Use case examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/emerson_reproduction.html">Manuscript use case 1: Reproduction of a published study inside immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/extendability_use_case.html">Manuscript use case 2: Extending immuneML with a deep learning component for predicting antigen specificity of paired receptor data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/benchmarking_use_case.html">Manuscript use case 3: Benchmarking ML methods on ground-truth synthetic data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immcantation_use_case.html">Integration use case: post-analysis of sequences with Immcantation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immunarch_use_case.html">Integration use case: post-analysis of sequences with immunarch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immunesim_use_case.html">Integration use case: Performing analysis on immuneSIM-generated repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Troubleshooting</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../developer_docs.html">Developer documentation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Developer documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="info_new_developers.html">Information for new developers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install_for_development.html">Set up immuneML for development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to_add_new_encoding.html">How to add a new encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to_add_new_ML_method.html">How to add a new machine learning method</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">How to add a new report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to_add_new_preprocessing.html">How to add a new preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_model.html">immuneML data model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="execution_flow.html">immuneML execution flow</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/developer_docs/how_to_add_new_report.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="how-to-add-a-new-report">
+<h1>How to add a new report<a class="headerlink" href="#how-to-add-a-new-report" title="Link to this heading">¶</a></h1>
+<section id="adding-an-example-data-report-to-the-immuneml-codebase">
+<h2>Adding an example data report to the immuneML codebase<a class="headerlink" href="#adding-an-example-data-report-to-the-immuneml-codebase" title="Link to this heading">¶</a></h2>
+<p>In this tutorial, we will show how to add a new report to plot sequence length distribution in repertoire datasets.
+This tutorial assumes you have installed immuneML for development as described at <a class="reference internal" href="install_for_development.html#set-up-immuneml-for-development"><span class="std std-ref">Set up immuneML for development</span></a>.</p>
+<section id="step-by-step-tutorial">
+<h3>Step-by-step tutorial<a class="headerlink" href="#step-by-step-tutorial" title="Link to this heading">¶</a></h3>
+<p>For this tutorial, we provide a <code class="code docutils literal notranslate"><span class="pre">RandomDataPlot</span></code> (<a class="reference download internal" download="" href="../_downloads/3ac39f28ae2085fdc421137e9c98af5f/RandomDataPlot.py"><code class="xref download docutils literal notranslate"><span class="pre">download</span> <span class="pre">here</span></code></a> or view below), in order to test adding a new Report file to immuneML.
+This report ignores the input dataset, and generates a scatterplot containing random values.</p>
+<blockquote>
+<div><details class="summary-randomdataplot-py">
+<summary>RandomDataPlot.py</summary><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">plotly.express</span> <span class="k">as</span> <span class="nn">px</span>
+
+<span class="kn">from</span> <span class="nn">immuneML.data_model.dataset.Dataset</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">immuneML.reports.ReportOutput</span> <span class="kn">import</span> <span class="n">ReportOutput</span>
+<span class="kn">from</span> <span class="nn">immuneML.reports.ReportResult</span> <span class="kn">import</span> <span class="n">ReportResult</span>
+<span class="kn">from</span> <span class="nn">immuneML.reports.data_reports.DataReport</span> <span class="kn">import</span> <span class="n">DataReport</span>
+<span class="kn">from</span> <span class="nn">immuneML.util.ParameterValidator</span> <span class="kn">import</span> <span class="n">ParameterValidator</span>
+<span class="kn">from</span> <span class="nn">immuneML.util.PathBuilder</span> <span class="kn">import</span> <span class="n">PathBuilder</span>
+
+
+<span class="k">class</span> <span class="nc">RandomDataPlot</span><span class="p">(</span><span class="n">DataReport</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This RandomDataPlot is a placeholder for a real Report.</span>
+<span class="sd">    It plots some random numbers.</span>
+
+<span class="sd">    **Specification arguments:**</span>
+
+<span class="sd">    - n_points_to_plot (int): The number of random points to plot.</span>
+
+
+<span class="sd">    **YAML specification:**</span>
+
+<span class="sd">    .. indent with spaces</span>
+<span class="sd">    .. code-block:: yaml</span>
+
+<span class="sd">        definitions:</span>
+<span class="sd">            reports:</span>
+<span class="sd">                my_report:</span>
+<span class="sd">                    RandomDataPlot:</span>
+<span class="sd">                        n_points_to_plot: 10</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">build_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># Here you may check the values of given user parameters</span>
+        <span class="c1"># This will ensure immuneML will crash early (upon parsing the specification) if incorrect parameters are specified</span>
+        <span class="n">ParameterValidator</span><span class="o">.</span><span class="n">assert_type_and_value</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;n_points_to_plot&#39;</span><span class="p">],</span> <span class="nb">int</span><span class="p">,</span> <span class="n">RandomDataPlot</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s1">&#39;n_points_to_plot&#39;</span><span class="p">,</span> <span class="n">min_inclusive</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">RandomDataPlot</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">result_path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">number_of_processes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">n_points_to_plot</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span> <span class="n">result_path</span><span class="o">=</span><span class="n">result_path</span><span class="p">,</span> <span class="n">number_of_processes</span><span class="o">=</span><span class="n">number_of_processes</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_points_to_plot</span> <span class="o">=</span> <span class="n">n_points_to_plot</span>
+
+    <span class="k">def</span> <span class="nf">check_prerequisites</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Here you may check properties of the dataset (e.g. dataset type), or parameter-dataset compatibility</span>
+        <span class="c1"># and return False if the prerequisites are incorrect.</span>
+        <span class="c1"># This will generate a user-friendly error message and ensure immuneML does not crash, but instead skips the report.</span>
+        <span class="c1"># Note: parameters should be checked in &#39;build_object&#39;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">_generate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReportResult</span><span class="p">:</span>
+        <span class="n">PathBuilder</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result_path</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_random_data</span><span class="p">()</span>
+
+        <span class="c1"># utility function for writing a dataframe to a csv file</span>
+        <span class="c1"># and creating a ReportOutput object containing the reference</span>
+        <span class="n">report_output_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_output_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">result_path</span> <span class="o">/</span> <span class="s1">&#39;random_data.csv&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Random data file&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Calling _safe_plot will internally call _plot, but ensure immuneML does not crash if errors occur</span>
+        <span class="n">report_output_fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safe_plot</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+
+        <span class="c1"># Ensure output is either None or a list with item (not an empty list or list containing None)</span>
+        <span class="n">output_tables</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">report_output_table</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="n">report_output_table</span><span class="p">]</span>
+        <span class="n">output_figures</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">report_output_fig</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="n">report_output_fig</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">ReportResult</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                            <span class="n">info</span><span class="o">=</span><span class="s2">&quot;Some random numbers&quot;</span><span class="p">,</span>
+                            <span class="n">output_tables</span><span class="o">=</span><span class="n">output_tables</span><span class="p">,</span>
+                            <span class="n">output_figures</span><span class="o">=</span><span class="n">output_figures</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_random_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;random_data_dim1&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_points_to_plot</span><span class="p">),</span>
+                             <span class="s2">&quot;random_data_dim2&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_points_to_plot</span><span class="p">)})</span>
+
+    <span class="k">def</span> <span class="nf">_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReportOutput</span><span class="p">:</span>
+        <span class="n">figure</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;random_data_dim1&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">&quot;random_data_dim2&quot;</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="s2">&quot;plotly_white&quot;</span><span class="p">)</span>
+        <span class="n">figure</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="s2">&quot;plotly_white&quot;</span><span class="p">)</span>
+
+        <span class="n">file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">result_path</span> <span class="o">/</span> <span class="s2">&quot;random_data.html&quot;</span>
+        <span class="n">figure</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">file_path</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ReportOutput</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">file_path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Random data plot&quot;</span><span class="p">)</span>
+
+</pre></div>
+</div>
+</details></div></blockquote>
+<ol class="arabic">
+<li><p>Add a new <a class="reference external" href="https://packaging.python.org/en/latest/tutorials/packaging-projects/">Python package</a> to the <code class="xref py py-mod docutils literal notranslate"><span class="pre">data_reports</span></code> package.
+This means: a new folder (with meaningful name) containing an empty <code class="code docutils literal notranslate"><span class="pre">__init__.py</span></code> file.</p></li>
+<li><p>Add a new class to the <code class="xref py py-mod docutils literal notranslate"><span class="pre">data_reports</span></code> package (other reports types should be placed in the appropriate sub-package of <code class="xref py py-mod docutils literal notranslate"><span class="pre">reports</span></code>).
+The new class should inherit from the base class <code class="xref py py-obj docutils literal notranslate"><span class="pre">DataReport</span></code>.</p></li>
+<li><p>If the encoder has any default parameters, they should be added in a default parameters YAML file. This file should be added to the folder <code class="code docutils literal notranslate"><span class="pre">config/default_params/reports</span></code>.
+The default parameters file is automatically discovered based on the name of the class using the base name converted to snake case, and with an added ‘_params.yaml’ suffix.
+For the <code class="code docutils literal notranslate"><span class="pre">RandomDataPlot</span></code>, this is <code class="code docutils literal notranslate"><span class="pre">random_data_report_params.yaml</span></code>, which could for example contain the following:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">n_points_to_plot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+</pre></div>
+</div>
+<p>In rare cases where classes have unconventional names that do not translate well to CamelCase (e.g., MiXCR, VDJdb), this needs to be accounted for in <code class="xref py py-meth docutils literal notranslate"><span class="pre">convert_to_snake_case()</span></code>.</p>
+</li>
+</ol>
+</section>
+<section id="test-running-the-new-report-with-a-yaml-specification">
+<h3>Test running the new report with a YAML specification<a class="headerlink" href="#test-running-the-new-report-with-a-yaml-specification" title="Link to this heading">¶</a></h3>
+<p>If you want to use immuneML directly to test run your report, the YAML example below may be used.
+This example analysis creates a randomly generated dataset, and runs the <code class="code docutils literal notranslate"><span class="pre">RandomDataPlot</span></code> (which ignores the dataset).</p>
+<blockquote>
+<div><details class="summary-test-run-random-data-report-yaml">
+<summary>test_run_random_data_report.yaml</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_dataset</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RandomSequenceDataset</span>
+<span class="w">      </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">sequence_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+
+<span class="w">  </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_random_report: RandomDataPlot</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">n_points_to_plot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+
+<span class="nt">instructions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my_instruction</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ExploratoryAnalysis</span>
+<span class="w">    </span><span class="nt">analyses</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">my_analysis_1</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_dataset</span>
+<span class="w">        </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">my_random_report</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+</details></div></blockquote>
+</section>
+<section id="adding-a-unit-test-for-a-report">
+<h3>Adding a unit test for a Report<a class="headerlink" href="#adding-a-unit-test-for-a-report" title="Link to this heading">¶</a></h3>
+<p>Add a unit test for the new <code class="code docutils literal notranslate"><span class="pre">RandomDataPlot</span></code> (<a class="reference download internal" download="" href="../_downloads/829ffda51faf31d40d2c60bad3ff1b89/_test_randomDataPlot.py"><code class="xref download docutils literal notranslate"><span class="pre">download</span></code></a> the example testfile or view below)</p>
+<details class="summary-test-randomdataplot-py">
+<summary>test_randomDataPlot.py</summary><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span>
+
+<span class="kn">from</span> <span class="nn">immuneML.caching.CacheType</span> <span class="kn">import</span> <span class="n">CacheType</span>
+<span class="kn">from</span> <span class="nn">immuneML.environment.Constants</span> <span class="kn">import</span> <span class="n">Constants</span>
+<span class="kn">from</span> <span class="nn">immuneML.environment.EnvironmentSettings</span> <span class="kn">import</span> <span class="n">EnvironmentSettings</span>
+<span class="kn">from</span> <span class="nn">immuneML.reports.data_reports.RandomDataPlot</span> <span class="kn">import</span> <span class="n">RandomDataPlot</span>
+<span class="kn">from</span> <span class="nn">immuneML.util.PathBuilder</span> <span class="kn">import</span> <span class="n">PathBuilder</span>
+
+
+<span class="k">class</span> <span class="nc">TestRandomDataPlot</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="n">Constants</span><span class="o">.</span><span class="n">CACHE_TYPE</span><span class="p">]</span> <span class="o">=</span> <span class="n">CacheType</span><span class="o">.</span><span class="n">TEST</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">def</span> <span class="nf">test_random_data_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">PathBuilder</span><span class="o">.</span><span class="n">remove_old_and_build</span><span class="p">(</span><span class="n">EnvironmentSettings</span><span class="o">.</span><span class="n">tmp_test_path</span> <span class="o">/</span> <span class="s2">&quot;random_data_plot&quot;</span><span class="p">)</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;n_points_to_plot&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}</span>
+        <span class="n">report</span> <span class="o">=</span> <span class="n">RandomDataPlot</span><span class="o">.</span><span class="n">build_object</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="c1"># make sure to set the &#39;path&#39; manually</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">result_path</span> <span class="o">=</span> <span class="n">path</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">check_prerequisites</span><span class="p">())</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">report</span><span class="o">.</span><span class="n">_generate</span><span class="p">()</span>
+
+        <span class="c1"># ensure result files are generated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">output_figures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">output_tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+
+        <span class="c1"># don&#39;t forget to remove the temporary path</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+</div>
+</details><ol class="arabic simple">
+<li><p>Add a new file to <code class="xref py py-mod docutils literal notranslate"><span class="pre">data_reports</span></code> package named test_randomDataPlot.py.</p></li>
+<li><p>Add a class <code class="code docutils literal notranslate"><span class="pre">TestRandomDataPlot</span></code> that inherits <code class="code docutils literal notranslate"><span class="pre">unittest.TestCase</span></code> to the new file.</p></li>
+<li><p>Add a function <code class="code docutils literal notranslate"><span class="pre">setUp()</span></code> to set up cache used for testing. This should ensure that the cache location will be set to <code class="code docutils literal notranslate"><span class="pre">EnvironmentSettings.tmp_test_path</span> <span class="pre">/</span> <span class="pre">&quot;cache/&quot;</span></code></p></li>
+<li><p>Define one or more tests for the class and functions you implemented.</p>
+<ul class="simple">
+<li><p>It is recommended to at least test building and generating the report</p></li>
+<li><p>Mock data is typically used to test new classes. Tip: the <code class="code docutils literal notranslate"><span class="pre">RandomDatasetGenerator</span></code> class can be used to generate Repertoire, Sequence or Receptor datasets with random sequences.</p></li>
+<li><p>If you need to write data to a path (for example test datasets or results), use the following location: <code class="code docutils literal notranslate"><span class="pre">EnvironmentSettings.tmp_test_path</span> <span class="pre">/</span> <span class="pre">&quot;some_unique_foldername&quot;</span></code></p></li>
+</ul>
+</li>
+</ol>
+</section>
+</section>
+<section id="implementing-a-new-report">
+<h2>Implementing a new Report<a class="headerlink" href="#implementing-a-new-report" title="Link to this heading">¶</a></h2>
+<p>This section describes tips and tricks for implementing your own new <code class="code docutils literal notranslate"><span class="pre">Report</span></code> from scratch.
+Detailed instructions of how to implement each method, as well as some special cases, can be found in the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">Report</span></code> base class.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">Report</span></code> type is determined by subclassing one of the following:</p>
+<ol class="arabic simple">
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataReport</span></code> – reports examining some aspect of the dataset (such as sequence length distribution, gene usage)</p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">EncodingReport</span></code> – shows some aspect of the encoded dataset (such as the feature values of an encoded dataset),</p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">MLReport</span></code> – shows the characteristics of an inferred machine learning model (such as coefficient values for logistic regression or kernel visualization for CNN)</p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">TrainMLModelReport</span></code> – show statistics of multiple trained ML models in the TrainMLModelInstruction (such as comparing performance statistics between models, or performance w.r.t. an encoding parameter)</p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">MultiDatasetReport</span></code> –  show statistics when running immuneML with the MultiDatasetBenchmarkTool</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Coding conventions and tips</strong></p>
+<ol class="arabic simple">
+<li><p>Class names are written in CamelCase</p></li>
+<li><p>Class methods are writte in snake_case</p></li>
+<li><p>Abstract base classes <code class="code docutils literal notranslate"><span class="pre">MLMethod</span></code>, <code class="code docutils literal notranslate"><span class="pre">DatasetEncoder</span></code>, and <code class="code docutils literal notranslate"><span class="pre">Report</span></code>, define an interface for their inheriting subclasses. These classes contain abstract methods which should be implemented.</p></li>
+<li><p>Class methods starting with _underscore are generally considered “private” methods, only to be called by the class itself. If a method is expected to be called from another class, the method name should not start with an underscore.</p></li>
+<li><p>When familiarising yourself with existing code, we recommend focusing on public methods. Private methods are typically very unique to a class (internal class-specific calculations), whereas the public methods contain more general functionalities (e.g., returning a main result).</p></li>
+<li><p>If your class should have any default parameters, they should be defined in a default parameters file under <code class="code docutils literal notranslate"><span class="pre">config/default_params/</span></code>.</p></li>
+<li><p>Some utility classes are available in the <code class="code docutils literal notranslate"><span class="pre">util</span></code> package to provide useful functionalities. For example, <code class="xref py py-obj docutils literal notranslate"><span class="pre">ParameterValidator</span></code> can be used to check user input and generate error messages, or <code class="xref py py-obj docutils literal notranslate"><span class="pre">PathBuilder</span></code> can be used to add and remove folders.</p></li>
+</ol>
+</div>
+<section id="determine-the-type-of-report">
+<h3>Determine the type of report<a class="headerlink" href="#determine-the-type-of-report" title="Link to this heading">¶</a></h3>
+<p>First, it is important to determine what the type of the report is, as this defines which report class should be inherited.</p>
+<section id="report-types-for-dataset-analysis">
+<h4>Report types for dataset analysis<a class="headerlink" href="#report-types-for-dataset-analysis" title="Link to this heading">¶</a></h4>
+<p>If the report will be used to analyze a Dataset (such as a <code class="code docutils literal notranslate"><span class="pre">RepertoireDataset</span></code>), either a <code class="code docutils literal notranslate"><span class="pre">DataReport</span></code> or an <code class="code docutils literal notranslate"><span class="pre">EncodingReport</span></code> should be used. The simplest
+report is the <code class="code docutils literal notranslate"><span class="pre">DataReport</span></code>, which should typically be used when summarizing some qualities of a dataset. This dataset can be found in the report
+attribute dataset.</p>
+<p>Use the <code class="code docutils literal notranslate"><span class="pre">EncodingReport</span></code> when it is necessary to access the encoded_data attribute of a <code class="code docutils literal notranslate"><span class="pre">Dataset</span></code>. The encoded_data attribute is an instance of a
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">EncodedData</span></code> class. This report should be used when the data
+representation first needs to be changed before running the report, either through an existing or a custom encoding (see:
+<a class="reference internal" href="how_to_add_new_encoding.html#how-to-add-a-new-encoding"><span class="std std-ref">How to add a new encoding</span></a>). For example, the <a class="reference internal" href="../yaml_specs/reports.html#matches"><span class="std std-ref">Matches</span></a> report represents a RepertoireDataset based on matches to a given reference
+dataset, and must first be encoded using a <a class="reference internal" href="../yaml_specs/encodings.html#matchedsequences"><span class="std std-ref">MatchedSequences</span></a>, <a class="reference internal" href="../yaml_specs/encodings.html#matchedreceptors"><span class="std std-ref">MatchedReceptors</span></a> or <a class="reference internal" href="../yaml_specs/encodings.html#matchedregex"><span class="std std-ref">MatchedRegex</span></a>.</p>
+</section>
+<section id="report-types-for-trained-ml-model-analysis">
+<h4>Report types for trained ML model analysis<a class="headerlink" href="#report-types-for-trained-ml-model-analysis" title="Link to this heading">¶</a></h4>
+<p>When the results of an experiment with a machine learning method should be analyzed, an <code class="code docutils literal notranslate"><span class="pre">MLReport</span></code> or <code class="code docutils literal notranslate"><span class="pre">TrainMLModelReport</span></code> should be used. These reports
+are more advanced and require understanding of the <code class="code docutils literal notranslate"><span class="pre">TrainMLModelInstruction</span></code>. The <code class="code docutils literal notranslate"><span class="pre">MLReport</span></code> should be used when plotting statistics or
+exporting information about one trained ML model. This report can be executed on any trained ML model (<code class="code docutils literal notranslate"><span class="pre">MLMethod</span></code> subclass object), both in the assessment and selection loop of
+the <a class="reference internal" href="../yaml_specs/instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a>. An <code class="code docutils literal notranslate"><span class="pre">MLReport</span></code> has the following attributes:</p>
+<ol class="arabic simple">
+<li><p>train_dataset: a Dataset (e.g., RepertoireDataset) object containing the training data used for the given classifier</p></li>
+<li><p>test_dataset: similar to train_dataset, but containing the test data</p></li>
+<li><p>method: the MLMethod object containing trained classifiers for each of the labels.</p></li>
+<li><p>label: the label that the report is executed for (the same report may be executed several times when training classifiers for multiple labels), can be used to retrieve relevant information from the MLMethod object.</p></li>
+<li><p>hp_setting: the <code class="xref py py-obj docutils literal notranslate"><span class="pre">HPSetting</span></code> object, containing all information about which preprocessing, encoding, and ML methods were used up to this point. This parameter can usually be ignored unless specific information from previous analysis steps is needed.</p></li>
+</ol>
+<p>In contrast, <code class="code docutils literal notranslate"><span class="pre">TrainMLModelReport</span></code> is used to compare several [optimal] ML models. This report has access to the attribute state: a <code class="xref py py-obj docutils literal notranslate"><span class="pre">TrainMLModelState</span></code>
+object, containing information that has been collected through the execution of the <code class="code docutils literal notranslate"><span class="pre">TrainMLModelInstruction</span></code>. This includes all datasets, trained
+models, labels, internal state objects for selection and assessment loops (nested cross-validation), optimal models, and more.</p>
+<p>Finally, the <code class="code docutils literal notranslate"><span class="pre">MultiDatasetReport</span></code> is used in rare cases when running immuneML with the <code class="code docutils literal notranslate"><span class="pre">MultiDatasetBenchmarkTool</span></code>.
+<strong>This is an advanced report type and is not typically used.</strong>
+This report type can be used when comparing the performance of classifiers over several datasets and accumulating the results.
+This report has the attribute instruction_states: a list of several <code class="code docutils literal notranslate"><span class="pre">TrainMLModelState</span></code> objects.</p>
+</section>
+</section>
+<section id="input-and-output-of-the-generate-method">
+<h3>Input and output of the _generate() method<a class="headerlink" href="#input-and-output-of-the-generate-method" title="Link to this heading">¶</a></h3>
+<p>The abstract method <cite>_generate()</cite> must be implemented,
+which has the following responsibilities:</p>
+<ul class="simple">
+<li><p>It should create the report results, for example, compute the data or create the plots that should be returned by the report.</p></li>
+<li><p>It should write the report results to the folder given at the variable <code class="code docutils literal notranslate"><span class="pre">self.result_path</span></code>.</p></li>
+<li><p>It should return a <code class="code docutils literal notranslate"><span class="pre">ReportResult</span></code> object, which contains lists of <code class="code docutils literal notranslate"><span class="pre">ReportOutput</span></code> objects. These <code class="code docutils literal notranslate"><span class="pre">ReportOutput</span></code> objects simply contain the path to a figure, table, text, or another type of result.
+One report can have multiple outputs, as long as they are all referred to in the returned <code class="code docutils literal notranslate"><span class="pre">ReportResult</span></code> object. This is used to format the summary of the results in the HTML output file.</p></li>
+<li><p>When the main result of the report is a plot, it is good practice to also make the raw data available to the user, for example as a csv file.</p></li>
+</ul>
+</section>
+<section id="creating-plots">
+<h3>Creating plots<a class="headerlink" href="#creating-plots" title="Link to this heading">¶</a></h3>
+<p>The preferred method for plotting data is through <a class="reference external" href="https://plotly.com/python/">plotly</a>, as it creates interactive and rescalable plots in HTML format [recommended] that
+display nicely in the HTML output file. Alternatively, plots can also be in pdf, png, jpg and svg format.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When plotting data with <a class="reference external" href="https://plotly.com/python/">plotly</a>, we recommend using the following color schemes for consistency:
+plotly.colors.sequential.Teal, plotly.colors.sequential.Viridis, or plotly.colors.diverging.Tealrose.
+Additionally, in the most of immuneML plots, ‘plotly_white’ theme is used for the background.</p>
+<p>For the overview of color schemes, visit <a class="reference external" href="https://plotly.com/python/builtin-colorscales/">this link</a>.
+For plotly themes, visit <a class="reference external" href="https://plotly.com/python/templates/">this link</a>.</p>
+</div>
+</section>
+<section id="checking-prerequisites-and-parameters">
+<h3>Checking prerequisites and parameters<a class="headerlink" href="#checking-prerequisites-and-parameters" title="Link to this heading">¶</a></h3>
+<p>New report objects are created by immuneML by calling the <code class="code docutils literal notranslate"><span class="pre">build_object()</span></code> method. This method can take in any custom parameters and should return an instance of the
+report object. The parameters of the method <code class="code docutils literal notranslate"><span class="pre">build_object()</span></code> can be directly specified in the YAML specification, nested under the report type, for example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">MyNewReport</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">custom_parameter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">“value”</span>
+</pre></div>
+</div>
+<p>Inside the <code class="code docutils literal notranslate"><span class="pre">build_object()</span></code> method, you can check if the correct parameters are specified and raise an exception when the user input is incorrect
+(for example using the <code class="xref py py-obj docutils literal notranslate"><span class="pre">ParameterValidator</span></code> utility class). Furthermore, it is possible to resolve more
+complex input parameters, such as loading reference sequences from an external input file, before passing them to the <code class="code docutils literal notranslate"><span class="pre">__init__()</span></code> method of the report.</p>
+<p>It is important to consider whether the method <code class="code docutils literal notranslate"><span class="pre">check_prerequisites()</span></code> should be implemented. This method should return a boolean value describing
+whether the prerequisites are met, and print a warning message to the user when this condition is false. The report will only be generated when
+<code class="code docutils literal notranslate"><span class="pre">check_prerequisites()</span></code> returns true. This method should not be used to raise exceptions. Instead, it is used to prevent exceptions from happening
+during execution, as this might cause lost results. Situations to consider are:</p>
+<ul class="simple">
+<li><p>When implementing an EncodingReport, use this function to check that the data has been encoded and that the correct encoder has been used.</p></li>
+<li><p>Similarly, when creating an MLReport or TrainMLModelReport, check that the appropriate ML methods have been used.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Please see the <code class="xref py py-obj docutils literal notranslate"><span class="pre">Report</span></code> class for the detailed description of the methods to be implemented.</p>
+</div>
+</section>
+<section id="specifying-different-report-types-in-yaml">
+<h3>Specifying different report types in YAML<a class="headerlink" href="#specifying-different-report-types-in-yaml" title="Link to this heading">¶</a></h3>
+<p>Custom reports may be defined in the YAML specification under the key ‘definitions’ the same way as any other reports. The easiest way to test run
+<a class="reference external" href="https://docs.immuneml.uio.no/specification.html#data-reports">Data reports</a> and <a class="reference external" href="https://docs.immuneml.uio.no/specification.html#encoding-reports">Encoding reports</a> is through the <a class="reference internal" href="../yaml_specs/instructions.html#exploratoryanalysis"><span class="std std-ref">ExploratoryAnalysis</span></a> instruction. They may also be specified in the <a class="reference internal" href="../yaml_specs/instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a>
+instruction in the <code class="code docutils literal notranslate"><span class="pre">selection</span></code> and <code class="code docutils literal notranslate"><span class="pre">assessment</span></code> loop under <code class="code docutils literal notranslate"><span class="pre">reports:data_splits</span></code> and <code class="code docutils literal notranslate"><span class="pre">reports:encoding</span></code> respectively.</p>
+<p><a class="reference external" href="https://docs.immuneml.uio.no/specification.html#ml-model-reports">ML model reports</a> and <a class="reference external" href="https://docs.immuneml.uio.no/specification.html#train-ml-model-reports">Train ML model reports</a> can only be run through the <a class="reference internal" href="../yaml_specs/instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a> instruction. <a class="reference internal" href="../yaml_specs/reports.html#ml-model-reports"><span class="std std-ref">ML model reports</span></a> can be specified inside both the
+<code class="code docutils literal notranslate"><span class="pre">selection</span></code> and <code class="code docutils literal notranslate"><span class="pre">assessment</span></code> loop under <code class="code docutils literal notranslate"><span class="pre">reports:models</span></code>. <a class="reference internal" href="../yaml_specs/reports.html#train-ml-model-reports"><span class="std std-ref">Train ML model reports</span></a> must be specified under <code class="code docutils literal notranslate"><span class="pre">reports</span></code>.</p>
+<p>Finally, <span class="xref std std-ref">Multi dataset reports</span> can be specified under <code class="code docutils literal notranslate"><span class="pre">benchmark_reports</span></code> when running the <code class="code docutils literal notranslate"><span class="pre">MultiDatasetBenchmarkTool</span></code>.</p>
+<p>The following specification shows the places where <a class="reference external" href="https://docs.immuneml.uio.no/specification.html#data-reports">Data reports</a>,
+<a class="reference external" href="https://docs.immuneml.uio.no/specification.html#encoding-reports">Encoding reports</a> ,
+<a class="reference external" href="https://docs.immuneml.uio.no/specification.html#ml-model-reports">ML model reports</a>,
+and <a class="reference external" href="https://docs.immuneml.uio.no/specification.html#train-ml-model-reports">Train ML model reports</a> can be specified:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_data_report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyNewDataReport</span><span class="w"> </span><span class="c1"># example data report without parameters</span>
+<span class="w">    </span><span class="nt">my_encoding_report</span><span class="p">:</span><span class="w"> </span><span class="c1"># example encoding report with a parameter</span>
+<span class="w">      </span><span class="nt">MyNewEncodingReport</span><span class="p">:</span>
+<span class="w">       </span><span class="nt">parameter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">value</span>
+<span class="w">    </span><span class="nt">my_ml_report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyNewMLReport</span><span class="w"> </span><span class="c1"># ml model report</span>
+<span class="w">    </span><span class="nt">my_trainml_report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyNewTrainMLModelReport</span><span class="w"> </span><span class="c1"># train ml model report</span>
+
+<span class="w">  </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">d1</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># if you do not have real data to test your report with, consider</span>
+<span class="w">      </span><span class="c1"># using a randomly generated dataset, see the documentation:</span>
+<span class="w">      </span><span class="c1"># “How to generate a random receptor or repertoire dataset”</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RandomRepertoireDataset</span>
+<span class="w">      </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">disease</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">True</span><span class="p">:</span><span class="w"> </span><span class="nv">0.5</span><span class="p p-Indicator">,</span><span class="nt"> False</span><span class="p">:</span><span class="w"> </span><span class="nv">0.5</span><span class="p p-Indicator">}}</span>
+<span class="w">          </span><span class="nt">repertoire_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+<span class="w">  </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">e1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KmerFrequency</span>
+<span class="w">  </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">m1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LogisticRegression</span>
+
+<span class="nt">instructions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">exploratory_instr</span><span class="p">:</span><span class="w"> </span><span class="c1"># Example of specifying reports in ExploratoryAnalysis</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ExploratoryAnalysis</span>
+<span class="w">    </span><span class="nt">analyses</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">analysis_1</span><span class="p">:</span><span class="w"> </span><span class="c1"># Example analysis with data report</span>
+<span class="w">        </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">d1</span>
+<span class="w">        </span><span class="nt">report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_data_report</span>
+<span class="w">      </span><span class="nt">analysis_1</span><span class="p">:</span><span class="w"> </span><span class="c1"># Example analysis with encoding report</span>
+<span class="w">        </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">d1</span>
+<span class="w">        </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">e1</span>
+<span class="w">        </span><span class="nt">report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_encoding_report</span>
+<span class="w">        </span><span class="nt">labels</span><span class="p">:</span><span class="w"> </span><span class="c1"># when running an encoding report, labels must be specified</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disease</span>
+
+<span class="w">  </span><span class="nt">trainmlmodel_instr</span><span class="p">:</span><span class="w"> </span><span class="c1"># Example of specifying reports in TrainMLModel instruction</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TrainMLModel</span>
+<span class="w">    </span><span class="nt">settings</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">e1</span>
+<span class="w">        </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">m1</span>
+<span class="w">    </span><span class="nt">assessment</span><span class="p">:</span><span class="w"> </span><span class="c1"># running reports in the assessment (outer) loop</span>
+<span class="w">      </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">data</span><span class="p">:</span><span class="w"> </span><span class="c1"># execute before splitting to training/(validation+test)</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_data_report</span>
+<span class="w">        </span><span class="nt">data_splits</span><span class="p">:</span><span class="w"> </span><span class="c1"># execute on training and (validation+test) sets</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_data_report</span>
+<span class="w">        </span><span class="nt">encoding</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_encoding_report</span>
+<span class="w">        </span><span class="nt">models</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_ml_report</span>
+<span class="w">    </span><span class="nt">selection</span><span class="p">:</span><span class="w"> </span><span class="c1"># running reports in the selection (inner) loop</span>
+<span class="w">      </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">data</span><span class="p">:</span><span class="w"> </span><span class="c1"># execute before splitting to validation/test</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_data_report</span>
+<span class="w">        </span><span class="nt">data_splits</span><span class="p">:</span><span class="w"> </span><span class="c1"># execute on validation and test sets</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_data_report</span>
+<span class="w">        </span><span class="nt">encoding</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_encoding_report</span>
+<span class="w">        </span><span class="nt">models</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_ml_report</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_trainml_report</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disease</span>
+</pre></div>
+</div>
+</section>
+<section id="class-documentation-standards-for-reports">
+<h3>Class documentation standards for reports<a class="headerlink" href="#class-documentation-standards-for-reports" title="Link to this heading">¶</a></h3>
+<p>Class documentation should be added as a docstring to all new Encoder, MLMethod, Report or Preprocessing classes.
+The class docstrings are used to automatically generate the documentation web pages, using Sphinx <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html">reStructuredText</a>, and should adhere to a standard format:</p>
+<ol class="arabic simple">
+<li><p>A short, general description of the functionality</p></li>
+<li><p>Optional extended description, including any references or specific cases that should be considered. For instance: if a class can only be used for a particular dataset type. Compatibility between Encoders, MLMethods and Reports should also be described.</p></li>
+<li><p>For encoders, the appropriate dataset type(s). For example:</p></li>
+</ol>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="err">*</span><span class="nv">*Dataset</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">type:**</span>
+
+<span class="l l-Scalar l-Scalar-Plain">- SequenceDatasets</span>
+
+<span class="l l-Scalar l-Scalar-Plain">- RepertoireDatasets</span>
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li><p>A list of arguments, when applicable. This should follow the format below:</p></li>
+</ol>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="err">*</span><span class="nv">*Specification</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arguments:**</span>
+
+<span class="l l-Scalar l-Scalar-Plain">- parameter_name (type)</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">a short description</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">other_paramer_name (type)</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">a short description</span>
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li><p>A YAML snippet, to show an example of how the new component should be called. Make sure to test your YAML snippet in an immuneML run to ensure it is specified correctly. The following formatting should be used to ensure the YAML snippet is rendered correctly:</p></li>
+</ol>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="err">*</span><span class="nv">*YAML</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">specification:**</span>
+
+<span class="l l-Scalar l-Scalar-Plain">.. code-block:</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yaml</span>
+
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">definitions</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">yaml_keyword</span><span class="p">:</span><span class="w"> </span><span class="c1"># could be encodings/ml_methods/reports/etc...</span>
+<span class="w">            </span><span class="nt">my_new_class</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">MyNewClass</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">parameter_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">                    </span><span class="nt">other_paramer_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</pre></div>
+</div>
+<details class="summary-click-to-view-a-full-example-of-report-class-documentation">
+<summary>Click to view a full example of Report class documentation.</summary><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">This</span> <span class="n">RandomDataPlot</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">placeholder</span> <span class="k">for</span> <span class="n">a</span> <span class="n">real</span> <span class="n">Report</span><span class="o">.</span>
+<span class="n">It</span> <span class="n">plots</span> <span class="n">some</span> <span class="n">random</span> <span class="n">numbers</span><span class="o">.</span>
+
+<span class="o">**</span><span class="n">Specification</span> <span class="n">arguments</span><span class="p">:</span><span class="o">**</span>
+
+<span class="o">-</span> <span class="n">n_points_to_plot</span> <span class="p">(</span><span class="nb">int</span><span class="p">):</span> <span class="n">The</span> <span class="n">number</span> <span class="n">of</span> <span class="n">random</span> <span class="n">points</span> <span class="n">to</span> <span class="n">plot</span><span class="o">.</span>
+
+
+<span class="o">**</span><span class="n">YAML</span> <span class="n">specification</span><span class="p">:</span><span class="o">**</span>
+
+<span class="o">..</span> <span class="n">indent</span> <span class="k">with</span> <span class="n">spaces</span>
+<span class="o">..</span> <span class="n">code</span><span class="o">-</span><span class="n">block</span><span class="p">::</span> <span class="n">yaml</span>
+
+    <span class="n">definitions</span><span class="p">:</span>
+        <span class="n">reports</span><span class="p">:</span>
+            <span class="n">my_report</span><span class="p">:</span>
+                <span class="n">RandomDataPlot</span><span class="p">:</span>
+                    <span class="n">n_points_to_plot</span><span class="p">:</span> <span class="mi">10</span>
+</pre></div>
+</div>
+</details></section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="how_to_add_new_preprocessing.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">How to add a new preprocessing</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="how_to_add_new_ML_method.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">How to add a new machine learning method</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2021-2025, Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">How to add a new report</a><ul>
+<li><a class="reference internal" href="#adding-an-example-data-report-to-the-immuneml-codebase">Adding an example data report to the immuneML codebase</a><ul>
+<li><a class="reference internal" href="#step-by-step-tutorial">Step-by-step tutorial</a></li>
+<li><a class="reference internal" href="#test-running-the-new-report-with-a-yaml-specification">Test running the new report with a YAML specification</a></li>
+<li><a class="reference internal" href="#adding-a-unit-test-for-a-report">Adding a unit test for a Report</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#implementing-a-new-report">Implementing a new Report</a><ul>
+<li><a class="reference internal" href="#determine-the-type-of-report">Determine the type of report</a><ul>
+<li><a class="reference internal" href="#report-types-for-dataset-analysis">Report types for dataset analysis</a></li>
+<li><a class="reference internal" href="#report-types-for-trained-ml-model-analysis">Report types for trained ML model analysis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#input-and-output-of-the-generate-method">Input and output of the _generate() method</a></li>
+<li><a class="reference internal" href="#creating-plots">Creating plots</a></li>
+<li><a class="reference internal" href="#checking-prerequisites-and-parameters">Checking prerequisites and parameters</a></li>
+<li><a class="reference internal" href="#specifying-different-report-types-in-yaml">Specifying different report types in YAML</a></li>
+<li><a class="reference internal" href="#class-documentation-standards-for-reports">Class documentation standards for reports</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=f1196aca"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    </body>
+</html>

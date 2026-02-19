@@ -1,0 +1,1437 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="ML method parameters" href="ml_methods.html" /><link rel="prev" title="Dataset parameters" href="datasets.html" />
+        <link rel="canonical" href="https://docs.immuneml.uio.no/yaml_specs/encodings.html" />
+
+    <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>Encoding parameters - immuneML 3.0.18 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/immuneml.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">immuneML 3.0.18 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">immuneML 3.0.18 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../quickstart.html">Quickstart</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Quickstart</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_simple.html">Quickstart: Galaxy with button-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_yaml.html">Quickstart: Galaxy with YAML-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/cli_yaml.html">Quickstart: command-line interface with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/simulation_quickstart.html">LIgO simulation quickstart</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installing immuneML</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Installing immuneML</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/install_with_package_manager.html">Install immuneML with a package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/installation_docker.html">Setting up immuneML with Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/cloud.html">Running immuneML in the cloud</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../specification.html">YAML specification</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of YAML specification</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how_to_specify_an_analysis_with_yaml.html">How to specify an analysis with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">Dataset parameters</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Encoding parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml_methods.html">ML method parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reports.html">Report parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preprocessings.html">Preprocessing parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation.html">Simulation parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="instructions.html">Instruction parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Tutorials</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/analyze_dataset.html">Analyzing Your Own Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_import_the_data_to_immuneML.html">How to import data into immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_generate_a_random_repertoire_dataset.html">How to generate a dataset with random sequences</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tutorials/ligo_simulation_tutorials.html">Dataset simulation with LIgO</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Dataset simulation with LIgO</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/ligo_simulation_yaml.html">YAML specification of the LigoSim instruction for introducing immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/how_to_simulate_co-occuring_signals.html">How to simulate co-occuring immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/how_to_simulate_paired_chain_data.html">Paired chain simulations in LIgO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/simulation_with_custom_signal_functions.html">Simulation with custom signal functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_train_and_assess_a_receptor_or_repertoire_classifier.html">How to train and assess a receptor or repertoire-level ML classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_apply_to_new_data.html">How to apply previously trained ML models to a new dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_perform_exploratory_analysis.html">How to perform an exploratory data analysis</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tutorials/motif_recovery.html">How to find motifs associated with disease or antigen binding state</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of How to find motifs associated with disease or antigen binding state</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/discover_motifs_precision_recall.html">Discovering positional motifs using precision and recall thresholds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/discover_motifs_classifiers.html">Discovering motifs learned by classifiers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/recovering_simulated_motifs.html">Recovering simulated immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/comparing_baseline_motifs.html">Comparing baseline motif frequencies in repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/clustering_tutorial.html">How to perform clustering analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_train_and_apply_gen_model.html">How to train a generative model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_combine_multiple_encodings.html">How to combine multiple encodings to represent a dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/getting_publication_ready_figures.html">How to get publication-ready figures</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../galaxy.html">immuneML &amp; Galaxy</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of immuneML &amp; Galaxy</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_intro.html">Introduction to Galaxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_tools.html">immuneML Galaxy tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_immunologist_friendly.html">ML basics: Training classifiers with the simplified Galaxy interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../usecases.html">Use case examples</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Use case examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/emerson_reproduction.html">Manuscript use case 1: Reproduction of a published study inside immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/extendability_use_case.html">Manuscript use case 2: Extending immuneML with a deep learning component for predicting antigen specificity of paired receptor data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/benchmarking_use_case.html">Manuscript use case 3: Benchmarking ML methods on ground-truth synthetic data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immcantation_use_case.html">Integration use case: post-analysis of sequences with Immcantation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immunarch_use_case.html">Integration use case: post-analysis of sequences with immunarch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immunesim_use_case.html">Integration use case: Performing analysis on immuneSIM-generated repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Troubleshooting</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../developer_docs.html">Developer documentation</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Developer documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/info_new_developers.html">Information for new developers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/install_for_development.html">Set up immuneML for development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_encoding.html">How to add a new encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_ML_method.html">How to add a new machine learning method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_report.html">How to add a new report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_preprocessing.html">How to add a new preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/data_model.html">immuneML data model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/execution_flow.html">immuneML execution flow</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/yaml_specs/encodings.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="encoding-parameters">
+<h1>Encoding parameters<a class="headerlink" href="#encoding-parameters" title="Link to this heading">¶</a></h1>
+<p>Under the <code class="code docutils literal notranslate"><span class="pre">definitions/encodings</span></code> component, the user can specify how to encode a given dataset.
+An encoding is a numerical data representation, which may be used as input for a machine learning algorithm.</p>
+<section id="compairrdistance">
+<h2>CompAIRRDistance<a class="headerlink" href="#compairrdistance" title="Link to this heading">¶</a></h2>
+<p>Encodes a given RepertoireDataset as a distance matrix, using the Morisita-Horn distance metric.
+Internally, <a class="reference external" href="https://github.com/uio-bmi/compairr/">CompAIRR</a> is used for fast calculation of overlap between repertoires.
+This creates a pairwise distance matrix between each of the repertoires.
+The distance is calculated based on the number of matching receptor chain sequences between the repertoires. This matching may be
+defined to permit 1 or 2 mismatching amino acid/nucleotide positions and 1 indel in the sequence. Furthermore,
+matching may or may not include V and J gene information, and sequence frequencies may be included or ignored.</p>
+<p>When mismatches (differences and indels) are allowed, the Morisita-Horn similarity may exceed 1. In this case, the
+Morisita-Horn distance (= similarity - 1) is set to 0 to avoid negative distance scores.</p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>RepertoireDatasets</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR has been
+installed such that it can be called directly on the command line with the command ‘compairr’, or that it is
+located at /usr/local/bin/compairr.</p></li>
+<li><p>keep_compairr_input (bool): whether to keep the input file that was passed to CompAIRR. This may take a lot of
+storage space if the input dataset is large. By default, the input file is not kept.</p></li>
+<li><p>differences (int): Number of differences allowed between the sequences of two immune receptor chains, this may be
+between 0 and 2. By default, differences is 0.</p></li>
+<li><p>indels (bool): Whether to allow an indel. This is only possible if differences is 1. By default, indels is False.</p></li>
+<li><p>ignore_counts (bool): Whether to ignore the frequencies of the immune receptor chains. If False, frequencies will
+be included, meaning the ‘counts’ values for the receptors available in two repertoires are multiplied. If False,
+only the number of unique overlapping immune receptors (‘clones’) are considered. By default, ignore_counts is False.</p></li>
+<li><p>ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor
+chains have to match. If True, gene information is ignored. By default, ignore_genes is False.</p></li>
+<li><p>threads (int): The number of threads to use for parallelization. Default is 8.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_distance_encoder</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">CompAIRRDistance</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">compairr_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">optional/path/to/compairr</span>
+<span class="w">                </span><span class="nt">differences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">                </span><span class="nt">indels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">                </span><span class="nt">ignore_counts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">                </span><span class="nt">ignore_genes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+</pre></div>
+</div>
+</section>
+<section id="compairrsequenceabundance">
+<h2>CompAIRRSequenceAbundance<a class="headerlink" href="#compairrsequenceabundance" title="Link to this heading">¶</a></h2>
+<p>This encoder works similarly to the <code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceAbundanceEncoder</span></code>,
+but internally uses <a class="reference external" href="https://github.com/uio-bmi/compairr/">CompAIRR</a> to accelerate core computations.</p>
+<p>This encoder represents the repertoires as vectors where:</p>
+<ul class="simple">
+<li><p>the first element corresponds to the number of label-associated clonotypes</p></li>
+<li><p>the second element is the total number of unique clonotypes</p></li>
+</ul>
+<p>To determine what clonotypes (amino acid sequences with or without matching V/J genes) are label-associated, Fisher’s exact test (one-sided)
+is used.</p>
+<p>The encoder also writes out files containing the contingency table used for fisher’s exact test,
+the resulting p-values, and the significantly abundant sequences
+(use <code class="xref py py-obj docutils literal notranslate"><span class="pre">RelevantSequenceExporter</span></code> to export these sequences in AIRR format).</p>
+<p>Reference: Emerson, Ryan O. et al.
+‘Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire’.
+Nature Genetics 49, no. 5 (May 2017): 659–65. <a class="reference external" href="https://doi.org/10.1038/ng.3822">doi.org/10.1038/ng.3822</a>.</p>
+<p>Note: to use this encoder, it is necessary to explicitly define the positive class for the label when defining the label
+in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
+See <a class="reference internal" href="../usecases/emerson_reproduction.html#reproduction-of-the-cmv-status-predictions-study"><span class="std std-ref">Reproduction of the CMV status predictions study</span></a> for an example using <code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceAbundanceEncoder</span></code>.</p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>RepertoireDatasets</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>p_value_threshold (float): The p value threshold to be used by the statistical test.</p></li>
+<li><p>compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
+has been installed such that it can be called directly on the command line with the command ‘compairr’,
+or that it is located at /usr/local/bin/compairr.</p></li>
+<li><p>ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor chains
+have to match. If True, gene information is ignored. By default, ignore_genes is False.</p></li>
+<li><p>sequence_batch_size (int): The number of sequences in a batch when comparing sequences across repertoires, typically 100s of thousands.
+This does not affect the results of the encoding, but may affect the speed and memory usage. The default value is 1.000.000</p></li>
+<li><p>threads (int): The number of threads to use for parallelization. This does not affect the results of the encoding, only the speed.
+The default number of threads is 8.</p></li>
+<li><p>keep_temporary_files (bool): whether to keep temporary files, including CompAIRR input, output and log files, and the sequence
+presence matrix. This may take a lot of storage space if the input dataset is large. By default, temporary files are not kept.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_sa_encoding</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">CompAIRRSequenceAbundance</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">compairr_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">optional/path/to/compairr</span>
+<span class="w">                </span><span class="nt">p_value_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">                </span><span class="nt">ignore_genes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">                </span><span class="nt">threads</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+</pre></div>
+</div>
+</section>
+<section id="composite">
+<h2>Composite<a class="headerlink" href="#composite" title="Link to this heading">¶</a></h2>
+<p>This encoder allows to combine multiple different encodings together, for example, KmerFrequency encoder
+with VGeneEncoder. The parameters for the different encoders are passed as a list of dictionaries, where each
+dictionary contains the parameters for one encoder. The different encoders are applied sequentially and their
+results concatenated together.</p>
+<p><strong>Dataset type:</strong>
+- SequenceDatasets
+- ReceptorDatasets
+- RepertoireDatasets</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To combine multiple encodings (e.g., GeneFrequency and KmerFrequency), keep in mind how the ML method will
+use the encoded data downstream. Currently, the recommended way to use CompositeEncoder is with
+<a class="reference internal" href="ml_methods.html#logregressioncustompenalty"><span class="std std-ref">LogRegressionCustomPenalty</span></a>, where you can specify which features should not be penalized.</p>
+</div>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>encoders (list): A list of dictionaries, where each dictionary contains the parameters for one encoder.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_composite_encoding</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">Composite</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">encoders</span><span class="p">:</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">KmerFrequency</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">k</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">GeneFrequency</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">genes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">V</span><span class="p p-Indicator">]</span>
+<span class="w">                    </span><span class="nt">normalization_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">relative_frequency</span>
+<span class="w">                    </span><span class="nt">scale_to_unit_variance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">                    </span><span class="nt">scale_to_zero_mean</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</pre></div>
+</div>
+</section>
+<section id="deeprc">
+<h2>DeepRC<a class="headerlink" href="#deeprc" title="Link to this heading">¶</a></h2>
+<p>DeepRCEncoder should be used in combination with the DeepRC ML method (<a class="reference internal" href="ml_methods.html#deeprc"><span class="std std-ref">DeepRC</span></a>).
+This encoder writes the data in a RepertoireDataset to .tsv files.
+For each repertoire, one .tsv file is created containing the amino acid sequences and the counts.
+Additionally, one metadata .tsv file is created, which describes the subset of repertoires that is encoded by
+a given instance of the DeepRCEncoder.</p>
+<p>Note: sequences where count is None, the count value will be set to 1</p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>RepertoireDatasets</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_deeprc_encoder</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DeepRC</span>
+</pre></div>
+</div>
+</section>
+<section id="distance">
+<h2>Distance<a class="headerlink" href="#distance" title="Link to this heading">¶</a></h2>
+<p>Encodes a given RepertoireDataset as distance matrix, where the pairwise distance between each of the repertoires
+is calculated. The distance is calculated based on the presence/absence of elements defined under attributes_to_match.
+Thus, if attributes_to_match contains only ‘sequence_aas’, this means the distance between two repertoires is maximal
+if they contain the same set of sequence_aas, and the distance is minimal if none of the sequence_aas are shared between
+two repertoires.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>distance_metric (<code class="xref py py-mod docutils literal notranslate"><span class="pre">DistanceMetricType</span></code>): The metric used to calculate the
+distance between two repertoires. Valid values are: <cite>JACCARD</cite>, <cite>MORISITA_HORN</cite>.
+The default distance metric is JACCARD (inverse Jaccard).</p></li>
+<li><p>sequence_batch_size (int): The number of sequences to be processed at once. Increasing this number increases the memory use.
+The default value is 1000.</p></li>
+<li><p>attributes_to_match (list): The attributes to consider when determining whether a sequence is present in both repertoires.
+Only the fields defined under attributes_to_match will be considered, all other fields are ignored.
+Valid values include any repertoire attribute as defined in AIRR rearrangement schema (cdr3_aa, v_call, j_call, etc).</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_distance_encoder</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">Distance</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">distance_metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">JACCARD</span>
+<span class="w">                </span><span class="nt">sequence_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">                </span><span class="nt">attributes_to_match</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cdr3_aa</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+</pre></div>
+</div>
+</section>
+<section id="esmc">
+<h2>ESMC<a class="headerlink" href="#esmc" title="Link to this heading">¶</a></h2>
+<p>Encoder based on a pretrained protein language model by Hayes et al. 2025. The used transformer model is
+“esmc_300m”.</p>
+<p>Original publication:
+Hayes, T., Rao, R., Akin, H., Sofroniew, N. J., Oktay, D., Lin, Z., Verkuil, R., Tran, V. Q., Deaton, J.,
+Wiggert, M., Badkundri, R., Shafkat, I., Gong, J., Derry, A., Molina, R. S., Thomas, N., Khan, Y. A.,
+Mishra, C., Kim, C., … Rives, A. (2025). Simulating 500 million years of evolution with a language model.
+Science, 387(6736), 850–858. <a class="reference external" href="https://doi.org/10.1126/science.ads0018">https://doi.org/10.1126/science.ads0018</a></p>
+<p>Original GitHub repository with license information: <a class="reference external" href="https://github.com/evolutionaryscale/esm">https://github.com/evolutionaryscale/esm</a></p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>SequenceDatasets</p></li>
+<li><p>ReceptorDatasets</p></li>
+<li><p>RepertoireDatasets</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>region_type (RegionType): Which part of the receptor sequence to encode. Defaults to IMGT_CDR3.</p></li>
+<li><p>device (str): Which device to use for model inference - ‘cpu’, ‘cuda’, ‘mps’ - as defined by pytorch.
+Defaults to ‘cpu’.</p></li>
+<li><p>num_processes (int): Number of processes to use for parallel processing. Defaults to 1.</p></li>
+<li><p>batch_size (int): The number of sequences to encode at the same time. This could have large impact on memory usage.
+If memory is an issue, try with smaller batch sizes. Defaults to 4096.</p></li>
+<li><p>scale_to_zero_mean (bool): Whether to scale the embeddings to zero mean. Defaults to True.</p></li>
+<li><p>scale_to_unit_variance (bool): Whether to scale the embeddings to unit variance. Defaults to True.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_emsc_encoder</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">ESMC</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span>
+<span class="w">                </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cpu</span>
+<span class="w">                </span><span class="nt">num_processes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">                </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4096</span>
+</pre></div>
+</div>
+</section>
+<section id="evennessprofile">
+<h2>EvennessProfile<a class="headerlink" href="#evennessprofile" title="Link to this heading">¶</a></h2>
+<p>The EvennessProfileEncoder class encodes a repertoire based on the clonal frequency distribution. The evenness for
+a given repertoire is defined as follows:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[^{\alpha} \mathrm{E}(\mathrm{f})=\frac{\left(\sum_{\mathrm{i}=1}^{\mathrm{n}} \mathrm{f}_{\mathrm{i}}^{\alpha}\right)^{\frac{1}{1-\alpha}}}{\mathrm{n}}\]</div>
+</div>
+<p>That is, it is the exponential of Renyi entropy at a given alpha divided by the species richness, or number of unique
+sequences.</p>
+<p>Reference: Greiff et al. (2015). A bioinformatic framework for immune repertoire diversity profiling enables detection of immunological
+status. Genome Medicine, 7(1), 49. <a class="reference external" href="https://doi.org/10.1186/s13073-015-0169-8">doi.org/10.1186/s13073-015-0169-8</a></p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>RepertoireDatasets</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>min_alpha (float): minimum alpha value to use</p></li>
+<li><p>max_alpha (float): maximum alpha value to use</p></li>
+<li><p>dimension (int): dimension of output evenness profile vector, or the number of alpha values to linearly space
+between min_alpha and max_alpha</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_evenness_profile</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">EvennessProfile</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">min_alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">                </span><span class="nt">max_alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">                </span><span class="nt">dimension</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">51</span>
+</pre></div>
+</div>
+</section>
+<section id="genefrequency">
+<h2>GeneFrequency<a class="headerlink" href="#genefrequency" title="Link to this heading">¶</a></h2>
+<p>GeneFrequencyEncoder represents a repertoire by the frequency of V and/or J genes used.</p>
+<p><strong>Dataset type:</strong>
+- RepertoireDatasets</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>genes (list): List of genes to use for the encoding. Possible values are ‘V’, and ‘J’. At least one gene must be
+specified.</p></li>
+<li><p>normalization_type (str): Type of normalization to apply to the gene frequencies. Possible values are ‘none’,
+‘binary’, ‘relative_frequency’, ‘max’, ‘l2’. Defaults to ‘relative_frequency’.</p></li>
+<li><p>scale_to_zero_mean (bool): Whether to scale the features to zero mean. Defaults to True.</p></li>
+<li><p>scale_to_unit_variance (bool): Whether to scale the features to unit variance. Defaults to True.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">gene_frequency_encoding</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">GeneFrequency</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">genes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">V</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">J</span><span class="p p-Indicator">]</span>
+<span class="w">            </span><span class="nt">normalization_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">relative_frequency</span>
+<span class="w">            </span><span class="nt">scale_to_unit_variance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">            </span><span class="nt">scale_to_zero_mean</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</pre></div>
+</div>
+</section>
+<section id="kmerabundance">
+<h2>KmerAbundance<a class="headerlink" href="#kmerabundance" title="Link to this heading">¶</a></h2>
+<p>This encoder is related to the <code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceAbundanceEncoder</span></code>,
+but identifies label-associated subsequences (k-mers) instead of full label-associated sequences.</p>
+<p>This encoder represents the repertoires as vectors where:</p>
+<ul class="simple">
+<li><p>the first element corresponds to the number of label-associated k-mers found in a repertoire</p></li>
+<li><p>the second element is the total number of unique k-mers per repertoire</p></li>
+</ul>
+<p>The label-associated k-mers are determined based on a one-sided Fisher’s exact test.</p>
+<p>The encoder also writes out files containing the contingency table used for fisher’s exact test,
+the resulting p-values, and the significantly abundant k-mers.</p>
+<p>Note: to use this encoder, it is necessary to explicitly define the positive class for the label when defining the label
+in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
+See <a class="reference internal" href="../usecases/emerson_reproduction.html#reproduction-of-the-cmv-status-predictions-study"><span class="std std-ref">Reproduction of the CMV status predictions study</span></a> for an example using <code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceAbundanceEncoder</span></code>.</p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>RepertoireDatasets</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>p_value_threshold (float): The p value threshold to be used by the statistical test.</p></li>
+<li><p>sequence_encoding (<code class="xref py py-mod docutils literal notranslate"><span class="pre">SequenceEncodingType</span></code>): The type of k-mers that are used. The simplest (default) sequence_encoding is <code class="xref py py-mod docutils literal notranslate"><span class="pre">CONTINUOUS_KMER</span></code>, which uses contiguous subsequences of length k to represent the k-mers. When gapped k-mers are used (<code class="xref py py-mod docutils literal notranslate"><span class="pre">GAPPED_KMER</span></code>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">GAPPED_KMER</span></code>), the k-mers may contain gaps with a size between min_gap and max_gap, and the k-mer length is defined as a combination of k_left and k_right. When IMGT k-mers are used (<code class="xref py py-mod docutils literal notranslate"><span class="pre">IMGT_CONTINUOUS_KMER</span></code>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">IMGT_GAPPED_KMER</span></code>), IMGT positional information is taken into account (i.e. the same sequence in a different position is considered to be a different k-mer).</p></li>
+<li><p>k (int): Length of the k-mer (number of amino acids) when ungapped k-mers are used. The default value for k is 3.</p></li>
+<li><p>k_left (int): When gapped k-mers are used, k_left indicates the length of the k-mer left of the gap. The default value for k_left is 1.</p></li>
+<li><p>k_right (int): Same as k_left, but k_right determines the length of the k-mer right of the gap. The default value for k_right is 1.</p></li>
+<li><p>min_gap (int): Minimum gap size when gapped k-mers are used. The default value for min_gap is 0.</p></li>
+<li><p>max_gap: (int): Maximum gap size when gapped k-mers are used. The default value for max_gap is 0.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_ka_encoding</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">KmerAbundance</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">p_value_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">                </span><span class="nt">threads</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+</pre></div>
+</div>
+</section>
+<section id="kmerfrequency">
+<h2>KmerFrequency<a class="headerlink" href="#kmerfrequency" title="Link to this heading">¶</a></h2>
+<p>The KmerFrequencyEncoder class encodes a repertoire, sequence or receptor by frequencies of k-mers it contains.
+A k-mer is a sequence of letters of length k into which an immune receptor sequence can be decomposed.
+K-mers can be defined in different ways, as determined by the sequence_encoding. If a dataset contains receptor
+sequences from multiple loci (e.g., TRA and TRB), the k-mer frequencies will be computed per locus and then combined
+into a single feature vector per sample. The k-mer frequencies can be normalized in different ways, as determined by
+the normalization_type. The design matrix can optionally be scaled to unit variance and/or to zero mean. The k-mer
+frequencies can be computed based on unique sequences (clonotypes) or taking into account the counts of the
+sequences in the repertoire.</p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>SequenceDatasets</p></li>
+<li><p>ReceptorDatasets</p></li>
+<li><p>RepertoireDatasets</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>sequence_encoding (<code class="xref py py-mod docutils literal notranslate"><span class="pre">SequenceEncodingType</span></code>):
+Sequence encoding determines how the sequences are decomposed into k-mers. It includes:</p>
+<ul>
+<li><p>CONTINUOUS_KMER: contiguous overlapping k-mers of length k (e.g., ACDE -&gt; {ACD, CDE} for k=3) - default value</p></li>
+<li><p>GAPPED_KMER: k-mers of length k_left + k_right with a gap of size between min_gap and max_gap in between
+(e.g., ACDE -&gt; {AC, A.D, CD, C.E} for k_left=1, k_right=1, min_gap=0, max_gap=1)</p></li>
+<li><p>IMGT_CONTINUOUS_KMER: contiguous k-mers of length k with IMGT positional information
+(e.g., AHCDE -&gt; {‘AHC_105’, ‘HCD_106’, ‘CDE_107’} for k=3)</p></li>
+<li><p>IMGT_GAPPED_KMER: k-mers of length k_left + k_right with a gap of size between min_gap and max_gap in
+between, annotated by the starting IMGT position (e.g., AHCDE -&gt; {‘AH_105’, ‘HC_106’, ‘CD_107’, ‘DE_116’,
+‘A.C_105’, ‘H.D_106’, ‘C.E_107’} for k_left=1, k_right=1, min_gap=0, max_gap=1)</p></li>
+<li><p>V_GENE_CONT_KMER: contiguous k-mers of length k, annotated by the V gene of the sequence they belong to
+(e.g., ACDE -&gt; {V1-1_ACD, V1-1_CDE} for k=3 and V gene V1-1)</p></li>
+<li><p>V_GENE_IMGT_KMER: contiguous k-mers of length k, annotated by the V gene of the sequence they belong to,
+annotated by the starting IMGT position (e.g., AHCDE -&gt; {V1-1_AHC_105, V1-1_HCD_106, V1-1_CDE_107} for k=3 and
+V gene V1-1)</p></li>
+<li><p>IDENTITY: the k-mers correspond to the original sequences</p></li>
+</ul>
+</li>
+<li><p>normalization_type (<code class="xref py py-mod docutils literal notranslate"><span class="pre">NormalizationType</span></code>): The way in which the
+k-mer frequencies should be normalized to unit norm; options are: binary, relative_frequency (also known as l1,
+default value), l2, max, none. For more information, see scikit-learn’s documentation on
+<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.normalize.html#sklearn.preprocessing.normalize">normalization</a>.</p></li>
+<li><p>reads (<code class="xref py py-mod docutils literal notranslate"><span class="pre">ReadsType</span></code>): Reads type signify whether the counts of the sequences in the
+repertoire will be taken into account. If <code class="xref py py-mod docutils literal notranslate"><span class="pre">UNIQUE</span></code>, only unique sequences
+(clonotypes) are encoded, and if <code class="xref py py-mod docutils literal notranslate"><span class="pre">ALL</span></code>, the sequence ‘count’ value is taken into
+account when determining the k-mer frequency. The default value for reads is unique.</p></li>
+<li><p>k (int): Length of the k-mer (number of amino acids) when ungapped k-mers are used. The default value for k is 3.</p></li>
+<li><p>k_left (int): When gapped k-mers are used, k_left indicates the length of the k-mer left of the gap. The default
+value for k_left is 1.</p></li>
+<li><p>k_right (int): Same as k_left, but k_right determines the length of the k-mer right of the gap. The default value
+for k_right is 1.</p></li>
+<li><p>min_gap (int): Minimum gap size when gapped k-mers are used. The default value for min_gap is 0.</p></li>
+<li><p>max_gap: (int): Maximum gap size when gapped k-mers are used. The default value for max_gap is 0.</p></li>
+<li><p>sequence_type (str): Whether to work with nucleotide or amino acid sequences. Amino acid sequences are the
+default. To work with either sequence type, the sequences of the desired type should be included in the datasets,
+e.g., listed under ‘columns_to_load’ parameter. By default, both types will be included if available. Valid values
+are: AMINO_ACID and NUCLEOTIDE.</p></li>
+<li><p>scale_to_unit_variance (bool): whether to scale the design matrix after normalization to have unit variance per
+feature. Setting this argument to True might improve the subsequent classifier’s performance depending on the type
+of the classifier. The default value for scale_to_unit_variance is true.</p></li>
+<li><p>scale_to_zero_mean (bool): whether to scale the design matrix after normalization to have zero mean per feature.
+Setting this argument to True might improve the subsequent classifier’s performance depending on the type of the
+classifier. However, if the original design matrix was sparse, setting this argument to True will destroy the
+sparsity and will increase the memory consumption. The default value for scale_to_zero_mean is false.</p></li>
+<li><p>region_type (:py:mod:<a href="#id2"><span class="problematic" id="id3">`</span></a>~immuneML.data_model.SequenceParams.RegionType): the part of the receptor sequence to use
+in the analysis. The default value is IMGT_CDR3. Other values: IMGT_CDR1, IMGT_CDR2, IMGT_CDR3, IMGT_FR1,
+IMGT_FR2, IMGT_FR3, IMGT_FR4, IMGT_JUNCTION, FULL_SEQUENCE. Note that if an IMGT-based sequence encoding is
+used, the region_type has to be IMGT_CDR3 or IMGT_JUNCTION.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_continuous_kmer</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">KmerFrequency</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">normalization_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RELATIVE_FREQUENCY</span>
+<span class="w">                </span><span class="nt">reads</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UNIQUE</span>
+<span class="w">                </span><span class="nt">sequence_encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CONTINUOUS_KMER</span>
+<span class="w">                </span><span class="nt">sequence_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NUCLEOTIDE</span>
+<span class="w">                </span><span class="nt">k</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">                </span><span class="nt">scale_to_unit_variance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">                </span><span class="nt">scale_to_zero_mean</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">        </span><span class="nt">my_gapped_kmer</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">KmerFrequency</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">normalization_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RELATIVE_FREQUENCY</span>
+<span class="w">                </span><span class="nt">reads</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UNIQUE</span>
+<span class="w">                </span><span class="nt">sequence_encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GAPPED_KMER</span>
+<span class="w">                </span><span class="nt">sequence_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AMINO_ACID</span>
+<span class="w">                </span><span class="nt">k_left</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">                </span><span class="nt">k_right</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">                </span><span class="nt">min_gap</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">                </span><span class="nt">max_gap</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">                </span><span class="nt">scale_to_unit_variance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">                </span><span class="nt">scale_to_zero_mean</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+</pre></div>
+</div>
+</section>
+<section id="matchedreceptors">
+<h2>MatchedReceptors<a class="headerlink" href="#matchedreceptors" title="Link to this heading">¶</a></h2>
+<p>Encodes the dataset based on the matches between a dataset containing unpaired (single chain) data,
+and a paired reference receptor dataset.
+For each paired reference receptor, the frequency of either chain in the dataset is counted.</p>
+<p>This encoding can be used in combination with the <a class="reference internal" href="reports.html#matches"><span class="std std-ref">Matches</span></a> report.</p>
+<p>When sum_matches and normalize are set to True, this encoder behaves similarly as described in: Yao, Y. et al. ‘T cell receptor repertoire as a potential diagnostic marker for celiac disease’.
+Clinical Immunology Volume 222 (January 2021): 108621. <a class="reference external" href="https://doi.org/10.1016/j.clim.2020.108621">doi.org/10.1016/j.clim.2020.108621</a>
+with the only exception being that this encoder uses paired receptors, while the original publication used single sequences (see also: <a class="reference internal" href="#matchedsequences"><span class="std std-ref">MatchedSequences</span></a> encoder).</p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>RepertoireDatasets</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>reference (dict): A dictionary describing the reference dataset file. Import should be specified the same way as
+regular dataset import. It is only allowed to import a receptor dataset here (i.e., is_repertoire is False and
+paired is True by default, and these are not allowed to be changed).</p></li>
+<li><p>max_edit_distances (dict): A dictionary specifying the maximum edit distance between a target sequence (from the
+repertoire) and the reference sequence. A maximum distance can be specified per chain, for example to allow for
+less strict matching of TCR alpha and BCR light chains. When only an integer is specified, this distance is
+applied to all possible chains.</p></li>
+<li><p>reads (<code class="xref py py-mod docutils literal notranslate"><span class="pre">ReadsType</span></code>): Reads type signify whether the counts of the sequences in the
+repertoire will be taken into account. If <code class="xref py py-mod docutils literal notranslate"><span class="pre">UNIQUE</span></code>, only unique sequences
+(clonotypes) are counted, and if <code class="xref py py-mod docutils literal notranslate"><span class="pre">ALL</span></code>, the sequence ‘count’ value is summed when
+determining the number of matches. The default value for reads is all.</p></li>
+<li><p>sum_matches (bool): When sum_matches is False, the resulting encoded data matrix contains multiple columns with
+the number of matches per reference receptor chain. When sum_matches is true, the columns representing each of the
+two chains are summed together, meaning that there are only two aggregated sums of matches (one per chain) per
+repertoire in the encoded data. To use this encoder in combination with the <a class="reference internal" href="reports.html#matches"><span class="std std-ref">Matches</span></a> report, sum_matches
+must be set to False. When sum_matches is set to True, this encoder behaves similarly to the encoder described by
+Yao, Y. et al. By default, sum_matches is False.</p></li>
+<li><p>normalize (bool): If True, the chain matches are divided by the total number of unique receptors in the repertoire
+(when reads = unique) or the total number of reads in the repertoire (when reads = all).</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_mr_encoding</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">MatchedReceptors</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">reference</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VDJdb</span>
+<span class="w">                    </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/file.txt</span>
+<span class="w">                </span><span class="nt">max_edit_distances</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">TRA</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">                    </span><span class="nt">TRB</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+</pre></div>
+</div>
+</section>
+<section id="matchedregex">
+<h2>MatchedRegex<a class="headerlink" href="#matchedregex" title="Link to this heading">¶</a></h2>
+<p>Encodes the dataset based on the matches between a RepertoireDataset and a collection of regular expressions.
+For each regular expression, the number of sequences in the RepertoireDataset containing the expression is counted.
+This can also be used to count how often a subsequence occurs in a RepertoireDataset.</p>
+<p>The regular expressions are defined per chain, and it is possible to require a V gene match in addition to the
+CDR3 sequence containing the regular expression.</p>
+<p>This encoding can be used in combination with the <a class="reference internal" href="reports.html#matches"><span class="std std-ref">Matches</span></a> report.</p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>RepertoireDatasets</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>match_v_genes (bool): Whether V gene matches are required. If this is True, a match is only counted if the
+V gene matches the gene specified in the motif input file. By default match_v_genes is False.</p></li>
+<li><p>reads (<code class="xref py py-mod docutils literal notranslate"><span class="pre">ReadsType</span></code>): Reads type signify whether the counts of the sequences in the
+repertoire will be taken into account. If <code class="xref py py-mod docutils literal notranslate"><span class="pre">UNIQUE</span></code>, only unique sequences
+(clonotypes) are counted, and if <code class="xref py py-mod docutils literal notranslate"><span class="pre">ALL</span></code>, the sequence ‘count’ value is
+summed when determining the number of matches. The default value for reads is all.</p></li>
+<li><p>motif_filepath (str): The path to the motif input file. This should be a tab separated file containing a
+column named ‘id’ and for every chain that should be matched a column containing the regex (&lt;chain&gt;_regex) and a
+column containing the V gene (&lt;chain&gt;V) if match_v_genes is True.
+The chains are specified by their three-letter code, see <code class="xref py py-obj docutils literal notranslate"><span class="pre">Chain</span></code>.</p></li>
+</ul>
+<p>In the simplest case, when counting the number of occurrences of a given list of k-mers in TRB sequences, the
+contents of the motif file could look like this:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>id</p></th>
+<th class="head"><p>TRB_regex</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>ACG</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>EDNA</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>DFWG</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>It is also possible to test whether paired regular expressions occur in the dataset (for example: regular expressions
+matching both a TRA chain and a TRB chain) by specifying them on the same line.
+In a more complex case where both paired and unpaired regular expressions are specified, in addition to matching the V
+genes, the contents of the motif file could look like this:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>id</p></th>
+<th class="head"><p>TRA_regex</p></th>
+<th class="head"><p>TRAV</p></th>
+<th class="head"><p>TRB_regex</p></th>
+<th class="head"><p>TRBV</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>AGQ.GSS</p></td>
+<td><p>TRAV35</p></td>
+<td><p>S[APL]GQY</p></td>
+<td><p>TRBV29-1</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td></td>
+<td></td>
+<td><p>ASS.R.*</p></td>
+<td><p>TRBV7-3</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_mr_encoding</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">MatchedRegex</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">motif_filepath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/file.txt</span>
+<span class="w">                </span><span class="nt">match_v_genes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">                </span><span class="nt">reads</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unique</span>
+</pre></div>
+</div>
+</section>
+<section id="matchedsequences">
+<h2>MatchedSequences<a class="headerlink" href="#matchedsequences" title="Link to this heading">¶</a></h2>
+<p>Encodes the dataset based on the matches between a RepertoireDataset and a reference sequence dataset. The feature
+names are derived from the reference sequences: “v_call_sequence_j_call” (e.g., “TRBV12-3_CASSLGTDTQYF_TRBJ2-7”). If
+there are duplicates in the feature names but sequences have different sequence IDs, the sequence ID is appended to
+the feature name to make it unique.</p>
+<p>This encoding can be used in combination with the <a class="reference internal" href="reports.html#matches"><span class="std std-ref">Matches</span></a> report.</p>
+<p>When sum_matches and normalize are set to True, this encoder behaves as described in: Yao, Y. et al. ‘T cell receptor repertoire as a potential diagnostic marker for celiac disease’.
+Clinical Immunology Volume 222 (January 2021): 108621. <a class="reference external" href="https://doi.org/10.1016/j.clim.2020.108621">doi.org/10.1016/j.clim.2020.108621</a></p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>RepertoireDatasets</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>reference (dict): A dictionary describing the reference dataset file. Import should be specified the same way as
+regular dataset import. It is only allowed to import a sequence dataset here (i.e., is_repertoire and paired are
+False by default, and are not allowed to be set to True).</p></li>
+<li><p>max_edit_distance (int): The maximum edit distance between a target sequence (from the repertoire) and the
+reference sequence.</p></li>
+<li><p>reads (<code class="xref py py-mod docutils literal notranslate"><span class="pre">ReadsType</span></code>): Reads type signify whether the counts of the sequences in the
+repertoire will be taken into account. If <code class="xref py py-mod docutils literal notranslate"><span class="pre">UNIQUE</span></code>, only unique sequences
+(clonotypes) are counted, and if <code class="xref py py-mod docutils literal notranslate"><span class="pre">ALL</span></code>, the sequence ‘count’ value is summed when
+determining the number of matches. The default value for reads is all.</p></li>
+<li><p>sum_matches (bool): When sum_matches is False, the resulting encoded data matrix contains multiple columns with
+the number of matches per reference sequence. When sum_matches is true, all columns are summed together, meaning
+that there is only one aggregated sum of matches per repertoire in the encoded data.
+To use this encoder in combination with the <a class="reference internal" href="reports.html#matches"><span class="std std-ref">Matches</span></a> report, sum_matches must be set to False. When
+sum_matches is set to True, this encoder behaves as described by Yao, Y. et al. By default, sum_matches is False.</p></li>
+<li><p>normalize (bool): If True, the sequence matches are divided by the total number of unique sequences in the
+repertoire (when reads = unique) or the total number of reads in the repertoire (when reads = all).</p></li>
+<li><p>output_count_as_feature: if True, the encoded repertoire is represented by the matches, and by the total number
+of sequences (or reads) in the repertoire, as defined by reads parameter above; by default this is False</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_ms_encoding</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">MatchedSequences</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">reference</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VDJDB</span>
+<span class="w">                    </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/file.txt</span>
+<span class="w">                </span><span class="nt">max_edit_distance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</pre></div>
+</div>
+</section>
+<section id="metadata">
+<h2>Metadata<a class="headerlink" href="#metadata" title="Link to this heading">¶</a></h2>
+<p>Encoder that uses metadata fields as features, such as HLA.</p>
+<p><strong>Dataset type:</strong>
+- RepertoireDatasets
+- SequenceDatasets
+- ReceptorDatasets</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>metadata_fields (list): List of metadata fields to use as features.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">metadata_encoding</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">Metadata</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">metadata_fields</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">HLA</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">sex</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+</section>
+<section id="motif">
+<h2>Motif<a class="headerlink" href="#motif" title="Link to this heading">¶</a></h2>
+<p>This encoder enumerates every possible positional motif in a sequence dataset, and keeps only the motifs associated with the positive class.
+A ‘motif’ is defined as a combination of position-specific amino acids. These motifs may contain one or multiple gaps.
+Motifs are filtered out based on a minimal precision and recall threshold for predicting the positive class.</p>
+<p>Note: the MotifEncoder can only be used for sequences of the same length.</p>
+<p>The ideal recall threshold(s) given a user-defined precision threshold can be calibrated using the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">MotifGeneralizationAnalysis</span></code> report. It is recommended to first run this report
+in <code class="xref py py-obj docutils literal notranslate"><span class="pre">ExploratoryAnalysisInstruction</span></code> before using this encoder for ML.</p>
+<p>This encoder can be used in combination with the <code class="xref py py-obj docutils literal notranslate"><span class="pre">BinaryFeatureClassifier</span></code> in order to
+learn a minimal set of compatible motifs for predicting the positive class.
+Alternatively, it may be combined with scikit-learn methods, such as for example <code class="xref py py-obj docutils literal notranslate"><span class="pre">LogisticRegression</span></code>,
+to learn a weight per motif.</p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>SequenceDatasets</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul>
+<li><p>max_positions (int): The maximum motif size. This is number of positional amino acids the motif consists of (excluding gaps). The default value for max_positions is 4.</p></li>
+<li><p>min_positions (int): The minimum motif size (see also: max_positions). The default value for max_positions is 1.</p></li>
+<li><p>no_gaps (bool): Must be set to True if only contiguous motifs (position-specific k-mers) are allowed. By default, no_gaps is False, meaning both gapped and ungapped motifs are searched for.</p></li>
+<li><p>min_precision (float): The minimum precision threshold for keeping a motif. The default value for min_precision is 0.8.</p></li>
+<li><p>min_recall (float): The minimum recall threshold for keeping a motif. The default value for min_precision is 0.
+It is also possible to specify a recall threshold for each motif size. In this case, a dictionary must be specified where
+the motif sizes are keys and the recall values are values. Use the <code class="xref py py-obj docutils literal notranslate"><span class="pre">MotifGeneralizationAnalysis</span></code> report
+to calibrate the optimal recall threshold given a user-defined precision threshold to ensure generalisability to unseen data.</p></li>
+<li><p>min_true_positives (int): The minimum number of true positive sequences that a motif needs to occur in. The default value for min_true_positives is 10.</p></li>
+<li><p>candidate_motif_filepath (str): Optional filepath for pre-filterd candidate motifs. This may be used to save time. Only the given candidate motifs are considered.
+When this encoder has been run previously, a candidate motifs file named ‘all_candidate_motifs.tsv’ will have been exported. This file contains all
+possible motifs with high enough min_true_positives without applying precision and recall thresholds.
+The file must be a tab-separated file, structured as follows:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>indices</p></th>
+<th class="head"><p>amino_acids</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1&amp;2&amp;3</p></td>
+<td><p>A&amp;G&amp;C</p></td>
+</tr>
+<tr class="row-odd"><td><p>5&amp;7</p></td>
+<td><p>E&amp;D</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The example above contains two motifs: AGC in positions 123, and E-D in positions 5-7 (with a gap at position 6).</p>
+</li>
+<li><p>label (str): The name of the binary label to train the encoder for. This is only necessary when the dataset contains multiple labels.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_motif_encoder</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">MotifEncoder</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">max_positions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">                </span><span class="nt">min_precision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span>
+<span class="w">                </span><span class="nt">min_recall</span><span class="p">:</span><span class="w">  </span><span class="c1"># different recall thresholds for each motif size</span>
+<span class="w">                    </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span><span class="w">   </span><span class="c1"># For shorter motifs, a stricter recall threshold is used</span>
+<span class="w">                    </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="w">                    </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="w">                    </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
+<span class="w">                </span><span class="nt">min_true_positives</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+</pre></div>
+</div>
+</section>
+<section id="onehot">
+<h2>OneHot<a class="headerlink" href="#onehot" title="Link to this heading">¶</a></h2>
+<p>One-hot encoding for repertoires, sequences or receptors. In one-hot encoding, each alphabet character
+(amino acid or nucleotide) is replaced by a sparse vector with one 1 and the rest zeroes. The position of the
+1 represents the alphabet character.</p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>SequenceDatasets</p></li>
+<li><p>ReceptorDatasets</p></li>
+<li><p>RepertoireDatasets</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>use_positional_info (bool): whether to include features representing the positional information.
+If True, three additional feature vectors will be added, representing the sequence start, sequence middle
+and sequence end. The values in these features are scaled between 0 and 1. A graphical representation of
+the values of these vectors is given below.</p></li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">  Value of sequence start:         Value of sequence middle:        Value of sequence end:</span>
+
+<span class="go">1 \                              1    /‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\         1                          /</span>
+<span class="go">   \                                 /                   \                                  /</span>
+<span class="go">    \                               /                     \                                /</span>
+<span class="go">0    \_____________________      0 /                       \      0  _____________________/</span>
+<span class="go">  &lt;----sequence length----&gt;        &lt;----sequence length----&gt;         &lt;----sequence length----&gt;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>distance_to_seq_middle (int): only applies when use_positional_info is True. This is the distance from the edge
+of the CDR3 sequence (IMGT positions 105 and 117) to the portion of the sequence that is considered ‘middle’.
+For example: if distance_to_seq_middle is 6 (default), all IMGT positions in the interval [111, 112)
+receive positional value 1.
+When using nucleotide sequences: note that the distance is measured in (amino acid) IMGT positions.
+If the complete sequence length is smaller than 2 * distance_to_seq_middle, the maximum value of the
+‘start’ and ‘end’ vectors will not reach 0, and the maximum value of the ‘middle’ vector will not reach 1.
+A graphical representation of the positional vectors with a too short sequence is given below:</p></li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Value of sequence start         Value of sequence middle        Value of sequence end:</span>
+<span class="go">with very short sequence:       with very short sequence:       with very short sequence:</span>
+
+<span class="go">     1 \                               1                                 1    /</span>
+<span class="go">        \                                                                    /</span>
+<span class="go">         \                                /\                                /</span>
+<span class="go">     0                                 0 /  \                            0</span>
+<span class="go">       &lt;-&gt;                               &lt;--&gt;                               &lt;-&gt;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>flatten (bool): whether to flatten the final onehot matrix to a 2-dimensional matrix [examples, other_dims_combined]
+This must be set to True when using onehot encoding in combination with scikit-learn ML methods (inheriting <code class="xref py py-obj docutils literal notranslate"><span class="pre">SklearnMethod</span></code>),
+such as <a class="reference internal" href="ml_methods.html#logisticregression"><span class="std std-ref">LogisticRegression</span></a>, <a class="reference internal" href="ml_methods.html#svm"><span class="std std-ref">SVM</span></a>, <a class="reference internal" href="ml_methods.html#svc"><span class="std std-ref">SVC</span></a>, <a class="reference internal" href="ml_methods.html#randomforestclassifier"><span class="std std-ref">RandomForestClassifier</span></a> and <a class="reference internal" href="ml_methods.html#knn"><span class="std std-ref">KNN</span></a>.</p></li>
+<li><p>sequence_type: whether to use nucleotide or amino acid sequence for encoding. Valid values are ‘nucleotide’ and ‘amino_acid’.</p></li>
+<li><p>region_type: which part of the sequence to encode; e.g., imgt_cdr3, imgt_junction</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">one_hot_vanilla</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">OneHot</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">use_positional_info</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">                </span><span class="nt">flatten</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">                </span><span class="nt">sequence_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">amino_acid</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">imgt_cdr3</span>
+
+<span class="w">        </span><span class="nt">one_hot_positional</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">OneHot</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">use_positional_info</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">                </span><span class="nt">distance_to_seq_middle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">                </span><span class="nt">flatten</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">                </span><span class="nt">sequence_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nucleotide</span>
+</pre></div>
+</div>
+</section>
+<section id="prott5">
+<h2>ProtT5<a class="headerlink" href="#prott5" title="Link to this heading">¶</a></h2>
+<p>Encoder based on a pretrained protein language model by Elnaggar et al. 2021. The used transformer model is
+“Rostlab/prot_t5_xl_half_uniref50-enc”.</p>
+<p>Original publication:
+Elnaggar, A., Heinzinger, M., Dallago, C., Rihawi, G., Wang, Y., Jones, L., Gibbs, T., Feher, T.,
+Angerer, C., Steinegger, M., Bhowmik, D., &amp; Rost, B. (2021). ProtTrans: Towards Cracking the Language of
+Life’s Code Through Self-Supervised Deep Learning and High Performance Computing (No. arXiv:2007.06225).
+arXiv. https://doi.org/10.48550/arXiv.2007.06225</p>
+<p>Original GitHub repository with license information: <a class="reference external" href="https://github.com/agemagician/ProtTrans">https://github.com/agemagician/ProtTrans</a></p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>SequenceDatasets</p></li>
+<li><p>ReceptorDatasets</p></li>
+<li><p>RepertoireDatasets</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>region_type (RegionType): Which part of the receptor sequence to encode. Defaults to IMGT_CDR3.</p></li>
+<li><p>device (str): Which device to use for model inference - ‘cpu’, ‘cuda’, ‘mps’ - as defined by pytorch.
+Defaults to ‘cpu’.</p></li>
+<li><p>num_processes (int): Number of processes to use for parallel processing. Defaults to 1.</p></li>
+<li><p>batch_size (int): The number of sequences to encode at the same time. This could have large impact on memory usage.
+If memory is an issue, try with smaller batch sizes. Defaults to 4096.</p></li>
+<li><p>scale_to_zero_mean (bool): Whether to scale the embeddings to zero mean. Defaults to True.</p></li>
+<li><p>scale_to_unit_variance (bool): Whether to scale the embeddings to unit variance. Defaults to True.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_prot_t5_encoder</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">ProtT5:</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span>
+<span class="w">                </span><span class="nt">device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cpu</span>
+<span class="w">                </span><span class="nt">num_processes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">                </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4096</span>
+</pre></div>
+</div>
+</section>
+<section id="sequenceabundance">
+<h2>SequenceAbundance<a class="headerlink" href="#sequenceabundance" title="Link to this heading">¶</a></h2>
+<p>This encoder represents the repertoires as vectors where:</p>
+<ul class="simple">
+<li><p>the first element corresponds to the number of label-associated clonotypes</p></li>
+<li><p>the second element is the total number of unique clonotypes</p></li>
+</ul>
+<p>To determine what clonotypes (with features defined by comparison_attributes) are label-associated, one-sided Fisher’s exact test is used.</p>
+<p>The encoder also writes out files containing the contingency table used for Fisher’s exact test,
+the resulting p-values, and the significantly abundant sequences
+(use <code class="xref py py-obj docutils literal notranslate"><span class="pre">RelevantSequenceExporter</span></code> to export these sequences in AIRR format).</p>
+<p>Reference: Emerson, Ryan O. et al.
+‘Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire’.
+Nature Genetics 49, no. 5 (May 2017): 659–65. <a class="reference external" href="https://doi.org/10.1038/ng.3822">doi.org/10.1038/ng.3822</a>.</p>
+<p>Note: to use this encoder, it is necessary to explicitly define the positive class for the label when defining the label
+in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
+For full example of using this encoder, see <a class="reference internal" href="../usecases/emerson_reproduction.html#reproduction-of-the-cmv-status-predictions-study"><span class="std std-ref">Reproduction of the CMV status predictions study</span></a>.</p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>RepertoireDatasets</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This encoder is computationally intensive and may require a large amount of memory and time to run. Use
+CompAIRRSequenceAbundance encoder instead for more efficient computation and for the same functionality.</p>
+</div>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>comparison_attributes (list): The attributes to be considered to group receptors into clonotypes. Only the fields specified in
+comparison_attributes will be considered, all other fields are ignored. Valid comparison value can be any
+repertoire field name (e.g., as specified in the AIRR rearrangement schema).</p></li>
+<li><p>p_value_threshold (float): The p value threshold to be used by the statistical test.</p></li>
+<li><p>sequence_batch_size (int): The number of sequences in a batch when comparing sequences across repertoires, typically 100s of thousands.
+This does not affect the results of the encoding, only the speed. The default value is 1.000.000</p></li>
+<li><p>repertoire_batch_size (int): How many repertoires will be loaded at once. This does not affect the result of the encoding, only the speed.
+This value is a trade-off between the number of repertoires that can fit the RAM at the time and loading time from disk.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_sa_encoding</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">SequenceAbundance</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">comparison_attributes</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cdr3_aa</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+<span class="w">                </span><span class="nt">p_value_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">                </span><span class="nt">sequence_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100000</span>
+<span class="w">                </span><span class="nt">repertoire_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
+</pre></div>
+</div>
+</section>
+<section id="shannondiversity">
+<h2>ShannonDiversity<a class="headerlink" href="#shannondiversity" title="Link to this heading">¶</a></h2>
+<p>ShannonDiversity encoder calculates the Shannon diversity index for each repertoire in a dataset. The diversity is
+computed as:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[diversity = - \sum_{i=1}^{n} p_i \log(p_i)\]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(p_i\)</span> is the clonal count for each unique sequence in the repertoire (from duplicate_count field)
+divided by the total clonal counts, and <span class="math notranslate nohighlight">\(n\)</span> is the total number of clonotypes (sequences) in the repertoire.</p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>RepertoireDataset</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<p>No arguments are needed for this encoder.</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">shannon_div_enc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ShannonDiversity</span>
+</pre></div>
+</div>
+</section>
+<section id="similartopositivesequence">
+<h2>SimilarToPositiveSequence<a class="headerlink" href="#similartopositivesequence" title="Link to this heading">¶</a></h2>
+<p>A simple baseline encoding, to be used in combination with <code class="xref py py-obj docutils literal notranslate"><span class="pre">BinaryFeatureClassifier</span></code> using keep_all = True.
+This encoder keeps track of all positive sequences in the training set, and ignores the negative sequences.
+Any sequence within a given hamming distance from a positive training sequence will be classified positive,
+all other sequences will be classified negative.</p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>SequenceDatasets</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>hamming_distance (int): Maximum number of differences allowed between any positive sequence of the training set and a
+new observed sequence in order for the observed sequence to be classified as ‘positive’.</p></li>
+<li><p>compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
+has been installed such that it can be called directly on the command line with the command ‘compairr’,
+or that it is located at /usr/local/bin/compairr.</p></li>
+<li><p>ignore_genes (bool): Only used when compairr is used. Whether to ignore V and J gene information. If False, the V and J genes between two sequences
+have to match for the sequence to be considered ‘similar’. If True, gene information is ignored. By default, ignore_genes is False.</p></li>
+<li><p>threads (int): The number of threads to use for parallelization. This does not affect the results of the encoding, only the speed.
+The default number of threads is 8.</p></li>
+<li><p>keep_temporary_files (bool): whether to keep temporary files, including CompAIRR input, output and log files, and the sequence
+presence matrix. This may take a lot of storage space if the input dataset is large. By default temporary files are not kept.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_sequence_encoder</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">SimilarToPositiveSequenceEncoder</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">hamming_distance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</pre></div>
+</div>
+</section>
+<section id="tcrbert">
+<h2>TCRBert<a class="headerlink" href="#tcrbert" title="Link to this heading">¶</a></h2>
+<p>TCRBertEncoder is based on <a class="reference external" href="https://github.com/wukevin/tcr-bert/tree/main">TCR-BERT</a>, a large language model
+trained on TCR sequences. TCRBertEncoder embeds TCR sequences using either of the pre-trained models provided on
+HuggingFace repository.</p>
+<p>Original publication:
+Wu, K. E., Yost, K., Daniel, B., Belk, J., Xia, Y., Egawa, T., Satpathy, A., Chang, H., &amp; Zou, J. (2024).
+TCR-BERT: Learning the grammar of T-cell receptors for flexible antigen-binding analyses. Proceedings of the
+18th Machine Learning in Computational Biology Meeting, 194–229. <a class="reference external" href="https://proceedings.mlr.press/v240/wu24b.html">https://proceedings.mlr.press/v240/wu24b.html</a></p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>SequenceDataset</p></li>
+<li><p>ReceptorDataset</p></li>
+<li><p>RepertoireDataset</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>model (str): The pre-trained model to use (huggingface model hub identifier). Available options are ‘tcr-bert’
+and ‘tcr-bert-mlm-only’.</p></li>
+<li><p>layers (list): The hidden layers to use for encoding. Layers should be given as negative integers, where -1
+indicates the last representation, -2 second to last, etc. Default is [-1].</p></li>
+<li><p>method (str): The method to use for pooling the hidden states. Available options are ‘mean’, ‘max’’,
+‘cls’, and ‘pool’. Default is ‘mean’. For explanation of the methods, see GitHub repository of TCR-BERT.</p></li>
+<li><p>batch_size (int): The number of sequences to encode at the same time. This could have large impact on memory usage.
+If memory is an issue, try with smaller batch sizes. Defaults to 4096.</p></li>
+<li><p>scale_to_zero_mean (bool): Whether to scale the embeddings to zero mean. Defaults to True.</p></li>
+<li><p>scale_to_unit_variance (bool): Whether to scale the embeddings to unit variance. Defaults to True.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_tcr_bert_encoder</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCRBert</span>
+</pre></div>
+</div>
+</section>
+<section id="tcrdist">
+<h2>TCRdist<a class="headerlink" href="#tcrdist" title="Link to this heading">¶</a></h2>
+<p>Encodes the given ReceptorDataset as a distance matrix between all receptors, where the distance is computed using TCRdist from the paper:
+Dash P, Fiore-Gartland AJ, Hertz T, et al. Quantifiable predictive features define epitope-specific T cell receptor repertoires.
+Nature. 2017; 547(7661):89-93. <a class="reference external" href="https://www.nature.com/articles/nature22383">doi:10.1038/nature22383</a>.</p>
+<p>For the implementation, <a class="reference external" href="https://tcrdist3.readthedocs.io/en/latest/">TCRdist3</a> library was used (source code available
+<a class="reference external" href="https://github.com/kmayerb/tcrdist3">here</a>).</p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>ReceptorDataset</p></li>
+<li><p>SequenceDataset</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>cores (int): number of processes to use for the computation</p></li>
+<li><p>cdr3_only (bool): whether to use only cdr3 or also v gene; if set to false, encoding will only compute the distances
+between the CDR3 regions of the receptors</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_tcr_dist_enc</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">TCRdist</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">cores</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">                </span><span class="nt">cdr3_only</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"> </span><span class="c1"># default tcrdist behavior</span>
+</pre></div>
+</div>
+</section>
+<section id="word2vec">
+<h2>Word2Vec<a class="headerlink" href="#word2vec" title="Link to this heading">¶</a></h2>
+<p>Word2VecEncoder learns the vector representations of k-mers based on the context (receptor sequence).
+Similar idea was discussed in: Ostrovsky-Berman, M., Frankel, B., Polak, P. &amp; Yaari, G.
+Immune2vec: Embedding B/T Cell Receptor Sequences in ℝN Using Natural Language Processing. Frontiers in Immunology 12, (2021).</p>
+<p>This encoder relies on gensim’s implementation of Word2Vec and KmerHelper for k-mer extraction. Currently it works on amino acid level.</p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>SequenceDatasets</p></li>
+<li><p>RepertoireDatasets</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>vector_size (int): The size of the vector to be learnt.</p></li>
+<li><p>model_type (<code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelType</span></code>):  The context which will be
+used to infer the representation of the sequence.
+If <code class="xref py py-obj docutils literal notranslate"><span class="pre">SEQUENCE</span></code> is used, the context of
+a k-mer is defined by the sequence it occurs in (e.g. if the sequence is CASTTY and k-mer is AST,
+then its context consists of k-mers CAS, STT, TTY)
+If <code class="xref py py-obj docutils literal notranslate"><span class="pre">KMER_PAIR</span></code> is used, the context for
+the k-mer is defined as all the k-mers that within one edit distance (e.g. for k-mer CAS, the context
+includes CAA, CAC, CAD etc.).
+Valid values are <cite>SEQUENCE</cite>, <cite>KMER_PAIR</cite>.</p></li>
+<li><p>k (int): The length of the k-mers used for the encoding.</p></li>
+<li><p>epochs (int): for how many epochs to train the word2vec model for a given set of sentences (corresponding to epochs parameter in gensim package)</p></li>
+<li><p>window (int): max distance between two k-mers in a sequence (same as window parameter in gensim’s word2vec)</p></li>
+</ul>
+<p><strong>YAML pecification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">my_w2v</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">Word2Vec</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">vector_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16</span>
+<span class="w">                    </span><span class="nt">k</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">                    </span><span class="nt">model_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SEQUENCE</span>
+<span class="w">                    </span><span class="nt">epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">                    </span><span class="nt">window</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="ml_methods.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">ML method parameters</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="datasets.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Dataset parameters</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2021-2025, Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Encoding parameters</a><ul>
+<li><a class="reference internal" href="#compairrdistance">CompAIRRDistance</a></li>
+<li><a class="reference internal" href="#compairrsequenceabundance">CompAIRRSequenceAbundance</a></li>
+<li><a class="reference internal" href="#composite">Composite</a></li>
+<li><a class="reference internal" href="#deeprc">DeepRC</a></li>
+<li><a class="reference internal" href="#distance">Distance</a></li>
+<li><a class="reference internal" href="#esmc">ESMC</a></li>
+<li><a class="reference internal" href="#evennessprofile">EvennessProfile</a></li>
+<li><a class="reference internal" href="#genefrequency">GeneFrequency</a></li>
+<li><a class="reference internal" href="#kmerabundance">KmerAbundance</a></li>
+<li><a class="reference internal" href="#kmerfrequency">KmerFrequency</a></li>
+<li><a class="reference internal" href="#matchedreceptors">MatchedReceptors</a></li>
+<li><a class="reference internal" href="#matchedregex">MatchedRegex</a></li>
+<li><a class="reference internal" href="#matchedsequences">MatchedSequences</a></li>
+<li><a class="reference internal" href="#metadata">Metadata</a></li>
+<li><a class="reference internal" href="#motif">Motif</a></li>
+<li><a class="reference internal" href="#onehot">OneHot</a></li>
+<li><a class="reference internal" href="#prott5">ProtT5</a></li>
+<li><a class="reference internal" href="#sequenceabundance">SequenceAbundance</a></li>
+<li><a class="reference internal" href="#shannondiversity">ShannonDiversity</a></li>
+<li><a class="reference internal" href="#similartopositivesequence">SimilarToPositiveSequence</a></li>
+<li><a class="reference internal" href="#tcrbert">TCRBert</a></li>
+<li><a class="reference internal" href="#tcrdist">TCRdist</a></li>
+<li><a class="reference internal" href="#word2vec">Word2Vec</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=f1196aca"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script>window.MathJax = {"extensions": ["tex2jax.js"], "jax": ["input/TeX", "output/HTML-CSS"]}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
+</html>

@@ -1,0 +1,636 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta content="summary" name="twitter:card" />
+<meta content="&#64;immuneml" name="twitter:site" />
+<meta content="immuneML: specify an analysis with YAML" name="twitter:title" />
+<meta content="See tutorials on how to specify analysis in immuneML through YAML specification file." name="twitter:description" />
+<meta content="https://docs.immuneml.uio.no/_images/receptor_classification_overview.png" name="twitter:image" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Dataset parameters" href="datasets.html" /><link rel="prev" title="YAML specification" href="../specification.html" />
+        <link rel="canonical" href="https://docs.immuneml.uio.no/yaml_specs/how_to_specify_an_analysis_with_yaml.html" />
+
+    <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>How to specify an analysis with YAML - immuneML 3.0.18 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/immuneml.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">immuneML 3.0.18 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">immuneML 3.0.18 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../quickstart.html">Quickstart</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Quickstart</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_simple.html">Quickstart: Galaxy with button-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_yaml.html">Quickstart: Galaxy with YAML-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/cli_yaml.html">Quickstart: command-line interface with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/simulation_quickstart.html">LIgO simulation quickstart</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installing immuneML</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Installing immuneML</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/install_with_package_manager.html">Install immuneML with a package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/installation_docker.html">Setting up immuneML with Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/cloud.html">Running immuneML in the cloud</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../specification.html">YAML specification</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of YAML specification</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">How to specify an analysis with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">Dataset parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="encodings.html">Encoding parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml_methods.html">ML method parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reports.html">Report parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preprocessings.html">Preprocessing parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation.html">Simulation parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="instructions.html">Instruction parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Tutorials</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/analyze_dataset.html">Analyzing Your Own Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_import_the_data_to_immuneML.html">How to import data into immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_generate_a_random_repertoire_dataset.html">How to generate a dataset with random sequences</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tutorials/ligo_simulation_tutorials.html">Dataset simulation with LIgO</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Dataset simulation with LIgO</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/ligo_simulation_yaml.html">YAML specification of the LigoSim instruction for introducing immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/how_to_simulate_co-occuring_signals.html">How to simulate co-occuring immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/how_to_simulate_paired_chain_data.html">Paired chain simulations in LIgO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/simulation_with_custom_signal_functions.html">Simulation with custom signal functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_train_and_assess_a_receptor_or_repertoire_classifier.html">How to train and assess a receptor or repertoire-level ML classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_apply_to_new_data.html">How to apply previously trained ML models to a new dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_perform_exploratory_analysis.html">How to perform an exploratory data analysis</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tutorials/motif_recovery.html">How to find motifs associated with disease or antigen binding state</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of How to find motifs associated with disease or antigen binding state</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/discover_motifs_precision_recall.html">Discovering positional motifs using precision and recall thresholds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/discover_motifs_classifiers.html">Discovering motifs learned by classifiers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/recovering_simulated_motifs.html">Recovering simulated immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/comparing_baseline_motifs.html">Comparing baseline motif frequencies in repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/clustering_tutorial.html">How to perform clustering analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_train_and_apply_gen_model.html">How to train a generative model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_combine_multiple_encodings.html">How to combine multiple encodings to represent a dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/getting_publication_ready_figures.html">How to get publication-ready figures</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../galaxy.html">immuneML &amp; Galaxy</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of immuneML &amp; Galaxy</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_intro.html">Introduction to Galaxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_tools.html">immuneML Galaxy tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_immunologist_friendly.html">ML basics: Training classifiers with the simplified Galaxy interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../usecases.html">Use case examples</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Use case examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/emerson_reproduction.html">Manuscript use case 1: Reproduction of a published study inside immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/extendability_use_case.html">Manuscript use case 2: Extending immuneML with a deep learning component for predicting antigen specificity of paired receptor data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/benchmarking_use_case.html">Manuscript use case 3: Benchmarking ML methods on ground-truth synthetic data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immcantation_use_case.html">Integration use case: post-analysis of sequences with Immcantation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immunarch_use_case.html">Integration use case: post-analysis of sequences with immunarch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immunesim_use_case.html">Integration use case: Performing analysis on immuneSIM-generated repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Troubleshooting</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../developer_docs.html">Developer documentation</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Developer documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/info_new_developers.html">Information for new developers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/install_for_development.html">Set up immuneML for development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_encoding.html">How to add a new encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_ML_method.html">How to add a new machine learning method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_report.html">How to add a new report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_preprocessing.html">How to add a new preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/data_model.html">immuneML data model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/execution_flow.html">immuneML execution flow</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/yaml_specs/how_to_specify_an_analysis_with_yaml.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="how-to-specify-an-analysis-with-yaml">
+<h1>How to specify an analysis with YAML<a class="headerlink" href="#how-to-specify-an-analysis-with-yaml" title="Link to this heading">¶</a></h1>
+<p>Analyses in immuneML are specified through a YAML specification file. This is a text file with nested keys and values.
+Since immuneML can be used for a variety of different tasks, different parameters need to be set depending on the use case.
+The keys are essentially the input parameters to immuneML, except the values to these parameters can consist of more key-value pairs.
+Throughout the documentation, the names of keys (which have a specific meaning) will be formatted like <code class="code docutils literal notranslate"><span class="pre">this</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you have not used YAML before, we recommend reading the official docs for an overview (<a class="reference external" href="https://yaml.org/spec/1.2.2/#chapter-2-language-overview">https://yaml.org/spec/1.2.2/#chapter-2-language-overview</a>) or any tutorial online.
+We also recommend using a YAML-friendly editor (Sublime Text, PyCharm or others) or an online YAML validator (<a class="reference external" href="https://jsonformatter.org/yaml-validator">https://jsonformatter.org/yaml-validator</a>) to make sure
+your YAML file is correctly formatted.</p>
+</div>
+<p>The immuneML YAML specification reflects two main sets of keys:</p>
+<ul class="simple">
+<li><p>Under <code class="code docutils literal notranslate"><span class="pre">definitions</span></code> the different analysis components are defined, such as a specific ML method, or the import parameters for a dataset.</p></li>
+<li><p>The <code class="code docutils literal notranslate"><span class="pre">instructions</span></code> describe what kind of workflow is executed using the components defined under definitions. For example, whether to train ML models, or simulate a dataset for benchmarking.</p></li>
+</ul>
+<p>This page gives a general overview of the YAML specification structure, and the keys that should be present.
+For an exhaustive list of all the options that can be specified, see <a class="reference internal" href="../specification.html#yaml-specification"><span class="std std-ref">YAML specification</span></a>.</p>
+<section id="structure-of-the-analysis-specification">
+<h2>Structure of the analysis specification<a class="headerlink" href="#structure-of-the-analysis-specification" title="Link to this heading">¶</a></h2>
+<p>The following figure outlines the general structure of the YAML specification file. Note that depending on the specific analysis,
+the components and parameters that need to be specified may not be the same.
+On the highest level, the analysis specification always consists of <code class="code docutils literal notranslate"><span class="pre">definitions</span></code> and <code class="code docutils literal notranslate"><span class="pre">instructions</span></code>.</p>
+<figure class="align-default">
+<img alt="structure of the YAML specification" src="../_images/yaml_structure.png" />
+</figure>
+<section id="specifying-definitions">
+<h3>Specifying Definitions<a class="headerlink" href="#specifying-definitions" title="Link to this heading">¶</a></h3>
+<p>Under <code class="code docutils literal notranslate"><span class="pre">definitions</span></code>, the following analysis components may be defined:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">datasets</span></code>: specifying where data is located, what format the data is in, and how it should be imported (see <a class="reference internal" href="../tutorials/how_to_import_the_data_to_immuneML.html#how-to-import-data-into-immuneml"><span class="std std-ref">How to import data into immuneML</span></a> for more details),</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">preprocessing_sequences</span></code>: defining one or more preprocessing steps to be taken on the dataset (this is optional),</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">encodings</span></code>: different data representations,</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">ml_methods</span></code>: different machine learning methods (e.g., SVM or KNN),</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">reports</span></code>: specific plots or statistics to apply to the raw or encoded data, ML methods or results.</p></li>
+</ul>
+<p>Simulation-specific components (only relevant when running the <a class="reference internal" href="../tutorials/ligo_simulation_tutorials.html#dataset-simulation-with-ligo"><span class="std std-ref">Dataset simulation with LIgO</span></a>) are:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">motifs</span></code>: parts of the simulation definition defined by a seed and a way to create specific motif instances from the seed,</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">signals</span></code>: parts of the simulation which can include multiple motifs and correspond to a single label for subsequent classification tasks,</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">simulations</span></code>: define how to combine different signals and how to implant them in the dataset.</p></li>
+</ul>
+<p>Under definitions, each analysis sub-component is defined using a user-defined key.
+Throughout the documentation, we use the prefix ‘my_’ to identify these keys, but any kind of name may be used here.
+These keys are unique names that identify the settings for a component, and they are
+later referenced in the <a class="reference internal" href="#specifying-instructions"><span class="std std-ref">instructions</span></a>.</p>
+<p>An example of a full <code class="code docutils literal notranslate"><span class="pre">definitions</span></code> section which may be used for a machine learning task is given below.
+Note that in order to run this yaml file, instructions still need to be added</p>
+<blockquote>
+<div><details class="summary-definitions-yaml">
+<summary>definitions.yaml</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">datasets</span><span class="p">:</span><span class="w"> </span><span class="c1"># every instruction uses a dataset</span>
+<span class="w">    </span><span class="nt">my_dataset</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AIRR</span>
+<span class="w">      </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/data/</span>
+<span class="w">        </span><span class="nt">metadata_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/metadata.csv</span>
+<span class="w">  </span><span class="nt">preprocessing_sequences</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_preprocessing</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">my_beta_chain_filter</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">ChainRepertoireFilter</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">keep_chain</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TRB</span>
+<span class="w">  </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_log_reg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LogisticRegression</span>
+<span class="w">    </span><span class="nt">my_svm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SVM</span>
+<span class="w">  </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_kmer_freq_encoding_1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KmerFrequency</span><span class="w"> </span><span class="c1"># KmerFrequency with default parameters</span>
+<span class="w">    </span><span class="nt">my_kmer_freq_encoding_2</span><span class="p">:</span><span class="w"> </span><span class="c1"># KmerFrequency with user-defined parameters</span>
+<span class="w">      </span><span class="nt">KmerFrequency</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">k</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">  </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_seq_length_distribution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SequenceLengthDistribution</span>
+<span class="nt">instructions</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># to be added...</span>
+</pre></div>
+</div>
+</details></div></blockquote>
+<p>The <code class="code docutils literal notranslate"><span class="pre">definitions</span></code> section used for Simulation contains different components (<code class="code docutils literal notranslate"><span class="pre">motifs</span></code>, <code class="code docutils literal notranslate"><span class="pre">signals</span></code>, <code class="code docutils literal notranslate"><span class="pre">simulations</span></code>).
+These are discussed in more detail in the following tutorial: <a class="reference internal" href="../tutorials/ligo_simulation_tutorials.html#dataset-simulation-with-ligo"><span class="std std-ref">Dataset simulation with LIgO</span></a>.</p>
+</section>
+<section id="specifying-instructions">
+<h3>Specifying Instructions<a class="headerlink" href="#specifying-instructions" title="Link to this heading">¶</a></h3>
+<p>Similarly to analysis components, <code class="code docutils literal notranslate"><span class="pre">instructions</span></code> are defined under a user-defined key.
+Under this key, you should define the instruction <code class="code docutils literal notranslate"><span class="pre">type</span></code>, which defines the type
+of analysis that will be done. All other settings are instruction-specific.</p>
+<p>The following instruction types may be used:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a></p></li>
+<li><p><a class="reference internal" href="instructions.html#exploratoryanalysis"><span class="std std-ref">ExploratoryAnalysis</span></a></p></li>
+<li><p><a class="reference internal" href="instructions.html#ligosim"><span class="std std-ref">LIgO Simulation</span></a></p></li>
+<li><p><a class="reference internal" href="instructions.html#mlapplication"><span class="std std-ref">MLApplication</span></a></p></li>
+<li><p>and few others; <a class="reference internal" href="instructions.html#instruction-parameters"><span class="std std-ref">Instructions</span></a> for the complete list.</p></li>
+</ul>
+<p>The components defined under definitions can be referenced inside the instruction, but any result from the
+instructions is not available to other instructions. If the output of one instruction needs to be used in another
+other instruction, two separate immuneML runs need to be made (e.g, running immuneML once with the Simulation
+instruction to generate a dataset, and subsequently using that dataset as an input to a second immuneML
+run to train a ML model).</p>
+<p>An example of the YAML specification for the TrainMLModel instruction is shown below.
+See the tutorial <a class="reference internal" href="../tutorials/how_to_train_and_assess_a_receptor_or_repertoire_classifier.html#how-to-train-and-assess-a-receptor-or-repertoire-level-ml-classifier"><span class="std std-ref">How to train and assess a receptor or repertoire-level ML classifier</span></a> for more explanation behind all settings.</p>
+<blockquote>
+<div><details class="summary-instructions-yaml">
+<summary>instructions.yaml</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># to be added...</span>
+<span class="nt">instructions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my_instruction</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined instruction key</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TrainMLModel</span>
+<span class="w">    </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_dataset</span><span class="w"> </span><span class="c1"># reference dataset from definitions</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">disease</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">settings</span><span class="p">:</span><span class="w"> </span><span class="c1"># settings are made up of preprocessing (optional), ml_method and encoding</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_kmer_freq_encoding_1</span>
+<span class="w">      </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_log_reg</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">preprocessing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_preprocessing</span>
+<span class="w">      </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_kmer_freq_encoding_2</span>
+<span class="w">      </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_svm</span>
+<span class="w">    </span><span class="nt">assessment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">random</span>
+<span class="w">      </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">training_percentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">70</span>
+<span class="w">      </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">data_splits</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">my_seq_length_distribution</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">selection</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k_fold</span>
+<span class="w">      </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">    </span><span class="nt">strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GridSearch</span>
+<span class="w">    </span><span class="nt">metrics</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">accuracy</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">optimization_metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">accuracy</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w"> </span><span class="c1"># no reports</span>
+<span class="w">    </span><span class="nt">refit_optimal_model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">    </span><span class="nt">number_of_processes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+</pre></div>
+</div>
+</details></div></blockquote>
+</section>
+<section id="specifying-output">
+<h3>Specifying output<a class="headerlink" href="#specifying-output" title="Link to this heading">¶</a></h3>
+<p>Optionally, the key <code class="code docutils literal notranslate"><span class="pre">output</span></code> may be specified on the base level (next to <code class="code docutils literal notranslate"><span class="pre">definitions</span></code> and <code class="code docutils literal notranslate"><span class="pre">instructions</span></code>). However,
+the only supported output format is currently HTML. The <code class="code docutils literal notranslate"><span class="pre">output</span></code> section may be omitted from the YAML, but if included, it should look like this:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">output</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTML</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="putting-all-parts-together">
+<h2>Putting all parts together<a class="headerlink" href="#putting-all-parts-together" title="Link to this heading">¶</a></h2>
+<p>Not every analysis component can be combined with every component.
+Some analysis components are specific to a particular dataset type (receptor, sequence or repertoire dataset),
+and some components need to be used in a specific combination (such as encoder-ML method compatibility).
+The diagrams below show for each dataset type how the components can be combined.</p>
+<img alt="Analysis paths repertoires" src="../_images/analysis_paths_repertoires.png" />
+<img alt="Analysis paths receptors" src="../_images/analysis_paths_receptors.png" />
+<img alt="Analysis paths sequences" src="../_images/analysis_paths_sequences.png" />
+<p>An example of a complete YAML specification for training an ML model through nested cross-validation is given here:</p>
+<blockquote>
+<div><details class="summary-complete-definitions-instructions-yaml">
+<summary>complete_definitions_instructions.yaml</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">d1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AIRR</span>
+<span class="w">      </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">metadata_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/metadata.csv</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/data/</span>
+<span class="w">  </span><span class="nt">preprocessing_sequences</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_preprocessing</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">my_beta_chain_filter</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">ChainRepertoireFilter</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">keep_chain</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TRB</span>
+<span class="w">  </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_log_reg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LogisticRegression</span>
+<span class="w">    </span><span class="nt">my_svm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SVM</span>
+<span class="w">  </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_kmer_freq_encoding_1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KmerFrequency</span><span class="w"> </span><span class="c1"># KmerFrequency with default parameters</span>
+<span class="w">    </span><span class="nt">my_kmer_freq_encoding_2</span><span class="p">:</span><span class="w"> </span><span class="c1"># KmerFrequency with user-defined parameters</span>
+<span class="w">      </span><span class="nt">KmerFrequency</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">k</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">  </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_seq_length_distribution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SequenceLengthDistribution</span>
+<span class="nt">instructions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my_instruction</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined instruction key</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TrainMLModel</span>
+<span class="w">    </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_dataset</span><span class="w"> </span><span class="c1"># reference dataset from definitions</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">disease</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">settings</span><span class="p">:</span><span class="w"> </span><span class="c1"># settings are made up of preprocessing (optional), ml_method and encoding</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_kmer_freq_encoding_1</span>
+<span class="w">      </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_log_reg</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">preprocessing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_preprocessing</span>
+<span class="w">      </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_kmer_freq_encoding_2</span>
+<span class="w">      </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_svm</span>
+<span class="w">    </span><span class="nt">assessment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">random</span>
+<span class="w">      </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">training_percentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">70</span>
+<span class="w">      </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">data_splits</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">my_seq_length_distribution</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">selection</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k_fold</span>
+<span class="w">      </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">    </span><span class="nt">strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GridSearch</span>
+<span class="w">    </span><span class="nt">metrics</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">accuracy</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">optimization_metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">accuracy</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w"> </span><span class="c1"># no reports</span>
+<span class="w">    </span><span class="nt">refit_optimal_model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">    </span><span class="nt">number_of_processes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="nt">output</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTML</span>
+</pre></div>
+</div>
+</details></div></blockquote>
+</section>
+<section id="running-the-specified-analysis">
+<h2>Running the specified analysis<a class="headerlink" href="#running-the-specified-analysis" title="Link to this heading">¶</a></h2>
+<p>To run an instruction via command line with the given YAML specification file:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">immune-ml path/to/specification.yaml result/folder/path/</span>
+</pre></div>
+</div>
+<p>Alternatively, create an ImmuneMLApp object in a Python script and pass it the path parameter to the constructor before calling its <code class="code docutils literal notranslate"><span class="pre">run()</span></code> method as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">immuneml.app.ImmuneMLApp</span> <span class="kn">import</span> <span class="n">ImmuneMLApp</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">ImmuneMLApp</span><span class="p">(</span><span class="n">specification_path</span><span class="o">=</span><span class="s2">&quot;path/to/specification.yaml&quot;</span><span class="p">,</span> <span class="n">result_path</span><span class="o">=</span><span class="s2">&quot;result/folder/path/&quot;</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="datasets.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Dataset parameters</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../specification.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">YAML specification</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2021-2025, Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">How to specify an analysis with YAML</a><ul>
+<li><a class="reference internal" href="#structure-of-the-analysis-specification">Structure of the analysis specification</a><ul>
+<li><a class="reference internal" href="#specifying-definitions">Specifying Definitions</a></li>
+<li><a class="reference internal" href="#specifying-instructions">Specifying Instructions</a></li>
+<li><a class="reference internal" href="#specifying-output">Specifying output</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#putting-all-parts-together">Putting all parts together</a></li>
+<li><a class="reference internal" href="#running-the-specified-analysis">Running the specified analysis</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=f1196aca"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    </body>
+</html>

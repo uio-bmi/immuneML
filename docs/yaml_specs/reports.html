@@ -1,0 +1,2178 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Preprocessing parameters" href="preprocessings.html" /><link rel="prev" title="ML method parameters" href="ml_methods.html" />
+        <link rel="canonical" href="https://docs.immuneml.uio.no/yaml_specs/reports.html" />
+
+    <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>Report parameters - immuneML 3.0.18 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/immuneml.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">immuneML 3.0.18 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">immuneML 3.0.18 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../quickstart.html">Quickstart</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Quickstart</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_simple.html">Quickstart: Galaxy with button-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_yaml.html">Quickstart: Galaxy with YAML-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/cli_yaml.html">Quickstart: command-line interface with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/simulation_quickstart.html">LIgO simulation quickstart</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installing immuneML</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Installing immuneML</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/install_with_package_manager.html">Install immuneML with a package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/installation_docker.html">Setting up immuneML with Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/cloud.html">Running immuneML in the cloud</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../specification.html">YAML specification</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of YAML specification</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how_to_specify_an_analysis_with_yaml.html">How to specify an analysis with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">Dataset parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="encodings.html">Encoding parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml_methods.html">ML method parameters</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Report parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preprocessings.html">Preprocessing parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation.html">Simulation parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="instructions.html">Instruction parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Tutorials</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/analyze_dataset.html">Analyzing Your Own Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_import_the_data_to_immuneML.html">How to import data into immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_generate_a_random_repertoire_dataset.html">How to generate a dataset with random sequences</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tutorials/ligo_simulation_tutorials.html">Dataset simulation with LIgO</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Dataset simulation with LIgO</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/ligo_simulation_yaml.html">YAML specification of the LigoSim instruction for introducing immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/how_to_simulate_co-occuring_signals.html">How to simulate co-occuring immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/how_to_simulate_paired_chain_data.html">Paired chain simulations in LIgO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/simulation_with_custom_signal_functions.html">Simulation with custom signal functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_train_and_assess_a_receptor_or_repertoire_classifier.html">How to train and assess a receptor or repertoire-level ML classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_apply_to_new_data.html">How to apply previously trained ML models to a new dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_perform_exploratory_analysis.html">How to perform an exploratory data analysis</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tutorials/motif_recovery.html">How to find motifs associated with disease or antigen binding state</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of How to find motifs associated with disease or antigen binding state</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/discover_motifs_precision_recall.html">Discovering positional motifs using precision and recall thresholds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/discover_motifs_classifiers.html">Discovering motifs learned by classifiers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/recovering_simulated_motifs.html">Recovering simulated immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/comparing_baseline_motifs.html">Comparing baseline motif frequencies in repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/clustering_tutorial.html">How to perform clustering analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_train_and_apply_gen_model.html">How to train a generative model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_combine_multiple_encodings.html">How to combine multiple encodings to represent a dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/getting_publication_ready_figures.html">How to get publication-ready figures</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../galaxy.html">immuneML &amp; Galaxy</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of immuneML &amp; Galaxy</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_intro.html">Introduction to Galaxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_tools.html">immuneML Galaxy tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_immunologist_friendly.html">ML basics: Training classifiers with the simplified Galaxy interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../usecases.html">Use case examples</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Use case examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/emerson_reproduction.html">Manuscript use case 1: Reproduction of a published study inside immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/extendability_use_case.html">Manuscript use case 2: Extending immuneML with a deep learning component for predicting antigen specificity of paired receptor data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/benchmarking_use_case.html">Manuscript use case 3: Benchmarking ML methods on ground-truth synthetic data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immcantation_use_case.html">Integration use case: post-analysis of sequences with Immcantation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immunarch_use_case.html">Integration use case: post-analysis of sequences with immunarch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immunesim_use_case.html">Integration use case: Performing analysis on immuneSIM-generated repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Troubleshooting</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../developer_docs.html">Developer documentation</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Developer documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/info_new_developers.html">Information for new developers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/install_for_development.html">Set up immuneML for development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_encoding.html">How to add a new encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_ML_method.html">How to add a new machine learning method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_report.html">How to add a new report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_preprocessing.html">How to add a new preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/data_model.html">immuneML data model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/execution_flow.html">immuneML execution flow</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/yaml_specs/reports.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="report-parameters">
+<h1>Report parameters<a class="headerlink" href="#report-parameters" title="Link to this heading">¶</a></h1>
+<p>Under the <code class="code docutils literal notranslate"><span class="pre">definitions/reports</span></code> component, the user can specify reports which visualise or summarise different properties
+of the dataset or analysis. To use a report, it must be specified in the specific <code class="code docutils literal notranslate"><span class="pre">reports</span></code> list of the instruction that generates it.</p>
+<p>Reports have been divided into different types. Different types of reports can be specified depending on which instruction is run. Click on the name of the report type to see more details.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#data-reports"><span class="std std-ref">Data reports</span></a> show some type of features or statistics about a given dataset.</p></li>
+<li><p><a class="reference internal" href="#encoding-reports"><span class="std std-ref">Encoding reports</span></a> show some type of features or statistics about an encoded dataset, or may export relevant sequences or tables.</p></li>
+<li><p><a class="reference internal" href="#ml-model-reports"><span class="std std-ref">ML model reports</span></a> show some type of features or statistics about a single trained ML model (e.g., model coefficients).</p></li>
+<li><p><a class="reference internal" href="#train-ml-model-reports"><span class="std std-ref">Train ML model reports</span></a> plot general statistics or export data of multiple models simultaneously when running the <a class="reference internal" href="instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a> instruction (e.g., performance comparison between models).</p></li>
+<li><p><a class="reference internal" href="#multi-dataset-reports"><span class="std std-ref">Multi dataset reports</span></a> are special reports that can be specified when running immuneML with the <code class="code docutils literal notranslate"><span class="pre">MultiDatasetBenchmarkTool</span></code>. See Manuscript use case 1: <a class="reference internal" href="../usecases/emerson_reproduction.html#robustness-assessment"><span class="std std-ref">Robustness assessment</span></a> for an example.</p></li>
+</ul>
+<section id="data-reports">
+<h2><strong>Data reports</strong><a class="headerlink" href="#data-reports" title="Link to this heading">¶</a></h2>
+<p>Data reports show some type of features or statistics about a given dataset.</p>
+<p>When running the <a class="reference internal" href="instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a> instruction, data reports can be specified inside the ‘selection’ or ‘assessment’
+specification under the keys ‘reports/data’ (current cross-validation split) or ‘reports/data_splits’ (train/test sub-splits).
+Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_data_report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SequenceCountDistribution</span>
+<span class="nt">my_instruction</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TrainMLModel</span>
+<span class="w">    </span><span class="nt">selection</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">data</span><span class="p">:</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_data_report</span>
+<span class="w">        </span><span class="c1"># other parameters...</span>
+<span class="w">    </span><span class="nt">assessment</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">data</span><span class="p">:</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_data_report</span>
+<span class="w">        </span><span class="c1"># other parameters...</span>
+<span class="w">    </span><span class="c1"># other parameters...</span>
+</pre></div>
+</div>
+<p>Alternatively, when running the <a class="reference internal" href="instructions.html#exploratoryanalysis"><span class="std std-ref">ExploratoryAnalysis</span></a> instruction, data reports can be specified under ‘report’. Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_instruction</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ExploratoryAnalysis</span>
+<span class="w">    </span><span class="nt">analyses</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_first_analysis</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_data_report</span>
+<span class="w">            </span><span class="c1"># other parameters...</span>
+<span class="w">    </span><span class="c1"># other parameters...</span>
+</pre></div>
+</div>
+<section id="aminoacidfrequencydistribution">
+<h3>AminoAcidFrequencyDistribution<a class="headerlink" href="#aminoacidfrequencydistribution" title="Link to this heading">¶</a></h3>
+<p>Generates a barplot showing the relative frequency of each amino acid at each position in the sequences of a dataset.</p>
+<p>Example output:</p>
+<a class="reference internal image-reference" href="../_static/images/reports/amino_acid_frequency.png"><img alt="Amino acid frequency" src="../_static/images/reports/amino_acid_frequency.png" style="width: 800px;" />
+</a>
+<a class="reference internal image-reference" href="../_static/images/reports/amino_acid_frequency_change.png"><img alt="Amino acid frequency change" src="../_static/images/reports/amino_acid_frequency_change.png" style="width: 800px;" />
+</a>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>alignment (str): Alignment style for aligning sequences of different lengths. Options are as follows:</p>
+<ul>
+<li><p>CENTER: center-align sequences of different lengths. The middle amino acid of any sequence be labelled position 0. By default, alignment is CENTER.</p></li>
+<li><p>LEFT: left-align sequences of different lengths, starting at 0.</p></li>
+<li><p>RIGHT: right align sequences of different lengths, ending at 0 (counting towards negative numbers).</p></li>
+<li><p>IMGT: align sequences based on their IMGT positional numbering, considering the sequence region_type (IMGT_CDR3 or IMGT_JUNCTION).
+The main difference between CENTER and IMGT is that IMGT aligns the first and last amino acids, adding gaps in the middle,
+whereas CENTER aligns the middle of the sequences, padding with gaps at the start and end of the sequence.
+When region_type is IMGT_JUNCTION, the IMGT positions run from 104 (conserved C) to 118 (conserved W/F). When IMGT_CDR3 is used, these positions are 105 to 117.
+For long CDR3 sequences, additional numbers are added in between IMGT positions 111 and 112.
+See the official IMGT documentation for more details: <a class="reference external" href="https://www.imgt.org/IMGTScientificChart/Numbering/CDR3-IMGTgaps.html">https://www.imgt.org/IMGTScientificChart/Numbering/CDR3-IMGTgaps.html</a></p></li>
+</ul>
+</li>
+<li><p>relative_frequency (bool): Whether to plot relative frequencies (true) or absolute counts (false) of the
+positional amino acids. Note that when sequences are of different length, setting relative_frequency to True will
+produce different results depending on the alignment type, as some positions are only covered by the longest sequences.
+By default, relative_frequency is False.</p></li>
+<li><p>split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a
+single label, or alternatively the label of interest can be specified under ‘label’. If split_by_label is set to
+true, the percentage-wise frequency difference between classes is plotted additionally. By default,
+split_by_label is False.</p></li>
+<li><p>label (str): if split_by_label is set to True, a label can be specified here.</p></li>
+<li><p>region_type (str): which part of the sequence to check; e.g., IMGT_CDR3</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_aa_freq_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">AminoAcidFrequencyDistribution</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">relative_frequency</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">                </span><span class="nt">split_by_label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">                </span><span class="nt">label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CMV</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span>
+</pre></div>
+</div>
+</section>
+<section id="compairrclusteringreport">
+<h3>CompAIRRClusteringReport<a class="headerlink" href="#compairrclusteringreport" title="Link to this heading">¶</a></h3>
+<p>A report that uses CompAIRR to compute repertoire distances based on sequence overlap and performs hierarchical
+clustering on the resulting distance matrix. The clustering results are visualized using a dendrogram,
+colored by a specified label.</p>
+<p>The report assumes that CompAIRR (<a class="reference external" href="https://github.com/uio-bmi/compairr">https://github.com/uio-bmi/compairr</a>) has been installed.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is an experimental feature.</p>
+</div>
+<p><strong>Specification arguments</strong>:</p>
+<ul class="simple">
+<li><p>labels (list): The list of labels to highlight below the dendrogram. The labels should be present in the dataset.</p></li>
+<li><p>compairr_path (str): Path to the CompAIRR executable.</p></li>
+<li><p>indels (bool): Whether to allow insertions/deletions when matching sequences (default: False)</p></li>
+<li><p>ignore_counts (bool): Whether to ignore sequence counts when computing overlap (default: False)</p></li>
+<li><p>ignore_genes (bool): Whether to ignore V/J gene assignments when matching sequences (default: False)</p></li>
+<li><p>threads (int): Number of threads to use for CompAIRR computation (default: 4)</p></li>
+<li><p>linkage_method (str): The linkage method to use for hierarchical clustering (default: ‘single’)</p></li>
+<li><p>is_cdr3 (bool): Whether the sequences represent CDR3s (default: True)</p></li>
+<li><p>clustering_criterion (str): The criterion to use for clustering (default: ‘distance’), as defined in
+scipy.cluster.hierarchy.linkage; valid values are ‘distance’, ‘maxclust’, ‘monocrit’, ‘maxclust_monocrit’</p></li>
+<li><p>clustering_threshold (float): The threshold for the clustering algorithm (default: 0.5), mapped to ‘t’ parameter
+in scipy.cluster.hierarchy.fcluster</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_compairr_clustering_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">CompAIRRClusteringReport</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">disease</span><span class="p p-Indicator">]</span>
+<span class="w">                </span><span class="nt">compairr_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/compairr</span>
+<span class="w">                </span><span class="nt">indels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">                </span><span class="nt">ignore_counts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">                </span><span class="nt">ignore_genes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">                </span><span class="nt">threads</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">                </span><span class="nt">linkage_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">single</span>
+<span class="w">                </span><span class="nt">is_cdr3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">                </span><span class="nt">clustering_criterion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">distance</span>
+<span class="w">                </span><span class="nt">clustering_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+</pre></div>
+</div>
+</section>
+<section id="gliph2exporter">
+<h3>GLIPH2Exporter<a class="headerlink" href="#gliph2exporter" title="Link to this heading">¶</a></h3>
+<p>Report which exports the receptor data to GLIPH2 format so that it can be directly used in GLIPH2 tool. Currently, the report accepts only
+receptor datasets.</p>
+<p>GLIPH2 publication: Huang H, Wang C, Rubelt F, Scriba TJ, Davis MM. Analyzing the Mycobacterium tuberculosis immune response by T-cell receptor
+clustering with GLIPH2 and genome-wide antigen screening. Nature Biotechnology. Published online April 27,
+2020:1-9. <a class="reference external" href="https://www.nature.com/articles/s41587-020-0505-4">doi:10.1038/s41587-020-0505-4</a></p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>condition (str): name of the parameter present in the receptor metadata in the dataset; condition can be anything which can be processed in
+GLIPH2, such as tissue type or treatment.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_gliph2_exporter</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">GLIPH2Exporter</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">epitope</span><span class="w"> </span><span class="c1"># for instance, epitope parameter is present in receptors&#39; metadata with values such as &quot;MtbLys&quot; for Mycobacterium tuberculosis (as shown in the original paper).</span>
+</pre></div>
+</div>
+</section>
+<section id="labeldist">
+<h3>LabelDist<a class="headerlink" href="#labeldist" title="Link to this heading">¶</a></h3>
+<p>LabelDist report plots the distribution of label values for all labels provided as
+input to the report.</p>
+<p>Specification arguments:</p>
+<ul class="simple">
+<li><p>labels (list): list of label names as they appear in the metadata file (RepertoireDataset)
+or in data files (Receptor/SequenceDataset).</p></li>
+</ul>
+<p>YAML specification:</p>
+</section>
+<section id="labeloverlap">
+<h3>LabelOverlap<a class="headerlink" href="#labeloverlap" title="Link to this heading">¶</a></h3>
+<p>This report creates a heatmap where the columns are the values of one label and rows are the values of another label,
+and the cells contain the number of samples that have both label values. It works for any dataset type.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>column_label (str): Name of the label to be used as columns in the heatmap.</p></li>
+<li><p>row_label (str): Name of the label to be used as rows in the heatmap.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_data_report</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">LabelOverlap</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">column_label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">epitope</span>
+<span class="w">        </span><span class="nt">row_label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch</span>
+</pre></div>
+</div>
+</section>
+<section id="motifgeneralizationanalysis">
+<h3>MotifGeneralizationAnalysis<a class="headerlink" href="#motifgeneralizationanalysis" title="Link to this heading">¶</a></h3>
+<p>This report splits the given dataset into a training and validation set, identifies significant motifs using the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">MotifEncoder</span></code>
+on the training set and plots the precision/recall and precision/true positive predictions of motifs
+on both the training and validation sets. This can be used to:</p>
+<ul class="simple">
+<li><p>determine the optimal recall cutoff for motifs of a given size</p></li>
+<li><p>investigate how well motifs learned on a training set generalize to a test set</p></li>
+</ul>
+<p>After running this report and determining the optimal recall cutoffs, the report
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">MotifTestSetPerformance</span></code> can be run to
+plot the performance on an independent test set.</p>
+<p>Note: the MotifEncoder (and thus this report) can only be used for sequences of the same length.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>label (dict): A label configuration. One label should be specified, and the positive_class for this label should be defined. See the YAML specification below for an example.</p></li>
+<li><p>training_set_identifier_path (str): Path to a file containing ‘sequence_identifiers’ of the sequences used for the training set. This file should have a single column named ‘example_id’ and have one sequence identifier per line. If training_set_identifier_path is not set, a random subset of the data (according to training_percentage) will be assigned to be the training set.</p></li>
+<li><p>training_percentage (float): If training_set_identifier_path is not set, this value is used to specify the fraction of sequences that will be randomly assigned to form the training set. Should be a value between 0 and 1. By default, training_percentage is 0.7.</p></li>
+<li><p>random_seed (int): Random seed for splitting the data into training and validation sets a training_set_identifier_path is not provided.</p></li>
+<li><p>split_by_motif_size (bool): Whether to split the analysis per motif size. If true, a recall threshold is learned for each motif size, and figures are generated for each motif size independently. By default, split_by_motif_size is true.</p></li>
+<li><p>min_precision: <code class="xref py py-obj docutils literal notranslate"><span class="pre">MotifEncoder</span></code> parameter. The minimum precision threshold for keeping a motif on the training set. By default, min_precision is 0.9.</p></li>
+<li><p>test_precision_threshold (float). The desired precision on the test set, given that motifs are learned by using a training set with a precision threshold of min_precision. It is recommended for test_precision_threshold to be lower than min_precision, e.g., min_precision - 0.1. By default, test_precision_threshold is 0.8.</p></li>
+<li><p>min_recall (float): <code class="xref py py-obj docutils literal notranslate"><span class="pre">MotifEncoder</span></code> parameter. The minimum recall threshold for keeping a motif. Any learned recall threshold will be at least as high as the set min_recall value. The default value for min_recall is 0.</p></li>
+<li><p>min_true_positives (int): <code class="xref py py-obj docutils literal notranslate"><span class="pre">MotifEncoder</span></code> parameter. The minimum number of true positive training sequences that a motif needs to occur in. The default value for min_true_positives is 1.</p></li>
+<li><p>max_positions (int): <code class="xref py py-obj docutils literal notranslate"><span class="pre">MotifEncoder</span></code> parameter. The maximum motif size. This is number of positional amino acids the motif consists of (excluding gaps). The default value for max_positions is 4.</p></li>
+<li><p>min_positions (int): <code class="xref py py-obj docutils literal notranslate"><span class="pre">MotifEncoder</span></code> parameter. The minimum motif size (see also: max_positions). The default value for min_positions is 1.</p></li>
+<li><p>no_gaps (bool): <code class="xref py py-obj docutils literal notranslate"><span class="pre">MotifEncoder</span></code> parameter. Must be set to True if only contiguous motifs (position-specific k-mers) are allowed. By default, no_gaps is False, meaning both gapped and ungapped motifs are searched for.</p></li>
+<li><p>smoothen_combined_precision (bool): whether to add a smoothed line representing the combined precision to the precision-vs-TP plot. When set to True, this may take considerable extra time to compute. By default, plot_smoothed_combined_precision is set to True.</p></li>
+<li><p>min_points_in_window (int): Parameter for smoothing the combined_precision line in the precision-vs-TP plot through lognormal kernel smoothing with adaptive window size. This parameter determines the minimum number of points that need to be present in a window to determine the adaptive window size. By default, min_points_in_window is 50.</p></li>
+<li><p>smoothing_constant1: Parameter for smoothing the combined_precision line in the precision-vs-TP plot through lognormal kernel smoothing with adaptive window size. This smoothing constant determines the dependence of the smoothness on the window size. Increasing this increases smoothness for regions where few points are present. By default, smoothing_constant1 is 5.</p></li>
+<li><p>smoothing_constant2: Parameter for smoothing the combined_precision line in the precision-vs-TP plot through lognormal kernel smoothing. with adaptive window size. This smoothing constant can be used to scale the overall kernel width, thus influencing the smoothness of all regions regardless of data density. By default, smoothing_constant2 is 10.</p></li>
+<li><p>training_set_name (str): Name of the training set to be used in figures. By default, the training_set_name is ‘training set’.</p></li>
+<li><p>test_set_name (str): Name of the test set to be used in figures. By default, the test_set_name is ‘test set’.</p></li>
+<li><p>highlight_motifs_path (str): Path to a set of motifs of interest to highlight in the output figures (such as implanted ground-truth motifs). By default, no motifs are highlighted.</p></li>
+<li><p>highlight_motifs_name (str): IF highlight_motifs_path is defined, this name will be used to label the motifs of interest in the output figures.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_motif_generalization</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">MotifGeneralizationAnalysis</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">min_precision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.9</span>
+<span class="w">                </span><span class="nt">min_recall</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="w">                </span><span class="nt">label</span><span class="p">:</span><span class="w"> </span><span class="c1"># Define a label, and the positive class for that given label</span>
+<span class="w">                    </span><span class="nt">CMV</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">positive_class</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">+</span>
+</pre></div>
+</div>
+</section>
+<section id="nodedegreedistribution">
+<h3>NodeDegreeDistribution<a class="headerlink" href="#nodedegreedistribution" title="Link to this heading">¶</a></h3>
+<p>A report that uses CompAIRR to compute the node degree distribution of a sequence dataset. Results are visualized
+as a histogram and stored in a TSV file.</p>
+<p>The report assumes that CompAIRR (<a class="reference external" href="https://github.com/uio-bmi/compairr">https://github.com/uio-bmi/compairr</a>) has been installed.</p>
+<p><strong>Specification arguments</strong>:</p>
+<ul class="simple">
+<li><p>compairr_path (str): The path to the CompAIRR executable.</p></li>
+<li><p>region_type (str): The region type to analyze. Can be either “IMGT_CDR3” or “IMGT_JUNCTION”.</p></li>
+<li><p>indels (bool): Whether to include indels in the analysis. Default is False.</p></li>
+<li><p>ignore_genes (bool): Whether to ignore gene names in the analysis. Default is False.</p></li>
+<li><p>hamming_distance (int): The Hamming distance to use for the analysis. Default is 1.</p></li>
+<li><p>per_repertoire (bool): Whether to compute the node degree distribution for each repertoire separately. Only
+applicable when using a RepertoireDataset. Default is False.</p></li>
+<li><p>per_label (bool): Whether to compute the node degree distribution for each label separately. Only applicable
+when using a RepertoireDataset. Default is False.</p></li>
+<li><p>threads (int): The number of threads to use for the analysis. Default is 4.</p></li>
+</ul>
+<p>YAML specification:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">NodeDegreeDistribution</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">compairr_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/compairr</span>
+<span class="w">    </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_JUNCTION</span>
+<span class="w">    </span><span class="nt">indels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">    </span><span class="nt">ignore_genes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">    </span><span class="nt">hamming_distance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">per_repertoire</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">    </span><span class="nt">per_label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">    </span><span class="nt">threads</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+</pre></div>
+</div>
+</section>
+<section id="recoveredsignificantfeatures">
+<h3>RecoveredSignificantFeatures<a class="headerlink" href="#recoveredsignificantfeatures" title="Link to this heading">¶</a></h3>
+<p>Compares a given collection of ground truth implanted signals (sequences or k-mers) to the significant label-associated
+k-mers or sequences according to Fisher’s exact test.</p>
+<p>Internally uses the <code class="xref py py-obj docutils literal notranslate"><span class="pre">KmerAbundanceEncoder</span></code> for calculating
+significant k-mers, and
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceAbundanceEncoder</span></code> or
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">CompAIRRSequenceAbundanceEncoder</span></code>
+to calculate significant full sequences (depending on whether the argument compairr_path was set).</p>
+<p>This report creates two plots:</p>
+<ul class="simple">
+<li><p>the first plot is a bar chart showing what percentage of the ground truth implanted signals were found to be significant.</p></li>
+<li><p>the second plot is a bar chart showing what percentage of the k-mers/sequences found to be significant match the
+ground truth implanted signals.</p></li>
+</ul>
+<p>To compare k-mers or sequences of differing lengths, the ground truth sequences or long k-mers are split into k-mers
+of the given size through a sliding window approach. When comparing ‘full_sequences’ to ground truth sequences, a match
+is only registered if both sequences are of equal length.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>ground_truth_sequences_path (str): Path to a file containing the true implanted (sub)sequences, e.g., full sequences or k-mers.
+The file should contain one sequence per line, without a header, and without V or J genes.</p></li>
+<li><p>sequence_type (str): either amino acid or nucleotide; which type of sequence to use for the analysis</p></li>
+<li><p>region_type (str): which AIRR field to use for comparison, e.g. IMGT_CDR3 or IMGT_JUNCTION</p></li>
+<li><p>p_values (list): The p value thresholds to be used by Fisher’s exact test. Each p-value specified here will become one panel in the output figure.</p></li>
+<li><p>k_values (list): Length of the k-mers (number of amino acids) created by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">KmerAbundanceEncoder</span></code>.
+When using a full sequence encoding (<code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceAbundanceEncoder</span></code> or
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">CompAIRRSequenceAbundanceEncoder</span></code>), specify ‘full_sequence’ here.
+Each value specified under k_values will represent one bar in the output figure.</p></li>
+<li><p>label (dict): A label configuration. One label should be specified, and the positive_class for this label should be defined. See the YAML specification below for an example.</p></li>
+<li><p>compairr_path (str): If ‘full_sequence’ is listed under k_values, the path to the CompAIRR executable may be provided.
+If the compairr_path is specified, the <code class="xref py py-obj docutils literal notranslate"><span class="pre">CompAIRRSequenceAbundanceEncoder</span></code>
+will be used to compute the significant sequences. If the path is not specified and ‘full_sequence’ is listed under
+k-values, <code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceAbundanceEncoder</span></code> will be used.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_recovered_significant_features_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">RecoveredSignificantFeatures</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">groundtruth_sequences_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/groundtruth/sequences.txt</span>
+<span class="w">                </span><span class="nt">trim_leading_trailing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">                </span><span class="nt">p_values</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0001</span>
+<span class="w">                </span><span class="nt">k_values</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">full_sequence</span>
+<span class="w">                </span><span class="nt">compairr_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/compairr</span><span class="w"> </span><span class="c1"># can be specified if &#39;full_sequence&#39; is listed under k_values</span>
+<span class="w">                </span><span class="nt">label</span><span class="p">:</span><span class="w"> </span><span class="c1"># Define a label, and the positive class for that given label</span>
+<span class="w">                    </span><span class="nt">CMV</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">positive_class</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">+</span>
+</pre></div>
+</div>
+</section>
+<section id="repertoireclonotypesummary">
+<h3>RepertoireClonotypeSummary<a class="headerlink" href="#repertoireclonotypesummary" title="Link to this heading">¶</a></h3>
+<p>Shows the number of distinct clonotypes per repertoire in a given dataset as a bar plot.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>color_label (str): the label to color the bar plot by (optional, default: None)</p></li>
+<li><p>facet_label (str): the label to facet the bar plot by (optional, default: None)</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_clonotype_summary_rep</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">RepertoireClonotypeSummary</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">color_label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">celiac</span>
+<span class="w">                </span><span class="nt">facet_label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hla</span>
+</pre></div>
+</div>
+</section>
+<section id="sequencecountdistribution">
+<h3>SequenceCountDistribution<a class="headerlink" href="#sequencecountdistribution" title="Link to this heading">¶</a></h3>
+<p>Generates a histogram of the duplicate counts of the sequences in a dataset.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a single label, or alternatively the label of interest can be specified under ‘label’. By default, split_by_label is False.</p></li>
+<li><p>label (str): Optional label for separating the results by color/creating separate plots. Note that this should the name of a valid dataset label.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_sld_report</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">SequenceCountDistribution</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disease</span>
+</pre></div>
+</div>
+</section>
+<section id="sequencelengthdistribution">
+<h3>SequenceLengthDistribution<a class="headerlink" href="#sequencelengthdistribution" title="Link to this heading">¶</a></h3>
+<p>Generates a histogram of the lengths of the sequences in a dataset.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>sequence_type (str): whether to check the length of amino acid or nucleotide sequences; default value is ‘amino_acid’</p></li>
+<li><p>region_type (str): which part of the sequence to examine; e.g., IMGT_CDR3</p></li>
+<li><p>split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a
+single label, or alternatively the label of interest can be specified under ‘label’. By default,
+split_by_label is False.</p></li>
+<li><p>label (str): if split_by_label is set to True, a label can be specified here.</p></li>
+<li><p>plot_frequencies (bool): if set to True, the plot will show the frequencies of the sequence lengths instead of the
+counts. By default, plot_frequencies is False.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_sld_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">SequenceLengthDistribution</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">sequence_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">amino_acid</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span>
+<span class="w">                </span><span class="nt">label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">label_1</span>
+<span class="w">                </span><span class="nt">split_by_label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">                </span><span class="nt">plot_frequencies</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+</pre></div>
+</div>
+</section>
+<section id="sequenceswithsignificantkmers">
+<h3>SequencesWithSignificantKmers<a class="headerlink" href="#sequenceswithsignificantkmers" title="Link to this heading">¶</a></h3>
+<p>Given a list of reference sequences, this report writes out the subsets of reference sequences containing significant k-mers
+(as computed by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">KmerAbundanceEncoder</span></code> using Fisher’s exact test).</p>
+<p>For each combination of p-value and k-mer size given, a file is written containing all sequences containing a significant
+k-mer of the given size at the given p-value.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>reference_sequences_path (str): Path to a file containing the reference sequences,
+The file should contain one sequence per line, without a header, and without V or J genes.</p></li>
+<li><p>p_values (list): The p value thresholds to be used by Fisher’s exact test. Each p-value specified here will become
+one panel in the output figure.</p></li>
+<li><p>k_values (list): Length of the k-mers (number of amino acids) created by the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">KmerAbundanceEncoder</span></code>.
+Each k-mer length will become one panel in the output figure.</p></li>
+<li><p>label (dict): A label configuration. One label should be specified, and the positive_class for this label should
+be defined. See the YAML specification below for an example.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_sequences_with_significant_kmers</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">SequencesWithSignificantKmers</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">reference_sequences_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/reference/sequences.txt</span>
+<span class="w">                </span><span class="nt">p_values</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0001</span>
+<span class="w">                </span><span class="nt">k_values</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">                </span><span class="nt">label</span><span class="p">:</span><span class="w"> </span><span class="c1"># Define a label, and the positive class for that given label</span>
+<span class="w">                    </span><span class="nt">CMV</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">positive_class</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">+</span>
+</pre></div>
+</div>
+</section>
+<section id="shannondiversityoverview">
+<h3>ShannonDiversityOverview<a class="headerlink" href="#shannondiversityoverview" title="Link to this heading">¶</a></h3>
+<p>Computes Shannon diversity for each repertoire using Shannon diversity encoder and plots the
+results in a histogram, optionally stratified by labels.</p>
+<p><strong>Dataset type:</strong></p>
+<ul class="simple">
+<li><p>Repertoire Dataset</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>color_label (str): The label used to color the histogram bars. Default is None.</p></li>
+<li><p>facet_row_label (str): The label used to facet the histogram into multiple rows.
+Default is None, meaning no row faceting.</p></li>
+<li><p>facet_col_label (str): The label used to facet the histogram into multiple columns.
+Default is None, meaning no column faceting.</p></li>
+</ul>
+<blockquote>
+<div><p><strong>YAML specification:</strong></p>
+</div></blockquote>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">shannon_div_rep</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">ShannonDiversityOverview</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">color_label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disease_status</span>
+</pre></div>
+</div>
+</section>
+<section id="significantfeatures">
+<h3>SignificantFeatures<a class="headerlink" href="#significantfeatures" title="Link to this heading">¶</a></h3>
+<p>Plots a boxplot of the number of significant features (label-associated k-mers or sequences) per Repertoire according to Fisher’s exact test,
+across different classes for the given label.</p>
+<p>Internally uses the <code class="xref py py-obj docutils literal notranslate"><span class="pre">KmerAbundanceEncoder</span></code> for calculating
+significant k-mers, and
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceAbundanceEncoder</span></code> or
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">CompAIRRSequenceAbundanceEncoder</span></code>
+to calculate significant full sequences (depending on whether the argument compairr_path was set).</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>p_values (list): The p value thresholds to be used by Fisher’s exact test. Each p-value specified here will become
+one panel in the output figure.</p></li>
+<li><p>k_values (list): Length of the k-mers (number of amino acids) created by the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">KmerAbundanceEncoder</span></code>.
+When using a full sequence encoding (<code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceAbundanceEncoder</span></code> or
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">CompAIRRSequenceAbundanceEncoder</span></code>), specify ‘full_sequence’ here.
+Each value specified under k_values will represent one boxplot in the output figure.</p></li>
+<li><p>label (dict): A label configuration. One label should be specified, and the positive_class for this label should be defined. See the YAML specification below for an example.</p></li>
+<li><p>compairr_path (str): If ‘full_sequence’ is listed under k_values, the path to the CompAIRR executable may be provided.
+If the compairr_path is specified, the <code class="xref py py-obj docutils literal notranslate"><span class="pre">CompAIRRSequenceAbundanceEncoder</span></code>
+will be used to compute the significant sequences. If the path is not specified and ‘full_sequence’ is listed under
+k-values, <code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceAbundanceEncoder</span></code> will be used.</p></li>
+<li><p>log_scale (bool): Whether to plot the y axis in log10 scale (log_scale = True) or continuous scale (log_scale = False). By default, log_scale is False.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_significant_features_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">SignificantFeatures</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">p_values</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0001</span>
+<span class="w">                </span><span class="nt">k_values</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">full_sequence</span>
+<span class="w">                </span><span class="nt">compairr_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/compairr</span><span class="w"> </span><span class="c1"># can be specified if &#39;full_sequence&#39; is listed under k_values</span>
+<span class="w">                </span><span class="nt">label</span><span class="p">:</span><span class="w"> </span><span class="c1"># Define a label, and the positive class for that given label</span>
+<span class="w">                    </span><span class="nt">CMV</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">positive_class</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">+</span>
+<span class="w">                </span><span class="nt">log_scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+</pre></div>
+</div>
+</section>
+<section id="significantkmerpositions">
+<h3>SignificantKmerPositions<a class="headerlink" href="#significantkmerpositions" title="Link to this heading">¶</a></h3>
+<p>Plots the number of significant k-mers (as computed by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">KmerAbundanceEncoder</span></code> using Fisher’s exact test)
+observed at each IMGT position of a given list of reference sequences.
+This report creates a stacked bar chart, where each bar represents an IMGT position, and each segment of the stack represents the observed frequency
+of one ‘significant’ k-mer at that position.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>reference_sequences_path (str): Path to a file containing the reference sequences,
+The file should contain one sequence per line, without a header, and without V or J genes.</p></li>
+<li><p>p_values (list): The p value thresholds to be used by Fisher’s exact test. Each p-value specified here will become one panel in the output figure.</p></li>
+<li><p>k_values (list): Length of the k-mers (number of amino acids) created by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">KmerAbundanceEncoder</span></code>.
+Each k-mer length will become one panel in the output figure.</p></li>
+<li><p>label (dict): A label configuration. One label should be specified, and the positive_class for this label should be defined. See the YAML specification below for an example.</p></li>
+<li><p>sequence_type (str): nucleotide or amino_acid</p></li>
+<li><p>region_type (str): which AIRR field to consider, e.g., IMGT_CDR3 or IMGT_JUNCTION</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_significant_kmer_positions_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">SignificantKmerPositions</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">reference_sequences_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/reference/sequences.txt</span>
+<span class="w">                </span><span class="nt">p_values</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0001</span>
+<span class="w">                </span><span class="nt">k_values</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">                </span><span class="nt">label</span><span class="p">:</span><span class="w"> </span><span class="c1"># Define a label, and the positive class for that given label</span>
+<span class="w">                    </span><span class="nt">CMV</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">positive_class</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">+</span>
+</pre></div>
+</div>
+</section>
+<section id="truemotifssummarybarplot">
+<h3>TrueMotifsSummaryBarplot<a class="headerlink" href="#truemotifssummarybarplot" title="Link to this heading">¶</a></h3>
+<p>This report can be used to show how well motifs (for example, motifs introduced using the Simulation instruction)
+are learned across different generative models. The report shows a bar plot with the proportion of sequences in each
+dataset that contain the given motifs. Bars are grouped by the dataset origin (e.g., train, PWM, VAE, LSTM)
+and the signals provided. The report also shows how many of the sequences are memorized (seen in train data) and
+how many are novel (not seen in train data).</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>region_type (str): which part of the sequence to check; e.g., IMGT_CDR3</p></li>
+<li><p>implanted_motifs_per_signal (dict): a nested dictionary that specifies the motif seeds that were implanted in the
+given dataset. The first level of keys in this dictionary represents the different signals. In the inner
+dictionary there should be two keys: “seeds” and “gap_sizes”.</p>
+<ul>
+<li><p>seeds: a list of motif seeds. The seeds may contain gaps, specified by a ‘/’ symbol.</p></li>
+<li><p>gap_sizes: a list of all the possible gap sizes that were used when implanting a gapped motif seed. When no
+gapped seeds are used, this value has no effect.</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_motif_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">TrueMotifsSummaryBarplot</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span>
+<span class="w">                </span><span class="nt">implanted_motifs_per_signal</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">my_signal1</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">seeds</span><span class="p">:</span>
+<span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEQ</span>
+<span class="w">                        </span><span class="nt">gap_sizes</span><span class="p">:</span>
+<span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">                    </span><span class="nt">my_signal2</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">seeds</span><span class="p">:</span>
+<span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AS/G</span>
+<span class="w">                        </span><span class="nt">gap_sizes</span><span class="p">:</span>
+<span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</pre></div>
+</div>
+</section>
+<section id="vjgenedistribution">
+<h3>VJGeneDistribution<a class="headerlink" href="#vjgenedistribution" title="Link to this heading">¶</a></h3>
+<p>This report creates several plots to gain insight into the V and J gene distribution of a given dataset.
+When a label is provided, the information in the plots is separated per label value, either by color or by creating
+separate plots. This way one can for example see if a particular V or J gene is more prevalent across disease
+associated receptors.</p>
+<ul class="simple">
+<li><p>Individual V and J gene distributions: for sequence and receptor datasets, a bar plot is created showing how often
+each V or J gene occurs in the dataset. For repertoire datasets, boxplots are used to represent how often each V or J
+gene is used across all repertoires. Since repertoires may differ in size, these counts are normalised by the repertoire
+size (original count values are additionaly exported in tsv files).</p></li>
+<li><p>Combined V and J gene distributions: for sequence and receptor datasets, a heatmap is created showing how often each
+combination of V and J genes occurs in the dataset. A similar plot is created for repertoire datasets, except in this
+case only the average value for the normalised gene usage frequencies are shown (original count values are additionaly exported in tsv files).</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a single label, or alternatively the label of interest can be specified under ‘label’. By default, split_by_label is False.</p></li>
+<li><p>label (str): Optional label for separating the results by color/creating separate plots. Note that this should the name of a valid dataset label.</p></li>
+<li><p>is_sequence_label (bool): for RepertoireDatasets, indicates if the label applies to the sequence level
+(e.g., antigen binding versus non-binding across repertoires) or repertoire level (e.g., diseased repertoires versus healthy repertoires).
+By default, is_sequence_label is False. For Sequence- and ReceptorDatasets, this parameter is ignored.</p></li>
+<li><p>show_joint_dist (bool): whether to show the combined V and J gene distribution. Default is True.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_vj_gene_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">VJGeneDistribution</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ag_binding</span>
+<span class="w">                </span><span class="nt">show_joint_dist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="encoding-reports">
+<h2><strong>Encoding reports</strong><a class="headerlink" href="#encoding-reports" title="Link to this heading">¶</a></h2>
+<p>Encoding reports show some type of features or statistics about an encoded dataset, or may in some cases
+export relevant sequences or tables.</p>
+<p>When running the <a class="reference internal" href="instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a> instruction, encoding reports can be specified inside the ‘selection’ or ‘assessment’ specification under the key ‘reports/encoding’.
+Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_instruction</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TrainMLModel</span>
+<span class="w">    </span><span class="nt">selection</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">encoding</span><span class="p">:</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_encoding_report</span>
+<span class="w">        </span><span class="c1"># other parameters...</span>
+<span class="w">    </span><span class="nt">assessment</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">encoding</span><span class="p">:</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_encoding_report</span>
+<span class="w">        </span><span class="c1"># other parameters...</span>
+<span class="w">    </span><span class="c1"># other parameters...</span>
+</pre></div>
+</div>
+<p>Alternatively, when running the <a class="reference internal" href="instructions.html#exploratoryanalysis"><span class="std std-ref">ExploratoryAnalysis</span></a> instruction, encoding reports can be specified under ‘report’. Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_instruction</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ExploratoryAnalysis</span>
+<span class="w">    </span><span class="nt">analyses</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_first_analysis</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_encoding_report</span>
+<span class="w">            </span><span class="c1"># other parameters...</span>
+<span class="w">    </span><span class="c1"># other parameters...</span>
+</pre></div>
+</div>
+<section id="designmatrixexporter">
+<h3>DesignMatrixExporter<a class="headerlink" href="#designmatrixexporter" title="Link to this heading">¶</a></h3>
+<p>Exports the design matrix and related information of a given encoded Dataset to csv files.
+If the encoded data has more than 2 dimensions (such as when using the OneHot encoder with option Flatten=False),
+the data are then exported to different formats to facilitate their import with external software.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>file_format (str): the format and extension of the file to store the design matrix. The supported formats are:
+npy, csv, pt, hdf5, npy.zip, csv.zip or hdf5.zip.</p></li>
+</ul>
+<p>Note: when using hdf5 or hdf5.zip output formats, make sure the ‘hdf5’ dependency is installed.</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_dme_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">DesignMatrixExporter</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">file_format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">csv</span>
+</pre></div>
+</div>
+</section>
+<section id="dimensionalityreduction">
+<h3>DimensionalityReduction<a class="headerlink" href="#dimensionalityreduction" title="Link to this heading">¶</a></h3>
+<p>This report visualizes the data obtained by dimensionality reduction. The data points can be highlighted by label of
+interest. It is also possible to specify labels that contain lists of values (e.g., HLA), in which case the data points
+will be duplicated (so that each point refers to one HLA allele) and jittered slightly to improve visibility
+before being highlighted by the concrete HLA allele values.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>labels (list): names of the label to use for highlighting data points; or None</p></li>
+<li><p>dim_red_method (str): dimensionality reduction method to be used for plotting; if set, in a workflow, this
+dimensionality reduction will be used for plotting instead of any other set in the workflow; if None, it will
+visualize the encoded data of reduced dimensionality if set</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">rep1</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">DimensionalityReduction</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">epitope</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">source</span><span class="p p-Indicator">]</span>
+<span class="w">                </span><span class="nt">dim_red_method</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">PCA</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">n_components</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</pre></div>
+</div>
+</section>
+<section id="featurecomparison">
+<h3>FeatureComparison<a class="headerlink" href="#featurecomparison" title="Link to this heading">¶</a></h3>
+<p>Encoding a dataset results in a numeric matrix, where the rows are examples (e.g., sequences, receptors, repertoires)
+and the columns are features. For example, when <a class="reference internal" href="encodings.html#kmerfrequency"><span class="std std-ref">KmerFrequency</span></a> encoder is used, the features are the
+k-mers (AAA, AAC, etc..) and the feature values are the frequencies per k-mer.</p>
+<p>This report separates the examples based on a binary metadata label, and plots the mean feature value
+of each feature in one example group against the other example group (for example: plot the feature
+value of ‘sick’ repertoires on the x axis, and ‘healthy’ repertoires on the y axis to spot consistent differences).
+The plot can be separated into different colors or facets using other metadata labels
+(for example: plot the average feature values of ‘cohort1’, ‘cohort2’ and ‘cohort3’ in different colors to spot biases).</p>
+<p>Alternatively, when plotting features without comparing them across a binary label, see:
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">FeatureValueBarplot</span></code> report to plot
+a simple bar chart per feature (average across examples).
+Or <code class="xref py py-obj docutils literal notranslate"><span class="pre">FeatureDistribution</span></code> report to plot
+the distribution of each feature across examples, rather than only showing the mean value in a bar plot.</p>
+<p>Example output:</p>
+<a class="reference internal image-reference" href="../_static/images/reports/feature_comparison_zoom.png"><img alt="Feature comparison zoomed in plot with VLEQ highlighted" src="../_static/images/reports/feature_comparison_zoom.png" style="width: 650px;" />
+</a>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>comparison_label (str): Mandatory label. This label is used to split the encoded data matrix and define the x
+and y axes of the plot. This label is only allowed to have 2 classes (for example: sick and healthy, binding and
+non-binding).</p></li>
+<li><p>color_grouping_label (str): Optional label that is used to color the points in the scatterplot. This can not be
+the same as comparison_label.</p></li>
+<li><p>row_grouping_label (str): Optional label that is used to group scatterplots into different row facets.
+This can not be the same as comparison_label.</p></li>
+<li><p>column_grouping_label (str): Optional label that is used to group scatterplots into different column facets.
+This can not be the same as comparison_label.</p></li>
+<li><p>show_error_bar (bool): Whether to show the error bar (standard deviation) for the points, both in the x and y
+dimension.</p></li>
+<li><p>log_scale (bool): Whether to plot the x and y axes in log10 scale (log_scale = True) or continuous scale
+(log_scale = False). By default, log_scale is False.</p></li>
+<li><p>keep_fraction (float): The total number of features may be very large and only the features differing
+significantly across comparison labels may be of interest. When the keep_fraction parameter is set below 1, only
+the fraction of features that differs the most across comparison labels is kept for plotting (note that the
+produced .csv file still contains all data). By default, keep_fraction is 1, meaning that all features are
+plotted.</p></li>
+<li><p>opacity (float): a value between 0 and 1 setting the opacity for data points making it easier to see if there are
+overlapping points</p></li>
+<li><p>error_function (str): which error function to use for the error bar. Options are ‘std’ (standard deviation) or
+‘sem’ (standard error of the mean). Default: std.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_comparison_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">FeatureComparison</span><span class="p">:</span><span class="w"> </span><span class="c1"># compare the different classes defined in the label disease</span>
+<span class="w">                </span><span class="nt">comparison_label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disease</span>
+</pre></div>
+</div>
+</section>
+<section id="featuredistribution">
+<h3>FeatureDistribution<a class="headerlink" href="#featuredistribution" title="Link to this heading">¶</a></h3>
+<p>Encoding a dataset results in a numeric matrix, where the rows are examples (e.g., sequences, receptors, repertoires)
+and the columns are features. For example, when <a class="reference internal" href="encodings.html#kmerfrequency"><span class="std std-ref">KmerFrequency</span></a> encoder is used, the features are the
+k-mers (AAA, AAC, etc..) and the feature values are the frequencies per k-mer.</p>
+<p>This report plots the distribution of feature values.
+For each feature, a violin plot is created to show the distribution of feature values across all examples.
+The violin plots can be separated into different colors or facets using metadata labels
+(for example: plot the feature distributions of ‘cohort1’, ‘cohort2’ and ‘cohort3’ in different colors to spot biases).</p>
+<p>See also: <code class="xref py py-obj docutils literal notranslate"><span class="pre">FeatureValueBarplot</span></code> report to plot
+a simple bar chart per feature (average across examples), rather than the entire distribution.
+Or <code class="xref py py-obj docutils literal notranslate"><span class="pre">FeatureComparison</span></code> report to compare
+features across binary metadata labels (e.g., plot the feature value of ‘sick’ repertoires on the x axis,
+and ‘healthy’ repertoires on the y axis).</p>
+<p>Example output:</p>
+<a class="reference internal image-reference" href="../_static/images/reports/feature_distribution.png"><img alt="Feature distribution report example" src="../_static/images/reports/feature_distribution.png" style="width: 750px;" />
+</a>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>color_grouping_label (str): The label that is used to color each bar, at each level of the grouping_label.</p></li>
+<li><p>row_grouping_label (str): The label that is used to group bars into different row facets.</p></li>
+<li><p>column_grouping_label (str): The label that is used to group bars into different column facets.</p></li>
+<li><p>mode (str): either ‘normal’, ‘sparse’ or ‘auto’ (default). in the ‘normal’ mode there are normal boxplots
+corresponding to each column of the encoded dataset matrix; in the ‘sparse’ mode all zero cells are eliminated before
+passing the data to the boxplots. If mode is set to ‘auto’, then it will automatically
+set to ‘sparse’ if the density of the matrix is below 0.01</p></li>
+<li><p>x_title (str): x-axis label</p></li>
+<li><p>y_title (str): y-axis label</p></li>
+<li><p>plot_top_n (int): plot n of the largest features on average separately (useful when there are too many features
+to plot at the same time). The n features are chosen based on the average feature values across all examples
+without grouping by labels.</p></li>
+<li><p>plot_bottom_n (int): plot n of the smallest features on average separately (useful when there are too many
+features to plot at the same time). The n features are chosen based on the average feature values across all
+examples without grouping by labels.</p></li>
+<li><p>plot_all_features (bool): whether to plot all (might be slow for large number of features)</p></li>
+<li><p>error_function (str): which error function to use for the error bar. Options are ‘std’ (standard deviation) or
+‘sem’ (standard error of the mean). Default: std.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_fdistr_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">FeatureDistribution</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sparse</span>
+<span class="w">                </span><span class="nt">plot_all_features</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">                </span><span class="nt">plot_top_n</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">                </span><span class="nt">plot_bottom_n</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+</pre></div>
+</div>
+</section>
+<section id="featurevaluebarplot">
+<h3>FeatureValueBarplot<a class="headerlink" href="#featurevaluebarplot" title="Link to this heading">¶</a></h3>
+<p>Encoding a dataset results in a numeric matrix, where the rows are examples (e.g., sequences, receptors, repertoires)
+and the columns are features. For example, when <a class="reference internal" href="encodings.html#kmerfrequency"><span class="std std-ref">KmerFrequency</span></a> encoder is used, the features are the
+k-mers (AAA, AAC, etc..) and the feature values are the frequencies per k-mer.</p>
+<p>This report plots the mean feature values per feature.
+A bar plot is created where the average feature value across all examples is shown, with optional error bars.
+The bar plots can be separated into different colors or facets using metadata labels
+(for example: plot the average feature values of ‘cohort1’, ‘cohort2’ and ‘cohort3’ in different colors to spot biases).</p>
+<p>See also: <code class="xref py py-obj docutils literal notranslate"><span class="pre">FeatureDistribution</span></code> report to plot
+the distribution of each feature across examples, rather than only showin the mean value in a bar plot.
+Or <code class="xref py py-obj docutils literal notranslate"><span class="pre">FeatureComparison</span></code> report to compare
+features across binary metadata labels (e.g., plot the feature value of ‘sick’ repertoires on the x axis,
+and ‘healthy’ repertoires on the y axis.).</p>
+<p>Example output:</p>
+<a class="reference internal image-reference" href="../_static/images/reports/feature_value_barplot.png"><img alt="Feature value barplot report example" src="../_static/images/reports/feature_value_barplot.png" style="width: 750px;" />
+</a>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>color_grouping_label (str): The label that is used to color each bar, at each level of the grouping_label.</p></li>
+<li><p>row_grouping_label (str): The label that is used to group bars into different row facets.</p></li>
+<li><p>column_grouping_label (str): The label that is used to group bars into different column facets.</p></li>
+<li><p>show_error_bar (bool): Whether to show the error bar (standard deviation) for the bars.</p></li>
+<li><p>x_title (str): x-axis label</p></li>
+<li><p>y_title (str): y-axis label</p></li>
+<li><p>plot_top_n (int): plot n of the largest features on average separately (useful when there are too many features
+to plot at the same time). The n features are chosen based on the average feature values across all examples
+without grouping by labels. The plot shows averages per label classes.</p></li>
+<li><p>plot_bottom_n (int): plot n of the smallest features on average separately (useful when there are too many
+features to plot at the same time). The n features are chosen based on the average feature values across all
+examples without grouping by labels. The plot shows averages per label classes.</p></li>
+<li><p>plot_all_features (bool): whether to plot all (might be slow for large number of features)</p></li>
+<li><p>error_function (str): which error function to use for the error bar. Options are ‘std’ (standard deviation) or
+‘sem’ (standard error of the mean). Default: std.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_fvb_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">FeatureValueBarplot</span><span class="p">:</span><span class="w"> </span><span class="c1"># timepoint, disease_status and age_group are metadata labels</span>
+<span class="w">                </span><span class="nt">column_grouping_label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">timepoint</span>
+<span class="w">                </span><span class="nt">row_grouping_label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disease_status</span>
+<span class="w">                </span><span class="nt">color_grouping_label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">age_group</span>
+<span class="w">                </span><span class="nt">plot_all_features</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">                </span><span class="nt">plot_top_n</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">                </span><span class="nt">plot_bottom_n</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+</pre></div>
+</div>
+</section>
+<section id="groundtruthmotifoverlap">
+<h3>GroundTruthMotifOverlap<a class="headerlink" href="#groundtruthmotifoverlap" title="Link to this heading">¶</a></h3>
+<p>Creates report displaying overlap between learned motifs and groundtruth motifs implanted in a given sequence dataset.
+This report must be used in combination with the MotifEncoder.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul>
+<li><p>groundtruth_motifs_path (str): Path to a .tsv file containing groundtruth position-specific motifs.
+The file should specify the motifs as position-specific amino acids, one column representing the positions
+concatenated with an ‘&amp;’ symbol, the next column specifying the amino acids concatenated with ‘&amp;’ symbol,
+and the last column specifying the implant rate.</p>
+<p>Example:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>indices</p></th>
+<th class="head"><p>amino_acids</p></th>
+<th class="head"><p>n_sequences</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>A</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-odd"><td><p>4&amp;8&amp;9</p></td>
+<td><p>G&amp;A&amp;C</p></td>
+<td><p>30</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>This file shows a motif ‘A’ at position 0 implanted in 4 sequences, and motif G—AC implanted between positions 4 and 9 in 30 sequences</p>
+</li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_ground_truth_motif_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">GroundTruthMotifOverlap</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">groundtruth_motifs_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/file.tsv</span>
+</pre></div>
+</div>
+</section>
+<section id="matches">
+<h3>Matches<a class="headerlink" href="#matches" title="Link to this heading">¶</a></h3>
+<p>Reports the number of matches that were found when using one of the following encoders:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="encodings.html#matchedsequences"><span class="std std-ref">MatchedSequences</span></a> encoder</p></li>
+<li><p><a class="reference internal" href="encodings.html#matchedreceptors"><span class="std std-ref">MatchedReceptors</span></a> encoder</p></li>
+<li><p><a class="reference internal" href="encodings.html#matchedregex"><span class="std std-ref">MatchedRegex</span></a> encoder</p></li>
+</ul>
+<p>Report results are:</p>
+<ul class="simple">
+<li><p>A table containing all matches, where the rows correspond to the Repertoires, and the
+columns correspond to the objects to match (regular expressions or receptor sequences).</p></li>
+<li><p>The repertoire sizes (read frequencies and the number of unique sequences per repertoire), for each of the chains.
+This can be used to calculate the percentage of matched sequences in a repertoire.</p></li>
+<li><p>When using <a class="reference internal" href="encodings.html#matchedsequences"><span class="std std-ref">MatchedSequences</span></a> encoder or
+<a class="reference internal" href="encodings.html#matchedreceptors"><span class="std std-ref">MatchedReceptors</span></a> encoder, tables describing
+the chains and receptors (ids, chains, V and J genes and sequences).</p></li>
+<li><p>When using <a class="reference internal" href="encodings.html#matchedreceptors"><span class="std std-ref">MatchedReceptors</span></a> encoder or using
+<a class="reference internal" href="encodings.html#matchedregex"><span class="std std-ref">MatchedRegex</span></a> encoder with chain pairs, tables describing
+the paired matches (where a match was found in both chains) per repertoire.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_match_report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Matches</span>
+</pre></div>
+</div>
+</section>
+<section id="motiftestsetperformance">
+<h3>MotifTestSetPerformance<a class="headerlink" href="#motiftestsetperformance" title="Link to this heading">¶</a></h3>
+<p>This report can be used to show the performance of a learned set motifs using the <code class="xref py py-obj docutils literal notranslate"><span class="pre">MotifEncoder</span></code>
+on an independent test set of unseen data.</p>
+<p>It is recommended to first run the report <code class="xref py py-obj docutils literal notranslate"><span class="pre">MotifGeneralizationAnalysis</span></code>
+in order to calibrate the optimal recall thresholds and plot the performance of motifs on training- and validation sets.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>test_dataset (dict): parameters for importing a SequenceDataset to use as an independent test set. By default,
+the import parameters ‘is_repertoire’ and ‘paired’ will be set to False to ensure a SequenceDataset is imported.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_motif_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">MotifTestSetPerformance</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">test_dataset</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AIRR</span><span class="w"> </span><span class="c1"># choose any valid import format</span>
+<span class="w">                    </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/files/</span>
+<span class="w">                        </span><span class="nt">is_repertoire</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">  </span><span class="c1"># is_repertoire must be False to import a SequenceDataset</span>
+<span class="w">                        </span><span class="nt">paired</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">         </span><span class="c1"># paired must be False to import a SequenceDataset</span>
+<span class="w">                        </span><span class="c1"># optional other parameters...</span>
+</pre></div>
+</div>
+</section>
+<section id="nonmotifsequencesimilarity">
+<h3>NonMotifSequenceSimilarity<a class="headerlink" href="#nonmotifsequencesimilarity" title="Link to this heading">¶</a></h3>
+<p>Plots the similarity of positions outside the motifs of interest. This report can be used to investigate if the
+motifs of interest as determined by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">MotifEncoder</span></code>
+have a tendency occur in sequences that are naturally very similar or dissimilar.</p>
+<p>For each motif, the subset of sequences containing the motif is selected, and the hamming distances are computed
+between all sequences in this subset. Finally, a plot is created showing the distribution of hamming distances
+between the sequences containing the motif. For motifs occurring in sets of very similar sequences, this distribution
+will lean towards small hamming distances. Likewise, for motifs occurring in a very diverse set of sequences, the
+distribution will lean towards containing more large hamming distances.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>motif_color_map (dict): An optional mapping between motif sizes and colors. If no mapping is given, default colors will be chosen.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_motif_sim</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">NonMotifSimilarity</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">motif_color_map</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;#66C5CC&quot;</span>
+<span class="w">                    </span><span class="nt">4</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;#F6CF71&quot;</span>
+<span class="w">                    </span><span class="nt">5</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;#F89C74&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="positionalmotiffrequencies">
+<h3>PositionalMotifFrequencies<a class="headerlink" href="#positionalmotiffrequencies" title="Link to this heading">¶</a></h3>
+<p>This report must be used in combination with the <code class="xref py py-obj docutils literal notranslate"><span class="pre">MotifEncoder</span></code>.
+Plots a stacked bar plot of amino acid occurrence at different indices in any given dataset, along with a plot
+investigating motif continuity which displays a bar plot of the gap sizes between the amino acids in the motifs in
+the given dataset. Note that a distance of 1 means that the amino acids are continuous (next to each other).</p>
+<p><strong>Specification arguments:</strong></p>
+<ul>
+<li><p>motif_color_map (dict): Optional mapping between motif lengths and specific colors to be used. Example:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>motif_color_map:</dt><dd><p>1: #66C5CC
+2: #F6CF71
+3: #F89C74</p>
+</dd>
+</dl>
+</div></blockquote>
+</li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_pos_motif_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">PositionalMotifFrequencies</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">motif_color_map</span><span class="p">:</span>
+</pre></div>
+</div>
+</section>
+<section id="relevantsequenceexporter">
+<h3>RelevantSequenceExporter<a class="headerlink" href="#relevantsequenceexporter" title="Link to this heading">¶</a></h3>
+<p>Exports the sequences that are extracted as label-associated when using the <code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceAbundanceEncoder</span></code> or
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">CompAIRRSequenceAbundanceEncoder</span></code> in AIRR-compliant format.</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_relevant_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RelevantSequenceExporter</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="ml-model-reports">
+<h2><strong>ML model reports</strong><a class="headerlink" href="#ml-model-reports" title="Link to this heading">¶</a></h2>
+<p>ML model reports show some type of features or statistics about a single trained ML model.</p>
+<p>In the <a class="reference internal" href="instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a> instruction, ML model reports can be specified inside the ‘selection’ or ‘assessment’ specification under the key ‘reports/models’.
+Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_instruction</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TrainMLModel</span>
+<span class="w">    </span><span class="nt">selection</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">models</span><span class="p">:</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_ml_report</span>
+<span class="w">        </span><span class="c1"># other parameters...</span>
+<span class="w">    </span><span class="nt">assessment</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">models</span><span class="p">:</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_ml_report</span>
+<span class="w">        </span><span class="c1"># other parameters...</span>
+<span class="w">    </span><span class="c1"># other parameters...</span>
+</pre></div>
+</div>
+<section id="binaryfeatureprecisionrecall">
+<h3>BinaryFeaturePrecisionRecall<a class="headerlink" href="#binaryfeatureprecisionrecall" title="Link to this heading">¶</a></h3>
+<p>Plots the precision and recall scores for each added feature to the collection of features selected by the BinaryFeatureClassifier.</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BinaryFeaturePrecisionRecall</span>
+</pre></div>
+</div>
+</section>
+<section id="coefficients">
+<h3>Coefficients<a class="headerlink" href="#coefficients" title="Link to this heading">¶</a></h3>
+<p>A report that plots the coefficients for a given ML method in a barplot. Can be used for <a class="reference internal" href="ml_methods.html#logisticregression"><span class="std std-ref">LogisticRegression</span></a>,
+<a class="reference internal" href="ml_methods.html#svm"><span class="std std-ref">SVM</span></a>, <a class="reference internal" href="ml_methods.html#svc"><span class="std std-ref">SVC</span></a>, and <a class="reference internal" href="ml_methods.html#randomforestclassifier"><span class="std std-ref">RandomForestClassifier</span></a>. In the case of RandomForest, the feature importances will be plotted.</p>
+<p>When used in <a class="reference internal" href="instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a> instruction, the report can be specified under ‘models’, both on
+the selection and assessment levels.</p>
+<p>Which coefficients should be plotted (for example: only nonzero, above a certain threshold, …) can be specified.
+Multiple options can be specified simultaneously. By default the 25 largest coefficients are plotted.
+The full set of coefficients will also be exported as a csv file.</p>
+<p>Example output:</p>
+<a class="reference internal image-reference" href="../_static/images/reports/coefficients_logistic_regression.png"><img alt="Coefficients report" src="../_static/images/reports/coefficients_logistic_regression.png" style="width: 650px;" />
+</a>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>coefs_to_plot (list): A list specifying which coefficients should be plotted. Valid values are: <cite>ALL</cite>, <cite>NONZERO</cite>, <cite>CUTOFF</cite>, <cite>N_LARGEST</cite>.</p></li>
+<li><p>cutoff (list): If ‘cutoff’ is specified under ‘coefs_to_plot’, the cutoff values can be specified here. The coefficients which have an absolute value equal to or greater than the cutoff will be plotted.</p></li>
+<li><p>n_largest (list): If ‘n_largest’ is specified under ‘coefs_to_plot’, the values for n can be specified here. These should be integer values. The n largest coefficients are determined based on their absolute values.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_coef_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">Coefficients</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">coefs_to_plot</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">all</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nonzero</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cutoff</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">n_largest</span>
+<span class="w">                </span><span class="nt">cutoff</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="w">                </span><span class="nt">n_largest</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+</pre></div>
+</div>
+</section>
+<section id="confounderanalysis">
+<h3>ConfounderAnalysis<a class="headerlink" href="#confounderanalysis" title="Link to this heading">¶</a></h3>
+<p>A report that plots the numbers of false positives and false negatives with respect to each value of
+the metadata features specified by the user. This allows checking whether a given machine learning model makes more
+misclassifications for some values of a metadata feature than for the others.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>metadata_labels (list): A list of the metadata features to use as a basis for the calculations</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_confounder_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">ConfounderAnalysis</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">metadata_labels</span><span class="p">:</span>
+<span class="w">                  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">age</span>
+<span class="w">                  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sex</span>
+</pre></div>
+</div>
+</section>
+<section id="confusionmatrix">
+<h3>ConfusionMatrix<a class="headerlink" href="#confusionmatrix" title="Link to this heading">¶</a></h3>
+<p>A report that plots the confusion matrix for a trained ML method.
+Supports both binary and multiclass classification.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>alternative_label (str): optionally, the confusion matrix can be split between different values of an alternative label.
+This may be useful to compare performance across different data subsets (e.g., batches, sources).
+If specified, separate confusion matrices will be generated for each value of the alternative label. Default is None.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_conf_mat_report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfusionMatrix</span>
+</pre></div>
+</div>
+</section>
+<section id="deeprcmotifdiscovery">
+<h3>DeepRCMotifDiscovery<a class="headerlink" href="#deeprcmotifdiscovery" title="Link to this heading">¶</a></h3>
+<p>This report plots the contributions of (i) input sequences and (ii) kernels to trained <a class="reference internal" href="ml_methods.html#deeprc"><span class="std std-ref">DeepRC</span></a> model with respect to
+the test dataset. Contributions are computed using integrated gradients (IG).
+This report produces two figures:</p>
+<ul class="simple">
+<li><p>inputs_integrated_gradients: Shows the contributions of the characters within the input sequences (test dataset) that was most important for immune status prediction of the repertoire. IG is only applied to sequences of positive class repertoires.</p></li>
+<li><p>kernel_integrated_gradients: Shows the 1D CNN kernels with the highest contribution over all positions and amino acids.</p></li>
+</ul>
+<p>For both inputs and kernels: Larger characters in the extracted motifs indicate higher contribution, with blue
+indicating positive contribution and red indicating negative contribution towards the prediction of the immune status.
+For kernels only: contributions to positional encoding are indicated by &lt; (beginning of sequence),
+∧ (center of sequence), and &gt; (end of sequence).</p>
+<p>See <a class="reference internal" href="../tutorials/discover_motifs_classifiers.html#deeprcmotifdiscovery-for-repertoire-classification"><span class="std std-ref">DeepRCMotifDiscovery for repertoire classification</span></a> for a more detailed example.</p>
+<p>Reference:</p>
+<p>Widrich, M., et al. (2020). Modern Hopfield Networks and Attention for Immune Repertoire Classification. Advances in
+Neural Information Processing Systems, 33. <a class="reference external" href="https://proceedings.neurips.cc//paper/2020/hash/da4902cb0bc38210839714ebdcf0efc3-Abstract.html">https://proceedings.neurips.cc//paper/2020/hash/da4902cb0bc38210839714ebdcf0efc3-Abstract.html</a></p>
+<p>Example output:</p>
+<a class="reference internal image-reference" href="../_static/images/reports/deeprc_ig_inputs.png"><img alt="DeepRC IG over inputs" src="../_static/images/reports/deeprc_ig_inputs.png" style="height: 150px;" />
+</a>
+<a class="reference internal image-reference" href="../_static/images/reports/deeprc_ig_kernels.png"><img alt="DeepRC IG over kernels" src="../_static/images/reports/deeprc_ig_kernels.png" style="height: 150px;" />
+</a>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>n_steps (int): Number of IG steps (more steps -&gt; better path integral -&gt; finer contribution values). 50 is usually good enough.</p></li>
+<li><p>threshold (float): Only applies to the plotting of kernels. Contributions are normalized to range [0, 1], and only kernels with normalized contributions above threshold are plotted.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_deeprc_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">DeepRCMotifDiscovery</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w">                </span><span class="nt">n_steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+</pre></div>
+</div>
+</section>
+<section id="kernelsequencelogo">
+<h3>KernelSequenceLogo<a class="headerlink" href="#kernelsequencelogo" title="Link to this heading">¶</a></h3>
+<p>A report that plots kernels of a CNN model as sequence logos. It works only with trained ReceptorCNN models which has kernels already normalized
+to represent information gain matrices. Additionally, it also plots the weights in the final fully-connected layer of the network associated with
+kernel outputs. For more information on how the model works, see <a class="reference internal" href="ml_methods.html#receptorcnn"><span class="std std-ref">ReceptorCNN</span></a>.</p>
+<p>The kernels are visualized using Logomaker. Original publication: Tareen A, Kinney JB. Logomaker: beautiful sequence logos in Python.
+Bioinformatics. 2020; 36(7):2272-2274. <a class="reference external" href="https://academic.oup.com/bioinformatics/article/36/7/2272/5671693">doi:10.1093/bioinformatics/btz921</a>.</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_kernel_seq_logo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KernelSequenceLogo</span>
+</pre></div>
+</div>
+</section>
+<section id="motifseedrecovery">
+<h3>MotifSeedRecovery<a class="headerlink" href="#motifseedrecovery" title="Link to this heading">¶</a></h3>
+<p>This report can be used to show how well implanted motifs (for example, through the Simulation instruction) can
+be recovered by various machine learning methods using the k-mer encoding.
+This report creates a boxplot, where the x axis (box grouping) represents the maximum possible overlap between
+an implanted motif seed and a kmer feature (measured in number of positions), and the y axis shows the coefficient size
+of the respective kmer feature. If the machine learning method has learned the implanted motif seeds, the coefficient
+size is expected to be largest for the kmer features with high overlap to the motif seeds.</p>
+<p>Note that to use this report, the following criteria must be met:</p>
+<ul class="simple">
+<li><p>KmerFrequencyEncoder must be used.</p></li>
+<li><p>One of the following classifiers must be used: RandomForestClassifier, LogisticRegression, SVM, SVC</p></li>
+<li><p>For each label, the implanted motif seeds relevant to that label must be specified</p></li>
+</ul>
+<p>To find the overlap score between kmer features and implanted motif seeds, the two sequences are compared in a sliding
+window approach, and the maximum overlap is calculated.</p>
+<p>Overlap scores between kmer features and implanted motifs are calculated differently based on the Hamming distance that was
+allowed during implanting.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Without hamming distance:
+Seed:     AAA  -&gt; score = 3
+Feature: xAAAx
+          ^^^
+
+Seed:     AAA  -&gt; score = 0
+Feature: xAAxx
+
+With hamming distance:
+Seed:     AAA  -&gt; score = 3
+Feature: xAAAx
+          ^^^
+
+Seed:     AAA  -&gt; score = 2
+Feature: xAAxx
+          ^^
+
+Furthermore, gap positions in the motif seed are ignored:
+Seed:     A/AA  -&gt; score = 3
+Feature: xAxAAx
+          ^/^^
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="../tutorials/recovering_simulated_motifs.html#recovering-simulated-immune-signals"><span class="std std-ref">Recovering simulated immune signals</span></a> for more details.</p>
+<p>Example output:</p>
+<a class="reference internal image-reference" href="../_static/images/reports/motif_seed_recovery.png"><img alt="Motif seed recovery report" src="../_static/images/reports/motif_seed_recovery.png" style="width: 650px;" />
+</a>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>implanted_motifs_per_label (dict): a nested dictionary that specifies the motif seeds that were implanted in the given dataset. The first
+level of keys in this dictionary represents the different labels. In the inner dictionary there should be two keys: “seeds” and
+“hamming_distance”:</p>
+<ul>
+<li><p>seeds: a list of motif seeds. The seeds may contain gaps, specified by a ‘/’ symbol.</p></li>
+<li><p>hamming_distance: A boolean value that specifies whether hamming distance was allowed when implanting the motif
+seeds for a given label. Note that this applies to all seeds for this label.</p></li>
+<li><p>gap_sizes: a list of all the possible gap sizes that were used when implanting a gapped motif seed. When no
+gapped seeds are used, this value has no effect.</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_motif_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">MotifSeedRecovery</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">implanted_motifs_per_label</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">CD</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">seeds</span><span class="p">:</span>
+<span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AA/A</span>
+<span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AAA</span>
+<span class="w">                        </span><span class="nt">hamming_distance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">                        </span><span class="nt">gap_sizes</span><span class="p">:</span>
+<span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">                    </span><span class="nt">T1D</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">seeds</span><span class="p">:</span>
+<span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CC/C</span>
+<span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CCC</span>
+<span class="w">                        </span><span class="nt">hamming_distance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">                        </span><span class="nt">gap_sizes</span><span class="p">:</span>
+<span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</pre></div>
+</div>
+</section>
+<section id="roccurve">
+<h3>ROCCurve<a class="headerlink" href="#roccurve" title="Link to this heading">¶</a></h3>
+<p>A report that plots the ROC curve for a binary classifier.</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_roc_report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ROCCurve</span>
+</pre></div>
+</div>
+</section>
+<section id="sequenceassociationlikelihood">
+<h3>SequenceAssociationLikelihood<a class="headerlink" href="#sequenceassociationlikelihood" title="Link to this heading">¶</a></h3>
+<p>Plots the beta distribution used as a prior for class assignment in ProbabilisticBinaryClassifier. The distribution plotted shows
+the probability that a sequence is associated with a given class for a label.</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_sequence_assoc_report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SequenceAssociationLikelihood</span>
+</pre></div>
+</div>
+</section>
+<section id="tcrdistmotifdiscovery">
+<h3>TCRdistMotifDiscovery<a class="headerlink" href="#tcrdistmotifdiscovery" title="Link to this heading">¶</a></h3>
+<p>The report for discovering motifs in paired immune receptor data of given specificity based on TCRdist3. The receptors are hierarchically
+clustered based on the tcrdist distance and then motifs are discovered for each cluster. The report outputs logo plots for the motifs along with
+the raw data used for plotting in csv format.</p>
+<p>For the implementation, <a class="reference external" href="https://tcrdist3.readthedocs.io/en/latest/">TCRdist3</a> library was used (source code available
+<a class="reference external" href="https://github.com/kmayerb/tcrdist3">here</a>). More details on the functionality used for this report are available
+<a class="reference external" href="https://tcrdist3.readthedocs.io/en/latest/motif_gallery.html">here</a>.</p>
+<p>Original publications:</p>
+<p>Dash P, Fiore-Gartland AJ, Hertz T, et al. Quantifiable predictive features define epitope-specific T cell receptor repertoires.
+Nature. 2017; 547(7661):89-93. <a class="reference external" href="https://www.nature.com/articles/nature22383">doi:10.1038/nature22383</a></p>
+<p>Mayer-Blackwell K, Schattgen S, Cohen-Lavi L, et al. TCR meta-clonotypes for biomarker discovery with tcrdist3: quantification of public,
+HLA-restricted TCR biomarkers of SARS-CoV-2 infection. bioRxiv. Published online December 26, 2020:2020.12.24.424260.
+<a class="reference external" href="https://www.biorxiv.org/content/10.1101/2020.12.24.424260v1">doi:10.1101/2020.12.24.424260</a></p>
+<p>Example output:</p>
+<a class="reference internal image-reference" href="../_static/images/reports/tcrdist_motif_a.svg"><img alt="TCRdist alpha chain logo plot" src="../_static/images/reports/tcrdist_motif_a.svg" style="width: 300px;" />
+</a>
+<a class="reference internal image-reference" href="../_static/images/reports/tcrdist_motif_b.svg"><img alt="TCRdist beta chain logo plot" src="../_static/images/reports/tcrdist_motif_b.svg" style="width: 300px;" />
+</a>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>positive_class_name (str): the class value (e.g., epitope) used to select only the receptors that are specific to the given epitope so that
+only those sequences are used to infer motifs; the reference receptors as required by TCRdist will be the ones from the dataset that have
+different or no epitope specified in their metadata; if the labels are available only on the epitope level (e.g., label is “AVFDRKSDAK” and
+classes are True and False), then here it should be specified that only the receptors with value “True” for label “AVFDRKSDAK” should be used;
+there is no default value for this argument</p></li>
+<li><p>cores (int): number of processes to use for the computation of the distance and motifs</p></li>
+<li><p>min_cluster_size (int): the minimum size of the cluster to discover the motifs for</p></li>
+<li><p>use_reference_sequences (bool): when showing motifs, this parameter defines if reference sequences should be provided as well as a background</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_tcr_dist_report</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined name</span>
+<span class="w">            </span><span class="nt">TCRdistMotifDiscovery</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">positive_class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># class name, could also be epitope name, depending on how it&#39;s defined in the dataset</span>
+<span class="w">                </span><span class="nt">cores</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">                </span><span class="nt">min_cluster_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">                </span><span class="nt">use_reference_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+</pre></div>
+</div>
+</section>
+<section id="trainingperformance">
+<h3>TrainingPerformance<a class="headerlink" href="#trainingperformance" title="Link to this heading">¶</a></h3>
+<p>A report that plots the evaluation metrics for the performance given machine learning model and training dataset.
+The available metrics are accuracy, balanced_accuracy, confusion_matrix, f1_micro, f1_macro, f1_weighted, precision,
+recall, auc and log_loss (see <code class="xref py py-obj docutils literal notranslate"><span class="pre">immuneML.environment.Metric.Metric</span></code>).</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>metrics (list): A list of metrics used to evaluate training performance. See <code class="xref py py-obj docutils literal notranslate"><span class="pre">immuneML.environment.Metric.Metric</span></code> for available options.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_performance_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">TrainingPerformance</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">metrics</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">accuracy</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balanced_accuracy</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">confusion_matrix</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">f1_micro</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">f1_macro</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">f1_weighted</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">precision</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recall</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auc</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log_loss</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="clustering-method-reports">
+<h2><strong>Clustering method reports</strong><a class="headerlink" href="#clustering-method-reports" title="Link to this heading">¶</a></h2>
+<p>Clustering method reports show some features or statistics about the clustering method.</p>
+<section id="clusteringvisualization">
+<h3>ClusteringVisualization<a class="headerlink" href="#clusteringvisualization" title="Link to this heading">¶</a></h3>
+<p>A report that creates low-dimensional visualizations of clustering results using the specified dimensionality reduction method.
+For each dataset and clustering configuration, it creates a scatter plot where points are colored by their cluster assignments.</p>
+<p>Specification arguments:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>dim_red_method (dict): specification of which dimensionality reduction to perform; valid options are presented
+under <a class="reference internal" href="ml_methods.html#dimensionality-reduction-methods"><span class="std std-ref">Dimensionality reduction methods</span></a> and should be specified with the name of the method and its
+parameters, see the example below; if not specified, the report will use any dimensionality reduced data
+present in the dataset’s encoded data; if the dataset does not contain dimensionality reduced data, and the
+encoded data has more than 2 dimensions, the report will be skipped.</p></li>
+</ul>
+</div></blockquote>
+<p>YAML specification:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_report_with_pca</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ClusteringVisualization</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">dim_red_method</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">PCA</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">n_components</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">    </span><span class="nt">my_report_with_tsne</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ClusteringVisualization</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">dim_red_method</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">TSNE</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">n_components</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">                    </span><span class="nt">init</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pca</span>
+<span class="w">    </span><span class="nt">my_report_existing_dim_red</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ClusteringVisualization</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">dim_red_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+</pre></div>
+</div>
+</section>
+<section id="dendrogram">
+<h3>Dendrogram<a class="headerlink" href="#dendrogram" title="Link to this heading">¶</a></h3>
+<p>This report generates a dendrogram visualization from the AgglomerativeClustering method and shows the external
+labels as annotations.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>labels (list): List of metadata labels to annotate on the dendrogram.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_dendrogram_report</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">Dendrogram</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disease_status</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">age_group</span>
+</pre></div>
+</div>
+</section>
+<section id="externallabelclustersummary">
+<h3>ExternalLabelClusterSummary<a class="headerlink" href="#externallabelclustersummary" title="Link to this heading">¶</a></h3>
+<p>This report summarizes the number of examples in a cluster with different values of external labels.
+For each external label, it creates:
+1. A contingency table showing the count of examples for each combination of cluster and label value
+2. A heatmap visualization of these counts</p>
+<p>It can be used in combination with Clustering instruction.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>external_labels (list): the list of metadata columns in the dataset that should be compared against cluster
+assignment</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_external_label_cluster_summary</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">ExternalLabelClusterSummary</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">external_labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">disease</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">HLA</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="generative-model-reports">
+<h2><strong>Generative model reports</strong><a class="headerlink" href="#generative-model-reports" title="Link to this heading">¶</a></h2>
+<p>Generative model reports show some type of features or statistics about a generative model.</p>
+<section id="pwmsummary">
+<h3>PWMSummary<a class="headerlink" href="#pwmsummary" title="Link to this heading">¶</a></h3>
+<p>This report provides the summary of the baseline PWM and shows the following:</p>
+<ul class="simple">
+<li><p>probabilities of generated sequences having different lengths</p></li>
+<li><p>PWMs for each length with positive probability</p></li>
+</ul>
+<p>This report takes no input arguments.</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_pwm_summary</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PWMSummary</span>
+</pre></div>
+</div>
+</section>
+<section id="vaesummary">
+<h3>VAESummary<a class="headerlink" href="#vaesummary" title="Link to this heading">¶</a></h3>
+<p>This report provides the summary of the train SimpleVAE and shows the following:</p>
+<ul class="simple">
+<li><p>plots of the latent space after applying a dimensionality reduction method to reduce the data to 2 dimensions,
+highlighted by V and J gene</p></li>
+<li><p>plots the histogram for each latent dimension</p></li>
+<li><p>plots loss per epoch</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>dim_dist_cols (int): how many columns to use to plot the histograms of latent dimensions (either this or
+dim_dist_rows has to be set, or both)</p></li>
+<li><p>dim_dist_rows (int): how many rows to use to plot the histogram of latent dimensions (either this or
+dim_dist_cols has to be set, or both)</p></li>
+<li><p>dim_red_method (dict): which dimensionality reduction method to use along with its parameters; the method has to
+return 2 dimensions; see <a class="reference internal" href="ml_methods.html#dimensionality-reduction-methods"><span class="std std-ref">Dimensionality reduction methods</span></a> for available options;
+default is PCA with 2 components</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_vae_summary</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">VAESummary</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">dim_dist_cols</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">                </span><span class="nt">dim_dist_rows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="w">                </span><span class="nt">dim_red_method</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">PCA</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">n_components</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="train-ml-model-reports">
+<h2><strong>Train ML model reports</strong><a class="headerlink" href="#train-ml-model-reports" title="Link to this heading">¶</a></h2>
+<p>Train ML model reports plot general statistics or export data of multiple models simultaneously when running the <a class="reference internal" href="instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a> instruction.</p>
+<p>In the <a class="reference internal" href="instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a> instruction, train ML model reports can be specified under ‘reports’. Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_instruction</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TrainMLModel</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_train_ml_model_report</span>
+<span class="w">    </span><span class="c1"># other parameters...</span>
+</pre></div>
+</div>
+<section id="cvfeatureperformance">
+<h3>CVFeaturePerformance<a class="headerlink" href="#cvfeatureperformance" title="Link to this heading">¶</a></h3>
+<p>This report plots the average training vs test performance w.r.t. given encoding parameter which is explicitly set
+in the feature attribute. It can be used only in combination with TrainMLModel instruction and can be only specified under ‘reports’</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>feature: name of the encoder parameter w.r.t. which the performance across training and test will be shown. Possible values depend
+on the encoder on which it is used.</p></li>
+<li><p>is_feature_axis_categorical (bool): if the x-axis of the plot where features are shown should be categorical; alternatively it is
+automatically determined based on the feature values</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">report1</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">CVFeaturePerformance</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">feature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">p_value_threshold</span><span class="w"> </span><span class="c1"># parameter value of SequenceAbundance encoder</span>
+<span class="w">                </span><span class="nt">is_feature_axis_categorical</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># show x-axis as categorical</span>
+</pre></div>
+</div>
+</section>
+<section id="diseaseassociatedsequencecvoverlap">
+<h3>DiseaseAssociatedSequenceCVOverlap<a class="headerlink" href="#diseaseassociatedsequencecvoverlap" title="Link to this heading">¶</a></h3>
+<p>DiseaseAssociatedSequenceCVOverlap report makes one heatmap per label showing the overlap of disease-associated sequences (or k-mers)
+produced by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceAbundanceEncoder</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">CompAIRRSequenceAbundanceEncoder</span></code> or
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">KmerAbundanceEncoder</span></code>
+between folds of cross-validation (either inner or outer loop of the nested CV). The overlap is computed by the following equation:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[overlap(X,Y) = \frac{|X \cap Y|}{min(|X|, |Y|)} x 100\]</div>
+</div>
+<p>For details, see Greiff V, Menzel U, Miho E, et al. Systems Analysis Reveals High Genetic and Antigen-Driven Predetermination of Antibody
+Repertoires throughout B Cell Development. Cell Reports. 2017;19(7):1467-1478. doi:10.1016/j.celrep.2017.04.054.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>compare_in_selection (bool): whether to compute the overlap over the inner loop of the nested CV - the sequence overlap is shown across CV
+folds for the model chosen as optimal within that selection</p></li>
+<li><p>compare_in_assessment (bool): whether to compute the overlap over the optimal models in the outer loop of the nested CV</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_overlap_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">DiseaseAssociatedSequenceCVOverlap</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">compare_in_selection</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">                </span><span class="nt">compare_in_assessment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</pre></div>
+</div>
+</section>
+<section id="mlsettingsperformance">
+<h3>MLSettingsPerformance<a class="headerlink" href="#mlsettingsperformance" title="Link to this heading">¶</a></h3>
+<p>Report for TrainMLModel instruction: plots the performance for each of the setting combinations as defined under ‘settings’ in the
+assessment (outer validation) loop.</p>
+<p>The performances are grouped by label (horizontal panels) encoding (vertical panels) and ML method (bar color).
+When multiple data splits are used, the average performance over the data splits is shown with an error bar
+representing the standard deviation.</p>
+<p>This report can be used only with TrainMLModel instruction under ‘reports’.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>single_axis_labels (bool): whether to use single axis labels. Note that using single axis labels makes the figure unsuited for rescaling, as the label position is given in a fixed distance from the axis. By default, single_axis_labels is False, resulting in standard plotly axis labels.</p></li>
+<li><p>x_label_position (float): if single_axis_labels is True, this should be an integer specifying the x axis label position relative to the x axis. The default value for label_position is -0.1.</p></li>
+<li><p>y_label_position (float): same as x_label_position, but for the y-axis.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_hp_report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MLSettingsPerformance</span>
+</pre></div>
+</div>
+</section>
+<section id="performanceperlabel">
+<h3>PerformancePerLabel<a class="headerlink" href="#performanceperlabel" title="Link to this heading">¶</a></h3>
+<p>Report that shows the performance of the model where the examples are grouped by alternative_label. It can be used
+to investigate if the model is learning the alternative_label instead of label of interest for classification.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>alternative_label (str): The name of the alternative_label column in the dataset.</p></li>
+<li><p>metric (str): The metric to use for the report. Default is balanced_accuracy.</p></li>
+<li><p>compute_for_selection (bool): If True, the report will be computed for the selection. Default is True.</p></li>
+<li><p>compute_for_assessment (bool): If True, the report will be computed for the assessment. Default is True.</p></li>
+<li><p>plot_on_test (bool): If True, the report will be plotted on the test data. Default is True.</p></li>
+<li><p>plot_on_train (bool): If True, the report will be plotted on the training data. Default is False.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_report</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">PerformancePerLabel</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">alternative_label</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch</span>
+<span class="w">            </span><span class="nt">metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balanced_accuracy</span>
+</pre></div>
+</div>
+</section>
+<section id="precisionrecallcurvesummary">
+<h3>PrecisionRecallCurveSummary<a class="headerlink" href="#precisionrecallcurvesummary" title="Link to this heading">¶</a></h3>
+<p>This report plots Precision-Recall curves for all trained ML settings ([preprocessing], encoding, ML model) in the outer loop of
+cross-validation in the <a class="reference internal" href="instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a> instruction. It also reports the average precision (AP) for each setting.</p>
+<blockquote>
+<div><p>If there are multiple splits in the outer loop, this report will make one</p>
+</div></blockquote>
+<p>plot per split. This report is defined only for binary classification.</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_pr_summary_report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PrecisionRecallCurveSummary</span>
+</pre></div>
+</div>
+</section>
+<section id="roccurvesummary">
+<h3>ROCCurveSummary<a class="headerlink" href="#roccurvesummary" title="Link to this heading">¶</a></h3>
+<p>This report plots ROC curves for all trained ML settings ([preprocessing], encoding, ML model) in the outer loop of cross-validation in the
+<a class="reference internal" href="instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a> instruction. If there are multiple splits in the outer loop, this report will make one plot per split. This report is
+defined only for binary classification. If there are multiple labels defined in the instruction, each label has to have two classes to be included
+in this report.</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_roc_summary_report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ROCCurveSummary</span>
+</pre></div>
+</div>
+</section>
+<section id="referencesequenceoverlap">
+<h3>ReferenceSequenceOverlap<a class="headerlink" href="#referencesequenceoverlap" title="Link to this heading">¶</a></h3>
+<p>The ReferenceSequenceOverlap report compares a list of disease-associated sequences (or k-mers) produced by the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceAbundanceEncoder</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">CompAIRRSequenceAbundanceEncoder</span></code> or
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">KmerAbundanceEncoder</span></code> to
+a list of reference sequences. It outputs a Venn diagram and a list of sequences found both in the encoder and reference list.</p>
+<p>The report compares the sequences by their sequence content and the additional comparison_attributes (such as V or J gene), as specified by the user.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>reference_path (str): path to the reference file in csv format which contains one entry per row and has columns that correspond to the attributes
+listed under comparison_attributes argument</p></li>
+<li><p>comparison_attributes (list): list of attributes to use for comparison; all of them have to be present in the reference file where they should
+be the names of the columns</p></li>
+<li><p>label (str): name of the label for which the reference sequences/k-mers should be compared to the model; if none, it takes the one label from the
+instruction; if it is none and multiple labels were specified for the instruction, the report will not be generated</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_reference_overlap_report</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">ReferenceSequenceOverlap</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">reference_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reference_sequences.csv</span><span class="w">  </span><span class="c1"># example usage with SequenceAbundanceEncoder or CompAIRRSequenceAbundanceEncoder</span>
+<span class="w">                </span><span class="nt">comparison_attributes</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_aa</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+<span class="w">        </span><span class="nt">my_reference_overlap_report_with_kmers</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">ReferenceSequenceOverlap</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">reference_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reference_kmers.csv</span><span class="w">  </span><span class="c1"># example usage with KmerAbundanceEncoder</span>
+<span class="w">                </span><span class="nt">comparison_attributes</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k-mer</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="clustering-instruction-reports">
+<h2><strong>Clustering Instruction Reports</strong><a class="headerlink" href="#clustering-instruction-reports" title="Link to this heading">¶</a></h2>
+<section id="externallabelmetricheatmap">
+<h3>ExternalLabelMetricHeatmap<a class="headerlink" href="#externallabelmetricheatmap" title="Link to this heading">¶</a></h3>
+<p>This report creates heatmaps comparing clustering methods against external labels for each metric.
+For each external label and metric combination, it creates:</p>
+<ol class="arabic simple">
+<li><p>A table showing the mean and standard deviation of metric values across splits for each
+combination of clustering method and external label</p></li>
+<li><p>A heatmap visualization where the color represents the mean value and the text shows mean±std</p></li>
+</ol>
+<p>The external labels and metrics are automatically determined from the clustering instruction specification.</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_external_label_metric_heatmap</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ExternalLabelMetricHeatmap</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="multi-dataset-reports">
+<h2><strong>Multi dataset reports</strong><a class="headerlink" href="#multi-dataset-reports" title="Link to this heading">¶</a></h2>
+<p>Multi dataset reports are special reports that can be specified when running immuneML with the <code class="xref py py-obj docutils literal notranslate"><span class="pre">MultiDatasetBenchmarkTool</span></code>.
+See Manuscript use case 1: <a class="reference internal" href="../usecases/emerson_reproduction.html#robustness-assessment"><span class="std std-ref">Robustness assessment</span></a> for an example.</p>
+<p>When running the <code class="xref py py-obj docutils literal notranslate"><span class="pre">MultiDatasetBenchmarkTool</span></code>, multi dataset reports can be specified under ‘benchmark_reports’.
+Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_instruction</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TrainMLModel</span>
+<span class="w">    </span><span class="nt">benchmark_reports</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_benchmark_report</span>
+<span class="w">    </span><span class="c1"># other parameters...</span>
+</pre></div>
+</div>
+<section id="diseaseassociatedsequenceoverlap">
+<h3>DiseaseAssociatedSequenceOverlap<a class="headerlink" href="#diseaseassociatedsequenceoverlap" title="Link to this heading">¶</a></h3>
+<p>DiseaseAssociatedSequenceOverlap report makes a heatmap showing the overlap of disease-associated sequences (or k-mers)
+produced by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">SequenceAbundanceEncoder</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">CompAIRRSequenceAbundanceEncoder</span></code> or
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">KmerAbundanceEncoder</span></code>
+between multiple datasets of different sizes (different number of repertoires per dataset).</p>
+<p>This plot can be used only with MultiDatasetBenchmarkTool.</p>
+<p>The overlap is computed by the following equation:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[overlap(X,Y) = \frac{|X \cap Y|}{min(|X|, |Y|)} * 100\]</div>
+</div>
+<p>For details, see:
+Greiff V, Menzel U, Miho E, et al. Systems Analysis Reveals High Genetic and Antigen-Driven Predetermination of Antibody
+Repertoires throughout B Cell Development. Cell Reports. 2017;19(7):1467-1478. doi:10.1016/j.celrep.2017.04.054.</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_overlap_report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DiseaseAssociatedSequenceOverlap</span><span class="w"> </span><span class="c1"># report has no parameters</span>
+</pre></div>
+</div>
+</section>
+<section id="performanceoverview">
+<h3>PerformanceOverview<a class="headerlink" href="#performanceoverview" title="Link to this heading">¶</a></h3>
+<p>PerformanceOverview report creates an ROC plot and precision-recall plot for optimal trained models on multiple datasets. The labels on the plots
+are the names of the datasets, so it might be good to have user-friendly names when defining datasets that are still a combination of
+letters, numbers and the underscore sign.</p>
+<p>This report can be used only with MultiDatasetBenchmarkTool as it will plot ROC and PR curve for trained models across datasets. Also, it requires
+the task to be immune repertoire classification and cannot be used for receptor or sequence classification. Furthermore, it uses predictions on
+the test dataset to assess the performance and plot the curves. If the parameter refit_optimal_model is set to True, all data will be used to fit
+the optimal model, so there will not be a test dataset which can be used to assess performance and the report will not be generated.</p>
+<p>If datasets have the same number of examples, the baseline PR curve will be plotted as described in this publication:
+Saito T, Rehmsmeier M. The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets.
+PLOS ONE. 2015;10(3):e0118432. doi:10.1371/journal.pone.0118432</p>
+<p>If the datasets have different number of examples, the baseline PR curve will not be plotted.</p>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_performance_report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PerformanceOverview</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="preprocessings.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Preprocessing parameters</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="ml_methods.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">ML method parameters</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2021-2025, Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Report parameters</a><ul>
+<li><a class="reference internal" href="#data-reports"><strong>Data reports</strong></a><ul>
+<li><a class="reference internal" href="#aminoacidfrequencydistribution">AminoAcidFrequencyDistribution</a></li>
+<li><a class="reference internal" href="#compairrclusteringreport">CompAIRRClusteringReport</a></li>
+<li><a class="reference internal" href="#gliph2exporter">GLIPH2Exporter</a></li>
+<li><a class="reference internal" href="#labeldist">LabelDist</a></li>
+<li><a class="reference internal" href="#labeloverlap">LabelOverlap</a></li>
+<li><a class="reference internal" href="#motifgeneralizationanalysis">MotifGeneralizationAnalysis</a></li>
+<li><a class="reference internal" href="#nodedegreedistribution">NodeDegreeDistribution</a></li>
+<li><a class="reference internal" href="#recoveredsignificantfeatures">RecoveredSignificantFeatures</a></li>
+<li><a class="reference internal" href="#repertoireclonotypesummary">RepertoireClonotypeSummary</a></li>
+<li><a class="reference internal" href="#sequencecountdistribution">SequenceCountDistribution</a></li>
+<li><a class="reference internal" href="#sequencelengthdistribution">SequenceLengthDistribution</a></li>
+<li><a class="reference internal" href="#sequenceswithsignificantkmers">SequencesWithSignificantKmers</a></li>
+<li><a class="reference internal" href="#shannondiversityoverview">ShannonDiversityOverview</a></li>
+<li><a class="reference internal" href="#significantfeatures">SignificantFeatures</a></li>
+<li><a class="reference internal" href="#significantkmerpositions">SignificantKmerPositions</a></li>
+<li><a class="reference internal" href="#truemotifssummarybarplot">TrueMotifsSummaryBarplot</a></li>
+<li><a class="reference internal" href="#vjgenedistribution">VJGeneDistribution</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#encoding-reports"><strong>Encoding reports</strong></a><ul>
+<li><a class="reference internal" href="#designmatrixexporter">DesignMatrixExporter</a></li>
+<li><a class="reference internal" href="#dimensionalityreduction">DimensionalityReduction</a></li>
+<li><a class="reference internal" href="#featurecomparison">FeatureComparison</a></li>
+<li><a class="reference internal" href="#featuredistribution">FeatureDistribution</a></li>
+<li><a class="reference internal" href="#featurevaluebarplot">FeatureValueBarplot</a></li>
+<li><a class="reference internal" href="#groundtruthmotifoverlap">GroundTruthMotifOverlap</a></li>
+<li><a class="reference internal" href="#matches">Matches</a></li>
+<li><a class="reference internal" href="#motiftestsetperformance">MotifTestSetPerformance</a></li>
+<li><a class="reference internal" href="#nonmotifsequencesimilarity">NonMotifSequenceSimilarity</a></li>
+<li><a class="reference internal" href="#positionalmotiffrequencies">PositionalMotifFrequencies</a></li>
+<li><a class="reference internal" href="#relevantsequenceexporter">RelevantSequenceExporter</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ml-model-reports"><strong>ML model reports</strong></a><ul>
+<li><a class="reference internal" href="#binaryfeatureprecisionrecall">BinaryFeaturePrecisionRecall</a></li>
+<li><a class="reference internal" href="#coefficients">Coefficients</a></li>
+<li><a class="reference internal" href="#confounderanalysis">ConfounderAnalysis</a></li>
+<li><a class="reference internal" href="#confusionmatrix">ConfusionMatrix</a></li>
+<li><a class="reference internal" href="#deeprcmotifdiscovery">DeepRCMotifDiscovery</a></li>
+<li><a class="reference internal" href="#kernelsequencelogo">KernelSequenceLogo</a></li>
+<li><a class="reference internal" href="#motifseedrecovery">MotifSeedRecovery</a></li>
+<li><a class="reference internal" href="#roccurve">ROCCurve</a></li>
+<li><a class="reference internal" href="#sequenceassociationlikelihood">SequenceAssociationLikelihood</a></li>
+<li><a class="reference internal" href="#tcrdistmotifdiscovery">TCRdistMotifDiscovery</a></li>
+<li><a class="reference internal" href="#trainingperformance">TrainingPerformance</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#clustering-method-reports"><strong>Clustering method reports</strong></a><ul>
+<li><a class="reference internal" href="#clusteringvisualization">ClusteringVisualization</a></li>
+<li><a class="reference internal" href="#dendrogram">Dendrogram</a></li>
+<li><a class="reference internal" href="#externallabelclustersummary">ExternalLabelClusterSummary</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#generative-model-reports"><strong>Generative model reports</strong></a><ul>
+<li><a class="reference internal" href="#pwmsummary">PWMSummary</a></li>
+<li><a class="reference internal" href="#vaesummary">VAESummary</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#train-ml-model-reports"><strong>Train ML model reports</strong></a><ul>
+<li><a class="reference internal" href="#cvfeatureperformance">CVFeaturePerformance</a></li>
+<li><a class="reference internal" href="#diseaseassociatedsequencecvoverlap">DiseaseAssociatedSequenceCVOverlap</a></li>
+<li><a class="reference internal" href="#mlsettingsperformance">MLSettingsPerformance</a></li>
+<li><a class="reference internal" href="#performanceperlabel">PerformancePerLabel</a></li>
+<li><a class="reference internal" href="#precisionrecallcurvesummary">PrecisionRecallCurveSummary</a></li>
+<li><a class="reference internal" href="#roccurvesummary">ROCCurveSummary</a></li>
+<li><a class="reference internal" href="#referencesequenceoverlap">ReferenceSequenceOverlap</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#clustering-instruction-reports"><strong>Clustering Instruction Reports</strong></a><ul>
+<li><a class="reference internal" href="#externallabelmetricheatmap">ExternalLabelMetricHeatmap</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#multi-dataset-reports"><strong>Multi dataset reports</strong></a><ul>
+<li><a class="reference internal" href="#diseaseassociatedsequenceoverlap">DiseaseAssociatedSequenceOverlap</a></li>
+<li><a class="reference internal" href="#performanceoverview">PerformanceOverview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=f1196aca"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script>window.MathJax = {"extensions": ["tex2jax.js"], "jax": ["input/TeX", "output/HTML-CSS"]}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
+</html>

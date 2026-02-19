@@ -1,0 +1,772 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta content="summary" name="twitter:card" />
+<meta content="&#64;immuneml" name="twitter:site" />
+<meta content="immuneML use case: reproduction of a published study inside immuneML" name="twitter:title" />
+<meta content="See how the study by Emerson et al. 2017 on CMV-status prediction from TCRbeta repertoires was reproduced in the immuneML manuscript." name="twitter:description" />
+<meta content="https://docs.immuneml.uio.no/_images/emerson_reproduction.png" name="twitter:image" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Manuscript use case 2: Extending immuneML with a deep learning component for predicting antigen specificity of paired receptor data" href="extendability_use_case.html" /><link rel="prev" title="Use case examples" href="../usecases.html" />
+        <link rel="canonical" href="https://docs.immuneml.uio.no/usecases/emerson_reproduction.html" />
+
+    <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>Manuscript use case 1: Reproduction of a published study inside immuneML - immuneML 3.0.18 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/immuneml.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">immuneML 3.0.18 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">immuneML 3.0.18 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../quickstart.html">Quickstart</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Quickstart</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_simple.html">Quickstart: Galaxy with button-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_yaml.html">Quickstart: Galaxy with YAML-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/cli_yaml.html">Quickstart: command-line interface with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/simulation_quickstart.html">LIgO simulation quickstart</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installing immuneML</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Installing immuneML</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/install_with_package_manager.html">Install immuneML with a package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/installation_docker.html">Setting up immuneML with Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/cloud.html">Running immuneML in the cloud</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../specification.html">YAML specification</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of YAML specification</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/how_to_specify_an_analysis_with_yaml.html">How to specify an analysis with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/datasets.html">Dataset parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/encodings.html">Encoding parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/ml_methods.html">ML method parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/reports.html">Report parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/preprocessings.html">Preprocessing parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/simulation.html">Simulation parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/instructions.html">Instruction parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Tutorials</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/analyze_dataset.html">Analyzing Your Own Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_import_the_data_to_immuneML.html">How to import data into immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_generate_a_random_repertoire_dataset.html">How to generate a dataset with random sequences</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tutorials/ligo_simulation_tutorials.html">Dataset simulation with LIgO</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Dataset simulation with LIgO</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/ligo_simulation_yaml.html">YAML specification of the LigoSim instruction for introducing immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/how_to_simulate_co-occuring_signals.html">How to simulate co-occuring immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/how_to_simulate_paired_chain_data.html">Paired chain simulations in LIgO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/simulation_with_custom_signal_functions.html">Simulation with custom signal functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_train_and_assess_a_receptor_or_repertoire_classifier.html">How to train and assess a receptor or repertoire-level ML classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_apply_to_new_data.html">How to apply previously trained ML models to a new dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_perform_exploratory_analysis.html">How to perform an exploratory data analysis</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tutorials/motif_recovery.html">How to find motifs associated with disease or antigen binding state</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of How to find motifs associated with disease or antigen binding state</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/discover_motifs_precision_recall.html">Discovering positional motifs using precision and recall thresholds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/discover_motifs_classifiers.html">Discovering motifs learned by classifiers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/recovering_simulated_motifs.html">Recovering simulated immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/comparing_baseline_motifs.html">Comparing baseline motif frequencies in repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/clustering_tutorial.html">How to perform clustering analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_train_and_apply_gen_model.html">How to train a generative model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_combine_multiple_encodings.html">How to combine multiple encodings to represent a dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/getting_publication_ready_figures.html">How to get publication-ready figures</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../galaxy.html">immuneML &amp; Galaxy</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of immuneML &amp; Galaxy</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_intro.html">Introduction to Galaxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_tools.html">immuneML Galaxy tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_immunologist_friendly.html">ML basics: Training classifiers with the simplified Galaxy interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../usecases.html">Use case examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Use case examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Manuscript use case 1: Reproduction of a published study inside immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extendability_use_case.html">Manuscript use case 2: Extending immuneML with a deep learning component for predicting antigen specificity of paired receptor data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarking_use_case.html">Manuscript use case 3: Benchmarking ML methods on ground-truth synthetic data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="immcantation_use_case.html">Integration use case: post-analysis of sequences with Immcantation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="immunarch_use_case.html">Integration use case: post-analysis of sequences with immunarch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="immunesim_use_case.html">Integration use case: Performing analysis on immuneSIM-generated repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Troubleshooting</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../developer_docs.html">Developer documentation</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Developer documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/info_new_developers.html">Information for new developers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/install_for_development.html">Set up immuneML for development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_encoding.html">How to add a new encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_ML_method.html">How to add a new machine learning method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_report.html">How to add a new report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_preprocessing.html">How to add a new preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/data_model.html">immuneML data model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/execution_flow.html">immuneML execution flow</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/usecases/emerson_reproduction.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="manuscript-use-case-1-reproduction-of-a-published-study-inside-immuneml">
+<h1>Manuscript use case 1: Reproduction of a published study inside immuneML<a class="headerlink" href="#manuscript-use-case-1-reproduction-of-a-published-study-inside-immuneml" title="Link to this heading">¶</a></h1>
+<p>In this use case, we show how the study by Emerson and colleagues on CMV status prediction from TCRbeta repertoires (<a class="reference external" href="https://www.nature.com/articles/ng.3822">Emerson et al. 2017</a>)
+can be reproduced within immuneML. Additionally, we test the approach on datasets subsampled from the original study (to include randomly chosen 400,
+200, 100 and 50 subjects) and estimate the performance of the approach when fewer examples are available.</p>
+<p>The dataset was downloaded from Adaptive Biotechnologies’ <a class="reference external" href="https://clients.adaptivebiotech.com/pub/Emerson-2017-NatGen">website</a>.
+Out of the 786 subjects (cohort 1: 666, cohort 2: 120), we removed 103 subjects from cohort 1 (1 with missing repertoire data, 25 with unknown CMV
+status, 3 with negative template counts for some of the sequences and the rest with no template count information).</p>
+<p>The complete collection of original files used in this use case can be found in the NIRD research data archive (DOI: <a class="reference external" href="https://doi.org/10.11582/2021.00008">10.11582/2021.00008</a>).
+This also includes the metadata files for cohorts 1 and 2 with the list of subjects included in this use case.
+Note that the YAML specifications in the original dataset were compatible with immuneML version 1.0.1.
+This documentation page contains the YAML specifications for equivalent analyses with the latest immuneML version.</p>
+<section id="reproduction-of-the-cmv-status-predictions-study">
+<h2>Reproduction of the CMV status predictions study<a class="headerlink" href="#reproduction-of-the-cmv-status-predictions-study" title="Link to this heading">¶</a></h2>
+<p>To reproduce the analysis, we used immuneML as a command line tool. We define the dataset to be used, data representation (encoding) which we call
+<cite>SequenceAbundance</cite>, the statistical model called <cite>ProbabilisticBinaryClassifier</cite> and different reports.</p>
+<p>The encoding represents each repertoire by two numbers: the number of disease-associated sequences as determined by the Fisher’s exact test and the
+total number of sequences in the repertoire. As a hyperparameter of the encoding, it is possible to set the p-value threshold which can be used to
+determine which sequences are disease-associated. As in the original publication, we try out different p-value thresholds through cross-validation.</p>
+<p>The statistical model <cite>ProbabilisticBinaryClassifier</cite> relies on <cite>SequenceAbundance</cite> encoding and fits two sets of parameters ({<span class="math notranslate nohighlight">\(\alpha_0\)</span>, <span class="math notranslate nohighlight">\(\beta_0\)</span>}
+and {<span class="math notranslate nohighlight">\(\alpha_1\)</span>, <span class="math notranslate nohighlight">\(\beta_1\)</span>}) to describe beta-distributed prior for CMV-negative and CMV-positive subjects. These parameters are then used
+to create log-posterior odds ratio for class assignment for new subjects.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When used on large datasets, ‘SequenceAbundance’ encoder might be slow. If you want to reproduce the analysis faster and you are using
+immuneML version 2.2.0 or later, use <a class="reference internal" href="../yaml_specs/encodings.html#compairrsequenceabundance"><span class="std std-ref">CompAIRRSequenceAbundance</span></a> encoder instead. <cite>p_value_threshold</cite> parameter is the same, and by default
+the analysis is performed using the amino acid sequence, and V and J genes. This can be turned of by setting <cite>ignore_genes</cite> to True (it is False by default).</p>
+</div>
+<p>To find the optimal p-value threshold we used 10-fold cross-validation on the cohort 1 and chose the one minimizing the cross-entropy loss (also
+called logarithmic loss). We then tested the performance of the optimal model (optimal p-value and the classifier fitted on resulting data representation)
+on the cohort 2 (as it was done in the original study).</p>
+<p>The full YAML specification:</p>
+<blockquote>
+<div><details class="summary-emerson-reproduction-yaml">
+<summary>emerson_reproduction.yaml</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">cmv2017</span><span class="p">:</span><span class="w"> </span><span class="c1"># the full dataset including cohort 1 and cohort 2</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ImmunoSEQRearrangement</span>
+<span class="w">      </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../emerson_adaptive/</span><span class="w"> </span><span class="c1"># dataset files as provided by Adaptive Biotechnologies unzipped into emerson_adaptive folder</span>
+<span class="w">        </span><span class="nt">metadata_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cmv_metadata.csv</span><span class="w"> </span><span class="c1"># metadata file including subjects for cohorts 1 and 2</span>
+<span class="w">        </span><span class="nt">result_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">imported_data/</span><span class="w"> </span><span class="c1"># where to store imported data [immuneML implementation detail]</span>
+<span class="w">  </span><span class="nt">encodings</span><span class="p">:</span><span class="w"> </span><span class="c1"># multiple encodings are defined that differ only on the p-value threshold they use to determine CMV-associated sequences</span>
+<span class="w">    </span><span class="nt">enc01</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">SequenceAbundance</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">comparison_attributes</span><span class="p">:</span><span class="w"> </span><span class="c1"># how we define a sequence: as a combination of CDR3, V and J gene (as in the original publication)</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_aas</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_genes</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_genes</span>
+<span class="w">        </span><span class="nt">p_value_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="w">        </span><span class="nt">sequence_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span><span class="w"> </span><span class="c1"># immuneML implementation details</span>
+<span class="w">        </span><span class="nt">repertoire_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span><span class="w"> </span><span class="c1"># immuneML implementation details</span>
+<span class="w">    </span><span class="nt">enc001</span><span class="p">:</span><span class="w"> </span><span class="c1"># second encoding with different p-value</span>
+<span class="w">      </span><span class="nt">SequenceAbundance</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">comparison_attributes</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_aas</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_genes</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_genes</span>
+<span class="w">        </span><span class="nt">p_value_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
+<span class="w">        </span><span class="nt">sequence_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span>
+<span class="w">        </span><span class="nt">repertoire_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span>
+<span class="w">    </span><span class="nt">enc0001</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">SequenceAbundance</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">comparison_attributes</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_aas</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_genes</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_genes</span>
+<span class="w">        </span><span class="nt">p_value_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0001</span>
+<span class="w">        </span><span class="nt">sequence_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span>
+<span class="w">        </span><span class="nt">repertoire_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span>
+<span class="w">    </span><span class="nt">enc00001</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">SequenceAbundance</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">comparison_attributes</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_aas</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_genes</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_genes</span>
+<span class="w">        </span><span class="nt">p_value_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.00001</span>
+<span class="w">        </span><span class="nt">sequence_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span>
+<span class="w">        </span><span class="nt">repertoire_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span>
+<span class="w">    </span><span class="nt">enc000001</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">SequenceAbundance</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">comparison_attributes</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_aas</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_genes</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_genes</span>
+<span class="w">        </span><span class="nt">p_value_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.000001</span>
+<span class="w">        </span><span class="nt">sequence_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span>
+<span class="w">        </span><span class="nt">repertoire_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span>
+<span class="w">  </span><span class="nt">ml_methods</span><span class="p">:</span><span class="w"> </span><span class="c1"># here we define the classifier</span>
+<span class="w">    </span><span class="nt">ml</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">ProbabilisticBinaryClassifier</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">max_iterations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50000</span><span class="w"> </span><span class="c1"># how many iterations are allowed while estimating the distribution parameters</span>
+<span class="w">        </span><span class="nt">update_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="w">  </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enc_data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DesignMatrixExporter</span><span class="w"> </span><span class="c1"># export encoded data in csv format</span>
+<span class="w">    </span><span class="nt">sequence_association_likelihood</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SequenceAssociationLikelihood</span><span class="w"> </span><span class="c1"># plot sequence association likelihood with estimated parameters</span>
+<span class="w">    </span><span class="nt">feature_performance_plot</span><span class="p">:</span><span class="w"> </span><span class="c1"># show how performance changes depending on p-value threshold</span>
+<span class="w">      </span><span class="nt">CVFeaturePerformance</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">feature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">p_value_threshold</span>
+<span class="w">    </span><span class="nt">sequence_overlap</span><span class="p">:</span><span class="w"> </span><span class="c1"># show if CMV-associated sequences overlap between CV folds</span>
+<span class="w">      </span><span class="nt">DiseaseAssociatedSequenceCVOverlap</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">compare_in_selection</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">        </span><span class="nt">compare_in_assessment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">relevant_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RelevantSequenceExporter</span><span class="w"> </span><span class="c1"># export CMV-associated sequences</span>
+<span class="w">    </span><span class="nt">emerson_reference_overlap</span><span class="p">:</span><span class="w"> </span><span class="c1"># check how many sequences overlap with the original study</span>
+<span class="w">      </span><span class="nt">ReferenceSequenceOverlap</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">reference_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">emerson_reference.csv</span>
+<span class="w">        </span><span class="nt">comparison_attributes</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_aas</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_genes</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_genes</span>
+<span class="nt">instructions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cmv_study_reproduction</span><span class="p">:</span><span class="w"> </span><span class="c1"># defines what analysis should be like</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">feature_performance_plot</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">sequence_overlap</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">emerson_reference_overlap</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># reports to run after nested CV is finished</span>
+<span class="w">    </span><span class="nt">assessment</span><span class="p">:</span><span class="w"> </span><span class="c1"># outer loop of nested cross-validation: split manually to training (cohort 1) and test (cohort 2)</span>
+<span class="w">      </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">manual</span>
+<span class="w">      </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">      </span><span class="nt">manual_config</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">train_metadata_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cmv_train_metadata.csv</span><span class="w"> </span><span class="c1"># cohort 1</span>
+<span class="w">        </span><span class="nt">test_metadata_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cmv_test_metadata.csv</span><span class="w"> </span><span class="c1"># cohort 2</span>
+<span class="w">      </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">enc_data</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">relevant_sequences</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">models</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">sequence_association_likelihood</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">selection</span><span class="p">:</span><span class="w"> </span><span class="c1"># inner loop of nested cross-validation performing 10 cross-validation to choose best p-value threshold</span>
+<span class="w">      </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k_fold</span>
+<span class="w">      </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">      </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">enc_data</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">relevant_sequences</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">number_of_processes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
+<span class="w">    </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cmv2017</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span><span class="w"> </span><span class="c1"># which labels to use from the metadata, here: CMV</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">CMV</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">positive_class</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># positive class is called &quot;True&quot; - implementation detail used for encodings and some reports</span>
+<span class="w">    </span><span class="nt">optimization_metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log_loss</span><span class="w"> </span><span class="c1"># which metric to use for choose the best encoding</span>
+<span class="w">    </span><span class="nt">metrics</span><span class="p">:</span><span class="w"> </span><span class="c1"># additional metrics to compute</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balanced_accuracy</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auc</span>
+<span class="w">    </span><span class="nt">strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GridSearch</span><span class="w"> </span><span class="c1"># try out all settings combinations (all encodings here)</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TrainMLModel</span><span class="w"> </span><span class="c1"># name of the instruction</span>
+<span class="w">    </span><span class="nt">refit_optimal_model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># whether to refit the data on the whole dataset when all training and testing is finished</span>
+<span class="w">    </span><span class="nt">settings</span><span class="p">:</span><span class="w"> </span><span class="c1"># combinations of encodings and classifiers to try out, basically, just listing all encodings with different p-values</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enc01</span>
+<span class="w">      </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ml</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enc001</span>
+<span class="w">      </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ml</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enc0001</span>
+<span class="w">      </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ml</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enc00001</span>
+<span class="w">      </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ml</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enc000001</span>
+<span class="w">      </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ml</span>
+<span class="nt">output</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTML</span><span class="w"> </span><span class="c1"># output the result as HTML</span>
+</pre></div>
+</div>
+</details></div></blockquote>
+</section>
+<section id="robustness-assessment">
+<h2>Robustness assessment<a class="headerlink" href="#robustness-assessment" title="Link to this heading">¶</a></h2>
+<p>After reproducing the study, we also assessed the robustness of the method on smaller datasets. To do that, we first constructed smaller datasets, and
+and then reproduced the analysis on those smaller datasets.</p>
+<section id="constructing-subsampled-datasets">
+<h3>Constructing subsampled datasets<a class="headerlink" href="#constructing-subsampled-datasets" title="Link to this heading">¶</a></h3>
+<p>To construct smaller datasets of 400, 200, 100 and 50 subjects randomly from both cohorts, we used Subsampling instruction with the following YAML specification.</p>
+<blockquote>
+<div><details class="summary-subsample-datasets-yaml">
+<summary>subsample_datasets.yaml</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">cmv2017</span><span class="p">:</span><span class="w"> </span><span class="c1"># we import the full dataset with 683 subjects as it was imported previously in immuneML-optimized format</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ImmuneML</span>
+<span class="w">      </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">imported_data/cmv2017.yaml</span><span class="w"> </span><span class="c1"># Note that in older versions of immuneML (&lt;3), immuneML datasets had .iml_dataset extension instead of .yaml</span>
+<span class="nt">instructions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">subsampling_inst</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined name of the instruction</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Subsampling</span><span class="w"> </span><span class="c1"># which instruction to execute</span>
+<span class="w">    </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cmv2017</span><span class="w"> </span><span class="c1"># original dataset to be subsampled</span>
+<span class="w">    </span><span class="nt">subsampled_dataset_sizes</span><span class="p">:</span><span class="w"> </span><span class="c1"># how large the subsampled datasets should be, one dataset will be created for each list item</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">400</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+<span class="w">    </span><span class="nt">dataset_export_formats</span><span class="p">:</span><span class="w"> </span><span class="c1"># in which formats to export the subsampled datasets</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ImmuneML</span>
+</pre></div>
+</div>
+</details></div></blockquote>
+</section>
+<section id="running-the-analysis-on-subsampled-datasets">
+<h3>Running the analysis on subsampled datasets<a class="headerlink" href="#running-the-analysis-on-subsampled-datasets" title="Link to this heading">¶</a></h3>
+<p>To analyze and compare performances on datasets of different sizes, we use MultiDatasetBenchmarkTool.</p>
+<p>The MultiDatasetBenchmarkTool can be run from the command line by providing the tool parameter in addition to YAML specification and the resulting folder:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">immune-ml robustness_assessment_specs.yaml robustness_assessment_result/ --tool MultiDatasetBenchmarkTool</span>
+</pre></div>
+</div>
+<p>The YAML specification is mostly the same as when only TrainMLModel instruction is used except:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>the <cite>dataset</cite> parameter is now called <cite>datasets</cite> and accepts a list of datasets on which the TrainMLModel instruction has to be performed (format and functionality are the same as described under reproduction), and</p></li>
+<li><p>it has one additional parameter called <cite>benchmark_reports</cite> that will be executed after all datasets have been used to compare performances.</p></li>
+</ul>
+</div></blockquote>
+<p>The YAML specification is given below.</p>
+<blockquote>
+<div><details class="summary-robustness-assessment-yaml">
+<summary>robustness_assessment.yaml</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">datasets</span><span class="p">:</span><span class="w"> </span><span class="c1"># datasets for assessing robustness</span>
+<span class="w">    </span><span class="nt">cmv2017_400</span><span class="p">:</span><span class="w"> </span><span class="c1"># with 400 repertoires</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ImmuneML</span>
+<span class="w">      </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">subsampled_datasets/subsampling_inst/cmv2017_400_subsampled_1/exported/immuneml/cmv2017_400_subsampled_1.yaml</span><span class="w"> </span><span class="c1"># Note that in older versions of immuneML (&lt;3), immuneML datasets had .iml_dataset extension instead of .yaml</span>
+<span class="w">    </span><span class="nt">cmv2017_200</span><span class="p">:</span><span class="w"> </span><span class="c1"># with 200 repertoires</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ImmuneML</span>
+<span class="w">      </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">subsampled_datasets/subsampling_inst/cmv2017_200_subsampled_2/exported/immuneml/cmv2017_200_subsampled_2.yaml</span>
+<span class="w">    </span><span class="nt">cmv2017_100</span><span class="p">:</span><span class="w"> </span><span class="c1"># with 100 repertoires</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ImmuneML</span>
+<span class="w">      </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">subsampled_datasets/subsampling_inst/cmv2017_100_subsampled_3/exported/immuneml/cmv2017_100_subsampled_3.yaml</span>
+<span class="w">    </span><span class="nt">cmv2017_50</span><span class="p">:</span><span class="w"> </span><span class="c1"># with 50 repertoires</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ImmuneML</span>
+<span class="w">      </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">subsampled_datasets/subsampling_inst/cmv2017_50_subsampled_4/exported/immuneml/cmv2017_50_subsampled_4.yaml</span>
+<span class="w">  </span><span class="nt">encodings</span><span class="p">:</span><span class="w"> </span><span class="c1"># encodings as in Emerson et al. 2017 with different p-values to discover disease-associated combination of amino acid sequence and V and J gene</span>
+<span class="w">    </span><span class="nt">enc01</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">SequenceAbundance</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">comparison_attributes</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_aas</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_genes</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_genes</span>
+<span class="w">        </span><span class="nt">p_value_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="w">        </span><span class="nt">sequence_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span><span class="w"> </span><span class="c1"># implementation details not affecting the algorithm, only the speed</span>
+<span class="w">        </span><span class="nt">repertoire_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span><span class="w"> </span><span class="c1"># implementation details not affecting the algorithm, only the speed</span>
+<span class="w">    </span><span class="nt">enc001</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">SequenceAbundance</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">comparison_attributes</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_aas</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_genes</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_genes</span>
+<span class="w">        </span><span class="nt">p_value_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
+<span class="w">        </span><span class="nt">sequence_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span>
+<span class="w">        </span><span class="nt">repertoire_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span>
+<span class="w">    </span><span class="nt">enc0001</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">SequenceAbundance</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">comparison_attributes</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_aas</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_genes</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_genes</span>
+<span class="w">        </span><span class="nt">p_value_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0001</span>
+<span class="w">        </span><span class="nt">sequence_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span>
+<span class="w">        </span><span class="nt">repertoire_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span>
+<span class="w">    </span><span class="nt">enc00001</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">SequenceAbundance</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">comparison_attributes</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_aas</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_genes</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_genes</span>
+<span class="w">        </span><span class="nt">p_value_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.00001</span>
+<span class="w">        </span><span class="nt">sequence_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span>
+<span class="w">        </span><span class="nt">repertoire_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span>
+<span class="w">    </span><span class="nt">enc000001</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">SequenceAbundance</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">comparison_attributes</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_aas</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_genes</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_genes</span>
+<span class="w">        </span><span class="nt">p_value_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.000001</span>
+<span class="w">        </span><span class="nt">sequence_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000000</span>
+<span class="w">        </span><span class="nt">repertoire_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150</span>
+<span class="w">  </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ml</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">ProbabilisticBinaryClassifier</span><span class="p">:</span><span class="w"> </span><span class="c1"># classifier as described in Emerson et al. 2017</span>
+<span class="w">        </span><span class="nt">max_iterations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50000</span>
+<span class="w">        </span><span class="nt">update_rate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="w">  </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enc_data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DesignMatrixExporter</span><span class="w"> </span><span class="c1"># export encoded data as a csv file, also export labels and other info</span>
+<span class="w">    </span><span class="nt">sequence_association_likelihood</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SequenceAssociationLikelihood</span>
+<span class="w">    </span><span class="nt">feature_performance_plot</span><span class="p">:</span><span class="w"> </span><span class="c1"># show how performance changes on average for different p-value thresholds for determining disease-associated sequences</span>
+<span class="w">      </span><span class="nt">CVFeaturePerformance</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">feature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">p_value_threshold</span>
+<span class="w">        </span><span class="nt">is_feature_axis_categorical</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">sequence_overlap</span><span class="p">:</span><span class="w"> </span><span class="c1"># check how stable are the estimates of disease-associated sequences across folds</span>
+<span class="w">      </span><span class="nt">DiseaseAssociatedSequenceCVOverlap</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">compare_in_selection</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># compare disease-associated sequences only for the chosen optimal model across CV folds</span>
+<span class="w">        </span><span class="nt">compare_in_assessment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">relevant_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RelevantSequenceExporter</span><span class="w"> </span><span class="c1"># export disease-associated sequences</span>
+<span class="w">    </span><span class="nt">emerson_reference_overlap</span><span class="p">:</span><span class="w"> </span><span class="c1"># check how much discovered disease-associated sequences overlap with the results published in the paper</span>
+<span class="w">      </span><span class="nt">ReferenceSequenceOverlap</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">reference_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">emerson_reference.csv</span>
+<span class="w">        </span><span class="nt">comparison_attributes</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_aas</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_genes</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_genes</span>
+<span class="w">    </span><span class="nt">sequence_overlap_across_datasets</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DiseaseAssociatedSequenceOverlap</span><span class="w"> </span><span class="c1"># check how much disease-associated sequences overlap across datasets of different size</span>
+<span class="w">    </span><span class="nt">performance_report</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PerformanceOverview</span><span class="w"> </span><span class="c1"># show AUROC, AUPRC across datasets</span>
+<span class="nt">instructions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cmv_study_reproduction</span><span class="p">:</span><span class="w"> </span><span class="c1"># the format of the instruction is the same as above except there is a parameter benchmark_reports which are run when the instructions have finished</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">feature_performance_plot</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">sequence_overlap</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">emerson_reference_overlap</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># reports to run after nested CV is finished</span>
+<span class="w">    </span><span class="nt">benchmark_reports</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">sequence_overlap_across_datasets</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">performance_report</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># reports to run after all dataset have been benchmarked</span>
+<span class="w">    </span><span class="nt">assessment</span><span class="p">:</span><span class="w"> </span><span class="c1"># nested 5-fold CV (outer loop)</span>
+<span class="w">      </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k_fold</span>
+<span class="w">      </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">      </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">enc_data</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">relevant_sequences</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">models</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">sequence_association_likelihood</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">selection</span><span class="p">:</span><span class="w"> </span><span class="c1"># nested 5-fold CV (inner loop)</span>
+<span class="w">      </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k_fold</span>
+<span class="w">      </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">      </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">enc_data</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">relevant_sequences</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">number_of_processes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">32</span>
+<span class="w">    </span><span class="nt">datasets</span><span class="p">:</span><span class="w"> </span><span class="c1"># instead of one dataset, there are 4 now when we use MultiDatasetBenchmarkTool</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cmv2017_400</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cmv2017_200</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cmv2017_100</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cmv2017_50</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">CMV</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">positive_class</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">metrics</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balanced_accuracy</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auc</span>
+<span class="w">    </span><span class="nt">optimization_metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log_loss</span>
+<span class="w">    </span><span class="nt">strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GridSearch</span><span class="w"> </span><span class="c1"># try out all combinations of encoding and ml_method listed under settings</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TrainMLModel</span><span class="w"> </span><span class="c1"># the type of the instruction which will be executed for each dataset</span>
+<span class="w">    </span><span class="nt">refit_optimal_model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">    </span><span class="nt">settings</span><span class="p">:</span><span class="w"> </span><span class="c1"># combinations to try out to choose the best p-value</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enc01</span>
+<span class="w">      </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ml</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enc001</span>
+<span class="w">      </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ml</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enc0001</span>
+<span class="w">      </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ml</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enc00001</span>
+<span class="w">      </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ml</span>
+<span class="nt">output</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTML</span>
+</pre></div>
+</div>
+</details></div></blockquote>
+</section>
+</section>
+<section id="results">
+<h2>Results<a class="headerlink" href="#results" title="Link to this heading">¶</a></h2>
+<p>The results of reproducing the study by Emerson et al. are shown in the following figure:</p>
+<figure class="align-default" id="id2">
+<a class="reference internal image-reference" href="../_images/emerson_reproduction.png"><img alt="Emerson reproduction results" src="../_images/emerson_reproduction.png" style="width: 80%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Reproducing the CMV status prediction study by Emerson et al.5 A. The overlap of the 164 disease-associated TCRβ sequences (V-TCRβaa-J) determined in the original study by Emerson et al., labeled “reference”, with those determined by the optimal model as reproduced here with a p-value threshold of 0.001 (labeled “model”). B. The overlap percentage of disease-associated TCRβ sequences for the optimal model with the p-value threshold of 0.001 between different data splits in 10-fold cross-validation (between 50% and 65% overlap). C. The probability that a TCRβ sequence is CMV-associated following a beta distribution estimated separately for CMV positive and negative subjects, which is then used for CMV status prediction of new subjects. D. Area under the ROC curve (AUROC) over p-value thresholds in training data (average AUROC over 10 cross-validation splits) and test data (AUROC in cohort 2).</span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>Furthermore, the results of the robustness assessment (reproducing the study with a lower number of repertoires) are show here:</p>
+<figure class="align-default" id="id3">
+<a class="reference internal image-reference" href="../_images/emerson_robustness.png"><img alt="Emerson robustness results" src="../_images/emerson_robustness.png" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Decreasing the number of repertoires (400, 200, 100, and 50) leads to decreased prediction accuracy (AUROC: 0.86–0.46).</span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="extendability_use_case.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Manuscript use case 2: Extending immuneML with a deep learning component for predicting antigen specificity of paired receptor data</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../usecases.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Use case examples</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2021-2025, Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Manuscript use case 1: Reproduction of a published study inside immuneML</a><ul>
+<li><a class="reference internal" href="#reproduction-of-the-cmv-status-predictions-study">Reproduction of the CMV status predictions study</a></li>
+<li><a class="reference internal" href="#robustness-assessment">Robustness assessment</a><ul>
+<li><a class="reference internal" href="#constructing-subsampled-datasets">Constructing subsampled datasets</a></li>
+<li><a class="reference internal" href="#running-the-analysis-on-subsampled-datasets">Running the analysis on subsampled datasets</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#results">Results</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=f1196aca"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script>window.MathJax = {"extensions": ["tex2jax.js"], "jax": ["input/TeX", "output/HTML-CSS"]}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
+</html>

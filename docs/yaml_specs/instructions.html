@@ -1,0 +1,1103 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Tutorials" href="../tutorials.html" /><link rel="prev" title="Simulation parameters" href="simulation.html" />
+        <link rel="canonical" href="https://docs.immuneml.uio.no/yaml_specs/instructions.html" />
+
+    <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>Instruction parameters - immuneML 3.0.18 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/immuneml.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">immuneML 3.0.18 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">immuneML 3.0.18 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../quickstart.html">Quickstart</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Quickstart</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_simple.html">Quickstart: Galaxy with button-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_yaml.html">Quickstart: Galaxy with YAML-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/cli_yaml.html">Quickstart: command-line interface with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/simulation_quickstart.html">LIgO simulation quickstart</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installing immuneML</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Installing immuneML</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/install_with_package_manager.html">Install immuneML with a package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/installation_docker.html">Setting up immuneML with Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/cloud.html">Running immuneML in the cloud</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../specification.html">YAML specification</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of YAML specification</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how_to_specify_an_analysis_with_yaml.html">How to specify an analysis with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">Dataset parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="encodings.html">Encoding parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml_methods.html">ML method parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reports.html">Report parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preprocessings.html">Preprocessing parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation.html">Simulation parameters</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Instruction parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Tutorials</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/analyze_dataset.html">Analyzing Your Own Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_import_the_data_to_immuneML.html">How to import data into immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_generate_a_random_repertoire_dataset.html">How to generate a dataset with random sequences</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tutorials/ligo_simulation_tutorials.html">Dataset simulation with LIgO</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Dataset simulation with LIgO</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/ligo_simulation_yaml.html">YAML specification of the LigoSim instruction for introducing immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/how_to_simulate_co-occuring_signals.html">How to simulate co-occuring immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/how_to_simulate_paired_chain_data.html">Paired chain simulations in LIgO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/simulation_with_custom_signal_functions.html">Simulation with custom signal functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_train_and_assess_a_receptor_or_repertoire_classifier.html">How to train and assess a receptor or repertoire-level ML classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_apply_to_new_data.html">How to apply previously trained ML models to a new dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_perform_exploratory_analysis.html">How to perform an exploratory data analysis</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tutorials/motif_recovery.html">How to find motifs associated with disease or antigen binding state</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of How to find motifs associated with disease or antigen binding state</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/discover_motifs_precision_recall.html">Discovering positional motifs using precision and recall thresholds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/discover_motifs_classifiers.html">Discovering motifs learned by classifiers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/recovering_simulated_motifs.html">Recovering simulated immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/comparing_baseline_motifs.html">Comparing baseline motif frequencies in repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/clustering_tutorial.html">How to perform clustering analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_train_and_apply_gen_model.html">How to train a generative model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_combine_multiple_encodings.html">How to combine multiple encodings to represent a dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/getting_publication_ready_figures.html">How to get publication-ready figures</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../galaxy.html">immuneML &amp; Galaxy</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of immuneML &amp; Galaxy</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_intro.html">Introduction to Galaxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_tools.html">immuneML Galaxy tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_immunologist_friendly.html">ML basics: Training classifiers with the simplified Galaxy interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../usecases.html">Use case examples</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Use case examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/emerson_reproduction.html">Manuscript use case 1: Reproduction of a published study inside immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/extendability_use_case.html">Manuscript use case 2: Extending immuneML with a deep learning component for predicting antigen specificity of paired receptor data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/benchmarking_use_case.html">Manuscript use case 3: Benchmarking ML methods on ground-truth synthetic data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immcantation_use_case.html">Integration use case: post-analysis of sequences with Immcantation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immunarch_use_case.html">Integration use case: post-analysis of sequences with immunarch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immunesim_use_case.html">Integration use case: Performing analysis on immuneSIM-generated repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Troubleshooting</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../developer_docs.html">Developer documentation</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Developer documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/info_new_developers.html">Information for new developers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/install_for_development.html">Set up immuneML for development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_encoding.html">How to add a new encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_ML_method.html">How to add a new machine learning method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_report.html">How to add a new report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_preprocessing.html">How to add a new preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/data_model.html">immuneML data model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/execution_flow.html">immuneML execution flow</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/yaml_specs/instructions.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="instruction-parameters">
+<h1>Instruction parameters<a class="headerlink" href="#instruction-parameters" title="Link to this heading">¶</a></h1>
+<p>The different workflows that can be executed by immuneML are called <code class="code docutils literal notranslate"><span class="pre">instructions</span></code>.
+Different instructions may require different analysis components (defined under <code class="code docutils literal notranslate"><span class="pre">definitions</span></code>).</p>
+<p>This page documents all instructions and their <em>parameters</em> in detail.
+Tutorials for general usage of most instructions can be found under <a class="reference internal" href="../tutorials.html#tutorials"><span class="std std-ref">Tutorials</span></a>.</p>
+<p>Please use the menu on the right side of this page to navigate to the
+documentation for the instructions of interest, or jump to one of the following
+sections:</p>
+<p><strong>Machine learning:</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a>: select and fit a classifier,</p></li>
+<li><p><a class="reference internal" href="#mlapplication"><span class="std std-ref">MLApplication</span></a>: apply fitted classifier to a new dataset,</p></li>
+<li><p><a class="reference internal" href="#traingenmodel"><span class="std std-ref">TrainGenModel</span></a>: train (multiple) generative model(s),</p></li>
+<li><p><a class="reference internal" href="#applygenmodel"><span class="std std-ref">ApplyGenModel</span></a>: apply a generative model to make new receptor sequences.</p></li>
+</ul>
+<p><strong>Data simulation:</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#ligosim"><span class="std std-ref">LigoSim</span></a>: use LIgO tool to generate synthetic datasets with different immune events and signals,</p></li>
+<li><p><a class="reference internal" href="#feasibilitysummary"><span class="std std-ref">FeasibilitySummary</span></a>: check the feasibility of the simulation with provided parameters.</p></li>
+</ul>
+<p><strong>Data analysis, exploration and manipulation:</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#exploratoryanalysis"><span class="std std-ref">ExploratoryAnalysis</span></a>: various data summaries for both raw and encoded data,</p></li>
+<li><p><a class="reference internal" href="#clustering"><span class="std std-ref">Clustering</span></a>: fit and compare multiple clustering settings,</p></li>
+<li><p><a class="reference internal" href="#validateclustering"><span class="std std-ref">ValidateClustering</span></a>: validate a clustering setting on a new dataset,</p></li>
+<li><p><a class="reference internal" href="#datasetexport"><span class="std std-ref">DatasetExport</span></a>: export a dataset,</p></li>
+<li><p><a class="reference internal" href="#subsampling"><span class="std std-ref">Subsampling</span></a>: subsample a dataset and export as a new dataset,</p></li>
+<li><p><a class="reference internal" href="#splitdataset"><span class="std std-ref">SplitDataset</span></a>: split dataset into two (e.g., for discovery and validation datasets for clustering).</p></li>
+</ul>
+<section id="applygenmodel">
+<h2>ApplyGenModel<a class="headerlink" href="#applygenmodel" title="Link to this heading">¶</a></h2>
+<p>ApplyGenModel instruction implements applying generative AIRR models on the sequence level.</p>
+<p>This instruction takes as input a trained model (trained in the <a class="reference internal" href="#traingenmodel"><span class="std std-ref">TrainGenModel</span></a> instruction)
+which will be used for generating data and the number of sequences to be generated.
+It can also produce reports of the applied model and reports of generated sequences.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>gen_examples_count (int): how many examples (sequences, repertoires) to generate from the applied model</p></li>
+<li><p>reports (list): list of report ids (defined under definitions/reports) to apply after generating
+gen_examples_count examples; these can be data reports (to be run on generated examples), ML reports (to be run
+on the fitted model)</p></li>
+<li><p>ml_config_path (str): path to the trained model in zip format (as provided by TrainGenModel instruction)</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">instructions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_apply_gen_model_inst</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined instruction name</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ApplyGenModel</span>
+<span class="w">        </span><span class="nt">gen_examples_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">        </span><span class="nt">ml_config_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./config.zip</span>
+<span class="w">        </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">data_rep1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">ml_rep2</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+</section>
+<section id="clustering">
+<h2>Clustering<a class="headerlink" href="#clustering" title="Link to this heading">¶</a></h2>
+<p>Clustering instruction fits clustering methods to the provided encoded dataset and compares the combinations of
+clustering method with its hyperparameters, and encodings across a pre-defined set of metrics. It provides results
+either for the full discovery dataset or for multiple subsets of discovery data as way to assess the stability
+of different metrics (Liu et al., 2022; Dangl and Leisch, 2020; Lange et al. 2004). Finally, it
+provides options to include a set of reports to visualize the results.</p>
+<p>See also: <a class="reference internal" href="../tutorials/clustering_tutorial.html#how-to-perform-clustering-analysis"><span class="std std-ref">How to perform clustering analysis</span></a> for more details on the clustering procedure.</p>
+<p>References:</p>
+<p>Lange, T., Roth, V., Braun, M. L., &amp; Buhmann, J. M. (2004). Stability-Based Validation of Clustering Solutions.
+Neural Computation, 16(6), 1299–1323. <a class="reference external" href="https://doi.org/10.1162/089976604773717621">https://doi.org/10.1162/089976604773717621</a></p>
+<p>Dangl, R., &amp; Leisch, F. (2020). Effects of Resampling in Determining the Number of Clusters in a Data Set.
+Journal of Classification, 37(3), 558–583. <a class="reference external" href="https://doi.org/10.1007/s00357-019-09328-2">https://doi.org/10.1007/s00357-019-09328-2</a></p>
+<p>Liu, T., Yu, H., &amp; Blair, R. H. (2022). Stability estimation for unsupervised clustering: A review. WIREs
+Computational Statistics, 14(6), e1575. <a class="reference external" href="https://doi.org/10.1002/wics.1575">https://doi.org/10.1002/wics.1575</a></p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>dataset (str): name of the dataset to be clustered</p></li>
+<li><p>metrics (list): a list of metrics to use for comparison of clustering algorithms and encodings (it can include
+metrics for either internal evaluation if no labels are provided or metrics for external evaluation so that the
+clusters can be compared against a list of predefined labels); some of the supported metrics include adjusted_rand_score,
+completeness_score, homogeneity_score, silhouette_score; for the full list, see scikit-learn’s documentation of
+clustering metrics at <a class="reference external" href="https://scikit-learn.org/stable/api/sklearn.metrics.html#module-sklearn.metrics.cluster">https://scikit-learn.org/stable/api/sklearn.metrics.html#module-sklearn.metrics.cluster</a>.</p></li>
+<li><p>labels (list): an optional list of labels to use for external evaluation of clustering</p></li>
+<li><p>sample_config (SampleConfig): configuration describing how to construct the data subsets to estimate different
+clustering settings’ performance with different internal and external validation indices; with parameters
+<cite>percentage</cite>, <cite>split_count</cite>, <cite>random_seed</cite>:</p></li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">sample_config</span><span class="p">:</span><span class="w"> </span><span class="c1"># make 5 subsets with 80% of the data each</span>
+<span class="w">    </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">    </span><span class="nt">percentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span>
+<span class="w">    </span><span class="nt">random_seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">42</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>stability_config (StabilityConfig): configuration describing how to compute clustering stability;
+currently, clustering stability is computed following approach by Lange et al. (2004) and only takes the number
+of repetitions as a parameter. Other strategies to compute clustering stability will be added in the future.</p></li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">stability_config</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"> </span><span class="c1"># number of times to repeat clustering for stability estimation</span>
+<span class="w">    </span><span class="nt">random_seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">12</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>clustering_settings (list): a list where each element represents a <code class="xref py py-obj docutils literal notranslate"><span class="pre">ClusteringSetting</span></code>; a combinations of encoding,
+optional dimensionality reduction algorithm, and the clustering algorithm that will be evaluated</p></li>
+<li><p>reports (list): a list of reports to be run on the clustering results or the encoded data</p></li>
+<li><p>number_of_processes (int): how many processes to use for parallelization</p></li>
+<li><p>sequence_type (str): whether to do analysis on the amino_acid or nucleotide level; this value is used only if
+nothing is specified on the encoder level</p></li>
+<li><p>region_type (str): which part of the receptor sequence to analyze (e.g., IMGT_CDR3); this value is used only if
+nothing is specified on the encoder level</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">instructions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_clustering_instruction</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Clustering</span>
+<span class="w">        </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">d1</span>
+<span class="w">        </span><span class="nt">metrics</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">adjusted_rand_score</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">adjusted_mutual_info_score</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">epitope</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">v_call</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">sequence_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">amino_acid</span>
+<span class="w">        </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">imgt_cdr3</span>
+<span class="w">        </span><span class="nt">sample_config</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">            </span><span class="nt">percentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span>
+<span class="w">            </span><span class="nt">random_seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">42</span>
+<span class="w">        </span><span class="nt">stability_config</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">            </span><span class="nt">random_seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">12</span>
+<span class="w">        </span><span class="nt">clustering_settings</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">e1</span>
+<span class="w">              </span><span class="nt">dim_reduction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pca</span>
+<span class="w">              </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k_means1</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">e2</span>
+<span class="w">              </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbscan</span>
+<span class="w">        </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">rep1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">rep2</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+</section>
+<section id="datasetexport">
+<h2>DatasetExport<a class="headerlink" href="#datasetexport" title="Link to this heading">¶</a></h2>
+<p>DatasetExport instruction takes a list of datasets as input, optionally applies preprocessing steps, and outputs
+the data in specified formats.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>datasets (list): a list of datasets to export in all given formats</p></li>
+<li><p>preprocessing_sequence (str): which preprocessing sequence to use on the dataset(s), this item is optional and does not have to be specified.
+When specified, the same preprocessing sequence will be applied to all datasets.</p></li>
+<li><p>number_of_processes (int): how many processes to use during repertoire export (not used for sequence datasets)</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">instructions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_dataset_export_instruction</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined instruction name</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DatasetExport</span><span class="w"> </span><span class="c1"># which instruction to execute</span>
+<span class="w">        </span><span class="nt">datasets</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of datasets to export</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_generated_dataset</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_dataset_from_adaptive</span>
+<span class="w">        </span><span class="nt">preprocessing_sequence</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_preprocessing_sequence</span>
+<span class="w">        </span><span class="nt">number_of_processes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+</pre></div>
+</div>
+</section>
+<section id="exploratoryanalysis">
+<h2>ExploratoryAnalysis<a class="headerlink" href="#exploratoryanalysis" title="Link to this heading">¶</a></h2>
+<p>Allows exploratory analysis of different datasets using encodings and reports.</p>
+<p>Analysis is defined by a dictionary of ExploratoryAnalysisUnit objects that encapsulate a dataset, an encoding [optional]
+and a report to be executed on the [encoded] dataset. Each analysis specified under <cite>analyses</cite> is completely independent from all
+others.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The “report” parameter has been updated to support multiple “reports” per analysis unit. For backward
+compatibility, the “report” key is still accepted, but it will be ignored if “reports” is present.
+“report” option will be removed in the next major version.</p>
+</div>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>analyses (dict): a dictionary of analyses to perform. The keys are the names of different analyses, and the values for each
+of the analyses are:</p>
+<ul>
+<li><p>dataset: dataset on which to perform the exploratory analysis</p></li>
+<li><p>preprocessing_sequence: which preprocessings to use on the dataset, this item is optional and does not have to be specified.</p></li>
+<li><p>example_weighting: which example weighting strategy to use before encoding the data, this item is optional and does not have to be specified.</p></li>
+<li><p>encoding: how to encode the dataset before running the report, this item is optional and does not have to be specified.</p></li>
+<li><p>labels: if encoding is specified, the relevant labels should be specified here.</p></li>
+<li><p>dim_reduction: which dimensionality reduction to apply;</p></li>
+<li><p>reports: which reports to run on the dataset. Reports specified here may be of the category <a class="reference internal" href="reports.html#data-reports"><span class="std std-ref">Data reports</span></a>
+or <a class="reference internal" href="reports.html#encoding-reports"><span class="std std-ref">Encoding reports</span></a>, depending on whether ‘encoding’ was specified.</p></li>
+</ul>
+</li>
+<li><p>number_of_processes: (int): how many processes should be created at once to speed up the analysis. For personal
+machines, 4 or 8 is usually a good choice.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">instructions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_expl_analysis_instruction</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined instruction name</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ExploratoryAnalysis</span><span class="w"> </span><span class="c1"># which instruction to execute</span>
+<span class="w">        </span><span class="nt">analyses</span><span class="p">:</span><span class="w"> </span><span class="c1"># analyses to perform</span>
+<span class="w">            </span><span class="nt">my_first_analysis</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined name of the analysis</span>
+<span class="w">                </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">d1</span><span class="w"> </span><span class="c1"># dataset to use in the first analysis</span>
+<span class="w">                </span><span class="nt">preprocessing_sequence</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">p1</span><span class="w"> </span><span class="c1"># preprocessing sequence to use in the first analysis</span>
+<span class="w">                </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">r1</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># which reports to generate using the dataset d1</span>
+<span class="w">            </span><span class="nt">my_second_analysis</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined name of another analysis</span>
+<span class="w">                </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">d1</span><span class="w"> </span><span class="c1"># dataset to use in the second analysis - can be the same or different from other analyses</span>
+<span class="w">                </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">e1</span><span class="w"> </span><span class="c1"># encoding to apply on the specified dataset (d1)</span>
+<span class="w">                </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">r2</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># which reports to generate in the second analysis</span>
+<span class="w">                </span><span class="nt">labels</span><span class="p">:</span><span class="w"> </span><span class="c1"># labels present in the dataset d1 which will be included in the encoded data on which report r2 will be run</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">celiac</span><span class="w"> </span><span class="c1"># name of the first label as present in the column of dataset&#39;s metadata file</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CMV</span><span class="w"> </span><span class="c1"># name of the second label as present in the column of dataset&#39;s metadata file</span>
+<span class="w">            </span><span class="nt">my_third_analysis</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined name of another analysis</span>
+<span class="w">                </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">d1</span><span class="w"> </span><span class="c1"># dataset to use in the second analysis - can be the same or different from other analyses</span>
+<span class="w">                </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">e1</span><span class="w"> </span><span class="c1"># encoding to apply on the specified dataset (d1)</span>
+<span class="w">                </span><span class="nt">dim_reduction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">umap</span><span class="w"> </span><span class="c1"># or None; which dimensionality reduction method to apply to encoded d1</span>
+<span class="w">                </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">r3</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># which report to generate in the third analysis</span>
+<span class="w">        </span><span class="nt">number_of_processes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w"> </span><span class="c1"># number of parallel processes to create (could speed up the computation)</span>
+</pre></div>
+</div>
+</section>
+<section id="feasibilitysummary">
+<h2>FeasibilitySummary<a class="headerlink" href="#feasibilitysummary" title="Link to this heading">¶</a></h2>
+<p>FeasibilitySummary instruction creates a small synthetic dataset and reports summary metrics to show if the simulation with the given
+parameters is feasible. The input parameters to this analysis are the name of the simulation
+(the same that can be used with LigoSim instruction later if feasibility analysis looks acceptable), and the number of sequences to
+simulate for estimating the feasibility.</p>
+<p>The feasibility analysis is performed for each generative model separately as these could differ in the analyses that will be reported.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>simulation (str): a name of a simulation object containing a list of SimConfigItem as specified under definitions key; defines how to combine signals with simulated data; specified under definitions</p></li>
+<li><p>sequence_count (int): how many sequences to generate to estimate feasibility (default value: 100 000)</p></li>
+<li><p>number_of_processes (int): for the parts of the analysis that are possible to parallelize, how many processes to use</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">instructions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_feasibility_summary</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined name of the instruction</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FeasibilitySummary</span><span class="w"> </span><span class="c1"># which instruction to execute</span>
+<span class="w">        </span><span class="nt">simulation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sim1</span>
+<span class="w">        </span><span class="nt">sequence_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
+</pre></div>
+</div>
+</section>
+<section id="ligosim">
+<h2>LigoSim<a class="headerlink" href="#ligosim" title="Link to this heading">¶</a></h2>
+<p>LIgO simulation instruction creates a synthetic dataset from scratch based on the generative model and a set of signals provided by
+the user.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>simulation (str): a name of a simulation object containing a list of SimConfigItem as specified under definitions key; defines how to combine signals with simulated data; specified under definitions</p></li>
+<li><p>sequence_batch_size (int): how many sequences to generate at once using the generative model before checking for signals and filtering</p></li>
+<li><p>max_iterations (int): how many iterations are allowed when creating sequences</p></li>
+<li><p>export_p_gens (bool): whether to compute generation probabilities (if supported by the generative model) for sequences and include them as part of output</p></li>
+<li><p>number_of_processes (int): determines how many simulation items can be simulated in parallel</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">instructions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_simulation_instruction</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined name of the instruction</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LIgOSim</span><span class="w"> </span><span class="c1"># which instruction to execute</span>
+<span class="w">        </span><span class="nt">simulation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sim1</span>
+<span class="w">        </span><span class="nt">sequence_batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">        </span><span class="nt">max_iterations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">        </span><span class="nt">export_p_gens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">        </span><span class="nt">number_of_processes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+</pre></div>
+</div>
+</section>
+<section id="mlapplication">
+<h2>MLApplication<a class="headerlink" href="#mlapplication" title="Link to this heading">¶</a></h2>
+<p>Instruction which enables using trained ML models and encoders on new datasets which do not necessarily have labeled data.
+When the same label is provided as the ML setting was trained for, performance metrics can be computed.</p>
+<p>The predictions are stored in the predictions.csv in the result path in the following format:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>example_id</p></th>
+<th class="head"><p>cmv_predicted_class</p></th>
+<th class="head"><p>cmv_1_proba</p></th>
+<th class="head"><p>cmv_0_proba</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>e1</p></td>
+<td><p>1</p></td>
+<td><p>0.8</p></td>
+<td><p>0.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>e2</p></td>
+<td><p>0</p></td>
+<td><p>0.2</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-even"><td><p>e3</p></td>
+<td><p>1</p></td>
+<td><p>0.78</p></td>
+<td><p>0.22</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>If the same label that the ML setting was trained for is present in the provided dataset, the ‘true’ label value
+will be added to the predictions table in addition:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>example_id</p></th>
+<th class="head"><p>cmv_predicted_class</p></th>
+<th class="head"><p>cmv_1_proba</p></th>
+<th class="head"><p>cmv_0_proba</p></th>
+<th class="head"><p>cmv_true_class</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>e1</p></td>
+<td><p>1</p></td>
+<td><p>0.8</p></td>
+<td><p>0.2</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>e2</p></td>
+<td><p>0</p></td>
+<td><p>0.2</p></td>
+<td><p>0.8</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>e3</p></td>
+<td><p>1</p></td>
+<td><p>0.78</p></td>
+<td><p>0.22</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>dataset: dataset for which examples need to be classified</p></li>
+<li><p>config_path: path to the zip file exported from MLModelTraining instruction (which includes train ML model, encoder, preprocessing etc.)</p></li>
+<li><p>number_of_processes (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.</p></li>
+<li><p>metrics (list): a list of metrics (<cite>accuracy</cite>, <cite>balanced_accuracy</cite>, <cite>confusion_matrix</cite>, <cite>f1_micro</cite>, <cite>f1_macro</cite>, <cite>f1_weighted</cite>, <cite>precision</cite>, <cite>precision_micro</cite>, <cite>precision_macro</cite>, <cite>precision_weighted</cite>, <cite>recall_micro</cite>, <cite>recall_macro</cite>, <cite>recall_weighted</cite>, <cite>average_precision</cite>, <cite>brier_score</cite>, <cite>recall</cite>, <cite>auc</cite>, <cite>auc_ovo</cite>, <cite>auc_ovr</cite>, <cite>log_loss</cite>, <cite>specificity</cite>) to compute between the true and predicted classes. These metrics will only be computed when the same label with the same classes is provided for the dataset as the original label the ML setting was trained for.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">instructions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">instruction_name</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MLApplication</span>
+<span class="w">        </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">d1</span>
+<span class="w">        </span><span class="nt">config_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./config.zip</span>
+<span class="w">        </span><span class="nt">metrics</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">accuracy</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">precision</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">recall</span>
+<span class="w">        </span><span class="nt">number_of_processes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+</pre></div>
+</div>
+</section>
+<section id="splitdataset">
+<h2>SplitDataset<a class="headerlink" href="#splitdataset" title="Link to this heading">¶</a></h2>
+<p>This instruction splits the dataset into two as defined by the instruction parameters. It can be used as a first
+step in clustering to obtain discovery and validation datasets, or to leave out the test dataset for classification.</p>
+<p>For classification, <a class="reference internal" href="#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a> instruction can be used for more complex data splitting (e.g.,
+nested cross-validation with different data splitting strategies).</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>dataset (str): name of the dataset to split, as defined previously in the analysis specification</p></li>
+<li><p>split_config (SplitConfig): the split configuration; split_count has to be 1</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">instructions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">split_dataset1</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SplitDataset</span>
+<span class="w">        </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">d1</span>
+<span class="w">        </span><span class="nt">split_config</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">            </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">random</span>
+<span class="w">            </span><span class="nt">training_percentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+</pre></div>
+</div>
+</section>
+<section id="subsampling">
+<h2>Subsampling<a class="headerlink" href="#subsampling" title="Link to this heading">¶</a></h2>
+<p>Subsampling is an instruction that subsamples a given dataset and creates multiple smaller dataset according to the
+parameters provided.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>dataset (str): original dataset which will be used as a basis for subsampling</p></li>
+<li><p>subsampled_dataset_sizes (list): a list of dataset sizes (number of examples) each subsampled dataset should have</p></li>
+<li><p>subsampled_repertoire_size (int): the number of sequences to keep per repertoire (or None if all sequences should
+be kept) if dataset is a RepertoireDataset; otherwise, this argument is ignored.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">instructions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_subsampling_instruction</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined name of the instruction</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Subsampling</span><span class="w"> </span><span class="c1"># which instruction to execute</span>
+<span class="w">        </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_dataset</span><span class="w"> </span><span class="c1"># original dataset to be subsampled, with e.g., 300 examples</span>
+<span class="w">        </span><span class="nt">subsampled_dataset_sizes</span><span class="p">:</span><span class="w"> </span><span class="c1"># how large the subsampled datasets should be, one dataset will be created for each list item</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200</span><span class="w"> </span><span class="c1"># one subsampled dataset with 200 examples (200 repertoires if my_dataset was repertoire dataset)</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"> </span><span class="c1"># the other subsampled dataset will have 100 examples</span>
+</pre></div>
+</div>
+</section>
+<section id="traingenmodel">
+<h2>TrainGenModel<a class="headerlink" href="#traingenmodel" title="Link to this heading">¶</a></h2>
+<p>TrainGenModel instruction implements training generative AIRR models on receptor level. Models that can be trained
+for sequence generation are listed under Generative Models section.</p>
+<p>This instruction takes a dataset as input which will be used to train a model, the model itself, and the number of
+sequences to generate to illustrate the applicability of the model. It can also produce reports of the fitted model
+and reports of original and generated sequences.</p>
+<p>To use the generative model previously trained with immuneML, see <a class="reference internal" href="#applygenmodel"><span class="std std-ref">ApplyGenModel</span></a> instruction.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>dataset: dataset to use for fitting the generative model; it has to be defined under definitions/datasets</p></li>
+<li><p>methods: which methods to fit (defined previously under definitions/ml_methods); for compatibility with previous
+versions ‘method’ with a single method can also be used, but the single method option will be removed in the
+future.</p></li>
+<li><p>number_of_processes (int): how many processes to use for fitting the model</p></li>
+<li><p>gen_examples_count (int): how many examples (sequences, repertoires) to generate from the fitted model</p></li>
+<li><p>reports (list): list of report ids (defined under definitions/reports) to apply after fitting a generative model
+and generating gen_examples_count examples; these can be data reports (to be run on generated examples), ML
+reports (to be run on the fitted model)</p></li>
+<li><p>split_strategy (str): strategy to use for splitting the dataset into training and test datasets; valid options are
+RANDOM and MANUAL (in which case train and test set are fixed); default is RANDOM</p></li>
+<li><p>training_percentage (float): percentage of the dataset to use for training the generative model if split_strategy
+parameter is RANDOM. If set to 1, the
+full dataset will be used for training and the test dataset will be the same as the training dataset. Default
+value is 0.7. When export_combined_dataset is set to True, the splitting of sequences into train, test, and
+generated will be shown in column dataset_split.</p></li>
+<li><p>manual_config (dict): if split_strategy is set to MANUAL, this parameter can be used to specify the ids of examples
+that should be in train and test sets; the paths to csv files with ids for train and test data should be provided
+under keys ‘train_metadata_path’ and ‘test_metadata_path’</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">instructions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_train_gen_model_inst</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined instruction name</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TrainGenModel</span>
+<span class="w">        </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">d1</span><span class="w"> </span><span class="c1"># defined previously under definitions/datasets</span>
+<span class="w">        </span><span class="nt">methods</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">model1</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># defined previously under definitions/ml_methods</span>
+<span class="w">        </span><span class="nt">gen_examples_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">        </span><span class="nt">number_of_processes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="w">        </span><span class="nt">training_percentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
+<span class="w">        </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RANDOM</span><span class="w"> </span><span class="c1"># optional, default is RANDOM</span>
+<span class="w">        </span><span class="nt">export_generated_dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">        </span><span class="nt">export_combined_dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">        </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">data_rep1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">ml_rep2</span><span class="p p-Indicator">]</span>
+
+<span class="w">    </span><span class="nt">my_train_gen_model_with_manual_split</span><span class="p">:</span><span class="w"> </span><span class="c1"># another instruction example</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TrainGenModel</span>
+<span class="w">        </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">d1</span><span class="w"> </span><span class="c1"># defined previously under definitions/datasets</span>
+<span class="w">        </span><span class="nt">methods</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">m1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">m2</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">gen_examples_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">        </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MANUAL</span>
+<span class="w">        </span><span class="nt">split_config</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">train_metadata_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/train_metadata.csv</span><span class="w"> </span><span class="c1"># path to csv file with ids of examples in train set</span>
+<span class="w">            </span><span class="nt">test_metadata_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/test_metadata.csv</span><span class="w"> </span><span class="c1"># path to csv file with ids of examples in test set</span>
+<span class="w">        </span><span class="nt">export_generated_dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">        </span><span class="nt">export_combined_dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">        </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">data_rep1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">ml_rep2</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+</section>
+<section id="trainmlmodel">
+<h2>TrainMLModel<a class="headerlink" href="#trainmlmodel" title="Link to this heading">¶</a></h2>
+<p>Class implementing hyperparameter optimization and training and assessing the model through nested cross-validation (CV).
+The process is defined by two loops:</p>
+<ul class="simple">
+<li><p>the outer loop over defined splits of the dataset for performance assessment</p></li>
+<li><p>the inner loop over defined hyperparameter space and with cross-validation or train &amp; validation split
+to choose the best hyperparameters.</p></li>
+</ul>
+<p>Optimal model chosen by the inner loop is then retrained on the whole training dataset in the outer loop.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are interested in plotting the performance of all combinations of encodings and ML methods on the test set,
+consider running the <a class="reference internal" href="reports.html#mlsettingsperformance"><span class="std std-ref">MLSettingsPerformance</span></a> report as hyperparameter report in the assessment loop.</p>
+</div>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>dataset: dataset to use for training and assessing the classifier</p></li>
+<li><p>strategy: how to search different hyperparameters; common options include grid search, random search. Valid values are: <cite>GridSearch</cite>.</p></li>
+<li><p>settings (list): a list of combinations of <cite>preprocessing_sequence</cite>, <cite>encoding</cite> and <cite>ml_method</cite>. <cite>preprocessing_sequence</cite> is optional, while <cite>encoding</cite> and <cite>ml_method</cite> are mandatory. These three options (and their parameters) can be optimized over, choosing the highest performing combination.</p></li>
+<li><p>assessment: description of the outer loop (for assessment) of nested cross-validation. It describes how to split the data, how many splits to make, what percentage to use for training and what reports to execute on those splits. See plitConfig below.</p></li>
+<li><p>selection: description of the inner loop (for selection) of nested cross-validation. The same as assessment argument, just to be executed in the inner loop. See plitConfig below.</p></li>
+<li><p>metrics (list): a list of metrics (<cite>accuracy</cite>, <cite>balanced_accuracy</cite>, <cite>confusion_matrix</cite>, <cite>f1_micro</cite>, <cite>f1_macro</cite>, <cite>f1_weighted</cite>, <cite>precision</cite>, <cite>precision_micro</cite>, <cite>precision_macro</cite>, <cite>precision_weighted</cite>, <cite>recall_micro</cite>, <cite>recall_macro</cite>, <cite>recall_weighted</cite>, <cite>average_precision</cite>, <cite>brier_score</cite>, <cite>recall</cite>, <cite>auc</cite>, <cite>auc_ovo</cite>, <cite>auc_ovr</cite>, <cite>log_loss</cite>, <cite>specificity</cite>) to compute for all splits and settings created during the nested cross-validation. These metrics will be computed only for reporting purposes. For choosing the optimal setting, <cite>optimization_metric</cite> will be used.</p></li>
+<li><p>optimization_metric: a metric to use for optimization and assessment in the nested cross-validation (one of <cite>accuracy</cite>, <cite>balanced_accuracy</cite>, <cite>confusion_matrix</cite>, <cite>f1_micro</cite>, <cite>f1_macro</cite>, <cite>f1_weighted</cite>, <cite>precision</cite>, <cite>precision_micro</cite>, <cite>precision_macro</cite>, <cite>precision_weighted</cite>, <cite>recall_micro</cite>, <cite>recall_macro</cite>, <cite>recall_weighted</cite>, <cite>average_precision</cite>, <cite>brier_score</cite>, <cite>recall</cite>, <cite>auc</cite>, <cite>auc_ovo</cite>, <cite>auc_ovr</cite>, <cite>log_loss</cite>, <cite>specificity</cite>).</p></li>
+<li><p>example_weighting: which example weighting strategy to use. Example weighting can be used to up-weight or down-weight the importance of each example in the dataset. These weights will be applied when computing (optimization) metrics, and are used by some encoders and ML methods.</p></li>
+<li><p>labels (list): a list of labels for which to train the classifiers. The goal of the nested CV is to find the
+setting which will have best performance in predicting the given label (e.g., if a subject has experienced an immune event or not).
+Performance and optimal settings will be reported for each label separately. If a label is binary, instead of specifying only its name, one
+should explicitly set the name of the positive class as well under parameter <cite>positive_class</cite>. If positive class is not set, one of the label
+classes will be assumed to be positive.</p></li>
+<li><p>number_of_processes (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.</p></li>
+<li><p>reports (list): a list of report names to be executed after the nested CV has finished to show the overall performance or some statistic;
+the reports that can be provided here are <a class="reference internal" href="reports.html#train-ml-model-reports"><span class="std std-ref">Train ML model reports</span></a>.</p></li>
+<li><p>refit_optimal_model (bool): if the final combination of preprocessing-encoding-ML model should be refitted on the full dataset thus providing
+the final model to be exported from instruction; alternatively, train combination from one of the assessment folds will be used</p></li>
+<li><p>export_all_models (bool): if set to True, all trained models in the assessment split are exported as .zip files.
+If False, only the optimal model is exported. By default, export_all_models is False.</p></li>
+<li><p>sequence_type (str): whether to perform the analysis on amino acid or nucleotide sequences</p></li>
+<li><p>region_type (str): which part of the sequence to analyze, e.g., IMGT_CDR3</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">instructions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_nested_cv_instruction</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined name of the instruction</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TrainMLModel</span><span class="w"> </span><span class="c1"># which instruction should be executed</span>
+<span class="w">        </span><span class="nt">settings</span><span class="p">:</span><span class="w"> </span><span class="c1"># a list of combinations of preprocessing, encoding and ml_method to optimize over</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">preprocessing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seq1</span><span class="w"> </span><span class="c1"># preprocessing is optional</span>
+<span class="w">              </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">e1</span><span class="w"> </span><span class="c1"># mandatory field</span>
+<span class="w">              </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">simpleLR</span><span class="w"> </span><span class="c1"># mandatory field</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">preprocessing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seq1</span><span class="w"> </span><span class="c1"># the second combination</span>
+<span class="w">              </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">e2</span>
+<span class="w">              </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">simpleLR</span>
+<span class="w">        </span><span class="nt">assessment</span><span class="p">:</span><span class="w"> </span><span class="c1"># outer loop of nested CV</span>
+<span class="w">            </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">random</span><span class="w"> </span><span class="c1"># perform Monte Carlo CV (randomly split the data into train and test)</span>
+<span class="w">            </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"> </span><span class="c1"># how many train/test datasets to generate</span>
+<span class="w">            </span><span class="nt">training_percentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span><span class="w"> </span><span class="c1"># what percentage of the original data should be used for the training set</span>
+<span class="w">            </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="c1"># reports to execute on training/test datasets, encoded datasets and trained ML methods</span>
+<span class="w">                </span><span class="nt">data_splits</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of reports to execute on training/test datasets (before they are encoded)</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rep1</span>
+<span class="w">                </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of reports to execute on encoded training/test datasets</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rep2</span>
+<span class="w">                </span><span class="nt">models</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of reports to execute on trained ML methods for each assessment CV split</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rep3</span>
+<span class="w">        </span><span class="nt">selection</span><span class="p">:</span><span class="w"> </span><span class="c1"># inner loop of nested CV</span>
+<span class="w">            </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k_fold</span><span class="w"> </span><span class="c1"># perform k-fold CV</span>
+<span class="w">            </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"> </span><span class="c1"># how many fold to create: here these two parameters mean: do 5-fold CV</span>
+<span class="w">            </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">data_splits</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of reports to execute on training/test datasets (in the inner loop, so these are actually training and validation datasets)</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rep1</span>
+<span class="w">                </span><span class="nt">models</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of reports to execute on trained ML methods for each selection CV split</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rep2</span>
+<span class="w">                </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of reports to execute on encoded training/test datasets (again, it is training/validation here)</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rep3</span>
+<span class="w">        </span><span class="nt">labels</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of labels to optimize the classifier for, as given in the metadata for the dataset</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">celiac</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">positive_class</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">+</span><span class="w"> </span><span class="c1"># if it&#39;s binary classification, positive class parameter should be set</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">T1D</span><span class="w"> </span><span class="c1"># this is not binary label, so no need to specify positive class</span>
+<span class="w">        </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">d1</span><span class="w"> </span><span class="c1"># which dataset to use for the nested CV</span>
+<span class="w">        </span><span class="nt">strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GridSearch</span><span class="w"> </span><span class="c1"># how to choose the combinations which to test from settings (GridSearch means test all)</span>
+<span class="w">        </span><span class="nt">metrics</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of metrics to compute for all settings, but these do not influence the choice of optimal model</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">accuracy</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auc</span>
+<span class="w">        </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of reports to execute when nested CV is finished to show overall performance</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rep4</span>
+<span class="w">        </span><span class="nt">number_of_processes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w"> </span><span class="c1"># number of parallel processes to create (could speed up the computation)</span>
+<span class="w">        </span><span class="nt">optimization_metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balanced_accuracy</span><span class="w"> </span><span class="c1"># the metric to use for choosing the optimal model and during training</span>
+<span class="w">        </span><span class="nt">refit_optimal_model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># use trained model, do not refit on the full dataset</span>
+<span class="w">        </span><span class="nt">export_all_ml_settings</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># only export the optimal setting</span>
+<span class="w">        </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span>
+<span class="w">        </span><span class="nt">sequence_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AMINO_ACID</span>
+</pre></div>
+</div>
+<p><strong>SplitConfig</strong></p>
+<p>SplitConfig describes how to split the data for cross-validation. It allows for the following combinations:</p>
+<ul class="simple">
+<li><p>loocv (leave-one-out cross-validation)</p></li>
+<li><p>k_fold (k-fold cross-validation)</p></li>
+<li><p>stratified_k_fold (stratified k-fold cross-validation that can be used when immuneML is used for single-label
+classification, see <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html">this documentation</a> for more details on how this is implemented)</p></li>
+<li><p>random (Monte Carlo cross-validation - randomly splitting the dataset to training and test datasets)</p></li>
+<li><p>manual (train and test dataset are explicitly specified by providing metadata files for the two datasets)</p></li>
+<li><p>leave_one_out_stratification (leave-one-out CV where one refers to a specific parameter, e.g. if subject is known
+in a receptor dataset, it is possible to have leave-subject-out CV; or if a dataset contains multiple batches, it
+is possible to split evaluation by batch).</p></li>
+</ul>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>split_strategy: one of the types of cross-validation listed above (<cite>LOOCV</cite>, <cite>K_FOLD</cite>, <cite>STRATIFIED_K_FOLD</cite>, <cite>MANUAL</cite>, ``  or <cite>RANDOM</cite>)</p></li>
+<li><p>split_count (int): if split_strategy is <cite>K_FOLD</cite>, then this defined how many splits to make (K), if split_strategy is RANDOM, split_count defines how many random splits to make, resulting in split_count training/test dataset pairs, or if split_strategy is <cite>LOOCV</cite>, <cite>MANUAL</cite> or <cite>LEAVE_ONE_OUT_STRATIFICATION</cite>, split_count does not need to be specified.</p></li>
+<li><p>training_percentage: if split_strategy is RANDOM, this defines which portion of the original dataset to use for creating the training dataset; for other values of split_strategy, this parameter is not used.</p></li>
+<li><p>reports: defines which reports to execute on which datasets or settings. See ReportConfig for more details.</p></li>
+<li><p>manual_config: if split strategy is <cite>MANUAL</cite>,
+here the paths to metadata files should be given (fields <cite>train_metadata_path</cite> and <cite>test_metadata_path</cite>). The matching of examples is done
+using the “subject_id” field in for repertoire datasets so it has to be present in both the original dataset and the metadata files provided
+here. For receptor and sequence datasets, “example_id” field needs to be provided in the metadata files and it will be mapped to either
+‘sequence_identifiers’ or ‘receptor_identifiers’ in the original dataset. If split strategy is anything other than <cite>MANUAL</cite>, this field has
+no effect and can be omitted.</p></li>
+<li><p>leave_one_out_config: if split strategy is
+<cite>LEAVE_ONE_OUT_STRATIFICATION</cite>, this config describes which parameter to use for stratification thus making a list of train/test dataset
+combinations in which in the test set there are examples with only one value of the specified parameter. <cite>leave_one_out_config</cite> argument
+accepts two inputs: <cite>parameter</cite> which is the name of the parameter to use for stratification and <cite>min_count</cite> which defines the minimum
+number of examples that can be present in the test dataset. This type of generating train and test datasets is only supported for receptor
+and sequence datasets so far. If split strategy is anything else, this field has no effect and can be omitted.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># as a part of a TrainMLModel instruction, defining the outer (assessment) loop of nested cross-validation:</span>
+<span class="nt">assessment</span><span class="p">:</span><span class="w"> </span><span class="c1"># outer loop of nested CV</span>
+<span class="w">    </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">random</span><span class="w"> </span><span class="c1"># perform Monte Carlo CV (randomly split the data into train and test)</span>
+<span class="w">    </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"> </span><span class="c1"># how many train/test datasets to generate</span>
+<span class="w">    </span><span class="nt">training_percentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span><span class="w"> </span><span class="c1"># what percentage of the original data should be used for the training set</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="c1"># reports to execute on training/test datasets, encoded datasets and trained ML methods</span>
+<span class="w">        </span><span class="nt">data_splits</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of data reports to execute on training/test datasets (before they are encoded)</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rep1</span>
+<span class="w">        </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of encoding reports to execute on encoded training/test datasets</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rep2</span>
+<span class="w">        </span><span class="nt">models</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of ML model reports to execute on the trained classifiers in the assessment loop</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rep3</span>
+
+<span class="c1"># as a part of a TrainMLModel instruction, defining the inner (selection) loop of nested cross-validation:</span>
+<span class="nt">selection</span><span class="p">:</span><span class="w"> </span><span class="c1"># inner loop of nested CV</span>
+<span class="w">    </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">leave_one_out_stratification</span>
+<span class="w">    </span><span class="nt">leave_one_out_config</span><span class="p">:</span><span class="w"> </span><span class="c1"># perform leave-(subject)-out CV</span>
+<span class="w">        </span><span class="nt">parameter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">subject</span><span class="w"> </span><span class="c1"># which parameter to use for splitting, must be present in the metadata for each example</span>
+<span class="w">        </span><span class="nt">min_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"> </span><span class="c1"># what is the minimum number of examples with unique value of the parameter specified above for the analysis to be valid</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="c1"># reports to execute on training/test datasets, encoded datasets and trained ML methods</span>
+<span class="w">        </span><span class="nt">data_splits</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of data reports to execute on training/test datasets (before they are encoded)</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rep1</span>
+<span class="w">        </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of encoding reports to execute on encoded training/test datasets</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rep2</span>
+<span class="w">        </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of ML model reports to execute the trained classifiers in the selection loop</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rep3</span>
+</pre></div>
+</div>
+<p><strong>ReportConfig</strong></p>
+<p>A class encapsulating different report lists which can be executed while performing nested cross-validation (CV) using TrainMLModel
+instruction. All arguments are optional.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>data: <a class="reference internal" href="reports.html#data-reports"><span class="std std-ref">Data reports</span></a> to be executed on the whole dataset before it is split to training/test or training/validation</p></li>
+<li><p>data_splits: <a class="reference internal" href="reports.html#data-reports"><span class="std std-ref">Data reports</span></a> to be executed after the data has been split into training and test (assessment CV loop) or training and validation (selection CV loop) datasets before they are encoded</p></li>
+<li><p>models: <a class="reference internal" href="reports.html#ml-model-reports"><span class="std std-ref">ML model reports</span></a> to be executed on all trained classifiers</p></li>
+<li><p>encoding: <a class="reference internal" href="reports.html#encoding-reports"><span class="std std-ref">Encoding reports</span></a> to be executed on each of the encoded training/test datasets or training/validation datasets</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># as a part of a TrainMLModel instruction, defining the outer (assessment) loop of nested cross-validation:</span>
+<span class="nt">assessment</span><span class="p">:</span><span class="w"> </span><span class="c1"># outer loop of nested CV</span>
+<span class="w">    </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">random</span><span class="w"> </span><span class="c1"># perform Monte Carlo CV (randomly split the data into train and test)</span>
+<span class="w">    </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"> </span><span class="c1"># how many train/test datasets to generate</span>
+<span class="w">    </span><span class="nt">training_percentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span><span class="w"> </span><span class="c1"># what percentage of the original data should be used for the training set</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="c1"># reports to execute on training/test datasets, encoded datasets and trained ML methods</span>
+<span class="w">        </span><span class="nt">data_splits</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of reports to execute on training/test datasets (before they are preprocessed and encoded)</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_data_split_report</span>
+<span class="w">        </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of reports to execute on encoded training/test datasets</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_encoding_report</span>
+
+<span class="c1"># as a part of a TrainMLModel instruction, defining the inner (selection) loop of nested cross-validation:</span>
+<span class="nt">selection</span><span class="p">:</span><span class="w"> </span><span class="c1"># inner loop of nested CV</span>
+<span class="w">    </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">random</span><span class="w"> </span><span class="c1"># perform Monte Carlo CV (randomly split the data into train and validation)</span>
+<span class="w">    </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"> </span><span class="c1"># how many train/validation datasets to generate</span>
+<span class="w">    </span><span class="nt">training_percentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span><span class="w"> </span><span class="c1"># what percentage of the original data should be used for the training set</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="c1"># reports to execute on training/validation datasets, encoded datasets and trained ML methods</span>
+<span class="w">        </span><span class="nt">data_splits</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of reports to execute on training/validation datasets (before they are preprocessed and encoded)</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_data_split_report</span>
+<span class="w">        </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of reports to execute on encoded training/validation datasets</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_encoding_report</span>
+<span class="w">        </span><span class="nt">models</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_ml_model_report</span>
+</pre></div>
+</div>
+</section>
+<section id="validateclustering">
+<h2>ValidateClustering<a class="headerlink" href="#validateclustering" title="Link to this heading">¶</a></h2>
+<p>ValidateClustering instruction supports the application of the chosen clustering setting (preprocessing, encoding,
+clustering, with all hyperparameters) to a new dataset for validation.</p>
+<p>For more details on validating the clustering algorithm and its hyperparameters, see the paper:
+Ullmann, T., Hennig, C., &amp; Boulesteix, A.-L. (2022). Validation of cluster analysis results on validation
+data: A systematic framework. WIREs Data Mining and Knowledge Discovery, 12(3), e1444.
+<a class="reference external" href="https://doi.org/10.1002/widm.1444">https://doi.org/10.1002/widm.1444</a></p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>clustering_config_path (str): path to the clustering exported by the Clustering instruction that will be applied
+to the new dataset</p></li>
+<li><p>dataset (str): name of the validation dataset to which the clustering will be applied, as defined under definitions</p></li>
+<li><p>metrics (list): a list of metrics to use for comparison of clustering algorithms and encodings (it can include
+metrics for either internal evaluation if no labels are provided or metrics for external evaluation so that the
+clusters can be compared against a list of predefined labels); some of the supported metrics include adjusted_rand_score,
+completeness_score, homogeneity_score, silhouette_score; for the full list, see scikit-learn’s documentation of
+clustering metrics at <a class="reference external" href="https://scikit-learn.org/stable/api/sklearn.metrics.html#module-sklearn.metrics.cluster">https://scikit-learn.org/stable/api/sklearn.metrics.html#module-sklearn.metrics.cluster</a>.</p></li>
+<li><p>validation_type (list): how to perform validation; options are <cite>method_based</cite> validation (refit the clustering
+algorithm to the new dataset and compare the clusterings) and <cite>result_based</cite> validation (transfer the clustering
+from the original dataset to the validation dataset using a supervised classifier and compare the clusterings)</p></li>
+<li><p>reports (list): a list of reports to run on the validation results; supported report types include:</p>
+<ul>
+<li><p>ClusteringMethodReport: reports that analyze the clustering method results (e.g., ClusteringVisualization)</p></li>
+<li><p>EncodingReport: reports that analyze the encoded dataset</p></li>
+<li><p>DataReport: reports that analyze the raw dataset</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">instructions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">validate_clustering_inst</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ValidateClustering</span>
+<span class="w">        </span><span class="nt">clustering_config_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/exported_clustering.zip</span>
+<span class="w">        </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">val_dataset</span>
+<span class="w">        </span><span class="nt">metrics</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">adjusted_rand_score</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">silhouette_score</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">validation_type</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">method_based</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">result_based</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">reports</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">cluster_vis</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">encoding_report</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../tutorials.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Tutorials</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="simulation.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Simulation parameters</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2021-2025, Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Instruction parameters</a><ul>
+<li><a class="reference internal" href="#applygenmodel">ApplyGenModel</a></li>
+<li><a class="reference internal" href="#clustering">Clustering</a></li>
+<li><a class="reference internal" href="#datasetexport">DatasetExport</a></li>
+<li><a class="reference internal" href="#exploratoryanalysis">ExploratoryAnalysis</a></li>
+<li><a class="reference internal" href="#feasibilitysummary">FeasibilitySummary</a></li>
+<li><a class="reference internal" href="#ligosim">LigoSim</a></li>
+<li><a class="reference internal" href="#mlapplication">MLApplication</a></li>
+<li><a class="reference internal" href="#splitdataset">SplitDataset</a></li>
+<li><a class="reference internal" href="#subsampling">Subsampling</a></li>
+<li><a class="reference internal" href="#traingenmodel">TrainGenModel</a></li>
+<li><a class="reference internal" href="#trainmlmodel">TrainMLModel</a></li>
+<li><a class="reference internal" href="#validateclustering">ValidateClustering</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=f1196aca"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    </body>
+</html>

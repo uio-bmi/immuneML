@@ -1,0 +1,867 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta content="summary" name="twitter:card" />
+<meta content="&#64;immuneml" name="twitter:site" />
+<meta content="immuneML: train and assess an ML classifier" name="twitter:title" />
+<meta content="See tutorials on how to train and assess an ML classifier." name="twitter:description" />
+<meta content="https://docs.immuneml.uio.no/_images/receptor_classification_overview.png" name="twitter:image" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="How to apply previously trained ML models to a new dataset" href="how_to_apply_to_new_data.html" /><link rel="prev" title="Simulation with custom signal functions" href="simulation_with_custom_signal_functions.html" />
+        <link rel="canonical" href="https://docs.immuneml.uio.no/tutorials/how_to_train_and_assess_a_receptor_or_repertoire_classifier.html" />
+
+    <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>How to train and assess a receptor or repertoire-level ML classifier - immuneML 3.0.18 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/immuneml.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">immuneML 3.0.18 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">immuneML 3.0.18 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../quickstart.html">Quickstart</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Quickstart</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_simple.html">Quickstart: Galaxy with button-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_yaml.html">Quickstart: Galaxy with YAML-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/cli_yaml.html">Quickstart: command-line interface with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/simulation_quickstart.html">LIgO simulation quickstart</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installing immuneML</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Installing immuneML</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/install_with_package_manager.html">Install immuneML with a package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/installation_docker.html">Setting up immuneML with Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/cloud.html">Running immuneML in the cloud</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../specification.html">YAML specification</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of YAML specification</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/how_to_specify_an_analysis_with_yaml.html">How to specify an analysis with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/datasets.html">Dataset parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/encodings.html">Encoding parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/ml_methods.html">ML method parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/reports.html">Report parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/preprocessings.html">Preprocessing parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/simulation.html">Simulation parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../yaml_specs/instructions.html">Instruction parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../tutorials.html">Tutorials</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Tutorials</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="analyze_dataset.html">Analyzing Your Own Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to_import_the_data_to_immuneML.html">How to import data into immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to_generate_a_random_repertoire_dataset.html">How to generate a dataset with random sequences</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="ligo_simulation_tutorials.html">Dataset simulation with LIgO</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Dataset simulation with LIgO</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="ligo_simulation_yaml.html">YAML specification of the LigoSim instruction for introducing immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="how_to_simulate_co-occuring_signals.html">How to simulate co-occuring immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="how_to_simulate_paired_chain_data.html">Paired chain simulations in LIgO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="simulation_with_custom_signal_functions.html">Simulation with custom signal functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">How to train and assess a receptor or repertoire-level ML classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to_apply_to_new_data.html">How to apply previously trained ML models to a new dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to_perform_exploratory_analysis.html">How to perform an exploratory data analysis</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="motif_recovery.html">How to find motifs associated with disease or antigen binding state</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of How to find motifs associated with disease or antigen binding state</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="discover_motifs_precision_recall.html">Discovering positional motifs using precision and recall thresholds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="discover_motifs_classifiers.html">Discovering motifs learned by classifiers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="recovering_simulated_motifs.html">Recovering simulated immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="comparing_baseline_motifs.html">Comparing baseline motif frequencies in repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="clustering_tutorial.html">How to perform clustering analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to_train_and_apply_gen_model.html">How to train a generative model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_to_combine_multiple_encodings.html">How to combine multiple encodings to represent a dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_publication_ready_figures.html">How to get publication-ready figures</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../galaxy.html">immuneML &amp; Galaxy</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of immuneML &amp; Galaxy</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_intro.html">Introduction to Galaxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_tools.html">immuneML Galaxy tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_immunologist_friendly.html">ML basics: Training classifiers with the simplified Galaxy interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../usecases.html">Use case examples</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Use case examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/emerson_reproduction.html">Manuscript use case 1: Reproduction of a published study inside immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/extendability_use_case.html">Manuscript use case 2: Extending immuneML with a deep learning component for predicting antigen specificity of paired receptor data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/benchmarking_use_case.html">Manuscript use case 3: Benchmarking ML methods on ground-truth synthetic data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immcantation_use_case.html">Integration use case: post-analysis of sequences with Immcantation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immunarch_use_case.html">Integration use case: post-analysis of sequences with immunarch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immunesim_use_case.html">Integration use case: Performing analysis on immuneSIM-generated repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Troubleshooting</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../developer_docs.html">Developer documentation</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Developer documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/info_new_developers.html">Information for new developers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/install_for_development.html">Set up immuneML for development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_encoding.html">How to add a new encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_ML_method.html">How to add a new machine learning method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_report.html">How to add a new report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_preprocessing.html">How to add a new preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/data_model.html">immuneML data model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/execution_flow.html">immuneML execution flow</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/tutorials/how_to_train_and_assess_a_receptor_or_repertoire_classifier.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="how-to-train-and-assess-a-receptor-or-repertoire-level-ml-classifier">
+<h1>How to train and assess a receptor or repertoire-level ML classifier<a class="headerlink" href="#how-to-train-and-assess-a-receptor-or-repertoire-level-ml-classifier" title="Link to this heading">¶</a></h1>
+<p>immuneML provides a rich set of functionality for training and assessing machine learning models to classify of receptors
+or repertoires. This is done using the <a class="reference internal" href="../yaml_specs/instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a> instruction.
+The goal of the training process is to learn the parameters for a given ML model that result in the most accurate predictions.
+Furthermore, we want to select the optimal settings for hyperparameters, which are tunable characteristics of an ML model which
+influence the training process and can not automatically be learned by training.</p>
+<p>Aside from the hyperparameters of the ML models themselves, the choices made for preprocessing or filtering of the dataset,
+as well as the encoding and its parameters will influence the performance of the trained ML model. Therefore, preprocessing steps
+and encoding are treated as hyperparameters during ML model training, enabling automatic optimization and unbiased assessment of these choices.</p>
+<p>To learn the parameters and hyperparameters of the ML model, the data needs to be split into training, validation and test sets.
+Models with different hyperparameters are trained on the training set, then assessed on the separate validation set to find
+the optimal hyperparameters, and finally tested on the test set to estimate the model performance.
+The resulting optimized classifier can also afterwards be applied to further datasets
+(see: <a class="reference internal" href="how_to_apply_to_new_data.html#how-to-apply-previously-trained-ml-models-to-a-new-dataset"><span class="std std-ref">How to apply previously trained ML models to a new dataset</span></a>).
+This process is shown in the figure below:</p>
+<figure class="align-default" id="id2">
+<a class="reference internal image-reference" href="../_images/ml_process_overview.png"><img alt="../_images/ml_process_overview.png" src="../_images/ml_process_overview.png" style="width: 50%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Overview of the training process of an ML classifier: hyperparameter
+optimization is done on training and validation data and the model performance is
+assessed on test data</span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>See also <a class="reference internal" href="discover_motifs_classifiers.html#discovering-motifs-learned-by-classifiers"><span class="std std-ref">Discovering motifs learned by classifiers</span></a> to read more about ML interpretability.</p>
+<section id="yaml-specification-of-trainmlmodel">
+<h2>YAML specification of TrainMLModel<a class="headerlink" href="#yaml-specification-of-trainmlmodel" title="Link to this heading">¶</a></h2>
+<section id="definitions-section">
+<h3>Definitions section<a class="headerlink" href="#definitions-section" title="Link to this heading">¶</a></h3>
+<p>When running the <a class="reference internal" href="../yaml_specs/instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a> instruction, the <code class="code docutils literal notranslate"><span class="pre">definitions</span></code> part of the YAML specification should at
+least contain <code class="code docutils literal notranslate"><span class="pre">datasets</span></code>, <code class="code docutils literal notranslate"><span class="pre">encodings</span></code> and <code class="code docutils literal notranslate"><span class="pre">ml_methods</span></code> components. Optionally, <code class="code docutils literal notranslate"><span class="pre">preprocessing_sequences</span></code>
+and <code class="code docutils literal notranslate"><span class="pre">reports</span></code> may be defined. For detailed descriptions of how the parameters for each of these components are defined,
+please refer to the <a class="reference internal" href="../specification.html#yaml-specification"><span class="std std-ref">YAML specification</span></a> documentation. Under <span class="xref std std-ref">Definitions</span> each analysis component is documented
+and settings are described.</p>
+<p>For importing a dataset, see <a class="reference internal" href="how_to_import_the_data_to_immuneML.html#how-to-import-data-into-immuneml"><span class="std std-ref">How to import data into immuneML</span></a> and for more details on writing the YAML specification, see <a class="reference internal" href="../yaml_specs/how_to_specify_an_analysis_with_yaml.html#how-to-specify-an-analysis-with-yaml"><span class="std std-ref">How to specify an analysis with YAML</span></a>.</p>
+<p>An example of the definitions section using a repertoire dataset is given here:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">datasets</span><span class="p">:</span><span class="w"> </span><span class="c1"># every instruction uses a dataset</span>
+<span class="w">    </span><span class="nt">my_dataset</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AIRR</span>
+<span class="w">      </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/repertoires/</span>
+<span class="w">        </span><span class="nt">metadata_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/metadata.csv</span>
+
+<span class="w">  </span><span class="nt">preprocessing_sequences</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_preprocessing</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined preprocessing name</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">my_beta_chain_filter</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">ChainRepertoireFilter</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">keep_chain</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TRB</span>
+
+<span class="w">  </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_svm</span><span class="p">:</span><span class="w">       </span><span class="c1"># example ML method with user-defined settings</span>
+<span class="w">      </span><span class="nt">SVM</span><span class="p">:</span><span class="w">        </span><span class="c1"># Here, a third level of 3-fold cross-validation is used</span>
+<span class="w">        </span><span class="nt">penalty</span><span class="p">:</span><span class="w">  </span><span class="c1"># to determine the optimal hyperparameters for &#39;C&#39; and &#39;penalty&#39;</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">l1</span><span class="w">    </span><span class="c1"># This functionality is only available for scikit-learn classifiers</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">l2</span>
+<span class="w">        </span><span class="nt">C</span><span class="p">:</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">      </span><span class="nt">model_selection_cv</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">      </span><span class="nt">model_selection_n_folds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">    </span><span class="nt">my_log_reg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LogisticRegression</span><span class="w"> </span><span class="c1"># example ML method with default settings</span>
+
+<span class="w">  </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_kmer_freq_encoding</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">KmerFrequency</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">k</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+
+<span class="w">  </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_coefficients</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Coefficients</span>
+<span class="w">    </span><span class="nt">my_sequence_lengths</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SequenceLengthDistribution</span>
+<span class="w">    </span><span class="nt">my_performance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MLSettingsPerformance</span>
+</pre></div>
+</div>
+<p>When choosing which ML method(s) are most suitable for your use-case, please consider the following table.
+The table describes which of the ML methods can be used for binary classification (two classes per label), and which
+can be used for multi-class classification. Note that all classifiers can automatically be used for multi-label classification
+in immuneML.
+Furthermore, it describes what type of dataset the classifier can be applied to, and whether a third level of nested cross-validation
+(<code class="code docutils literal notranslate"><span class="pre">model_selection_cv</span></code> in the YAML specification) can be used for the selection of model parameters (scikit-learn classifiers).</p>
+<div class="table-wrapper docutils container" id="id3">
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-text">ML methods properties</span><a class="headerlink" href="#id3" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>ML method</p></th>
+<th class="head"><p>binary classification</p></th>
+<th class="head"><p>multi-class classification</p></th>
+<th class="head"><p>sequence dataset</p></th>
+<th class="head"><p>receptor dataset</p></th>
+<th class="head"><p>repertoire dataset</p></th>
+<th class="head"><p>model selection CV</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>AtchleyKmerMILClassifier</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+</tr>
+<tr class="row-odd"><td><p>BinaryFeatureClassifier</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+</tr>
+<tr class="row-even"><td><p>DeepRC</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+</tr>
+<tr class="row-odd"><td><p>KNN</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>KerasSequenceCnn</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+</tr>
+<tr class="row-odd"><td><p>LogisticRegression</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>PrecomputedKNN</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>ProbabalisticBinaryClassifier</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+</tr>
+<tr class="row-even"><td><p>RandomForestClassifier</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>ReceptorCNN</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+</tr>
+<tr class="row-even"><td><p>SVC</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>SVM</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>TCRdistClassifier</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="instructions-section">
+<h3>Instructions section<a class="headerlink" href="#instructions-section" title="Link to this heading">¶</a></h3>
+<p>The YAML specification of the <a class="reference internal" href="../yaml_specs/instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a> instruction contains various different components.
+Firstly, we should give our instruction a unique name and set the <code class="code docutils literal notranslate"><span class="pre">type</span></code>:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">instructions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my_instr</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TrainMLModel</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">...</span><span class="w"> </span><span class="c1"># other parameters should be added here</span>
+</pre></div>
+</div>
+<p>Furthermore, we should define which <code class="code docutils literal notranslate"><span class="pre">dataset</span></code> to train the models on, and which <code class="code docutils literal notranslate"><span class="pre">labels</span></code> to predict.
+The labels are defined based on the metadata file (repertoire datasets) or metadata column mapping (sequence or receptor datasets),
+see <a class="reference internal" href="how_to_import_the_data_to_immuneML.html#how-to-import-data-into-immuneml"><span class="std std-ref">How to import data into immuneML</span></a> for details.
+In most cases there will only be one label, but it is possible to specify multiple labels in order to train
+multiple different classifiers.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_dataset</span>
+<span class="nt">labels</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disease_1</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disease_2</span>
+</pre></div>
+</div>
+<p>In the <code class="code docutils literal notranslate"><span class="pre">settings</span></code> section the different combinations of ML settings must be specified. They consist of
+an <code class="code docutils literal notranslate"><span class="pre">encoding</span></code>, an <code class="code docutils literal notranslate"><span class="pre">ml_method</span></code> and optional <code class="code docutils literal notranslate"><span class="pre">preprocessing</span></code> (only available for repertoire datasets),
+which should be referenced by the names that were used to defined them under <code class="code docutils literal notranslate"><span class="pre">definitions</span></code>.</p>
+<p>Not every combination of encodings and ML methods is valid. For all the valid options, see the figure in the <a class="reference internal" href="../specification.html#yaml-specification"><span class="std std-ref">YAML specification</span></a> documentation.
+An example of the settings section of the instruction is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">settings</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_kmer_freq_encoding</span><span class="w"> </span><span class="c1"># Testing my_kmer_freq_encoding in combination with</span>
+<span class="w">    </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_log_reg</span><span class="w">           </span><span class="c1"># my_log_reg and my_svm, with and without my_preprocessing</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_kmer_freq_encoding</span>
+<span class="w">    </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_svm</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">preprocessing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_preprocessing</span><span class="w"> </span><span class="c1"># preprocessing can only be defined for repertoire datasets</span>
+<span class="w">    </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_kmer_freq_encoding</span>
+<span class="w">    </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_log_reg</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">preprocessing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_preprocessing</span>
+<span class="w">    </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_kmer_freq_encoding</span>
+<span class="w">    </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_svm</span>
+</pre></div>
+</div>
+<p>Nested cross-validation consists of two loops:</p>
+<ul class="simple">
+<li><p>the inner <code class="code docutils literal notranslate"><span class="pre">selection</span></code> loop, which is used to select the optimal hyperparameter settings using the validation set(s)</p></li>
+<li><p>the outer <code class="code docutils literal notranslate"><span class="pre">assessment</span></code> loop, which is used to give an unbiased assessment of the trained models using the test set(s)</p></li>
+</ul>
+<p>Both for the <code class="code docutils literal notranslate"><span class="pre">selection</span></code> and <code class="code docutils literal notranslate"><span class="pre">assessment</span></code> loops, we need to define what splitting strategy should be used for the data.
+The parameters that should be defined under <code class="code docutils literal notranslate"><span class="pre">selection</span></code> and <code class="code docutils literal notranslate"><span class="pre">assessment</span></code> are described in the <span class="xref std std-ref">SplitConfig</span>
+documentation.
+Optionally, it is possible to specify various types of <code class="code docutils literal notranslate"><span class="pre">reports</span></code> here (for more details see <span class="xref std std-ref">ReportConfig</span>):</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">models</span></code>: <a class="reference external" href="https://docs.immuneml.uio.no/specification.html#ml-model-reports">ML model reports</a> which will be applied to all compatible models in the given loop.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">encoding</span></code>: <a class="reference external" href="https://docs.immuneml.uio.no/specification.html#encoding-reports">Encoding reports</a> which will be applied to the encoded data of a given split (all data or training+validation data)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">data</span></code>: <a class="reference external" href="https://docs.immuneml.uio.no/specification.html#data-reports">Data reports</a> which will be applied to the complete dataset of a given split (all data or training+validation data)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">data_splits</span></code>: <a class="reference external" href="https://docs.immuneml.uio.no/specification.html#data-reports">Data reports</a> which will be applied to the data splits (training/validation or training+validation/test splits)</p></li>
+</ul>
+<p>The following example shows a piece of the YAML specification when two different splitting strategies are
+used for both loops:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">assessment</span><span class="p">:</span><span class="w">                </span><span class="c1"># example defining 5-fold cross-validation</span>
+<span class="w">  </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k_fold</span>
+<span class="w">  </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">  </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">models</span><span class="p">:</span><span class="w">                </span><span class="c1"># plot the coefficients of the trained models</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_coefficients</span>
+<span class="w">    </span><span class="nt">data</span><span class="p">:</span><span class="w">                  </span><span class="c1"># run this report on all data</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_sequence_lengths</span>
+<span class="nt">selection</span><span class="p">:</span><span class="w">                 </span><span class="c1"># example defining 3-fold monte carlo cross-validation with</span>
+<span class="w">  </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">random</span><span class="w">   </span><span class="c1"># 70% randomly chosen training data per split</span>
+<span class="w">  </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">  </span><span class="nt">training_percentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
+<span class="w">  </span><span class="nt">reports</span><span class="p">:</span><span class="w">                 </span><span class="c1"># run this report on training/validation splits</span>
+<span class="w">    </span><span class="nt">data_splits</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_sequence_lengths</span>
+</pre></div>
+</div>
+<p>Furthermore, the <code class="code docutils literal notranslate"><span class="pre">optimization_metric</span></code> and search <code class="code docutils literal notranslate"><span class="pre">strategy</span></code> (used to determine optimal hyperparameters) must be set.
+Currently, <em>GridSearch</em> is the only supported search <code class="code docutils literal notranslate"><span class="pre">strategy</span></code>. Aside from the <code class="code docutils literal notranslate"><span class="pre">optimization_metric</span></code>, other performance
+<code class="code docutils literal notranslate"><span class="pre">metrics</span></code> can also be computed for reference. And the user needs to decide whether the optimal ML settings should be
+retrained on the complete dataset (including test set) after assessment through setting the parameter <code class="code docutils literal notranslate"><span class="pre">refit_optimal_model</span></code>.</p>
+<p>The following YAML example shows how these parameters are defined:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">optimization_metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balanced_accuracy</span><span class="w"> </span><span class="c1"># the metric used for optimization</span>
+<span class="nt">metrics</span><span class="p">:</span><span class="w"> </span><span class="c1"># other metrics to compute</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">accuracy</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auc</span>
+<span class="nt">strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GridSearch</span>
+<span class="nt">refit_optimal_model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+</pre></div>
+</div>
+<p><span class="xref std std-ref">Train ML model reports</span> summarizing the performance of multiple different models should be set under <code class="code docutils literal notranslate"><span class="pre">reports</span></code>.
+And finally, the <code class="code docutils literal notranslate"><span class="pre">number_of_processes</span></code> used for parallelization should be set.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">reports</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_performance</span>
+<span class="nt">number_of_processes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+</pre></div>
+</div>
+</section>
+<section id="complete-yaml">
+<h3>Complete YAML<a class="headerlink" href="#complete-yaml" title="Link to this heading">¶</a></h3>
+<p>An example of the complete YAML specification is shown here:</p>
+<blockquote>
+<div><details class="summary-instructions-yaml">
+<summary>instructions.yaml</summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">datasets</span><span class="p">:</span><span class="w"> </span><span class="c1"># every instruction uses a dataset</span>
+<span class="w">    </span><span class="nt">my_dataset</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AIRR</span>
+<span class="w">      </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/repertoires/</span>
+<span class="w">        </span><span class="nt">metadata_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/metadata.csv</span>
+
+<span class="w">  </span><span class="nt">preprocessing_sequences</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_preprocessing</span><span class="p">:</span><span class="w"> </span><span class="c1"># user-defined preprocessing name</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">my_beta_chain_filter</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">ChainRepertoireFilter</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">keep_chain</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TRB</span>
+
+<span class="w">  </span><span class="nt">ml_methods</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_svm</span><span class="p">:</span><span class="w">       </span><span class="c1"># example ML method with user-defined settings</span>
+<span class="w">      </span><span class="nt">SVM</span><span class="p">:</span><span class="w">        </span><span class="c1"># Here, a third level of 3-fold cross-validation is used</span>
+<span class="w">        </span><span class="nt">penalty</span><span class="p">:</span><span class="w">  </span><span class="c1"># to determine the optimal hyperparameters for &#39;C&#39; and &#39;penalty&#39;</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">l1</span><span class="w">    </span><span class="c1"># This functionality is only available for scikit-learn classifiers</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">l2</span>
+<span class="w">        </span><span class="nt">C</span><span class="p">:</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">      </span><span class="nt">model_selection_cv</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">      </span><span class="nt">model_selection_n_folds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">    </span><span class="nt">my_log_reg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LogisticRegression</span><span class="w"> </span><span class="c1"># example ML method with default settings</span>
+
+<span class="w">  </span><span class="nt">encodings</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_kmer_freq_encoding</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">KmerFrequency</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">k</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+
+<span class="w">  </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my_coefficients</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Coefficients</span>
+<span class="w">    </span><span class="nt">my_sequence_lengths</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SequenceLengthDistribution</span>
+<span class="w">    </span><span class="nt">my_performance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MLSettingsPerformance</span>
+
+<span class="nt">instructions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my_instr</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TrainMLModel</span>
+
+<span class="w">    </span><span class="nt">dataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_dataset</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disease_1</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disease_2</span>
+
+<span class="w">    </span><span class="nt">settings</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_kmer_freq_encoding</span><span class="w"> </span><span class="c1"># Testing my_kmer_freq_encoding in combination with</span>
+<span class="w">        </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_log_reg</span><span class="w">           </span><span class="c1"># my_log_reg and my_svm, with and without my_preprocessing</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_kmer_freq_encoding</span>
+<span class="w">        </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_svm</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">preprocessing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_preprocessing</span><span class="w"> </span><span class="c1"># preprocessing can only be defined for repertoire datasets</span>
+<span class="w">        </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_kmer_freq_encoding</span>
+<span class="w">        </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_log_reg</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">preprocessing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_preprocessing</span>
+<span class="w">        </span><span class="nt">encoding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_kmer_freq_encoding</span>
+<span class="w">        </span><span class="nt">ml_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_svm</span>
+
+<span class="w">    </span><span class="nt">assessment</span><span class="p">:</span><span class="w">                </span><span class="c1"># example defining 5-fold cross-validation</span>
+<span class="w">      </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k_fold</span>
+<span class="w">      </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">      </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">models</span><span class="p">:</span><span class="w">                </span><span class="c1"># plot the coefficients of the trained models</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_coefficients</span>
+<span class="w">        </span><span class="nt">data</span><span class="p">:</span><span class="w">                  </span><span class="c1"># run this report on all data</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_sequence_lengths</span>
+<span class="w">    </span><span class="nt">selection</span><span class="p">:</span><span class="w">                 </span><span class="c1"># example defining 3-fold monte carlo cross-validation with</span>
+<span class="w">      </span><span class="nt">split_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">random</span><span class="w">   </span><span class="c1"># 70% randomly chosen training data per split</span>
+<span class="w">      </span><span class="nt">split_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">      </span><span class="nt">training_percentage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
+<span class="w">      </span><span class="nt">reports</span><span class="p">:</span><span class="w">                 </span><span class="c1"># run this report on training/validation splits</span>
+<span class="w">        </span><span class="nt">data_splits</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_sequence_lengths</span>
+
+<span class="w">    </span><span class="nt">optimization_metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">balanced_accuracy</span><span class="w"> </span><span class="c1"># the metric used for optimization</span>
+<span class="w">    </span><span class="nt">metrics</span><span class="p">:</span><span class="w"> </span><span class="c1"># other metrics to compute</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">accuracy</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auc</span>
+<span class="w">    </span><span class="nt">strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GridSearch</span>
+<span class="w">    </span><span class="nt">refit_optimal_model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_performance</span>
+<span class="w">    </span><span class="nt">number_of_processes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+</pre></div>
+</div>
+</details></div></blockquote>
+</section>
+</section>
+<section id="example-datasets-to-test-training-ml-models">
+<h2>Example datasets to test training ML models<a class="headerlink" href="#example-datasets-to-test-training-ml-models" title="Link to this heading">¶</a></h2>
+<p>Below you will find example datasets that can be used to test out the <a class="reference internal" href="../yaml_specs/instructions.html#trainmlmodel"><span class="std std-ref">TrainMLModel</span></a> instruction.</p>
+<section id="repertoire-dataset">
+<h3>Repertoire dataset<a class="headerlink" href="#repertoire-dataset" title="Link to this heading">¶</a></h3>
+<p>An example dataset for testing out repertoire classification in immuneML is the Quickstart dataset: <a class="reference download internal" download="" href="../_downloads/8df95c99c753b3e6b1ee5f0fc6311632/quickstart_data.zip"><code class="xref download docutils literal notranslate"><span class="pre">quickstart_data.zip</span></code></a>
+This is a dataset in AIRR format and can be imported as follows:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">datasets</span><span class="p">:</span><span class="w"> </span><span class="c1"># every instruction uses a dataset</span>
+<span class="w">    </span><span class="nt">my_dataset</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AIRR</span>
+<span class="w">      </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/repertoires/</span>
+<span class="w">        </span><span class="nt">metadata_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/metadata.csv</span>
+</pre></div>
+</div>
+<p>For this dataset, the <code class="code docutils literal notranslate"><span class="pre">label</span></code> that can be used for prediction is ‘signal_disease’.</p>
+</section>
+<section id="sequence-dataset">
+<h3>Sequence dataset<a class="headerlink" href="#sequence-dataset" title="Link to this heading">¶</a></h3>
+<p>An example dataset for sequence classification of epitope GILGFVFTL can be downloaded here: <a class="reference download internal" download="" href="../_downloads/a15981c9776b4b94a6d128afeb92f0e1/sequences.tsv"><code class="xref download docutils literal notranslate"><span class="pre">sequences.tsv</span></code></a>.
+To import this dataset, use the following YAML snippet:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">datasets</span><span class="p">:</span><span class="w"> </span><span class="c1"># every instruction uses a dataset</span>
+<span class="w">    </span><span class="nt">my_dataset</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AIRR</span>
+<span class="w">      </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/sequences.tsv</span>
+<span class="w">        </span><span class="nt">is_repertoire</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="nt">paired</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="nt">metadata_column_mapping</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">epitope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">epitope</span>
+</pre></div>
+</div>
+<p>For this dataset, the <code class="code docutils literal notranslate"><span class="pre">label</span></code> that can be used for prediction is ‘epitope’.</p>
+</section>
+<section id="receptor-dataset">
+<h3>Receptor dataset<a class="headerlink" href="#receptor-dataset" title="Link to this heading">¶</a></h3>
+<p>An example dataset for receptor classification of epitope GILGFVFTL can be downloaded here: <a class="reference download internal" download="" href="../_downloads/af14292cc26eb2b83a1e87f01cb06cf7/receptors.tsv"><code class="xref download docutils literal notranslate"><span class="pre">receptors.tsv</span></code></a>
+To import this dataset, use the following YAML snippet:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">datasets</span><span class="p">:</span><span class="w"> </span><span class="c1"># every instruction uses a dataset</span>
+<span class="w">    </span><span class="nt">my_dataset</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AIRR</span>
+<span class="w">      </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/receptors.tsv</span>
+<span class="w">        </span><span class="nt">is_repertoire</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="nt">paired</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">receptor_chains</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TRA_TRB</span>
+<span class="w">        </span><span class="nt">metadata_column_mapping</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">epitope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">epitope</span>
+</pre></div>
+</div>
+<p>For this dataset, the <code class="code docutils literal notranslate"><span class="pre">label</span></code> that can be used for prediction is ‘epitope’.</p>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="how_to_apply_to_new_data.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">How to apply previously trained ML models to a new dataset</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="simulation_with_custom_signal_functions.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Simulation with custom signal functions</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2021-2025, Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">How to train and assess a receptor or repertoire-level ML classifier</a><ul>
+<li><a class="reference internal" href="#yaml-specification-of-trainmlmodel">YAML specification of TrainMLModel</a><ul>
+<li><a class="reference internal" href="#definitions-section">Definitions section</a></li>
+<li><a class="reference internal" href="#instructions-section">Instructions section</a></li>
+<li><a class="reference internal" href="#complete-yaml">Complete YAML</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#example-datasets-to-test-training-ml-models">Example datasets to test training ML models</a><ul>
+<li><a class="reference internal" href="#repertoire-dataset">Repertoire dataset</a></li>
+<li><a class="reference internal" href="#sequence-dataset">Sequence dataset</a></li>
+<li><a class="reference internal" href="#receptor-dataset">Receptor dataset</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=f1196aca"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    </body>
+</html>

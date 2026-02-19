@@ -1,0 +1,1252 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Encoding parameters" href="encodings.html" /><link rel="prev" title="How to specify an analysis with YAML" href="how_to_specify_an_analysis_with_yaml.html" />
+        <link rel="canonical" href="https://docs.immuneml.uio.no/yaml_specs/datasets.html" />
+
+    <link rel="shortcut icon" href="../_static/favicon.ico"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>Dataset parameters - immuneML 3.0.18 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/immuneml.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">immuneML 3.0.18 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">immuneML 3.0.18 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../quickstart.html">Quickstart</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Quickstart</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_simple.html">Quickstart: Galaxy with button-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/galaxy_yaml.html">Quickstart: Galaxy with YAML-based tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/cli_yaml.html">Quickstart: command-line interface with YAML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart/simulation_quickstart.html">LIgO simulation quickstart</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../installation.html">Installing immuneML</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Installing immuneML</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/install_with_package_manager.html">Install immuneML with a package manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/installation_docker.html">Setting up immuneML with Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/cloud.html">Running immuneML in the cloud</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../specification.html">YAML specification</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of YAML specification</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how_to_specify_an_analysis_with_yaml.html">How to specify an analysis with YAML</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Dataset parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="encodings.html">Encoding parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ml_methods.html">ML method parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reports.html">Report parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="preprocessings.html">Preprocessing parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation.html">Simulation parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="instructions.html">Instruction parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Tutorials</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/analyze_dataset.html">Analyzing Your Own Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_import_the_data_to_immuneML.html">How to import data into immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_generate_a_random_repertoire_dataset.html">How to generate a dataset with random sequences</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tutorials/ligo_simulation_tutorials.html">Dataset simulation with LIgO</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Dataset simulation with LIgO</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/ligo_simulation_yaml.html">YAML specification of the LigoSim instruction for introducing immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/how_to_simulate_co-occuring_signals.html">How to simulate co-occuring immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/how_to_simulate_paired_chain_data.html">Paired chain simulations in LIgO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/simulation_with_custom_signal_functions.html">Simulation with custom signal functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_train_and_assess_a_receptor_or_repertoire_classifier.html">How to train and assess a receptor or repertoire-level ML classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_apply_to_new_data.html">How to apply previously trained ML models to a new dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_perform_exploratory_analysis.html">How to perform an exploratory data analysis</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../tutorials/motif_recovery.html">How to find motifs associated with disease or antigen binding state</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of How to find motifs associated with disease or antigen binding state</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/discover_motifs_precision_recall.html">Discovering positional motifs using precision and recall thresholds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/discover_motifs_classifiers.html">Discovering motifs learned by classifiers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/recovering_simulated_motifs.html">Recovering simulated immune signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/comparing_baseline_motifs.html">Comparing baseline motif frequencies in repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/clustering_tutorial.html">How to perform clustering analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_train_and_apply_gen_model.html">How to train a generative model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/how_to_combine_multiple_encodings.html">How to combine multiple encodings to represent a dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/getting_publication_ready_figures.html">How to get publication-ready figures</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../galaxy.html">immuneML &amp; Galaxy</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of immuneML &amp; Galaxy</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_intro.html">Introduction to Galaxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_tools.html">immuneML Galaxy tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/galaxy_immunologist_friendly.html">ML basics: Training classifiers with the simplified Galaxy interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../usecases.html">Use case examples</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Use case examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/emerson_reproduction.html">Manuscript use case 1: Reproduction of a published study inside immuneML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/extendability_use_case.html">Manuscript use case 2: Extending immuneML with a deep learning component for predicting antigen specificity of paired receptor data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/benchmarking_use_case.html">Manuscript use case 3: Benchmarking ML methods on ground-truth synthetic data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immcantation_use_case.html">Integration use case: post-analysis of sequences with Immcantation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immunarch_use_case.html">Integration use case: post-analysis of sequences with immunarch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../usecases/immunesim_use_case.html">Integration use case: Performing analysis on immuneSIM-generated repertoires</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../troubleshooting.html">Troubleshooting</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Troubleshooting</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../developer_docs.html">Developer documentation</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Developer documentation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/info_new_developers.html">Information for new developers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/install_for_development.html">Set up immuneML for development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_encoding.html">How to add a new encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_ML_method.html">How to add a new machine learning method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_report.html">How to add a new report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/how_to_add_new_preprocessing.html">How to add a new preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/data_model.html">immuneML data model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../developer_docs/execution_flow.html">immuneML execution flow</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/yaml_specs/datasets.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="dataset-parameters">
+<h1>Dataset parameters<a class="headerlink" href="#dataset-parameters" title="Link to this heading">¶</a></h1>
+<p>Under the <code class="code docutils literal notranslate"><span class="pre">definitions/datasets</span></code> component, the user can specify how to import a dataset from files.
+The file format determines which importer should be used, as listed below. See also: <a class="reference internal" href="../tutorials/how_to_import_the_data_to_immuneML.html#how-to-import-data-into-immuneml"><span class="std std-ref">How to import data into immuneML</span></a>.</p>
+<p>For testing purposes, it is also possible to generate a random dataset instead of importing from files, using
+<a class="reference internal" href="#randomreceptordataset"><span class="std std-ref">RandomReceptorDataset</span></a>, <a class="reference internal" href="#randomsequencedataset"><span class="std std-ref">RandomSequenceDataset</span></a> or <a class="reference internal" href="#randomrepertoiredataset"><span class="std std-ref">RandomRepertoireDataset</span></a> import types.
+See also: <a class="reference internal" href="../tutorials/how_to_generate_a_random_repertoire_dataset.html#how-to-generate-a-dataset-with-random-sequences"><span class="std std-ref">How to generate a dataset with random sequences</span></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To reduce storage requirements with AIRR datasets</p>
+<p>In the standard workflow, the dataset is imported, preprocessed and stored under the results folder as specified by
+the user. If the dataset is already in the AIRR format and no preprocessing is needed, to avoid using too much
+storage, under datasets/dataset/params, it is possible to specify <cite>result_path</cite> parameter to be the same as the
+<cite>path</cite> from which the dataset is imported. In this case, the dataset will not be copied to the results folder,
+but used directly from the original location.</p>
+</div>
+<section id="airr">
+<h2>AIRR<a class="headerlink" href="#airr" title="Link to this heading">¶</a></h2>
+<p>Imports data in AIRR format into a Repertoire-, Sequence- or ReceptorDataset.
+RepertoireDatasets should be used when making predictions per repertoire, such as predicting a disease state.
+SequenceDatasets or ReceptorDatasets should be used when predicting values for unpaired (single-chain) and paired
+immune receptors respectively, like antigen specificity.</p>
+<p>The AIRR .tsv format is explained here: <a class="reference external" href="https://docs.airr-community.org/en/stable/datarep/format.html">https://docs.airr-community.org/en/stable/datarep/format.html</a>
+And the AIRR rearrangement schema can be found here: <a class="reference external" href="https://docs.airr-community.org/en/stable/datarep/rearrangements.html">https://docs.airr-community.org/en/stable/datarep/rearrangements.html</a></p>
+<p>When importing a ReceptorDataset, the AIRR field cell_id is used to determine the chain pairs.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul>
+<li><p>path (str): For RepertoireDatasets, this is the path to a directory with AIRR files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.</p></li>
+<li><p>is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or ReceptorDataset. By default, is_repertoire is set to True.</p></li>
+<li><p>metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. Only the AIRR files included under the column ‘filename’ are imported into the RepertoireDataset. For setting Sequence- or ReceptorDataset labels, metadata_file is ignored, use label_columns instead.</p></li>
+<li><p>label_columns (list): For Sequence- or ReceptorDataset, this parameter can be used to explicitly set the column names of labels to import. These labels can be used as prediction target. When label_columns are not set, label names are attempted to be discovered automatically (any column name which is not used in the column_mapping). For setting RepertoireDataset labels, label_columns is ignored, use metadata_file instead.</p></li>
+<li><p>paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a SequenceDataset (paired = False) or a ReceptorDataset (paired = True). In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together based on the identifier given in the AIRR column named ‘cell_id’.</p></li>
+<li><p>receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor. Valid values are <cite>TRA_TRB</cite>, <cite>TRG_TRD</cite>, <cite>IGH_IGL</cite>, <cite>IGH_IGK</cite>. If receptor_chains is not provided, the chain pair is automatically detected (only one chain pair type allowed per repertoire).</p></li>
+<li><p>import_productive (bool): Whether productive sequences (with value ‘T’ in column productive) should be included in the imported sequences. By default, import_productive is True.</p></li>
+<li><p>import_unknown_productivity (bool): Whether sequences with unknown productivity (missing value in column productive) should be included in the imported sequences. By default, import_unknown_productivity is True.</p></li>
+<li><p>import_with_stop_codon (bool): Whether sequences with stop codons (with value ‘T’ in column stop_codon) should be included in the imported sequences. This only applies if column stop_codon is present. By default, import_with_stop_codon is False.</p></li>
+<li><p>import_out_of_frame (bool): Whether out of frame sequences (with value ‘F’ in column vj_in_frame) should be included in the imported sequences. This only applies if column vj_in_frame is present. By default, import_out_of_frame is False.</p></li>
+<li><p>import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon ‘*’, or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.</p></li>
+<li><p>import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.</p></li>
+<li><p>import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.</p></li>
+<li><p>column_mapping (dict): A mapping from AIRR column names to immuneML’s internal data representation. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the AIRR file, or using alternative column names).</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">additional_column_in_the_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">column_name_to_be_used_in_analysis</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>separator (str): Column separator, for AIRR this is by default “t”.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_airr_dataset</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AIRR</span>
+<span class="w">            </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/files/</span>
+<span class="w">                </span><span class="nt">is_repertoire</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># whether to import a RepertoireDataset</span>
+<span class="w">                </span><span class="nt">metadata_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/metadata.csv</span><span class="w"> </span><span class="c1"># metadata file for RepertoireDataset</span>
+<span class="w">                </span><span class="nt">import_productive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># whether to include productive sequences in the dataset</span>
+<span class="w">                </span><span class="nt">import_with_stop_codon</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># whether to include sequences with stop codon in the dataset</span>
+<span class="w">                </span><span class="nt">import_out_of_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># whether to include out of frame sequences in the dataset</span>
+<span class="w">                </span><span class="nt">import_illegal_characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># remove sequences with illegal characters for the sequence_type being used</span>
+<span class="w">                </span><span class="nt">import_empty_nt_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># keep sequences even if the `sequences` column is empty (provided that other fields are as specified here)</span>
+<span class="w">                </span><span class="nt">import_empty_aa_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># remove all sequences with empty column</span>
+<span class="w">                </span><span class="c1"># Optional fields with AIRR-specific defaults, only change when different behavior is required:</span>
+<span class="w">                </span><span class="nt">separator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;\t&quot;</span><span class="w"> </span><span class="c1"># column separator</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span><span class="w"> </span><span class="c1"># what part of the sequence check for import</span>
+</pre></div>
+</div>
+</section>
+<section id="generic">
+<h2>Generic<a class="headerlink" href="#generic" title="Link to this heading">¶</a></h2>
+<p>Imports data from any tabular file into a Repertoire-, Sequence- or ReceptorDataset. RepertoireDatasets should be
+used when making predictions per repertoire, such as predicting a disease state. SequenceDatasets or ReceptorDatasets
+should be used when predicting values for unpaired (single-chain) and paired immune receptors respectively,
+like antigen specificity.</p>
+<p>This importer works similarly to other importers, but has no predefined default values for which fields are imported,
+and can therefore be tailored to import data from various different tabular files with headers.</p>
+<p>For ReceptorDatasets: this importer assumes the two receptor sequences appear on different lines in the file, and can
+be paired together by a common sequence identifier.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul>
+<li><p>path (str): For RepertoireDatasets, this is the path to a directory with files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.</p></li>
+<li><p>is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or ReceptorDataset. By default, is_repertoire is set to True.</p></li>
+<li><p>metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. For setting Sequence- or ReceptorDataset labels, metadata_file is ignored, use label_columns instead.</p></li>
+<li><p>label_columns (list): For Sequence- or ReceptorDataset, this parameter can be used to explicitly set the column names of labels to import. These labels can be used as prediction target. When label_columns are not set, label names are attempted to be discovered automatically (any column name which is not used in the column_mapping). For setting RepertoireDataset labels, label_columns is ignored, use metadata_file instead.</p></li>
+<li><p>paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a SequenceDataset (paired = False) or a ReceptorDataset (paired = True). In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together based on a common identifier. This identifier should be mapped to the immuneML field ‘sequence_identifiers’ using the column_mapping.</p></li>
+<li><p>receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor. Valid values are <cite>TRA_TRB</cite>, <cite>TRG_TRD</cite>, <cite>IGH_IGL</cite>, <cite>IGH_IGK</cite>.</p></li>
+<li><p>import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon ‘*’, or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.</p></li>
+<li><p>import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.</p></li>
+<li><p>import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.</p></li>
+<li><p>region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means immuneML assumes the IMGT junction (including leading C and trailing Y/F amino acids) is used in the input file, and the first and last amino acids will be removed from the sequences to retrieve the IMGT CDR3 sequence. Specifying any other value will result in importing the sequences as they are. Valid values are <cite>IMGT_CDR1</cite>, <cite>IMGT_CDR2</cite>, <cite>IMGT_CDR3</cite>, <cite>IMGT_FR1</cite>, <cite>IMGT_FR2</cite>, <cite>IMGT_FR3</cite>, <cite>IMGT_FR4</cite>, <cite>IMGT_JUNCTION</cite>, <cite>FULL_SEQUENCE</cite>.</p></li>
+<li><p>column_mapping (dict): Required for all datasets. A mapping where the keys are the column names in the input file, and the values correspond to the names in the AIRR format. Valid immuneML fields that can be specified here by <a class="reference external" href="https://docs.airr-community.org/en/latest/datarep/rearrangements.html">the AIRR Rearrangement Schema</a>.. A column mapping can look for example like this:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">file_column_amino_acids</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cdr3_aa</span>
+<span class="nt">file_column_v_genes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="nt">file_column_j_genes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+<span class="nt">file_column_frequencies</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">duplicate_count</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For Generic import, there is no default column_mapping_synonyms.</p></li>
+<li><p>columns_to_load (list): Optional; specifies which columns to load from the input file. This may be useful if the input files contain many unused columns. If no value is specified, all columns are loaded.</p></li>
+<li><p>separator (str): Required parameter. Column separator, for example “t” or “,”. The default value is “t”</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_generic_dataset</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Generic</span>
+<span class="w">            </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/files/</span>
+<span class="w">                </span><span class="nt">is_repertoire</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># whether to import a RepertoireDataset</span>
+<span class="w">                </span><span class="nt">metadata_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/metadata.csv</span><span class="w"> </span><span class="c1"># metadata file for RepertoireDataset</span>
+<span class="w">                </span><span class="nt">paired</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False</span>
+<span class="w">                </span><span class="nt">receptor_chains</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TRA_TRB</span><span class="w"> </span><span class="c1"># what chain pair to import for a ReceptorDataset</span>
+<span class="w">                </span><span class="nt">separator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;\t&quot;</span><span class="w"> </span><span class="c1"># column separator</span>
+<span class="w">                </span><span class="nt">import_illegal_characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># remove sequences with illegal characters for the sequence_type being used</span>
+<span class="w">                </span><span class="nt">import_empty_nt_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># keep sequences even though the nucleotide sequence might be empty</span>
+<span class="w">                </span><span class="nt">import_empty_aa_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># filter out sequences if they don&#39;t have amino acid sequence set</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span><span class="w"> </span><span class="c1"># which column to check for illegal characters/empty strings etc</span>
+<span class="w">                </span><span class="nt">column_mapping</span><span class="p">:</span><span class="w"> </span><span class="c1"># column mapping file: immuneML/AIRR column names</span>
+<span class="w">                    </span><span class="nt">file_column_amino_acids</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">junction_aa</span>
+<span class="w">                    </span><span class="nt">file_column_v_genes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="w">                    </span><span class="nt">file_column_j_genes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+<span class="w">                    </span><span class="nt">file_column_frequencies</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">duplicate_count</span>
+<span class="w">                    </span><span class="nt">file_column_antigen_specificity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">antigen_specificity</span>
+<span class="w">                </span><span class="nt">columns_to_load</span><span class="p">:</span><span class="w">  </span><span class="c1"># which subset of columns to load from the file</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file_column_amino_acids</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file_column_v_genes</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file_column_j_genes</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file_column_frequencies</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file_column_antigen_specificity</span>
+</pre></div>
+</div>
+</section>
+<section id="igor">
+<h2>IGoR<a class="headerlink" href="#igor" title="Link to this heading">¶</a></h2>
+<p>Imports data generated by <a class="reference external" href="https://github.com/qmarcou/IGoR">IGoR</a> simulations into a Repertoire-, or SequenceDataset.
+RepertoireDatasets should be used when making predictions per repertoire, such as predicting a disease state.
+SequenceDatasets should be used when predicting values for unpaired (single-chain) immune receptors, like
+antigen specificity.</p>
+<p>Note that you should run IGoR with the –CDR3 option specified, this tool imports the generated CDR3 files.
+Sequences with missing anchors are not imported, meaning only sequences with value ‘1’ in the anchors_found column are imported.
+Nucleotide sequences are automatically translated to amino acid sequences.</p>
+<p>Reference: Quentin Marcou, Thierry Mora, Aleksandra M. Walczak
+‘High-throughput immune repertoire analysis with IGoR’. Nature Communications, (2018)
+<a class="reference external" href="https://doi.org/10.1038/s41467-018-02832-w">doi.org/10.1038/s41467-018-02832-w</a>.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul>
+<li><p>path (str): For RepertoireDatasets, this is the path to a directory with IGoR files to import. For Sequence- or
+ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one
+or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.</p></li>
+<li><p>is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset.
+By default, is_repertoire is set to True.</p></li>
+<li><p>metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file.
+This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in
+instructions. Only the IGoR files included under the column ‘filename’ are imported into the RepertoireDataset.
+For setting Sequence- or ReceptorDataset labels, metadata_file is ignored, use label_columns instead.</p></li>
+<li><p>label_columns (list): For Sequence- or ReceptorDataset, this parameter can be used to explicitly set the column
+names of labels to import. These labels can be used as prediction target. When label_columns are not set, label
+names are attempted to be discovered automatically (any column name which is not used in the column_mapping).
+For setting RepertoireDataset labels, label_columns is ignored, use metadata_file instead.</p></li>
+<li><p>import_with_stop_codon (bool): Whether sequences with stop codons should be included in the imported sequences.
+By default, import_with_stop_codon is False.</p></li>
+<li><p>import_out_of_frame (bool): Whether out of frame sequences (with value ‘0’ in column is_inframe) should be
+included in the imported sequences. By default, import_out_of_frame is False.</p></li>
+<li><p>import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters
+that do not appear in the sequence alphabet (amino acids including stop codon ‘*’, or nucleotides). When set to
+false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only
+entries with illegal characters in the amino acid sequence are removed). By default, import_illegal_characters
+is False.</p></li>
+<li><p>import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True
+or False. By default, import_empty_nt_sequences is set to True.</p></li>
+<li><p>region_type (str): Which part of the sequence to check when importing. By default, this value is set to IMGT_CDR3.
+This means the first and last amino acids are removed from the CDR3 sequence, as IGoR uses the IMGT junction.
+Specifying any other value will result in importing the sequences as they are. Valid values for region_type are
+the names of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">RegionType</span></code> enum.</p></li>
+<li><p>column_mapping (dict): A mapping from IGoR column names to immuneML’s internal data representation. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the IGoR file, or using alternative column names). Valid immuneML fields that can be specified here by <a class="reference external" href="https://docs.airr-community.org/en/latest/datarep/rearrangements.html">the AIRR Rearrangement Schema</a>.. For IGoR, this is by default set to:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">nt_CDR3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cdr3</span>
+<span class="nt">seq_index</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_id</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>separator (str): Column separator, for IGoR this is by default “,”.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_igor_dataset</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IGoR</span>
+<span class="w">            </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/files/</span>
+<span class="w">                </span><span class="nt">is_repertoire</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># whether to import a RepertoireDataset (True) or a SequenceDataset (False)</span>
+<span class="w">                </span><span class="nt">metadata_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/metadata.csv</span><span class="w"> </span><span class="c1"># metadata file for RepertoireDataset</span>
+<span class="w">                </span><span class="nt">import_with_stop_codon</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># whether to include sequences with stop codon in the dataset</span>
+<span class="w">                </span><span class="nt">import_out_of_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># whether to include out of frame sequences in the dataset</span>
+<span class="w">                </span><span class="nt">import_illegal_characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># remove sequences with illegal characters for the sequence_type being used</span>
+<span class="w">                </span><span class="nt">import_empty_nt_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># keep sequences even though the nucleotide sequence might be empty</span>
+<span class="w">                </span><span class="c1"># Optional fields with IGoR-specific defaults, only change when different behavior is required:</span>
+<span class="w">                </span><span class="nt">separator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;,&quot;</span><span class="w"> </span><span class="c1"># column separator</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span><span class="w"> </span><span class="c1"># what part of the sequence to import</span>
+<span class="w">                </span><span class="nt">column_mapping</span><span class="p">:</span><span class="w"> </span><span class="c1"># column mapping IGoR: immuneML</span>
+<span class="w">                    </span><span class="nt">nt_CDR3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cdr3</span>
+<span class="w">                    </span><span class="nt">seq_index</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_id</span>
+<span class="w">                    </span><span class="nt">igor_column_name1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metadata_label1</span>
+<span class="w">                    </span><span class="nt">igor_column_name2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metadata_label2</span>
+</pre></div>
+</div>
+</section>
+<section id="ireceptor">
+<h2>IReceptor<a class="headerlink" href="#ireceptor" title="Link to this heading">¶</a></h2>
+<p>Imports AIRR datasets retrieved through the <a class="reference external" href="https://gateway.ireceptor.org/home">iReceptor Gateway</a> into a Repertoire-, Sequence- or ReceptorDataset.
+The differences between this importer and the <a class="reference internal" href="#airr"><span class="std std-ref">AIRR</span></a> importer are:</p>
+<ul class="simple">
+<li><p>This importer takes in a list of .zip files, which must contain one or more AIRR tsv files, and for each AIRR file, a corresponding metadata json file must be present.</p></li>
+<li><p>This importer does not require a metadata csv file for RepertoireDataset import, it is generated automatically from the metadata json files.</p></li>
+</ul>
+<p>RepertoireDatasets should be used when making predictions per repertoire, such as predicting a disease state.
+SequenceDatasets or ReceptorDatasets should be used when predicting values for unpaired (single-chain) and paired
+immune receptors respectively, like antigen specificity.</p>
+<p>AIRR rearrangement schema can be found here: <a class="reference external" href="https://docs.airr-community.org/en/stable/datarep/rearrangements.html">https://docs.airr-community.org/en/stable/datarep/rearrangements.html</a></p>
+<p>When importing a ReceptorDataset, the AIRR field cell_id is used to determine the chain pairs.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>path (str): This is the path to a directory <strong>with .zip files</strong> retrieved from the iReceptor Gateway. These .zip files should include AIRR files (with .tsv extension) and corresponding metadata.json files with matching names (e.g., for my_dataset.tsv the corresponding metadata file is called my_dataset-metadata.json). The zip files must use the .zip extension.</p></li>
+<li><p>is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or ReceptorDataset. By default, is_repertoire is set to True.</p></li>
+<li><p>label_columns (list): For Sequence- or ReceptorDataset, this parameter can be used to explicitly set the column names of labels to import. These labels can be used as prediction target. When label_columns are not set, label names are attempted to be discovered automatically (any column name which is not used in the column_mapping). For RepertoireDataset labels, label_columns is ignored, metadata is discovered automatically from the metadata json.</p></li>
+<li><p>paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a SequenceDataset (paired = False) or a ReceptorDataset (paired = True). In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together based on the identifier given in the AIRR column named ‘cell_id’.</p></li>
+<li><p>receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor. Valid values are <cite>TRA_TRB</cite>, <cite>TRG_TRD</cite>, <cite>IGH_IGL</cite>, <cite>IGH_IGK</cite>. If receptor_chains is not provided, the chain pair is automatically detected (only one chain pair type allowed per repertoire).</p></li>
+<li><p>import_productive (bool): Whether productive sequences (with value ‘T’ in column productive) should be included in the imported sequences. By default, import_productive is True.</p></li>
+<li><p>import_with_stop_codon (bool): Whether sequences with stop codons (with value ‘T’ in column stop_codon) should be included in the imported sequences. This only applies if column stop_codon is present. By default, import_with_stop_codon is False.</p></li>
+<li><p>import_out_of_frame (bool): Whether out of frame sequences (with value ‘F’ in column vj_in_frame) should be included in the imported sequences. This only applies if column vj_in_frame is present. By default, import_out_of_frame is False.</p></li>
+<li><p>import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon ‘*’, or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.</p></li>
+<li><p>import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.</p></li>
+<li><p>import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.</p></li>
+<li><p>region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as AIRR uses the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values are <cite>IMGT_CDR1</cite>, <cite>IMGT_CDR2</cite>, <cite>IMGT_CDR3</cite>, <cite>IMGT_FR1</cite>, <cite>IMGT_FR2</cite>, <cite>IMGT_FR3</cite>, <cite>IMGT_FR4</cite>, <cite>IMGT_JUNCTION</cite>, <cite>FULL_SEQUENCE</cite>.</p></li>
+<li><p>separator (str): Column separator, for AIRR this is by default “t”.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_airr_dataset</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IReceptor</span>
+<span class="w">            </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/zipfiles/</span>
+<span class="w">                </span><span class="nt">is_repertoire</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># whether to import a RepertoireDataset</span>
+<span class="w">                </span><span class="nt">metadata_column_mapping</span><span class="p">:</span><span class="w"> </span><span class="c1"># metadata column mapping AIRR: immuneML for Sequence- or ReceptorDatasetDataset</span>
+<span class="w">                    </span><span class="nt">airr_column_name1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metadata_label1</span>
+<span class="w">                    </span><span class="nt">airr_column_name2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metadata_label2</span>
+<span class="w">                </span><span class="nt">import_productive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># whether to include productive sequences in the dataset</span>
+<span class="w">                </span><span class="nt">import_with_stop_codon</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># whether to include sequences with stop codon in the dataset</span>
+<span class="w">                </span><span class="nt">import_out_of_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># whether to include out of frame sequences in the dataset</span>
+<span class="w">                </span><span class="nt">import_illegal_characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># remove sequences with illegal characters for the sequence_type being used</span>
+<span class="w">                </span><span class="nt">import_empty_nt_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># keep sequences even if the `sequences` column is empty (provided that other fields are as specified here)</span>
+<span class="w">                </span><span class="nt">import_empty_aa_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># remove all sequences with empty `sequence_aas` column</span>
+<span class="w">                </span><span class="c1"># Optional fields with AIRR-specific defaults, only change when different behavior is required:</span>
+<span class="w">                </span><span class="nt">separator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;\t&quot;</span><span class="w"> </span><span class="c1"># column separator</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span><span class="w"> </span><span class="c1"># what part of the sequence to import</span>
+</pre></div>
+</div>
+</section>
+<section id="immunoseqrearrangement">
+<h2>ImmunoSEQRearrangement<a class="headerlink" href="#immunoseqrearrangement" title="Link to this heading">¶</a></h2>
+<p>Imports data from Adaptive Biotechnologies immunoSEQ Analyzer rearrangement-level .tsv files into a
+Repertoire-, or SequenceDataset.
+RepertoireDatasets should be used when making predictions per repertoire, such as predicting a disease state.
+SequenceDatasets should be used when predicting values for unpaired (single-chain) immune receptors, like
+antigen specificity.</p>
+<p>The format of the files imported by this importer is described here:
+<a class="reference external" href="https://www.adaptivebiotech.com/wp-content/uploads/2019/07/MRK-00342_immunoSEQ_TechNote_DataExport_WEB_REV.pdf">https://www.adaptivebiotech.com/wp-content/uploads/2019/07/MRK-00342_immunoSEQ_TechNote_DataExport_WEB_REV.pdf</a>
+Alternatively, to import sample-level .tsv files, see <a class="reference internal" href="#immunoseqsample"><span class="std std-ref">ImmunoSEQSample</span></a> import</p>
+<p>The only difference between these two importers is which columns they load from the .tsv files.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul>
+<li><p>path (str): For RepertoireDatasets, this is the path to a directory with files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.</p></li>
+<li><p>is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset. By default, is_repertoire is set to True.</p></li>
+<li><p>metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. Only the files included under the column ‘filename’ are imported into the RepertoireDataset. For setting Sequence- or ReceptorDataset labels, metadata_file is ignored, use label_columns instead.</p></li>
+<li><p>label_columns (list): For Sequence- or ReceptorDataset, this parameter can be used to explicitly set the column names of labels to import. These labels can be used as prediction target. When label_columns are not set, label names are attempted to be discovered automatically (any column name which is not used in the column_mapping). For setting RepertoireDataset labels, label_columns is ignored, use metadata_file instead.</p></li>
+<li><p>import_productive (bool): Whether productive sequences (with value ‘In’ in column frame_type) should be included in the imported sequences. By default, import_productive is True.</p></li>
+<li><p>import_with_stop_codon (bool): Whether sequences with stop codons (with value ‘Stop’ in column frame_type) should be included in the imported sequences. By default, import_with_stop_codon is False.</p></li>
+<li><p>import_out_of_frame (bool): Whether out of frame sequences (with value ‘Out’ in column frame_type) should be included in the imported sequences. By default, import_out_of_frame is False.</p></li>
+<li><p>import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon ‘*’, or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.</p></li>
+<li><p>import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.</p></li>
+<li><p>import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.</p></li>
+<li><p>region_type (str): Which part of the sequence to check when importing. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as immunoSEQ files use the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values are <cite>IMGT_CDR1</cite>, <cite>IMGT_CDR2</cite>, <cite>IMGT_CDR3</cite>, <cite>IMGT_FR1</cite>, <cite>IMGT_FR2</cite>, <cite>IMGT_FR3</cite>, <cite>IMGT_FR4</cite>, <cite>IMGT_JUNCTION</cite>, <cite>FULL_SEQUENCE</cite>.</p></li>
+<li><p>column_mapping (dict): A mapping from immunoSEQ column names to immuneML’s internal data representation. For immunoSEQ rearrangement-level files, this is by default set the values shown below in YAML format.         A custom column mapping can be specified here if necessary (for example: adding additional data fields if they are present in the file, or using alternative column names). Valid immuneML fields that can be specified here by <a class="reference external" href="https://docs.airr-community.org/en/latest/datarep/rearrangements.html">the AIRR Rearrangement Schema</a>.. For ImmunoSEQ rearrangement import, this is by default set to:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">rearrangement</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence</span>
+<span class="nt">amino_acid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">junction_aa</span>
+<span class="nt">v_resolved</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="nt">j_resolved</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+<span class="nt">templates</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">duplicate_count</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>columns_to_load (list): Specifies which subset of columns must be loaded from the file. By default, this is: [rearrangement, v_family, v_gene, v_allele, j_family, j_gene, j_allele, amino_acid, templates, frame_type, locus]</p></li>
+<li><p>separator (str): Column separator, for ImmunoSEQ files this is by default “t”.</p></li>
+<li><p>import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False</p></li>
+<li><p>import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_immunoseq_dataset</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ImmunoSEQRearrangement</span>
+<span class="w">            </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/files/</span>
+<span class="w">                </span><span class="nt">is_repertoire</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># whether to import a RepertoireDataset (True) or a SequenceDataset (False)</span>
+<span class="w">                </span><span class="nt">metadata_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/metadata.csv</span><span class="w"> </span><span class="c1"># metadata file for RepertoireDataset</span>
+<span class="w">                </span><span class="nt">metadata_column_mapping</span><span class="p">:</span><span class="w"> </span><span class="c1"># metadata column mapping ImmunoSEQ: immuneML for SequenceDataset</span>
+<span class="w">                    </span><span class="nt">immunoseq_column_name1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metadata_label1</span>
+<span class="w">                    </span><span class="nt">immunoseq_column_name2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metadata_label2</span>
+<span class="w">                </span><span class="nt">import_productive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># whether to include productive sequences in the dataset</span>
+<span class="w">                </span><span class="nt">import_with_stop_codon</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># whether to include sequences with stop codon in the dataset</span>
+<span class="w">                </span><span class="nt">import_out_of_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># whether to include out of frame sequences in the dataset</span>
+<span class="w">                </span><span class="nt">import_illegal_characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># remove sequences with illegal characters for the sequence_type being used</span>
+<span class="w">                </span><span class="nt">import_empty_nt_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># keep sequences even though the nucleotide sequence might be empty</span>
+<span class="w">                </span><span class="nt">import_empty_aa_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># filter out sequences if they don&#39;t have sequence_aa set</span>
+<span class="w">                </span><span class="c1"># Optional fields with ImmunoSEQ rearrangement-specific defaults, only change when different behavior is required:</span>
+<span class="w">                </span><span class="nt">separator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;\t&quot;</span><span class="w"> </span><span class="c1"># column separator</span>
+<span class="w">                </span><span class="nt">columns_to_load</span><span class="p">:</span><span class="w"> </span><span class="c1"># subset of columns to load</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rearrangement</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_family</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_gene</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_resolved</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_family</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_gene</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_resolved</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">amino_acid</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">templates</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">frame_type</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">locus</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span><span class="w"> </span><span class="c1"># what part of the sequence to import</span>
+<span class="w">                </span><span class="nt">column_mapping</span><span class="p">:</span><span class="w"> </span><span class="c1"># column mapping immunoSEQ: immuneML</span>
+<span class="w">                    </span><span class="nt">rearrangement</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cdr3</span>
+<span class="w">                    </span><span class="nt">amino_acid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cdr3_aa</span>
+<span class="w">                    </span><span class="nt">v_resolved</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="w">                    </span><span class="nt">j_resolved</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+<span class="w">                    </span><span class="nt">templates</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">duplicate_count</span>
+</pre></div>
+</div>
+</section>
+<section id="immunoseqsample">
+<h2>ImmunoSEQSample<a class="headerlink" href="#immunoseqsample" title="Link to this heading">¶</a></h2>
+<p>Imports data from Adaptive Biotechnologies immunoSEQ Analyzer sample-level .tsv files into a
+Repertoire-, or SequenceDataset.
+RepertoireDatasets should be used when making predictions per repertoire, such as predicting a disease state.
+SequenceDatasets should be used when predicting values for unpaired (single-chain) immune receptors, like
+antigen specificity.</p>
+<p>The format of the files imported by this importer is described here in section 3.4.13
+<a class="reference external" href="https://clients.adaptivebiotech.com/assets/downloads/immunoSEQ_AnalyzerManual.pdf">https://clients.adaptivebiotech.com/assets/downloads/immunoSEQ_AnalyzerManual.pdf</a>
+Alternatively, to import rearrangement-level .tsv files, see <a class="reference internal" href="#immunoseqrearrangement"><span class="std std-ref">ImmunoSEQRearrangement</span></a> import.
+The only difference between these two importers is which columns they load from the .tsv files.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul>
+<li><p>path (str): For RepertoireDatasets, this is the path to a directory with files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.</p></li>
+<li><p>is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset. By default, is_repertoire is set to True.</p></li>
+<li><p>metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. Only the files included under the column ‘filename’ are imported into the RepertoireDataset. For setting Sequence- or ReceptorDataset labels, metadata_file is ignored, use label_columns instead.</p></li>
+<li><p>label_columns (list): For Sequence- or ReceptorDataset, this parameter can be used to explicitly set the column names of labels to import. These labels can be used as prediction target. When label_columns are not set, label names are attempted to be discovered automatically (any column name which is not used in the column_mapping). For setting RepertoireDataset labels, label_columns is ignored, use metadata_file instead.</p></li>
+<li><p>import_productive (bool): Whether productive sequences (with value ‘In’ in column frame_type) should be included in the imported sequences. By default, import_productive is True.</p></li>
+<li><p>import_with_stop_codon (bool): Whether sequences with stop codons (with value ‘Stop’ in column frame_type) should be included in the imported sequences. By default, import_with_stop_codon is False.</p></li>
+<li><p>import_out_of_frame (bool): Whether out of frame sequences (with value ‘Out’ in column frame_type) should be included in the imported sequences. By default, import_out_of_frame is False.</p></li>
+<li><p>import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon ‘*’, or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.</p></li>
+<li><p>import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.</p></li>
+<li><p>import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.</p></li>
+<li><p>region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as immunoSEQ files use the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values are <cite>IMGT_CDR1</cite>, <cite>IMGT_CDR2</cite>, <cite>IMGT_CDR3</cite>, <cite>IMGT_FR1</cite>, <cite>IMGT_FR2</cite>, <cite>IMGT_FR3</cite>, <cite>IMGT_FR4</cite>, <cite>IMGT_JUNCTION</cite>, <cite>FULL_SEQUENCE</cite>.</p></li>
+<li><p>column_mapping (dict): A mapping from immunoSEQ column names to immuneML’s internal data representation. For immunoSEQ sample-level files, this is by default set to the values shown bellow in YAML format.         A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the file, or using alternative column names). Valid immuneML fields that can be specified here by <a class="reference external" href="https://docs.airr-community.org/en/latest/datarep/rearrangements.html">the AIRR Rearrangement Schema</a>.. For ImmunoSEQ sample import, this is by default set to:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">nucleotide</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence</span>
+<span class="nt">aminoAcid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">junction_aa</span>
+<span class="nt">vGeneName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="nt">jGeneName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+<span class="nt">sequenceStatus</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">frame_type</span>
+<span class="nt">count (templates/reads)</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">duplicate_count</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For immunoSEQ sample .tsv files, there is no default column_mapping_synonyms.</p></li>
+<li><p>columns_to_load (list): Specifies which subset of columns must be loaded from the file. By default, this is: [nucleotide, aminoAcid, count (templates/reads), vFamilyName, vGeneName, vGeneAllele, jFamilyName, jGeneName, jGeneAllele, sequenceStatus]; these are the columns from the original file that will be imported</p></li>
+<li><p>metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDatasets. This should specify a mapping similar to column_mapping where keys are immunoSEQ column names and values are the names that are internally used in immuneML as metadata fields. These metadata fields can be used as prediction labels for Sequence- and ReceptorDatasets. This parameter can also be used to specify sequence-level metadata columns for RepertoireDatasets, which can be used by reports. To set prediction label metadata for RepertoireDatasets, see metadata_file instead. For immunoSEQ sample .tsv files, there is no default metadata_column_mapping.</p></li>
+<li><p>separator (str): Column separator, for ImmunoSEQ files this is by default “t”.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_immunoseq_dataset</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ImmunoSEQSample</span>
+<span class="w">            </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/files/</span>
+<span class="w">                </span><span class="nt">is_repertoire</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># whether to import a RepertoireDataset (True) or a SequenceDataset (False)</span>
+<span class="w">                </span><span class="nt">metadata_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/metadata.csv</span><span class="w"> </span><span class="c1"># metadata file for RepertoireDataset</span>
+<span class="w">                </span><span class="nt">metadata_column_mapping</span><span class="p">:</span><span class="w"> </span><span class="c1"># metadata column mapping ImmunoSEQ: immuneML for SequenceDataset</span>
+<span class="w">                    </span><span class="nt">immunoseq_column_name1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metadata_label1</span>
+<span class="w">                    </span><span class="nt">immunoseq_column_name2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metadata_label2</span>
+<span class="w">                </span><span class="nt">import_productive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># whether to include productive sequences in the dataset</span>
+<span class="w">                </span><span class="nt">import_with_stop_codon</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># whether to include sequences with stop codon in the dataset</span>
+<span class="w">                </span><span class="nt">import_out_of_frame</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># whether to include out of frame sequences in the dataset</span>
+<span class="w">                </span><span class="nt">import_illegal_characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># remove sequences with illegal characters for the sequence_type being used</span>
+<span class="w">                </span><span class="nt">import_empty_nt_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># keep sequences even though the nucleotide sequence might be empty</span>
+<span class="w">                </span><span class="nt">import_empty_aa_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># filter out sequences if they don&#39;t have sequence_aa set</span>
+<span class="w">                </span><span class="c1"># Optional fields with ImmunoSEQ sample-specific defaults, only change when different behavior is required:</span>
+<span class="w">                </span><span class="nt">separator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;\t&quot;</span><span class="w"> </span><span class="c1"># column separator</span>
+<span class="w">                </span><span class="nt">columns_to_load</span><span class="p">:</span><span class="w"> </span><span class="c1"># subset of columns to load</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nucleotide</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aminoAcid</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">count (templates/reads)</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vFamilyName</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vGeneName</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vGeneAllele</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jFamilyName</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jGeneName</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jGeneAllele</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequenceStatus</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span><span class="w"> </span><span class="c1"># what part of the sequence to import</span>
+<span class="w">                </span><span class="nt">column_mapping</span><span class="p">:</span><span class="w"> </span><span class="c1"># column mapping immunoSEQ: immuneML</span>
+<span class="w">                    </span><span class="nt">nucleotide</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence</span>
+<span class="w">                    </span><span class="nt">aminoAcid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">junction_aa</span>
+<span class="w">                    </span><span class="nt">vGeneName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="w">                    </span><span class="nt">jGeneName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+<span class="w">                    </span><span class="nt">sequenceStatus</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">frame_type</span>
+<span class="w">                    </span><span class="nt">vFamilyName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_family</span>
+<span class="w">                    </span><span class="nt">jFamilyName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_family</span>
+<span class="w">                    </span><span class="nt">vGeneAllele</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_allele</span>
+<span class="w">                    </span><span class="nt">jGeneAllele</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_allele</span>
+<span class="w">                    </span><span class="nt">count (templates/reads)</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">duplicate_count</span>
+</pre></div>
+</div>
+</section>
+<section id="mixcr">
+<h2>MiXCR<a class="headerlink" href="#mixcr" title="Link to this heading">¶</a></h2>
+<p>Imports data in MiXCR format into a Repertoire-, or SequenceDataset.
+RepertoireDatasets should be used when making predictions per repertoire, such as predicting a disease state.
+SequenceDatasets should be used when predicting values for unpaired (single-chain) immune receptors, like
+antigen specificity.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul>
+<li><p>path (str): For RepertoireDatasets, this is the path to a directory with MiXCR files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.</p></li>
+<li><p>is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset. By default, is_repertoire is set to True.</p></li>
+<li><p>metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. Only the MiXCR files included under the column ‘filename’ are imported into the RepertoireDataset. For setting Sequence- or ReceptorDataset labels, metadata_file is ignored, use label_columns instead.</p></li>
+<li><p>label_columns (list): For Sequence- or ReceptorDataset, this parameter can be used to explicitly set the column names of labels to import. These labels can be used as prediction target. When label_columns are not set, label names are attempted to be discovered automatically (any column name which is not used in the column_mapping). For setting RepertoireDataset labels, label_columns is ignored, use metadata_file instead.</p></li>
+<li><p>import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon ‘*’, or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence, such as ‘_’, are removed). By default import_illegal_characters is False.</p></li>
+<li><p>import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.</p></li>
+<li><p>import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.</p></li>
+<li><p>region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as MiXCR format contains the trailing and leading conserved amino acids in the CDR3. Valid values are <cite>IMGT_CDR1</cite>, <cite>IMGT_CDR2</cite>, <cite>IMGT_CDR3</cite>, <cite>IMGT_FR1</cite>, <cite>IMGT_FR2</cite>, <cite>IMGT_FR3</cite>, <cite>IMGT_FR4</cite>, <cite>IMGT_JUNCTION</cite>, <cite>FULL_SEQUENCE</cite>.</p></li>
+<li><p>column_mapping (dict): A mapping from MiXCR column names to immuneML’s internal data representation. The columns that specify the sequences to import are handled by the region_type parameter. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the MiXCR file, or using alternative column names). Valid immuneML fields that can be specified here by <a class="reference external" href="https://docs.airr-community.org/en/latest/datarep/rearrangements.html">the AIRR Rearrangement Schema</a>.. For MiXCR, this is by default set to:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">cloneCount</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">duplicate_count</span>
+<span class="nt">allVHitsWithScore</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="nt">allJHitsWithScore</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+<span class="nt">aaSeqCDR3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">junction_aa</span>
+<span class="nt">nSeqCDR3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">junction</span>
+<span class="nt">aaSeqCDR1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cdr1_aa</span>
+<span class="nt">nSeqCDR1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cdr1</span>
+<span class="nt">aaSeqCDR2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cdr2_aa</span>
+<span class="nt">nSeqCDR2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cdr2</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>columns_to_load (list): Specifies which subset of columns must be loaded from the MiXCR file. By default, this is: [cloneCount, allVHitsWithScore, allJHitsWithScore, aaSeqCDR3, nSeqCDR3]</p></li>
+<li><p>separator (str): Column separator, for MiXCR this is by default “t”.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_mixcr_dataset</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MiXCR</span>
+<span class="w">            </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/files/</span>
+<span class="w">                </span><span class="nt">is_repertoire</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># whether to import a RepertoireDataset (True) or a SequenceDataset (False)</span>
+<span class="w">                </span><span class="nt">metadata_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/metadata.csv</span><span class="w"> </span><span class="c1"># metadata file for RepertoireDataset</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span><span class="w"> </span><span class="c1"># what part of the sequence to import</span>
+<span class="w">                </span><span class="nt">import_illegal_characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># remove sequences with illegal characters for the sequence_type being used</span>
+<span class="w">                </span><span class="nt">import_empty_nt_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># keep sequences even though the nucleotide sequence might be empty</span>
+<span class="w">                </span><span class="nt">import_empty_aa_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># filter out sequences if they don&#39;t have sequence_aa set</span>
+<span class="w">                </span><span class="c1"># Optional fields with MiXCR-specific defaults, only change when different behavior is required:</span>
+<span class="w">                </span><span class="nt">separator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;\t&quot;</span><span class="w"> </span><span class="c1"># column separator</span>
+<span class="w">                </span><span class="nt">columns_to_load</span><span class="p">:</span><span class="w"> </span><span class="c1"># subset of columns to load, sequence columns are handled by region_type parameter</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cloneCount</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allVHitsWithScore</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allJHitsWithScore</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aaSeqCDR3</span>
+<span class="w">                </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nSeqCDR3</span>
+<span class="w">                </span><span class="nt">column_mapping</span><span class="p">:</span><span class="w"> </span><span class="c1"># column mapping MiXCR: immuneML</span>
+<span class="w">                    </span><span class="nt">cloneCount</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">duplicate_count</span>
+<span class="w">                    </span><span class="nt">allVHitsWithScore</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="w">                    </span><span class="nt">allJHitsWithScore</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+<span class="w">                    </span><span class="nt">mixcrColumnName1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metadata_label1</span>
+<span class="w">                    </span><span class="nt">mixcrColumnName2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metadata_label2</span>
+</pre></div>
+</div>
+</section>
+<section id="olga">
+<h2>OLGA<a class="headerlink" href="#olga" title="Link to this heading">¶</a></h2>
+<p>Imports data generated by <a class="reference external" href="https://github.com/statbiophys/OLGA">OLGA</a> simulations into a Repertoire-, or SequenceDataset. Assumes that the columns in each
+file correspond to: nucleotide sequences, amino acid sequences, v genes, j genes</p>
+<p>Reference: Sethna, Zachary et al.
+‘High-throughput immune repertoire analysis with IGoR’. Bioinformatics, (2019)
+<a class="reference external" href="https://doi.org/10.1093/bioinformatics/btz035">doi.org/10.1093/bioinformatics/btz035</a>.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul>
+<li><p>path (str): For RepertoireDatasets, this is the path to a directory with OLGA files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.</p></li>
+<li><p>is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset. By default, is_repertoire is set to True.</p></li>
+<li><p>metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. Only the OLGA files included under the column ‘filename’ are imported into the RepertoireDataset. SequenceDataset metadata is currently not supported.</p></li>
+<li><p>import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon ‘*’, or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.</p></li>
+<li><p>import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.</p></li>
+<li><p>import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.</p></li>
+<li><p>region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as OLGA uses the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values are <cite>IMGT_CDR1</cite>, <cite>IMGT_CDR2</cite>, <cite>IMGT_CDR3</cite>, <cite>IMGT_FR1</cite>, <cite>IMGT_FR2</cite>, <cite>IMGT_FR3</cite>, <cite>IMGT_FR4</cite>, <cite>IMGT_JUNCTION</cite>, <cite>FULL_SEQUENCE</cite>.</p></li>
+<li><p>separator (str): Column separator, for OLGA this is by default “t”.</p></li>
+<li><p>column_mapping (dict): defines which columns to import from olga format: keys are the number of the columns and values are the names of the AIRR fields to be mapped to. For OLGA, this is by default set to:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">junction</span>
+<span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">junction_aa</span>
+<span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_olga_dataset</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OLGA</span>
+<span class="w">            </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/files/</span>
+<span class="w">                </span><span class="nt">is_repertoire</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># whether to import a RepertoireDataset (True) or a SequenceDataset (False)</span>
+<span class="w">                </span><span class="nt">metadata_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/metadata.csv</span><span class="w"> </span><span class="c1"># metadata file for RepertoireDataset</span>
+<span class="w">                </span><span class="nt">import_illegal_characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># remove sequences with illegal characters for the sequence_type being used</span>
+<span class="w">                </span><span class="nt">import_empty_nt_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># keep sequences even though the nucleotide sequence might be empty</span>
+<span class="w">                </span><span class="nt">import_empty_aa_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># filter out sequences if they don&#39;t have amino acid sequence set</span>
+<span class="w">                </span><span class="c1"># Optional fields with OLGA-specific defaults, only change when different behavior is required:</span>
+<span class="w">                </span><span class="nt">separator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;\t&quot;</span><span class="w"> </span><span class="c1"># column separator</span>
+<span class="w">                </span><span class="nt">columns_to_load</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">]</span>
+<span class="w">                </span><span class="nt">column_mapping</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">junction</span>
+<span class="w">                    </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">junction_aa</span>
+<span class="w">                    </span><span class="nt">2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="w">                    </span><span class="nt">3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+</pre></div>
+</div>
+</section>
+<section id="randomreceptordataset">
+<h2>RandomReceptorDataset<a class="headerlink" href="#randomreceptordataset" title="Link to this heading">¶</a></h2>
+<p>Returns a ReceptorDataset consisting of randomly generated sequences, which can be used for benchmarking purposes.
+The sequences consist of uniformly chosen amino acids or nucleotides.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>receptor_count (int): The number of receptors the ReceptorDataset should contain.</p></li>
+<li><p>chain_1_length_probabilities (dict): A mapping where the keys correspond to different sequence lengths for chain
+1, and the values are the probabilities for choosing each sequence length. For example, to create a random
+ReceptorDataset where 40% of the sequences for chain 1 would be of length 10, and 60% of the sequences would
+have length 12, this mapping would need to be specified:</p></li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">10</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.4</span>
+<span class="nt">12</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>chain_2_length_probabilities (dict): Same as chain_1_length_probabilities, but for chain 2.</p></li>
+<li><p>labels (dict): A mapping that specifies randomly chosen labels to be assigned to the receptors. One or multiple
+labels can be specified here. The keys of this mapping are the labels, and the values consist of another mapping
+between label classes and their probabilities. For example, to create a random ReceptorDataset with the label
+cmv_epitope where 70% of the receptors has class binding and the remaining 30% has class not_binding, the
+following mapping should be specified:</p></li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">cmv_epitope</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">binding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
+<span class="w">    </span><span class="nt">not_binding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.3</span>
+</pre></div>
+</div>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_random_dataset</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RandomReceptorDataset</span>
+<span class="w">            </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">receptor_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"> </span><span class="c1"># number of random receptors to generate</span>
+<span class="w">                </span><span class="nt">chain_1_length_probabilities</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">14</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span><span class="w"> </span><span class="c1"># 80% of all generated sequences for all receptors (for chain 1) will have length 14</span>
+<span class="w">                    </span><span class="nt">15</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span><span class="w"> </span><span class="c1"># 20% of all generated sequences across all receptors (for chain 1) will have length 15</span>
+<span class="w">                </span><span class="nt">chain_2_length_probabilities</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">14</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span><span class="w"> </span><span class="c1"># 80% of all generated sequences for all receptors (for chain 2) will have length 14</span>
+<span class="w">                    </span><span class="nt">15</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span><span class="w"> </span><span class="c1"># 20% of all generated sequences across all receptors (for chain 2) will have length 15</span>
+<span class="w">                </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">epitope1</span><span class="p">:</span><span class="w"> </span><span class="c1"># label name</span>
+<span class="w">                        </span><span class="nt">True</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span><span class="w"> </span><span class="c1"># 50% of the receptors will have class True</span>
+<span class="w">                        </span><span class="nt">False</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span><span class="w"> </span><span class="c1"># 50% of the receptors will have class False</span>
+<span class="w">                    </span><span class="nt">epitope2</span><span class="p">:</span><span class="w"> </span><span class="c1"># next label with classes that will be assigned to receptors independently of the previous label or other parameters</span>
+<span class="w">                        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.3</span><span class="w"> </span><span class="c1"># 30% of the generated receptors will have class 1</span>
+<span class="w">                        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span><span class="w"> </span><span class="c1"># 70% of the generated receptors will have class 0</span>
+</pre></div>
+</div>
+</section>
+<section id="randomrepertoiredataset">
+<h2>RandomRepertoireDataset<a class="headerlink" href="#randomrepertoiredataset" title="Link to this heading">¶</a></h2>
+<p>Returns a RepertoireDataset consisting of randomly generated sequences, which can be used for benchmarking purposes.
+The sequences consist of uniformly chosen amino acids or nucleotides.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul>
+<li><p>repertoire_count (int): The number of repertoires the RepertoireDataset should contain.</p></li>
+<li><p>sequence_count_probabilities (dict): A mapping where the keys are the number of sequences per repertoire, and the values are the probabilities that any of the repertoires would have that number of sequences. For example, to create a random RepertoireDataset where 40% of the repertoires would have 1000 sequences, and the other 60% would have 1100 sequences, this mapping would need to be specified:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">1000</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.4</span>
+<span class="nt">1100</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>sequence_length_probabilities (dict): A mapping where the keys correspond to different sequence lengths, and the values are the probabilities for choosing each sequence length. For example, to create a random RepertoireDataset where 40% of the sequences would be of length 10, and 60% of the sequences would have length 12, this mapping would need to be specified:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">10</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.4</span>
+<span class="nt">12</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>labels (dict): A mapping that specifies randomly chosen labels to be assigned to the Repertoires. One or multiple labels can be specified here. The keys of this mapping are the labels, and the values consist of another mapping between label classes and their probabilities. For example, to create a random RepertoireDataset with the label CMV where 70% of the Repertoires has class cmv_positive and the remaining 30% has class cmv_negative, the following mapping should be specified:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">CMV</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">cmv_positive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
+<span class="w">    </span><span class="nt">cmv_negative</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.3</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_random_dataset</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RandomRepertoireDataset</span>
+<span class="w">            </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">repertoire_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"> </span><span class="c1"># number of random repertoires to generate</span>
+<span class="w">                </span><span class="nt">sequence_count_probabilities</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">10</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span><span class="w"> </span><span class="c1"># probability that any of the repertoires would have 10 receptor sequences</span>
+<span class="w">                    </span><span class="nt">20</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w">                </span><span class="nt">sequence_length_probabilities</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">10</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span><span class="w"> </span><span class="c1"># probability that any of the receptor sequences would be 10 amino acids in length</span>
+<span class="w">                    </span><span class="nt">12</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w">                </span><span class="nt">labels</span><span class="p">:</span><span class="w"> </span><span class="c1"># randomly assigned labels (only useful for simple benchmarking)</span>
+<span class="w">                    </span><span class="nt">cmv</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">True</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span><span class="w"> </span><span class="c1"># probability of value True for label cmv to be assigned to any repertoire</span>
+<span class="w">                        </span><span class="nt">False</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+</pre></div>
+</div>
+</section>
+<section id="randomsequencedataset">
+<h2>RandomSequenceDataset<a class="headerlink" href="#randomsequencedataset" title="Link to this heading">¶</a></h2>
+<p>Returns a SequenceDataset consisting of randomly generated sequences, which can be used for benchmarking purposes.
+The sequences consist of uniformly chosen amino acids or nucleotides.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul class="simple">
+<li><p>sequence_count (int): The number of sequences the SequenceDataset should contain.</p></li>
+<li><p>length_probabilities (dict): A mapping where the keys correspond to different sequence lengths and the values
+are the probabilities for choosing each sequence length. For example, to create a random SequenceDataset where
+40% of the sequences would be of length 10, and 60% of the sequences would have length 12, this mapping would
+need to be specified:</p></li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">10</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.4</span>
+<span class="nt">12</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>labels (dict): A mapping that specifies randomly chosen labels to be assigned to the sequences. One or multiple
+labels can be specified here. The keys of this mapping are the labels, and the values consist of another mapping
+between label classes and their probabilities. For example, to create a random SequenceDataset with the label
+cmv_epitope where 70% of the sequences has class binding and the remaining 30% has class not_binding, the
+following mapping should be specified:</p></li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">cmv_epitope</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">binding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
+<span class="w">    </span><span class="nt">not_binding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.3</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>region_type (str): which region_type to assign to all randomly generated sequences</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_random_dataset</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RandomSequenceDataset</span>
+<span class="w">            </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">sequence_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"> </span><span class="c1"># number of random sequences to generate</span>
+<span class="w">                </span><span class="nt">length_probabilities</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">14</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span><span class="w"> </span><span class="c1"># 80% of all generated sequences for all sequences will have length 14</span>
+<span class="w">                    </span><span class="nt">15</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span><span class="w"> </span><span class="c1"># 20% of all generated sequences across all sequences will have length 15</span>
+<span class="w">                </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">epitope1</span><span class="p">:</span><span class="w"> </span><span class="c1"># label name</span>
+<span class="w">                        </span><span class="nt">True</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span><span class="w"> </span><span class="c1"># 50% of the sequences will have class True</span>
+<span class="w">                        </span><span class="nt">False</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span><span class="w"> </span><span class="c1"># 50% of the sequences will have class False</span>
+<span class="w">                    </span><span class="nt">epitope2</span><span class="p">:</span><span class="w"> </span><span class="c1"># next label with classes that will be assigned to sequences independently of the previous label or other parameters</span>
+<span class="w">                        </span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.3</span><span class="w"> </span><span class="c1"># 30% of the generated sequences will have class 1</span>
+<span class="w">                        </span><span class="nt">0</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span><span class="w"> </span><span class="c1"># 70% of the generated sequences will have class 0</span>
+</pre></div>
+</div>
+</section>
+<section id="tenxgenomics">
+<h2>TenxGenomics<a class="headerlink" href="#tenxgenomics" title="Link to this heading">¶</a></h2>
+<p>Imports data from the 10x Genomics Cell Ranger analysis pipeline into a Repertoire-, Sequence- or ReceptorDataset.
+RepertoireDatasets should be used when making predictions per repertoire, such as predicting a disease state.
+SequenceDatasets or ReceptorDatasets should be used when predicting values for unpaired (single-chain) and paired
+immune receptors respectively, like antigen specificity.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The 10xGenomics Cell Ranger VDJ pipeline also directly exports data in AIRR format (‘airr_rearrangement.tsv’,
+see <a class="reference external" href="https://www.10xgenomics.com/support/software/cell-ranger/latest/analysis/outputs/cr-5p-outputs-overview-vdj">https://www.10xgenomics.com/support/software/cell-ranger/latest/analysis/outputs/cr-5p-outputs-overview-vdj</a>).
+If possible, we highly recommend directly using the AIRR formatted files as input for immuneML.</p>
+</div>
+<p>If AIRR files are not available, this importer may be used to import data from Contig annotation CSV files
+(‘all_contig_annotations.csv’ or ‘filtered_contig_annotations.csv’) as described here: <a class="reference external" href="https://www.10xgenomics.com/support/software/cell-ranger/latest/analysis/outputs/cr-5p-outputs-annotations-vdj#contig-annotation-csv">https://www.10xgenomics.com/support/software/cell-ranger/latest/analysis/outputs/cr-5p-outputs-annotations-vdj#contig-annotation-csv</a></p>
+<p>It is recommended to run <code class="xref py py-obj docutils literal notranslate"><span class="pre">DuplicateSequenceFilter</span></code> to
+collapse together clonotypes when importing as a RepertoireDataset, and in some cases for Sequence- and ReceptorDatasets.</p>
+<p>Note that for pairing together Receptor chains, the column named ‘barcode’ is used.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul>
+<li><p>path (str): For RepertoireDatasets, this is the path to a directory with 10xGenomics files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.</p></li>
+<li><p>is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or ReceptorDataset. By default, is_repertoire is set to True.</p></li>
+<li><p>metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions.For setting Sequence- or ReceptorDataset labels, metadata_file is ignored, use label_columns instead.</p></li>
+<li><p>label_columns (list): For Sequence- or ReceptorDataset, this parameter can be used to explicitly set the column names of labels to import. These labels can be used as prediction target. When label_columns are not set, label names are attempted to be discovered automatically (any column name which is not used in the column_mapping). For setting RepertoireDataset labels, label_columns is ignored, use metadata_file instead.</p></li>
+<li><p>paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a SequenceDataset (paired = False) or a ReceptorDataset (paired = True). In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together based on the identifier given in the 10xGenomics column named ‘clonotype_id’.</p></li>
+<li><p>receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor.  Valid values are <cite>TRA_TRB</cite>, <cite>TRG_TRD</cite>, <cite>IGH_IGL</cite>, <cite>IGH_IGK</cite>. If receptor_chains is not provided, the chain pair is automatically detected (only one chain pair type allowed per repertoire).</p></li>
+<li><p>import_productive (bool): Whether productive sequences (with value ‘True’ in column productive) should be included in the imported sequences. By default, import_productive is True.</p></li>
+<li><p>import_unproductive (bool): Whether productive sequences (with value ‘Fale’ in column productive) should be included in the imported sequences. By default, import_unproductive is False.</p></li>
+<li><p>import_unknown_productivity (bool): Whether sequences with unknown productivity (missing or ‘NA’ value in column productive) should be included in the imported sequences. By default, import_unknown_productivity is True.</p></li>
+<li><p>import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon ‘*’, or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.</p></li>
+<li><p>import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.</p></li>
+<li><p>import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.</p></li>
+<li><p>region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as 10xGenomics uses IMGT junction as CDR3. Specifying any other value will result in importing the sequences as they are. Valid values are <cite>IMGT_CDR1</cite>, <cite>IMGT_CDR2</cite>, <cite>IMGT_CDR3</cite>, <cite>IMGT_FR1</cite>, <cite>IMGT_FR2</cite>, <cite>IMGT_FR3</cite>, <cite>IMGT_FR4</cite>, <cite>IMGT_JUNCTION</cite>, <cite>FULL_SEQUENCE</cite>.</p></li>
+<li><p>column_mapping (dict): A mapping from 10xGenomics column names to immuneML’s internal data representation. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the 10xGenomics file, or using alternative column names). Valid immuneML fields that can be specified here by <a class="reference external" href="https://docs.airr-community.org/en/latest/datarep/rearrangements.html">the AIRR Rearrangement Schema</a>.. For 10xGenomics, this is by default set to:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">cdr3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">junction</span>
+<span class="nt">cdr3_nt</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">junction_aa</span>
+<span class="nt">v_gene</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="nt">j_gene</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+<span class="nt">umis</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">duplicate_count</span>
+<span class="nt">clonotype_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cell_id</span>
+<span class="nt">consensus_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_id</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For 10xGenomics format, there is no default column_mapping_synonyms.</p></li>
+<li><p>separator (str): Column separator, for 10xGenomics this is by default “,”.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_10x_dataset</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10xGenomics</span>
+<span class="w">            </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/files/</span>
+<span class="w">                </span><span class="nt">is_repertoire</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># whether to import a RepertoireDataset</span>
+<span class="w">                </span><span class="nt">metadata_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/metadata.csv</span><span class="w"> </span><span class="c1"># metadata file for RepertoireDataset</span>
+<span class="w">                </span><span class="nt">paired</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False</span>
+<span class="w">                </span><span class="nt">receptor_chains</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TRA_TRB</span><span class="w"> </span><span class="c1"># what chain pair to import for a ReceptorDataset</span>
+<span class="w">                </span><span class="nt">import_illegal_characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># remove sequences with illegal characters for the sequence_type being used</span>
+<span class="w">                </span><span class="nt">import_empty_nt_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># keep sequences even though the nucleotide sequence might be empty</span>
+<span class="w">                </span><span class="nt">import_empty_aa_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># filter out sequences if they don&#39;t have amino acid sequence set</span>
+<span class="w">                </span><span class="c1"># Optional fields with 10xGenomics-specific defaults, only change when different behavior is required:</span>
+<span class="w">                </span><span class="nt">separator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;,&quot;</span><span class="w"> </span><span class="c1"># column separator</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span><span class="w"> </span><span class="c1"># what part of the sequence to import</span>
+<span class="w">                </span><span class="nt">column_mapping</span><span class="p">:</span><span class="w"> </span><span class="c1"># column mapping 10xGenomics: immuneML</span>
+<span class="w">                    </span><span class="nt">cdr3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">junction_aa</span>
+<span class="w">                    </span><span class="nt">cdr3_nt</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">junction</span>
+<span class="w">                    </span><span class="nt">v_gene</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="w">                    </span><span class="nt">j_gene</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+<span class="w">                    </span><span class="nt">umis</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">duplicate_count</span>
+<span class="w">                    </span><span class="nt">clonotype_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cell_id</span>
+<span class="w">                    </span><span class="nt">consensus_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_id</span>
+</pre></div>
+</div>
+</section>
+<section id="vdjdb">
+<h2>VDJdb<a class="headerlink" href="#vdjdb" title="Link to this heading">¶</a></h2>
+<p>Imports data in VDJdb format into a Repertoire-, Sequence- or ReceptorDataset.
+RepertoireDatasets should be used when making predictions per repertoire, such as predicting a disease state.
+SequenceDatasets or ReceptorDatasets should be used when predicting values for unpaired (single-chain) and paired
+immune receptors respectively, like antigen specificity.</p>
+<p><strong>Specification arguments:</strong></p>
+<ul>
+<li><p>path (str): For RepertoireDatasets, this is the path to a directory with VDJdb files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.</p></li>
+<li><p>is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or ReceptorDataset. By default, is_repertoire is set to True.</p></li>
+<li><p>metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. For setting Sequence- or ReceptorDataset labels, metadata_file is ignored, use label_columns instead.</p></li>
+<li><p>label_columns (list): For Sequence- or ReceptorDataset, this parameter can be used to explicitly set the column names of labels to import. By default, label_columns for VDJdbImport are [Epitope, Epitope gene, Epitope species]. These labels can be used as prediction target. When label_columns are not set, label names are attempted to be discovered automatically (any column name which is not used in the column_mapping). For setting RepertoireDataset labels, label_columns is ignored, use metadata_file instead.</p></li>
+<li><p>paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a SequenceDataset (paired = False) or a ReceptorDataset (paired = True). In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together based on the identifier given in the VDJdb column named ‘complex.id’.</p></li>
+<li><p>receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor. Valid values are <cite>TRA_TRB</cite>, <cite>TRG_TRD</cite>, <cite>IGH_IGL</cite>, <cite>IGH_IGK</cite>. If receptor_chains is not provided, the chain pair is automatically detected (only one chain pair type allowed per repertoire).</p></li>
+<li><p>import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon ‘*’, or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.</p></li>
+<li><p>import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.</p></li>
+<li><p>import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.</p></li>
+<li><p>region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as VDJdb uses IMGT junction as CDR3. Specifying any other value will result in importing the sequences as they are. Valid values are <cite>IMGT_CDR1</cite>, <cite>IMGT_CDR2</cite>, <cite>IMGT_CDR3</cite>, <cite>IMGT_FR1</cite>, <cite>IMGT_FR2</cite>, <cite>IMGT_FR3</cite>, <cite>IMGT_FR4</cite>, <cite>IMGT_JUNCTION</cite>, <cite>FULL_SEQUENCE</cite>.</p></li>
+<li><p>column_mapping (dict): A mapping from VDJdb column names to immuneML’s internal data representation. A custom column mapping can be specified here if necessary (for example; adding additional data fields if they are present in the VDJdb file, or using alternative column names). Valid immuneML fields that can be specified here by <a class="reference external" href="https://docs.airr-community.org/en/latest/datarep/rearrangements.html">the AIRR Rearrangement Schema</a>.. For VDJdb, this is by default set to:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">V</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="nt">J</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+<span class="nt">CDR3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">junction_aa</span>
+<span class="nt">complex.id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cell_id</span>
+<span class="nt">Gene</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">locus</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>separator (str): Column separator, for VDJdb this is by default “t”.</p></li>
+</ul>
+<p><strong>YAML specification:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">definitions</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">datasets</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my_vdjdb_dataset</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VDJdb</span>
+<span class="w">            </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/files/</span>
+<span class="w">                </span><span class="nt">is_repertoire</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># whether to import a RepertoireDataset</span>
+<span class="w">                </span><span class="nt">metadata_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path/to/metadata.csv</span><span class="w"> </span><span class="c1"># metadata file for RepertoireDataset</span>
+<span class="w">                </span><span class="nt">paired</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False</span>
+<span class="w">                </span><span class="nt">receptor_chains</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TRA_TRB</span><span class="w"> </span><span class="c1"># what chain pair to import for a ReceptorDataset</span>
+<span class="w">                </span><span class="nt">import_illegal_characters</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># remove sequences with illegal characters for the sequence_type being used</span>
+<span class="w">                </span><span class="nt">import_empty_nt_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"> </span><span class="c1"># keep sequences even though the nucleotide sequence might be empty</span>
+<span class="w">                </span><span class="nt">import_empty_aa_sequences</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w"> </span><span class="c1"># filter out sequences if they don&#39;t have amino acid sequence set</span>
+<span class="w">                </span><span class="c1"># Optional fields with VDJdb-specific defaults, only change when different behavior is required:</span>
+<span class="w">                </span><span class="nt">separator</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;\t&quot;</span><span class="w"> </span><span class="c1"># column separator</span>
+<span class="w">                </span><span class="nt">region_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMGT_CDR3</span><span class="w"> </span><span class="c1"># what part of the sequence to import</span>
+<span class="w">                </span><span class="nt">column_mapping</span><span class="p">:</span><span class="w"> </span><span class="c1"># column mapping VDJdb: immuneML</span>
+<span class="w">                    </span><span class="nt">V</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v_call</span>
+<span class="w">                    </span><span class="nt">J</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">j_call</span>
+<span class="w">                    </span><span class="nt">CDR3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">junction_aa</span>
+<span class="w">                    </span><span class="nt">complex.id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sequence_id</span>
+<span class="w">                    </span><span class="nt">Gene</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chain</span>
+<span class="w">                    </span><span class="nt">Epitope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">epitope</span>
+<span class="w">                    </span><span class="nt">Epitope gene</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">epitope_gene</span>
+<span class="w">                    </span><span class="nt">Epitope species</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">epitope_species</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="encodings.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Encoding parameters</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="how_to_specify_an_analysis_with_yaml.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">How to specify an analysis with YAML</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2021-2025, Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Dataset parameters</a><ul>
+<li><a class="reference internal" href="#airr">AIRR</a></li>
+<li><a class="reference internal" href="#generic">Generic</a></li>
+<li><a class="reference internal" href="#igor">IGoR</a></li>
+<li><a class="reference internal" href="#ireceptor">IReceptor</a></li>
+<li><a class="reference internal" href="#immunoseqrearrangement">ImmunoSEQRearrangement</a></li>
+<li><a class="reference internal" href="#immunoseqsample">ImmunoSEQSample</a></li>
+<li><a class="reference internal" href="#mixcr">MiXCR</a></li>
+<li><a class="reference internal" href="#olga">OLGA</a></li>
+<li><a class="reference internal" href="#randomreceptordataset">RandomReceptorDataset</a></li>
+<li><a class="reference internal" href="#randomrepertoiredataset">RandomRepertoireDataset</a></li>
+<li><a class="reference internal" href="#randomsequencedataset">RandomSequenceDataset</a></li>
+<li><a class="reference internal" href="#tenxgenomics">TenxGenomics</a></li>
+<li><a class="reference internal" href="#vdjdb">VDJdb</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=f1196aca"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    </body>
+</html>
