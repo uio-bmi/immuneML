@@ -1,4 +1,5 @@
 # main packages
+setuptools<70 # issue with airr package if it's above because it uses pkg_resources which is deprecated in setuptools 70
 numpy<=1.26.4
 pandas>=2.1.0
 PyYAML>=5.3
