@@ -7,21 +7,18 @@ from typing import List
 import sklearn.metrics as sklearn_metrics
 
 from immuneML.data_model.SequenceParams import RegionType
-from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
-from immuneML.hyperparameter_optimization.config.LeaveOneOutConfig import LeaveOneOutConfig
-from immuneML.hyperparameter_optimization.config.ManualSplitConfig import ManualSplitConfig
-from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
-from immuneML.hyperparameter_optimization.config.SplitType import SplitType
+from immuneML.hyperparameter_optimization.config.SampleConfig import SampleConfig
 from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.reports.Report import Report
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.workflows.instructions.clustering.ClusteringInstruction import ClusteringInstruction
+from immuneML.workflows.instructions.clustering.ClusteringState import StabilityConfig
 from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringSetting
 
 
@@ -35,69 +32,45 @@ class ClusteringParser:
 
         ParameterValidator.assert_region_type(instruction, ClusteringParser.__name__)
         ParameterValidator.assert_sequence_type(instruction, ClusteringParser.__name__)
-        if instruction['validation_type'] is not None:
-            ParameterValidator.assert_type_and_value(instruction['validation_type'], list, ClusteringParser.__name__,
-                                                     'validation_type')
-            for val_type in instruction['validation_type']:
-                ParameterValidator.assert_in_valid_list(val_type, ['method_based', 'result_based'],
-                                                        ClusteringParser.__name__, 'validation_type')
 
         dataset = symbol_table.get(instruction['dataset'])
         clustering_settings = parse_clustering_settings(key, instruction, symbol_table)
-        metrics = parse_metrics(key, instruction, symbol_table)
+        metrics = parse_metrics(key, instruction)
         label_config = parse_labels(key, instruction, dataset)
         reports = parse_reports(key, instruction, symbol_table)
-        split_config = parse_split_config(instruction)
+        sample_config = parse_sample_config(instruction)
+        stability_config = parse_stability_config(instruction)
 
         return ClusteringInstruction(dataset=dataset, metrics=metrics, clustering_settings=clustering_settings,
                                      name=key, label_config=label_config, reports=reports,
                                      sequence_type=SequenceType[instruction['sequence_type'].upper()],
                                      region_type=RegionType[instruction['region_type'].upper()],
-                                     split_config=split_config, validation_type=instruction['validation_type'])
+                                     sample_config=sample_config, stability_config=stability_config)
+
+def parse_stability_config(instruction) -> StabilityConfig:
+    ParameterValidator.assert_type_and_value(instruction['stability_config']['split_count'], int, StabilityConfig.__name__, 'stability_config:split_count', min_inclusive=1)
+    ParameterValidator.assert_type_and_value(instruction['stability_config']['random_seed'], int, StabilityConfig.__name__, 'stability_config:random_seed')
+    return StabilityConfig(split_count=instruction['stability_config']['split_count'], random_seed=instruction['stability_config']['random_seed'])
 
 
-def parse_split_config(instruction) -> SplitConfig:
+def parse_sample_config(instruction) -> SampleConfig:
+    split_key = 'sample_config'
     try:
-        split_key = 'split_config'
-        default_params = DefaultParamsLoader.load("instructions/", SplitConfig.__name__)
-        instruction[split_key] = {**default_params, **instruction[split_key]}
 
-        valid_keys = [k for k in inspect.signature(SplitConfig.__init__).parameters.keys() if k not in ['self']]
+        valid_keys = [k for k in inspect.signature(SampleConfig.__init__).parameters.keys() if k not in ['self']]
 
         ParameterValidator.assert_keys(instruction[split_key].keys(), valid_keys, ClusteringParser.__name__, split_key,
                                        exclusive=False)
         ParameterValidator.assert_type_and_value(instruction[split_key]['split_count'], int, ClusteringParser.__name__,
                                                  'split_count', min_inclusive=1)
 
-        split_strategy = SplitType[instruction[split_key]["split_strategy"].upper()]
-        training_percentage = float(
-            instruction[split_key]["training_percentage"]) if split_strategy == SplitType.RANDOM else -1
+        ParameterValidator.assert_type_and_value(instruction[split_key]['percentage'], float, ClusteringParser.__name__, 'percentage', None, None, 0, 1)
+        ParameterValidator.assert_type_and_value(instruction[split_key]['random_seed'], int, ClusteringParser.__name__, 'random_seed')
 
-        if split_strategy == SplitType.RANDOM:
-            assert 0. <= training_percentage <= 1., \
-                f'{ClusteringParser.__name__}: training_percentage has to between 0 and 1 if split_strategy is RANDOM.'
+        percentage = float(instruction[split_key]["percentage"])
+        random_seed = int(instruction[split_key]["random_seed"])
 
-        elif split_strategy == SplitType.MANUAL:
-            ParameterValidator.assert_keys(keys=instruction[split_key]["manual_config"].keys(),
-                                           valid_keys=["discovery_data", "validation_data"],
-                                           location=ClusteringParser.__name__, parameter_name="manual_config",
-                                           exclusive=True)
-
-            ParameterValidator.assert_valid_tabular_file(instruction[split_key]["manual_config"]["discovery_data"],
-                                                         location=ClusteringParser.__name__,
-                                                         parameter_name="discovery_data")
-
-            ParameterValidator.assert_valid_tabular_file(instruction[split_key]["manual_config"]["validation_data"],
-                                                         location=ClusteringParser.__name__,
-                                                         parameter_name="validation_data")
-
-        return SplitConfig(split_strategy=split_strategy,
-                           split_count=instruction[split_key]['split_count'], training_percentage=training_percentage,
-                           manual_config=ManualSplitConfig(train_metadata_path=instruction[split_key]['discovery_data'],
-                                                           test_metadata_path=instruction[split_key]['validation_data'])
-                           if "manual_config" in instruction[split_key] else None,
-                           leave_one_out_config=LeaveOneOutConfig(**instruction[split_key]["leave_one_out_config"])
-                           if "leave_one_out_config" in instruction[split_key] else None)
+        return SampleConfig(split_count=instruction[split_key]['split_count'], percentage=percentage, random_seed=random_seed)
 
     except KeyError as key_error:
         raise KeyError(
@@ -116,18 +89,18 @@ def parse_reports(key, instruction, symbol_table) -> List[Report]:
     if 'reports' not in instruction or instruction['reports'] is None:
         return []
     else:
-        ParameterValidator.assert_type_and_value(instruction['reports'], list, 'ClusteringParser', 'reports')
+        ParameterValidator.assert_type_and_value(instruction['reports'], list, 'ClusteringParser', f'{key}:reports')
         valid_reports = symbol_table.get_keys_by_type(SymbolType.REPORT)
 
-        ParameterValidator.assert_all_type_and_value(instruction['reports'], str, 'ClusteringParser', 'reports')
+        ParameterValidator.assert_all_type_and_value(instruction['reports'], str, 'ClusteringParser', f'{key}:reports')
         ParameterValidator.assert_all_in_valid_list(instruction['reports'], valid_reports, 'ClusteringParser',
-                                                    'reports')
+                                                    f'{key}:reports')
 
         reports = [symbol_table.get(report_id) for report_id in instruction['reports']]
         return reports
 
 
-def parse_metrics(key: str, instruction: dict, symbol_table: SymbolTable) -> List[str]:
+def parse_metrics(key: str, instruction: dict) -> List[str]:
     ParameterValidator.assert_type_and_value(instruction['metrics'], list, 'ClusteringParser', f'{key}:metrics')
     ParameterValidator.assert_all_type_and_value(instruction['metrics'], str, 'ClusteringParser', f'{key}:metrics')
 

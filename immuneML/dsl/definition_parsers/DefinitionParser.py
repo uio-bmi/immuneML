@@ -111,8 +111,8 @@ class DefinitionParser:
         file_path = path / filename
         mode = "w"
 
-        report_types = [DataReport, EncodingReport, MLReport, GenModelReport, TrainMLModelReport, ClusteringReport,
-                        MultiDatasetReport]
+        report_types = [DataReport, EncodingReport, MLReport, ClusteringMethodReport, GenModelReport,
+                        TrainMLModelReport, ClusteringReport, MultiDatasetReport]
 
         for report_type_class in report_types:
             with file_path.open(mode) as file:

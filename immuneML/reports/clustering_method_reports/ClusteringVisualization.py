@@ -87,7 +87,8 @@ class ClusteringVisualization(ClusteringMethodReport):
                                      f"Clustering visualization for {self.item.cl_setting.get_key()}")
 
         return ReportResult(f"{self.desc} ({self.name})",
-                            info=f"Visualizations of clustering results",
+                            info=f"Visualizations of clustering results using "
+                                 f"{self.dim_red_method.__class__.__name__ if self.dim_red_method else 'encoded data directly'}.",
                             output_figures=[report_output])
 
     def _make_plot(self, result_path: Path) -> Path:
@@ -96,9 +97,11 @@ class ClusteringVisualization(ClusteringMethodReport):
         elif self.item.dataset.encoded_data.dimensionality_reduced_data is not None:
             transformed_data = self.item.dataset.encoded_data.dimensionality_reduced_data
             self._dimension_names = self.item.dataset.encoded_data.dim_names if self.item.dataset.encoded_data.dim_names else ['dim1', 'dim2']
+            self.dim_red_method = self.item.dim_red_method
         elif self.item.dataset.encoded_data.examples.shape[1] <= 2:
             transformed_data = self.item.dataset.encoded_data.get_examples_as_np_matrix()
             self._dimension_names = self.item.dataset.encoded_data.feature_names
+            self.dim_red_method = None
         else:
             raise ValueError("ClusteringVisualization: No dimensionality reduction method specified, and the dataset "
                              "does not contain dimensionality reduced data. Please specify a dimensionality reduction "
@@ -108,9 +111,11 @@ class ClusteringVisualization(ClusteringMethodReport):
         df['cluster'] = pd.Series(self.item.predictions).astype(str)
         df['id'] = self.item.dataset.get_example_ids()
 
+        unique_clusters = sorted(df.cluster.astype(int).unique())
+        color_palette = self.get_color_palette(len(unique_clusters))
         fig = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1], color='cluster',
-                         color_discrete_sequence=plotly.colors.qualitative.Set2,
-                         category_orders={'cluster': sorted(df.cluster.unique())},
+                         color_discrete_sequence=color_palette,
+                         category_orders={'cluster': [str(c) for c in unique_clusters]},
                          hover_data=['id'])
 
         fig.update_layout(template="plotly_white")
@@ -123,6 +128,16 @@ class ClusteringVisualization(ClusteringMethodReport):
 
         return plot_path
 
+    def get_color_palette(self, n_clusters):
+        if n_clusters <= 10:
+            return px.colors.qualitative.Vivid
+        elif n_clusters <= 24:
+            return px.colors.qualitative.Dark24
+        else:
+            logging.warning(f"ClusteringVisualization: number of clusters is {n_clusters}, which is commonly too many to "
+                            f"visualize effectively.")
+            return plotly.colors.sample_colorscale('Plasma', [i / n_clusters for i in range(n_clusters)])
+
     def get_ids(self):
         if isinstance(self.item.dataset, RepertoireDataset):
             metadata = self.item.dataset.get_metadata(['subject_id'], return_df=True)
@@ -132,3 +147,11 @@ class ClusteringVisualization(ClusteringMethodReport):
                 return self.item.dataset.get_example_ids()
         else:
             return self.item.dataset.get_example_ids()
+
+    def check_prerequisites(self) -> bool:
+        """The results cannot be visualized in this report if the encoded data is precomputed distances"""
+
+        from immuneML.encodings.distance_encoding.DistanceEncoder import DistanceEncoder
+        from immuneML.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
+
+        return not isinstance(self.item.encoder, TCRdistEncoder) and not isinstance(self.item.encoder, DistanceEncoder)

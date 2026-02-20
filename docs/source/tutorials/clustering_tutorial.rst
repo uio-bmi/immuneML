@@ -67,22 +67,41 @@ Step 2: Clustering analysis
 ----------------------------
 
 To perform the clustering, we will use KmerFrequencyEncoding, PCA and KMeans algorithms from immuneML and scikit-learn.
-We will split the data into discovery and validation sets, where the discovery set will be used to fit the clustering model,
-that will then be used to predict the clusters of the validation set. This is of special interest if:
+We will split the data into discovery and validation set, where the discovery set will be used to fit the clustering model,
+and the resulting clustering will be validated on the validation set.
 
-- we want to see how well the model generalizes to new data (even in this unsupervised setting),
+As we do not know the optimal way to represent and cluster the data in advance, we will try out different combinations
+of encoding, dimensionality reduction (optional) and clustering algorithms with corresponding hyperparameters. These
+combinations we will call clustering settings. To choose the optimal clustering setting, we will perform the following
+analysis on discovery data:
 
-- we want to compare different clustering settings (e.g. different number of clusters or different ways of encoding the
-  data).
+1. We will generate random subsets of the data without replacement and fit the clustering settings on each subset.
+   Then, we will evaluate the clustering results using different clustering metrics (both internal and external if
+   labels are available) and report the variability of the metrics across the subsets.
 
-Following the paper by `Ullmann and colleagues (2023) <https://wires.onlinelibrary.wiley.com/doi/abs/10.1002/widm.1444>`_,
-immuneML supports two types of validation: method-based and result-based. In method-based validation, we perform the same
-preprocessing+encoding+clustering on discovery and validation sets and compare the results. In result-based validation, we
-fit a supervised classifier to the clusters determined on the discovery dataset and use it to predict the clustering
-on the validation data, which shows if the clustering result itself is useful for validation data.
+2. We will split the discovery data into two and measure how stable the clustering settings are across the two subsets.
+   We will then repeat this for different random splits of the discovery data to get a robust estimate of clustering stability.
 
-Additionally, immuneML supports different metrics for clustering evaluation: internal metrics which evaluate the quality of
-the clustering, and external metrics that compare the clustering to some external information available.
+Clustering stability is one of the measures that can be used to inform the selection of the clustering setting.
+Referring to `Liu and colleagues (2022) <https://onlinelibrary.wiley.com/doi/abs/10.1002/wics.1575>`_:
+
+  "Stability measures capture how well partitions and clusters are preserved under perturbations to the original dataset.
+  The underlying premise is that a good clustering of the data will be reproduced over an ensemble of perturbed datasets that are nearly
+  identical to the original data. Stability measures the quality of perservation of clustering solutions across perturbed datasets."
+
+To measure the stability of the clustering setting across the two subsets, immuneML implements the following procedure:
+- The clustering setting is fit on the first subset, resulting in concrete cluster assignments for each data point in that subset.
+- The clustering setting is fit on the second subset independently, resulting in cluster assignments for the second subset.
+- A supervised classifier (which depends on the clustering algorithm used) is trained on the data from the first subset
+  with the cluster assignments as labels. The cluster assignments for the second subset are then predicted using this classifier.
+- Finally, the predicted cluster assignments for the second subset are compared to the actual cluster assignments obtained
+  by fitting the clustering setting on the second subset using adjusted Rand index.
+
+As this is repeated many times for different random splits of the discovery data, immuneML reports the distribution of adjusted
+Rand index values across the splits, which indicates how stable the clustering setting is. This procedure follows the
+procedure by `Lange et al. (2004) <https://direct.mit.edu/neco/article/16/6/1299-1323/6841>`_, with the difference that
+immuneML uses adjusted Rand index to compute the similarity between cluster assignments. The review by Liu et al. (2022)
+reviews this and other methods for measuring clustering stability.
 
 In this tutorial, we will use the following settings:
 
@@ -168,3 +187,15 @@ To run the clustering analysis from the command line with immuneML installed, ru
 
 This will generate a report with the clustering results in the specified directory. To explore the results, see the
 index.html file in output directory.
+
+Once the analysis is done, we can explore the results and choose the optimal clustering setting. The next step is
+to validate the chosen clustering setting on the validation data.
+
+Step 3: Validation of clustering results
+------------------------------------------
+
+Following the paper by `Ullmann and colleagues (2023) <https://wires.onlinelibrary.wiley.com/doi/abs/10.1002/widm.1444>`_,
+immuneML supports two types of validation: method-based and result-based. In method-based validation, we perform the same
+preprocessing+encoding+clustering on discovery and validation sets and compare the results. In result-based validation, we
+fit a supervised classifier to the clusters determined on the discovery dataset and use it to predict the clustering
+on the validation data, which shows if the clustering result itself is useful for validation data.

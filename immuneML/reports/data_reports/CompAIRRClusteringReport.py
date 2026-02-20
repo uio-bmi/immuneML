@@ -253,7 +253,7 @@ class CompAIRRClusteringReport(DataReport):
         matrix_text = np.where(np.isnan(matrix_values), '', matrix_text)
 
         fig = go.Figure(data=go.Heatmap(z=matrix_values, x=subject_ids[:-1] + [""], y=[""] + subject_ids[1:],
-                                        colorscale='Darkmint',
+                                        colorscale='Blues',
                                         hoverongaps=False, text=matrix_text, texttemplate="%{text}"))
         fig.update_layout(template="plotly_white", title=f"{name} matrix", xaxis_title="repertoire",
                           yaxis_title='repertoire')

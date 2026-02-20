@@ -6,299 +6,199 @@
     <style>
         {{{css_style}}}
 
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin: 1em 0;
+        .back-link {
+            margin-bottom: 1em;
         }
 
-        .plot-container {
-            width: 100%;
-            max-width: 800px;
-            margin: 2em auto;
-        }
-
-        .plot-container embed {
-            width: 100%;
-            border: none;
-        }
-
-        img, embed {
-            max-width: 100%;
-            margin: 1em 0;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        /* Make embedded plots more square-shaped */
-        embed {
-            width: 100%;
-            height: 400px;  /* Reduced fixed height */
-            margin: 0 auto;
-            display: block;
-        }
-
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        ul li {
-            margin: 0.5em 0;
-        }
-
-        ul li a {
-            display: block;
-            padding: 0.5em;
-            background: var(--background-color);
+        .back-link a {
+            color: var(--accent-color, teal);
             text-decoration: none;
-            color: var(--text-color);
-            border-radius: 4px;
-            transition: all 0.2s ease;
         }
 
-        ul li a:hover {
-            background: var(--accent-color);
-            color: white;
+        .back-link a:hover {
+            text-decoration: underline;
         }
 
         .section {
             margin: 2em 0;
-            padding: 1em;
+            padding: 1.5em;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background: #fafafa;
+        }
+
+        .section h2 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--accent-color, teal);
+            padding-bottom: 0.5em;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-container th, .table-container td {
+            padding: 0.5em;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .plot-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 1.5em 0;
+        }
+
+        .plot-container embed, .plot-container iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
             border-radius: 4px;
-            border: 1px solid teal;
+        }
+
+        .plot-container img {
+            max-width: 100%;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .download-link {
+            display: inline-block;
+            margin: 0.5em 0;
+            padding: 0.5em 1em;
+            background: var(--accent-color, teal);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .download-link:hover {
+            background: #006666;
         }
 
         .report-section {
-            margin: 2em 0;
+            margin: 1.5em 0;
             padding: 1em;
             background: white;
             border-radius: 8px;
+            border: 1px solid #eee;
         }
 
+        .download-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .download-list li {
+            margin: 0.3em 0;
+        }
+
+        .download-list li a {
+            color: var(--accent-color, teal);
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Split {{split_number}} - {{setting_name}} Details</h1>
-
-        <div class="results-grid">
-            <!-- Discovery Section -->
-            <div class="section">
-                <h2>Discovery Results</h2>
-                <hr>
-                <h3>Internal Performance</h3>
-                {{#discovery.internal_performance}}
-                <div class="table-container">
-                    {{{discovery.internal_performance}}}
-                </div>
-                {{/discovery.internal_performance}}
-                {{^discovery.internal_performance}}
-                <p>No internal performance metrics available</p>
-                {{/discovery.internal_performance}}
-
-                <h3>External Performance</h3>
-                {{#discovery.external_performance}}
-                <div class="table-container">
-                    {{{discovery.external_performance}}}
-                </div>
-                {{/discovery.external_performance}}
-                {{^discovery.external_performance}}
-                <p>No external performance metrics available</p>
-                {{/discovery.external_performance}}
-
-                <p><a href="{{discovery.predictions_path}}">Download predictions</a></p>
-
-                {{#discovery.reports.has_reports}}
-                <h3>Reports</h3>
-                {{#discovery.reports.reports}}
-                <div class="report-section">
-                    <h4>{{name}}</h4>
-                    {{#info}}
-                    <p class="padded-bottom">{{info}}</p>
-                    {{/info}}
-                    
-                    {{#output_figures}}
-                    <div class="plot-container">
-                        {{#name}}<h5>{{name}}</h5>{{/name}}
-                        {{#is_embed}}
-                        <embed src="{{path}}">
-                        {{/is_embed}}
-                        {{^is_embed}}
-                        <img src="{{path}}">
-                        {{/is_embed}}
-                    </div>
-                    {{/output_figures}}
-                    
-                    {{#output_tables.length}}
-                    <p>Downloadable tables:</p>
-                    {{#output_tables}}
-                    <div>
-                        <ul>
-                        {{#is_download_link}}
-                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
-                        {{/is_download_link}}
-                        </ul>
-                    </div>
-                    {{/output_tables}}
-                    {{/output_tables.length}}
-                    
-                    {{#output_text.length}}
-                    <p>Text reports:</p>
-                    {{#output_text}}
-                    <div>
-                        <ul>
-                        {{#is_download_link}}
-                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
-                        {{/is_download_link}}
-                        </ul>
-                    </div>
-                    {{/output_text}}
-                    {{/output_text.length}}
-                </div>
-                {{/discovery.reports.reports}}
-                {{/discovery.reports.has_reports}}
-            </div>
-
-            <!-- Method-based Validation Section -->
-            {{#has_method_based}}
-            <div class="section">
-                <h2>Method-based Validation</h2>
-                <hr>
-                <h3>Internal Performance</h3>
-                <div class="table-container">
-                    {{{method_based.internal_performance}}}
-                </div>
-
-                <h3>External Performance</h3>
-                <div class="table-container">
-                    {{{method_based.external_performance}}}
-                </div>
-
-                <p><a href="{{method_based.predictions_path}}">Download predictions</a></p>
-
-                {{#method_based.reports.has_reports}}
-                <h3>Reports</h3>
-                {{#method_based.reports.reports}}
-                <div class="report-section">
-                    <h4>{{name}}</h4>
-                    {{#info}}
-                    <p class="padded-bottom">{{info}}</p>
-                    {{/info}}
-
-                    {{#output_figures}}
-                    <div class="plot-container">
-                        {{#name}}<h5>{{name}}</h5>{{/name}}
-                        {{#is_embed}}
-                        <embed src="{{path}}">
-                        {{/is_embed}}
-                        {{^is_embed}}
-                        <img src="{{path}}">
-                        {{/is_embed}}
-                    </div>
-                    {{/output_figures}}
-
-                    {{#output_tables.length}}
-                    <p>Downloadable tables:</p>
-                    {{#output_tables}}
-                    <div>
-                        <ul>
-                        {{#is_download_link}}
-                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
-                        {{/is_download_link}}
-                        </ul>
-                    </div>
-                    {{/output_tables}}
-                    {{/output_tables.length}}
-
-                    {{#output_text.length}}
-                    <p>Text reports:</p>
-                    {{#output_text}}
-                    <div>
-                        <ul>
-                        {{#is_download_link}}
-                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
-                        {{/is_download_link}}
-                        </ul>
-                    </div>
-                    {{/output_text}}
-                    {{/output_text.length}}
-                </div>
-                {{/method_based.reports.reports}}
-                {{/method_based.reports.has_reports}}
-            </div>
-            {{/has_method_based}}
-
-            <!-- Result-based Validation Section -->
-            {{#has_result_based}}
-            <div class="section">
-                <h2>Result-based Validation</h2>
-                <hr>
-                <h3>Internal Performance</h3>
-                <div class="table-container">
-                    {{{result_based.internal_performance}}}
-                </div>
-
-                <h3>External Performance</h3>
-                <div class="table-container">
-                    {{{result_based.external_performance}}}
-                </div>
-
-                <p><a href="{{result_based.predictions_path}}">Download predictions</a></p>
-
-                {{#result_based.reports.has_reports}}
-                <h3>Reports</h3>
-                {{#result_based.reports.reports}}
-                <div class="report-section">
-                    <h4>{{name}}</h4>
-                    {{#info}}
-                    <p class="padded-bottom">{{info}}</p>
-                    {{/info}}
-
-                    {{#output_figures}}
-                    <div class="plot-container">
-                        {{#name}}<h5>{{name}}</h5>{{/name}}
-                        {{#is_embed}}
-                        <embed src="{{path}}">
-                        {{/is_embed}}
-                        {{^is_embed}}
-                        <img src="{{path}}">
-                        {{/is_embed}}
-                    </div>
-                    {{/output_figures}}
-
-                    {{#output_tables.length}}
-                    <p>Downloadable tables:</p>
-                    {{#output_tables}}
-                    <div>
-                        <ul>
-                        {{#is_download_link}}
-                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
-                        {{/is_download_link}}
-                        </ul>
-                    </div>
-                    {{/output_tables}}
-                    {{/output_tables.length}}
-
-                    {{#output_text.length}}
-                    <p>Text reports:</p>
-                    {{#output_text}}
-                    <div>
-                        <ul>
-                        {{#is_download_link}}
-                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
-                        {{/is_download_link}}
-                        </ul>
-                    </div>
-                    {{/output_text}}
-                    {{/output_text.length}}
-                </div>
-                {{/result_based.reports.reports}}
-                {{/result_based.reports.has_reports}}
-            </div>
-            {{/has_result_based}}
+        <div class="back-link">
+            <a href="{{main_page_link}}">&larr; Back to main page</a>
         </div>
+
+        <h1>Split {{split_number}} - {{setting_name}}</h1>
+
+        <!-- Predictions Section -->
+        <div class="section">
+            <h2>Predictions</h2>
+            {{#predictions_path}}
+            <p><a class="download-link" href="{{predictions_path}}" download>Download Full Predictions CSV</a></p>
+            {{/predictions_path}}
+
+            {{#predictions_table}}
+            <p>Preview (first 20 rows):</p>
+            <div class="table-container" style="overflow-x: auto; overflow-y: scroll; max-height: 500px;">
+                {{{predictions_table}}}
+            </div>
+            {{/predictions_table}}
+            {{^predictions_table}}
+            <p>No predictions available.</p>
+            {{/predictions_table}}
+        </div>
+
+        <!-- Performance Section -->
+        <div class="section">
+            <h2>Performance Metrics</h2>
+
+            <h3>Internal Performance</h3>
+            {{#internal_performance}}
+            <div class="table-container">
+                {{{internal_performance}}}
+            </div>
+            {{/internal_performance}}
+            {{^internal_performance}}
+            <p>No internal performance metrics available.</p>
+            {{/internal_performance}}
+
+            <h3>External Performance</h3>
+            {{#external_performance}}
+            <div class="table-container">
+                {{{external_performance}}}
+            </div>
+            {{/external_performance}}
+            {{^external_performance}}
+            <p>No external performance metrics available.</p>
+            {{/external_performance}}
+        </div>
+
+        <!-- Reports Section -->
+        {{#reports.has_reports}}
+        <div class="section">
+            <h2>Reports</h2>
+            {{#reports.reports}}
+            <div class="report-section">
+                <h3>{{name}}</h3>
+                {{#show_info}}
+                <p>{{info}}</p>
+                {{/show_info}}
+
+                {{#output_figures}}
+                <div class="plot-container">
+                    {{#name}}<h4>{{name}}</h4>{{/name}}
+                    {{#is_embed}}
+                    <iframe src="{{path}}"></iframe>
+                    {{/is_embed}}
+                    {{^is_embed}}
+                    <img src="{{path}}" alt="{{name}}">
+                    {{/is_embed}}
+                </div>
+                {{/output_figures}}
+
+                {{#show_tables}}
+                <h4>Downloadable Tables</h4>
+                <ul class="download-list">
+                    {{#output_tables}}
+                    <li><a href="{{download_link}}" download>{{file_name}}</a> - {{name}}</li>
+                    {{/output_tables}}
+                </ul>
+                {{/show_tables}}
+
+                {{#show_text}}
+                <h4>Text Reports</h4>
+                <ul class="download-list">
+                    {{#output_text}}
+                    <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                    {{/output_text}}
+                </ul>
+                {{/show_text}}
+            </div>
+            {{/reports.reports}}
+        </div>
+        {{/reports.has_reports}}
     </div>
 </body>
 </html>

@@ -38,8 +38,6 @@ def make_dummy_progen_model(model_path: Path) -> Path:
 
     config = ProGenConfig(
         vocab_size=len(tokenizer),
-        n_positions=256,
-        n_ctx=256,
         n_embd=16,
         n_layer=1,
         n_head=8,

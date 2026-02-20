@@ -24,9 +24,9 @@ class DimRedMethod(ABC):
 
     def fit(self, dataset: Dataset = None, design_matrix: np.ndarray = None):
         if dataset is None:
-            self.method.fit(design_matrix)
+            self.method = self.method.fit(design_matrix)
         else:
-            self.method.fit(dataset.encoded_data.get_examples_as_np_matrix())
+            self.method = self.method.fit(dataset.encoded_data.get_examples_as_np_matrix())
 
     def transform(self, dataset: Dataset = None, design_matrix: np.ndarray = None):
         if dataset is None:
@@ -35,10 +35,8 @@ class DimRedMethod(ABC):
             return self.method.transform(dataset.encoded_data.get_examples_as_np_matrix())
 
     def fit_transform(self, dataset: Dataset = None, design_matrix: np.ndarray = None):
-        if dataset is None:
-            return self.method.fit_transform(design_matrix)
-        else:
-            return self.method.fit_transform(dataset.encoded_data.get_examples_as_np_matrix())
+        self.fit(dataset, design_matrix)
+        return self.transform(dataset, design_matrix)
 
     def inverse_transform(self, transformed_data):
         try:

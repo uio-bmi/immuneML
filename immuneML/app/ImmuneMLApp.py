@@ -4,9 +4,8 @@ import os
 import shutil
 import traceback
 from datetime import datetime
-from sys import exit as sys_exit
-import warnings
 from pathlib import Path
+from sys import exit as sys_exit
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser

@@ -20,40 +20,42 @@ class ClusteringReportHandler:
 
     def run_clustering_reports(self, state: ClusteringState):
         """Generate overall clustering reports."""
-        report_path = PathBuilder.build(state.result_path / f'reports/')
-        for report in self.reports:
-            if isinstance(report, ClusteringReport):
-                tmp_report = copy.deepcopy(report)
-                tmp_report.result_path = report_path
-                tmp_report.state = state
-                state.clustering_report_results.append(tmp_report.generate_report())
+        if self.reports and len(self.reports) > 0:
+            report_path = PathBuilder.build(state.result_path / f'reports/')
+            for report in self.reports:
+                if isinstance(report, ClusteringReport):
+                    tmp_report = copy.deepcopy(report)
+                    tmp_report.result_path = report_path
+                    tmp_report.state = state
+                    state.clustering_report_results.append(tmp_report.generate_report())
 
-        if len(self.reports) > 0:
             gen_rep_count = len(state.clustering_report_results)
             print_log(f"{state.config.name}: generated {gen_rep_count} clustering reports.", True)
 
         return state
 
-    def run_item_reports(self, cl_item: ClusteringItem, analysis_desc: str, run_id: int, path: Path,
+    def run_item_reports(self, cl_item: ClusteringItem, run_id: int, path: Path,
                          state: ClusteringState) -> list:
         """Generate reports for individual clustering items."""
-        report_path = PathBuilder.build(path / f'reports/')
-        report_results = []
-        for report in self.reports:
-            tmp_report = copy.deepcopy(report)
-            tmp_report.result_path = PathBuilder.build(report_path / tmp_report.name)
-            if isinstance(report, EncodingReport):
-                tmp_report.dataset = cl_item.dataset
-                rep_result = tmp_report.generate_report()
-                report_results.append(rep_result)
-            elif isinstance(report, ClusteringMethodReport):
-                tmp_report.item = cl_item
-                rep_result = tmp_report.generate_report()
-                report_results.append(rep_result)
+        if self.reports and len(self.reports) > 0:
+            report_path = PathBuilder.build(path / f'reports/')
+            report_results = []
+            for report in self.reports:
+                tmp_report = copy.deepcopy(report)
+                tmp_report.result_path = PathBuilder.build(report_path / tmp_report.name)
+                if isinstance(report, EncodingReport):
+                    tmp_report.dataset = cl_item.dataset
+                    rep_result = tmp_report.generate_report()
+                    report_results.append(rep_result)
+                elif isinstance(report, ClusteringMethodReport):
+                    tmp_report.item = cl_item
+                    rep_result = tmp_report.generate_report()
+                    report_results.append(rep_result)
 
-        if len(self.reports) > 0:
             gen_rep_count = len(report_results)
             print_log(f"{state.config.name}: generated {gen_rep_count} reports for setting "
-                      f"{cl_item.cl_setting.get_key()} for {analysis_desc}, run id: {run_id + 1}.", True)
+                      f"{cl_item.cl_setting.get_key()}, run id: {run_id + 1}.", True)
 
-        return report_results
+            return report_results
+        else:
+            return []

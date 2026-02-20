@@ -269,7 +269,7 @@ class TrainMLModelInstruction(Instruction):
             "label_configuration (LabelConfiguration)": "labels (list)",
             "data_reports": "reports",
             "a list of metrics": f"a list of metrics ({valid_values})",
-            "a metric to use for optimization": f"a metric to use for optimization (one of {valid_values})",
+            "a metric to use for optimization and assessment in the nested cross-validation.": f"a metric to use for optimization and assessment in the nested cross-validation (one of {valid_values}).",
             "Valid values are objects of any class inheriting :py:obj:`~immuneML.hyperparameter_optimization.strategy."
             "HPOptimizationStrategy.HPOptimizationStrategy`.": f"Valid values are: {valid_strategies}.",
             "the reports to be specified here have to be :py:obj:`~immuneML.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport` reports.": f"the reports that can be provided here are :ref:`**{TrainMLModelReport.DOCS_TITLE}**`.",

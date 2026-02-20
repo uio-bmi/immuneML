@@ -1,7 +1,20 @@
+import numpy as np
+import sklearn
+
 INTERNAL_EVAL_METRICS = ['calinski_harabasz_score', 'davies_bouldin_score', 'silhouette_score']
 EXTERNAL_EVAL_METRICS = ['rand_score', 'adjusted_rand_score', 'adjusted_mutual_info_score', 'completeness_score',
                          'fowlkes_mallows_score', 'homogeneity_score', 'mutual_info_score',
                          'normalized_mutual_info_score', 'v_measure_score']
+
+
+def compute(metric: str, features, predictions, distance_metric: str = None):
+    metric_fn = getattr(sklearn.metrics, metric)
+    if metric == 'silhouette_score' and distance_metric == 'precomputed':
+        return metric_fn(features, predictions, metric='precomputed')
+    elif distance_metric == 'precomputed':
+        return np.nan
+    else:
+        return metric_fn(features, predictions)
 
 
 def is_internal(metric: str):
@@ -14,3 +27,15 @@ def is_external(metric: str):
 
 def is_valid_metric(metric: str):
     return metric in INTERNAL_EVAL_METRICS or metric in EXTERNAL_EVAL_METRICS
+
+def get_search_criterion(metric):
+    assert is_valid_metric(metric), f"Metric '{metric}' is not recognized as a valid clustering metric."
+
+    if metric in ['adjusted_mutual_info_score', 'adjusted_rand_score', 'calinski_harabasz_score', 'completeness_score',
+                  'fowlkes_mallows_score', 'homogeneity_score', 'mutual_info_score', 'normalized_mutual_info_score',
+                  'rand_score', 'silhouette_score', 'v_measure_score']:
+        return max
+    elif metric in ['davies_bouldin_score']:
+        return min
+    else:
+        raise ValueError(f"Metric '{metric}' is not recognized as a valid clustering metric.")

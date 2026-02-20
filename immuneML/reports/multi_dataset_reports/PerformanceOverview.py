@@ -94,8 +94,8 @@ class PerformanceOverview(MultiDatasetReport):
                 predicted_class = df[f"{label.name}_{label.positive_class}_proba"].values
                 fpr, tpr, _ = roc_curve(y_true=true_class, y_score=predicted_class)
                 auc = roc_auc_score(y_true=true_class, y_score=predicted_class)
-                name = self.instruction_states[index].dataset.name + f' (AUC = {round(auc, 2)})'
-                figure.add_trace(go.Scatter(x=fpr, y=tpr, mode='lines', name=name, marker=dict(color=colors[index], line=dict(width=3)), hoverinfo="skip"))
+                name = self.instruction_states[index].dataset.name
+                figure.add_trace(go.Scatter(x=fpr, y=tpr, mode='lines', name=name + f' (AUC = {round(auc, 2)})', marker=dict(color=colors[index], line=dict(width=3)), hoverinfo="skip"))
 
                 data_path = self.result_path / f"roc_curve_data_{name}.csv"
                 pd.DataFrame({"FPR": fpr, "TPR": tpr}).to_csv(data_path, index=False)
@@ -116,7 +116,7 @@ class PerformanceOverview(MultiDatasetReport):
 
             true_class = df[f"{label.name}_true_class"].values
             predicted_proba = df[f"{label.name}_{label.positive_class}_proba"].values
-            precision, recall, _ = precision_recall_curve(y_true=true_class, probas_pred=predicted_proba)
+            precision, recall, _ = precision_recall_curve(y_true=true_class, y_score=predicted_proba, pos_label=label.positive_class)
             name = self.instruction_states[index].dataset.name
             figure.add_trace(go.Scatter(x=recall, y=precision, mode='lines', name=name, marker=dict(color=colors[index], line=dict(width=3)),
                                         hoverinfo="skip"))

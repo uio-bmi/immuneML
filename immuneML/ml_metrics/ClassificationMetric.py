@@ -23,6 +23,8 @@ class ClassificationMetric(Enum):
     AUC_OVO = "roc_auc_score_ovo"
     AUC_OVR = "roc_auc_score_ovr"
     LOG_LOSS = "log_loss"
+    SENSITIVITY = "recall_score"  # Sensitivity is equivalent to recall
+    SPECIFICITY = "specificity_score"  # Specificity needs to be implemented separately
 
     @staticmethod
     def get_binary_only_metrics():

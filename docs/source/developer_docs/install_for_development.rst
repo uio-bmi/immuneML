@@ -114,3 +114,9 @@ Alternatively, unit tests can be run on the command line using the following com
 
   python -m unittest
 
+Documentation of the development version of immuneML
+********************************************************
+
+The documentation of the development version of immuneML is automatically built on every push to the
+development branch and hosted at https://uio-bmi.github.io/immuneML/.
+

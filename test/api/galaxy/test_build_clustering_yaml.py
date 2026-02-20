@@ -33,7 +33,7 @@ class MyTestCase(unittest.TestCase):
 
             yamlbuilder_main(
                 ["-o", str(output_dir), "-f", output_filename, "-k", "3", "-n", "2", "-d", "PCA", "-l", "label1", "-e",
-                 "silhouette_score", "mutual_info_score", "-t", "70"])
+                 "silhouette_score", "mutual_info_score", "-s", "5", "-p", "0.8", "-r", "1"])
 
             # Use ImmuneML parser to test whether the yaml file created here is still valid
             ImmuneMLParser.parse_yaml_file(output_dir / output_filename, path / "result_path")

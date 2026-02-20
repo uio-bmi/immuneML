@@ -15,9 +15,9 @@ and some basic knowledge of how Git works.
 
   #. Read the :ref:`Information for new developers` and other relevant tutorials as needed.
   #. Follow the guide to :ref:`Set up immuneML for development`.
-  #. Create a new branch with a descriptive name from the master branch.
+  #. Create a new branch with a descriptive name from the development branch.
   #. Implement your changes and add documentation.
-  #. Make a pull request to the master branch.
+  #. Make a pull request to the development branch.
 
 .. toctree::
   :maxdepth: 1

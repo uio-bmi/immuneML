@@ -1,15 +1,16 @@
+import logging
 import re
 from itertools import zip_longest
+
 import numpy as np
-import logging
+
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
-from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.protein_embedding.ProteinEmbeddingEncoder import ProteinEmbeddingEncoder
+from immuneML.util.Logger import log_memory_usage
 from immuneML.util.NumpyHelper import NumpyHelper
 from immuneML.util.ParameterValidator import ParameterValidator
-from immuneML.util.Logger import log_memory_usage
 
 
 class TCRBertEncoder(ProteinEmbeddingEncoder):

@@ -18,11 +18,11 @@ classifiers = [
 ]
 
 dependencies = [
+    'setuptools<70',
     "numpy<=1.26.4",
     "pandas>=2.1.0",
     "PyYAML>=5.3",
     "scikit-learn>=0.23",
-    "python-glmnet",
     "matplotlib>=3.1",
     "editdistance",
     "regex",

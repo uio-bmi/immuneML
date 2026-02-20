@@ -8,7 +8,6 @@ import plotly.express as px
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.diversity_encoding.ShannonDiversityEncoder import ShannonDiversityEncoder
-from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -113,11 +112,30 @@ class ShannonDiversityOverview(DataReport):
 
         hover_data_cols = ['repertoire_id'] + (['subject_id'] if 'subject_id' in encoded_df.columns else [])
 
+        unique_color_labels = encoded_df[self.color_label].nunique() if self.color_label else 0
+        color_sequence = px.colors.qualitative.Vivid if unique_color_labels <= 10 else px.colors.qualitative.Dark24
+        if unique_color_labels > 24:
+            color_sequence = [px.colors.qualitative.Vivid[0]]
+            logging.warning(f"ShannonDiversityOverview: The color label '{self.color_label}' has "
+                            f"{unique_color_labels} unique values, which may lead to indistinguishable colors in the "
+                            f"plot. All bars will be colored with the first color in the Vivid palette.")
+
         fig = px.bar(encoded_df, x='repertoire_index', y='shannon_diversity', facet_row=self.facet_row_label,
-                     color=self.color_label, title='Shannon diversity per repertoire', facet_col=self.facet_col_label,
-                     color_discrete_sequence=px.colors.qualitative.Vivid, hover_data=hover_data_cols)
-        fig.update_layout(template="plotly_white", yaxis_title='Shannon diversity',
-                          xaxis_title='Repertoires sorted by Shannon diversity')
+                     color=self.color_label, facet_col=self.facet_col_label,
+                     color_discrete_sequence=color_sequence, hover_data=hover_data_cols)
+        fig.update_layout(template="plotly_white", xaxis_title='Repertoires sorted by Shannon diversity')
+
+        fig.add_annotation(
+            text="Shannon diversity",
+            xref="paper", yref="paper",
+            x=-0.02, y=0.5,
+            showarrow=False,
+            textangle=-90,
+            font=dict(size=14)
+        )
+
+        fig.update_layout(margin=dict(l=80))
+        fig.update_yaxes(title='')
 
         fig.update_traces(
             hovertemplate=(
@@ -129,4 +147,4 @@ class ShannonDiversityOverview(DataReport):
 
         figure_path = PlotlyUtil.write_image_to_file(fig, self.result_path / 'shannon_diversity.html')
 
-        return ReportOutput(figure_path, name='Shannon diversity')
+        return ReportOutput(figure_path, name='Shannon diversity per repertoire')
