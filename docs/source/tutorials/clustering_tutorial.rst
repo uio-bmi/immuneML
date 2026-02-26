@@ -92,10 +92,8 @@ Referring to `Liu and colleagues (2022) <https://onlinelibrary.wiley.com/doi/abs
 To measure the stability of the clustering setting across the two subsets, immuneML implements the following procedure:
 - The clustering setting is fit on the first subset, resulting in concrete cluster assignments for each data point in that subset.
 - The clustering setting is fit on the second subset independently, resulting in cluster assignments for the second subset.
-- A supervised classifier (which depends on the clustering algorithm used) is trained on the data from the first subset
-  with the cluster assignments as labels. The cluster assignments for the second subset are then predicted using this classifier.
-- Finally, the predicted cluster assignments for the second subset are compared to the actual cluster assignments obtained
-  by fitting the clustering setting on the second subset using adjusted Rand index.
+- A supervised classifier (which depends on the clustering algorithm used) is trained on the data from the first subset with the cluster assignments as labels. The cluster assignments for the second subset are then predicted using this classifier.
+- Finally, the predicted cluster assignments for the second subset are compared to the actual cluster assignments obtained by fitting the clustering setting on the second subset using adjusted Rand index.
 
 As this is repeated many times for different random splits of the discovery data, immuneML reports the distribution of adjusted
 Rand index values across the splits, which indicates how stable the clustering setting is. This procedure follows the

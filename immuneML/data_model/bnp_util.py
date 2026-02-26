@@ -56,6 +56,8 @@ def write_yaml(filename: Path, yaml_dict):
 
 
 def read_yaml(filename: Path) -> dict:
+    assert filename.exists(), f"Error reading {filename}: file does not exist."
+    assert filename.suffix == ".yaml", f"Error reading {filename}: file extension is not .yaml."
     with filename.open("r") as file:
         content = yaml.safe_load(file)
     return load_type_dict(content)
