@@ -7,6 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.data_model.EncodedData import EncodedData
 from immuneML.data_model.datasets.Dataset import Dataset
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
@@ -21,6 +22,8 @@ class GeneFrequencyEncoder(DatasetEncoder):
 
     **Dataset type:**
     - RepertoireDatasets
+    - ReceptorDatasets
+    - SequenceDatasets
 
     **Specification arguments:**
 
@@ -28,7 +31,9 @@ class GeneFrequencyEncoder(DatasetEncoder):
       specified.
 
     - normalization_type (str): Type of normalization to apply to the gene frequencies. Possible values are 'none',
-      'binary', 'relative_frequency', 'max', 'l2'. Defaults to 'relative_frequency'.
+      'binary', 'relative_frequency', 'max', 'l2'. Defaults to 'relative_frequency'. For SequenceDatasets and
+      ReceptorDatasets, the gene frequencies are binary (1 if the gene is present in any chain, 0 otherwise)
+      regardless of the normalization_type specified.
 
     - scale_to_zero_mean (bool): Whether to scale the features to zero mean. Defaults to True.
 
@@ -60,7 +65,9 @@ class GeneFrequencyEncoder(DatasetEncoder):
 
     @property
     def all_feature_names(self) -> List[str]:
-        return [feature_name for gene in self.genes for feature_name in self.feature_names[gene]]
+        if self.feature_names is None:
+            return []
+        return [name for gene in self.genes for name in self.feature_names[gene]]
 
     @staticmethod
     def build_object(dataset: Dataset, **params):
@@ -82,8 +89,74 @@ class GeneFrequencyEncoder(DatasetEncoder):
     def encode(self, dataset, params: EncoderParams) -> Dataset:
         if isinstance(dataset, RepertoireDataset):
             return self._encode_repertoire_dataset(dataset, params)
+        elif isinstance(dataset, ReceptorDataset):
+            return self._encode_receptor_dataset(dataset, params)
+        elif isinstance(dataset, SequenceDataset):
+            return self._encode_sequence_dataset(dataset, params)
         else:
             raise RuntimeError(f"{self.__class__.__name__}: {self.name}: invalid dataset type: {type(dataset)}.")
+
+    def _encode_receptor_dataset(self, dataset: ReceptorDataset, params: EncoderParams) -> ReceptorDataset:
+        df = dataset.data.topandas()
+
+        gene_dfs = {}
+        for gene in self.genes:
+            col = f'{gene.lower()}_call'
+            gene_values = df[col].apply(lambda x: x.split('*')[0] if x else x)
+            dummies = pd.get_dummies(gene_values, dtype=float)
+            dummies['cell_id'] = df['cell_id'].values
+            # one row per receptor: 1 if either chain carries that gene
+            dummies = dummies.groupby('cell_id').max().reset_index(drop=True)
+            gene_dfs[gene] = dummies
+
+        if params.learn_model:
+            self.feature_names = {gene: gene_df.columns.tolist() for gene, gene_df in gene_dfs.items()}
+        else:
+            for gene in self.genes:
+                # genes not seen during training are ignored (dropped);
+                # training genes absent here become 0
+                gene_dfs[gene] = gene_dfs[gene].reindex(columns=self.feature_names[gene], fill_value=0)
+
+        examples = NumpyHelper.concat_arrays_rowwise([gene_dfs[gene].values for gene in self.genes])
+
+        labels = dataset.get_metadata(params.label_config.get_labels_by_name(), return_df=False) \
+            if params.encode_labels else None
+
+        encoded_data = EncodedData(examples=examples, labels=labels, example_ids=dataset.get_example_ids(),
+                                   feature_names=self.all_feature_names, encoding=GeneFrequencyEncoder.__name__,
+                                   info={'genes': self.genes},
+                                   feature_annotations=pd.DataFrame({"feature": self.all_feature_names}))
+        encoded_dataset = dataset.clone()
+        encoded_dataset.encoded_data = encoded_data
+        return encoded_dataset
+
+    def _encode_sequence_dataset(self, dataset: SequenceDataset, params: EncoderParams) -> SequenceDataset:
+        df = dataset.data.topandas()
+
+        gene_dfs = {}
+        for gene in self.genes:
+            col = f'{gene.lower()}_call'
+            gene_values = df[col].apply(lambda x: x.split('*')[0] if x else x)
+            gene_dfs[gene] = pd.get_dummies(gene_values, dtype=int)
+
+        if params.learn_model:
+            self.feature_names = {gene: gene_df.columns.tolist() for gene, gene_df in gene_dfs.items()}
+        else:
+            for gene in self.genes:
+                gene_dfs[gene] = gene_dfs[gene].reindex(columns=self.feature_names[gene], fill_value=0)
+
+        examples = NumpyHelper.concat_arrays_rowwise([gene_dfs[gene].values for gene in self.genes])
+
+        labels = dataset.get_metadata(params.label_config.get_labels_by_name(), return_df=False) \
+            if params.encode_labels else None
+
+        encoded_data = EncodedData(examples=examples, labels=labels, example_ids=dataset.get_example_ids(),
+                                   feature_names=self.all_feature_names, encoding=GeneFrequencyEncoder.__name__,
+                                   info={'genes': self.genes},
+                                   feature_annotations=pd.DataFrame({"feature": self.all_feature_names}))
+        encoded_dataset = dataset.clone()
+        encoded_dataset.encoded_data = encoded_data
+        return encoded_dataset
 
     def _encode_repertoire_dataset(self, dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
         counters = {gene: [] for gene in self.genes}
