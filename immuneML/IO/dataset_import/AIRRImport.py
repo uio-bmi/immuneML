@@ -10,7 +10,7 @@ class AIRRImport(DataImport):
     SequenceDatasets or ReceptorDatasets should be used when predicting values for unpaired (single-chain) and paired
     immune receptors respectively, like antigen specificity.
 
-    The AIRR .tsv format is explained here: https://docs.airr-community.org/en/stable/datarep/format.html
+    The AIRR .tsv format is explained here: https://docs.airr-community.org/en/v1.3.1/datarep/overview.html
     And the AIRR rearrangement schema can be found here: https://docs.airr-community.org/en/stable/datarep/rearrangements.html
 
     When importing a ReceptorDataset, the AIRR field cell_id is used to determine the chain pairs.
