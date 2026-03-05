@@ -17,6 +17,7 @@ from immuneML.workflows.instructions.clustering.ClusteringState import Clusterin
 
 class ClusteringHTMLBuilder:
     CSS_PATH = EnvironmentSettings.html_templates_path / "css/custom.css"
+    PREDICTION_N_ROWS_PREVIEW = 21
 
     @staticmethod
     def build(state: ClusteringState) -> Path:
@@ -142,7 +143,7 @@ class ClusteringHTMLBuilder:
     @staticmethod
     def _format_predictions_file(file_path: Path) -> str:
         try:
-            df = pd.read_csv(file_path)
+            df = pd.read_csv(file_path, nrows=ClusteringHTMLBuilder.PREDICTION_N_ROWS_PREVIEW)
             return df.to_html(border=0, classes="prediction-table", max_rows=None, justify='left', index=False)
         except Exception as e:
             logging.warning(f"Error loading predictions: {e}")
