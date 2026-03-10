@@ -85,7 +85,9 @@ class DimensionalityReduction(EncodingReport):
                      " optionally colored by labels of interest.")
 
     def check_prerequisites(self):
-        return (isinstance(self.dataset.encoded_data, EncodedData) and
+        valid_encoding = self.dataset.encoded_data.encoding not in ['TCRdistEncoder', 'DistanceEncoder']
+
+        return valid_encoding and (isinstance(self.dataset.encoded_data, EncodedData) and
                 (self.dataset.encoded_data.dimensionality_reduced_data is not None or self._dim_red_method is not None))
 
     def _generate(self) -> ReportResult:
