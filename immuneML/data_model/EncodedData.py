@@ -75,7 +75,7 @@ class EncodedData:
         shape = state.pop('examples_shape') if 'examples_shape' in state else None
         self.__dict__.update(state)
         if self._examples_filename is not None:
-            self.examples = np.memmap(self._examples_filename, dtype='float32', mode='w+', shape=shape)
+            self.examples = np.memmap(self._examples_filename, dtype='float32', mode='r+', shape=shape)
 
     def get_examples_as_np_matrix(self):
         if isinstance(self.examples, np.ndarray):

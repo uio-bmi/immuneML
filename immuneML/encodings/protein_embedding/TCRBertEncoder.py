@@ -46,6 +46,9 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
     - batch_size (int): The number of sequences to encode at the same time. This could have large impact on memory usage.
       If memory is an issue, try with smaller batch sizes. Defaults to 4096.
 
+    - device (str): Which device to use for model inference - 'cpu', 'cuda', 'mps' - as defined by pytorch.
+      Defaults to 'cpu'.
+
     - scale_to_zero_mean (bool): Whether to scale the embeddings to zero mean. Defaults to True.
 
     - scale_to_unit_variance (bool): Whether to scale the embeddings to unit variance. Defaults to True.
