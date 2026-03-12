@@ -24,12 +24,15 @@ class TCRdistHelper:
         return [str(Chain.get_chain(el)).lower() for el in set(dataset.data.locus.tolist())]
 
     @staticmethod
-    def compute_tcr_dist(dataset: ElementDataset, label_names: list, cores: int = 1, cdr3_only: bool = False):
-        return CacheHandler.memo_by_params((('dataset_identifier', dataset.identifier), ("type", "TCRrep")),
-                                           lambda: TCRdistHelper._compute_tcr_dist(dataset, label_names, cores, cdr3_only))
+    def compute_tcr_dist(dataset: ElementDataset, label_names: list, cores: int = 1, cdr3_only: bool = False,
+                         organism: str = None):
+        return CacheHandler.memo_by_params(
+            (('dataset_identifier', dataset.identifier), ("type", "TCRrep"), ("organism", organism)),
+            lambda: TCRdistHelper._compute_tcr_dist(dataset, label_names, cores, cdr3_only, organism))
 
     @staticmethod
-    def _compute_tcr_dist(dataset: ElementDataset, label_names: list, cores: int, cdr3_only: bool = False):
+    def _compute_tcr_dist(dataset: ElementDataset, label_names: list, cores: int, cdr3_only: bool = False,
+                          organism: str = None):
         """
         Computes the tcrdist distances by creating a TCRrep object and calling compute_distances() function.
 
@@ -41,6 +44,7 @@ class TCRdistHelper:
             dataset: receptor dataset for which all pairwise distances between receptors will be computed
             label_names: a list of label names (e.g., specific epitopes) to be used for later classification or reports
             cores: how many cpus to use for computation
+            organism: organism name (e.g. 'human', 'mouse'); if None, extracted from dataset.labels
 
         Returns:
             an instance of TCRrep object with computed pairwise distances between all receptors in the dataset
@@ -48,8 +52,13 @@ class TCRdistHelper:
         """
         from tcrdist.repertoire import TCRrep
 
+        if organism is None:
+            org_val = dataset.labels.get("organism") if isinstance(dataset.labels, dict) else None
+            organism = org_val if isinstance(org_val, str) else \
+                (org_val[0] if isinstance(org_val, list) and len(org_val) == 1 else None)
+
         df, chains = TCRdistHelper.prepare_tcr_dist_dataframe(dataset, label_names)
-        tcr_rep = TCRrep(cell_df=df, chains=chains, organism=dataset.labels["organism"], cpus=cores,
+        tcr_rep = TCRrep(cell_df=df, chains=chains, organism=organism, cpus=cores,
                          deduplicate=False, compute_distances=False)
 
         if cdr3_only:
@@ -59,6 +68,48 @@ class TCRdistHelper:
                             {key: value for key, value in getattr(tcr_rep, f'{attr_prefix}_{chain[0]}').items() if 'cdr3' in key})
 
         tcr_rep.compute_distances()
+
+        return tcr_rep
+
+    @staticmethod
+    def compute_tcr_dist_rect(query_dataset: ElementDataset, reference_clone_df, chains: list,
+                               organism: str, label_names: list, cores: int = 1, cdr3_only: bool = False):
+        return CacheHandler.memo_by_params(
+            (('query_dataset_identifier', query_dataset.identifier), ("type", "TCRrep_rect"),
+             ("organism", organism)),
+            lambda: TCRdistHelper._compute_tcr_dist_rect(query_dataset, reference_clone_df, chains,
+                                                          organism, label_names, cores, cdr3_only))
+
+    @staticmethod
+    def _compute_tcr_dist_rect(query_dataset: ElementDataset, reference_clone_df, chains: list,
+                                organism: str, label_names: list, cores: int, cdr3_only: bool = False):
+        """
+        Computes rectangular TCRdist distances between query_dataset sequences and a reference clone_df.
+
+        Args:
+            query_dataset: new dataset whose sequences form the rows of the distance matrix
+            reference_clone_df: TCRrep clone_df from training, whose sequences form the columns
+            chains: list of chains (e.g. ['beta'])
+            organism: organism string (e.g. 'human')
+            label_names: label names to include when preparing the query dataframe
+            cores: number of parallel processes
+
+        Returns:
+            TCRrep instance with rw_alpha / rw_beta rectangular distance arrays
+        """
+        from tcrdist.repertoire import TCRrep
+
+        query_df, _ = TCRdistHelper.prepare_tcr_dist_dataframe(query_dataset, [])
+        tcr_rep = TCRrep(cell_df=query_df, chains=chains, organism=organism, cpus=cores,
+                         deduplicate=False, compute_distances=False)
+
+        if cdr3_only:
+            for chain in chains:
+                for attr_prefix in ['metrics', 'kargs', 'weights']:
+                    setattr(tcr_rep, f'{attr_prefix}_{chain[0]}',
+                            {key: value for key, value in getattr(tcr_rep, f'{attr_prefix}_{chain[0]}').items() if 'cdr3' in key})
+
+        tcr_rep.compute_rect_distances(df=tcr_rep.clone_df, df2=reference_clone_df)
 
         return tcr_rep
 
