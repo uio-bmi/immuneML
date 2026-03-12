@@ -1,7 +1,10 @@
 import os
 import shutil
+import uuid
 from pathlib import Path
 from typing import List
+
+import dill
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.util.Util import Util as MLUtil
@@ -10,6 +13,7 @@ from immuneML.presentation.PresentationFactory import PresentationFactory
 from immuneML.presentation.PresentationFormat import PresentationFormat
 from immuneML.presentation.TemplateParser import TemplateParser
 from immuneML.presentation.html.Util import Util
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class HTMLBuilder:
@@ -72,9 +76,11 @@ class HTMLBuilder:
     @staticmethod
     def _collect_all_presentations(states: list, rel_path: Path) -> List[InstructionPresentation]:
         presentations = []
+        temp_states_dir = PathBuilder.build(rel_path / 'states')
 
         for state in states:
             presentation_builder = PresentationFactory.make_presentation_builder(state, PresentationFormat.HTML)
+            HTMLBuilder.store_state_temp(state, temp_states_dir)
             presentation_path = presentation_builder.build(state)
             if len(states) > 1:
                 presentation_path = Path(os.path.relpath(str(presentation_path), str(rel_path)))
@@ -82,4 +88,16 @@ class HTMLBuilder:
             presentation = InstructionPresentation(presentation_path, instruction_class, state.name)
             presentations.append(presentation)
 
+        HTMLBuilder.remove_temp_states(temp_states_dir)
+
         return presentations
+
+    @staticmethod
+    def store_state_temp(state, path: Path):
+        filename = path / f"{state.name}_{type(state).__name__}_{uuid.uuid4()}.pickle"
+        with filename.open('wb') as file:
+            dill.dump(state, file)
+
+    @staticmethod
+    def remove_temp_states(path: Path):
+        shutil.rmtree(path, ignore_errors=True)
