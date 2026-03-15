@@ -99,7 +99,8 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
 
     def _get_model_and_tokenizer(self, log_location):
         from transformers import BertModel, BertTokenizer
-        
+        import torch
+
         log_memory_usage(stage="start", location=log_location)
         logging.info(f"TCRBert ({self.name}): Loading model: wukevin/{self.model}")
         
@@ -119,7 +120,8 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
             pad_token="$",
             cls_token="*",
             mask_token=".",
-            padding_side="right"
+            padding_side="right",
+            device=torch.device(self.device)
         )
         log_memory_usage("after tokenizer load", log_location)
         

@@ -93,7 +93,8 @@ class ProtT5Encoder(ProteinEmbeddingEncoder):
         model = model.to(self.device).eval()
         log_memory_usage("after model to device", log_location)
 
-        tokenizer = T5Tokenizer.from_pretrained(self.transformer_link, do_lower_case=False, legacy=True)
+        tokenizer = T5Tokenizer.from_pretrained(self.transformer_link, do_lower_case=False, legacy=True,
+                                                device=torch.device(self.device))
         log_memory_usage("after tokenizer load", log_location)
 
         return model, tokenizer

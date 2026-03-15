@@ -79,11 +79,12 @@ class ESMCEncoder(ProteinEmbeddingEncoder):
 
     def _get_model(self, log_location):
         from esm.models.esmc import ESMC
+        import torch
 
         log_memory_usage(stage="start", location=log_location)
         logging.info(f"ESMC ({self.name}): Loading model: {self.transformer_link}")
         
-        model = ESMC.from_pretrained(self.transformer_link)
+        model = ESMC.from_pretrained(self.transformer_link, device=torch.device(self.device))
         log_memory_usage("after model load", log_location)
         
         model = model.to(self.device).eval()
