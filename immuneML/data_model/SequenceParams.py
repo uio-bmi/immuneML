@@ -55,7 +55,7 @@ class ChainPair(Enum):
 
     @staticmethod
     def is_allowed(chain: Chain, chain_pair: 'ChainPair'):
-        return chain.value in chain_pair.value
+        return isinstance(chain, Chain) and chain.value in chain_pair.value
 
     @staticmethod
     def get_chain_pair(chains: List[Chain]):
