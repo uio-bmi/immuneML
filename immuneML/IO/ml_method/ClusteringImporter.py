@@ -63,6 +63,8 @@ class ClusteringImporter:
         """Import the encoder from the exported files."""
         encoder_class = ReflectionHandler.get_class_by_name(config['encoding_class'], 'encodings/')
         encoder = encoder_class.load_encoder(config_dir / config['encoding_file'])
+        if hasattr(encoder, 'context'):
+            encoder.context = None # clear old context if set
         return encoder
 
     @staticmethod

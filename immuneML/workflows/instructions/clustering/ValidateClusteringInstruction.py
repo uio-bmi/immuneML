@@ -129,6 +129,7 @@ class ValidateClusteringInstruction(Instruction):
         self._save_predictions(predictions_df)
 
         print_log("ValidateClusteringInstruction: validation completed.")
+        print_log("-------------------------------------------------------------------------------------")
 
         return self._state
 
@@ -182,7 +183,7 @@ class ValidateClusteringInstruction(Instruction):
         self._state.method_based_report_results = self._run_item_reports(
             cl_item_result.item, path, "method_based"
         )
-        print_log("ValidateClusteringInstruction: finished method-based validation.")
+        print_log("ValidateClusteringInstruction: finished method-based validation. ----------------------------------")
 
         return predictions_df
 
@@ -231,7 +232,7 @@ class ValidateClusteringInstruction(Instruction):
         # Run reports for result-based validation
         self._state.result_based_report_results = self._run_item_reports(cl_item, cl_setting.path, "result_based")
 
-        print_log(f"ValidateClusteringInstruction: result-based validation completed.")
+        print_log(f"ValidateClusteringInstruction: result-based validation completed. --------------------------------")
 
         return predictions_df
 

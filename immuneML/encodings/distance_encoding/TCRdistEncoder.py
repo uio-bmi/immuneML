@@ -52,6 +52,10 @@ class TCRdistEncoder(DatasetEncoder):
         self.distance_matrix = None
         self.context = None
         self._tmp_results_path = None
+        self.training_ids = None
+        self.training_df = None
+        self.training_chains = None
+        self.organism = None
 
     @staticmethod
     def build_object(dataset, **params):
@@ -68,10 +72,14 @@ class TCRdistEncoder(DatasetEncoder):
         if self._tmp_results_path is None and params.learn_model:
             self._tmp_results_path = params.result_path
 
-        train_receptor_ids = EncoderHelper.prepare_training_ids(dataset, params, self._tmp_results_path)
-
         if params.learn_model:
+            train_receptor_ids = EncoderHelper.prepare_training_ids(dataset, params, self._tmp_results_path)
+            self.training_ids = list(train_receptor_ids)
             self._build_tcr_dist_matrix(dataset, params.label_config.get_labels_by_name())
+        else:
+            train_receptor_ids = self.training_ids if self.training_ids is not None \
+                else EncoderHelper.prepare_training_ids(dataset, params, self._tmp_results_path)
+            self._extend_distance_matrix(dataset, params.label_config.get_labels_by_name())
 
         distance_matrix = self.distance_matrix.loc[dataset.get_example_ids(), train_receptor_ids]
         labels = self._build_labels(dataset, params) if params.encode_labels else None
@@ -87,7 +95,13 @@ class TCRdistEncoder(DatasetEncoder):
         chains = TCRdistHelper.get_chains(dataset)
 
         current_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
-        tcr_rep = TCRdistHelper.compute_tcr_dist(current_dataset, label_names, self.cores,self.cdr3_only)
+        organism = self._get_organism(current_dataset)
+        tcr_rep = TCRdistHelper.compute_tcr_dist(current_dataset, label_names, self.cores, self.cdr3_only,
+                                                  organism=organism)
+
+        self.organism = tcr_rep.organism
+        self.training_df = tcr_rep.clone_df
+        self.training_chains = chains
 
         data = 0.
 
@@ -98,6 +112,37 @@ class TCRdistEncoder(DatasetEncoder):
 
         self.distance_matrix = pd.DataFrame(data, index=tcr_rep.clone_df.clone_id.values,
                                             columns=tcr_rep.clone_df.clone_id.values)
+
+    def _get_organism(self, dataset: ElementDataset) -> str:
+        labels = dataset.labels if isinstance(dataset.labels, dict) else {}
+        org_val = labels.get("organism")
+        if isinstance(org_val, str):
+            return org_val
+        if isinstance(org_val, list) and len(org_val) == 1:
+            return org_val[0]
+        return self.organism
+
+    def _extend_distance_matrix(self, dataset: ElementDataset, label_names):
+        """Compute cross-distances between new sequences and training sequences, extending the distance matrix."""
+        from immuneML.util.TCRdistHelper import TCRdistHelper
+
+        new_ids = [id_ for id_ in dataset.get_example_ids() if id_ not in self.distance_matrix.index]
+        if not new_ids:
+            return
+
+        tcr_rep = TCRdistHelper.compute_tcr_dist_rect(dataset, self.training_df, self.training_chains,
+                                                       self.organism, label_names, self.cores, self.cdr3_only)
+
+        data = 0.
+        if 'alpha' in self.training_chains:
+            data += tcr_rep.rw_alpha
+        if 'beta' in self.training_chains:
+            data += tcr_rep.rw_beta
+
+        cross_df = pd.DataFrame(data, index=tcr_rep.clone_df.clone_id.values,
+                                columns=self.training_df.clone_id.values)
+        new_rows = cross_df.loc[[id_ for id_ in cross_df.index if id_ not in self.distance_matrix.index]]
+        self.distance_matrix = pd.concat([self.distance_matrix, new_rows])
 
     def _build_labels(self, dataset: ElementDataset, params: EncoderParams) -> dict:
         return dataset.get_metadata(params.label_config.get_labels_by_name())

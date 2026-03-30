@@ -54,6 +54,9 @@ class NumpyHelper:
         dir_path = PathBuilder.build(EnvironmentSettings.get_cache_path() / "memmap_storage")
         memmap_path = dir_path / f"temp_{uuid.uuid4()}.npy"
         if data is not None:
+            from scipy import sparse
+            if sparse.issparse(data):
+                data = data.toarray()
             data.astype('float32').tofile(memmap_path)
             return np.memmap(memmap_path, dtype='float32', mode='r+', shape=shape)
         else:
@@ -93,7 +96,8 @@ class NumpyHelper:
             # All are numpy arrays
             result = np.hstack(arrays)
 
-        if np.isnan(result).any():
+        data = result.data if sparse.issparse(result) else result
+        if np.isnan(data).any():
             import inspect
             logging.error(f"NumpyHelper: NaN values found in concatenated array; called from {inspect.stack()[1].function}")
             raise RuntimeError('NumpyHelper: NaN values found in concatenated array')

@@ -173,13 +173,14 @@ class ValidateClusteringHTMLBuilder:
                 if hasattr(report, "output_tables") and report.output_tables:
                     for table in report.output_tables:
                         try:
-                            formatted_report["output_tables"].append({
-                                "name": table.name,
-                                "download_link": os.path.relpath(table.path, base_path),
-                                "file_name": os.path.basename(table.path)
-                            })
+                            if table:
+                                formatted_report["output_tables"].append({
+                                    "name": table.name,
+                                    "download_link": os.path.relpath(table.path, base_path),
+                                    "file_name": os.path.basename(table.path)
+                                })
                         except Exception as e:
-                            logging.warning(f"Error processing table {table.name}: {e}")
+                            logging.warning(f"Error processing table: {e}")
 
                 # Process text outputs
                 if hasattr(report, "output_text") and report.output_text:

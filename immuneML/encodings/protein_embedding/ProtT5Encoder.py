@@ -86,14 +86,15 @@ class ProtT5Encoder(ProteinEmbeddingEncoder):
         model = T5EncoderModel.from_pretrained(self.transformer_link)
         log_memory_usage("after model load", log_location)
 
-        if self.device == torch.device("cpu"):
+        if self.device == 'cpu':
             logging.info(f"{log_location}: Casting model to full precision for running on CPU ...")
             model.to(torch.float32)
 
         model = model.to(self.device).eval()
         log_memory_usage("after model to device", log_location)
 
-        tokenizer = T5Tokenizer.from_pretrained(self.transformer_link, do_lower_case=False, legacy=True)
+        tokenizer = T5Tokenizer.from_pretrained(self.transformer_link, do_lower_case=False, legacy=True,
+                                                device=torch.device(self.device))
         log_memory_usage("after tokenizer load", log_location)
 
         return model, tokenizer

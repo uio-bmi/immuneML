@@ -1,3 +1,4 @@
+import copy
 import pickle
 import shutil
 from pathlib import Path
@@ -73,8 +74,13 @@ class ClusteringExporter:
 
     @staticmethod
     def _store_encoder(encoder: DatasetEncoder, path: Path) -> Path:
+        encoder_copy = copy.deepcopy(encoder)
+        if hasattr(encoder_copy, 'context'):
+            encoder_copy.context = None
+        if hasattr(encoder_copy, '_tmp_results_path'):
+            encoder_copy._tmp_results_path = None
         filename = path / "encoder.pickle"
-        type(encoder).store_encoder(encoder, filename)
+        type(encoder_copy).store_encoder(encoder_copy, filename)
         return filename
 
     @staticmethod
