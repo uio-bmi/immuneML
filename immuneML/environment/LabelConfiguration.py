@@ -2,7 +2,7 @@
 import logging
 from typing import List
 
-from immuneML.environment.Label import Label
+from immuneML.environment.Label import Label, infer_label_types
 from immuneML.util.ParameterValidator import ParameterValidator
 
 
@@ -21,14 +21,21 @@ class LabelConfiguration:
 
     def add_label(self, label_name: str, values: list = None, auxiliary_labels: list = None, positive_class=None):
 
-        vals = list(values) if values else None
+        vals = infer_label_types(list(values)) if values else None
 
         if label_name in self._labels and self._labels[label_name] is not None and len(self._labels[label_name]) > 0:
             logging.warning("Label " + label_name + " has already been set. Overriding existing values...")
 
         if positive_class is not None:
-            if all(isinstance(val, str) for val in vals) and not isinstance(positive_class, str):
-                positive_class = str(positive_class)
+            if positive_class not in vals:
+                # Handle type mismatches: pandas often loads numeric columns as strings,
+                # while YAML parses 1/0/True/False as their native types (and vice versa).
+                # Find a matching value by comparing string representations.
+                coerced = next((v for v in vals if str(v) == str(positive_class)), None)
+                if coerced is not None:
+                    logging.info(f"LabelConfiguration: positive_class '{positive_class}' ({type(positive_class).__name__}) "
+                                 f"was coerced to '{coerced}' ({type(coerced).__name__}) to match the type of label values for '{label_name}'.")
+                    positive_class = coerced
             ParameterValidator.assert_in_valid_list(positive_class, vals, Label.__name__, 'positive_class')
         else:
             positive_class = self._get_default_positive_class(vals)

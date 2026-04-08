@@ -1,4 +1,27 @@
 import logging
+import re
+
+_INT_PATTERN = re.compile(r'^[+-]?\d+$')
+
+
+def _is_float_str(s: str) -> bool:
+    s = s.lstrip('+-')
+    parts = s.split('.')
+    return len(parts) == 2 and (parts[0] == '' or parts[0].isdigit()) and parts[1].isdigit()
+
+
+def infer_label_types(values: list) -> list:
+    """
+    Convert a list of string label values to their natural numeric type when all values match.
+    Priority: int > float > unchanged.
+    """
+    if values is None or len(values) == 0 or not all(isinstance(v, str) for v in values):
+        return values
+    if all(_INT_PATTERN.fullmatch(v) for v in values):
+        return [int(v) for v in values]
+    if all(_is_float_str(v) for v in values):
+        return [float(v) for v in values]
+    return values
 
 
 class Label:
@@ -23,8 +46,14 @@ class Label:
     def positive_class(self):
         """
         Ensures the same class is always returned as the 'positive class', even when it was not explicitly set.
+        When a type mismatch exists between the stored positive_class and the actual label values (e.g., int 1
+        vs string '1' due to pandas loading data as strings), the value is coerced to match the values' type.
         """
         if self._positive_class is not None:
+            if self._values is not None and self._positive_class not in self._values:
+                coerced = next((v for v in self._values if str(v) == str(self._positive_class)), None)
+                if coerced is not None:
+                    self._positive_class = coerced
             return self._positive_class
         else:
             assert self._values is not None, f"Label: cannot access positive class for label {self.name} " \
@@ -61,3 +90,6 @@ class Label:
         Method to call when storing a label to YAML format
         """
         return {key.lstrip("_"): value for key, value in vars(self).items()}
+
+
+

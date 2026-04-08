@@ -18,6 +18,7 @@ from immuneML.data_model.bnp_util import bnp_write_to_file, read_yaml, write_dat
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset, ReceptorDataset, ElementDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
+from immuneML.environment.Label import infer_label_types
 from immuneML.util.ImportHelper import ImportHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
@@ -153,7 +154,7 @@ class DataImport(metaclass=abc.ABCMeta):
     def determine_repertoire_dataset_labels(self, metadata, imported_labels=None):
         potential_label_names = list(
             set(metadata.columns.tolist()) - {"filename", "type_dict_dynamic_fields", "identifier", "subject_id"})
-        potential_labels = {key: list(set(metadata[key].values.tolist())) for key in potential_label_names}
+        potential_labels = {key: infer_label_types(list(set(metadata[key].values.tolist()))) for key in potential_label_names}
 
         if imported_labels is not None:
             labels = imported_labels
@@ -186,7 +187,7 @@ class DataImport(metaclass=abc.ABCMeta):
         bnp_dc, type_dict = build_dynamic_airr_sequence_set_dataclass(final_data_dict)
         filename = self._write_element_dataset_tsv_file(final_data_dict, bnp_dc)
 
-        possible_labels = {key: list(set(final_data_dict[key])) for key in type_dict.keys()}
+        possible_labels = {key: infer_label_types(list(set(final_data_dict[key]))) for key in type_dict.keys()}
         logging.info(f"All possible labels for dataset '{self.dataset_name}' are: {list(possible_labels.keys())}")
 
         if self.params.label_columns:
