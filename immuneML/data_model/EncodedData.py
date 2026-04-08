@@ -3,6 +3,8 @@ import logging
 import pandas as pd
 import numpy as np
 
+from immuneML.environment.Label import infer_label_types
+
 
 class EncodedData:
     """
@@ -52,7 +54,7 @@ class EncodedData:
 
         self.examples = examples
         self._examples_filename = examples.filename if isinstance(examples, np.memmap) else None
-        self.labels = labels
+        self.labels = {name: infer_label_types(vals) for name, vals in labels.items()} if labels is not None else labels
         self.example_ids = example_ids
         self.feature_names = feature_names
         self.feature_annotations = feature_annotations
