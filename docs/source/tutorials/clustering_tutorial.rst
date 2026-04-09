@@ -1,11 +1,11 @@
-How to perform clustering analysis on highly similar immune sequences
+How to perform clustering analysis
 =====================================================================
 
 In this tutorial, we will perform clustering analysis on a dataset of immune receptor sequences.
 The dataset was simulated to contain sequences sharing strong structural resemblance — each sequence carries one
 of 15 distinct implanted motifs.
 
-The dataset (`simulated_highly_similar_sequences.tsv`) contains 14,724 TRB sequences in AIRR format. Each sequence
+The dataset (:download:`simulated_highly_similar_sequences.tsv <simulated_highly_similar_sequences.tsv>`) contains 14,724 TRB sequences in AIRR format. Each sequence
 is annotated with a ``motif`` label indicating which of the 15 motifs was implanted, but this label is only used
 for external validation — not as input to clustering.
 
