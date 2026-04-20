@@ -24,7 +24,7 @@ Useful links:
 - Main website: https://immuneml.uio.no
 - Documentation: https://docs.immuneml.uio.no
 - Documentation for the latest (unstable) version (development branch): https://uio-bmi.github.io/immuneML/
-- Galaxy web interface: https://galaxy.immuneml.uiocloud.no
+- Galaxy web interface (under development): https://galaxy.immuneml.uiocloud.no
 
 
 
