@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from typing import List
 
 import numpy as np
@@ -16,23 +17,31 @@ from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
+
+_FACTORS_DIR = Path(__file__).parent.parent.parent / "config" / "physicochemical_factors"
+SUPPORTED_FACTORS = ['atchley', 'amino_acid_property', 'kidera']
 
 
 class AminoAcidPropertyEncoder(DatasetEncoder):
     """
     Encodes a dataset by replacing each amino acid in a sequence with its biophysicochemical
     factor vector and averaging those vectors across all positions in the sequence.
-    Two classical factor sets are supported: Atchley factors (5 factors per amino acid) and
-    Kidera factors (10 factors per amino acid). Characters outside the standard 20-amino-acid
-    alphabet (gaps, X, etc.) are silently skipped; a sequence with no known amino acids is
-    encoded as an all-zero vector.
+    Three factor sets are supported, each stored as a TSV file under
+    ``immuneML/config/physicochemical_factors/``:
+
+    - ``atchley`` — 5 factors per amino acid (Atchley et al., 2005).
+    - ``kidera`` — 10 factors per amino acid (Kidera et al., 1985).
+    - ``amino_acid_property`` — 14 mixed physicochemical descriptors per amino acid compiled
+      from several published sources and originally aggregated in VDJtools (Shugay et al., 2015).
+
+    Characters outside the standard 20-amino-acid alphabet (gaps, X, etc.) are silently
+    skipped; a sequence with no known amino acids is encoded as an all-zero vector.
 
     For SequenceDatasets the output shape is ``[n_sequences, n_factors]``. For ReceptorDatasets
     each chain is encoded independently and the resulting vectors are concatenated (chains ordered
-    alphabetically by locus name), giving shape ``[n_receptors, 2 × n_factors]``. For
-    RepertoireDatasets each repertoire is represented by the mean of its per-sequence averaged
-    factor vectors, giving shape ``[n_repertoires, n_factors]``.
+    alphabetically by locus name), giving shape ``[n_receptors, 2 × n_factors]``.
 
     **Dataset type:**
 
@@ -40,30 +49,34 @@ class AminoAcidPropertyEncoder(DatasetEncoder):
 
     - ReceptorDatasets
 
-    - RepertoireDatasets
-
 
     **Specification arguments:**
 
     - factors (str): Which set of biophysicochemical factors to use. Valid values: ``atchley``
-      (5 factors) or ``kidera`` (10 factors).
+      (5 factors), ``kidera`` (10 factors), or ``amino_acid_property`` (14 factors).
 
     - region_type (str): Which part of the receptor sequence to encode (e.g. ``imgt_cdr3``).
 
     - scale_to_zero_mean (bool): Whether to scale each feature to zero mean across examples
-      after encoding. Defaults to ``False``.
+      after encoding. Defaults to ``true``.
 
     - scale_to_unit_variance (bool): Whether to scale each feature to unit variance across
-      examples after encoding. Defaults to ``False``.
+      examples after encoding. Defaults to ``true``.
 
 
     **References:**
 
-    - Atchley et al. (2005). Solving the protein sequence metric problem. *PNAS*, 102(18),
-      6395–6400.
+    Factor values downloaded from `vadimnazarov/kidera-atchley
+    <https://github.com/vadimnazarov/kidera-atchley>`_.
 
-    - Kidera et al. (1985). Statistical analysis of the physical properties of the 20 naturally
-      occurring amino acids. *Journal of Protein Chemistry*, 4(1), 23–55.
+    - W.R. Atchley, J. Zhao, A.D. Fernandes,  & T. Drüke,   Solving the protein sequence metric problem, Proc.
+      Natl. Acad. Sci. U.S.A. 102 (18) 6395-6400, https://doi.org/10.1073/pnas.0408677102 (2005).
+
+    - Kidera, A., Konishi, Y., Oka, M. et al. Statistical analysis of the physical properties of the 20 naturally
+      occurring amino acids. J Protein Chem 4, 23–55 (1985). https://doi.org/10.1007/BF01025492
+
+    - Shugay M et al. VDJtools: Unifying Post-analysis of T Cell Receptor Repertoires. PLoS Comp Biol 2015;
+      11(11):e1004503-e1004503.
 
 
     **YAML specification:**
@@ -77,77 +90,19 @@ class AminoAcidPropertyEncoder(DatasetEncoder):
                     AminoAcidProperty:
                         factors: atchley
                         region_type: imgt_cdr3
-                        scale_to_zero_mean: False
-                        scale_to_unit_variance: False
+                        scale_to_zero_mean: true
+                        scale_to_unit_variance: true
 
                 my_kidera_encoder:
                     AminoAcidProperty:
                         factors: kidera
                         region_type: imgt_cdr3
+
+                my_aa_property_encoder:
+                    AminoAcidProperty:
+                        factors: amino_acid_property
+                        region_type: imgt_cdr3
     """
-
-    # Atchley et al. (2005), PNAS 102(18): 6395-6400, Table 1.
-    # Factors: polarity, propensity for secondary structures, molecular volume,
-    #          codon diversity, electrostatic charge
-    ATCHLEY_FACTORS = {
-        'A': [-0.591, -1.302, -0.733,  1.570, -0.146],
-        'C': [-1.343,  0.465, -0.862, -1.020, -0.255],
-        'D': [ 1.050,  0.302, -3.656, -0.259, -3.242],
-        'E': [ 1.357, -1.453,  1.477,  0.113, -0.837],
-        'F': [-1.006, -0.590,  1.891, -0.397,  0.412],
-        'G': [-0.384,  1.652,  1.330,  1.045,  2.064],
-        'H': [ 0.336, -0.417, -1.673, -1.474, -0.078],
-        'I': [-1.239, -0.547,  2.131,  0.393,  0.816],
-        'K': [ 1.831, -0.561,  0.533, -0.277,  1.648],
-        'L': [-1.019, -0.987, -1.505,  1.266, -0.912],
-        'M': [-0.663, -1.524,  2.219, -1.005,  1.212],
-        'N': [ 0.945,  0.828,  1.299, -0.169,  0.933],
-        'P': [ 0.189,  2.081, -1.628,  0.421, -1.392],
-        'Q': [ 0.931, -0.179, -3.005, -0.503, -1.853],
-        'R': [ 1.538, -0.055,  1.502,  0.440,  2.897],
-        'S': [-0.228,  1.399, -4.760,  0.670, -2.647],
-        'T': [-0.032,  0.326,  2.213,  0.908,  1.313],
-        'V': [-1.337, -0.279, -0.544,  1.242, -1.262],
-        'W': [-0.595,  0.009,  0.672, -2.128, -0.184],
-        'Y': [ 0.260,  0.830,  3.097, -0.838,  1.512],
-    }
-
-    # Kidera et al. (1985), J. Protein Chem. 4(1): 23-55.
-    # Factors: helix/bend preference, side-chain size, extended structure preference,
-    #          hydrophobicity, double-bend preference, partial specific volume,
-    #          flat extended preference, occurrence in alpha region, pK-C,
-    #          surrounding hydrophobicity
-    KIDERA_FACTORS = {
-        'A': [ 0.24, -2.32,  0.60, -0.14,  1.89,  0.22, -0.60, -1.14, -0.09, -0.35],
-        'C': [ 0.84, -1.67,  3.71,  0.18, -2.65,  0.00,  1.20,  1.37, -1.68, -0.67],
-        'D': [-0.98, -1.43, -3.71, -0.15, -0.86, -0.01, -0.07, -0.29,  0.28, -0.01],
-        'E': [-0.77, -1.53, -2.29, -0.35,  2.82, -0.56,  0.03,  0.32, -0.47, -0.14],
-        'F': [ 1.06,  1.77,  0.27, -1.43,  1.13,  0.54, -0.49, -0.06,  0.78,  0.04],
-        'G': [ 2.05, -4.06,  0.36, -0.82, -0.38,  1.03,  0.27,  0.20,  0.21,  0.12],
-        'H': [-0.26,  0.53, -1.87, -1.22, -0.55, -0.87,  0.20,  1.82,  0.32, -0.07],
-        'I': [-0.11, -2.02,  3.36, -0.75,  0.55,  0.07,  1.52,  0.95, -0.46, -0.97],
-        'K': [-1.18,  1.40,  0.80, -0.75,  0.00, -0.31, -0.05, -0.28,  0.34,  0.74],
-        'L': [ 1.22, -2.32,  3.99, -0.27,  0.77,  1.16,  0.83, -0.98,  0.65,  0.09],
-        'M': [ 1.12, -2.99,  3.03,  0.00, -0.43,  0.96,  0.82, -0.69, -0.30, -0.32],
-        'N': [-0.94, -0.34, -2.29, -1.52, -0.49, -0.85, -0.79,  0.65, -0.28,  0.09],
-        'P': [-0.01, -1.58,  0.91,  0.68, -2.17, -0.66, -0.77, -0.01,  0.57, -0.47],
-        'Q': [-0.58, -0.20, -1.40, -0.58, -1.62, -0.94,  0.01, -0.67, -0.07,  0.25],
-        'R': [-1.96, -0.04, -0.12, -1.20,  0.35, -0.05,  0.10,  1.02,  0.22,  0.20],
-        'S': [-0.92, -1.03, -1.38,  0.29, -1.62,  0.97,  0.24, -0.29, -1.41, -0.08],
-        'T': [-0.36, -2.55,  1.04, -0.49, -1.56,  0.55,  0.64,  1.13, -0.47, -0.16],
-        'V': [ 0.76, -2.23,  2.62, -0.52,  0.02, -0.88,  0.26,  0.77, -0.69, -0.29],
-        'W': [ 0.48,  2.91,  1.15, -2.21,  1.76,  0.71, -0.07,  1.38,  0.75, -0.30],
-        'Y': [ 0.16,  1.06,  0.49, -0.44, -0.14,  1.11, -0.24,  0.32, -0.34, -0.15],
-    }
-
-    FACTOR_NAMES = {
-        'atchley': ['polarity', 'propensity_for_secondary_structures', 'molecular_volume',
-                    'codon_diversity', 'electrostatic_charge'],
-        'kidera': ['helix_bend_preference', 'side_chain_size', 'extended_structure_preference',
-                   'hydrophobicity', 'double_bend_preference', 'partial_specific_volume',
-                   'flat_extended_preference', 'occurrence_in_alpha_region', 'pK_C',
-                   'surrounding_hydrophobicity'],
-    }
 
     def __init__(self, factors: str, region_type: RegionType, scale_to_zero_mean: bool = False,
                  scale_to_unit_variance: bool = False, name: str = None):
@@ -156,27 +111,41 @@ class AminoAcidPropertyEncoder(DatasetEncoder):
         self.region_type = region_type
         self.scale_to_zero_mean = scale_to_zero_mean
         self.scale_to_unit_variance = scale_to_unit_variance
-        self.factor_table = self.ATCHLEY_FACTORS if factors == 'atchley' else self.KIDERA_FACTORS
+        self.factor_table, self.factor_names = self._load_factor_file(factors)
         self.scaler = None
         self._lookup, self._valid_mask = self._build_lookup_table()
 
     @staticmethod
+    def _load_factor_file(factors: str) -> tuple:
+        """Load a TSV factor file and return (factor_table dict, factor_names list)."""
+        filepath = _FACTORS_DIR / f"{factors}.tsv"
+        factor_table = {}
+        with open(filepath) as fh:
+            header = next(fh).rstrip('\n').split('\t')
+            factor_names = header[1:]
+            for line in fh:
+                parts = line.rstrip('\n').split('\t')
+                if len(parts) < 2:
+                    continue
+                aa = parts[0]
+                factor_table[aa] = [float(v) for v in parts[1:]]
+        return factor_table, factor_names
+
+    @staticmethod
     def build_object(dataset: Dataset, **params):
         location = AminoAcidPropertyEncoder.__name__
-        ParameterValidator.assert_in_valid_list(params.get('factors'), ['atchley', 'kidera'],
+        ParameterValidator.assert_in_valid_list(params.get('factors'), SUPPORTED_FACTORS,
                                                 location, 'factors')
         ParameterValidator.assert_region_type(params, location)
-        if 'scale_to_zero_mean' in params:
-            ParameterValidator.assert_type_and_value(params['scale_to_zero_mean'], bool, location,
-                                                     'scale_to_zero_mean')
-        if 'scale_to_unit_variance' in params:
-            ParameterValidator.assert_type_and_value(params['scale_to_unit_variance'], bool, location,
-                                                     'scale_to_unit_variance')
+        ParameterValidator.assert_type_and_value(params['scale_to_zero_mean'], bool, location,
+                                                 'scale_to_zero_mean')
+        ParameterValidator.assert_type_and_value(params['scale_to_unit_variance'], bool, location,
+                                                 'scale_to_unit_variance')
         return AminoAcidPropertyEncoder(
             factors=params['factors'],
             region_type=RegionType[params['region_type'].upper()],
-            scale_to_zero_mean=params.get('scale_to_zero_mean', False),
-            scale_to_unit_variance=params.get('scale_to_unit_variance', False),
+            scale_to_zero_mean=params['scale_to_zero_mean'],
+            scale_to_unit_variance=params['scale_to_unit_variance'],
             name=params.get('name'),
         )
 
@@ -285,27 +254,20 @@ class AminoAcidPropertyEncoder(DatasetEncoder):
     def _encode_receptor_dataset(self, dataset: ReceptorDataset, params: EncoderParams) -> ReceptorDataset:
         seq_field = get_sequence_field_name(self.region_type, SequenceType.AMINO_ACID)
         data = dataset.data
-        loci = sorted(set(data.locus.tolist()))
 
-        assert len(loci) == 2, (
-            f"{self.__class__.__name__}: receptor dataset must contain exactly two chains, "
-            f"but found: {loci}.")
+        receptor_ids, loci, mask1, mask2 = EncoderHelper.get_receptor_chain_masks(dataset)
 
-        per_seq_embeddings = self._encode_sequence_set(data, seq_field)
+        per_seq_embeddings = self._encode_sequence_set(data, seq_field)  # [n_chains, n_factors]
 
-        chain1, chain2 = {}, {}
-        for i, (cell_id, locus) in enumerate(zip(data.cell_id.tolist(), data.locus.tolist())):
-            (chain1 if locus == loci[0] else chain2)[cell_id] = per_seq_embeddings[i]
-
-        assert set(chain1) == set(chain2), \
-            f"{self.__class__.__name__}: some receptors are missing one of the two chains."
-
-        receptor_ids = list(chain1.keys())
-        examples = np.array([np.concatenate([chain1[cid], chain2[cid]]) for cid in receptor_ids])
+        examples = np.hstack([per_seq_embeddings[mask1], per_seq_embeddings[mask2]])  # [n_receptors, 2*n_factors]
         examples = self._scale_examples(examples, params)
 
-        labels = (data.topandas().groupby('cell_id').first()[params.label_config.get_labels_by_name()]
-                  .to_dict(orient='list') if params.encode_labels else None)
+        if params.encode_labels:
+            df = data.topandas()
+            labels = {name: df[name].values[mask1].tolist()
+                      for name in params.label_config.get_labels_by_name()}
+        else:
+            labels = None
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(
@@ -364,12 +326,12 @@ class AminoAcidPropertyEncoder(DatasetEncoder):
     # ------------------------------------------------------------------
 
     def _get_feature_names(self) -> List[str]:
-        return [f'{self.factors}_{name}' for name in self.FACTOR_NAMES[self.factors]]
+        return [f'{self.factors}_{name}' for name in self.factor_names]
 
     def _get_receptor_feature_names(self, loci: List[str]) -> List[str]:
         return [f'{locus}_{self.factors}_{name}'
                 for locus in loci
-                for name in self.FACTOR_NAMES[self.factors]]
+                for name in self.factor_names]
 
     # ------------------------------------------------------------------
     # Caching

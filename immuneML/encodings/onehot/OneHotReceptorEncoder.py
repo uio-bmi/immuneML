@@ -4,6 +4,7 @@ from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
 from immuneML.data_model.EncodedData import EncodedData
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
+from immuneML.util.EncoderHelper import EncoderHelper
 
 
 class OneHotReceptorEncoder(OneHotEncoder):
@@ -28,17 +29,16 @@ class OneHotReceptorEncoder(OneHotEncoder):
     def _encode_data(self, dataset: ReceptorDataset, params: EncoderParams):
         data = dataset.data
 
-        chains = sorted(np.unique(dataset.data.locus.tolist()).tolist())
-        assert len(chains) == 2, f"OneHotEncoder: {len(chains)} different loci in the dataset, expected 2."
+        receptor_ids, chains, mask1, mask2 = EncoderHelper.get_receptor_chain_masks(dataset)
 
-        first_chain_seqs = data[np.array(data.locus.tolist()) == chains[0]]
-        second_chain_seqs = data[np.array(data.locus.tolist()) == chains[1]]
+        first_chain_seqs = data[mask1]
+        second_chain_seqs = data[mask2]
 
         sequence_field = self._get_seq_field_name(params)
 
         max_seq_len = max(getattr(data, sequence_field).lengths)
 
-        labels = self._get_labels(data, params) if params.encode_labels else None
+        labels = self._get_labels(data, mask1, params) if params.encode_labels else None
 
         examples_first_chain = self._encode_sequence_list(first_chain_seqs, pad_n_sequences=len(data) // 2,
                                                           pad_sequence_len=max_seq_len, params=params)
@@ -55,7 +55,7 @@ class OneHotReceptorEncoder(OneHotEncoder):
 
         encoded_data = EncodedData(examples=examples,
                                    labels=labels,
-                                   example_ids=dataset.get_example_ids(),
+                                   example_ids=receptor_ids,
                                    feature_names=feature_names,
                                    encoding=OneHotEncoder.__name__,
                                    info={"chain_names": chains})
@@ -65,8 +65,7 @@ class OneHotReceptorEncoder(OneHotEncoder):
     def _get_feature_names(self, max_seq_len, chains):
         return [[[f"{chain}_{pos}_{dim}" for dim in self.onehot_dimensions] for pos in range(max_seq_len)] for chain in chains]
 
-    def _get_labels(self, data, params: EncoderParams):
+    def _get_labels(self, data, mask1, params: EncoderParams):
         label_names = params.label_config.get_labels_by_name()
-        labels = data.topandas().groupby('cell_id').aggregate({ln: 'first' for ln in label_names})[label_names].to_dict('list')
-
-        return labels
+        df = data.topandas()
+        return {name: df[name].values[mask1].tolist() for name in label_names}

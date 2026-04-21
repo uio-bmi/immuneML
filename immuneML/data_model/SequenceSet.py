@@ -254,7 +254,7 @@ def make_receptors_from_data(data: AIRRSequenceSet, dynamic_fields: dict, locati
                              region_type: RegionType = RegionType.IMGT_CDR3):
     df = data.topandas()
     receptors = []
-    for name, group in df.groupby('cell_id'):
+    for name, group in df.groupby('cell_id', sort=False):
         assert group.shape[0] == 2, \
             (f"{location}: receptor objects cannot be created from the data file, there are "
              f"{group.shape[0]} sequences with cell id {group['cell_id'].unique()[0]}.")

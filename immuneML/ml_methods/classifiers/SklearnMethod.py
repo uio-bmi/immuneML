@@ -291,6 +291,7 @@ class SklearnMethod(MLMethod):
         from immuneML.encodings.baseline_encoding.GeneFrequencyEncoder import GeneFrequencyEncoder
         from immuneML.encodings.baseline_encoding.MetadataEncoder import MetadataEncoder
         from immuneML.encodings.amino_acid_property_encoding.AminoAcidPropertyEncoder import AminoAcidPropertyEncoder
+        from immuneML.encodings.sequence_length_encoding.SequenceLengthEncoder import SequenceLengthEncoder
 
         from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import \
             CompAIRRSequenceAbundanceEncoder
@@ -298,7 +299,7 @@ class SklearnMethod(MLMethod):
         return [KmerFrequencyEncoder, OneHotEncoder, Word2VecEncoder, EvennessProfileEncoder,
                 MatchedSequencesEncoder, MatchedReceptorsEncoder, MatchedRegexEncoder, MotifEncoder,
                 ESMCEncoder, ProtT5Encoder, TCRBertEncoder, ShannonDiversityEncoder, CompAIRRSequenceAbundanceEncoder,
-                CompositeEncoder, GeneFrequencyEncoder, MetadataEncoder, AminoAcidPropertyEncoder]
+                CompositeEncoder, GeneFrequencyEncoder, MetadataEncoder, AminoAcidPropertyEncoder, SequenceLengthEncoder]
 
     @staticmethod
     def get_usage_documentation(model_name):
