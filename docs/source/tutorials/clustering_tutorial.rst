@@ -1,78 +1,72 @@
 How to perform clustering analysis
-===================================
+=====================================================================
 
-In this tutorial, we will generate a synthetic dataset and perform clustering analysis on it.
+In this tutorial, we will perform clustering analysis on a dataset of immune receptor sequences.
+The dataset was simulated to contain sequences sharing strong structural resemblance — each sequence carries one
+of 15 distinct implanted motifs.
 
-Step 1: Creating a dataset
-----------------------------
+The dataset (:download:`simulated_highly_similar_sequences.tsv <simulated_highly_similar_sequences.tsv>`) contains 14,724 TRB sequences in AIRR format. Each sequence
+is annotated with a ``motif`` label indicating which of the 15 motifs was implanted, but this label is only used
+for external validation — not as input to clustering.
 
-First, we will create a synthetic dataset using LIgO tool from immuneML. It generates immune receptor sequences using
-Olga and simulates an immune event by implanting a list of k-mers. We will create a dataset with 100 sequences,
-where 50 will contain signal1 (meaning they will have either AAA or GGG) and 50 will not contain the signal.
+The analysis proceeds in four steps:
 
-Here is the configuration yaml file:
+1. Split the dataset into a discovery set and a validation set.
+2. Run clustering analysis on the discovery set to explore different combinations of encoding and clustering algorithm.
+3. Manually inspect the results and choose the best-performing clustering setting.
+4. Validate the chosen clustering setting on the held-out validation set.
 
-.. collapse:: ligo_complete_specification.yaml
+Step 1: Splitting data into discovery and validation sets
+---------------------------------------------------------
+
+Before running any analysis, we split the dataset into two equal halves: a discovery set and a validation set. The
+discovery set is used to fit and select between clustering settings. The validation set is held out and only used in the
+final validation step.
+
+Here is the configuration YAML file for splitting:
+
+.. collapse:: split_data_to_discovery_and_validation.yaml
 
         .. highlight:: yaml
         .. code-block:: yaml
 
-          definitions:
-            motifs:
-              motif1:
-                seed: AAA
-              motif2:
-                seed: GGG
-            signals:
-              signal1:
-                motifs: [motif1, motif2]
-            simulations:
-              sim1:
-                is_repertoire: false # the simulation is on the sequence level (nor repertoire level)
-                paired: false # we are simulating single-chain sequences
-                sequence_type: amino_acid
-                simulation_strategy: Implanting # how to simulate the signals
-                remove_seqs_with_signals: true # remove signal-specific AIRs from the background
-                sim_items:
-                  sim_item: # group of AIRs with the same parameters
-                    AIRR1:
-                      signals:
-                        signal1: 1 # all sequences in this group will have signal1
-                      number_of_examples: 50 # simulate 50 sequences
-                      generative_model: # how to generate background AIRs
-                        default_model_name: humanTRB # use default model
-                        type: OLGA # use OLGA for background simulation
-                    AIRR2: # another set of sequences, but with different parameters
-                      signals: {} # no signals here
-                      number_of_examples: 50
-                      generative_model:
-                        default_model_name: humanTRB
-                        type: OLGA
-          instructions:
-            my_sim_inst:
-              export_p_gens: false
-              max_iterations: 100
-              number_of_processes: 4
-              sequence_batch_size: 1000
-              simulation: sim1
-              type: LigoSim
+              definitions:
+                datasets:
+                  d1:
+                    format: AIRR
+                    params:
+                      path: simulated_highly_similar_sequences.tsv
+                      is_repertoire: false
+              instructions:
+                split_dataset1:
+                  type: SplitDataset
+                  dataset: d1
+                  split_config:
+                    split_count: 1
+                    split_strategy: random
+                    training_percentage: 0.5
 
-To run this analysis from the command line with immuneML installed, run:
+To run this from the command line with immuneML installed, run:
 
 .. code-block:: bash
 
-    immune-ml ligo_complete_specification.yaml ./simulated_dataset/
+    immune-ml split_data_to_discovery_and_validation.yaml ./data/
 
-Step 2: Clustering analysis
-----------------------------
+The resulting split datasets will be located under ``./data/split_dataset1/train/`` (discovery) and
+``./data/split_dataset1/test/`` (validation).
 
-To perform the clustering, we will use KmerFrequencyEncoding, PCA and KMeans algorithms from immuneML and scikit-learn.
-We will split the data into discovery and validation set, where the discovery set will be used to fit the clustering model,
-and the resulting clustering will be validated on the validation set.
+Step 2: Clustering analysis on the discovery set
+-------------------------------------------------
 
-As we do not know the optimal way to represent and cluster the data in advance, we will try out different combinations
-of encoding, dimensionality reduction (optional) and clustering algorithms with corresponding hyperparameters. These
-combinations we will call clustering settings. To choose the optimal clustering setting, we will perform the following
+Next, we run clustering analysis on the discovery set. We will use
+k-mer frequency encoding to represent the sequences, followed by PCA for dimensionality reduction,
+and KMeans clustering with k=15 and k=30.
+
+As in principle we do not know in advance which combination of encoding, dimensionality reduction, and clustering hyperparameters
+will best recover the underlying structure, immuneML evaluates multiple *clustering settings* (clustering approaches) on the discovery data.
+Each setting is a combination of an encoding, an optional dimensionality reduction step, and a clustering algorithm.
+
+To choose the optimal clustering setting, we will perform the following
 analysis on discovery data:
 
 1. We will generate random subsets of the data without replacement and fit the clustering settings on each subset.
@@ -103,97 +97,191 @@ reviews this and other methods for measuring clustering stability.
 
 In this tutorial, we will use the following settings:
 
-.. collapse:: clustering_analysis.yaml
+.. collapse:: highly_similar_immune_data_clustering.yaml
 
         .. highlight:: yaml
         .. code-block:: yaml
 
-                definitions:
-                  datasets:
-                    d1:
-                      format: AIRR
-                      params:
-                        path: simulated_dataset/simulated_dataset.tsv # paths to files from the previous step
-                        dataset_file: simulated_dataset/simulated_dataset.yaml
-                  encodings:
-                    kmer: KmerFrequency # we encode the sequences using k-mer frequencies
-                  ml_methods:
-                    kmeans2: # we try out kmeans with k=2
-                      KMeans:
-                        n_clusters: 2
-                    kmeans3: # and k=3
-                      KMeans:
-                        n_clusters: 3
-                    pca:
-                      PCA:
-                        n_components: 4
+              definitions:
+                datasets:
+                  d1:
+                    format: AIRR
+                    params:
+                      is_repertoire: False
+                      organism: human
+                      paired: false
+                      path: data/split_dataset1/train/subset_d1_train.tsv
+                      dataset_file: data/split_dataset1/train/subset_d1_train.yaml
+                encodings:
+                  kmer: KmerFrequency
+                ml_methods:
+                  kmeans15:
+                    KMeans:
+                      n_clusters: 15
+                  kmeans30:
+                    KMeans:
+                      n_clusters: 30
+                  pca:
+                    PCA:
+                      n_components: 2
+                reports:
+                  dim_reduction_plot:
+                    DimensionalityReduction:
+                      dim_red_method:
+                        PCA:
+                          n_components: 2
+                      label: motif
+                  external_label_metric_summary: ExternalLabelMetricHeatmap
+                  cluster_vis: ClusteringVisualization
+                  external_labels_summary:
+                    ExternalLabelClusterSummary:
+                      external_labels: [motif]
+              instructions:
+                clustering_instruction:
+                  clustering_settings:
+                  - dim_reduction: pca
+                    encoding: kmer
+                    method: kmeans15
+                  - dim_reduction: pca
+                    encoding: kmer
+                    method: kmeans30
+                  dataset: d1
+                  labels:
+                  - motif
+                  metrics:
+                  - adjusted_mutual_info_score
+                  - adjusted_rand_score
+                  - silhouette_score
+                  number_of_processes: 8
                   reports:
-                    rep1: # this is how we will visualize the data
-                      DimensionalityReduction:
-                        dim_red_method:
-                          PCA:
-                            n_components: 2
-                        label: signal1 # we will color the graph by the signal we implanted
-                    cluster_vis: # this will visualize clustering results
-                      ClusteringVisualization: # plot a scatter plot of dim-reduced data and color the points by cluster assignments
-                        dim_red_method:
-                          KernelPCA: # here we can use any dimensionality reduction method supported in immuneML (see docs)
-                            n_components: 2
-                            kernel: rbf
-                    stability: # for each split, assess how well the clusters from discovery data correspond to validation data (see docs)
-                      ClusteringStabilityReport:
-                        metric: adjusted_rand_score
-                    external_labels_summary: # show heatmap of how cluster assignments correspond to external labels
-                      ExternalLabelClusterSummary:
-                        external_labels: [signal1]
-                instructions:
-                  clustering_instruction_with_ligo_data:
-                    clustering_settings: # what combinations of encoding+dim_reduction+clustering we want to try
-                    - encoding: kmer
-                      method: kmeans2
-                    - dim_reduction: pca
-                      encoding: kmer
-                      method: kmeans3
-                    dataset: d1
-                    labels: # here we list external labels we want to compare against if available
-                    - signal1
-                    metrics: # list metrics we want to use, both internal, and external (if labels are available)
-                    - adjusted_rand_score
-                    - adjusted_mutual_info_score
-                    - silhouette_score
-                    - calinski_harabasz_score
-                    number_of_processes: 4
-                    reports:
-                    - rep1
-                    - stability
-                    - external_labels_summary
-                    - cluster_vis
-                    split_config: # we want to repeat the analysis on different splits of the data to assess stability of the results
-                      split_count: 2
-                      split_strategy: random # the splits will be random
-                      training_percentage: 0.5 # we will use 50% of the data for discovery and 50% for validation
-                    type: Clustering
-                    validation_type: # the type of validation we want to perform [here we do both]
-                    - result_based
-                    - method_based
+                  - dim_reduction_plot
+                  - cluster_vis
+                  - external_labels_summary
+                  - external_label_metric_summary
+                  stability_config:
+                    split_count: 5
+                    random_seed: 12
+                  sample_config:
+                    split_count: 5
+                    percentage: 0.8
+                    random_seed: 12
+                  type: Clustering
 
 To run the clustering analysis from the command line with immuneML installed, run:
 
 .. code-block:: bash
 
-    immune-ml clustering_analysis.yaml ./clustering_results/
+    immune-ml highly_similar_immune_data_clustering.yaml ./clustering_results/
 
-This will generate a report with the clustering results in the specified directory. To explore the results, see the
-index.html file in output directory.
+This will generate a report with the clustering results in the specified directory. To explore the results,
+open the ``index.html`` file in ``./clustering_results/``.
 
-Once the analysis is done, we can explore the results and choose the optimal clustering setting. The next step is
-to validate the chosen clustering setting on the validation data.
+Step 3: Choosing the best clustering setting
+--------------------------------------------
 
-Step 3: Validation of clustering results
-------------------------------------------
+After the clustering analysis completes, inspect the results to choose which clustering setting to validate.
+The HTML report provides several views to support this decision:
 
-Following the paper by `Ullmann and colleagues (2023) <https://wires.onlinelibrary.wiley.com/doi/abs/10.1002/widm.1444>`_,
-immuneML supports two types of validation: method-based and result-based. In method-based validation, we perform the same
-preprocessing+encoding+clustering on discovery and validation sets and compare the results. In result-based validation, we
-fit a supervised classifier to the clusters determined on the discovery dataset and use it to predict the clustering
-on the validation data, which shows if the clustering result itself is useful for validation data.
+- **Stability boxplot**: Shows the distribution of adjusted Rand index scores across repeated random splits of the
+  discovery data for each clustering setting. A higher and less variable ARI indicates a more stable clustering.
+- **External metric heatmaps**: Show how well each clustering setting recovers known labels (here: ``motif``).
+  High adjusted mutual information or adjusted Rand index against the known motif labels suggests the clustering
+  captures biologically meaningful structure.
+- **Internal metric boxplots**: Show the silhouette score across subsamples for each setting, reflecting internal
+  cluster compactness and separation.
+- **Cluster visualisation**: PCA scatter plots coloured by cluster assignment and by external label, allowing
+  visual inspection of how well clusters separate.
+
+In this tutorial, the setting ``kmer + PCA + KMeans(k=15)`` shows higher stability and better agreement with
+the ground-truth motif labels compared to ``KMeans(k=30)``. This is consistent with the dataset containing
+exactly 15 distinct motifs. We therefore select ``kmer_pca_kmeans15`` for validation.
+
+.. note::
+
+  In practice, there will be no one concrete label that we can so easily compare against. It could be many different
+  labels that could guide the clustering, some measured (e.g., gene usage, specificity, batch), and some not measured
+  (e.g., HLA). Then, we can compare the clustering results across multiple different biologically plausible labels
+  that have been measured and reported in the specific dataset.
+
+The fitted model for the chosen setting is stored under
+``clustering_results/clustering_instruction/refitted_best_settings/kmer_pca_kmeans15/kmer_pca_kmeans15.zip``.
+This path is used in the next step.
+
+Step 4: Validating the chosen clustering setting
+-------------------------------------------------
+
+Following `Ullmann and colleagues (2023) <https://wires.onlinelibrary.wiley.com/doi/abs/10.1002/widm.1444>`_,
+immuneML supports two types of clustering validation:
+
+- **Method-based validation**: The same preprocessing, encoding, dimensionality reduction and clustering (clustering
+  approach/setting) is applied independently
+  to the validation data. The resulting cluster assignments are compared to any available external labels. The overall
+  results are compared to the results on discovery data.
+- **Result-based validation**: A supervised classifier trained on the discovery cluster assignments is used to
+  predict cluster membership for the validation data. This assesses whether the cluster structure identified on
+  the discovery set transfers to unseen data.
+
+In this tutorial we run method-based validation to confirm that the ``kmer_pca_kmeans15`` setting produces
+consistent clusters on the held-out validation set.
+
+Here is the YAML configuration for validation:
+
+.. collapse:: validate_clustering.yaml
+
+        .. highlight:: yaml
+        .. code-block:: yaml
+
+              definitions:
+                datasets:
+                  d1:
+                    format: AIRR
+                    params:
+                      is_repertoire: False
+                      organism: human
+                      paired: false
+                      path: data/split_dataset1/test/subset_d1_test.tsv
+                      dataset_file: data/split_dataset1/test/subset_d1_test.yaml
+                reports:
+                  dim_reduction_plot:
+                    DimensionalityReduction:
+                      dim_red_method:
+                        PCA:
+                          n_components: 2
+                      label: motif
+                  external_label_metric_summary: ExternalLabelMetricHeatmap
+                  cluster_vis:
+                    ClusteringVisualization:
+                      dim_red_method:
+                        PCA:
+                          n_components: 2
+                  external_labels_summary:
+                    ExternalLabelClusterSummary:
+                      external_labels: [motif]
+              instructions:
+                validate_clustering:
+                  type: ValidateClustering
+                  clustering_config_path: clustering_results/clustering_instruction/refitted_best_settings/kmer_pca_kmeans15/kmer_pca_kmeans15.zip
+                  dataset: d1
+                  labels:
+                    - motif
+                  metrics:
+                    - adjusted_mutual_info_score
+                    - adjusted_rand_score
+                    - silhouette_score
+                  number_of_processes: 8
+                  reports:
+                    - dim_reduction_plot
+                    - cluster_vis
+                    - external_labels_summary
+                    - external_label_metric_summary
+                  validation_type: ['method_based']
+
+To run the validation from the command line with immuneML installed, run:
+
+.. code-block:: bash
+
+    immune-ml validate_clustering.yaml ./clustering_validation/
+
+The results will be available in ``./clustering_validation/``. Open ``index.html`` to explore the validation report,
+which includes cluster visualisations, external label heatmaps, and metric scores for the validation set. Comparing
+these to the discovery results shows whether the clustering generalises to unseen sequences.

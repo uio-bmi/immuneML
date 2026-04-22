@@ -93,6 +93,21 @@ class ImportHelper:
         return df
 
     @staticmethod
+    def pair_receptor_chains(df: pd.DataFrame) -> pd.DataFrame:
+        """Sort rows so that the two chains of each receptor are consecutive.
+
+        Receptor order follows first occurrence of each ``cell_id`` in ``df``,
+        preserving the ordering of the original dataset. Within each receptor pair
+        the two rows are additionally sorted by ``locus`` so that both the encoder
+        and ``make_receptors_from_data`` see chains in a consistent, predictable order.
+        """
+        df = df.copy()
+        # ngroup() with sort=False numbers groups in first-occurrence order
+        df['_receptor_order'] = df.groupby('cell_id', sort=False).ngroup()
+        df = df.sort_values(['_receptor_order', 'locus'], kind='stable')
+        return df.drop(columns=['_receptor_order']).reset_index(drop=True)
+
+    @staticmethod
     def filter_illegal_receptors(df: pd.DataFrame, chain_pair: ChainPair = None) -> pd.DataFrame:
         df = ImportHelper.remove_illegal_chains(df, chain_pair)
 

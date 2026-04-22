@@ -1,0 +1,4 @@
+region_type: imgt_cdr3
+sequence_type: amino_acid
+scale_to_zero_mean: true
+scale_to_unit_variance: true

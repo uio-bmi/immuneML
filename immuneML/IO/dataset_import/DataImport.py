@@ -168,7 +168,7 @@ class DataImport(metaclass=abc.ABCMeta):
 
         return labels
 
-    def import_element_dataset(self, dataset_class: Type, filter_func=None):
+    def import_element_dataset(self, dataset_class: Type, filter_func=None, post_process_func=None):
         if self.params.dataset_file is not None and self.params.dataset_file.is_file():
             filenames = [Path(read_yaml(self.params.dataset_file)["filename"])]
             if self.params.path.is_file():
@@ -182,7 +182,7 @@ class DataImport(metaclass=abc.ABCMeta):
         else:
             filenames = ImportHelper.get_sequence_filenames(self.params.path, self.dataset_name)
 
-        final_data_dict = self._construct_element_dataset_data_dict(filenames, filter_func)
+        final_data_dict = self._construct_element_dataset_data_dict(filenames, filter_func, post_process_func)
 
         bnp_dc, type_dict = build_dynamic_airr_sequence_set_dataclass(final_data_dict)
         filename = self._write_element_dataset_tsv_file(final_data_dict, bnp_dc)
@@ -208,10 +208,13 @@ class DataImport(metaclass=abc.ABCMeta):
         return self.import_element_dataset(SequenceDataset)
 
     def import_receptor_dataset(self) -> ReceptorDataset:
-        return self.import_element_dataset(ReceptorDataset,
-                                           lambda df: ImportHelper.filter_illegal_receptors(df, self.params.receptor_chains))
+        return self.import_element_dataset(
+            ReceptorDataset,
+            filter_func=lambda df: ImportHelper.filter_illegal_receptors(df, self.params.receptor_chains),
+            post_process_func=ImportHelper.pair_receptor_chains,
+        )
 
-    def _construct_element_dataset_data_dict(self, filenames, filter_func) -> dict:
+    def _construct_element_dataset_data_dict(self, filenames, filter_func=None, post_process_func=None) -> dict:
         final_df = None
 
         for filename in filenames:
@@ -219,6 +222,9 @@ class DataImport(metaclass=abc.ABCMeta):
             if filter_func:
                 df = filter_func(df)
             final_df = pd.concat([final_df, df])
+
+        if post_process_func:
+            final_df = post_process_func(final_df)
 
         return final_df.to_dict(orient='list')
 

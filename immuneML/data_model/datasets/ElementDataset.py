@@ -179,11 +179,15 @@ class SequenceDataset(ElementDataset):
         data_filename = path / f'{name}.tsv'
 
         bnp_write_to_file(data_filename, data)
+        labels = {label: list(set(getattr(data, label).tolist())) if hasattr(data, label) and getattr(data, label) is not None else self.labels[label] for label in self.labels} if self.labels else {}
 
         metadata_filename = path / f'{name}.yaml'
-        shutil.copyfile(self.dataset_file, metadata_filename)
+        metadata = read_yaml(self.dataset_file)
+        write_dataset_yaml(metadata_filename, {
+            **metadata, **{'filename': f"{name}.tsv", 'name': name, 'labels': labels}
+        })
 
-        return SequenceDataset(filename=data_filename, name=name, labels=copy.deepcopy(self.labels),
+        return SequenceDataset(filename=data_filename, name=name, labels=labels,
                                dynamic_fields=self.dynamic_fields, dataset_file=metadata_filename,
                                bnp_dataclass=self.bnp_dataclass)
 
@@ -268,12 +272,13 @@ class ReceptorDataset(ElementDataset):
 
         metadata_filename = path / f'{name}.yaml'
         metadata = read_yaml(self.dataset_file)
+        labels = {label: list(set(getattr(data, label).tolist())) if hasattr(data, label) and getattr(data, label) is not None else self.labels[label] for label in self.labels} if self.labels else {}
         write_dataset_yaml(metadata_filename, {
-            **metadata, **{'filename': f"{name}.tsv", 'name': name}
+            **metadata, **{'filename': f"{name}.tsv", 'name': name,
+                           'labels': labels}
         })
 
-        return ReceptorDataset(filename=path / f"{name}.tsv", name=name,
-                               labels=copy.deepcopy(self.labels),
+        return ReceptorDataset(filename=path / f"{name}.tsv", name=name, labels=labels,
                                dynamic_fields=self.dynamic_fields, dataset_file=metadata_filename,
                                bnp_dataclass=self.bnp_dataclass)
 

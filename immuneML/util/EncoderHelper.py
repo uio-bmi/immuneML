@@ -1,6 +1,8 @@
 import copy
 import pickle
 
+import numpy as np
+
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.ElementDataset import ElementDataset
@@ -81,6 +83,41 @@ class EncoderHelper:
                 labels[label_name].append(label)
 
         return labels
+
+    @staticmethod
+    def get_receptor_chain_masks(dataset):
+        """Return boolean masks and receptor IDs for a ReceptorDataset, in dataset order.
+
+        Chains are split by locus (sorted alphabetically so column assignment is
+        deterministic). Receptor order is read directly from the flat data: because
+        ``ImportHelper.pair_receptor_chains`` ensures both chains of each receptor are
+        stored consecutively and sorted by locus, ``cell_id_arr[mask1]`` gives one
+        cell_id per receptor in the original dataset insertion order — no Receptor
+        objects need to be materialised.
+
+        Returns:
+            receptor_ids  – list of cell_id strings, one per receptor, in dataset order
+            loci          – [locus_name_0, locus_name_1] sorted alphabetically
+            mask1         – boolean ndarray selecting loci[0] rows from ``dataset.data``
+            mask2         – boolean ndarray selecting loci[1] rows from ``dataset.data``
+        """
+        data = dataset.data
+        locus_arr = np.array(data.locus.tolist())
+        cell_id_arr = np.array(data.cell_id.tolist())
+        loci = sorted(set(data.locus.tolist()))
+
+        assert len(loci) == 2, (
+            f"EncoderHelper.get_receptor_chain_masks: expected exactly two loci, got {loci}.")
+
+        mask1 = locus_arr == loci[0]
+        mask2 = locus_arr == loci[1]
+
+        assert mask1.sum() == mask2.sum(), \
+            "EncoderHelper.get_receptor_chain_masks: some receptors are missing one of the two chains."
+
+        receptor_ids = cell_id_arr[mask1].tolist()
+
+        return receptor_ids, loci, mask1, mask2
 
     @staticmethod
     def encode_repertoire_dataset_labels(dataset: RepertoireDataset, label_config: LabelConfiguration):

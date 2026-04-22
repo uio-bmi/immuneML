@@ -2,6 +2,7 @@ import copy
 import logging
 from datetime import datetime
 from pathlib import Path
+from typing import Tuple
 from uuid import uuid4
 
 import pandas as pd
@@ -169,12 +170,12 @@ class RepertoireDataset(Dataset):
     def get_filenames(self):
         return [Path(filename) for filename in self.get_metadata(["filename"])["filename"]]
 
-    def _build_new_metadata(self, indices, path: Path) -> Path:
+    def _build_new_metadata(self, indices, path: Path) -> Tuple[Path, dict]:
         if self.metadata_file:
             df = pd.read_csv(self.metadata_file, comment=Constants.COMMENT_SIGN)
             df = df.iloc[indices, :]
             df.to_csv(path, index=False)
-            return path
+            return path, {label: df[label].unique().tolist() if label in df else self.labels[label] for label in self.labels} if self.labels else {}
         else:
             return None
 
@@ -193,9 +194,9 @@ class RepertoireDataset(Dataset):
 
         """
 
-        metadata_file = self._build_new_metadata(example_indices, path / f"{dataset_type}_metadata.csv")
+        metadata_file, labels = self._build_new_metadata(example_indices, path / f"{dataset_type}_metadata.csv")
         new_dataset = RepertoireDataset(repertoires=[self.repertoires[i] for i in example_indices],
-                                        labels=copy.deepcopy(self.labels), name=f"{self.name}_{dataset_type}",
+                                        labels=labels, name=f"{self.name}_{dataset_type}",
                                         metadata_file=metadata_file, identifier=str(uuid4()))
 
         return new_dataset
