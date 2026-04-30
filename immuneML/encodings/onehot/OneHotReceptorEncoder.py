@@ -38,7 +38,8 @@ class OneHotReceptorEncoder(OneHotEncoder):
 
         max_seq_len = max(getattr(data, sequence_field).lengths)
 
-        labels = self._get_labels(data, mask1, params) if params.encode_labels else None
+        labels = (EncoderHelper.encode_element_dataset_labels(dataset, params.label_config, data=data, mask=mask1)
+                  if params.encode_labels else None)
 
         examples_first_chain = self._encode_sequence_list(first_chain_seqs, pad_n_sequences=len(data) // 2,
                                                           pad_sequence_len=max_seq_len, params=params)
@@ -64,8 +65,3 @@ class OneHotReceptorEncoder(OneHotEncoder):
 
     def _get_feature_names(self, max_seq_len, chains):
         return [[[f"{chain}_{pos}_{dim}" for dim in self.onehot_dimensions] for pos in range(max_seq_len)] for chain in chains]
-
-    def _get_labels(self, data, mask1, params: EncoderParams):
-        label_names = params.label_config.get_labels_by_name()
-        df = data.topandas()
-        return {name: df[name].values[mask1].tolist() for name in label_names}

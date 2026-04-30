@@ -5,7 +5,7 @@ import numpy as np
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.datasets.Dataset import Dataset
-from immuneML.data_model.datasets.ElementDataset import ElementDataset
+from immuneML.data_model.datasets.ElementDataset import ElementDataset, ReceptorDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.Label import Label
@@ -73,16 +73,23 @@ class EncoderHelper:
                 f"Valid dataset types for this encoder are: {', '.join(list(class_name.dataset_mapping.keys()))}")
 
     @staticmethod
-    def encode_element_dataset_labels(dataset: ElementDataset, label_config: LabelConfiguration):
-        """Automatically generates the encoded labels for an ElementDataset (= SequenceDataset or ReceptorDataset)"""
-        labels = {name: [] for name in label_config.get_labels_by_name()}
+    def encode_element_dataset_labels(dataset: ElementDataset, label_config: LabelConfiguration, data=None, mask=None):
+        """Generates encoded labels for an ElementDataset (SequenceDataset or ReceptorDataset).
 
-        for sequence in dataset.get_data():
-            for label_name in label_config.get_labels_by_name():
-                label = sequence.metadata[label_name]
-                labels[label_name].append(label)
-
-        return labels
+        Pass `data` (AIRRSequenceSet) to avoid re-reading it from the dataset; defaults to
+        `dataset.data`. For ReceptorDatasets, also pass `mask` (boolean array selecting one
+        chain per receptor) to skip inferring it; if omitted it is derived via
+        `get_receptor_chain_masks`.
+        """
+        label_names = label_config.get_labels_by_name()
+        data = data if data is not None else dataset.data
+        if isinstance(dataset, ReceptorDataset):
+            if mask is None:
+                _, _, mask, _ = EncoderHelper.get_receptor_chain_masks(dataset)
+            df = data.topandas()
+            return {name: df[name].values[mask].tolist() for name in label_names}
+        else:
+            return {name: getattr(data, name).tolist() for name in label_names}
 
     @staticmethod
     def get_receptor_chain_masks(dataset):

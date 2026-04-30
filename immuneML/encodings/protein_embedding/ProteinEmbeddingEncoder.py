@@ -15,6 +15,7 @@ from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.NumpyHelper import NumpyHelper
 
 
@@ -59,10 +60,12 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
         embeddings = self._embed_sequence_set(dataset.data, seq_field)
         embeddings = self._scale_examples(dataset, embeddings, params)
 
+        labels = (EncoderHelper.encode_element_dataset_labels(dataset, params.label_config, data=dataset.data)
+                  if params.encode_labels else None)
+
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=embeddings,
-                                                   labels={label.name: getattr(dataset.data, label.name).tolist()
-                                                           for label in params.label_config.get_label_objects()},
+                                                   labels=labels,
                                                    example_ids=dataset.data.sequence_id.tolist(),
                                                    encoding=self._get_encoding_name())
         return encoded_dataset
@@ -102,8 +105,8 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
 
         concatenated_embeddings = self._scale_examples(dataset, concatenated_embeddings, params)
 
-        labels = (data.topandas().groupby('cell_id').first()[params.label_config.get_labels_by_name()]
-                  .to_dict(orient='list'))
+        labels = (EncoderHelper.encode_element_dataset_labels(dataset, params.label_config, data=data)
+                  if params.encode_labels else None)
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(
