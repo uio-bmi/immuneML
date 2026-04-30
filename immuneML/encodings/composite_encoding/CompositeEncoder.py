@@ -94,6 +94,7 @@ class CompositeEncoder(DatasetEncoder):
         encoded_dataset.encoded_data = EncodedData(examples=np.array(examples), feature_names=feature_names,
                                                    feature_annotations=feature_annotations, info=info,
                                                    labels=dataset.get_metadata(params.label_config.get_labels_by_name()),
-                                                   encoding=type(self).__name__)
+                                                   encoding=type(self).__name__,
+                                                   example_ids=dataset.get_example_ids())
 
         return encoded_dataset

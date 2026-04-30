@@ -1,8 +1,8 @@
-from immuneML.data_model.AIRRSequenceSet import AIRRSequenceSet
 from immuneML.data_model.EncodedData import EncodedData
 from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
+from immuneML.util.EncoderHelper import EncoderHelper
 
 
 class OneHotSequenceEncoder(OneHotEncoder):
@@ -30,7 +30,8 @@ class OneHotSequenceEncoder(OneHotEncoder):
         sequence_field = self._get_seq_field_name(params)
 
         max_seq_len = max(getattr(data, sequence_field).lengths)
-        labels = self._get_labels(data, params) if params.encode_labels else None
+        labels = (EncoderHelper.encode_element_dataset_labels(dataset, params.label_config, data=data)
+                  if params.encode_labels else None)
 
         examples = self._encode_sequence_list(data, pad_n_sequences=len(data),
                                               pad_sequence_len=max_seq_len, params=params)
@@ -51,9 +52,3 @@ class OneHotSequenceEncoder(OneHotEncoder):
 
     def _get_feature_names(self, max_seq_len):
         return [[f"{pos}_{dim}" for dim in self.onehot_dimensions] for pos in range(max_seq_len)]
-
-    def _get_labels(self, data: AIRRSequenceSet, params: EncoderParams):
-        label_names = params.label_config.get_labels_by_name()
-        labels = {name: getattr(data, name).tolist() for name in label_names}
-
-        return labels

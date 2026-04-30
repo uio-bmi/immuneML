@@ -42,6 +42,7 @@ class LabelHelper:
                               f"{label}, using empty list instead. This issue may occur due to improper loading of dataset {dataset.name},"
                               f"and could cause problems with some encodings.")
 
+            assert len(label_values) > 1, f"{instruction_name}: for {yaml_location}, label values could not be recovered for label {label}, or only one unique value was found. "
             label_config.add_label(label_name, label_values, positive_class=positive_class)
 
         return label_config

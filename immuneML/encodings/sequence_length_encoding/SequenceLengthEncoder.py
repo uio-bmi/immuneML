@@ -121,8 +121,7 @@ class SequenceLengthEncoder(DatasetEncoder):
         examples = lengths.reshape(-1, 1)                      # [n_sequences, 1]
         examples = self._scale_examples(examples, params)
 
-        labels = ({label.name: getattr(dataset.data, label.name).tolist()
-                   for label in params.label_config.get_label_objects()}
+        labels = (EncoderHelper.encode_element_dataset_labels(dataset, params.label_config, data=dataset.data)
                   if params.encode_labels else None)
 
         encoded_dataset = dataset.clone()
@@ -156,12 +155,8 @@ class SequenceLengthEncoder(DatasetEncoder):
         examples = np.column_stack([lengths[mask1], lengths[mask2]])  # [n_receptors, 2]
         examples = self._scale_examples(examples, params)
 
-        if params.encode_labels:
-            label_names = params.label_config.get_labels_by_name()
-            df = data.topandas()
-            labels = {name: df[name].values[mask1].tolist() for name in label_names}
-        else:
-            labels = None
+        labels = (EncoderHelper.encode_element_dataset_labels(dataset, params.label_config, data=data, mask=mask1)
+                  if params.encode_labels else None)
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(

@@ -89,6 +89,8 @@ class ImportParser:
             params["metadata_file"] = Path(params["metadata_file"])
         if "dataset_file" in params:
             params['dataset_file'] = Path(params['dataset_file'])
+        if "separator" in params:
+            params["separator"] = str(params["separator"]).replace("\\t", '\t')
         dataset_specs["params"] = params
         return params
 

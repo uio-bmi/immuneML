@@ -4,6 +4,7 @@ from immuneML.data_model.SequenceParams import Chain
 from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
+from immuneML.util.EncoderHelper import EncoderHelper
 
 
 class KmerFreqReceptorEncoder(KmerFrequencyEncoder):
@@ -22,12 +23,9 @@ class KmerFreqReceptorEncoder(KmerFrequencyEncoder):
     def _encode_examples(self, dataset: ReceptorDataset, params: EncoderParams):
         encoded_receptors_counts = []
         receptor_ids = []
-        label_config = params.label_config
-        labels = {label: [] for label in label_config.get_labels_by_name()} if params.encode_labels else None
 
         params.region_type = self.region_type
         encode_locus = self._encode_locus(dataset)
-
         sequence_encoder = self._prepare_sequence_encoder()
         for receptor in dataset.get_data(region_type=self.region_type):
             chains = [Chain.get_chain(chain).name.lower() for chain in receptor.chain_pair.value]
@@ -38,9 +36,7 @@ class KmerFreqReceptorEncoder(KmerFrequencyEncoder):
             encoded_receptors_counts.append(counts[chains[0]] + counts[chains[1]])
             receptor_ids.append(receptor.cell_id)
 
-            if params.encode_labels:
-                for label_name in label_config.get_labels_by_name():
-                    label = receptor.metadata[label_name]
-                    labels[label_name].append(label)
+        labels = (EncoderHelper.encode_element_dataset_labels(dataset, params.label_config)
+                  if params.encode_labels else None)
 
         return encoded_receptors_counts, receptor_ids, labels

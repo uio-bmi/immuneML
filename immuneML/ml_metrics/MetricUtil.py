@@ -20,6 +20,12 @@ class MetricUtil:
         return fn
 
     @staticmethod
+    def _get_fn_params(fn):
+        # inspect.getfullargspec does not follow __wrapped__ for sklearn-decorated functions
+        # in sklearn >= 1.2; inspect.signature does, so use it as the authoritative source.
+        return set(inspect.signature(fn).parameters.keys())
+
+    @staticmethod
     def score_for_metric(metric: ClassificationMetric, predicted_y, predicted_proba_y, true_y, classes, pos_class=None):
         """
         Note: when providing label classes, make sure the 'positive class' is sorted last.
@@ -29,7 +35,9 @@ class MetricUtil:
         fn = MetricUtil.get_metric_fn(metric)
 
         if metric in ClassificationMetric.get_binary_only_metrics():
-            true_y, predicted_y = Util.binarize_label_classes(true_y=true_y, predicted_y=predicted_y, classes=classes)
+            processed_true_y, processed_predicted_y = Util.binarize_label_classes(true_y=true_y, predicted_y=predicted_y, classes=classes)
+        else:
+            processed_true_y, processed_predicted_y = true_y, predicted_y
 
         try:
             if metric in ClassificationMetric.get_probability_based_metric_types():
@@ -38,17 +46,18 @@ class MetricUtil:
                     logging.warning(
                         f"MLMethodAssessment: metric {metric} is specified, but the chosen ML method does not output "
                         f"class probabilities. Using predicted classes instead...")
-                    predictions = predicted_y
+                    predictions = processed_predicted_y
             else:
-                predictions = predicted_y
+                predictions = processed_predicted_y
 
-            if 'labels' in inspect.getfullargspec(fn).kwonlyargs or 'labels' in inspect.getfullargspec(fn).args:
-                if 'pos_label' in inspect.getfullargspec(fn).kwonlyargs or 'pos_label' in inspect.getfullargspec(fn).args:
-                    score = fn(true_y, predictions, labels=classes, pos_label=pos_class if pos_class is not None else classes[-1])
+            fn_params = MetricUtil._get_fn_params(fn)
+            if 'labels' in fn_params:
+                if 'pos_label' in fn_params:
+                    score = fn(processed_true_y, predictions, labels=classes, pos_label=pos_class if pos_class is not None else classes[-1])
                 else:
-                    score = fn(true_y, predictions, labels=classes)
+                    score = fn(processed_true_y, predictions, labels=classes)
             else:
-                score = fn(true_y, predictions)
+                score = fn(processed_true_y, predictions)
 
         except ValueError as err:
             logging.warning(f"MLMethodAssessment: score for metric {metric.name} could not be calculated."

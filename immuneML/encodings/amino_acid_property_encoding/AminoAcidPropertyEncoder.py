@@ -237,8 +237,7 @@ class AminoAcidPropertyEncoder(DatasetEncoder):
         examples = self._encode_sequence_set(dataset.data, seq_field)
         examples = self._scale_examples(examples, params)
 
-        labels = ({label.name: getattr(dataset.data, label.name).tolist()
-                   for label in params.label_config.get_label_objects()}
+        labels = (EncoderHelper.encode_element_dataset_labels(dataset, params.label_config, data=dataset.data)
                   if params.encode_labels else None)
 
         encoded_dataset = dataset.clone()
@@ -262,12 +261,8 @@ class AminoAcidPropertyEncoder(DatasetEncoder):
         examples = np.hstack([per_seq_embeddings[mask1], per_seq_embeddings[mask2]])  # [n_receptors, 2*n_factors]
         examples = self._scale_examples(examples, params)
 
-        if params.encode_labels:
-            df = data.topandas()
-            labels = {name: df[name].values[mask1].tolist()
-                      for name in params.label_config.get_labels_by_name()}
-        else:
-            labels = None
+        labels = (EncoderHelper.encode_element_dataset_labels(dataset, params.label_config, data=data, mask=mask1)
+                  if params.encode_labels else None)
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(
