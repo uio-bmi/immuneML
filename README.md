@@ -41,8 +41,7 @@ or [set up via docker](<https://docs.immuneml.uio.no/latest/installation/install
 ```bash
 python3 -m venv ./immuneml_venv/
 source ./immuneml_venv/bin/activate
-pip install wheel
-pip install immune-ml
+pip install immuneML
 ```
 
 or

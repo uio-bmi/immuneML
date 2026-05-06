@@ -15,7 +15,7 @@ This manual shows how to install immuneML using either conda or pip.
 Install immuneML with pip
 ------------------------------
 
-0. To install immuneML with pip, make sure to have Python version **3.9 or later** installed.
+0. To install immuneML with pip, make sure to have Python version **3.11 or later** installed.
 
 1. Create a virtual environment where immuneML will be installed. It is possible to install immuneML as a global
    package, but it is not recommended as there might be conflicting versions of different packages. For more details,
@@ -96,7 +96,7 @@ If you want to use the :ref:`TCRdistClassifier` ML method and corresponding :ref
 
 .. code-block:: console
 
-  pip install immuneML[TCRdist]
+  pip install "immuneML[TCRdist]"
 
 The TCRdist dependencies can also be installed manually using the :download:`requirements_TCRdist.txt <https://raw.githubusercontent.com/uio-bmi/immuneML/master/requirements_TCRdist.txt>` file:
 
@@ -127,7 +127,7 @@ In order to use any of the supported deep learning models (KerasSequenceCNN or o
 
 .. code-block:: console
 
-  pip install immuneML[DL]
+  pip install "immuneML[DL]"
 
 Fisher's exact test
 **********************
@@ -137,7 +137,7 @@ please install 'fisher' optional dependencies:
 
 .. code-block:: console
 
-  pip install immuneML[fisher]
+  pip install "immuneML[fisher]"
 
 Full immuneML installation
 ******************************
@@ -146,7 +146,7 @@ To install all optional dependencies and have access to the full set of immuneML
 
 .. code-block:: console
 
-  pip install immuneML[all]
+  pip install "immuneML[all]"
 
 CompAIRR
 ********
