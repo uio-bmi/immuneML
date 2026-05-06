@@ -83,13 +83,12 @@ class PrecisionRecallCurveSummary(TrainMLModelReport):
         else:
             predicted_y = [label_mapping[val] for val in df[f"{label.name}_predicted_class"].values]
 
-        precision, recall, _ = precision_recall_curve(y_true=true_y, y_score=predicted_y,
-                                                      pos_label=label.positive_class)
+        precision, recall, _ = precision_recall_curve(y_true=true_y, y_score=predicted_y, pos_label=1)
 
         return {
             "Precision": precision,
             "Recall": recall,
-            "AP": average_precision_score(y_true=true_y, y_score=predicted_y),
+            "AP": average_precision_score(y_true=true_y, y_score=predicted_y, pos_label=1),
             "HPItem": str(hp_item.hp_setting)
         }
 
