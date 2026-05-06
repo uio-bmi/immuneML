@@ -1,15 +1,15 @@
 import abc
-from typing import List
+from typing import List, Optional, Tuple
 
+import numpy as np
 import pandas as pd
-from sklearn.feature_extraction import DictVectorizer
+from scipy.sparse import coo_matrix
 from sklearn.preprocessing import StandardScaler
 
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.EncodedData import EncodedData
 from immuneML.data_model.SequenceParams import RegionType
-from immuneML.data_model.SequenceSet import ReceptorSequence
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
@@ -19,6 +19,51 @@ from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReadsType import ReadsType
 from immuneML.util.ReflectionHandler import ReflectionHandler
+
+
+class KmerFrequencyVectorizer:
+    """
+    Operates on flat numpy string arrays + row_ids
+    (both returned by BNPSequenceEncodingStrategies) and builds a scipy CSR
+    matrix without creating any Python Counter or dict objects. 
+    Replaces DictVectorizer used in previous immuneML versions.
+
+    Interface mirrors the subset of DictVectorizer used by _encode_data:
+        fit_transform / transform  → csr_matrix
+        feature_names_             → list[str]
+    """
+
+    def __init__(self):
+        self.feature_names_: List[str] = []
+        self._vocab: Optional[np.ndarray] = None   # sorted string array
+
+    def fit_transform(self, flat_kmers: np.ndarray, row_ids: np.ndarray,
+                      n_rows: int, weights: Optional[np.ndarray] = None):
+        self._vocab = np.unique(flat_kmers)
+        self.feature_names_ = self._vocab.tolist()
+        return self._build_matrix(flat_kmers, row_ids, n_rows, weights)
+
+    def transform(self, flat_kmers: np.ndarray, row_ids: np.ndarray,
+                  n_rows: int, weights: Optional[np.ndarray] = None):
+        col_ids, valid = self._map_to_columns(flat_kmers)
+        return self._build_matrix(flat_kmers[valid], row_ids[valid], n_rows,
+                                   weights[valid] if weights is not None else None,
+                                   col_ids=col_ids[valid])
+
+    def _map_to_columns(self, flat_kmers: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        col_ids = np.searchsorted(self._vocab, flat_kmers)
+        clipped = np.clip(col_ids, 0, len(self._vocab) - 1)
+        valid = (col_ids < len(self._vocab)) & (self._vocab[clipped] == flat_kmers)
+        return col_ids, valid
+
+    def _build_matrix(self, flat_kmers: np.ndarray, row_ids: np.ndarray,
+                       n_rows: int, weights: Optional[np.ndarray] = None,
+                       col_ids: Optional[np.ndarray] = None):
+        if col_ids is None:
+            col_ids = np.searchsorted(self._vocab, flat_kmers)
+        data = weights if weights is not None else np.ones(len(flat_kmers), dtype=float)
+        return coo_matrix((data, (row_ids, col_ids)),
+                          shape=(n_rows, len(self._vocab)), dtype=float).tocsr()
 
 
 class KmerFrequencyEncoder(DatasetEncoder):
@@ -219,6 +264,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
         return encoder
 
     def encode(self, dataset, params: EncoderParams):
+        self.region_type = params.region_type if self.region_type is None else self.region_type
+        self.sequence_type = params.sequence_type if self.sequence_type is None else self.sequence_type
 
         cache_params = self._prepare_caching_params(dataset, params)
 
@@ -238,13 +285,13 @@ class KmerFrequencyEncoder(DatasetEncoder):
                 ("encoding_params", tuple(vars(self).items())))
 
     def _encode_data(self, dataset, params: EncoderParams) -> EncodedData:
-        encoded_example_list, example_ids, encoded_labels = CacheHandler.memo_by_params(
+        flat_kmers, row_ids, weights, example_ids, encoded_labels = CacheHandler.memo_by_params(
             self._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_ENCODED),
             lambda: self._encode_examples(dataset, params))
 
+        n_examples = len(example_ids)
         self._initialize_vectorizer(params)
-        vectorized_examples = self._vectorize_encoded(examples=encoded_example_list, params=params,
-                                                      vectorizer=self.vectorizer)
+        vectorized_examples = self._vectorize_encoded(flat_kmers, row_ids, n_examples, weights, params)
         feature_names = self.vectorizer.feature_names_
         normalized_examples = FeatureScaler.normalize(vectorized_examples, self.normalization_type)
 
@@ -287,32 +334,14 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     def _initialize_vectorizer(self, params: EncoderParams):
         if self.vectorizer is None or params.learn_model:
-            self.vectorizer = DictVectorizer(sparse=True, dtype=float)
+            self.vectorizer = KmerFrequencyVectorizer()
 
-    def _vectorize_encoded(self, examples: list, params: EncoderParams, vectorizer: DictVectorizer):
-
+    def _vectorize_encoded(self, flat_kmers: np.ndarray, row_ids: np.ndarray,
+                            n_examples: int, weights: Optional[np.ndarray],
+                            params: EncoderParams):
         if params.learn_model:
-            vectorized_examples = vectorizer.fit_transform(examples)
-        else:
-            vectorized_examples = vectorizer.transform(examples)
-
-        return vectorized_examples
-
-    def _prepare_sequence_encoder(self):
-        class_name = self.sequence_encoding.value
-        sequence_encoder = ReflectionHandler.get_class_by_name(class_name, "encodings/")
-        return sequence_encoder
-
-    def _encode_sequence(self, sequence: ReceptorSequence, params: EncoderParams, sequence_encoder, counts, encode_locus: bool):
-        params.model = vars(self)
-        features = sequence_encoder.encode_sequence(sequence, params, encode_locus)
-        if features is not None:
-            for i in features:
-                if self.reads == ReadsType.UNIQUE:
-                    counts[i] += 1
-                elif self.reads == ReadsType.ALL:
-                    counts[i] += sequence.duplicate_count
-        return counts
+            return self.vectorizer.fit_transform(flat_kmers, row_ids, n_examples, weights)
+        return self.vectorizer.transform(flat_kmers, row_ids, n_examples, weights)
 
     @abc.abstractmethod
     def _encode_locus(self, dataset):
