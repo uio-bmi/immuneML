@@ -61,7 +61,15 @@ class TCRdistHelper:
         tcr_rep = TCRrep(cell_df=df, chains=chains, organism=organism, cpus=cores,
                          deduplicate=False, compute_distances=False)
 
-        if cdr3_only:
+        non_cdr3_aa_cols = [c for c in tcr_rep.clone_df.columns if c.endswith('_aa') and 'cdr' in c and 'cdr3' not in c]
+        has_none_cdr = non_cdr3_aa_cols and tcr_rep.clone_df[non_cdr3_aa_cols].isna().any().any()
+
+        if cdr3_only or has_none_cdr:
+            if has_none_cdr and not cdr3_only:
+                logging.warning("TCRdistHelper: Some V genes were not recognized by the tcrdist reference database "
+                                "and CDR1/CDR2/PMHC sequences could not be inferred. Falling back to CDR3-only "
+                                "distance computation to retain all sequences. To suppress this warning, set "
+                                "cdr3_only: true in the TCRdistEncoder configuration.")
             for chain in chains:
                 for attr_prefix in ['metrics', 'kargs', 'weights']:
                     setattr(tcr_rep, f'{attr_prefix}_{chain[0]}',
@@ -128,10 +136,10 @@ class TCRdistHelper:
         if "subject" not in df:
             df['subject'] = "sub" + df['cell_id']
 
-        df.loc[df['v_call'].str.contains("\*"), 'v_call'] = [TCRdistHelper.add_default_allele_to_v_gene(el) for el in
-                                                             df.loc[df['v_call'].str.contains("\*"), 'v_call']]
-        df.loc[df['j_call'].str.contains("\*"), 'j_call'] = [TCRdistHelper.add_default_allele_to_v_gene(el) for el in
-                                                             df.loc[df['j_call'].str.contains("\*"), 'j_call']]
+        df.loc[~df['v_call'].str.contains("\*", na=False), 'v_call'] = [TCRdistHelper.add_default_allele_to_v_gene(el) for el in
+                                                             df.loc[~df['v_call'].str.contains("\*", na=False), 'v_call']]
+        df.loc[~df['j_call'].str.contains("\*", na=False), 'j_call'] = [TCRdistHelper.add_default_allele_to_v_gene(el) for el in
+                                                             df.loc[~df['j_call'].str.contains("\*", na=False), 'j_call']]
         unique_chains = [str(Chain.get_chain(el)).lower() for el in df['locus'].unique().tolist()]
 
         df['clone_id'] = df['cell_id' if len(unique_chains) == 2 else 'sequence_id']
