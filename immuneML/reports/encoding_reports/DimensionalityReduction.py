@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -21,14 +21,25 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class DimensionalityReduction(EncodingReport):
     """
-    This report visualizes the data obtained by dimensionality reduction. The data points can be highlighted by label of
-    interest. It is also possible to specify labels that contain lists of values (e.g., HLA), in which case the data points
-    will be duplicated (so that each point refers to one HLA allele) and jittered slightly to improve visibility
-    before being highlighted by the concrete HLA allele values.
+    This report visualizes the data obtained by dimensionality reduction. The data points can be highlighted by label
+    of interest. It is also possible to specify labels that contain lists of values (e.g., HLA), in which case the
+    data points will be duplicated (so that each point refers to one HLA allele) and jittered slightly to improve
+    visibility before being highlighted by the concrete HLA allele values.
+
+    When a ``dim_red_method`` is configured, its ``components`` parameter determines which two components are plotted
+    and overrides the report-level ``components``. When no ``dim_red_method`` is set (using pre-computed
+    dimensionality-reduced data), the report-level ``components`` selects which two columns to plot.
+    All computed components are always written to the output CSV.
+
+    For PCA the explained variance per component is exported to a separate CSV and annotated on the axis labels.
+    For KernelPCA with ``compute_total_variance: true`` the fraction of total kernel-space variance is shown instead.
 
     **Specification arguments:**
 
     - labels (list): names of the label to use for highlighting data points; or None
+
+    - components (list): which two components (1-indexed) to plot when no ``dim_red_method`` is provided.
+      When a ``dim_red_method`` is set, use its own ``components`` parameter instead. Default: [1, 2].
 
     - dim_red_method (str): dimensionality reduction method to be used for plotting; if set, in a workflow, this
       dimensionality reduction will be used for plotting instead of any other set in the workflow; if None, it will
@@ -42,12 +53,20 @@ class DimensionalityReduction(EncodingReport):
 
         definitions:
             reports:
+                # Plot PC3 vs PC4 from a 5-component PCA, annotated with explained variance
                 rep1:
                     DimensionalityReduction:
                         labels: [epitope, source]
                         dim_red_method:
                             PCA:
-                                n_components: 2
+                                n_components: 5
+                                components: [3, 4]
+
+                # Plot components 1 vs 2 from pre-computed dimensionality-reduced data
+                rep2:
+                    DimensionalityReduction:
+                        labels: [epitope]
+                        components: [1, 2]
 
     """
 
@@ -72,17 +91,43 @@ class DimensionalityReduction(EncodingReport):
             labels = kwargs["labels"]
             ParameterValidator.assert_all_type_and_value(labels, str, location, "labels")
 
+        components = kwargs.get('components', None)
+        if components is not None:
+            assert isinstance(components, list) and len(components) == 2 \
+                   and all(isinstance(c, int) and c >= 1 for c in components), \
+                (f"{location}: 'components' must be a list of exactly 2 positive integers (1-indexed), "
+                 f"e.g. [1, 2]. Got: {components}.")
+
         return DimensionalityReduction(**{**kwargs, "dim_red_method": method, 'labels': labels})
 
     def __init__(self, dataset: Dataset = None, batch_size: int = 1, result_path: Path = None,
-                 name: str = None, labels: list = None, dim_red_method: DimRedMethod = None):
+                 name: str = None, labels: list = None, dim_red_method: DimRedMethod = None,
+                 components: list = None):
         super().__init__(dataset=dataset, result_path=result_path, name=name)
         self._labels = labels
         self._dim_red_method = dim_red_method
-        self._dimension_names = ['dimension_1', 'dimension_2'] if self._dim_red_method is None \
-            else self._dim_red_method.get_dimension_names()
+
+        # Method-level components take precedence over report-level components
+        if dim_red_method is not None and dim_red_method.components is not None:
+            self._components = dim_red_method.components
+        else:
+            self._components = components
+
+        # Column names for the two plotted components; refreshed after fit if n_components was None
+        self._dimension_names = self._resolve_dimension_names()
+
         self.info = ("This report visualizes the encoded data after applying dimensionality reduction dim_red,"
                      " optionally colored by labels of interest.")
+
+    def _resolve_dimension_names(self) -> List[str]:
+        c = self._components
+        if self._dim_red_method is not None and c is not None:
+            try:
+                all_names = self._dim_red_method.get_dimension_names()
+                return [all_names[c[0] - 1], all_names[c[1] - 1]]
+            except (TypeError, IndexError):
+                pass
+        return [f"dimension_{c[0]}", f"dimension_{c[1]}"] if c else ['dimension_1', 'dimension_2']
 
     def check_prerequisites(self):
         valid_encoding = self.dataset.encoded_data.encoding not in ['TCRdistEncoder', 'DistanceEncoder']
@@ -95,16 +140,27 @@ class DimensionalityReduction(EncodingReport):
         PathBuilder.build(self.result_path)
 
         dim_reduced_data = self._get_dim_reduced_data()
+
+        # Refresh dimension names now that fitting is complete (handles n_components=None before fit)
+        self._dimension_names = self._resolve_dimension_names()
+
+        output_tables = []
+        ev_ratio = self._dim_red_method.get_explained_variance_ratio() if self._dim_red_method else None
+
+        if ev_ratio is not None:
+            output_tables.append(self._export_explained_variance(ev_ratio))
+
         df, report_output_table = self._make_plotting_df(dim_reduced_data)
-        report_output_figures = self._safe_plot(df=df, output_written=True)
+        output_tables.append(report_output_table)
+        report_output_figures = self._safe_plot(df=df, ev_ratio=ev_ratio, output_written=True)
 
         dim_red_text = f" ({self._dim_red_method.__class__.__name__})" if self._dim_red_method else ""
 
         return ReportResult(name=self.name, info=self.info.replace(" dim_red", dim_red_text),
                             output_figures=report_output_figures,
-                            output_tables=[report_output_table])
+                            output_tables=output_tables)
 
-    def _get_dim_reduced_data(self):
+    def _get_dim_reduced_data(self) -> np.ndarray:
         if self._dim_red_method:
             assert self.dataset.encoded_data.examples is not None, \
                 f"{DimensionalityReduction.__name__}: data not encoded, report will not be made."
@@ -113,40 +169,75 @@ class DimensionalityReduction(EncodingReport):
             assert self.dataset.encoded_data.dimensionality_reduced_data is not None
             dim_reduced_data = self.dataset.encoded_data.dimensionality_reduced_data
 
-        assert dim_reduced_data.shape[1] == 2, \
-            (f"{DimensionalityReduction.__name__}: {self.name}: dimensionality reduced data is not 2d (got: "
-             f"{dim_reduced_data.shape}, so it cannot be plotted.")
+        assert dim_reduced_data.shape[1] >= 2, \
+            (f"{DimensionalityReduction.__name__}: {self.name}: dimensionality reduced data must have at least "
+             f"2 components for plotting (got shape {dim_reduced_data.shape}).")
+
+        if self._components is not None:
+            assert dim_reduced_data.shape[1] >= max(self._components), \
+                (f"{DimensionalityReduction.__name__}: {self.name}: requested components {self._components} but "
+                 f"the data only has {dim_reduced_data.shape[1]} components. "
+                 f"Ensure n_components >= {max(self._components)}.")
 
         return dim_reduced_data
 
+    def _export_explained_variance(self, ev_ratio: np.ndarray) -> ReportOutput:
+        all_dim_names = self._dim_red_method.get_dimension_names()
+        ev_df = pd.DataFrame({
+            'component': [all_dim_names[i] for i in range(len(ev_ratio))],
+            'explained_variance_ratio': ev_ratio,
+            'cumulative_explained_variance_ratio': np.cumsum(ev_ratio)
+        })
+        path = self.result_path / 'explained_variance.csv'
+        ev_df.to_csv(path, index=False)
+        return ReportOutput(path, f'Explained variance ratio per component '
+                                  f'({self._dim_red_method.__class__.__name__})')
+
     def _make_plotting_df(self, dim_reduced_data: np.ndarray) -> Tuple[pd.DataFrame, ReportOutput]:
-        df = pd.DataFrame({'example_id': self.dataset.get_example_ids(),
-                           self._dimension_names[0]: dim_reduced_data[:, 0],
-                           self._dimension_names[1]: dim_reduced_data[:, 1]})
+        if self._dim_red_method is not None:
+            all_dim_names = self._dim_red_method.get_dimension_names()
+        else:
+            all_dim_names = [f"dimension_{i + 1}" for i in range(dim_reduced_data.shape[1])]
+
+        component_cols = {all_dim_names[i]: dim_reduced_data[:, i] for i in range(dim_reduced_data.shape[1])}
+        df = pd.DataFrame({'example_id': self.dataset.get_example_ids(), **component_cols})
 
         try:
             if self._labels:
                 df[self._labels] = self.dataset.get_metadata(self._labels, return_df=True)[self._labels]
-        except (AttributeError, TypeError) as e:
+        except (AttributeError, TypeError):
             logging.warning(f"Labels {self._labels} not found in the dataset. Skipping label coloring in the plot.")
 
         if hasattr(self.dataset, 'get_metadata_fields') and 'subject_id' in self.dataset.get_metadata_fields():
             df['subject_id'] = self.dataset.get_metadata(['subject_id'], return_df=True)['subject_id']
 
         df.to_csv(self.result_path / 'dimensionality_reduced_data.csv', index=False)
-        return df, ReportOutput(self.result_path / 'dimensionality_reduced_data.csv', 'data after dimensionality reduction')
+        return df, ReportOutput(self.result_path / 'dimensionality_reduced_data.csv',
+                                'data after dimensionality reduction')
 
-    def _plot(self, df: pd.DataFrame) -> List[ReportOutput]:
+    def _build_axis_label_map(self, ev_ratio: Optional[np.ndarray]) -> dict:
+        label_map = {}
+        for i, col in enumerate(self._dimension_names):
+            comp_idx = self._components[i] if self._components else i + 1
+            if ev_ratio is not None and comp_idx <= len(ev_ratio):
+                label_map[col] = f"{col} ({ev_ratio[comp_idx - 1] * 100:.2f}%)"
+            else:
+                label_map[col] = col
+        return label_map
+
+    def _plot(self, df: pd.DataFrame, ev_ratio: Optional[np.ndarray] = None) -> List[ReportOutput]:
         PathBuilder.build(self.result_path)
+        label_map = self._build_axis_label_map(ev_ratio)
+        x, y = self._dimension_names[0], self._dimension_names[1]
+
         outputs = []
         if self._labels:
             for label in self._labels:
 
                 df_copy = self._parse_labels_with_lists(df, label)
-
                 unique_values = df_copy[label].unique()
 
-                hover_data = self._dimension_names + self._labels
+                hover_data = list(self._dimension_names) + list(self._labels)
                 if 'subject_id' in df_copy.columns:
                     hover_data += ['subject_id']
                 elif 'example_id' in df_copy.columns:
@@ -155,17 +246,19 @@ class DimensionalityReduction(EncodingReport):
                 if len(unique_values) <= 24:
                     color_sequence = px.colors.qualitative.Vivid if len(unique_values) <= 12 else px.colors.qualitative.Dark24
                     df_copy[label] = df_copy[label].astype('category')
-                    figure = px.scatter(df_copy, x=self._dimension_names[0], y=self._dimension_names[1], color=label,
+                    figure = px.scatter(df_copy, x=x, y=y, color=label,
                                         color_discrete_sequence=color_sequence,
-                                        hover_data=hover_data,
+                                        hover_data=hover_data, labels=label_map,
                                         category_orders={label: sorted(unique_values)})
                 elif df_copy[label].dtype.name == 'category' or df_copy[label].dtype == object:
-                    figure = px.scatter(df_copy, x=self._dimension_names[0], y=self._dimension_names[1], color=label,
-                                        hover_data=hover_data,
-                                        color_discrete_sequence=plotly.colors.sample_colorscale('Plasma', [i / len(unique_values) for i in range(len(unique_values))]),)
+                    figure = px.scatter(df_copy, x=x, y=y, color=label,
+                                        hover_data=hover_data, labels=label_map,
+                                        color_discrete_sequence=plotly.colors.sample_colorscale(
+                                            'Plasma', [i / len(unique_values) for i in range(len(unique_values))]))
                 else:
-                    figure = px.scatter(df_copy, x=self._dimension_names[0], y=self._dimension_names[1], color=label,
-                                        hover_data=hover_data, color_continuous_scale='Plasma')
+                    figure = px.scatter(df_copy, x=x, y=y, color=label,
+                                        hover_data=hover_data, labels=label_map,
+                                        color_continuous_scale='Plasma')
 
                 figure.update_layout(template="plotly_white", showlegend=True)
                 figure.update_traces(opacity=.6)
@@ -173,11 +266,10 @@ class DimensionalityReduction(EncodingReport):
                 file_path = self.result_path / f"dimensionality_reduction_{label}.html"
                 file_path = PlotlyUtil.write_image_to_file(figure, file_path)
                 outputs.append(ReportOutput(path=file_path,
-                                            name="Data visualization after dimensionality reduction "
-                                                 "(highlighted by {})".format(label)))
+                                            name=f"Data visualization after dimensionality reduction "
+                                                 f"(highlighted by {label})"))
         else:
-            # No label case - just plot points
-            figure = px.scatter(df, x=self._dimension_names[0], y=self._dimension_names[1])
+            figure = px.scatter(df, x=x, y=y, labels=label_map)
             figure.update_layout(template="plotly_white")
             figure.update_traces(opacity=.6)
 
@@ -195,12 +287,10 @@ class DimensionalityReduction(EncodingReport):
         if any(isinstance(df_long[label].iloc[i], (list, tuple)) for i in range(df_long.shape[0])):
             df_long = df_long.explode(label)
 
-            # Compute jitter based on the range of each axis
             x_range = df_long[self._dimension_names[0]].max() - df_long[self._dimension_names[0]].min()
             y_range = df_long[self._dimension_names[1]].max() - df_long[self._dimension_names[1]].min()
             jitter_strength = 0.005 * min(x_range, y_range)
 
-            # Apply jitter
             df_long[self._dimension_names[0]] += np.random.uniform(-jitter_strength, jitter_strength, size=len(df_long))
             df_long[self._dimension_names[1]] += np.random.uniform(-jitter_strength, jitter_strength, size=len(df_long))
 

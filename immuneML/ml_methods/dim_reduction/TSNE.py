@@ -11,10 +11,13 @@ from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 class TSNE(DimRedMethod):
     """
     t-distributed Stochastic Neighbor Embedding (t-SNE) method which wraps scikit-learn's TSNE. It can be useful for
-    visualizing high-dimensional data. Input arguments for the method are the
-    same as supported by scikit-learn (see `TSNE scikit-learn documentation
-    <https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html#sklearn.manifold.TSNE>`_ for details).
+    visualizing high-dimensional data. Input arguments for the method are the same as supported by scikit-learn (see
+    `TSNE scikit-learn documentation
+    <https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html#sklearn.manifold.TSNE>`_ for
+    details), plus one additional immuneML argument:
 
+    - components (list): which two components (1-indexed) to use for visualization in the
+      :ref:`DimensionalityReduction` report. Default: [1, 2].
 
     **YAML specification:**
 
@@ -25,15 +28,18 @@ class TSNE(DimRedMethod):
             ml_methods:
                 my_tsne:
                     TSNE:
-                        # arguments as defined by scikit-learn
                         n_components: 2
                         init: pca
+                        components: [1, 2]
 
     """
+
     def __init__(self, name: str = None, **kwargs):
         super().__init__(name)
+        self.components = kwargs.pop('components', None)
         self.method_kwargs = kwargs
         self.method = SklearnTSNE(**self.method_kwargs)
+        self._validate_components(self.method.n_components)
 
     def transform(self, dataset: Dataset = None, design_matrix: np.ndarray = None):
         logging.warning(f"{TSNE.__name__}: calling transform method of TSNE, but it only supports fit_transform. "

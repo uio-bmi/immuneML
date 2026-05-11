@@ -7,9 +7,12 @@ from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 
 class UMAP(DimRedMethod):
     """
-    Uniform manifold approximation and projection (UMAP) method which wraps umap-learn's UMAP. Input arguments for the method are the
-    same as supported by umap-learn (see `UMAP in the umap-learn documentation
-    <https://umap-learn.readthedocs.io/en/latest/>`_ for details).
+    Uniform manifold approximation and projection (UMAP) method which wraps umap-learn's UMAP. Input arguments for
+    the method are the same as supported by umap-learn (see `UMAP in the umap-learn documentation
+    <https://umap-learn.readthedocs.io/en/latest/>`_ for details), plus one additional immuneML argument:
+
+    - components (list): which two components (1-indexed) to use for visualization in the
+      :ref:`DimensionalityReduction` report. Default: [1, 2].
 
     Note that when providing the arguments for UMAP in the immuneML's specification, it is not possible to set
     functions as input values (e.g., for the metric parameter, it has to be one of the predefined metrics available
@@ -24,17 +27,19 @@ class UMAP(DimRedMethod):
             ml_methods:
                 my_umap:
                     UMAP:
-                        # arguments as defined by umap-learn
                         n_components: 2
                         n_neighbors: 15
                         metric: euclidean
+                        components: [1, 2]
 
     """
 
     def __init__(self, name: str = None, **kwargs):
         super().__init__(name)
+        self.components = kwargs.pop('components', None)
         self.method_kwargs = kwargs
         self.method = umap.UMAP(**kwargs)
+        self._validate_components(self.method.n_components)
 
     def get_dimension_names(self) -> List[str]:
         return [f"UMAP_dimension_{i+1}" for i in range(self.method.n_components)]
