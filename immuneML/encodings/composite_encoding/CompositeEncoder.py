@@ -79,12 +79,14 @@ class CompositeEncoder(DatasetEncoder):
 
         for encoder in self.encoders:
             encoded_dataset = encoder.encode(dataset, params)
-            tmp_feature_annotations = encoded_dataset.encoded_data.feature_annotations
+            fa = encoded_dataset.encoded_data.feature_annotations
+            n_features = len(encoded_dataset.encoded_data.feature_names or [])
+            tmp_feature_annotations = fa.copy() if isinstance(fa, pd.DataFrame) and not fa.empty else pd.DataFrame(index=range(n_features))
             tmp_feature_annotations['encoder'] = type(encoder).__name__
             tmp_feature_annotations['encoder_name'] = encoder.name
             feature_annotations.append(tmp_feature_annotations)
             examples.append(encoded_dataset.encoded_data.examples)
-            feature_names.extend(encoded_dataset.encoded_data.feature_names)
+            feature_names.extend(encoded_dataset.encoded_data.feature_names if encoded_dataset.encoded_data.feature_names else [])
             info[f'encoder_{encoder.name}'] = encoded_dataset.encoded_data.info
 
         examples = NumpyHelper.concat_arrays_rowwise(examples, use_memmap=True)

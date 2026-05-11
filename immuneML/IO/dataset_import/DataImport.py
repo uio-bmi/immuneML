@@ -2,9 +2,10 @@
 
 import abc
 import logging
+import multiprocessing
+import sys
 import uuid
 from dataclasses import fields
-from multiprocessing import Pool
 from pathlib import Path
 from typing import Type
 
@@ -133,7 +134,8 @@ class DataImport(metaclass=abc.ABCMeta):
     def load_repertoires(self, metadata):
         PathBuilder.build(self.params.result_path / "repertoires/")
 
-        with Pool(self.params.number_of_processes) as pool:
+        ctx = multiprocessing.get_context('forkserver' if sys.platform.startswith('linux') else 'spawn')
+        with ctx.Pool(self.params.number_of_processes) as pool:
             repertoires = pool.map(self.load_repertoire_object, [row for _, row in metadata.iterrows()])
 
         return repertoires

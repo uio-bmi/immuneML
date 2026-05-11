@@ -1,3 +1,4 @@
+import itertools
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -34,6 +35,7 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
         self.batch_size = batch_size
         self.scale_to_zero_mean = scale_to_zero_mean
         self.scale_to_unit_variance = scale_to_unit_variance
+        self.embedding_dim = None
 
     @staticmethod
     @abstractmethod
@@ -65,7 +67,7 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=embeddings,
-                                                   labels=labels,
+                                                   labels=labels, feature_names=self._get_feature_names(dataset),
                                                    example_ids=dataset.data.sequence_id.tolist(),
                                                    encoding=self._get_encoding_name())
         return encoded_dataset
@@ -110,7 +112,7 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(
-            examples=concatenated_embeddings,
+            examples=concatenated_embeddings, feature_names=self._get_feature_names(dataset),
             labels=labels, example_ids=receptor_ids,
             encoding=self._get_encoding_name()
         )
@@ -133,6 +135,7 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
         encoded_dataset = dataset.clone()
         labels = dataset.get_metadata(params.label_config.get_labels_by_name())
         encoded_dataset.encoded_data = EncodedData(examples=examples, labels=labels,
+                                                   feature_names=self._get_feature_names(dataset),
                                                    example_ids=dataset.get_example_ids(),
                                                    encoding=self._get_encoding_name())
 
@@ -165,6 +168,14 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
     @abstractmethod
     def _get_model_link(self) -> str:
         pass
+
+    def _get_feature_names(self, dataset: Dataset) -> list:
+        if isinstance(dataset, ReceptorDataset):
+            chains = dataset.get_locus()
+            return list(itertools.chain.from_iterable([[f"{self._get_encoding_name()}_{chain}_feature_{i}" for i in range(self.embedding_dim)]
+                                                      for chain in chains]))
+        else:
+            return [f"{self._get_encoding_name()}_feature_{i}" for i in range(self.embedding_dim)]
 
     def _get_caching_params(self, dataset, params: EncoderParams, step: str = None) -> tuple:
         return (dataset.identifier, tuple(params.label_config.get_labels_by_name()), self.scale_to_zero_mean,

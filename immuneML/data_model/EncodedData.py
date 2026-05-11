@@ -35,7 +35,7 @@ class EncodedData:
             (f"EncodedData: the length of feature_names ({len(feature_names)}) must match the feature dimension of the "
              f"example matrix ({examples.shape[1]})")
         if feature_names is not None:
-            assert feature_annotations is None or feature_annotations.shape[0] == len(feature_names) == examples.shape[1]
+            assert feature_annotations is None or feature_annotations.shape[0] == len(feature_names) == examples.shape[1], (len(feature_names), len(feature_annotations), examples.shape[1])
         if example_ids is not None and labels is not None:
             for label in labels.values():
                 assert len(label) == len(example_ids), "EncodedData: there are {} labels, but {} examples"\
