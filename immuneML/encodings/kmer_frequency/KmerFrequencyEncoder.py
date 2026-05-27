@@ -104,7 +104,6 @@ class KmerFrequencyEncoder(DatasetEncoder):
       - V_GENE_IMGT_KMER: contiguous k-mers of length k, annotated by the V gene of the sequence they belong to,
         annotated by the starting IMGT position (e.g., AHCDE -> {V1-1_AHC_105, V1-1_HCD_106, V1-1_CDE_107} for k=3 and
         V gene V1-1)
-      - IDENTITY: the k-mers correspond to the original sequences
 
     - normalization_type (:py:mod:`~immuneML.analysis.data_manipulation.NormalizationType`): The way in which the
       k-mer frequencies should be normalized to unit norm; options are: binary, relative_frequency (also known as l1,
