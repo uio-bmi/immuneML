@@ -86,8 +86,8 @@ to navigate through all the results that were produced.
 The quickest way to familiarize yourself with immuneML usage is to follow
 one of the [Quickstart tutorials](https://docs.immuneml.uio.no/quickstart.html).
 These tutorials provide a step-by-step guide on how to use immuneML for a 
-simple machine learning analysis on an adaptive immune receptor repertoire (AIRR) dataset,
-using either the command line tool or the [Galaxy web interface](https://galaxy.immuneml.uiocloud.no). 
+simple machine learning analysis on an adaptive immune receptor repertoire (AIRR) dataset
+using the command line tool.
 
 
 ### Overview of immuneML analyses
@@ -148,9 +148,7 @@ When experiencing an issue, please take the following steps:
     - We will be able to help you fastest if you can also provide a small reproducible example, such as a very small dataset for which your run fails. 
 
   
-If this does not answer your question, you can contact us via:
-- Twitter [`@immuneml`](https://twitter.com/immuneml)
-- Email [`contact@immuneml.uio.no`](mailto:contact@immuneml.uio.no)
+If this does not answer your question, you can contact us via email [`contact@immuneml.uio.no`](mailto:contact@immuneml.uio.no).
 
 
 
@@ -158,14 +156,13 @@ If this does not answer your question, you can contact us via:
 
 If you are using immuneML in any published work, please cite:
 
-Pavlović, M., Scheffer, L., Motwani, K. et al. The immuneML ecosystem for machine learning analysis of adaptive immune 
-receptor repertoires. Nat Mach Intell 3, 936–944 (2021). https://doi.org/10.1038/s42256-021-00413-z
+Pavlović, M., Scheffer, L., Motwani, K. et al. The immuneML ecosystem for machine learning analysis of adaptive immune receptor repertoires. Nat Mach Intell 3, 936–944 (2021). https://doi.org/10.1038/s42256-021-00413-z
 
-
+Pavlović, M., Würtzen, C., Kanduri, C., Mamica, M., Scheffer, L., Lund-Andersen, C., Gubatan, J., Ullmann, T., Greiff, V., & Sandve, G. K. (2026). Unsupervised Machine Learning for Adaptive Immune Receptors with immuneML (p. 2026.04.15.718648). bioRxiv. https://doi.org/10.64898/2026.04.15.718648
 
 <hr>
 
 
-© Copyright 2021-2022, Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve
+© Copyright 2021-2026, Milena Pavlovic, Lonneke Scheffer, Victor Greiff, Geir Kjetil Sandve
 
 
