@@ -1,11 +1,10 @@
 import copy
 import itertools
 import logging
-import shutil
 import typing
-from datetime import datetime
 from abc import ABC
 from dataclasses import dataclass, fields
+from datetime import datetime
 from pathlib import Path
 from typing import List
 from uuid import uuid4
@@ -292,7 +291,7 @@ class ReceptorDataset(ElementDataset):
                                         f"ReceptorDataset {self.identifier}", region_type)
 
     def get_example_ids(self):
-        return np.unique(self.data.cell_id.tolist()).tolist()
+        return list(dict.fromkeys(self.data.cell_id.tolist()))
 
     def get_data_from_index_range(self, start_index: int, end_index: int):
         return self.data[start_index * 2: end_index * 2]

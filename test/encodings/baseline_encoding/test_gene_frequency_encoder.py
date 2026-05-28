@@ -60,53 +60,56 @@ def test_gene_frequency_encoder():
     shutil.rmtree(path)
 
 
-def test_gene_frequency_encoder_receptor():
-    path = PathBuilder.remove_old_and_build(
-        EnvironmentSettings.tmp_test_path / 'test_gene_frequency_encoder_receptor')
+def _make_receptor(cell_id, tra_v, tra_j, trb_v, trb_j):
+    return Receptor(
+        chain_pair=ChainPair.TRA_TRB,
+        chain_1=ReceptorSequence(sequence_aa='AA', locus='TRA', v_call=tra_v, j_call=tra_j),
+        chain_2=ReceptorSequence(sequence_aa='CC', locus='TRB', v_call=trb_v, j_call=trb_j),
+        cell_id=cell_id
+    )
 
-    def make_receptor(cell_id, tra_v, tra_j, trb_v, trb_j):
-        return Receptor(
-            chain_pair=ChainPair.TRA_TRB,
-            chain_1=ReceptorSequence(sequence_aa='AA', locus='TRA', v_call=tra_v, j_call=tra_j),
-            chain_2=ReceptorSequence(sequence_aa='CC', locus='TRB', v_call=trb_v, j_call=trb_j),
-            cell_id=cell_id
-        )
+
+def test_gene_frequency_encoder_receptor_one_hot():
+    path = PathBuilder.remove_old_and_build(
+        EnvironmentSettings.tmp_test_path / 'test_gene_frequency_encoder_receptor_one_hot')
 
     receptors = [
-        make_receptor('cell1', 'TRAV1*01', 'TRAJ1*01', 'TRBV1*01', 'TRBJ1*01'),
-        make_receptor('cell2', 'TRAV2*01', 'TRAJ1*01', 'TRBV1*01', 'TRBJ2*01'),
-        make_receptor('cell3', 'TRAV1*01', 'TRAJ2*01', 'TRBV2*01', 'TRBJ1*01'),
+        _make_receptor('cell1', 'TRAV1*01', 'TRAJ1*01', 'TRBV1*01', 'TRBJ1*01'),
+        _make_receptor('cell2', 'TRAV2*01', 'TRAJ1*01', 'TRBV1*01', 'TRBJ2*01'),
+        _make_receptor('cell3', 'TRAV1*01', 'TRAJ2*01', 'TRBV2*01', 'TRBJ1*01'),
     ]
 
     dataset = ReceptorDataset.build_from_objects(receptors, PathBuilder.build(path / 'dataset'), name='receptor_dataset')
 
     encoder = GeneFrequencyEncoder(genes=['V', 'J'], normalization_type=NormalizationType.NONE,
-                                   scale_to_zero_mean=False, scale_to_unit_variance=False)
+                                   scale_to_zero_mean=False, scale_to_unit_variance=False,
+                                   encoding_type='one_hot')
 
     label_config = LabelConfiguration(labels=[Label('label', [0, 1])])
     encoded = encoder.encode(dataset, EncoderParams(label_config=label_config, learn_model=True,
                                                     encode_labels=False))
 
-    # V: TRAV1, TRAV2, TRBV1, TRBV2 (alphabetical); J: TRAJ1, TRAJ2, TRBJ1, TRBJ2
+    # V: TRAV1, TRAV2 (TRA locus first), TRBV1, TRBV2 (TRB locus); J: TRAJ1, TRAJ2, TRBJ1, TRBJ2
     assert encoded.encoded_data.examples.shape == (3, 8)
     assert encoded.encoded_data.feature_names == ['TRAV1', 'TRAV2', 'TRBV1', 'TRBV2',
                                                   'TRAJ1', 'TRAJ2', 'TRBJ1', 'TRBJ2']
+    # every row sums to 4: one gene per locus (TRAV, TRBV, TRAJ, TRBJ)
     assert_array_equal(encoded.encoded_data.examples, np.array([
         [1., 0., 1., 0.,  1., 0., 1., 0.],  # cell1
         [0., 1., 1., 0.,  1., 0., 0., 1.],  # cell2
         [1., 0., 0., 1.,  0., 1., 1., 0.],  # cell3
     ]))
+    assert encoded.encoded_data.examples.sum(axis=1).tolist() == [4., 4., 4.]
+    assert encoded.encoded_data.info['reference_genes'] == {}
 
     # at predict time: TRAV3 is novel → ignored (0); TRBV1 known → 1
-    receptors2 = [make_receptor('cell1', 'TRAV3*01', 'TRAJ1*01', 'TRBV1*01', 'TRBJ1*01')]
+    receptors2 = [_make_receptor('cell1', 'TRAV3*01', 'TRAJ1*01', 'TRBV1*01', 'TRBJ1*01')]
     dataset2 = ReceptorDataset.build_from_objects(receptors2, PathBuilder.build(path / 'dataset2'), name='receptor_dataset2')
 
     encoded2 = encoder.encode(dataset2, EncoderParams(label_config=label_config, learn_model=False,
                                                       encode_labels=False))
 
     assert encoded2.encoded_data.examples.shape == (1, 8)
-    assert encoded2.encoded_data.feature_names == ['TRAV1', 'TRAV2', 'TRBV1', 'TRBV2',
-                                                   'TRAJ1', 'TRAJ2', 'TRBJ1', 'TRBJ2']
     assert_array_equal(encoded2.encoded_data.examples, np.array([
         [0., 0., 1., 0.,  1., 0., 1., 0.],  # TRAV3 unknown → TRAV1=0, TRAV2=0
     ]))
@@ -114,9 +117,57 @@ def test_gene_frequency_encoder_receptor():
     shutil.rmtree(path)
 
 
-def test_gene_frequency_encoder_sequence():
+def test_gene_frequency_encoder_receptor_dummy():
     path = PathBuilder.remove_old_and_build(
-        EnvironmentSettings.tmp_test_path / 'test_gene_frequency_encoder_sequence')
+        EnvironmentSettings.tmp_test_path / 'test_gene_frequency_encoder_receptor_dummy')
+
+    receptors = [
+        _make_receptor('cell1', 'TRAV1*01', 'TRAJ1*01', 'TRBV1*01', 'TRBJ1*01'),
+        _make_receptor('cell2', 'TRAV2*01', 'TRAJ1*01', 'TRBV1*01', 'TRBJ2*01'),
+        _make_receptor('cell3', 'TRAV1*01', 'TRAJ2*01', 'TRBV2*01', 'TRBJ1*01'),
+    ]
+
+    dataset = ReceptorDataset.build_from_objects(receptors, PathBuilder.build(path / 'dataset'), name='receptor_dataset')
+
+    encoder = GeneFrequencyEncoder(genes=['V', 'J'], normalization_type=NormalizationType.NONE,
+                                   scale_to_zero_mean=False, scale_to_unit_variance=False,
+                                   encoding_type='dummy')
+
+    label_config = LabelConfiguration(labels=[Label('label', [0, 1])])
+    encoded = encoder.encode(dataset, EncoderParams(label_config=label_config, learn_model=True,
+                                                    encode_labels=False))
+
+    # Most frequent per locus: V_TRA=TRAV1 (2x), V_TRB=TRBV1 (2x), J_TRA=TRAJ1 (2x), J_TRB=TRBJ1 (2x)
+    # Remaining features: TRAV2, TRBV2, TRAJ2, TRBJ2
+    assert encoded.encoded_data.examples.shape == (3, 4)
+    assert encoded.encoded_data.feature_names == ['TRAV2', 'TRBV2', 'TRAJ2', 'TRBJ2']
+    assert_array_equal(encoded.encoded_data.examples, np.array([
+        [0., 0., 0., 0.],  # cell1: all reference genes
+        [1., 0., 0., 1.],  # cell2: TRAV2, TRBJ2
+        [0., 1., 1., 0.],  # cell3: TRBV2, TRAJ2
+    ]))
+    assert encoded.encoded_data.info['reference_genes'] == {
+        'V_TRA': 'TRAV1', 'V_TRB': 'TRBV1', 'J_TRA': 'TRAJ1', 'J_TRB': 'TRBJ1'
+    }
+
+    # at predict time: TRAV3 is novel → 0; TRBV1 is reference → not in features → 0
+    receptors2 = [_make_receptor('cell4', 'TRAV3*01', 'TRAJ1*01', 'TRBV1*01', 'TRBJ1*01')]
+    dataset2 = ReceptorDataset.build_from_objects(receptors2, PathBuilder.build(path / 'dataset2'), name='receptor_dataset2')
+
+    encoded2 = encoder.encode(dataset2, EncoderParams(label_config=label_config, learn_model=False,
+                                                      encode_labels=False))
+
+    assert encoded2.encoded_data.examples.shape == (1, 4)
+    assert_array_equal(encoded2.encoded_data.examples, np.array([
+        [0., 0., 0., 0.],  # TRAV3 unknown, all others are reference genes
+    ]))
+
+    shutil.rmtree(path)
+
+
+def test_gene_frequency_encoder_sequence_one_hot():
+    path = PathBuilder.remove_old_and_build(
+        EnvironmentSettings.tmp_test_path / 'test_gene_frequency_encoder_sequence_one_hot')
 
     sequences = [
         ReceptorSequence(sequence_aa='AA', locus='TRB', v_call='TRBV1*01', j_call='TRBJ1*01'),
@@ -127,13 +178,13 @@ def test_gene_frequency_encoder_sequence():
     dataset = SequenceDataset.build_from_objects(sequences, PathBuilder.build(path / 'dataset'), name='sequence_dataset')
 
     encoder = GeneFrequencyEncoder(genes=['V', 'J'], normalization_type=NormalizationType.NONE,
-                                   scale_to_zero_mean=False, scale_to_unit_variance=False)
+                                   scale_to_zero_mean=False, scale_to_unit_variance=False,
+                                   encoding_type='one_hot')
 
     label_config = LabelConfiguration(labels=[Label('label', [0, 1])])
     encoded = encoder.encode(dataset, EncoderParams(label_config=label_config, learn_model=True,
                                                     encode_labels=False))
 
-    # V: TRBV1, TRBV2 (alphabetical); J: TRBJ1, TRBJ2
     assert encoded.encoded_data.examples.shape == (3, 4)
     assert encoded.encoded_data.feature_names == ['TRBV1', 'TRBV2', 'TRBJ1', 'TRBJ2']
     assert_array_equal(encoded.encoded_data.examples, np.array([
@@ -141,6 +192,7 @@ def test_gene_frequency_encoder_sequence():
         [0., 1., 1., 0.],
         [1., 0., 0., 1.],
     ]))
+    assert encoded.encoded_data.info['reference_genes'] == {}
 
     # at predict time: TRBV3 is novel → ignored (0)
     sequences2 = [ReceptorSequence(sequence_aa='TT', locus='TRB', v_call='TRBV3*01', j_call='TRBJ1*01')]
@@ -150,7 +202,50 @@ def test_gene_frequency_encoder_sequence():
                                                       encode_labels=False))
 
     assert encoded2.encoded_data.examples.shape == (1, 4)
-    assert encoded2.encoded_data.feature_names == ['TRBV1', 'TRBV2', 'TRBJ1', 'TRBJ2']
     assert_array_equal(encoded2.encoded_data.examples, np.array([[0., 0., 1., 0.]]))
+
+    shutil.rmtree(path)
+
+
+def test_gene_frequency_encoder_sequence_dummy():
+    path = PathBuilder.remove_old_and_build(
+        EnvironmentSettings.tmp_test_path / 'test_gene_frequency_encoder_sequence_dummy')
+
+    sequences = [
+        ReceptorSequence(sequence_aa='AA', locus='TRB', v_call='TRBV1*01', j_call='TRBJ1*01'),
+        ReceptorSequence(sequence_aa='CC', locus='TRB', v_call='TRBV2*01', j_call='TRBJ1*01'),
+        ReceptorSequence(sequence_aa='GG', locus='TRB', v_call='TRBV1*01', j_call='TRBJ2*01'),
+    ]
+
+    dataset = SequenceDataset.build_from_objects(sequences, PathBuilder.build(path / 'dataset'), name='sequence_dataset')
+
+    encoder = GeneFrequencyEncoder(genes=['V', 'J'], normalization_type=NormalizationType.NONE,
+                                   scale_to_zero_mean=False, scale_to_unit_variance=False,
+                                   encoding_type='dummy')
+
+    label_config = LabelConfiguration(labels=[Label('label', [0, 1])])
+    encoded = encoder.encode(dataset, EncoderParams(label_config=label_config, learn_model=True,
+                                                    encode_labels=False))
+
+    # Most frequent per locus: V_TRB=TRBV1 (2x), J_TRB=TRBJ1 (2x)
+    # Remaining features: TRBV2, TRBJ2
+    assert encoded.encoded_data.examples.shape == (3, 2)
+    assert encoded.encoded_data.feature_names == ['TRBV2', 'TRBJ2']
+    assert_array_equal(encoded.encoded_data.examples, np.array([
+        [0., 0.],  # TRBV1=ref, TRBJ1=ref
+        [1., 0.],  # TRBV2, TRBJ1=ref
+        [0., 1.],  # TRBV1=ref, TRBJ2
+    ]))
+    assert encoded.encoded_data.info['reference_genes'] == {'V_TRB': 'TRBV1', 'J_TRB': 'TRBJ1'}
+
+    # at predict time: TRBV3 novel → 0; TRBJ1 is reference → not in features → 0
+    sequences2 = [ReceptorSequence(sequence_aa='TT', locus='TRB', v_call='TRBV3*01', j_call='TRBJ1*01')]
+    dataset2 = SequenceDataset.build_from_objects(sequences2, PathBuilder.build(path / 'dataset2'), name='sequence_dataset2')
+
+    encoded2 = encoder.encode(dataset2, EncoderParams(label_config=label_config, learn_model=False,
+                                                      encode_labels=False))
+
+    assert encoded2.encoded_data.examples.shape == (1, 2)
+    assert_array_equal(encoded2.encoded_data.examples, np.array([[0., 0.]]))
 
     shutil.rmtree(path)
