@@ -3,9 +3,6 @@ import pickle
 from pathlib import Path
 
 import numpy as np
-import torch
-import torch.nn as nn
-import torch.optim as optim
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
@@ -32,6 +29,9 @@ class _TorchLogReg(BaseEstimator, ClassifierMixin):
         self.device = device
 
     def fit(self, X, y):
+        import torch
+        import torch.nn as nn
+        import torch.optim as optim
         X_arr = X.toarray() if hasattr(X, 'toarray') else np.asarray(X)
         n, p = X_arr.shape
         dev = torch.device(self.device)
@@ -64,6 +64,7 @@ class _TorchLogReg(BaseEstimator, ClassifierMixin):
         return self
 
     def predict_proba(self, X):
+        import torch
         X_arr = X.toarray() if hasattr(X, 'toarray') else np.asarray(X)
         dev = torch.device(self.device)
         X_t = torch.from_numpy(X_arr.astype(np.float32)).to(dev)
@@ -93,6 +94,10 @@ def _compute_lambda_sequence(X, y, alpha, n_lambda, min_lambda_ratio=None):
 
 def _lbfgs_step(linear, X_t, y_t, mask, lam, alpha, max_iter):
     """One warm-started LBFGS step along the regularisation path for a single lambda value."""
+    import torch.nn as nn
+    import torch.optim as optim
+    import torch
+
     criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.LBFGS(linear.parameters(), lr=1.0,
                               max_iter=max_iter, line_search_fn='strong_wolfe')
@@ -187,6 +192,13 @@ class LogRegressionCustomPenalty(MLMethod):
         for ind, encoding in enumerate(self.non_penalized_encodings):
             if 'Encoder' not in encoding:
                 self.non_penalized_encodings[ind] = encoding + 'Encoder'
+
+        if backend == 'torch':
+            try:
+                import torch
+            except ImportError:
+                raise ImportError("LogRegressionCustomPenalty: PyTorch is required for the 'torch' backend. "
+                                  "Please install it to use this option.")
 
         self.model = None
         self.feature_names = None

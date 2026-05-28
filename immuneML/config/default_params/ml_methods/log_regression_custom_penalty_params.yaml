@@ -1,0 +1,6 @@
+backend: glmnet
+alpha: 1.0 # l1 penalty
+n_lambda: 100
+n_splits: 3
+max_iter: 100000 # glmnet's default; for torch it should be much less
+device: cpu
