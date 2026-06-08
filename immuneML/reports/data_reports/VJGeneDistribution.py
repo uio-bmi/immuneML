@@ -170,14 +170,32 @@ class VJGeneDistribution(DataReport):
 
         return df[colnames + ["counts"]].reset_index(drop=True)
 
+    def _add_percentage_column(self, df, count_col='counts'):
+        df = df.copy()
+        if self.label_name is not None and self.label_name in df.columns:
+            totals = df.groupby(self.label_name)[count_col].transform('sum')
+        else:
+            totals = df[count_col].sum()
+        df['percentage'] = (df[count_col] / totals * 100).round(1)
+        return df
+
     def _plot_gene_distribution(self, df, title, filename):
-        figure = px.bar(df, x="genes", y="counts", color=self.label_name,
+        df = self._add_percentage_column(df)
+        df = df.copy()
+        df['_total_count'] = df.groupby('genes')['counts'].transform('sum')
+        df = df.sort_values('_total_count', ascending=False)
+        gene_order = df['genes'].unique().tolist()
+        df = df.drop(columns='_total_count')
+        figure = px.bar(df, x="genes", y="percentage", color=self.label_name,
+                        custom_data=["counts"],
+                        category_orders={"genes": gene_order},
                         labels={"genes": "Gene names",
-                                "counts": "Observed frequency"},
+                                "percentage": "Frequency (%)"},
                         color_discrete_sequence=px.colors.qualitative.Vivid)
-        figure.update_layout(xaxis=dict(tickmode='array', tickvals=df["genes"]),
-                             yaxis=dict(tickmode='array', tickvals=df["counts"]),
-                             template="plotly_white",
+        figure.update_traces(
+            hovertemplate="<b>%{x}</b><br>Frequency: %{y:.1f}%<br>Count: %{customdata[0]}<extra></extra>"
+        )
+        figure.update_layout(template="plotly_white",
                              barmode="group")
 
         file_path = self.result_path / filename
@@ -205,7 +223,7 @@ class VJGeneDistribution(DataReport):
                                              filename=f"{chain}VJ_gene_distribution.html"))
             else:
                 # ensure the same color scale is used for each heatmap
-                zmax = max(chain_df["counts"])
+                zmax = max(self._add_percentage_column(chain_df)["percentage"])
 
                 for label_class in set(dataset_attributes[self.label_name]):
                     label_chain_df = chain_df[chain_df[self.label_name] == label_class]
@@ -219,14 +237,27 @@ class VJGeneDistribution(DataReport):
         return tables, plots
 
     def _plot_gene_combo_heatmap(self, chain_df, title, filename, value_to_plot="counts", zmax=None,
-                                 color_name="Observed frequency"):
-        zmax = max(chain_df[value_to_plot]) if zmax is None else zmax
+                                 color_name="Observed frequency (%)"):
+        if value_to_plot == "counts":
+            chain_df = self._add_percentage_column(chain_df, count_col="counts")
+            count_matrix = chain_df.pivot(index="v_genes", columns="j_genes", values="counts").fillna(0).astype(int)
+            pct_matrix = chain_df.pivot(index="v_genes", columns="j_genes", values="percentage").round(decimals=1)
+            count_matrix = count_matrix.reindex(index=pct_matrix.index, columns=pct_matrix.columns).fillna(0).astype(int)
+            zmax = max(chain_df["percentage"]) if zmax is None else zmax
+            figure = px.imshow(pct_matrix, labels=dict(x="J genes", y="V genes", color=color_name),
+                               text_auto='.1f', zmin=0, zmax=zmax, aspect="auto")
+            figure.update_traces(
+                hoverongaps=False,
+                customdata=count_matrix.values,
+                hovertemplate="V: %{y}<br>J: %{x}<br>Frequency: %{z:.1f}%<br>Count: %{customdata}<extra></extra>"
+            )
+        else:
+            zmax = max(chain_df[value_to_plot]) if zmax is None else zmax
+            chain_df = chain_df.pivot(index="v_genes", columns="j_genes", values=value_to_plot).round(decimals=2)
+            figure = px.imshow(chain_df, labels=dict(x="J genes", y="V genes", color=color_name),
+                               text_auto=True, zmin=0, zmax=zmax, aspect="auto")
+            figure.update_traces(hoverongaps=False)
 
-        chain_df = chain_df.pivot(index="v_genes", columns="j_genes", values=value_to_plot).round(decimals=2)
-        figure = px.imshow(chain_df, labels=dict(x="J genes", y="V genes", color=color_name),
-                           text_auto=True, zmin=0, zmax=zmax, aspect="auto")
-
-        figure.update_traces(hoverongaps=False)
         figure.update_layout(template='plotly_white', xaxis=dict(showgrid=False), yaxis=dict(showgrid=False))
 
         file_path = self.result_path / filename
