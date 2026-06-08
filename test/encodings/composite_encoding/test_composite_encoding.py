@@ -11,6 +11,7 @@ from immuneML.encodings.composite_encoding.CompositeEncoder import CompositeEnco
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.ml_methods.dim_reduction.PCA import PCA
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
@@ -60,4 +61,72 @@ def test_composite_encoder():
     assert_array_equal(encoded_dataset2.encoded_data.get_examples_as_np_matrix(), np.array([[1, 0, 0, 0, 0.5, 0.5, 0., 0.5, 0.5],
                                                                                             [0, 1, 0, 1, 0., 1., 0., 0., 1.],
                                                                                             [1, 0, 0, 1, 0., 0., 1., 0., 0.]]))
+    shutil.rmtree(path)
+
+
+def test_composite_encoder_build_object_with_dim_reduction():
+    path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'test_composite_build_object_dim_red')
+
+    dataset = RepertoireBuilder.build_dataset(
+        [['AA', 'CC'], ['CC'], ['TT']],
+        path / 'dataset',
+        seq_metadata=[[{'v_call': 'TRBV1*01', 'j_call': 'TRBJ2-1*01'},
+                       {'v_call': 'TRBV3*01', 'j_call': 'TRBJ2-2*01'}],
+                      [{'v_call': 'TRBV3*01', 'j_call': 'TRBJ2-2*01'}],
+                      [{'v_call': 'TRBV2*01', 'j_call': 'TRBJ2-1*01'}]],
+        labels={'label': [0, 1, 0], 'HLA': ['HLAA1,HLAB2', 'HLAA2,HLAB3', 'HLAA1,HLAB3']}
+    )
+
+    # Build from dict — MetadataEncoder (no dim reduction) + GeneFrequency with PCA(n_components=2)
+    params = {
+        'name': 'composite',
+        'encoders': [
+            {'Metadata': {'metadata_fields': ['HLA']}},
+            {
+                'GeneFrequency': {
+                    'genes': ['V', 'J'],
+                    'normalization_type': 'relative_frequency',
+                    'scale_to_zero_mean': False,
+                    'scale_to_unit_variance': False,
+                },
+                'dim_reduction': {'PCA': {'n_components': 2}},
+            },
+        ],
+    }
+
+    encoder = CompositeEncoder.build_object(dataset, **params)
+
+    assert len(encoder.encoders) == 2
+    assert encoder.dim_red_methods[0] is None
+    assert isinstance(encoder.dim_red_methods[1], PCA)
+
+    label_config = LabelConfiguration(labels=[Label('label', [0, 1])])
+
+    # Training: PCA is fit+transformed; MetadataEncoder produces 4 features, PCA produces 2 -> total 6
+    encoded_train = encoder.encode(dataset, EncoderParams(label_config=label_config, learn_model=True))
+
+    assert encoded_train.encoded_data.get_examples_as_np_matrix().shape == (3, 6)
+    assert encoded_train.encoded_data.feature_names[:4] == ['HLA_HLAA1', 'HLA_HLAA2', 'HLA_HLAB2', 'HLA_HLAB3']
+    assert encoded_train.encoded_data.feature_names[4:] == ['PC1', 'PC2']
+
+    fa = encoded_train.encoded_data.feature_annotations
+    assert fa['dim_reduction'].iloc[:4].isna().all()
+    assert (fa['dim_reduction'].iloc[4:] == 'PCA').all()
+
+    # Inference: PCA is transform-only; shape and feature names must be unchanged
+    dataset2 = RepertoireBuilder.build_dataset(
+        [['AA', 'CC'], ['CC'], ['TT']],
+        path / 'dataset2',
+        seq_metadata=[[{'v_call': 'TRBV1*01', 'j_call': 'TRBJ2-1*01'},
+                       {'v_call': 'TRBV3*01', 'j_call': 'TRBJ2-2*01'}],
+                      [{'v_call': 'TRBV3*01', 'j_call': 'TRBJ2-2*01'}],
+                      [{'v_call': 'TRBV2*01', 'j_call': 'TRBJ4-1*01'}]],
+        labels={'label': [0, 1, 0], 'HLA': ['HLAA1,HLAB4', 'HLAA2,HLAB3', 'HLAA1,HLAB3']}
+    )
+
+    encoded_test = encoder.encode(dataset2, EncoderParams(label_config=label_config, learn_model=False))
+
+    assert encoded_test.encoded_data.get_examples_as_np_matrix().shape == (3, 6)
+    assert encoded_test.encoded_data.feature_names == encoded_train.encoded_data.feature_names
+
     shutil.rmtree(path)

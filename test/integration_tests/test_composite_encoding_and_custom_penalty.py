@@ -57,6 +57,11 @@ class TestRandomDatasetWorkflow(TestCase):
                                 {
                                     "KmerFrequency": {
                                         "k": 3
+                                    },
+                                    "dim_reduction": {
+                                        "PCA": {
+                                            "n_components": 5
+                                        }
                                     }
                                 },
                                 {
