@@ -39,7 +39,9 @@ dependencies = [
     "psutil",
     "kaleido",
     "logomaker",
-    "python-glmnet"
+    "python-glmnet",
+    "shap",
+    "xgboost"
 ]
 
 [project.optional-dependencies]
