@@ -28,17 +28,27 @@ class MLExporter:
         preproc_filename = MLExporter._store_preprocessing_sequence(hp_item.hp_setting.preproc_sequence, path).name
         encoder_filename = MLExporter._store_encoder(hp_item.hp_setting.encoder, path).name
 
+        dim_red_filename = None
+        if hp_item.hp_setting.dim_reduction_method is not None:
+            dim_red_filename = MLExporter._store_dim_reduction_method(
+                hp_item.hp_setting.dim_reduction_method, path).name
+
         MLExporter.store_ml_method(hp_item.method, path, preproc_filename, encoder_filename,
                                    hp_item.hp_setting.encoder_name, hp_item.hp_setting.encoder_params,
                                    type(hp_item.hp_setting.encoder).__name__, hp_item.train_dataset,
-                                   hp_item.hp_setting.preproc_sequence_name, hp_item.hp_setting.preproc_sequence)
+                                   hp_item.hp_setting.preproc_sequence_name, hp_item.hp_setting.preproc_sequence,
+                                   dim_red_method=hp_item.hp_setting.dim_reduction_method,
+                                   dim_red_filename=dim_red_filename,
+                                   dim_red_name=hp_item.hp_setting.dim_red_name,
+                                   dim_red_params=hp_item.hp_setting.dim_red_params)
 
         return path
 
     @staticmethod
     def store_ml_method(method: MLMethod, path: Path, preproc_filename, encoder_filename, encoder_name,
                         encoder_params, encoder_class_name, train_dataset, preproc_sequence_name,
-                        preproc_sequence):
+                        preproc_sequence, dim_red_method=None, dim_red_filename=None,
+                        dim_red_name=None, dim_red_params=None):
         method.store(path)
 
         method_config = MLMethodConfiguration(label_name=method.get_label_name(),
@@ -58,9 +68,20 @@ class MLExporter:
                                               preprocessing_parameters={
                                                   type(seq).__name__: {str(key): str(val) for key, val in
                                                                        vars(seq).items()}
-                                                  for seq in preproc_sequence})
+                                                  for seq in preproc_sequence},
+                                              dim_reduction_name=dim_red_name,
+                                              dim_reduction_class=type(dim_red_method).__name__ if dim_red_method is not None else None,
+                                              dim_reduction_file=dim_red_filename,
+                                              dim_reduction_params=dim_red_params)
 
         method_config.store(path / 'ml_config.yaml')
+
+    @staticmethod
+    def _store_dim_reduction_method(dim_red_method, path: Path) -> Path:
+        filename = path / "dim_reduction.pickle"
+        with filename.open("wb") as f:
+            pickle.dump(dim_red_method, f)
+        return filename
 
     @staticmethod
     def _store_encoder(encoder, path: Path) -> Path:

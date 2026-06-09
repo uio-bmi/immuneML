@@ -52,7 +52,7 @@ class EncodedData:
             if example_weights is not None:
                 assert len(example_weights) == examples.shape[0]
 
-        self.examples = examples
+        self._examples = examples
         self._examples_filename = examples.filename if isinstance(examples, np.memmap) else None
         self.labels = {name: infer_label_types(vals) for name, vals in labels.items()} if labels is not None else labels
         self.example_ids = example_ids
@@ -64,20 +64,26 @@ class EncodedData:
         self.dim_names = dim_names
         self.dimensionality_reduced_data = dimensionality_reduced_data
 
+    @property
+    def examples(self):
+        return self.dimensionality_reduced_data if self.dimensionality_reduced_data is not None else self._examples
+
     def __getstate__(self):
         """Convert memmap to regular array when pickling"""
         state = self.__dict__.copy()
-        if isinstance(self.examples, np.memmap):
-            state['examples_shape'] = self.examples.shape
-            state['examples'] = None
+        if isinstance(self._examples, np.memmap):
+            state['examples_shape'] = self._examples.shape
+            state['_examples'] = None
         return state
 
     def __setstate__(self, state):
         """Restore object state from pickling"""
         shape = state.pop('examples_shape') if 'examples_shape' in state else None
+        if 'examples' in state and '_examples' not in state:
+            state['_examples'] = state.pop('examples')
         self.__dict__.update(state)
         if self._examples_filename is not None:
-            self.examples = np.memmap(self._examples_filename, dtype='float32', mode='r+', shape=shape)
+            self._examples = np.memmap(self._examples_filename, dtype='float32', mode='r+', shape=shape)
 
     def get_examples_as_np_matrix(self):
         if isinstance(self.examples, np.ndarray):

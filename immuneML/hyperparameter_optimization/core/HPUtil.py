@@ -1,6 +1,6 @@
 import copy
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
@@ -115,6 +115,21 @@ class HPUtil:
                 region_type=region_type
             ),
         ))
+        return encoded_dataset
+
+    @staticmethod
+    def apply_dim_reduction(encoded_dataset, hp_setting: HPSetting, learn_model: bool):
+        if hp_setting.dim_reduction_method is None:
+            return encoded_dataset
+        if learn_model:
+            dim_red = copy.deepcopy(hp_setting.dim_reduction_method)
+            reduced = dim_red.fit_transform(dataset=encoded_dataset)
+            hp_setting.dim_reduction_method = dim_red
+        else:
+            dim_red = hp_setting.dim_reduction_method
+            reduced = dim_red.transform(dataset=encoded_dataset)
+        encoded_dataset.encoded_data.dimensionality_reduced_data = reduced
+        encoded_dataset.encoded_data.dim_names = dim_red.get_dimension_names()
         return encoded_dataset
 
     @staticmethod

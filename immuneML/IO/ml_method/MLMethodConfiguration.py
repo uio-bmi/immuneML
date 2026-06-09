@@ -22,6 +22,11 @@ class MLMethodConfiguration:
     preprocessing_parameters: dict = None
     preprocessing_file: str = None
 
+    dim_reduction_name: str = None
+    dim_reduction_class: str = None
+    dim_reduction_file: str = None
+    dim_reduction_params: dict = None
+
     ml_method: str = None
     ml_method_name: str = None
 

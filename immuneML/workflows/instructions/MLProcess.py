@@ -95,6 +95,8 @@ class MLProcess:
                                                       sequence_type=self.sequence_type,
                                                       region_type=self.region_type)
 
+        HPUtil.apply_dim_reduction(encoded_train_dataset, self.hp_setting, learn_model=True)
+
         method = self._train_method(encoded_train_dataset)
 
         encoding_train_results = ReportUtil.run_encoding_reports(encoded_train_dataset, self.encoding_reports,
@@ -138,6 +140,8 @@ class MLProcess:
                                                          label_configuration=self.label_config,
                                                          sequence_type=self.sequence_type,
                                                          region_type=self.region_type)
+
+            HPUtil.apply_dim_reduction(encoded_test_dataset, self.hp_setting, learn_model=False)
 
             performance = HPUtil.assess_performance(method, self.metrics, self.optimization_metric,
                                                     encoded_test_dataset, split_index, self.path,
