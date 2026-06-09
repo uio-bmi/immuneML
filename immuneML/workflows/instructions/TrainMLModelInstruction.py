@@ -1,7 +1,9 @@
+import random
 from collections import Counter
 from pathlib import Path
 
 import logging
+import numpy as np
 import pandas as pd
 
 from immuneML.IO.ml_method.MLExporter import MLExporter
@@ -50,7 +52,7 @@ class TrainMLModelInstruction(Instruction):
 
     - hp_strategy (HPOptimizationStrategy): how to search different hyperparameters; common options include grid search, random search. Valid values are objects of any class inheriting :py:obj:`~immuneML.hyperparameter_optimization.strategy.HPOptimizationStrategy.HPOptimizationStrategy`.
 
-    - hp_settings (list): a list of combinations of `preprocessing_sequence`, `encoding` and `ml_method`. `preprocessing_sequence` is optional, while `encoding` and `ml_method` are mandatory. These three options (and their parameters) can be optimized over, choosing the highest performing combination.
+    - hp_settings (list): a list of combinations of `preprocessing_sequence`, `encoding`, `dim_reduction` and `ml_method`. `preprocessing_sequence` and `dim_reduction` are optional, while `encoding` and `ml_method` are mandatory. These options (and their parameters) can be optimized over, choosing the highest performing combination. When `dim_reduction` is specified, the encoder output is first reduced before training the ML method.
 
     - assessment (SplitConfig): description of the outer loop (for assessment) of nested cross-validation. It describes how to split the data, how many splits to make, what percentage to use for training and what reports to execute on those splits. See plitConfig below.
 
@@ -79,6 +81,10 @@ class TrainMLModelInstruction(Instruction):
     - export_all_models (bool): if set to True, all trained models in the assessment split are exported as .zip files.
       If False, only the optimal model is exported. By default, export_all_models is False.
 
+    - random_seed (int): optional integer seed passed to Python's ``random``, ``numpy.random``, and (if available)
+      ``torch`` at the start of the instruction to make dataset splits and model training reproducible.
+      If not set (default), no seed is applied.
+
     - sequence_type (str): whether to perform the analysis on amino acid or nucleotide sequences
 
     - region_type (str): which part of the sequence to analyze, e.g., IMGT_CDR3
@@ -92,9 +98,10 @@ class TrainMLModelInstruction(Instruction):
         instructions:
             my_nested_cv_instruction: # user-defined name of the instruction
                 type: TrainMLModel # which instruction should be executed
-                settings: # a list of combinations of preprocessing, encoding and ml_method to optimize over
+                settings: # a list of combinations of preprocessing, encoding, dim_reduction and ml_method to optimize over
                     - preprocessing: seq1 # preprocessing is optional
                       encoding: e1 # mandatory field
+                      dim_reduction: pca1 # dim_reduction is optional
                       ml_method: simpleLR # mandatory field
                     - preprocessing: seq1 # the second combination
                       encoding: e2
@@ -137,6 +144,7 @@ class TrainMLModelInstruction(Instruction):
                 export_all_ml_settings: False # only export the optimal setting
                 region_type: IMGT_CDR3
                 sequence_type: AMINO_ACID
+                random_seed: 42 # optional: set for reproducibility
 
     SPLITCONFIG
 
@@ -149,14 +157,28 @@ class TrainMLModelInstruction(Instruction):
                  label_configuration: LabelConfiguration, path: Path = None, context: dict = None,
                  number_of_processes: int = 1, reports: dict = None, name: str = None,
                  refit_optimal_model: bool = False, sequence_type: SequenceType = None, region_type: RegionType = None,
-                 export_all_ml_settings: bool = False, example_weighting: ExampleWeightingStrategy = None):
+                 export_all_ml_settings: bool = False, example_weighting: ExampleWeightingStrategy = None,
+                 random_seed: int = None):
+        self.random_seed = random_seed
         self.state = TrainMLModelState(dataset, hp_strategy, hp_settings, assessment, selection, metrics,
                                        optimization_metric, label_configuration, path, context, number_of_processes,
                                        reports if reports is not None else {}, name, refit_optimal_model,
                                        export_all_ml_settings, example_weighting, sequence_type=sequence_type,
                                        region_type=region_type)
 
+    def _set_random_seed(self):
+        if self.random_seed is not None:
+            random.seed(self.random_seed)
+            np.random.seed(self.random_seed)
+            try:
+                import torch
+                torch.manual_seed(self.random_seed)
+            except ImportError:
+                pass
+            logging.info(f"TrainMLModelInstruction: random seed set to {self.random_seed}.")
+
     def run(self, result_path: Path):
+        self._set_random_seed()
         self.state.path = result_path
         self.state = HPAssessment.run_assessment(self.state)
         self._export_all_ml_settings()

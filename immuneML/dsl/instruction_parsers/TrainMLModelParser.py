@@ -1,3 +1,4 @@
+import copy
 import hashlib
 from inspect import signature
 from pathlib import Path
@@ -9,11 +10,13 @@ from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.definition_parsers.PreprocessingParser import PreprocessingParser
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
+from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeightingStrategy
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
+from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.hyperparameter_optimization.config.LeaveOneOutConfig import LeaveOneOutConfig
 from immuneML.hyperparameter_optimization.config.ManualSplitConfig import ManualSplitConfig
 from immuneML.hyperparameter_optimization.config.ReportConfig import ReportConfig
@@ -32,7 +35,8 @@ class TrainMLModelParser:
 
         valid_keys = ["assessment", "selection", "dataset", "strategy", "labels", "metrics", "settings",
                       "number_of_processes", "type", "reports", "sequence_type", "region_type",
-                      "optimization_metric", "refit_optimal_model", "example_weighting", "export_all_ml_settings"]
+                      "optimization_metric", "refit_optimal_model", "example_weighting", "export_all_ml_settings",
+                      "random_seed"]
         ParameterValidator.assert_type_and_value(instruction['settings'], list, TrainMLModelParser.__name__, 'settings')
         ParameterValidator.assert_keys(list(instruction.keys()), valid_keys, TrainMLModelParser.__name__, "TrainMLModel")
         ParameterValidator.assert_type_and_value(instruction['refit_optimal_model'], bool, TrainMLModelParser.__name__, 'refit_optimal_model')
@@ -46,6 +50,9 @@ class TrainMLModelParser:
 
         if instruction["example_weighting"] is not None:
             ParameterValidator.assert_type_and_value(instruction['example_weighting'], str, TrainMLModelParser.__name__, 'example_weighting')
+
+        if instruction["random_seed"] is not None:
+            ParameterValidator.assert_type_and_value(instruction['random_seed'], int, TrainMLModelParser.__name__, 'random_seed')
 
         ParameterValidator.assert_sequence_type(instruction, TrainMLModelParser.__name__)
         ParameterValidator.assert_region_type(instruction, TrainMLModelParser.__name__)
@@ -73,7 +80,8 @@ class TrainMLModelParser:
                                                  example_weighting=example_weighting, export_all_ml_settings=instruction['export_all_ml_settings'],
                                                  name=key,
                                                  sequence_type=SequenceType[instruction['sequence_type'].upper()],
-                                                 region_type=RegionType[instruction['region_type'].upper()])
+                                                 region_type=RegionType[instruction['region_type'].upper()],
+                                                 random_seed=instruction['random_seed'])
 
         return hp_instruction
 
@@ -106,6 +114,8 @@ class TrainMLModelParser:
 
     def _parse_settings(self, instruction: dict, symbol_table: SymbolTable) -> list:
         try:
+            valid_dim_red = [entry.symbol for entry in symbol_table.get_by_type(SymbolType.ML_METHOD)
+                             if isinstance(entry.item, DimRedMethod)]
             settings = []
             for index, setting in enumerate(instruction["settings"]):
                 if "preprocessing" in setting and setting["preprocessing"] is not None:
@@ -127,8 +137,18 @@ class TrainMLModelParser:
                     preprocessing_sequence = []
                     preproc_name = None
 
-                ParameterValidator.assert_keys(setting.keys(), ["preprocessing", "ml_method", "encoding"], TrainMLModelParser.__name__,
-                                               f"settings, {index + 1}. entry")
+                if 'dim_reduction' in setting and setting['dim_reduction'] is not None:
+                    ParameterValidator.assert_in_valid_list(setting['dim_reduction'], valid_dim_red,
+                                                            TrainMLModelParser.__name__, 'dim_reduction')
+                    dim_reduction = copy.deepcopy(symbol_table.get(setting['dim_reduction']))
+                    dim_red_params = symbol_table.get_config(setting['dim_reduction'])
+                    dim_red_name = setting['dim_reduction']
+                else:
+                    setting['dim_reduction'] = None
+                    dim_reduction, dim_red_params, dim_red_name = None, None, None
+
+                ParameterValidator.assert_keys(setting.keys(), ["preprocessing", "ml_method", "encoding", "dim_reduction"],
+                                               TrainMLModelParser.__name__, f"settings, {index + 1}. entry")
 
                 encoder = symbol_table.get(setting["encoding"]).build_object(symbol_table.get(instruction["dataset"]),
                                                                              **symbol_table.get_config(setting["encoding"])["encoder_params"])\
@@ -143,7 +163,10 @@ class TrainMLModelParser:
                               ml_method=ml_method,
                               ml_method_name=setting["ml_method"],
                               ml_params=symbol_table.get_config(setting["ml_method"]),
-                              preproc_sequence=preprocessing_sequence, preproc_sequence_name=preproc_name)
+                              preproc_sequence=preprocessing_sequence, preproc_sequence_name=preproc_name,
+                              dim_reduction_method=dim_reduction,
+                              dim_red_params=dim_red_params,
+                              dim_red_name=dim_red_name)
                 settings.append(s)
             return settings
         except KeyError as key_error:
