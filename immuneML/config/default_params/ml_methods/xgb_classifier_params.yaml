@@ -1,0 +1,3 @@
+# All parameters are forwarded directly to xgboost.XGBClassifier.
+# Any xgboost.XGBClassifier parameter can be specified here as a key-value pair.
+# If omitted, XGBoost's own defaults are used.
