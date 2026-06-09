@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 
 from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
@@ -27,6 +29,8 @@ class LeaveOneOutSplitter:
 
         input_params.split_config.split_count = unique_values.shape[0]
         input_params.split_count = input_params.split_config.split_count
+        base_path = str(input_params.paths[0]).split("/split_")[0]
+        input_params.paths = [Path(base_path) / f"split_{i + 1}" for i in range(input_params.split_config.split_count)]
 
         return input_params
 

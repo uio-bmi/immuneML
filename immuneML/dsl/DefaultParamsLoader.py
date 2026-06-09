@@ -40,7 +40,7 @@ class DefaultParamsLoader:
                 logging.info("DefaultParams: no default parameters were found for {}. Proceeding...".format(class_name))
             params = {}
 
-        return params
+        return params if params is not None else {}
 
     @staticmethod
     def _parse_to_enum_instances(params, location):

@@ -53,6 +53,7 @@ class XGBClassifier(MLMethod):
 
     def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
         from xgboost import XGBClassifier as _XGB
+        from sklearn.model_selection import train_test_split
 
         X = encoded_data.examples
         y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
@@ -62,7 +63,15 @@ class XGBClassifier(MLMethod):
 
         self.model = _XGB(**params)
 
-        if encoded_data.example_weights is not None:
+        if "early_stopping_rounds" in params and params["early_stopping_rounds"] is not None:
+            weights = encoded_data.example_weights
+            X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1)
+            fit_kwargs = {"eval_set": [(X_val, y_val)]}
+            if weights is not None:
+                w_train, _ = train_test_split(weights, test_size=0.1)
+                fit_kwargs["sample_weight"] = w_train
+            self.model.fit(X_train, y_train, **fit_kwargs)
+        elif encoded_data.example_weights is not None:
             self.model.fit(X, y, sample_weight=encoded_data.example_weights)
         else:
             self.model.fit(X, y)

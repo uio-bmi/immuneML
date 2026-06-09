@@ -60,13 +60,16 @@ class DefinitionParser:
 
     @staticmethod
     def _call_if_exists(key: str, method, specs: dict, symbol_table: SymbolTable, path=None):
-        if key in specs:
-            if "path" in signature(method).parameters:
-                return method(specs[key], symbol_table, path)
+        try:
+            if key in specs:
+                if "path" in signature(method).parameters:
+                    return method(specs[key], symbol_table, path)
+                else:
+                    return method(specs[key], symbol_table)
             else:
-                return method(specs[key], symbol_table)
-        else:
-            return symbol_table, {}
+                return symbol_table, {}
+        except Exception as e:
+            raise RuntimeError(f"Error while parsing {key} definitions: {str(e)}")
 
     @staticmethod
     def generate_docs(path: Path):

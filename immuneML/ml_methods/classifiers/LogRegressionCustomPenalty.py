@@ -339,5 +339,29 @@ class LogRegressionCustomPenalty(MLMethod):
         return False
 
     def get_compatible_encoders(self):
+        from immuneML.encodings.diversity_encoding.EvennessProfileEncoder import EvennessProfileEncoder
+        from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
+        from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
+        from immuneML.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
+        from immuneML.encodings.reference_encoding.MatchedSequencesEncoder import MatchedSequencesEncoder
+        from immuneML.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedReceptorsEncoder
+        from immuneML.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
+        from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
+        from immuneML.encodings.protein_embedding.ESMCEncoder import ESMCEncoder
+        from immuneML.encodings.protein_embedding.ProtT5Encoder import ProtT5Encoder
+        from immuneML.encodings.protein_embedding.TCRBertEncoder import TCRBertEncoder
+        from immuneML.encodings.diversity_encoding.ShannonDiversityEncoder import ShannonDiversityEncoder
         from immuneML.encodings.composite_encoding.CompositeEncoder import CompositeEncoder
-        return [CompositeEncoder]
+        from immuneML.encodings.baseline_encoding.GeneFrequencyEncoder import GeneFrequencyEncoder
+        from immuneML.encodings.baseline_encoding.MetadataEncoder import MetadataEncoder
+        from immuneML.encodings.amino_acid_property_encoding.AminoAcidPropertyEncoder import AminoAcidPropertyEncoder
+        from immuneML.encodings.sequence_length_encoding.SequenceLengthEncoder import SequenceLengthEncoder
+
+        from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import \
+            CompAIRRSequenceAbundanceEncoder
+
+        return [KmerFrequencyEncoder, OneHotEncoder, Word2VecEncoder, EvennessProfileEncoder,
+                MatchedSequencesEncoder, MatchedReceptorsEncoder, MatchedRegexEncoder, MotifEncoder,
+                ESMCEncoder, ProtT5Encoder, TCRBertEncoder, ShannonDiversityEncoder, CompAIRRSequenceAbundanceEncoder,
+                CompositeEncoder, GeneFrequencyEncoder, MetadataEncoder, AminoAcidPropertyEncoder,
+                SequenceLengthEncoder]
