@@ -37,7 +37,7 @@ class TestTCRdistClassifier(TestCase):
         predictions = knn.predict(encoded_data, Label("test", [0, 1]))
         self.assertTrue(np.array_equal(y["test"], predictions["test"]))
 
-        encoded_data.examples = np.array([[1.1, 0.1, 0.9, 1.9]])
+        encoded_data._examples = np.array([[1.1, 0.1, 0.9, 1.9]])
         predictions = knn.predict(encoded_data, Label("test", [0, 1]))
         self.assertTrue(np.array_equal([0], predictions["test"]))
 

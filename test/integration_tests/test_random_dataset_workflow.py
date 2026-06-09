@@ -68,6 +68,11 @@ class TestRandomDatasetWorkflow(TestCase):
                         "LogisticRegression": {
                             'penalty': 'l1',
                         }
+                    },
+                    'pca': {
+                        'PCA': {
+                            'n_components': 10
+                        }
                     }
                 },
                 "reports": {
@@ -100,6 +105,7 @@ class TestRandomDatasetWorkflow(TestCase):
                         },
                         {
                             "encoding": "kmer_freq2",
+                            # 'dim_reduction': 'pca',
                             "ml_method": "logistic_regression"
                         }
                     ],
@@ -109,7 +115,6 @@ class TestRandomDatasetWorkflow(TestCase):
                         "training_percentage": 0.7,
                         'reports': {
                             'models': ['conf_matrix_per_label'],
-                            'encoding': ['design_matrix_exporter'],
                         }
                     },
                     "selection": {
