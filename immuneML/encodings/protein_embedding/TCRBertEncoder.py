@@ -80,12 +80,14 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
 
     @staticmethod
     def _prepare_parameters(name: str = None, model: str = None, layers: list = None, method: str = None,
-                            batch_size: int = None, device: str = None):
+                            batch_size: int = None, device: str = None, scale_to_zero_mean: bool = False, scale_to_unit_variance: bool = False):
         location = TCRBertEncoder.__name__
         ParameterValidator.assert_in_valid_list(model, ["tcr-bert", "tcr-bert-mlm-only"], location, "model")
         ParameterValidator.assert_type_and_value(layers, list, location, "layers")
         ParameterValidator.assert_in_valid_list(method, ["mean", "max", "attn_mean", "cls", "pool"], location, "method")
         ParameterValidator.assert_type_and_value(batch_size, int, location, "batch_size")
+        ParameterValidator.assert_type_and_value(scale_to_zero_mean, bool, location, "scale_to_zero_mean")
+        ParameterValidator.assert_type_and_value(scale_to_unit_variance, bool, location, "scale_to_unit_variance")
         ParameterValidator.assert_type_and_value(device, str, location, 'device')
         if len(re.findall("cuda:[0-9]*", device)) == 0:
             ParameterValidator.assert_in_valid_list(device, ['cpu', 'mps', 'cuda'], location, 'device')
