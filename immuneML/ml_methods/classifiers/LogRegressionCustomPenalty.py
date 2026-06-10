@@ -243,6 +243,8 @@ class LogRegressionCustomPenalty(MLMethod):
     def _fit_torch(self, X, y, non_penalized_indices, n_jobs):
         # With warm starting each step starts near the solution, so few LBFGS iterations suffice.
         # Cap at MAX_TORCH_ITERS; the glmnet default of 100000 is for coordinate descent, not quasi-Newton.
+        import torch
+        from torch import nn
         lbfgs_max_iter = min(self.max_iter, MAX_TORCH_ITERS)
         alpha = float(self.alpha)
         dev = torch.device(self.device)

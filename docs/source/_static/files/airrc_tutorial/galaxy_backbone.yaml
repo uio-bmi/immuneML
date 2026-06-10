@@ -1,7 +1,7 @@
 definitions:
   datasets:
     my_dataset:
-      format: ImmuneML
+      format: AIRR
       params:
         path: dataset.yaml
   encodings:
