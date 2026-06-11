@@ -10,10 +10,12 @@ from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.classifiers.GradientBoosting import GradientBoosting
 from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
+from immuneML.ml_methods.classifiers.LogRegressionCustomPenalty import LogRegressionCustomPenalty
 from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.classifiers.RandomForestClassifier import RandomForestClassifier
 from immuneML.ml_methods.classifiers.SVC import SVC
 from immuneML.ml_methods.classifiers.SVM import SVM
+from immuneML.ml_methods.classifiers.XGBClassifier import XGBClassifier
 from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -28,7 +30,8 @@ from scripts.specification_util import update_docs_per_mapping
 class Coefficients(MLReport):
     """
     A report that plots the coefficients for a given ML method in a barplot. Can be used for :ref:`LogisticRegression`,
-    :ref:`SVM`, :ref:`SVC`, and :ref:`RandomForestClassifier`. In the case of RandomForest, the feature importances will be plotted.
+    :ref:`LogRegressionCustomPenalty`, :ref:`GradientBoosting`, :ref:`SVM`, :ref:`SVC`, :ref:`RandomForestClassifier`, and :ref:`XGBClassifier`.
+    In the case of RandomForest, GradientBoosting and XGBClassifier, the feature importances will be plotted.
 
     When used in :ref:`TrainMLModel` instruction, the report can be specified under 'models', both on
     the selection and assessment levels.
@@ -156,11 +159,10 @@ class Coefficients(MLReport):
                             output_figures=[p for p in paths if p is not None])
 
     def _set_plotting_parameters(self):
-        if isinstance(self.method, RandomForestClassifier) or isinstance(self.method, GradientBoosting):
+        if isinstance(self.method, (RandomForestClassifier, GradientBoosting, XGBClassifier)):
             self._param_field = "feature_importances"
             self._y_axis_title = "Feature importance"
         else:
-            # SVM, logistic regression, ...
             self._param_field = "coefficients"
             self._y_axis_title = "Coefficient value"
 
@@ -209,8 +211,11 @@ class Coefficients(MLReport):
 
         run_report = True
 
-        if not any([isinstance(self.method, legal_method) for legal_method in (RandomForestClassifier, LogisticRegression, SVM, SVC, GradientBoosting)]):
-            logging.warning(f"Coefficients report can only be created for RandomForestClassifier, LogisticRegression, SVC, or SVM, but got "
+        legal_methods = (RandomForestClassifier, LogisticRegression, SVM, SVC, GradientBoosting,
+                          LogRegressionCustomPenalty, XGBClassifier)
+        if not any([isinstance(self.method, legal_method) for legal_method in legal_methods]):
+            logging.warning(f"Coefficients report can only be created for RandomForestClassifier, LogisticRegression, "
+                            f"SVC, SVM, GradientBoosting, LogRegressionCustomPenalty, or XGBClassifier, but got "
                             f"{type(self.method).__name__} instead. Coefficients report will not be created.")
             run_report = False
 

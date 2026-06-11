@@ -330,8 +330,12 @@ class LogRegressionCustomPenalty(MLMethod):
                 'lambda_max': self.model.lambda_max_,
                 'random_state': self.model.random_state,
             })
+            if not for_refitting:
+                params['coefficients'] = self.model.coef_[0].tolist()
         else:
             params['C'] = self.model.C
+            if not for_refitting:
+                params['coefficients'] = self.model.linear_.weight.squeeze().detach().cpu().numpy().tolist()
         return params
 
     def can_predict_proba(self) -> bool:
