@@ -141,7 +141,7 @@ class MLProcess:
                                                          sequence_type=self.sequence_type,
                                                          region_type=self.region_type)
 
-            HPUtil.apply_dim_reduction(encoded_test_dataset, self.hp_setting, learn_model=False)
+            encoded_test_dataset = HPUtil.apply_dim_reduction(encoded_test_dataset, self.hp_setting, learn_model=False)
 
             performance = HPUtil.assess_performance(method, self.metrics, self.optimization_metric,
                                                     encoded_test_dataset, split_index, self.path,
@@ -159,7 +159,7 @@ class MLProcess:
             hp_item = HPItem(method=method, hp_setting=self.hp_setting,
                              train_predictions_path=self.train_predictions_path,
                              test_predictions_path=self.test_predictions_path, train_dataset=self.train_dataset,
-                             test_dataset=self.test_dataset, split_index=split_index,
+                             test_dataset=encoded_test_dataset, split_index=split_index,
                              model_report_results=model_report_results,
                              encoding_train_results=encoding_train_results, encoding_test_results=encoding_test_results,
                              performance=performance,
