@@ -105,7 +105,7 @@ class TestTopFeaturesPerformance(TestCase):
 
         state = self._make_state(n_splits, n_features, n_samples)
         report = TopFeaturesPerformance(top_n_values=top_n_values, use_optimal_only=True,
-                                        metric=None, name="test_report",
+                                        metric=None, name="test_report", n_points=10,
                                         state=state, label=None, result_path=path)
 
         self.assertTrue(report.check_prerequisites())
@@ -115,21 +115,21 @@ class TestTopFeaturesPerformance(TestCase):
 
         # two tables (performance CSV + frequency CSV) and two figures
         self.assertEqual(2, len(result.output_tables))
-        self.assertEqual(2, len(result.output_figures))
+        self.assertEqual(3, len(result.output_figures))
         for out in result.output_tables + result.output_figures:
             self.assertTrue(out.path.is_file(), f"Missing output: {out.path}")
 
         # --- performance CSV ---
         perf_csv = next(o for o in result.output_tables if "performance" in o.path.name)
         df_perf = pd.read_csv(perf_csv.path)
-        self.assertIn("n_features", df_perf.columns)
-        self.assertIn("performance", df_perf.columns)
-        self.assertIn("split", df_perf.columns)
-        self.assertIn("is_full_model", df_perf.columns)
+        for col in ("n_features", "performance", "split", "is_full_model", "in_explicit_set"):
+            self.assertIn(col, df_perf.columns)
 
-        # top_n_values [2, 5] plus full model (10) must all appear
-        expected_ns = {2, 5, n_features}
-        self.assertEqual(expected_ns, set(df_perf["n_features"].unique()))
+        # CSV must contain the union of explicit values, log-spaced values, and the full model
+        _log_pts = np.logspace(0, np.log10(n_features), 10)
+        _log_ns = {int(round(x)) for x in _log_pts if 1 <= round(x) <= n_features}
+        expected_ns = sorted(set(top_n_values) | _log_ns | {n_features})
+        self.assertEqual(set(expected_ns), set(df_perf["n_features"].unique()))
         # one row per split × n_value
         self.assertEqual(n_splits * len(expected_ns), len(df_perf))
         # performance values must be valid metric scores [0, 1]
@@ -138,6 +138,9 @@ class TestTopFeaturesPerformance(TestCase):
         full_model_rows = df_perf[df_perf["is_full_model"]]
         self.assertEqual(n_splits, len(full_model_rows))
         self.assertTrue((full_model_rows["n_features"] == n_features).all())
+        # in_explicit_set must be True exactly for top_n_values, False for everything else
+        self.assertTrue(df_perf[df_perf["n_features"].isin(top_n_values)]["in_explicit_set"].all())
+        self.assertFalse(df_perf[~df_perf["n_features"].isin(top_n_values)]["in_explicit_set"].any())
 
         # --- frequency CSV ---
         freq_csv = next(o for o in result.output_tables if "frequency" in o.path.name)

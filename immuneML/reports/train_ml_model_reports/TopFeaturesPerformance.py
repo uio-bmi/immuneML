@@ -30,13 +30,25 @@ class TopFeaturesPerformance(TrainMLModelReport):
 
     For each outer cross-validation split, the report takes an already-trained model and evaluates it
     on the test set while zeroing out all but the top-N input features. This is repeated for each value
-    of N in ``top_n_values``. The rightmost point is always the full model (all features) and serves as
-    the reference. The resulting curve reveals how many features are actually needed to achieve near-optimal
-    performance — the "knee" of the saturation curve.
+    of N specified via ``top_n_values`` and/or auto-generated via ``n_points``. The rightmost point is
+    always the full model (all features) and serves as the reference.
 
-    In addition, for each N the report counts how many CV splits include each feature in the top-N set.
-    This shows which features are consistently ranked highly across splits (appearing in many splits) and
-    which are borderline (appearing in only a few).
+    At least one of ``top_n_values`` or ``n_points`` must be specified.
+
+    When **both** are provided, the report generates **two complementary figures**:
+
+    - A **summary figure** (mean ± std band only, no individual split lines) for the explicit
+      ``top_n_values`` — shows performance at specific, meaningful feature cutoffs.
+    - A **saturation curve figure** for the log-spaced ``n_points`` — shows the full curve shape
+      with individual per-split lines and a mean ± std overlay across the feature range.
+
+    When only one is provided, a single figure is produced using the current style.
+
+    In addition, for each N in ``top_n_values`` the report counts how many CV splits include each feature
+    in the top-N set. This shows which features are consistently ranked highly (present in many splits)
+    and which are borderline (present in few).
+
+    All data are exported to CSV so that plots can be reproduced or customised externally.
 
     Compatible models: LogisticRegression, SVM, SVC, LogRegressionCustomPenalty (ranked by ``|coef_|``),
     and RandomForestClassifier, GradientBoosting, XGBClassifier (ranked by ``feature_importances_``).
@@ -44,19 +56,26 @@ class TopFeaturesPerformance(TrainMLModelReport):
     **Two comparison modes** (controlled by ``use_optimal_only``):
 
     - ``use_optimal_only: true`` *(default)*: evaluates only the optimal HP setting per split.
-      The plot shows one line per CV split plus a mean ± std band — useful for assessing consistency
-      of the saturation pattern across dataset splits.
+      The saturation curve shows one line per CV split plus a mean ± std band — useful for assessing
+      consistency of the saturation pattern across dataset splits.
 
     - ``use_optimal_only: false``: evaluates every HP setting (encoding + ML method combination) in
-      the assessment loop across all splits. The plot shows one mean ± std curve per HP setting —
-      useful for comparing whether different model configurations require the same number of features.
+      the assessment loop across all splits. The saturation curve shows one mean ± std curve per HP
+      setting — useful for comparing whether different model configurations require the same number of
+      features.
 
 
     **Specification arguments:**
 
-    - top_n_values (list): integers specifying how many top features to include at each evaluation point,
-      e.g. ``[5, 10, 25, 50, 100]``. Values exceeding the total feature count are ignored; the full model
-      is always included as the final point. Default: ``[10, 25, 50, 100]``.
+    - top_n_values (list): explicit integers specifying how many top features to include at each
+      evaluation point, e.g. ``[5, 10, 25, 50, 100]``. Values exceeding the total feature count are
+      ignored; the full model is always included as the final point. When provided together with
+      ``n_points``, produces a separate summary figure (mean ± SD only) for these values. Optional.
+
+    - n_points (int): number of log-spaced evaluation points automatically generated between 1 and
+      the total number of features at runtime. Useful when the feature count is not known in advance.
+      When provided together with ``top_n_values``, produces a separate saturation curve figure with
+      individual per-split lines. Optional.
 
     - use_optimal_only (bool): if ``true``, only the selected optimal HP setting is evaluated per split.
       If ``false``, all HP settings are evaluated and grouped in the plot. Default: ``true``.
@@ -75,6 +94,7 @@ class TopFeaturesPerformance(TrainMLModelReport):
                 my_saturation_report:
                     TopFeaturesPerformance:
                         top_n_values: [5, 10, 25, 50, 100]
+                        n_points: 15
                         use_optimal_only: true
                         metric: BALANCED_ACCURACY  # optional
 
@@ -83,7 +103,7 @@ class TopFeaturesPerformance(TrainMLModelReport):
     REPORT_INFO = (
         "Examines how model performance depends on the number of top-ranked features (performance saturation), "
         "and how often each feature appears in the top-N set across cross-validation splits. "
-        "Supports linear models (ranked by |coefficient|) and tree-based models (ranked by feature importance)."
+        "Supports linear models (ranked by coefficient values) and tree-based models (ranked by feature importance)."
     )
 
     @classmethod
@@ -91,8 +111,16 @@ class TopFeaturesPerformance(TrainMLModelReport):
         location = "TopFeaturesPerformance"
 
         top_n_values = kwargs.get("top_n_values", None)
-        ParameterValidator.assert_type_and_value(top_n_values, list, location, "top_n_values")
-        ParameterValidator.assert_all_type_and_value(top_n_values, int, location, "top_n_values", min_inclusive=1)
+        if top_n_values is not None:
+            ParameterValidator.assert_type_and_value(top_n_values, list, location, "top_n_values")
+            ParameterValidator.assert_all_type_and_value(top_n_values, int, location, "top_n_values", min_inclusive=1)
+
+        n_points = kwargs.get("n_points", None)
+        if n_points is not None:
+            ParameterValidator.assert_type_and_value(n_points, int, location, "n_points", min_inclusive=2)
+
+        if top_n_values is None and n_points is None:
+            raise ValueError(f"{location}: at least one of 'top_n_values' or 'n_points' must be specified.")
 
         use_optimal_only = kwargs.get("use_optimal_only", None)
         ParameterValidator.assert_type_and_value(use_optimal_only, bool, location, "use_optimal_only")
@@ -103,18 +131,20 @@ class TopFeaturesPerformance(TrainMLModelReport):
 
         return TopFeaturesPerformance(
             top_n_values=top_n_values,
+            n_points=n_points,
             use_optimal_only=use_optimal_only,
             metric=metric,
             name=kwargs.get("name"),
         )
 
-    def __init__(self, top_n_values: List[int] = None, use_optimal_only: bool = True,
-                 metric: Optional[str] = None, name: str = None,
+    def __init__(self, top_n_values: List[int] = None, n_points: int = None,
+                 use_optimal_only: bool = True, metric: Optional[str] = None, name: str = None,
                  state: TrainMLModelState = None, label: Label = None,
                  result_path: Path = None, number_of_processes: int = 1):
         super().__init__(name=name, state=state, label=label, result_path=result_path,
                          number_of_processes=number_of_processes)
-        self.top_n_values = sorted(top_n_values)
+        self.top_n_values = sorted(top_n_values) if top_n_values is not None else None
+        self.n_points = n_points
         self.use_optimal_only = use_optimal_only
         self.metric = metric
 
@@ -158,10 +188,30 @@ class TopFeaturesPerformance(TrainMLModelReport):
         df.to_csv(csv_path, index=False)
         tables = [ReportOutput(csv_path,
                                name=f"Performance data ({metric.name.lower()}) vs. number of top features — label: {label.name}")]
-        figures = [fig for fig in [self._plot_performance_curve(df, label, metric)] if fig is not None]
+
+        figures = []
+        both_modes = self.top_n_values is not None and self.n_points is not None
+
+        if self.top_n_values is not None:
+            explicit_df = df[df["in_explicit_set"] | df["is_full_model"]]
+            if both_modes:
+                fig = self._plot_explicit_curve(explicit_df, label, metric)
+            else:
+                fig = self._plot_performance_curve(explicit_df, label, metric, suffix="explicit")
+            if fig is not None:
+                figures.append(fig)
+
+        if self.n_points is not None:
+            log_df = df[~df["in_explicit_set"] | df["is_full_model"]]
+            fig = self._plot_performance_curve(log_df, label, metric, suffix="logspaced")
+            if fig is not None:
+                figures.append(fig)
+
         return tables, figures
 
     def _generate_stability_outputs_for_label(self, label: Label) -> Tuple[list, list]:
+        if self.top_n_values is None:
+            return [], []
         feature_sets = self._collect_feature_sets_for_label(label)
         if not feature_sets:
             return [], []
@@ -229,6 +279,7 @@ class TopFeaturesPerformance(TrainMLModelReport):
                               split_idx: int, hp_key: str, n_features: int) -> list:
         rows = []
         sorted_idx = np.argsort(importances)
+        explicit_set = set(self.top_n_values) if self.top_n_values is not None else set()
         for n in self._get_top_n_values(n_features):
             X_masked = np.zeros_like(X_test)
             X_masked[:, sorted_idx[-n:]] = X_test[:, sorted_idx[-n:]]
@@ -236,7 +287,8 @@ class TopFeaturesPerformance(TrainMLModelReport):
             if score is not None:
                 rows.append({"split": split_idx + 1, "n_features": n, "performance": score,
                              "label": label.name, "hp_setting": hp_key,
-                             "total_features": n_features, "is_full_model": n == n_features})
+                             "total_features": n_features, "is_full_model": n == n_features,
+                             "in_explicit_set": n in explicit_set})
         return rows
 
     # ------------------------------------------------------------------ #
@@ -261,6 +313,8 @@ class TopFeaturesPerformance(TrainMLModelReport):
         return result
 
     def _build_top_n_feature_sets(self, hp_item: HPItem) -> Optional[dict]:
+        if self.top_n_values is None:
+            return None
         encoded_data, importances = self._get_encoded_data_and_importances(hp_item)
         if encoded_data is None or importances is None:
             return None
@@ -292,8 +346,16 @@ class TopFeaturesPerformance(TrainMLModelReport):
             return None, None
         return encoded_data, self._get_feature_importances(hp_item.method)
 
+    def _get_log_spaced_values(self, n_features: int) -> list:
+        if self.n_points is None:
+            return []
+        pts = np.logspace(0, np.log10(max(n_features, 2)), self.n_points)
+        return sorted({int(round(x)) for x in pts if 1 <= round(x) <= n_features})
+
     def _get_top_n_values(self, n_features: int) -> list:
-        return sorted(set([n for n in self.top_n_values if n < n_features] + [n_features]))
+        explicit = [n for n in (self.top_n_values or []) if n < n_features]
+        log_spaced = self._get_log_spaced_values(n_features)
+        return sorted(set(explicit + log_spaced + [n_features]))
 
     def _get_feature_importances(self, method) -> Optional[np.ndarray]:
         try:
@@ -338,65 +400,76 @@ class TopFeaturesPerformance(TrainMLModelReport):
     # ------------------------------------------------------------------ #
 
     def _plot_performance_curve(self, df: pd.DataFrame, label: Label,
-                                metric: ClassificationMetric) -> Optional[ReportOutput]:
+                                metric: ClassificationMetric,
+                                suffix: str = "") -> Optional[ReportOutput]:
         try:
-            figure = (self._plot_by_split(df, label, metric) if self.use_optimal_only
-                      else self._plot_by_hp_setting(df, label, metric))
-            file_path = PlotlyUtil.write_image_to_file(
-                figure, self.result_path / f"top_features_performance_{label.name}.html")
+            metric_name = self._metric_display_name(metric)
+            figure = self._build_performance_figure(df, metric_name, show_splits=True)
+            figure.update_layout(
+                template="plotly_white", xaxis_title="Number of top features",
+                yaxis_title=metric_name, title=f"Top-features performance — label: {label.name}",
+                legend=dict(yanchor="bottom", y=0.01, xanchor="right", x=0.99), font_size=14)
+            fname = f"top_features_performance_{label.name}{'_' + suffix if suffix else ''}.html"
+            file_path = PlotlyUtil.write_image_to_file(figure, self.result_path / fname)
             return ReportOutput(path=file_path,
-                                name=f"Performance saturation curve ({metric.name.lower()}): how "
-                                     f"{metric.name.lower()} changes as more top-ranked features are "
-                                     f"included — label: {label.name}")
+                                name=f"Performance saturation curve ({metric.name.lower()}) — label: {label.name}")
         except Exception as e:
             logging.warning(f"{self.__class__.__name__}: could not generate performance plot: {e}")
             return None
 
-    def _plot_by_split(self, df: pd.DataFrame, label: Label,
-                       metric: ClassificationMetric) -> go.Figure:
-        metric_name = metric.name.replace("_", " ").title()
-        figure = go.Figure()
-        palette = px.colors.qualitative.Vivid
-        splits = sorted(df["split"].unique())
-        common_x = sorted(df["n_features"].unique())
+    def _plot_explicit_curve(self, df: pd.DataFrame, label: Label,
+                             metric: ClassificationMetric) -> Optional[ReportOutput]:
+        try:
+            metric_name = self._metric_display_name(metric)
+            figure = self._build_performance_figure(df, metric_name, show_splits=False)
+            figure.update_layout(
+                template="plotly_white", xaxis_title="Number of top features",
+                yaxis_title=metric_name,
+                legend=dict(yanchor="bottom", y=0.01, xanchor="right", x=0.99),
+                font=dict(size=18))
+            fname = f"top_features_performance_{label.name}_explicit.html"
+            file_path = PlotlyUtil.write_image_to_file(figure, self.result_path / fname)
+            return ReportOutput(path=file_path,
+                                name=f"Performance at explicit feature cutoffs "
+                                     f"({metric.name.lower()}, mean ± SD) — label: {label.name}")
+        except Exception as e:
+            logging.warning(f"{self.__class__.__name__}: could not generate explicit-values plot: {e}")
+            return None
 
-        for i, split in enumerate(splits):
-            split_df = df[df["split"] == split].sort_values("n_features")
-            figure.add_trace(go.Scatter(
-                x=split_df["n_features"].tolist(), y=split_df["performance"].tolist(),
-                mode="lines+markers", name=f"Split {split}", opacity=0.5,
-                line=dict(color=palette[i % len(palette)], width=1), marker=dict(size=5),
-                hovertemplate=f"Split {split}<br>Features: %{{x}}<br>{metric_name}: %{{y:.4f}}<extra></extra>"))
-
-        if len(splits) > 1:
-            interp_y = self._interpolate_per_split(df, splits, common_x)
-            mean_y, std_y = np.mean(interp_y, axis=0), np.std(interp_y, axis=0)
-            self._add_mean_std_band(figure, common_x, mean_y, std_y, "Mean", "#1a1aff", metric_name)
-
-        self._apply_layout(figure, metric_name, label.name)
-        return figure
-
-    def _plot_by_hp_setting(self, df: pd.DataFrame, label: Label,
-                            metric: ClassificationMetric) -> go.Figure:
-        metric_name = metric.name.replace("_", " ").title()
+    def _build_performance_figure(self, df: pd.DataFrame, metric_name: str,
+                                  show_splits: bool) -> go.Figure:
         figure = go.Figure()
         palette = px.colors.qualitative.Vivid
 
-        for i, hp_key in enumerate(sorted(df["hp_setting"].unique())):
-            hp_df = df[df["hp_setting"] == hp_key]
-            common_x = sorted(hp_df["n_features"].unique())
-            splits = sorted(hp_df["split"].unique())
-            interp_y = self._interpolate_per_split(hp_df, splits, common_x)
-            mean_y = np.mean(interp_y, axis=0)
-            std_y = np.std(interp_y, axis=0) if len(splits) > 1 else np.zeros_like(mean_y)
-            self._add_mean_std_band(figure, common_x, mean_y, std_y, hp_key,
-                                    palette[i % len(palette)], metric_name)
-
-        self._apply_layout(figure, metric_name, label.name)
+        if self.use_optimal_only:
+            splits = sorted(df["split"].unique())
+            common_x = sorted(df["n_features"].unique())
+            if show_splits:
+                for i, split in enumerate(splits):
+                    split_df = df[df["split"] == split].sort_values("n_features")
+                    figure.add_trace(go.Scatter(
+                        x=split_df["n_features"].tolist(), y=split_df["performance"].tolist(),
+                        mode="lines+markers", name=f"Split {split}", opacity=0.5,
+                        line=dict(color=palette[i % len(palette)], width=1), marker=dict(size=5),
+                        hovertemplate=f"Split {split}<br>Features: %{{x}}<br>{metric_name}: %{{y:.4f}}<extra></extra>"))
+            if not show_splits or len(splits) > 1:
+                interp_y = self._interpolate_per_split(df, splits, common_x)
+                mean_y, std_y = np.mean(interp_y, axis=0), np.std(interp_y, axis=0)
+                self._add_mean_std_band(figure, common_x, mean_y, std_y, "Mean ± SD",
+                                        "#1a1aff", metric_name)
+        else:
+            for i, hp_key in enumerate(sorted(df["hp_setting"].unique())):
+                hp_df = df[df["hp_setting"] == hp_key]
+                common_x = sorted(hp_df["n_features"].unique())
+                splits = sorted(hp_df["split"].unique())
+                interp_y = self._interpolate_per_split(hp_df, splits, common_x)
+                mean_y = np.mean(interp_y, axis=0)
+                std_y = np.std(interp_y, axis=0) if len(splits) > 1 else np.zeros_like(mean_y)
+                self._add_mean_std_band(figure, common_x, mean_y, std_y, hp_key,
+                                        palette[i % len(palette)], metric_name)
         return figure
 
-    def _interpolate_per_split(self, df: pd.DataFrame, splits: list,
-                               common_x: list) -> list:
+    def _interpolate_per_split(self, df: pd.DataFrame, splits: list, common_x: list) -> list:
         interp_y = []
         for split in splits:
             split_df = df[df["split"] == split].sort_values("n_features")
@@ -417,11 +490,8 @@ class TopFeaturesPerformance(TrainMLModelReport):
             hovertemplate=name + "<br>Features: %{x}<br>" + metric_name + ": %{y:.4f}<extra></extra>"))
 
     @staticmethod
-    def _apply_layout(figure: go.Figure, metric_name: str, label_name: str):
-        figure.update_layout(
-            template="plotly_white", xaxis_title="Number of top features used",
-            yaxis_title=metric_name, title=f"Top-features performance — label: {label_name}",
-            legend=dict(yanchor="bottom", y=0.01, xanchor="right", x=0.99), font_size=14)
+    def _metric_display_name(metric: ClassificationMetric) -> str:
+        return metric.name.replace("_", " ").title()
 
     @staticmethod
     def _hex_to_rgb(color: str) -> tuple:
