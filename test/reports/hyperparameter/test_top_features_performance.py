@@ -47,9 +47,9 @@ class TestTopFeaturesPerformance(TestCase):
         coeffs[5:] = rng.uniform(0.0, 0.1, size=n_features - 5)
         method.get_params.return_value = {"coefficients": coeffs.tolist()}
         method.class_mapping = {0: False, 1: True}
-        method.can_predict_proba.return_value = False
-        method.model.predict.return_value = rng.integers(0, 2, size=n_samples)
-        method.model.classes_ = [0, 1]
+        predicted_y = np.array([bool(v) for v in rng.integers(0, 2, size=n_samples)])
+        method.predict.return_value = {"cmv": predicted_y}
+        method.predict_proba.return_value = None
         return method
 
     def _make_hp_item(self, n_features: int, n_samples: int,

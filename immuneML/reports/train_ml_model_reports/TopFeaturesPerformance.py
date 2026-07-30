@@ -8,12 +8,12 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+from immuneML.data_model.EncodedData import EncodedData
 from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.ml_metrics.MetricUtil import MetricUtil
-from immuneML.ml_methods.util.Util import Util
 from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -269,12 +269,11 @@ class TopFeaturesPerformance(TrainMLModelReport):
                             f"skipping split {split_idx}, setting '{hp_item.hp_setting}'.")
             return []
         X_test = encoded_data.get_examples_as_np_matrix()
-        y_true = np.array(encoded_data.labels[label.name])
         n_features = X_test.shape[1]
-        return self._score_top_n_subsets(hp_item.method, X_test, y_true, importances,
+        return self._score_top_n_subsets(hp_item.method, encoded_data, X_test, importances,
                                          label, metric, split_idx, str(hp_item.hp_setting), n_features)
 
-    def _score_top_n_subsets(self, method, X_test: np.ndarray, y_true: np.ndarray,
+    def _score_top_n_subsets(self, method, encoded_data, X_test: np.ndarray,
                               importances: np.ndarray, label: Label, metric: ClassificationMetric,
                               split_idx: int, hp_key: str, n_features: int) -> list:
         rows = []
@@ -283,7 +282,11 @@ class TopFeaturesPerformance(TrainMLModelReport):
         for n in self._get_top_n_values(n_features):
             X_masked = np.zeros_like(X_test)
             X_masked[:, sorted_idx[-n:]] = X_test[:, sorted_idx[-n:]]
-            score = self._compute_metric(method, X_masked, y_true, label, metric)
+            masked_data = EncodedData(examples=X_masked, labels=encoded_data.labels,
+                                      example_ids=encoded_data.example_ids,
+                                      feature_names=encoded_data.feature_names,
+                                      example_weights=encoded_data.example_weights)
+            score = self._compute_metric(method, masked_data, label, metric)
             if score is not None:
                 rows.append({"split": split_idx + 1, "n_features": n, "performance": score,
                              "label": label.name, "hp_setting": hp_key,
@@ -368,12 +371,12 @@ class TopFeaturesPerformance(TrainMLModelReport):
             logging.warning(f"{self.__class__.__name__}: could not extract feature importances: {e}")
         return None
 
-    def _compute_metric(self, method, X_masked: np.ndarray, y_true: np.ndarray,
+    def _compute_metric(self, method, masked_data: EncodedData,
                         label: Label, metric: ClassificationMetric) -> Optional[float]:
         try:
-            raw_pred = method.model.predict(X_masked)
-            y_pred = Util.map_to_old_class_values(np.array(raw_pred), method.class_mapping)
-            y_proba = self._get_positive_class_proba(method, X_masked, label)
+            y_true = np.array(masked_data.labels[label.name])
+            y_pred = method.predict(masked_data, label)[label.name]
+            y_proba = self._get_proba_matrix(method, masked_data, label)
             score = MetricUtil.score_for_metric(metric=metric, predicted_y=y_pred,
                                                 predicted_proba_y=y_proba, true_y=y_true,
                                                 classes=label.values, pos_class=label.positive_class)
@@ -382,18 +385,19 @@ class TopFeaturesPerformance(TrainMLModelReport):
             logging.warning(f"{self.__class__.__name__}: could not compute metric: {e}")
             return None
 
-    def _get_positive_class_proba(self, method, X_masked: np.ndarray,
-                                  label: Label) -> Optional[np.ndarray]:
-        if not method.can_predict_proba() or label.positive_class is None:
+    def _get_proba_matrix(self, method, masked_data: EncodedData,
+                          label: Label) -> Optional[np.ndarray]:
+        """Builds the (n_samples, n_classes) probability matrix with columns ordered by
+        ``label.values`` (positive class last), matching the contract expected by
+        MetricUtil.score_for_metric / the custom roc_auc_score — same convention used by
+        MLMethodAssessment._score."""
+        proba_per_class = method.predict_proba(masked_data, label)
+        if proba_per_class is None:
             return None
-        original_to_internal = {v: k for k, v in method.class_mapping.items()}
-        pos_internal = original_to_internal.get(label.positive_class)
-        if pos_internal is None:
+        proba_by_class = proba_per_class[label.name]
+        if proba_by_class is None or not all(cls in proba_by_class for cls in label.values):
             return None
-        classes_list = list(method.model.classes_)
-        if pos_internal not in classes_list:
-            return None
-        return method.model.predict_proba(X_masked)[:, classes_list.index(pos_internal)]
+        return np.vstack([proba_by_class[cls] for cls in label.values]).T
 
     # ------------------------------------------------------------------ #
     # Performance saturation — plotting                                   #

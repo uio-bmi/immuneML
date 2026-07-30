@@ -134,6 +134,9 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
             else:
                 self.label = self.state.label_configuration.get_label_objects()[0]
 
+        if not any(self._check_encoder_class(hp_setting.encoder) for hp_setting in self.state.hp_settings):
+            valid = False
+
         return valid
 
     def _compute_optimal_model_overlap(self) -> Tuple[ReportOutput, ReportOutput]:
