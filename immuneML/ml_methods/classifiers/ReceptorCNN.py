@@ -104,7 +104,7 @@ class ReceptorCNN(MLMethod):
         self.positional_channels = positional_channels
         self.number_of_threads = number_of_threads
         self.random_seed = random_seed
-        self.device = device
+        self.device = torch.device(device if device is not None else "cpu")
         self.l1_weight_decay = l1_weight_decay
         self.l2_weight_decay = l2_weight_decay
         self.learning_rate = learning_rate
@@ -137,8 +137,9 @@ class ReceptorCNN(MLMethod):
         with torch.no_grad():
             predictions = []
             for examples, labels, example_ids in self._get_data_batch(encoded_data_pt, self.label.name):
+                examples = examples.to(self.device)
                 logit_outputs = self.CNN(examples)
-                prediction = torch.sigmoid(logit_outputs)
+                prediction = torch.sigmoid(logit_outputs).cpu()
                 predictions.extend(prediction.numpy())
 
         return {self.label.name: {self.label.positive_class: np.array(predictions),
@@ -167,6 +168,10 @@ class ReceptorCNN(MLMethod):
 
                 # Reset gradients
                 optimizer.zero_grad()
+
+                # Move batch tensors to the correct device (CPU or GPU)
+                examples = examples.to(self.device)
+                labels = labels.to(self.device)
 
                 # Calculate predictions
                 logit_outputs = self.CNN(examples)
@@ -210,13 +215,24 @@ class ReceptorCNN(MLMethod):
 
     def _make_encoded_data(self, encoded_data, indices):
         examples = np.swapaxes(encoded_data.examples, 2, 3)
-        return EncodedData(examples=torch.from_numpy(examples[indices]).float(),
-                           labels={
-                               label_name: torch.from_numpy(np.array([encoded_data.labels[label_name][i] for i in indices]) == self.class_mapping[1]).float()
-                               for label_name in encoded_data.labels.keys()},
-                           example_ids=[encoded_data.example_ids[i] for i in indices], feature_names=encoded_data.feature_names,
-                           feature_annotations=encoded_data.feature_annotations, encoding=encoded_data.encoding)
+        # move labels directly to gpu/cpu device
+        examples_tensor = torch.from_numpy(examples[indices]).float().to(self.device)
+        labels_tensor = {
+            label_name: torch.from_numpy(
+                np.array([encoded_data.labels[label_name][i] for i in indices]) == self.class_mapping[1]
+            ).float().to(self.device)
+            for label_name in encoded_data.labels.keys()
+            }
 
+        return EncodedData(
+            examples=examples_tensor,
+            labels=labels_tensor,
+            example_ids=[encoded_data.example_ids[i] for i in indices],
+            feature_names=encoded_data.feature_names,
+            feature_annotations=encoded_data.feature_annotations,
+            encoding=encoded_data.encoding
+        )
+    
     def _compute_loss(self, loss_function, logit_outputs, labels):
         pred_loss = loss_function(logit_outputs, labels)
         l1reg_loss = (torch.mean(torch.stack([p.abs().float().mean() for p in self.CNN.parameters()])))
@@ -244,6 +260,8 @@ class ReceptorCNN(MLMethod):
 
             with torch.no_grad():
                 for examples, labels, example_ids in self._get_data_batch(data, self.label.name):
+                    examples = examples.to(self.device)
+                    labels = labels.to(self.device)
                     logit_outputs = self.CNN(examples)
                     loss += loss_func(logit_outputs, labels) / len(data.example_ids)
 
