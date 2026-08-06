@@ -5,6 +5,10 @@ from torch.nn.functional import relu
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.util.device_manager import get_device
+
+
+device = get_device()
 
 
 class PyTorchReceptorCNN(nn.Module):
@@ -82,6 +86,9 @@ class PyTorchReceptorCNN(nn.Module):
             predictions of class assignment
         """
 
+        #move input to gpu/cpu device
+        x = x.to(device)
+
         # creates batch_size x kernel_count representation of chain 1 and chain 2 by applying kernels, followed by relu and global max pooling
         chain_1 = torch.cat([torch.max(relu(conv_kernel(x[:, 0])), dim=2)[0] for conv_kernel in
                              [getattr(self, name) for name in self.conv_chain_1]], dim=1)
@@ -117,3 +124,4 @@ class PyTorchReceptorCNN(nn.Module):
         # append positional kernel values to rescaled weights and convert back to parameter
         weight_parameter = nn.Parameter(torch.cat([weight_chain, weight_parameter[:, dim:, :]], dim=1))
         return weight_parameter
+    
