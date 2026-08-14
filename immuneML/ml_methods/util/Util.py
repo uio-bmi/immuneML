@@ -107,6 +107,25 @@ class Util:
         return 'immuneML ' + Constants.VERSION
 
     @staticmethod
+    def is_gpu_oom_error(error: Exception) -> bool:
+        """
+        Checks whether an exception's message indicates a GPU out-of-memory condition. Framework-agnostic
+        (matches messages from e.g. xgboost.core.XGBoostError and PyTorch's RuntimeError/OutOfMemoryError) -
+        callers should still narrow on the expected exception type in their except clause before calling this,
+        e.g.:
+
+            except xgboost.core.XGBoostError as e:
+                if Util.is_gpu_oom_error(e): ...
+
+            except RuntimeError as e:
+                if Util.is_gpu_oom_error(e): ...
+        """
+        message = str(error).lower()
+        oom_markers = ["bad_alloc", "cudaerrormemoryallocation", "memory allocation error", "out of memory",
+                       "cuda error", "cublas_status_alloc_failed"]
+        return any(marker in message for marker in oom_markers)
+
+    @staticmethod
     def get_train_val_indices(n_examples, training_percentage, random_seed=None):
         indices = list(range(n_examples))
 

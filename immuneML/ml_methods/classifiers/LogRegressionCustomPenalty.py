@@ -18,6 +18,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 MAX_TORCH_ITERS = 200
 
+
 class _TorchLogReg(BaseEstimator, ClassifierMixin):
     """sklearn-compatible logistic regression via PyTorch LBFGS with a per-feature penalty mask."""
 
@@ -29,12 +30,24 @@ class _TorchLogReg(BaseEstimator, ClassifierMixin):
         self.device = device
 
     def fit(self, X, y):
+        X_arr = X.toarray() if hasattr(X, 'toarray') else np.asarray(X)
+        try:
+            self._fit_on_device(X_arr, y, self.device)
+        except RuntimeError as e:
+            if 'cuda' in str(self.device) and Util.is_gpu_oom_error(e):
+                self._fall_back_to_cpu(e, during="fitting")
+                self._fit_on_device(X_arr, y, self.device)
+            else:
+                raise
+        self.classes_ = np.unique(y)
+        return self
+
+    def _fit_on_device(self, X_arr, y, device):
         import torch
         import torch.nn as nn
         import torch.optim as optim
-        X_arr = X.toarray() if hasattr(X, 'toarray') else np.asarray(X)
         n, p = X_arr.shape
-        dev = torch.device(self.device)
+        dev = torch.device(device)
         X_t = torch.from_numpy(X_arr).float().to(dev)
         y_t = torch.from_numpy(y.astype(float)).float().unsqueeze(1).to(dev)
 
@@ -60,17 +73,35 @@ class _TorchLogReg(BaseEstimator, ClassifierMixin):
             return total
 
         optimizer.step(closure)
-        self.classes_ = np.unique(y)
-        return self
 
     def predict_proba(self, X):
-        import torch
         X_arr = X.toarray() if hasattr(X, 'toarray') else np.asarray(X)
-        dev = torch.device(self.device)
+        try:
+            probs = self._predict_proba_on_device(X_arr, self.device)
+        except RuntimeError as e:
+            if 'cuda' in str(self.device) and Util.is_gpu_oom_error(e):
+                self._fall_back_to_cpu(e, during="inference")
+                self.linear_ = self.linear_.to('cpu')
+                probs = self._predict_proba_on_device(X_arr, self.device)
+            else:
+                raise
+        return np.column_stack([1.0 - probs, probs])
+
+    def _predict_proba_on_device(self, X_arr, device):
+        import torch
+        dev = torch.device(device)
         X_t = torch.from_numpy(X_arr.astype(np.float32)).to(dev)
         with torch.no_grad():
             probs = torch.sigmoid(self.linear_(X_t)).cpu().numpy().ravel()
-        return np.column_stack([1.0 - probs, probs])
+        return probs
+
+    def _fall_back_to_cpu(self, error: Exception, during: str):
+        import torch
+        logging.warning(f"_TorchLogReg: GPU ran out of memory during {during} ({error}). "
+                         f"Falling back to CPU (device='cpu') and retrying.")
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        self.device = 'cpu'
 
     def predict(self, X):
         return self.classes_[(self.predict_proba(X)[:, 1] >= 0.5).astype(int)]
@@ -236,7 +267,19 @@ class LogRegressionCustomPenalty(MLMethod):
             self.model = LogitNet(**glmnet_params)
             self.model.fit(X, y, relative_penalties=penalty_factor)
         elif self.backend == 'torch':
-            self._fit_torch(X, y, non_penalized_indices, cores_for_training)
+            try:
+                self._fit_torch(X, y, non_penalized_indices, cores_for_training)
+            except RuntimeError as e:
+                if 'cuda' in str(self.device) and Util.is_gpu_oom_error(e):
+                    import torch
+                    logging.warning(f"{self.__class__.__name__}: GPU ran out of memory while fitting ({e}). "
+                                     f"Falling back to CPU (device='cpu') and retrying.")
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+                    self.device = 'cpu'
+                    self._fit_torch(X, y, non_penalized_indices, cores_for_training)
+                else:
+                    raise
         else:
             raise ValueError(f"Unknown backend '{self.backend}'. Use 'glmnet' or 'torch'.")
 

@@ -52,14 +52,32 @@ class XGBClassifier(MLMethod):
         self.model = None
 
     def _fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
-        from xgboost import XGBClassifier as _XGB
-        from sklearn.model_selection import train_test_split
+        import xgboost
 
         X = encoded_data.examples
         y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
         params = copy.deepcopy(self._parameters)
-        params["n_jobs"] = cores_for_training
+        uses_gpu = 'device' in params and params['device'] is not None and 'cuda' in str(params['device'])
+        if not uses_gpu:
+            params["n_jobs"] = cores_for_training
+
+        try:
+            self._fit_with_params(X, y, encoded_data, params)
+        except xgboost.core.XGBoostError as e:
+            if uses_gpu and Util.is_gpu_oom_error(e):
+                logging.warning(f"XGBClassifier: GPU ran out of memory while fitting ({e}). "
+                                 f"Falling back to CPU (device='cpu', n_jobs={cores_for_training}) and retrying.")
+                cpu_params = copy.deepcopy(params)
+                cpu_params['device'] = 'cpu'
+                cpu_params['n_jobs'] = cores_for_training
+                self._fit_with_params(X, y, encoded_data, cpu_params)
+            else:
+                raise
+
+    def _fit_with_params(self, X, y, encoded_data: EncodedData, params: dict):
+        from xgboost import XGBClassifier as _XGB
+        from sklearn.model_selection import train_test_split
 
         self.model = _XGB(**params)
 
@@ -76,12 +94,37 @@ class XGBClassifier(MLMethod):
         else:
             self.model.fit(X, y)
 
+    def _model_uses_gpu(self) -> bool:
+        device = self.model.get_params().get('device')
+        return device is not None and 'cuda' in str(device)
+
+    def _fall_back_model_to_cpu(self, error: Exception):
+        logging.warning(f"XGBClassifier: GPU ran out of memory during inference ({error}). "
+                         f"Switching this model to CPU (device='cpu') and retrying.")
+        self.model.set_params(device='cpu')
+
     def _predict(self, encoded_data: EncodedData):
-        predictions = self.model.predict(encoded_data.examples)
+        import xgboost
+        try:
+            predictions = self.model.predict(encoded_data.examples)
+        except xgboost.core.XGBoostError as e:
+            if self._model_uses_gpu() and Util.is_gpu_oom_error(e):
+                self._fall_back_model_to_cpu(e)
+                predictions = self.model.predict(encoded_data.examples)
+            else:
+                raise
         return {self.label.name: Util.map_to_old_class_values(predictions, self.class_mapping)}
 
     def _predict_proba(self, encoded_data: EncodedData):
-        probabilities = self.model.predict_proba(encoded_data.examples)
+        import xgboost
+        try:
+            probabilities = self.model.predict_proba(encoded_data.examples)
+        except xgboost.core.XGBoostError as e:
+            if self._model_uses_gpu() and Util.is_gpu_oom_error(e):
+                self._fall_back_model_to_cpu(e)
+                probabilities = self.model.predict_proba(encoded_data.examples)
+            else:
+                raise
         class_names = Util.map_to_old_class_values(self.model.classes_, self.class_mapping)
         return {self.label.name: {cls: probabilities[:, i] for i, cls in enumerate(class_names)}}
 
