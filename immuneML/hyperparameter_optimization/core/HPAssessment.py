@@ -13,7 +13,7 @@ from immuneML.ml_methods.classifiers.MLMethod import MLMethod
 from immuneML.ml_methods.classifiers.SklearnMethod import SklearnMethod
 from immuneML.ml_metrics.ClassificationMetric import ClassificationMetric
 from immuneML.reports.ReportUtil import ReportUtil
-from immuneML.util.Logger import print_log
+from immuneML.util.Logger import print_log, log_memory_usage
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.MLProcess import MLProcess
 
@@ -46,6 +46,7 @@ class HPAssessment:
 
         print_log(f'Training ML model: running outer CV loop: started split {split_index + 1}/{n_splits}.\n',
                   include_datetime=True)
+        log_memory_usage(f"start of outer split {split_index + 1}/{n_splits}", "Nested CV assessment")
 
         current_path = HPAssessment.create_assessment_path(state, split_index)
 
@@ -68,6 +69,7 @@ class HPAssessment:
 
         print_log(f'Training ML model: running outer CV loop: finished split {split_index + 1}/{n_splits}.\n',
                   include_datetime=True)
+        log_memory_usage(f"end of outer split {split_index + 1}/{n_splits}", "Nested CV assessment")
 
         return state
 

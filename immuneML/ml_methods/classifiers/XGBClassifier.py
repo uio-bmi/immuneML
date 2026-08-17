@@ -98,6 +98,9 @@ class XGBClassifier(MLMethod):
         device = self.model.get_params().get('device')
         return device is not None and 'cuda' in str(device)
 
+    def uses_offloadable_resources(self) -> bool:
+        return self.model is not None and self._model_uses_gpu()
+
     def _fall_back_model_to_cpu(self, error: Exception):
         logging.warning(f"XGBClassifier: GPU ran out of memory during inference ({error}). "
                          f"Switching this model to CPU (device='cpu') and retrying.")

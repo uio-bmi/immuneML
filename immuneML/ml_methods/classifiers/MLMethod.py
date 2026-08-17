@@ -241,6 +241,17 @@ class MLMethod(metaclass=abc.ABCMeta):
         """
         pass
 
+    def uses_offloadable_resources(self) -> bool:
+        """
+        Whether this fitted model holds onto resources (typically GPU device memory) that are expensive
+        enough to be worth dropping and reloading from disk (via store()/load()) when the model isn't
+        immediately needed, e.g. while many fitted models are being retained in memory during
+        hyperparameter selection in nested cross-validation (see HPItem). Defaults to False, since for
+        most (CPU-based, lightweight) methods the fitted model is cheap to keep resident and offloading it
+        would only add unnecessary disk I/O. Override to return True for methods that can run on GPU.
+        """
+        return False
+
     @abc.abstractmethod
     def get_params(self, for_refitting=False) -> dict:
         """

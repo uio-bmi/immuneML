@@ -38,4 +38,15 @@ def log_memory_usage(stage: str, location: str = None):
     process = psutil.Process()
     memory_info = process.memory_info()
     memory_gb = memory_info.rss / 1024 / 1024 / 1024
-    logging.info(f"{location}: Memory usage at {stage}: {memory_gb:.2f} GB")
+    message = f"{location}: Memory usage at {stage}: {memory_gb:.2f} GB RAM"
+
+    try:
+        import torch
+        if torch.cuda.is_available():
+            free_b, total_b = torch.cuda.mem_get_info()
+            message += (f"; GPU memory: {(total_b - free_b) / 1024 ** 3:.2f}/{total_b / 1024 ** 3:.2f} GB used"
+                       f" ({free_b / 1024 ** 3:.2f} GB free)")
+    except Exception:
+        pass
+
+    logging.info(message)

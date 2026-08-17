@@ -7,7 +7,7 @@ from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
 from immuneML.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
-from immuneML.util.Logger import print_log
+from immuneML.util.Logger import print_log, log_memory_usage
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.MLProcess import MLProcess
 
@@ -34,6 +34,7 @@ class HPSelection:
 
             print_log(f"Hyperparameter optimization: running the inner loop of nested CV: selection for label {label.name} "
                       f"(label {idx + 1} / {n_labels}).\n", include_datetime=True)
+            log_memory_usage(f"start of inner loop, split {split_index + 1}, label {label.name}", "Nested CV selection")
 
             selection_state = HPSelectionState(train_datasets, val_datasets, path, state.hp_strategy)
             state.assessment_states[split_index].label_states[label.name].selection_state = selection_state
@@ -48,6 +49,7 @@ class HPSelection:
 
             print_log(f"Hyperparameter optimization: running the inner loop of nested CV: completed selection for "
                       f"label {label.name} (label {idx + 1} / {n_labels}).\n", include_datetime=True)
+            log_memory_usage(f"end of inner loop, split {split_index + 1}, label {label.name}", "Nested CV selection")
 
         return state
 
