@@ -84,4 +84,3 @@ class HPItem:
                 and getattr(self._method, 'model', None) is not None \
                 and self._method.uses_offloadable_resources():
             self._method.model = None
-            gc.collect()
