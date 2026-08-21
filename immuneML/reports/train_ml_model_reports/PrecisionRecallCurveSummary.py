@@ -62,13 +62,16 @@ class PrecisionRecallCurveSummary(TrainMLModelReport):
 
     def _create_figure_for_assessment_split(self, index, label: Label):
         data = []
+        all_labels_on_test = self.state.assessment_states[index].test_dataset.get_metadata([label.name])[label.name]
+        pos_class_percentage = sum(int(lbl == label.positive_class) for lbl in all_labels_on_test) / len(all_labels_on_test) * 100
         for hp_item_name, hp_item in self.state.assessment_states[index].label_states[
             label.name].assessment_items.items():
             data.append(self._make_pr_curve(hp_item, label, f"{label.name}_{label.positive_class}_proba"))
 
         figure = self._draw_pr_curves(data=data,
                                       pr_legends=[f"{item['HPItem']} (AP = {round(item['AP'], 2)})" for item in data],
-                                      figure_name=f"Precision-Recall curves for label {label.name} on assessment split {index + 1}.html")
+                                      figure_name=f"Precision-Recall curves for label {label.name} on assessment split {index + 1}.html",
+                                      positive_class_percentage=pos_class_percentage)
         return figure
 
     def _make_pr_curve(self, hp_item: HPItem, label: Label, proba_name: str) -> dict:
@@ -92,14 +95,14 @@ class PrecisionRecallCurveSummary(TrainMLModelReport):
             "HPItem": str(hp_item.hp_setting)
         }
 
-    def _draw_pr_curves(self, data: list, pr_legends: list, figure_name: str) -> ReportOutput:
+    def _draw_pr_curves(self, data: list, pr_legends: list, figure_name: str, positive_class_percentage: float) -> ReportOutput:
         figure = go.Figure()
 
         for index, item in enumerate(data):
             figure.add_trace(
                 go.Scatter(x=item["Recall"], y=item["Precision"], mode='lines', name=pr_legends[index],
                            marker=dict(line=dict(width=3)),
-                           hovertemplate="%{name}<extra></extra>"))
+                           hovertemplate=pr_legends[index] + "<br>Recall: %{x}<br>Precision: %{y}<extra></extra>"))
 
         figure.update_layout(template='plotly_white', xaxis_title='recall',
                              yaxis_title='precision', legend=dict(yanchor="top", y=0.94, xanchor="right", x=0.99),
@@ -108,4 +111,4 @@ class PrecisionRecallCurveSummary(TrainMLModelReport):
         file_path = self.result_path / figure_name.replace(" ", "_")
         file_path = PlotlyUtil.write_image_to_file(figure, file_path)
 
-        return ReportOutput(path=file_path, name=figure_name.split(".")[0])
+        return ReportOutput(path=file_path, name=figure_name.split(".")[0] + f" (positive class percentage: {round(positive_class_percentage, 2)}%)")
