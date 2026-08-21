@@ -203,6 +203,7 @@ class TrainMLModelInstruction(Instruction):
             self._compute_optimal_item(label, f"(label {idx + 1} / {n_labels})")
             zip_path = MLExporter.export_zip(hp_item=self.state.optimal_hp_items[label.name], path=self.state.path / f"optimal_{label.name}", label_name=label.name)
             self.state.optimal_hp_item_paths[label.name] = zip_path
+            print_log(f"TrainMLModelInstruction: optimal model for label {label.name} was exported to: {zip_path}\n", include_datetime=True)
 
     def _compute_optimal_item(self, label: Label, index_repr: str):
         optimal_hp_settings = [state.label_states[label.name].optimal_hp_setting for state in self.state.assessment_states]

@@ -1,6 +1,6 @@
 import copy
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.data_model.datasets.Dataset import Dataset
@@ -19,9 +19,9 @@ from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
-from immuneML.workflows.steps.DataWeighter import DataWeighter
 from immuneML.workflows.steps.DataEncoder import DataEncoder
 from immuneML.workflows.steps.DataEncoderParams import DataEncoderParams
+from immuneML.workflows.steps.DataWeighter import DataWeighter
 from immuneML.workflows.steps.DataWeighterParams import DataWeighterParams
 from immuneML.workflows.steps.MLMethodAssessment import MLMethodAssessment
 from immuneML.workflows.steps.MLMethodAssessmentParams import MLMethodAssessmentParams
@@ -155,7 +155,9 @@ class HPUtil:
             tmp_report.state = state
             tmp_report.result_path = path / key
             tmp_report.number_of_processes = state.number_of_processes
+            print_log(f"TrainMLModelInstruction: running report {key} ({tmp_report.__class__.__name__})", True)
             report_result = tmp_report.generate_report()
+            print_log(f"TrainMLModelInstruction: finished report {key} ({tmp_report.__class__.__name__})", True)
             report_results.append(report_result)
         return report_results
 
