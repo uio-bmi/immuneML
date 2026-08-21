@@ -11,6 +11,15 @@
 <body>
     <div class="container">
         <h3>Assessment - split {{split_index}} details</h3>
+        <div class="summary-info">
+            <p><b>Label:</b> {{label}}</p>
+            {{#train_val_summary}}
+            <p><b>Train/validation set:</b> {{example_count}} examples{{#has_class_counts}} ({{class_counts_str}}){{/has_class_counts}}</p>
+            {{/train_val_summary}}
+            {{#test_summary}}
+            <p><b>Test set:</b> {{example_count}} examples{{#has_class_counts}} ({{class_counts_str}}){{/has_class_counts}}</p>
+            {{/test_summary}}
+        </div>
         {{#train_metadata_path}}
         <div class="padded-top padded-bottom">
             <details>

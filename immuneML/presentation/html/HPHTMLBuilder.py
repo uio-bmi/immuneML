@@ -79,10 +79,15 @@ class HPHTMLBuilder:
                             not (
                                         state.selection.split_strategy == SplitType.RANDOM and state.selection.training_percentage == 1)
 
+        split_summaries = HPHTMLBuilder._make_selection_split_summaries(selection_state, label_name,
+                                                                        state.selection.split_count)
+
         return {
             "css_style": Util.get_css_content(HPHTMLBuilder.CSS_PATH),
             "label": label_name,
             "assessment_split": assessment_index + 1,
+            "split_summaries": split_summaries,
+            "has_split_summaries": bool(split_summaries),
             "splits": [{"split_index": i} for i in range(1, state.selection.split_count + 1)],
             "split_count": state.selection.split_count,
             "optimization_metric": state.optimization_metric.name.lower(),
@@ -113,6 +118,17 @@ class HPHTMLBuilder:
         }
 
     @staticmethod
+    def _make_selection_split_summaries(selection_state: HPSelectionState, label_name: str, split_count: int) -> list:
+        if len(selection_state.train_datasets) != split_count or len(selection_state.val_datasets) != split_count:
+            return None
+
+        return [{
+            "split_index": index + 1,
+            "train_summary": Util.get_dataset_summary_info(selection_state.train_datasets[index], label_name),
+            "val_summary": Util.get_dataset_summary_info(selection_state.val_datasets[index], label_name),
+        } for index in range(split_count)]
+
+    @staticmethod
     def _make_selection_reports_for_item_list(hp_items: list, base_path) -> list:
         result = []
 
@@ -141,6 +157,10 @@ class HPHTMLBuilder:
             assessment_item = {"css_style": Util.get_css_content(HPHTMLBuilder.CSS_PATH),
                                "optimization_metric": state.optimization_metric.name.lower(),
                                "split_index": assessment_state.split_index + 1,
+                               "train_val_summary": Util.get_dataset_summary_info(
+                                   assessment_state.train_val_dataset, label_name),
+                               "test_summary": Util.get_dataset_summary_info(
+                                   assessment_state.test_dataset, label_name),
                                "hp_settings": [],
                                "has_reports": len(state.assessment.reports.model_reports) + len(
                                    state.assessment.reports.encoding_reports) > 0,

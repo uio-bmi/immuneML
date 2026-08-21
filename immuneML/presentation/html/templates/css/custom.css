@@ -336,6 +336,25 @@ table {
     margin-bottom: 20px;
 }
 
+/* Small summary box (number of examples / examples per class) shown below a page title */
+.summary-info {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    width: fit-content;
+    margin: 0.5em 0 1.5em 0;
+    padding: 0.6em 1em;
+    font-size: 0.9em;
+}
+
+.summary-info p {
+    margin: 0.2em 0;
+}
+
+.summary-info b {
+    color: var(--primary-color);
+}
+
 /* Dataset info table specific styling */
 .dataset-info {
     background: white;

@@ -127,6 +127,28 @@ class Util:
         return report_result
 
     @staticmethod
+    def get_dataset_summary_info(dataset, label_name: str = None) -> dict:
+        """
+        Returns a small summary of a dataset (number of examples, and if a label is given and available for that
+        dataset, the number of examples per class for that label), to be shown as a quick overview at the top of
+        an HTML report page.
+        """
+        example_count = dataset.get_example_count()
+        class_counts_str = None
+
+        if label_name is not None and label_name in dataset.get_label_names():
+            try:
+                label_values = dataset.get_metadata([label_name], return_df=True)[label_name]
+                counts = label_values.value_counts(dropna=False).sort_index(key=lambda index: index.astype(str))
+                class_counts_str = ", ".join(f"{class_name}: {count}" for class_name, count in counts.items())
+            except Exception as e:
+                logging.warning(f"Util: could not compute the number of examples per class for label "
+                                f"{label_name} for dataset {dataset.name}: {e}")
+
+        return {"example_count": example_count, "class_counts_str": class_counts_str,
+                "has_class_counts": bool(class_counts_str)}
+
+    @staticmethod
     def make_dataset_html_map(dataset, dataset_key="dataset"):
         return {f"{dataset_key}_name": dataset.name,
                 f"{dataset_key}_type": StringHelper.camel_case_to_word_string(type(dataset).__name__),

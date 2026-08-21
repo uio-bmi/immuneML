@@ -11,9 +11,33 @@
 <body>
     <div class="container">
         <h2>Selection for assessment split {{assessment_split}} - label {{label}}</h2>
+        {{#has_split_summaries}}
+        <p><b>Label:</b> {{label}}</p>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Split</th>
+                        <th>Train examples</th>
+                        <th>Validation examples</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#split_summaries}}
+                    <tr>
+                        <td>{{split_index}}</td>
+                        <td>{{#train_summary}}{{example_count}}{{#has_class_counts}} ({{class_counts_str}}){{/has_class_counts}}{{/train_summary}}</td>
+                        <td>{{#val_summary}}{{example_count}}{{#has_class_counts}} ({{class_counts_str}}){{/has_class_counts}}{{/val_summary}}</td>
+                    </tr>
+                    {{/split_summaries}}
+                </tbody>
+            </table>
+        </div>
+        {{/has_split_summaries}}
         <p>
             In the table below, the performance for each hyperparameter setting (combination of preprocessing (if any), encoding and ML model)
-            on each of validation split is shown along with the average performance for the optimization metric (if applicable).
+            on each of validation split is shown along with the average performance for the optimization metric
+            (<b>{{optimization_metric}}</b>), if applicable.
             The hyperparameter setting chosen as optimal (the best average performance) is shown in bold.
         </p>
         <div class="padded">
