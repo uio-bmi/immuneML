@@ -106,7 +106,7 @@ class ROCCurveSummary(TrainMLModelReport):
             figure.add_trace(
                 go.Scatter(x=item["FPR"], y=item["TPR"], mode='lines', name=roc_legends[index],
                            marker=dict(line=dict(width=3)),
-                           hovertemplate="%{name}<extra></extra>"))
+                           hovertemplate=roc_legends[index] + "<br>False Positive Rate: %{x}<br>True Positive Rate: %{y}<extra></extra>"))
 
         figure.update_layout(template='plotly_white', xaxis_title='false positive rate',
                              yaxis_title='true positive rate')

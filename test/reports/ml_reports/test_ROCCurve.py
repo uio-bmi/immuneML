@@ -13,6 +13,7 @@ from immuneML.environment.Label import Label
 from immuneML.ml_methods.classifiers.LogisticRegression import LogisticRegression
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.ROCCurve import ROCCurve
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestROCCurve(unittest.TestCase):
@@ -44,7 +45,7 @@ class TestROCCurve(unittest.TestCase):
         return report
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path / "test/tmp/roccurve/"
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "roccurve/")
 
         report = self._create_report(path)
 

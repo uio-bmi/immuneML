@@ -51,7 +51,8 @@ class ROCCurve(MLReport):
         trace1 = go.Scatter(x=fpr, y=tpr,
                             mode='lines',
                             line=dict(color='darkorange', width=2),
-                            name=f"ROC curve (area = {roc_auc})")
+                            name=f"ROC curve (area = {roc_auc})",
+                            hovertemplate="False Positive Rate: %{x}<br>True Positive Rate: %{y}<extra></extra>")
         trace2 = go.Scatter(x=[0, 1], y=[0, 1],
                             mode='lines',
                             line=dict(color='navy', width=2, dash='dash'),
