@@ -154,7 +154,9 @@ class MLProcess:
             model_report_results = ReportUtil.run_ML_reports(encoded_train_dataset, encoded_test_dataset, method,
                                                              self.ml_reports,
                                                              self.report_path / "ml_method", self.hp_setting,
-                                                             self.label, self.number_of_processes, self.report_context)
+                                                             self.label, self.number_of_processes, self.report_context,
+                                                             train_predictions_path=self.train_predictions_path,
+                                                             test_predictions_path=self.test_predictions_path)
 
             hp_item = HPItem(method=method, hp_setting=self.hp_setting,
                              train_predictions_path=self.train_predictions_path,

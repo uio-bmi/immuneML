@@ -133,6 +133,9 @@ class Util:
         dataset, the number of examples per class for that label), to be shown as a quick overview at the top of
         an HTML report page.
         """
+        if dataset is None:
+            return None
+
         example_count = dataset.get_example_count()
         class_counts_str = None
 

@@ -28,7 +28,8 @@ class ReportUtil:
 
     @staticmethod
     def run_ML_reports(train_dataset: Dataset, test_dataset: Dataset, method: MLMethod, reports: List[MLReport], path: Path,
-                       hp_setting: HPSetting, label: Label, number_of_processes: int = 1, context: dict = None) -> List[ReportResult]:
+                       hp_setting: HPSetting, label: Label, number_of_processes: int = 1, context: dict = None,
+                       train_predictions_path: Path = None, test_predictions_path: Path = None) -> List[ReportResult]:
         report_results = []
         for report in reports:
             tmp_report = ReportUtil._make_new_report(report, path, number_of_processes, context)
@@ -37,6 +38,8 @@ class ReportUtil:
             tmp_report.test_dataset = test_dataset
             tmp_report.hp_setting = hp_setting
             tmp_report.label = label
+            tmp_report.train_predictions_path = train_predictions_path
+            tmp_report.test_predictions_path = test_predictions_path
             result = tmp_report.generate_report()
             report_results.append(result)
         return report_results
