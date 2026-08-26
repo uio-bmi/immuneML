@@ -69,6 +69,51 @@ def test_predict_proba(backend):
     assert all(0.0 <= p <= 1.0 for p in proba_pos)
 
 
+def test_pos_weight_balanced_glmnet():
+    model = LogRegressionCustomPenalty(backend="glmnet", alpha=1, n_lambda=5, n_splits=3, max_iter=50,
+                                       random_state=1, pos_weight="balanced")
+    model.fit(_encoded_data(), LABEL)
+    assert model.model is not None
+
+
+def test_pos_weight_numeric_glmnet():
+    model = LogRegressionCustomPenalty(backend="glmnet", alpha=1, n_lambda=5, n_splits=3, max_iter=50,
+                                       random_state=1, pos_weight=3.5)
+    model.fit(_encoded_data(), LABEL)
+    assert model.model is not None
+
+
+def test_pos_weight_with_torch_backend_raises():
+    with pytest.raises(ValueError):
+        LogRegressionCustomPenalty(backend="torch", device="cpu", pos_weight="balanced")
+
+
+def test_resolve_sample_weight_balanced():
+    model = LogRegressionCustomPenalty(backend="glmnet", pos_weight="balanced")
+    y = np.array([0, 0, 0, 1])  # 3 negative, 1 positive -> positive rows should get weight 3
+    weights = model._resolve_sample_weight(y)
+    np.testing.assert_array_almost_equal(weights, [1.0, 1.0, 1.0, 3.0])
+
+
+def test_resolve_sample_weight_numeric():
+    model = LogRegressionCustomPenalty(backend="glmnet", pos_weight=2.0)
+    y = np.array([0, 1, 0, 1])
+    weights = model._resolve_sample_weight(y)
+    np.testing.assert_array_almost_equal(weights, [1.0, 2.0, 1.0, 2.0])
+
+
+def test_resolve_sample_weight_none_by_default():
+    model = LogRegressionCustomPenalty(backend="glmnet")
+    y = np.array([0, 1, 0, 1])
+    assert model._resolve_sample_weight(y) is None
+
+
+def test_resolve_sample_weight_balanced_missing_class_warns_and_returns_none(caplog):
+    model = LogRegressionCustomPenalty(backend="glmnet", pos_weight="balanced")
+    y = np.array([0, 0, 0, 0])  # only one class present
+    assert model._resolve_sample_weight(y) is None
+
+
 def test_non_penalized_features_excluded_from_penalty():
     model = LogRegressionCustomPenalty(backend="glmnet", alpha=1, n_lambda=5, n_splits=3,
                                        non_penalized_features=["feature_0", "feature_1"], random_state=1)

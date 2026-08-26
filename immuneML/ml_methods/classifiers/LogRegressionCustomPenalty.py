@@ -173,7 +173,18 @@ class LogRegressionCustomPenalty(MLMethod):
 
     - n_splits (int): Cross-validation folds for lambda selection. Default 3.
 
-    - scoring (str): Scoring metric for lambda selection. Default None (accuracy for glmnet; roc_auc for torch).
+    - scoring (str): Scoring metric for lambda selection when using the glmnet backend; accepts any scikit-learn
+      scorer name (e.g. 'accuracy', 'roc_auc', 'average_precision'). Default None (accuracy). Under strong class
+      imbalance, 'average_precision' (PR-AUC) can be a more sensitive criterion for choosing lambda than 'roc_auc',
+      since ROC-AUC is prevalence-invariant while PR-AUC's baseline tracks the positive-class prevalence directly.
+      Ignored by the torch backend.
+
+    - pos_weight: up-weights the positive class when fitting with the glmnet backend, passed through as glmnet's
+      `sample_weight` (rows with the positive class get this weight, all other rows get weight 1). Not supported by
+      the torch backend (raises an error if set together with backend='torch'). One of: None (default, no
+      reweighting, i.e. the previous behaviour), 'balanced' (weight is set to (number of negative examples) /
+      (number of positive examples), computed from the training data being fit), or a positive number used directly
+      as the weight.
 
     - random_state (int): Random seed for CV fold splitting.
 
@@ -204,7 +215,7 @@ class LogRegressionCustomPenalty(MLMethod):
     def __init__(self, non_penalized_features: list = None, name: str = None, label: Label = None,
                  non_penalized_encodings: list = None, backend: str = None,
                  alpha: float = None, n_lambda: int = None, min_lambda_ratio: float = None,
-                 n_splits: int = None, scoring: str = None, random_state: int = None,
+                 n_splits: int = None, scoring: str = None, pos_weight=None, random_state: int = None,
                  max_iter: int = None, device: str = None, **kwargs):
         super().__init__(name=name, label=label)
         self.non_penalized_features = non_penalized_features if non_penalized_features is not None else []
@@ -215,6 +226,7 @@ class LogRegressionCustomPenalty(MLMethod):
         self.min_lambda_ratio = min_lambda_ratio
         self.n_splits = n_splits
         self.scoring = scoring
+        self.pos_weight = pos_weight
         self.random_state = random_state
         self.max_iter = max_iter
         self.device = device
@@ -225,6 +237,9 @@ class LogRegressionCustomPenalty(MLMethod):
                 self.non_penalized_encodings[ind] = encoding + 'Encoder'
 
         if backend == 'torch':
+            if pos_weight is not None:
+                raise ValueError(f"{self.__class__.__name__}: pos_weight is currently only supported with "
+                                 f"backend='glmnet', not with the torch backend.")
             try:
                 import torch
             except ImportError:
@@ -265,7 +280,8 @@ class LogRegressionCustomPenalty(MLMethod):
             if self.scoring is not None:
                 glmnet_params['scoring'] = self.scoring
             self.model = LogitNet(**glmnet_params)
-            self.model.fit(X, y, relative_penalties=penalty_factor)
+            sample_weight = self._resolve_sample_weight(y)
+            self.model.fit(X, y, sample_weight=sample_weight, relative_penalties=penalty_factor)
         elif self.backend == 'torch':
             try:
                 self._fit_torch(X, y, non_penalized_indices, cores_for_training)
@@ -282,6 +298,30 @@ class LogRegressionCustomPenalty(MLMethod):
                     raise
         else:
             raise ValueError(f"Unknown backend '{self.backend}'. Use 'glmnet' or 'torch'.")
+
+    def _resolve_sample_weight(self, y):
+        """Resolves self.pos_weight into a per-example sample_weight array for glmnet's LogitNet.fit(), computed
+        from the labels y of the training data currently being fit. Rows with the positive class (y == 1) get the
+        resolved weight, all other rows get weight 1. Returns None (i.e. uniform weighting, glmnet's default) when
+        self.pos_weight is None."""
+        if self.pos_weight is None:
+            return None
+
+        if isinstance(self.pos_weight, str):
+            assert self.pos_weight == 'balanced', \
+                f"{self.__class__.__name__}: pos_weight has to be None, 'balanced', or a positive number, " \
+                f"got '{self.pos_weight}' instead."
+            n_pos = float((y == 1).sum())
+            n_neg = float((y == 0).sum())
+            if n_pos == 0 or n_neg == 0:
+                logging.warning(f"{self.__class__.__name__}: cannot compute a 'balanced' pos_weight since one of "
+                                f"the classes is not present in the data being fit; fitting without pos_weight instead.")
+                return None
+            weight_value = n_neg / n_pos
+        else:
+            weight_value = float(self.pos_weight)
+
+        return np.where(y == 1, weight_value, 1.0)
 
     def _fit_torch(self, X, y, non_penalized_indices, n_jobs):
         # With warm starting each step starts near the solution, so few LBFGS iterations suffice.
@@ -366,6 +406,7 @@ class LogRegressionCustomPenalty(MLMethod):
             'alpha': self.alpha,
             'non_penalized_features': self.non_penalized_features,
             'backend': self.backend,
+            'pos_weight': self.pos_weight,
         }
         if self.backend == 'glmnet':
             params.update({
