@@ -270,6 +270,11 @@ class LogRegressionCustomPenalty(MLMethod):
             penalty_factor[idx] = 0.0
 
         if self.backend == 'glmnet':
+            logging.warning(f"{self.__class__.__name__}: DIAGNOSTIC X.shape={X.shape}, "
+                            f"nan_in_X={bool(np.isnan(X).any())}, inf_in_X={bool(np.isinf(X).any())}, "
+                            f"X_min={np.nanmin(X)}, X_max={np.nanmax(X)}, "
+                            f"zero_variance_cols={int((np.nanstd(X, axis=0) == 0).sum())}/{X.shape[1]}, "
+                            f"y_class_counts={dict(zip(*np.unique(y, return_counts=True)))}")
             glmnet_params = dict(
                 alpha=self.alpha, n_lambda=self.n_lambda, n_splits=self.n_splits,
                 random_state=self.random_state, max_iter=self.max_iter,
