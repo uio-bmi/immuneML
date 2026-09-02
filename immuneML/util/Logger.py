@@ -42,7 +42,7 @@ def log_memory_usage(stage: str, location: str = None):
 
     try:
         import torch
-        if torch.cuda.is_available():
+        if torch.cuda.is_initialized():
             free_b, total_b = torch.cuda.mem_get_info()
             message += (f"; GPU memory: {(total_b - free_b) / 1024 ** 3:.2f}/{total_b / 1024 ** 3:.2f} GB used"
                        f" ({free_b / 1024 ** 3:.2f} GB free)")
