@@ -31,12 +31,14 @@ class MLApplicationParser:
             - precision
             - recall
             number_of_processes: 4
+            device: cpu
 
     """
 
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path) -> MLApplicationInstruction:
         location = MLApplicationParser.__name__
-        ParameterValidator.assert_keys(instruction.keys(), ['type', 'dataset', 'number_of_processes', 'config_path', 'metrics'], location, key)
+        ParameterValidator.assert_keys(instruction.keys(), ['type', 'dataset', 'number_of_processes', 'config_path', 'metrics', 'device'],
+                                       location, key, exclusive=False)
         ParameterValidator.assert_in_valid_list(instruction['dataset'], symbol_table.get_keys_by_type(SymbolType.DATASET), location, f"{key}: dataset")
         ParameterValidator.assert_type_and_value(instruction['number_of_processes'], int, location, f"{key}: number_of_processes", min_inclusive=1)
         ParameterValidator.assert_type_and_value(instruction['config_path'], str, location, f'{key}: config_path')
@@ -49,6 +51,11 @@ class MLApplicationParser:
 
         hp_setting, label = self._parse_hp_setting(instruction, path, key)
 
+        device = instruction.get('device', None)
+        if device is not None:
+            ParameterValidator.assert_type_and_value(device, str, location, f'{key}: device')
+            self._set_device(hp_setting, device)
+
         instruction = MLApplicationInstruction(dataset=symbol_table.get(instruction['dataset']), name=key,
                                                number_of_processes=instruction['number_of_processes'],
                                                label_configuration=LabelConfiguration([label]),
@@ -56,6 +63,11 @@ class MLApplicationParser:
                                                metrics=metrics)
 
         return instruction
+
+    def _set_device(self, hp_setting: HPSetting, device: str):
+        for obj in [hp_setting.encoder, hp_setting.dim_reduction_method, hp_setting.ml_method]:
+            if obj is not None and hasattr(obj, 'device'):
+                obj.device = device
 
     def _parse_hp_setting(self, instruction: dict, path: Path, key: str) -> Tuple[HPSetting, Label]:
 

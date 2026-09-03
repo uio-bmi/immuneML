@@ -127,7 +127,9 @@ class ReceptorCNN(MLMethod):
                            for i in range(len(EnvironmentSettings.get_sequence_alphabet(self.sequence_type)))])
 
     def _predict_proba(self, encoded_data: EncodedData):
-        # set the model to evaluation mode for inference
+        # move the model to the configured device (may have changed since load(), e.g. when overridden
+        # for inference) and set it to evaluation mode
+        self.CNN.to(device=self.device)
         self.CNN.eval()
 
         # convert encoded data from numpy arrays to tensors
@@ -137,9 +139,10 @@ class ReceptorCNN(MLMethod):
         with torch.no_grad():
             predictions = []
             for examples, labels, example_ids in self._get_data_batch(encoded_data_pt, self.label.name):
+                examples = examples.to(device=self.device)
                 logit_outputs = self.CNN(examples)
                 prediction = torch.sigmoid(logit_outputs)
-                predictions.extend(prediction.numpy())
+                predictions.extend(prediction.detach().cpu().numpy())
 
         return {self.label.name: {self.label.positive_class: np.array(predictions),
                                   self.label.get_binary_negative_class(): 1 - np.array(predictions)}}
@@ -285,7 +288,8 @@ class ReceptorCNN(MLMethod):
         self.sequence_type = SequenceType[self.sequence_type.upper()]
 
         self._make_CNN()
-        self.CNN.load_state_dict(torch.load(str(path / "CNN.pt")))
+        self.CNN.load_state_dict(torch.load(str(path / "CNN.pt"), map_location='cpu'))
+        self.CNN.to(device=self.device)
 
     def _make_CNN(self):
         if self.background_probabilities is None:

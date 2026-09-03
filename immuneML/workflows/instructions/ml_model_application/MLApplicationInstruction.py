@@ -86,6 +86,8 @@ class MLApplicationInstruction(Instruction):
 
     - metrics (list): a list of metrics to compute between the true and predicted classes. These metrics will only be computed when the same label with the same classes is provided for the dataset as the original label the ML setting was trained for.
 
+    - device (str): optional; which device to use for inference ('cpu', 'cuda', 'mps', ...). If set, it overrides the device that was used when the encoder, dimensionality reduction method and/or ML method were originally trained (as stored in config_path) for any of these objects that support a device parameter. If not set, the device stored in config_path is used as-is.
+
 
     **YAML specification:**
 
@@ -102,6 +104,7 @@ class MLApplicationInstruction(Instruction):
                 - precision
                 - recall
                 number_of_processes: 4
+                device: cpu
 
     """
 
