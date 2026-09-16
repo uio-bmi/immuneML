@@ -49,11 +49,13 @@ class MLApplicationParser:
         else:
             metrics = []
 
-        hp_setting, label = self._parse_hp_setting(instruction, path, key)
-
         device = instruction.get('device', None)
         if device is not None:
             ParameterValidator.assert_type_and_value(device, str, location, f'{key}: device')
+
+        hp_setting, label = self._parse_hp_setting(instruction, path, key, device)
+
+        if device is not None:
             self._set_device(hp_setting, device)
 
         instruction = MLApplicationInstruction(dataset=symbol_table.get(instruction['dataset']), name=key,
@@ -66,10 +68,23 @@ class MLApplicationParser:
 
     def _set_device(self, hp_setting: HPSetting, device: str):
         for obj in [hp_setting.encoder, hp_setting.dim_reduction_method, hp_setting.ml_method]:
-            if obj is not None and hasattr(obj, 'device'):
-                obj.device = device
+            self._set_device_recursive(obj, device)
 
-    def _parse_hp_setting(self, instruction: dict, path: Path, key: str) -> Tuple[HPSetting, Label]:
+    def _set_device_recursive(self, obj, device: str):
+        # obj may wrap other objects that carry their own independent 'device' attribute, e.g. a
+        # CompositeEncoder wrapping other encoders/dim reduction methods (like TCRBertEncoder), or an
+        # MLMethod like LogRegressionCustomPenalty whose fitted self.model (_TorchLogReg) has its own
+        # device string that isn't touched by torch.load's map_location (that only relocates tensors)
+        if obj is None:
+            return
+        if hasattr(obj, 'device'):
+            obj.device = device
+        for nested_attr in ('encoders', 'dim_red_methods', 'model'):
+            nested = getattr(obj, nested_attr, None)
+            for nested_obj in (nested if isinstance(nested, list) else [nested]):
+                self._set_device_recursive(nested_obj, device)
+
+    def _parse_hp_setting(self, instruction: dict, path: Path, key: str, device: str = None) -> Tuple[HPSetting, Label]:
 
         assert os.path.isfile(instruction['config_path']), f'MLApplicationParser: {instruction["config_path"]} is not file path.'
         assert '.zip' in instruction['config_path'], f'MLApplicationParser: {instruction["config_path"]} is not a zip file.'
@@ -77,6 +92,6 @@ class MLApplicationParser:
         config_dir = PathBuilder.build(path / f"unpacked_{key}/")
         shutil.unpack_archive(instruction['config_path'], config_dir, 'zip')
 
-        hp_setting, label = MLImport.import_hp_setting(config_dir)
+        hp_setting, label = MLImport.import_hp_setting(config_dir, device)
 
         return hp_setting, label

@@ -387,19 +387,51 @@ class LogRegressionCustomPenalty(MLMethod):
     def store(self, path: Path):
         PathBuilder.build(path)
         write_yaml(path / 'model.yaml', vars(self))
-        with open(path / 'model.pkl', 'wb') as f:
-            pickle.dump({
-                'model': self.model,
-                'non_penalized_features': self.non_penalized_features,
-                'feature_names': self.feature_names
-            }, f)
+        payload = {'model': self.model, 'non_penalized_features': self.non_penalized_features,
+                   'feature_names': self.feature_names, 'backend': self.backend, 'label': self.label,
+                   'device': self.device, 'class_mapping': self.class_mapping}
+        if self.backend == 'torch':
+            # only the torch backend's model can contain torch tensors; torch.save (unlike plain pickle)
+            # records their device so torch.load can remap it later (e.g. CUDA -> CPU)
+            import torch
+            torch.save(payload, path / 'model.pkl')
+        else:
+            with open(path / 'model.pkl', 'wb') as f:
+                pickle.dump(payload, f)
 
     def load(self, path: Path):
+        import torch
+
         with open(path / 'model.pkl', 'rb') as f:
-            model = pickle.load(f)
-            self.model = model['model']
-            self.non_penalized_features = model['non_penalized_features']
-            self.feature_names = model['feature_names']
+            is_torch_save = f.read(2) == b'PK'  # torch.save's zip-based format, used only for the torch backend
+
+        device = self.device if self.device is not None else ('cuda' if torch.cuda.is_available() else 'cpu')
+
+        if is_torch_save:
+            model = torch.load(path / 'model.pkl', map_location=device, weights_only=False)
+        else:
+            # plain pickle: either a glmnet-backend model (no torch tensors involved), or a torch-backend
+            # model exported before torch.save was used for storage here. Either way, torch tensors (if
+            # any) reconstruct themselves via torch.storage._load_from_bytes(), which has no map_location
+            # and would try to restore them onto the device they were saved on (e.g. CUDA on a CPU-only
+            # machine); redirect that reconstructor to the configured device (a no-op if there are none).
+            import io
+            from unittest.mock import patch
+            load_on_device = lambda b: torch.load(io.BytesIO(b), map_location=device, weights_only=False)
+            with patch('torch.storage._load_from_bytes', load_on_device):
+                with open(path / 'model.pkl', 'rb') as f:
+                    model = pickle.load(f)
+
+        self.model = model['model']
+        self.non_penalized_features = model['non_penalized_features']
+        self.feature_names = model['feature_names']
+        self.label = model['label'] if 'label' in model else None
+        # keep an explicitly configured device (set on this instance before load() was called, e.g. by
+        # MLApplicationParser) rather than overwriting it with whatever device the model was trained on
+        self.device = self.device if self.device is not None else model.get('device', device)
+        self.class_mapping = model['class_mapping'] if 'class_mapping' in model else None
+        # backend isn't persisted separately (older exports predate it); infer it from the model's type
+        self.backend = 'torch' if isinstance(self.model, _TorchLogReg) else 'glmnet'
 
     def get_params(self, for_refitting=False) -> dict:
         params = {
