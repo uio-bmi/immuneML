@@ -12,7 +12,9 @@ from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
+from immuneML.hyperparameter_optimization.config.StratifiedKFoldConfig import StratifiedKFoldConfig
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.steps.data_splitter.DataSplitter import DataSplitter
 from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
@@ -113,3 +115,44 @@ class TestDataSplitter(TestCase):
             self.assertTrue(all(cls in test.get_metadata(["key1"])["key1"] for cls in [0, 1, 2]))
 
         shutil.rmtree(EnvironmentSettings.tmp_test_path / "data_splitter/")
+
+    def test_stratified_k_fold_with_alternative_stratification_label(self):
+        PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "data_splitter_strat_label/")
+
+        dataset = RepertoireDataset(repertoires=[Repertoire(Path(f"{index}.tsv"), None, str(index))
+                                                 for index in range(15)])
+
+        paths = [EnvironmentSettings.tmp_test_path / "data_splitter_strat_label/split_{}".format(i) for i in range(3)]
+        for path in paths:
+            PathBuilder.build(path)
+
+        # prediction label ("disease") is binary and has no structure of its own; "subtype" only varies within the
+        # negative class and is the field we want folds to be stratified on instead
+        df = pd.DataFrame(data={"disease": [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+                                "subtype": [0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2, 0, 0, 1],
+                                "filename": list(range(15))})
+        df.to_csv(EnvironmentSettings.tmp_test_path / "data_splitter_strat_label/metadata.csv")
+
+        dataset.metadata_file = EnvironmentSettings.tmp_test_path / "data_splitter_strat_label/metadata.csv"
+
+        split_config = SplitConfig(split_strategy=SplitType.STRATIFIED_K_FOLD, split_count=3,
+                                   stratified_k_fold_config=StratifiedKFoldConfig(stratification_label="subtype"))
+
+        trains, tests = DataSplitter.run(DataSplitterParams(
+            dataset=dataset,
+            split_strategy=SplitType.STRATIFIED_K_FOLD,
+            split_count=3,
+            training_percentage=-1,
+            paths=paths,
+            split_config=split_config,
+            label_config=LabelConfiguration([Label("disease", [0, 1])])
+        ))
+
+        self.assertEqual(3, len(trains))
+        self.assertEqual(3, len(tests))
+        for train in trains:
+            self.assertTrue(all(cls in train.get_metadata(["subtype"])["subtype"] for cls in [0, 1, 2]))
+        for test in tests:
+            self.assertTrue(all(cls in test.get_metadata(["subtype"])["subtype"] for cls in [0, 1, 2]))
+
+        shutil.rmtree(EnvironmentSettings.tmp_test_path / "data_splitter_strat_label/")

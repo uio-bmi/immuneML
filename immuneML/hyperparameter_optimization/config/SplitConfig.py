@@ -2,6 +2,7 @@ from immuneML.hyperparameter_optimization.config.LeaveOneOutConfig import LeaveO
 from immuneML.hyperparameter_optimization.config.ManualSplitConfig import ManualSplitConfig
 from immuneML.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
+from immuneML.hyperparameter_optimization.config.StratifiedKFoldConfig import StratifiedKFoldConfig
 from scripts.specification_util import update_docs_per_mapping
 
 
@@ -51,6 +52,14 @@ class SplitConfig:
       number of examples that can be present in the test dataset. This type of generating train and test datasets is only supported for receptor
       and sequence datasets so far. If split strategy is anything else, this field has no effect and can be omitted.
 
+    - stratified_k_fold_config (:py:obj:`~immuneML.hyperparameter_optimization.config.StratifiedKFoldConfig.StratifiedKFoldConfig`): if split
+      strategy is `STRATIFIED_K_FOLD`, this optional config can be used to stratify the folds by a metadata field other than the prediction
+      label -- useful, for instance, when the negative class has internal structure (e.g., a subtype or batch) that should be preserved
+      across folds. It accepts one input: `stratification_label`, the name of the metadata field to stratify by (it does not need to be
+      defined as a `Label` used for prediction). If `stratified_k_fold_config` is not specified, or `stratification_label` is not set within
+      it, stratification falls back to the prediction label, as before. If split strategy is anything other than `STRATIFIED_K_FOLD`, this
+      field has no effect and can be omitted.
+
     **YAML specification:**
 
     .. indent with spaces
@@ -83,16 +92,25 @@ class SplitConfig:
                 encoding: # list of ML model reports to execute the trained classifiers in the selection loop
                     - rep3
 
+        # as a part of a TrainMLModel instruction, using stratified k-fold CV, stratified by a field other than the prediction label:
+        assessment: # outer loop of nested CV
+            split_strategy: stratified_k_fold
+            split_count: 5
+            stratified_k_fold_config: # optional; if omitted, stratification is done on the prediction label
+                stratification_label: subtype # metadata field to stratify by; does not have to be a prediction label
+
     """
 
     def __init__(self, split_strategy: SplitType, split_count: int, training_percentage: float = None, reports: ReportConfig = None,
-                 manual_config: ManualSplitConfig = None, leave_one_out_config: LeaveOneOutConfig = None):
+                 manual_config: ManualSplitConfig = None, leave_one_out_config: LeaveOneOutConfig = None,
+                 stratified_k_fold_config: StratifiedKFoldConfig = None):
         self.split_strategy = split_strategy
         self.split_count = split_count
         self.training_percentage = training_percentage
         self.reports = reports if reports is not None else ReportConfig()
         self.manual_config = manual_config
         self.leave_one_out_config = leave_one_out_config
+        self.stratified_k_fold_config = stratified_k_fold_config
 
     def __str__(self):
         desc = ""
@@ -116,7 +134,8 @@ class SplitConfig:
             "split_strategy (SplitType)": "split_strategy",
             "reports (ReportConfig)": "reports",
             "manual_config (:py:obj:`~immuneML.hyperparameter_optimization.config.ManualSplitConfig.ManualSplitConfig`)": "manual_config",
-            "leave_one_out_config (:py:obj:`~immuneML.hyperparameter_optimization.config.LeaveOneOutConfig.LeaveOneOutConfig`)": "leave_one_out_config"
+            "leave_one_out_config (:py:obj:`~immuneML.hyperparameter_optimization.config.LeaveOneOutConfig.LeaveOneOutConfig`)": "leave_one_out_config",
+            "stratified_k_fold_config (:py:obj:`~immuneML.hyperparameter_optimization.config.StratifiedKFoldConfig.StratifiedKFoldConfig`)": "stratified_k_fold_config"
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

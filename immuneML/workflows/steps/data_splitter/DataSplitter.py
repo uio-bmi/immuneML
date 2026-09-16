@@ -48,7 +48,18 @@ class DataSplitter(Step):
             f"{DataSplitter.__name__}: stratified k-fold cross validation is set, but there are " \
             f"{len(input_params.label_config.get_labels_by_name())} labels specified. Stratified k-fold CV can be used only with one label set."
 
-        classes = input_params.dataset.get_metadata(input_params.label_config.get_labels_by_name())[input_params.label_config.get_labels_by_name()[0]]
+        stratified_k_fold_config = input_params.split_config.stratified_k_fold_config if input_params.split_config is not None else None
+        if stratified_k_fold_config is not None and stratified_k_fold_config.stratification_label is not None:
+            strat_field = stratified_k_fold_config.stratification_label
+        else:
+            strat_field = input_params.label_config.get_labels_by_name()[0]
+
+        try:
+            classes = input_params.dataset.get_metadata([strat_field])[strat_field]
+        except KeyError:
+            raise KeyError(f"{DataSplitter.__name__}: stratification label '{strat_field}' was not found in the metadata of dataset "
+                            f"{input_params.dataset.name}. Please check the 'stratification_label' set under 'stratified_k_fold_config'.")
+
         indices = np.arange(0, input_params.dataset.get_example_count())
 
         strat_k_fold = StratifiedKFold(n_splits=input_params.split_count, shuffle=True)
