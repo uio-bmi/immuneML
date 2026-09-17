@@ -1,0 +1,19 @@
+definitions:
+  datasets:
+    my_dataset:
+      format: AIRR
+      params:
+        # path to the extra receptors file relative to the working directory where immuneML is executed
+        path: 100_extra_receptors.tsv
+        is_repertoire: false
+        paired: true
+        receptor_chains: TRA_TRB
+        metadata_column_mapping:
+          binder: binder
+instructions:
+  instruction_name:
+    type: MLApplication
+    dataset: my_dataset
+    # path to the exported optimal ML settings file for label 'binder' relative to the working directory where immuneML is executed
+    # change this path to whereever the ml_settings_binder.zip file resides in your case
+    config_path: result/my_instruction/optimal_binder/zip/ml_settings_binder.zip
