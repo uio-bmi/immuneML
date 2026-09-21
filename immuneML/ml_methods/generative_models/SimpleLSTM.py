@@ -117,7 +117,8 @@ class SimpleLSTM(GenerativeModel):
         from torch import as_tensor
         model = SimpleLSTMGenerator(input_size=self.num_letters, hidden_size=self.hidden_size,
                                     embed_size=self.embed_size, output_size=self.num_letters,
-                                    batch_size=self.batch_size, device=self.device)
+                                    batch_size=self.batch_size, num_layers=self.num_layers,
+                                    device=self.device)
 
         if isinstance(state_dict_file, Path) and state_dict_file.is_file():
             state_dict = read_yaml(state_dict_file)
