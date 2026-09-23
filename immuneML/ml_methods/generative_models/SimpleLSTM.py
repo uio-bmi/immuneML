@@ -49,6 +49,14 @@ class SimpleLSTM(GenerativeModel):
 
     - prime_str (str): the initial sequence to start generating from
 
+    - window_size (int): the length of the windows the training sequences are cut into; each window provides an
+      input-target pair of length window_size - 1
+
+    - window_step (int): how many characters to move forward between two consecutive windows; the default of 1 starts
+      a window at every position, which yields window_size times more (highly overlapping) training examples than a
+      step of window_size, where the windows are disjoint; num_epochs should be reduced accordingly when using a
+      small step
+
     - seed (int): random seed for the model or None
 
     - iter_to_report (int): number of epochs between training progress reports
@@ -91,7 +99,7 @@ class SimpleLSTM(GenerativeModel):
     def __init__(self, locus: str, sequence_type: str, hidden_size: int, learning_rate: float, num_epochs: int,
                  batch_size: int, num_layers: int, embed_size: int, temperature, device: str, name=None,
                  region_type: str = RegionType.IMGT_CDR3.name, prime_str: str = "C", window_size: int = 64,
-                 seed: int = None, iter_to_report: int = 1):
+                 window_step: int = 1, seed: int = None, iter_to_report: int = 1):
 
         super().__init__(locus, region_type=RegionType.get_object(region_type), name=name, seed=seed)
         self._model = None
@@ -105,6 +113,7 @@ class SimpleLSTM(GenerativeModel):
         self.temperature = temperature
         self.prime_str = prime_str
         self.window_size = window_size
+        self.window_step = window_step
         self.device = device
         self.iter_to_report = iter_to_report
         self.unique_letters = EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + ["*"]
@@ -208,9 +217,13 @@ class SimpleLSTM(GenerativeModel):
 
         sequences = as_tensor(sequences, device=self.device).long()
 
-        # Create overlapping windows of size window_size
-        # stride=1 means each window overlaps with previous window by window_size-1 elements
-        windows = sequences.unfold(0, self.window_size, 1)
+        assert len(sequences) >= self.window_size, \
+            (f"{SimpleLSTM.__name__}: the training data has {len(sequences)} characters in total, which is fewer than "
+             f"window_size ({self.window_size}); use a smaller window_size or a larger dataset.")
+
+        # Create windows of size window_size, starting every window_step characters: with the default step of 1,
+        # consecutive windows overlap in window_size-1 characters, while a step of window_size makes them disjoint
+        windows = sequences.unfold(0, self.window_size, self.window_step)
 
         # Create input-target pairs from windows
         x = windows[:, :-1]  # All but last character of each window
