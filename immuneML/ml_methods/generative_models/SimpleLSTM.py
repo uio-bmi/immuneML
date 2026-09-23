@@ -269,7 +269,9 @@ class SimpleLSTM(GenerativeModel):
                 inp = inp.unsqueeze(0).unsqueeze(0)
 
                 if predicted_char == "*":
-                    last_seq = predicted.split('*')[-2]
+                    seq_end = len(predicted) - 1
+                    seq_start = predicted.rfind('*', 0, seq_end) + 1
+                    last_seq = predicted[seq_start:seq_end]
                     if len(last_seq) > 0:
                         gen_seq_count += 1
                         print_log(f"Generated valid sequence {gen_seq_count}/{count}", True)
