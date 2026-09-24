@@ -10,3 +10,4 @@ esm
 datasets
 tokenizers
 accelerate>=0.26.0
+tcrpeg>=1.0.6

@@ -112,6 +112,18 @@ def test_fit_apply_gen_model():
                 'device': 'cpu',
                 'region_type': 'IMGT_CDR3'
             }
+        },
+        {
+            "TCRpeg": {
+                'hidden_size': 8,
+                'num_layers': 2,
+                'num_epochs': 3,
+                'batch_size': 10,
+                'learning_rate': 0.01,
+                'require_c_start': False,  # the random dataset does not have the conserved C
+                'vj': True,
+                'seed': 1
+            }
         }
     ]
 

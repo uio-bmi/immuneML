@@ -19,7 +19,8 @@ immuneML supports several approaches for training generative models:
 - positional weight matrices (:ref:`PWM`),
 - LSTM-based generative models (:ref:`SimpleLSTM`),
 - Variational Autoencoders (:ref:`SimpleVAE`),
-- SoNNia model (:ref:`SoNNia`).
+- SoNNia model (:ref:`SoNNia`),
+- TCRpeg, a GRU-based autoregressive model of TCR CDR3 sequences (:ref:`TCRpeg`).
 
 See the documentation for each model for details on how to configure them. Some require almost no parameters, while
 others allow greater flexibility and customization.
