@@ -22,9 +22,11 @@ class SimpleLSTM(GenerativeModel):
     """
     This is a simple generative model for receptor sequences based on LSTM.
 
-    Similar models have been proposed in:
+    It is based on Akbar et al. (2022), which trains on all sequences concatenated into one character stream:
 
     Akbar, R. et al. (2022). In silico proof of principle of machine learning-based antibody design at unconstrained scale. mAbs, 14(1), 2031482. https://doi.org/10.1080/19420862.2022.2031482
+
+    A related model, trained on each sequence separately, was proposed in:
 
     Saka, K. et al. (2021). Antibody design using LSTM based deep generative model from phage display library for affinity maturation. Scientific Reports, 11(1), Article 1. https://doi.org/10.1038/s41598-021-85274-7
 
@@ -45,7 +47,8 @@ class SimpleLSTM(GenerativeModel):
 
     - embed_size (int): the dimension of the sequence embedding
 
-    - temperature (float): a higher temperature leads to faster yet more unstable learning
+    - temperature (float): controls sampling when generating sequences, with no effect on training; below 1 makes
+      generation more conservative, above 1 more diverse
 
     - prime_str (str): the initial sequence to start generating from
 
