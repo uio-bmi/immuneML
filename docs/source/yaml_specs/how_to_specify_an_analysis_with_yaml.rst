@@ -191,6 +191,27 @@ the only supported output format is currently HTML. The :code:`output` section m
     format: HTML
 
 
+Specifying the random seed
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Optionally, the key :code:`random_seed` may be specified on the base level (next to :code:`definitions` and :code:`instructions`).
+It has to be a non-negative integer smaller than 2\ :sup:`32`. immuneML uses it to seed Python's :code:`random`, :code:`numpy.random`
+and, if installed, :code:`torch` once, before the specification is parsed and before any instruction is run. This makes
+randomness drawn during parsing (for example, when a random dataset is generated under :code:`definitions`) reproducible,
+as well as randomness in the instructions. The value is included in the full specification written to the results folder.
+
+.. highlight:: yaml
+.. code-block:: yaml
+
+  random_seed: 42
+
+If :code:`random_seed` is omitted, nothing is seeded. A seed set within an instruction (such as :code:`random_seed` under the
+:ref:`TrainMLModel` instruction) is applied when that instruction starts and takes over from that point on.
+Seeding makes an analysis reproducible on the same machine and software versions, but it does not fix the hash seed
+of Python itself (:code:`PYTHONHASHSEED`), which has to be set as an environment variable before immuneML is started, and it
+cannot make nondeterministic parallel or GPU computations deterministic.
+
+
 Putting all parts together
 ---------------------------------------
 Not every analysis component can be combined with every component.
