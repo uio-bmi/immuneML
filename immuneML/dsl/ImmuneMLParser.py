@@ -99,6 +99,7 @@ class ImmuneMLParser:
                 reports: []
         output: # this section can also be omitted, in that case output will be automatically HTML
             format: HTML # or None
+        random_seed: 42 # optional: seeds random, numpy and torch before parsing and before any instruction runs
 
     """
 
@@ -143,7 +144,8 @@ class ImmuneMLParser:
         app_output = OutputParser.parse(workflow_specification, symbol_table)
 
         path = ImmuneMLParser._output_specs(file_path=file_path, result_path=result_path, definitions=specs_defs,
-                                            instructions=specs_instructions, output=app_output)
+                                            instructions=specs_instructions, output=app_output,
+                                            random_seed=workflow_specification.get("random_seed"))
 
         return symbol_table, path
 
@@ -157,10 +159,13 @@ class ImmuneMLParser:
             return result_path / file_name
 
     @staticmethod
-    def _output_specs(file_path=None, result_path=None, definitions: dict = None, instructions: dict = None, output: dict = None) -> Path:
+    def _output_specs(file_path=None, result_path=None, definitions: dict = None, instructions: dict = None, output: dict = None,
+                      random_seed: int = None) -> Path:
         filepath = ImmuneMLParser._get_full_specs_filepath(file_path, result_path)
 
         result = {"definitions": definitions, "instructions": instructions, "output": output}
+        if random_seed is not None:
+            result["random_seed"] = random_seed
         result = ImmuneMLParser._paths_to_strings_recursive(result)
 
         PathBuilder.build(filepath.parent)
