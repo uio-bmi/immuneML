@@ -4,18 +4,27 @@ from torch import nn
 
 class SimpleLSTMGenerator(nn.Module):
 
-    def __init__(self, input_size, embed_size, hidden_size, output_size, batch_size, num_layers=1, device: str = 'cpu'):
+    def __init__(self, input_size, embed_size, hidden_size, output_size, batch_size, num_layers=1, device: str = 'cpu',
+                 dropout: float = 0.):
         super(SimpleLSTMGenerator, self).__init__()
 
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.batch_size = batch_size
+        self.input_size = input_size
         self.device = device
 
-        self.embed = nn.Embedding(num_embeddings=input_size, embedding_dim=embed_size)
-        nn.init.normal_(self.embed.weight)
+        # embed_size None means the input is one-hot encoded rather than embedded
+        if embed_size is None:
+            self.embed = None
+        else:
+            self.embed = nn.Embedding(num_embeddings=input_size, embedding_dim=embed_size)
+            nn.init.normal_(self.embed.weight)
 
-        self.lstm = nn.LSTM(input_size=embed_size, hidden_size=hidden_size, num_layers=num_layers)
+        # dropout is applied between LSTM layers, so it only has an effect when num_layers > 1
+        self.lstm = nn.LSTM(input_size=embed_size if embed_size is not None else input_size,
+                            hidden_size=hidden_size, num_layers=num_layers,
+                            dropout=dropout if num_layers > 1 else 0.)
         for name, param in self.lstm.named_parameters():
             if 'weight' in name:
                 nn.init.xavier_uniform_(param)
@@ -29,9 +38,12 @@ class SimpleLSTMGenerator(nn.Module):
     def forward(self, features, hidden_and_cell_state):
         # features shape: (batch_size, seq_len)
         features = features.transpose(0, 1)  # Convert to (seq_len, batch_size)
-        embedded = self.embed(features)  # (seq_len, batch_size, embed_size)
-        
-        output, hidden_and_cell_state = self.lstm(embedded, hidden_and_cell_state)
+        if self.embed is not None:
+            encoded = self.embed(features)  # (seq_len, batch_size, embed_size)
+        else:
+            encoded = nn.functional.one_hot(features, num_classes=self.input_size).float()
+
+        output, hidden_and_cell_state = self.lstm(encoded, hidden_and_cell_state)
         # output shape: (seq_len, batch_size, hidden_size)
         
         output = self.fc(output)  # (seq_len, batch_size, output_size)

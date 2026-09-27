@@ -114,6 +114,20 @@ def test_fit_apply_gen_model():
             }
         },
         {
+            "SakaLSTM": {
+                'sequence_type': 'amino_acid',
+                'num_epochs': 10,
+                'hidden_size': 8,
+                'learning_rate': 0.01,
+                'batch_size': 10,
+                'temperature': 1.,
+                'num_layers': 2,
+                'dropout': 0.2,
+                'device': 'cpu',
+                'region_type': 'IMGT_JUNCTION'
+            }
+        },
+        {
             "TCRpeg": {
                 'hidden_size': 8,
                 'num_layers': 2,

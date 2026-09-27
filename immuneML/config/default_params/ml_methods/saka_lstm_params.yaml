@@ -1,0 +1,12 @@
+sequence_type: amino_acid
+num_epochs: 500
+hidden_size: 64
+num_layers: 2
+dropout: 0.2
+learning_rate: 0.01
+batch_size: 64
+temperature: 1.0
+device: cpu
+seed: null
+locus: null
+max_batch_size: 10000
