@@ -40,7 +40,7 @@ class SakaLSTM(GenerativeModel):
 
     - num_layers (int): how many hidden LSTM layers should there be
 
-    - dropout (float): dropout rate between LSTM layers; only has an effect if num_layers is larger than 1
+    - dropout (float): dropout rate applied between LSTM layers and to the output of the last LSTM layer
 
     - num_epochs (int): for how many epochs to train each per-length model
 
@@ -138,13 +138,21 @@ class SakaLSTM(GenerativeModel):
         self.letter_to_index = {letter: i for i, letter in enumerate(self.unique_letters)}
         self.index_to_letter = {i: letter for letter, i in self.letter_to_index.items()}
         self.start_index = self.letter_to_index[SakaLSTM.START_TOKEN]
+
+        # the start token is only ever an input, never a target, so the output layer covers the amino acids only:
+        # sampling and scoring then use the same distribution. This relies on the start token coming last, so that
+        # output index i is unique_letters[i] for every amino acid.
+        self.num_output_letters = self.num_letters - 1
+        assert self.start_index == self.num_output_letters, \
+            f"{SakaLSTM.__name__}: the start token must be the last letter in the alphabet."
+
         self.loss_summary_path = None
 
     def make_new_model(self, state_dict_file: Path = None):
         from torch import as_tensor
 
         model = SimpleLSTMGenerator(input_size=self.num_letters, hidden_size=self.hidden_size,
-                                    embed_size=None, output_size=self.num_letters,
+                                    embed_size=None, output_size=self.num_output_letters,
                                     batch_size=self.batch_size, num_layers=self.num_layers,
                                     device=self.device, dropout=self.dropout)
 
@@ -273,9 +281,6 @@ class SakaLSTM(GenerativeModel):
             output, state = model(inp, state)
 
             scaled = torch.clamp(output[:, 0] / self.temperature, min=-100, max=100)
-            # the start token is only ever an input, so it must not be sampled as part of a sequence
-            scaled[:, self.start_index] = -float('inf')
-
             inp = torch.multinomial(torch.nn.functional.softmax(scaled, dim=1), 1)
             tokens[:, position] = inp[:, 0].cpu()
 
@@ -399,8 +404,9 @@ class SakaLSTM(GenerativeModel):
     def save_model(self, path: Path) -> Path:
         model_path = PathBuilder.build(path / 'model')
 
-        skip_keys_for_export = ['_model', '_models', 'length_probs', 'loss_summary_path', 'index_to_letter',
-                                'letter_to_index', 'unique_letters', 'num_letters', 'start_index']
+        skip_keys_for_export = ['_models', 'length_probs', 'loss_summary_path', 'index_to_letter',
+                                'letter_to_index', 'unique_letters', 'num_letters', 'num_output_letters',
+                                'start_index']
         write_yaml(filename=model_path / 'model_overview.yaml',
                    yaml_dict={**{k: v for k, v in vars(self).items() if k not in skip_keys_for_export},
                               **{'type': self.__class__.__name__, 'region_type': self.region_type.name,

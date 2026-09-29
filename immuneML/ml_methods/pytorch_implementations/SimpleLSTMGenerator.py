@@ -21,7 +21,7 @@ class SimpleLSTMGenerator(nn.Module):
             self.embed = nn.Embedding(num_embeddings=input_size, embedding_dim=embed_size)
             nn.init.normal_(self.embed.weight)
 
-        # dropout is applied between LSTM layers, so it only has an effect when num_layers > 1
+        # nn.LSTM only applies dropout between LSTM layers, so it has no effect when num_layers == 1
         self.lstm = nn.LSTM(input_size=embed_size if embed_size is not None else input_size,
                             hidden_size=hidden_size, num_layers=num_layers,
                             dropout=dropout if num_layers > 1 else 0.)
@@ -30,6 +30,10 @@ class SimpleLSTMGenerator(nn.Module):
                 nn.init.xavier_uniform_(param)
             elif 'bias' in name:
                 nn.init.zeros_(param)
+
+        # the output of the last LSTM layer is regularized too, which nn.LSTM does not cover; this has no
+        # parameters, so it does not change the state dict
+        self.dropout = nn.Dropout(dropout)
 
         self.fc = nn.Linear(hidden_size, output_size)
         nn.init.xavier_uniform_(self.fc.weight)
@@ -45,7 +49,8 @@ class SimpleLSTMGenerator(nn.Module):
 
         output, hidden_and_cell_state = self.lstm(encoded, hidden_and_cell_state)
         # output shape: (seq_len, batch_size, hidden_size)
-        
+
+        output = self.dropout(output)
         output = self.fc(output)  # (seq_len, batch_size, output_size)
         output = output.transpose(0, 1)  # Convert back to (batch_size, seq_len, output_size)
         return output, hidden_and_cell_state
