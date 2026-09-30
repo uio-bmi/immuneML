@@ -4,7 +4,10 @@ import pandas as pd
 
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
 from immuneML.data_model.bnp_util import write_yaml
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.SequenceType import SequenceType
+from immuneML.ml_methods.generative_models.OLGA import OLGA
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -145,7 +148,36 @@ def test_fit_apply_gen_model():
         fit_and_apply_gen_model(gen_model)
 
 
-def fit_and_apply_gen_model(gen_model):
+def test_fit_apply_tcrsep():
+    # TCRsep needs human TRB V and J genes known to OLGA and the TCR2vec gene segments, so it is trained on OLGA data
+    # instead of the random dataset used above
+    base_path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "fit_apply_tcrsep_dataset")
+
+    olga = OLGA.build_object(default_model_name='humanTRB')
+    olga.generate_sequences(300, 1, base_path / 'olga_sequences.tsv', SequenceType.AMINO_ACID, False)
+    df = pd.read_csv(base_path / 'olga_sequences.tsv', sep='\t')
+    df = pd.DataFrame({'junction_aa': df['sequence_aa'], 'junction': df['sequence'], 'v_call': df['v_call'],
+                       'j_call': df['j_call'], 'locus': df['locus']})
+    SequenceDataset.build_from_partial_df(df, PathBuilder.build(base_path / 'dataset'), 'olga_dataset', {}, {})
+
+    dataset = {'format': 'AIRR', 'params': {'dataset_file': str(base_path / 'dataset/olga_dataset.yaml'),
+                                            'path': str(base_path / 'dataset')}}
+
+    fit_and_apply_gen_model({
+        "TCRsep": {
+            'n_gen_seqs': 300,
+            'epochs': 20,
+            'batch_size': 16,
+            'learning_rate': 0.001,
+            'num_processes': 1,
+            'seed': 1
+        }
+    }, dataset)
+
+    shutil.rmtree(base_path)
+
+
+def fit_and_apply_gen_model(gen_model, dataset: dict = None):
     model_name = list(gen_model.keys())[0]
     print(f"Starting the integration test for model: {model_name}")
 
@@ -154,20 +186,23 @@ def fit_and_apply_gen_model(gen_model):
     generated_model_path = PathBuilder.build(base_path / "generated_model")
     applied_model_path = PathBuilder.build(base_path / "applied_model")
 
+    if dataset is None:
+        dataset = {
+            "format": "RandomSequenceDataset",
+            "params": {
+                'length_probabilities': {
+                    11: 0.5,
+                    10: 0.5
+                },
+                'sequence_count': 10,
+                'region_type': 'IMGT_JUNCTION'
+            }
+        }
+
     specs = {
         "definitions": {
             "datasets": {
-                "d1": {
-                    "format": "RandomSequenceDataset",
-                    "params": {
-                        'length_probabilities': {
-                            11: 0.5,
-                            10: 0.5
-                        },
-                        'sequence_count': 10,
-                        'region_type': 'IMGT_JUNCTION'
-                    }
-                }
+                "d1": dataset
             },
             "ml_methods": {
                 'gen_model': gen_model

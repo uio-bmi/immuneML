@@ -1,0 +1,17 @@
+default_model_name: humanTRB
+custom_model_path: null
+tcr2vec_model_path: null
+cdr3vec_model_path: null
+n_gen_seqs: null
+alpha: 0.1
+epochs: 500
+batch_size: 512
+learning_rate: 0.0001
+early_stopping: True
+validation_ratio: 0.1
+max_length: 30
+require_c_start: True
+sampling_bound: 10.
+device: cpu
+num_processes: 1
+seed: null

@@ -11,3 +11,4 @@ datasets
 tokenizers
 accelerate>=0.26.0
 tcrpeg>=1.0.6
+tcrsep>=1.3.1
