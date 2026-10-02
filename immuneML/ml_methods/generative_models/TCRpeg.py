@@ -19,46 +19,19 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TCRpeg(GenerativeModel):
     """
-    TCRpeg is a deep autoregressive generative model of T-cell receptor CDR3 amino acid sequences. The probability of a
-    sequence x is factorized as ``p(x) = p(x_1) * prod_i p(x_i | x_1, ..., x_(i-1)) * p(end | x)``, where the
-    conditional probabilities are given by stacked GRU layers followed by a softmax. The amino acid input embeddings
-    are word2vec embeddings and are kept fixed while the GRU layers are trained with the negative log-likelihood loss.
-    New sequences are sampled residue by residue from the start token until the end token is sampled. The model gives
-    the probability of any sequence, so generation probabilities (p_gen) can be computed.
+    TCRpeg is a deep autoregressive generative model of T-cell receptor CDR3 amino acid sequences, where the
+    probability of each residue given the previous ones is modelled by stacked GRU layers on top of fixed word2vec
+    amino acid embeddings. Since the model gives the probability of any sequence, p_gen can be computed. Optionally
+    (vj: True), V and J genes are predicted from the final hidden state and included in the generated sequences. It is
+    a wrapper around the tcrpeg package (https://github.com/jiangdada1221/TCRpeg), which has to be installed separately
+    (e.g., with the gen_models extra of immuneML).
 
-    Optionally (``vj: True``), two single-layer fully connected heads predict the V and J gene from the final GRU
-    hidden states, so that ``p(x, V, J) = p(x) * p(V | x) * p(J | x)``, and the generated sequences also include
-    ``v_call`` and ``j_call``. The V and J genes are taken from the training data exactly as they are written there.
-
-    This class is a wrapper around the ``tcrpeg`` Python package (https://github.com/jiangdada1221/TCRpeg, PyPI package
-    tcrpeg, released under the GPLv3 licence), which has to be installed separately (e.g., by installing immuneML
-    with the ``gen_models`` extra). The TCRpeg-c classifier from the same publication is not included.
-
-    By default, the pretrained amino acid embeddings shipped with the package (tcrpeg/data/embedding_32.txt) are used.
-    They were learned by the authors with word2vec on a large pool of human TRB CDR3 sequences (Emerson et al.). For
-    other loci or species, the embeddings can instead be learned on the training data (``train_aa_embeddings: True``,
-    using the package's word2vec implementation) or read from a user-provided file (``aa_embedding_path``). Note that
-    the package's word2vec starts from random embeddings, uses plain gradient descent and already reduces its learning
-    rate to 20% after the first epoch, so with the default word2vec parameters (learning rate 0.0001, 20 epochs) the
-    learned embeddings stay very close to their random initialization. Since the embeddings are kept fixed while
-    training the GRU layers, it is recommended to either provide pretrained embeddings through ``aa_embedding_path`` or
-    to considerably increase word2vec_learning_rate and/or word2vec_epochs when using ``train_aa_embeddings``.
-
-    The default architecture and training parameters are those of the package's training script
-    (tcrpeg/scripts/train.py): 3 GRU layers with hidden size 64, batch size 1000, learning rate 0.0001, 20 epochs. The
-    package reduces the learning rate to 20% of its value halfway through training. These defaults were chosen for
-    very large repertoires (the publication trains on about 10^8 sequences). For small datasets (thousands to tens of
-    thousands of sequences), such settings result in very few optimization steps and an undertrained model; a higher
-    learning rate (e.g., 0.001, as in the package README example) together with a smaller batch size and/or more
-    epochs is recommended. The package also uses only full batches: in each epoch, the training data is shuffled and
-    the remaining sequences that do not fill a complete batch are skipped (e.g., with 1500 sequences and batch size
-    1000, only 1000 sequences are used per epoch). Choosing a batch size that is much smaller than the number of
-    training sequences, or divides it, limits this effect.
-
-    Before training, sequences with non-standard amino acids, longer than max_length, or explicitly marked as
-    non-productive are removed, as in the publication. If the region type is IMGT_JUNCTION, sequences that do not start
-    with a cysteine are removed as well (unless require_c_start is False). If vj is True, sequences without V or J
-    gene are removed.
+    By default, the pretrained human TRB amino acid embeddings shipped with the package are used; for other loci,
+    provide embeddings through aa_embedding_path or learn them with train_aa_embeddings (in which case
+    word2vec_learning_rate and/or word2vec_epochs should be increased, as the embeddings otherwise stay close to
+    random). The default training parameters are those of the package, chosen for very large repertoires; for small
+    datasets, a higher learning rate (e.g., 0.001) and a smaller batch size are recommended. Sequences that do not fill
+    a complete batch are skipped in each epoch.
 
     Original publication:
 
@@ -69,8 +42,7 @@ class TCRpeg(GenerativeModel):
 
     - locus (str): the locus of the receptor chain; if not set, it is taken from the training dataset
 
-    - region_type (str): which part of the sequence to model, e.g., IMGT_JUNCTION (default, CDR3 including the
-      conserved C and F/W, as in the publication) or IMGT_CDR3
+    - region_type (str): which part of the sequence to model, IMGT_JUNCTION (default) or IMGT_CDR3
 
     - hidden_size (int): number of features in the hidden state of each GRU layer; default 64
 
@@ -80,35 +52,26 @@ class TCRpeg(GenerativeModel):
 
     - num_epochs (int): number of training epochs; default 20
 
-    - batch_size (int): number of sequences per batch for training, generation and computing p_gen; if there are fewer
-      training sequences than batch_size, all of them are used as one batch; otherwise, sequences that do not fill a
-      complete batch are skipped in each epoch; default 1000
+    - batch_size (int): number of sequences per batch; default 1000
 
     - learning_rate (float): learning rate for the Adam optimizer; default 0.0001
 
-    - max_length (int): maximum sequence length; longer training sequences are removed, generated sequences are at
-      most this long, and longer sequences get p_gen 0; default 30
+    - max_length (int): maximum sequence length; longer training sequences are removed; default 30
 
-    - vj (bool): whether to also model V and J gene usage conditioned on the sequence and output v_call and j_call for
-      generated sequences; default False
+    - vj (bool): whether to also model V and J gene usage and output v_call and j_call; default False
 
     - require_c_start (bool): if True and region_type is IMGT_JUNCTION, training sequences that do not start with C are
       removed; default True
 
-    - aa_embedding_path (str): optional path to a comma-separated file with amino acid embeddings in the TCRpeg format
-      (22 rows: the token followed by the embedding values, with tokens 's' for start, the 20 amino acids and 'e' for
-      end); if not set and train_aa_embeddings is False, the pretrained embeddings shipped with the package are used
+    - aa_embedding_path (str): optional path to a file with amino acid embeddings in the TCRpeg format
 
-    - train_aa_embeddings (bool): if True, amino acid embeddings are learned on the training data with the package's
-      word2vec implementation instead of using the pretrained ones; with the default word2vec parameters, the learned
-      embeddings stay close to random (see above); default False
+    - train_aa_embeddings (bool): if True, amino acid embeddings are learned on the training data; default False
 
-    - embed_size (int): dimension of the embeddings learned when train_aa_embeddings is True (otherwise the dimension
-      is given by the embedding file); default 32
+    - embed_size (int): dimension of the learned embeddings if train_aa_embeddings is True; default 32
 
-    - word2vec_epochs (int): number of word2vec epochs when train_aa_embeddings is True; default 20
+    - word2vec_epochs (int): number of word2vec epochs; default 20
 
-    - word2vec_batch_size (int): word2vec batch size (number of amino acid pairs); default 1000
+    - word2vec_batch_size (int): word2vec batch size; default 1000
 
     - word2vec_learning_rate (float): word2vec learning rate; default 0.0001
 
@@ -117,7 +80,6 @@ class TCRpeg(GenerativeModel):
     - device (str): torch device to use, e.g., cpu or cuda:0; default cpu
 
     - seed (int): random seed for the model or None
-
 
     **YAML specification:**
 

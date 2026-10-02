@@ -11,6 +11,7 @@ early_stopping: True
 validation_ratio: 0.1
 max_length: 30
 require_c_start: True
+allow_family_calls: False
 sampling_bound: 10.
 device: cpu
 num_processes: 1

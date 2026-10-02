@@ -67,6 +67,12 @@ def test_tcrsep():
     seq = {'junction_aa': 'CASSLGAGGSGTEAFF', 'v_call': 'TRBV7-9*01', 'j_call': 'TRBJ1-1*01'}
     assert 0 < model.compute_p_gen(seq, SequenceType.AMINO_ACID) < 1
     assert model.compute_p_gen({**seq, 'v_call': 'TRBV99'}, SequenceType.AMINO_ACID) == 0
+    # a gene call resolved only to the family is supported only if allow_family_calls is True (P_gen is then computed
+    # over the genes of the family)
+    assert model.compute_p_gen({**seq, 'v_call': 'TRBV7'}, SequenceType.AMINO_ACID) == 0
+    model.allow_family_calls = True
+    assert 0 < model.compute_p_gen({**seq, 'v_call': 'TRBV7'}, SequenceType.AMINO_ACID) < 1
+    model.allow_family_calls = False
     assert model.compute_p_gen({**seq, 'junction_aa': 'CASSXZF'}, SequenceType.AMINO_ACID) == 0
 
     # generation is deterministic given the seed
@@ -104,6 +110,22 @@ def test_tcrsep_filtering():
     model._tcrsep = model._make_upstream_model()
     samples = model._filter_training_data(dataset.data.topandas())
     assert samples.tolist() == [['CASSLGAGGSGTEAFF', 'TRBV7-9', 'TRBJ1-1']]
+
+    # gene calls resolved only to the family (e.g., in Adaptive data) are kept if allow_family_calls is True;
+    # pseudogenes (TRBV12-1) and families without usable genes (TRBV99) are removed in both cases
+    family_df = pd.DataFrame({'junction_aa': ['CSARDRGSYEQYF', 'CASSLGQGYEQYF', 'CASSLGQGYEQYF', 'CASSLGQGYEQYF',
+                                              'CASSLGQGYEQYF'],
+                              'v_call': ['TRBV20', 'TRBV12', 'TRBV12-1', 'TRBV99', 'TRBV12-3*01'],
+                              'j_call': ['TRBJ2-7*01', 'TRBJ2', 'TRBJ2-7', 'TRBJ2-7', 'TRBJ2-7']})
+    assert model._filter_training_data(family_df).tolist() == [['CASSLGQGYEQYF', 'TRBV12-3', 'TRBJ2-7']]
+
+    family_model = _make_model(allow_family_calls=True)
+    family_model._tcrsep = family_model._make_upstream_model()
+    family_samples = family_model._filter_training_data(family_df)
+    assert family_samples.tolist() == [['CSARDRGSYEQYF', 'TRBV20', 'TRBJ2-7'], ['CASSLGQGYEQYF', 'TRBV12', 'TRBJ2'],
+                                       ['CASSLGQGYEQYF', 'TRBV12-3', 'TRBJ2-7']]
+    family_embeddings, valid = family_model._embed(family_samples)
+    assert np.all(valid) and np.all(np.linalg.norm(family_embeddings, axis=1) > 0)
 
     # the batch size is reduced so that there are at least two training batches
     assert model._get_batch_size(400, 50) == 22
