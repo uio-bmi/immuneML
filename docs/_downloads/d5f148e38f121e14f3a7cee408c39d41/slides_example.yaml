@@ -1,0 +1,50 @@
+definitions:
+  datasets:
+    my_dataset:
+      format: AIRR
+      params:
+        path: 100_receptors.tsv # path to the receptors file relative to the working directory where immuneML is executed
+        is_repertoire: false
+        paired: true
+        receptor_chains: TRA_TRB
+        metadata_column_mapping:
+          binder: binder
+  encodings:
+    my_encoding:
+      KmerFrequency:
+        k: 3
+    my_second_encoding:
+      KmerFrequency:
+        k: 4
+  ml_methods:
+    my_ml_method:
+      LogisticRegression:
+        C: [0.01, 0.1, 1, 10, 100]
+      model_selection_cv: True
+      model_selection_n_folds: 3
+  reports:
+    my_coefficients_report:
+      Coefficients:
+        n_largest: [5]
+    my_performance_report: MLSettingsPerformance
+instructions:
+  my_instruction:
+    type: TrainMLModel
+    dataset: my_dataset
+    labels: [binder]
+    settings: 
+      - encoding: my_encoding
+        ml_method: my_ml_method
+      - encoding: my_second_encoding
+        ml_method: my_ml_method
+    optimization_metric: balanced_accuracy
+    selection:
+      split_strategy: random
+      split_count: 1
+      training_percentage: 0.7 
+    assessment:
+      split_strategy: k_fold
+      split_count: 3
+      reports:
+        models: [my_coefficients_report]
+    reports: [my_performance_report] 
