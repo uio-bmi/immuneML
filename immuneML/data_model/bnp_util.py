@@ -244,9 +244,30 @@ def merge_dataclass_objects(objects: list, fill_unmatched: bool = False):
                                 field_name in missing_fields}))
 
     cls = type(tmp_objs[0])
-    return cls(
-        **{field_name: list(chain.from_iterable([getattr(obj, field_name) for obj in tmp_objs])) for field_name in
-           fields.keys()})
+    return cls(**{field_name: _concatenate_field([getattr(obj, field_name) for obj in tmp_objs])
+                  for field_name in fields.keys()})
+
+
+def _concatenate_field(values: list):
+    # concatenating whole arrays avoids splitting the field into per-row elements, which bionumpy would then have to
+    # convert back one by one (very slow for large datasets); fall back to that if the arrays are not compatible
+    if _have_same_type_and_encoding(values):
+        try:
+            return np.concatenate(values)
+        except Exception:
+            pass
+    return list(chain.from_iterable(values))
+
+
+def _have_same_type_and_encoding(values: list) -> bool:
+    # bionumpy concatenates encoded arrays by joining the raw codes and keeping the first array's encoding, so arrays
+    # with different encodings would be silently corrupted
+    first = values[0]
+    if not all(type(v) is type(first) for v in values):
+        return False
+    if hasattr(first, 'encoding'):
+        return all(type(v.encoding) is type(first.encoding) and v.encoding == first.encoding for v in values)
+    return True
 
 
 def get_type_dict_from_bnp_object(bnp_object) -> dict:
@@ -256,6 +277,6 @@ def get_type_dict_from_bnp_object(bnp_object) -> dict:
 def make_full_airr_seq_set_df(df):
     field_type_dict = AIRRSequenceSet.get_field_type_dict()
     default_fields = pd.DataFrame({
-        f_name: [AIRRSequenceSet.get_neutral_value(f_type) for _ in range(df.shape[0])]
+        f_name: [AIRRSequenceSet.get_neutral_value(f_type)] * df.shape[0]
         for f_name, f_type in field_type_dict.items() if f_name not in df.columns})
     return pd.concat([df, default_fields], axis=1)
