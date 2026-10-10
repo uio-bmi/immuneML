@@ -145,7 +145,7 @@ def test_fit_apply_gen_model():
     ]
 
     for gen_model in gen_models:
-        fit_and_apply_gen_model(gen_model)
+        fit_and_apply_gen_model(gen_model, compute_p_gens='SakaLSTM' in gen_model)
 
 
 def test_fit_apply_tcrsep():
@@ -177,7 +177,7 @@ def test_fit_apply_tcrsep():
     shutil.rmtree(base_path)
 
 
-def fit_and_apply_gen_model(gen_model, dataset: dict = None):
+def fit_and_apply_gen_model(gen_model, dataset: dict = None, compute_p_gens: bool = False):
     model_name = list(gen_model.keys())[0]
     print(f"Starting the integration test for model: {model_name}")
 
@@ -248,8 +248,17 @@ def fit_and_apply_gen_model(gen_model, dataset: dict = None):
         }
     }
 
+    if compute_p_gens:
+        specs['definitions']['datasets'] = {'d1': dataset}
+        specs['instructions']['inst1']['p_gen_datasets'] = ['d1']
+
     write_yaml(applied_model_path / 'specs.yaml', specs)
 
     ImmuneMLApp(applied_model_path / 'specs.yaml', applied_model_path / 'output').run()
+
+    if compute_p_gens:
+        df = pd.read_csv(applied_model_path / 'output/inst1/datasets_with_p_gens/d1_p_gens.tsv', sep='\t')
+        assert df.shape[0] == 10
+        assert df['p_gen'].between(0, 1).all()
 
     shutil.rmtree(base_path)
