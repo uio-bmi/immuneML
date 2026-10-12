@@ -68,7 +68,7 @@ An example of the definitions section using a repertoire dataset is given here:
       my_preprocessing: # user-defined preprocessing name
         - my_beta_chain_filter:
             ChainRepertoireFilter:
-              keep_chain: TRB
+              keep_chains: [TRB]
 
     ml_methods:
       my_svm:       # example ML method with user-defined settings
@@ -253,7 +253,7 @@ An example of the complete YAML specification is shown here:
               my_preprocessing: # user-defined preprocessing name
                 - my_beta_chain_filter:
                     ChainRepertoireFilter:
-                      keep_chain: TRB
+                      keep_chains: [TRB]
 
             ml_methods:
               my_svm:       # example ML method with user-defined settings
@@ -368,8 +368,7 @@ To import this dataset, use the following YAML snippet:
           path: path/to/sequences.tsv
           is_repertoire: false
           paired: false
-          metadata_column_mapping:
-            epitope: epitope
+          label_columns: [epitope]
 
 For this dataset, the :code:`label` that can be used for prediction is 'epitope'.
 
@@ -391,7 +390,6 @@ To import this dataset, use the following YAML snippet:
           is_repertoire: false
           paired: true
           receptor_chains: TRA_TRB
-          metadata_column_mapping:
-            epitope: epitope
+          label_columns: [epitope]
 
 For this dataset, the :code:`label` that can be used for prediction is 'epitope'.

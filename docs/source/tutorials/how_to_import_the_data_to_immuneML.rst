@@ -121,9 +121,11 @@ Specifying params for receptor or sequence dataset import
 If you want to import a sequence or receptor dataset, set the parameter :code:`is_repertoire` to false, and set :code:`paired` to either false (sequence dataset)
 or true (receptor dataset). For sequence and receptor dataset, metadata labels must be specified directly as columns in the input files.
 These metadata labels can be used as a prediction target when training ML models. For example, a column 'binding' can be added, which may have values 'true' and 'false'.
-The metadata labels are specified through parameter :code:`metadata_column_mapping`, which is a mapping from the names of the columns in
-the file to the names that will be used internally in immuneML (for example: when specifying :code:`labels` in the :ref:`TrainMLModel` instruction).
-It is recommended that the immuneML-internal names contain only lowercase letters, numbers and underscores.
+By default, all columns that are not standard AIRR fields can be used as labels. To import only some of them, list
+their names under the parameter :code:`label_columns`. Columns can be renamed with :code:`column_mapping`, which maps
+the names of the columns in the file to the names that will be used internally in immuneML (for example: when
+specifying :code:`labels` in the :ref:`TrainMLModel` instruction). It is recommended that the immuneML-internal names
+contain only lowercase letters, numbers and underscores.
 
 A complete specification for importing a sequence dataset from AIRR format with default parameters may look like this:
 

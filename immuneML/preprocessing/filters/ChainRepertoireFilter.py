@@ -26,7 +26,7 @@ class ChainRepertoireFilter(Filter):
 
     - keep_chains (list): Which chains should be kept, valid values are "TRA", "TRB", "IGH", "IGL", "IGK"
 
-    - remove_only_sequences (bool): Whether to remove only sequences with different chain than "keep_chain" (true) in
+    - remove_only_sequences (bool): Whether to remove only sequences with different chain than "keep_chains" (true) in
       case of repertoire datasets; default is false
 
     **YAML specification:**

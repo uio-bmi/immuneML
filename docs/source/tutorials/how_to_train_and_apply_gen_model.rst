@@ -86,7 +86,7 @@ To train an LSTM, the following YAML configuration may be used:
 
 To explore the dataset with original and generated sequences, we could encode them using k-mer frequencies and visualize
 with feature value barplots. The exported dataset from the previous instruction will contain both the original and
-generated sequences, and the column 'dataset_split' will indicate which sequences are original and used for training,
+generated sequences, and the column 'data_origin' will indicate which sequences are original and used for training,
 which are original, but not used during training (test) and which are generated.
 
 .. code-block:: yaml
@@ -122,7 +122,7 @@ which are original, but not used during training (test) and which are generated.
     reports:
       feature_value_barplot:
         FeatureValueBarplot:
-          color_grouping_label: dataset_split
+          color_grouping_label: data_origin
           plot_all_features: false
           plot_top_n: 25
           error_function: sem

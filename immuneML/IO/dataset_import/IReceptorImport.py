@@ -72,9 +72,7 @@ class IReceptorImport(DataImport):
                     params:
                         path: path/to/zipfiles/
                         is_repertoire: True # whether to import a RepertoireDataset
-                        metadata_column_mapping: # metadata column mapping AIRR: immuneML for Sequence- or ReceptorDatasetDataset
-                            airr_column_name1: metadata_label1
-                            airr_column_name2: metadata_label2
+                        label_columns: [label1, label2] # columns to import as labels for Sequence- or ReceptorDataset
                         import_productive: True # whether to include productive sequences in the dataset
                         import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
                         import_out_of_frame: False # whether to include out of frame sequences in the dataset

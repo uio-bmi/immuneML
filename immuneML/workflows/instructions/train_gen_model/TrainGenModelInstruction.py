@@ -79,7 +79,7 @@ class TrainGenModelInstruction(Instruction):
       parameter is RANDOM. If set to 1, the
       full dataset will be used for training and the test dataset will be the same as the training dataset. Default
       value is 0.7. When export_combined_dataset is set to True, the splitting of sequences into train, test, and
-      generated will be shown in column dataset_split.
+      generated will be shown in column data_origin.
 
     - split_config (dict): if split_strategy is set to MANUAL, this parameter can be used to specify the ids of examples
       that should be in train and test sets; the paths to csv files with ids for train and test data should be provided

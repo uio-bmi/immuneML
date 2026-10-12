@@ -60,8 +60,6 @@ class ImmunoSEQSampleImport(DataImport):
 
     - columns_to_load (list): Specifies which subset of columns must be loaded from the file. By default, this is: [nucleotide, aminoAcid, count (templates/reads), vFamilyName, vGeneName, vGeneAllele, jFamilyName, jGeneName, jGeneAllele, sequenceStatus]; these are the columns from the original file that will be imported
 
-    - metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDatasets. This should specify a mapping similar to column_mapping where keys are immunoSEQ column names and values are the names that are internally used in immuneML as metadata fields. These metadata fields can be used as prediction labels for Sequence- and ReceptorDatasets. This parameter can also be used to specify sequence-level metadata columns for RepertoireDatasets, which can be used by reports. To set prediction label metadata for RepertoireDatasets, see metadata_file instead. For immunoSEQ sample .tsv files, there is no default metadata_column_mapping.
-
     - separator (str): Column separator, for ImmunoSEQ files this is by default "\\t".
 
 
@@ -78,9 +76,7 @@ class ImmunoSEQSampleImport(DataImport):
                         path: path/to/files/
                         is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
                         metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                        metadata_column_mapping: # metadata column mapping ImmunoSEQ: immuneML for SequenceDataset
-                            immunoseq_column_name1: metadata_label1
-                            immunoseq_column_name2: metadata_label2
+                        label_columns: [label1, label2] # columns to import as labels for SequenceDataset
                         import_productive: True # whether to include productive sequences in the dataset
                         import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
                         import_out_of_frame: False # whether to include out of frame sequences in the dataset

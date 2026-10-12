@@ -78,6 +78,11 @@ class ImportParser:
         params = DefaultParamsLoader.load(ImportParser.keyword, dataset_specs["format"])
         if "params" in dataset_specs.keys():
             params = {**params, **dataset_specs["params"]}
+        if "metadata_column_mapping" in params:
+            params.pop("metadata_column_mapping")
+            print_log(f"ImportParser: metadata_column_mapping under datasets:{dataset_name} is no longer supported and "
+                      f"will be ignored. All non-AIRR columns are imported as labels by default; to choose which ones, "
+                      f"use label_columns instead, and to rename columns, use column_mapping.", log_func_name='warning')
         if "result_path" not in params or params["result_path"] is None:
             params["result_path"] = Path(result_path) / "datasets" / dataset_name
         else:

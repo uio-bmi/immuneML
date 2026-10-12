@@ -27,7 +27,8 @@ Step 2: Define frequency of each individual signal and the pair of signals in a 
 `````````````````````````````````````````````````````````````````````````````````````````````````
 .. code-block:: yaml
 
-  simulations:
+  definitions:
+    simulations:
       sim1:
         is_repertoire: true
         paired: false
@@ -40,12 +41,12 @@ Step 2: Define frequency of each individual signal and the pair of signals in a 
               model_path: null
               type: OLGA
             is_noise: false
-            number_of_examples: 10 # we simulate 10 reprtoires
-            receptors_in_repertoire_count: 1000 # we simulate 1000 BCRs in each repertoire
+            number_of_examples: 10 # we simulate 10 repertoires
+            receptors_in_repertoire_count: 1000 # we simulate 1000 TRBs in each repertoire
             signals:
-              signal1__signal2: 0.1 # 10% of BCRs contain both signal 1 and signal 2
-              signal1: 0.2 # 20% of BCRs contain signal 1
-              signal2: 0.2 # 20% of BCRs contain signal 2
+              signal1__signal2: 0.1 # 10% of TRBs contain both signal 1 and signal 2
+              signal1: 0.2 # 20% of TRBs contain signal 1
+              signal2: 0.2 # 20% of TRBs contain signal 2
 
 
 Step 3: Run the simulation with the following yaml file
@@ -64,7 +65,7 @@ Step 3: Run the simulation with the following yaml file
         motifs: [motif1]
       signal2:
         motifs: [motif2]
-  simulations:
+    simulations:
       sim1:
         is_repertoire: true
         paired: false
@@ -77,12 +78,12 @@ Step 3: Run the simulation with the following yaml file
               model_path: null
               type: OLGA
             is_noise: false
-            number_of_examples: 10 # we simulate 10 reprtoires
-            receptors_in_repertoire_count: 1000 # we simulate 1000 BCRs in each repertoire
+            number_of_examples: 10 # we simulate 10 repertoires
+            receptors_in_repertoire_count: 1000 # we simulate 1000 TRBs in each repertoire
             signals:
-              signal1__signal2: 0.1 # 10% of BCRs contain both signal 1 and signal 2
-              signal1: 0.2 # 20% of BCRs contain signal 1
-              signal2: 0.2 # 20% of BCRs contain signal 2
+              signal1__signal2: 0.1 # 10% of TRBs contain both signal 1 and signal 2
+              signal1: 0.2 # 20% of TRBs contain signal 1
+              signal2: 0.2 # 20% of TRBs contain signal 2
   instructions:
     inst1:
       export_p_gens: false # could take some time to compute (from olga)

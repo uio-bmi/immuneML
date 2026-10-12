@@ -96,7 +96,7 @@ Note that in order to run this yaml file, instructions still need to be added
               my_preprocessing:
                 - my_beta_chain_filter:
                     ChainRepertoireFilter:
-                      keep_chain: TRB
+                      keep_chains: [TRB]
             ml_methods:
               my_log_reg: LogisticRegression
               my_svm: SVM
@@ -246,7 +246,7 @@ An example of a complete YAML specification for training an ML model through nes
               my_preprocessing:
                 - my_beta_chain_filter:
                     ChainRepertoireFilter:
-                      keep_chain: TRB
+                      keep_chains: [TRB]
             ml_methods:
               my_log_reg: LogisticRegression
               my_svm: SVM

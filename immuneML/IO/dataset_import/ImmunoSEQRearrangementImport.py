@@ -78,9 +78,7 @@ class ImmunoSEQRearrangementImport(DataImport):
                         path: path/to/files/
                         is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
                         metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                        metadata_column_mapping: # metadata column mapping ImmunoSEQ: immuneML for SequenceDataset
-                            immunoseq_column_name1: metadata_label1
-                            immunoseq_column_name2: metadata_label2
+                        label_columns: [label1, label2] # columns to import as labels for SequenceDataset
                         import_productive: True # whether to include productive sequences in the dataset
                         import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
                         import_out_of_frame: False # whether to include out of frame sequences in the dataset
