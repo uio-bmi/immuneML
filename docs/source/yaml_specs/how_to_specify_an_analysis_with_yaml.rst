@@ -297,6 +297,19 @@ To run an instruction via command line with the given YAML specification file:
 
   immune-ml path/to/specification.yaml result/folder/path/
 
+If the result folder already exists and is not empty, the results are stored in a new folder with a timestamp appended
+to its name (e.g., :code:`result/folder/path_2026-10-12 10:15:30.123456/`).
+
+To also get the results as a single zip file (e.g., to download or share them), add the :code:`--compress` option:
+
+.. code-block:: console
+
+  immune-ml path/to/specification.yaml result/folder/path/ --compress
+
+After the analysis finishes, the result folder is zipped into a file with the same name next to it
+(:code:`result/folder/path.zip`), and the folder itself is kept. If that zip file already exists, both the result folder
+and the zip file get the same timestamp appended to their names.
+
 Alternatively, create an ImmuneMLApp object in a Python script and pass it the path parameter to the constructor before calling its :code:`run()` method as follows:
 
 .. highlight:: python

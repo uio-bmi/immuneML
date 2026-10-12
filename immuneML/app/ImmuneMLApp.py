@@ -109,10 +109,15 @@ class ImmuneMLApp:
 
 
 def run_immuneML(namespace: argparse.Namespace):
-    if os.path.isdir(namespace.result_path) and len(os.listdir(namespace.result_path)) != 0:
+    compress = getattr(namespace, "compress", False)
+    dir_exists = os.path.isdir(namespace.result_path) and len(os.listdir(namespace.result_path)) != 0
+    zip_exists = compress and Path(f"{namespace.result_path}.zip").exists()
+
+    if dir_exists or zip_exists:
         result_path = f"{namespace.result_path}_{datetime.now()}"
-        print(f"Directory {namespace.result_path} already exists. The output of this analysis will be "
-              f"stored in {result_path}.")
+        existing = f"Directory {namespace.result_path}" if dir_exists else f"File {namespace.result_path}.zip"
+        print(f"{existing} already exists. The output of this analysis will be stored in {result_path}"
+              f"{' and ' + result_path + '.zip' if compress else ''}.")
     else:
         result_path = namespace.result_path
 
@@ -126,6 +131,18 @@ def run_immuneML(namespace: argparse.Namespace):
 
     app.run()
 
+    if compress:
+        compress_results(Path(result_path))
+
+
+def compress_results(result_path: Path) -> Path:
+    """Zips result_path into <result_path>.zip next to it, so the folder and the archive share the same name.
+    The archive contains the result directory itself; the directory is kept."""
+    result_path = result_path.absolute()
+    zip_path = shutil.make_archive(str(result_path), "zip", root_dir=result_path.parent, base_dir=result_path.name)
+    print_log(f"immuneML: results compressed to {zip_path}.\n", include_datetime=True)
+    return Path(zip_path)
+
 
 def main():
     parser = argparse.ArgumentParser(description="immuneML command line tool")
@@ -137,6 +154,8 @@ def main():
                                        "way before running standard immuneML.")
     parser.add_argument('--logging', help='Logging level to use',
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], default='INFO')
+    parser.add_argument("--compress", action="store_true", help="If set, the output directory is zipped after the "
+                                                                "analysis finishes and stored as <result_path>.zip.")
     parser.add_argument("--version", action="version", version=Constants.VERSION)
 
     namespace = parser.parse_args()

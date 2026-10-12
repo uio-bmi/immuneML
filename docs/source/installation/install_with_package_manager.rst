@@ -181,22 +181,29 @@ The output should look like this:
 
 .. code-block:: console
 
-  usage: immune-ml [-h] [--tool TOOL] specification_path result_path
+  usage: immune-ml [-h] [--tool TOOL]
+                   [--logging {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
+                   [--compress] [--version]
+                   specification_path result_path
 
   immuneML command line tool
 
   positional arguments:
-    specification_path  Path to specification YAML file. Always used to define
-                        the analysis.
-    result_path         Output directory path.
+    specification_path    Path to specification YAML file. Always used to define
+                          the analysis.
+    result_path           Output directory path.
 
-  optional arguments:
-    -h, --help          show this help message and exit
-    --tool TOOL         Name of the tool which calls immuneML. This name will be
-                        used to invoke appropriate API call, which will then do
-                        additional work in tool-dependent way before running
-                        standard immuneML.
-    --version           show program's version and exit
+  options:
+    -h, --help            show this help message and exit
+    --tool TOOL           Name of the tool which calls immuneML. This name will
+                          be used to invoke appropriate API call, which will
+                          then do additional work in tool-dependent way before
+                          running standard immuneML.
+    --logging {DEBUG,INFO,WARNING,ERROR,CRITICAL}
+                          Logging level to use
+    --compress            If set, the output directory is zipped after the
+                          analysis finishes and stored as <result_path>.zip.
+    --version             show program's version number and exit
 
 
 .. include:: ./run_quickstart.rst
