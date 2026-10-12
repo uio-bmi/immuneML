@@ -12,6 +12,7 @@ from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.reports.clustering_method_reports.ClusteringMethodReport import ClusteringMethodReport
+from immuneML.reports.clustering_reports.ClusteringReport import ClusteringReport
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.util.ParameterValidator import ParameterValidator
@@ -115,7 +116,7 @@ class ValidateClusteringParser:
         """Parse reports from the symbol table."""
         if 'reports' in instruction and instruction['reports'] is not None:
             ParameterValidator.assert_report_types(instruction['reports'], symbol_table,
-                                                   (ClusteringMethodReport, DataReport, EncodingReport),
+                                                   (ClusteringMethodReport, DataReport, EncodingReport, ClusteringReport),
                                                    ValidateClusteringParser.__name__, 'reports')
             return [symbol_table.get(report_name) for report_name in instruction['reports']]
         return []

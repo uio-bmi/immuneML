@@ -1,5 +1,7 @@
 import shutil
 
+import pandas as pd
+
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
 from immuneML.data_model.bnp_util import write_yaml
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -98,7 +100,8 @@ def test_validate_clustering_workflow():
             },
             'reports': {
                 'cluster_vis': 'ClusteringVisualization',
-                'seq_len_dist': 'SequenceLengthDistribution'
+                'seq_len_dist': 'SequenceLengthDistribution',
+                'external_label_heatmap': 'ExternalLabelMetricHeatmap'
             }
         },
         'instructions': {
@@ -109,7 +112,7 @@ def test_validate_clustering_workflow():
                 'metrics': ['adjusted_rand_score', 'silhouette_score'],
                 'validation_type': ['method_based', 'result_based'],
                 'labels': ['epitope'],
-                'reports': ['cluster_vis', 'seq_len_dist']
+                'reports': ['cluster_vis', 'seq_len_dist', 'external_label_heatmap']
             }
         }
     }
@@ -142,6 +145,20 @@ def test_validate_clustering_workflow():
 
     result_reports_path = list(validation_output.rglob('result_based_validation/reports'))
     assert len(result_reports_path) > 0, "Result-based reports directory not found"
+
+    # Check ExternalLabelMetricHeatmap output: one table with a row per validation type
+    heatmap_tables = list(validation_output.rglob('clustering_reports/external_label_heatmap/adjusted_rand_score.csv'))
+    assert len(heatmap_tables) == 1, "ExternalLabelMetricHeatmap table not found"
+    heatmap_df = pd.read_csv(heatmap_tables[0])
+    assert list(heatmap_df['validation_type']) == ['method_based', 'result_based']
+    assert list(heatmap_df.columns) == ['validation_type', 'epitope']
+
+    # Check that the heatmap is shown in the HTML output
+    html_files = list(validation_output.rglob('ValidateClustering_*.html'))
+    assert len(html_files) == 1, "ValidateClustering HTML output not found"
+    html_content = html_files[0].read_text()
+    assert "Validation Comparison Reports" in html_content
+    assert "External Label - Clustering Heatmap" in html_content
 
     # Clean up
     shutil.rmtree(path)

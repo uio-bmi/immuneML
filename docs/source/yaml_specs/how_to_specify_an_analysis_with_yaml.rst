@@ -237,7 +237,7 @@ An example of a complete YAML specification for training an ML model through nes
 
           definitions:
             datasets:
-              d1:
+              my_dataset:
                 format: AIRR
                 params:
                   metadata_file: path/to/metadata.csv

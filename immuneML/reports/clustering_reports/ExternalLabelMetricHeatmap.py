@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+from typing import List, Dict, Union
 
 import numpy as np
 import pandas as pd
@@ -13,6 +13,7 @@ from immuneML.reports.clustering_reports.ClusteringReport import ClusteringRepor
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringState
+from immuneML.workflows.instructions.clustering.ValidateClusteringInstruction import ValidateClusteringState
 
 
 class ExternalLabelMetricHeatmap(ClusteringReport):
@@ -26,6 +27,10 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
     2. A heatmap visualization where the color represents the mean value and the text shows mean±std
 
     The external labels and metrics are automatically determined from the clustering instruction specification.
+
+    The report can also be used in the ValidateClustering instruction. There, the rows of the heatmap are the validation
+    types (method-based and result-based) and, since there is only one run per validation type, no standard deviation
+    is shown.
 
     **YAML specification:**
 
@@ -43,7 +48,7 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
                                      ExternalLabelMetricHeatmap.__name__, ExternalLabelMetricHeatmap.__name__)
         return ExternalLabelMetricHeatmap(**kwargs)
 
-    def __init__(self, name: str = None, state: ClusteringState = None,
+    def __init__(self, name: str = None, state: Union[ClusteringState, ValidateClusteringState] = None,
                  result_path: Path = None, number_of_processes: int = 1):
         super().__init__(name, result_path, number_of_processes, state)
         self.desc = "External Label - Clustering Heatmap"
@@ -51,7 +56,13 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
     def _generate(self) -> ReportResult:
         self.result_path = PathBuilder.build(self.result_path / self.name)
         report_outputs = []
-        external_labels = self.state.config.label_config.get_labels_by_name()
+
+        if isinstance(self.state, ValidateClusteringState):
+            label_config, all_metrics = self.state.label_config, self.state.metrics
+        else:
+            label_config, all_metrics = self.state.config.label_config, self.state.config.metrics
+
+        external_labels = label_config.get_labels_by_name() if label_config else []
 
         if not external_labels or len(external_labels) == 0:
             return ReportResult(
@@ -59,10 +70,11 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
                 info="No external labels were found in the clustering state's label configuration."
             )
 
-        metrics = [metric for metric in self.state.config.metrics if ClusteringMetric.is_external(metric)]
+        metrics = [metric for metric in all_metrics if ClusteringMetric.is_external(metric)]
+        performances = self._get_performances()
 
         for metric in metrics:
-            report_outputs.extend(self._process_metric_across_splits(metric, external_labels))
+            report_outputs.extend(self._process_metric_across_splits(metric, external_labels, performances))
 
         if not report_outputs:
             return ReportResult(
@@ -77,39 +89,44 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
             output_figures=[output for output in report_outputs if output.path.suffix in ['.html', '.png']],
         )
 
-    def _process_metric_across_splits(self, metric: str, external_labels: List[str]) -> List[ReportOutput]:
+    def _get_performances(self) -> Dict[str, List[pd.DataFrame]]:
+        """Returns external performance dataframes per row of the heatmap (clustering setting or validation type),
+        with one dataframe per split."""
+        if isinstance(self.state, ValidateClusteringState):
+            results = {'method_based': self.state.method_based_result, 'result_based': self.state.result_based_result}
+            return {validation_type: [cl_item.external_performance.get_df()]
+                    for validation_type, cl_item in results.items()
+                    if cl_item is not None and cl_item.external_performance is not None}
+        else:
+            setting_keys = list(self.state.clustering_items[0].items.keys())
+            return {setting_key: [clustering_results.items[setting_key].item.external_performance.get_df()
+                                  for clustering_results in self.state.clustering_items]
+                    for setting_key in setting_keys}
+
+    def _process_metric_across_splits(self, metric: str, external_labels: List[str],
+                                      performances: Dict[str, List[pd.DataFrame]]) -> List[ReportOutput]:
         outputs = []
 
-        # Get setting keys from the first split
-        setting_keys = list(self.state.clustering_items[0].items.keys())
+        setting_keys = list(performances.keys())
+        row_title = 'validation type' if isinstance(self.state, ValidateClusteringState) else 'clustering setting'
 
         # Collect metric values across all splits
         # Shape: (n_splits, n_settings, n_labels)
-        all_values = []
-
-        for clustering_results in self.state.clustering_items:
-            split_values = []
-            for setting_key in setting_keys:
-                item_result = clustering_results.items[setting_key]
-                performance_df = item_result.item.external_performance.get_df()
-                label_values = []
-                for label in external_labels:
-                    value = performance_df[performance_df['metric'] == metric][label].values[0]
-                    label_values.append(value)
-                split_values.append(label_values)
-            all_values.append(split_values)
-
-        all_values = np.array(all_values)  # (n_splits, n_settings, n_labels)
+        all_values = np.array([[[df[df['metric'] == metric][label].values[0] for label in external_labels]
+                                for df in performances[setting_key]]
+                               for setting_key in setting_keys]).transpose(1, 0, 2)
 
         # Calculate mean and std across splits (axis=0)
         mean_values = np.mean(all_values, axis=0)  # (n_settings, n_labels)
         std_values = np.std(all_values, axis=0)    # (n_settings, n_labels)
+        show_std = all_values.shape[0] > 1
 
-        # Create text annotations with mean±std format
+        # Create text annotations with mean±std format (only the value if there is a single split)
         text_annotations = np.empty(mean_values.shape, dtype=object)
         for i in range(mean_values.shape[0]):
             for j in range(mean_values.shape[1]):
-                text_annotations[i, j] = f"{mean_values[i, j]:.3f}±{std_values[i, j]:.3f}"
+                text_annotations[i, j] = f"{mean_values[i, j]:.3f}±{std_values[i, j]:.3f}" if show_std \
+                    else f"{mean_values[i, j]:.3f}"
 
         # Wrap long y-axis labels (clustering setting names) for better display
         wrapped_setting_keys = [_wrap_label(key) for key in setting_keys]
@@ -141,8 +158,8 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
             colorscale='Blues',
             text=text_annotations,
             texttemplate='%{text}',
-            hovertemplate=(metric + ' (mean): %{z:.3f}<br>external label: %{x}<br>'
-                          'clustering setting: %{y}<extra></extra>'),
+            hovertemplate=(metric + (' (mean)' if show_std else '') + ': %{z:.3f}<br>external label: %{x}<br>'
+                          + row_title + ': %{y}<extra></extra>'),
             hoverongaps=False
         ))
 
@@ -179,18 +196,18 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
 
         outputs.append(ReportOutput(
             path=plot_path,
-            name=f"Heatmap for {metric.replace('_', ' ')} (mean±std across splits)"
+            name=f"Heatmap for {metric.replace('_', ' ')}" + (" (mean±std across splits)" if show_std else "")
         ))
 
         # Create a combined table with mean±std format (use original keys for CSV)
         df_combined = pd.DataFrame(text_annotations, index=setting_keys, columns=external_labels)
-        df_combined = df_combined.reset_index().rename(columns={'index': 'clustering_setting'})
+        df_combined = df_combined.reset_index().rename(columns={'index': row_title.replace(' ', '_')})
 
-        table_path = self.result_path / f"{metric}_mean_std.csv"
+        table_path = self.result_path / (f"{metric}_mean_std.csv" if show_std else f"{metric}.csv")
         df_combined.to_csv(table_path, index=False)
         outputs.append(ReportOutput(
             path=table_path,
-            name=f"Metric values (mean±std) for {metric}"
+            name=f"Metric values" + (" (mean±std)" if show_std else "") + f" for {metric}"
         ))
 
         return outputs
@@ -198,6 +215,9 @@ class ExternalLabelMetricHeatmap(ClusteringReport):
     def check_prerequisites(self):
         if not self.state:
             return False
+
+        if isinstance(self.state, ValidateClusteringState):
+            return self.state.method_based_result is not None or self.state.result_based_result is not None
 
         if not self.state.clustering_items:
             return False

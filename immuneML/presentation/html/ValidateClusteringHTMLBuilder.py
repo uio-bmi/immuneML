@@ -49,7 +49,8 @@ class ValidateClusteringHTMLBuilder:
             **Util.make_dataset_html_map(state.dataset),
             **ValidateClusteringHTMLBuilder._make_method_based_html_map(state, base_path),
             **ValidateClusteringHTMLBuilder._make_result_based_html_map(state, base_path),
-            **ValidateClusteringHTMLBuilder._make_data_reports_html_map(state, base_path)
+            **ValidateClusteringHTMLBuilder._make_data_reports_html_map(state, base_path),
+            "clustering_reports": ValidateClusteringHTMLBuilder._format_reports(state.clustering_report_results, base_path)
         }
         return html_map
 
