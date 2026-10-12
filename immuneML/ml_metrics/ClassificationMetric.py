@@ -46,18 +46,18 @@ class ClassificationMetric(Enum):
 
     @staticmethod
     def get_search_criterion(metric):
-        if metric in [ClassificationMetric.LOG_LOSS]:
+        if metric in [ClassificationMetric.LOG_LOSS, ClassificationMetric.BRIER_SCORE]:
             return min
         else:
             return max
 
     @staticmethod
     def get_sklearn_score_name(metric):
-        if metric in [ClassificationMetric.LOG_LOSS]:
+        if metric in [ClassificationMetric.LOG_LOSS, ClassificationMetric.BRIER_SCORE]:
             return f"neg_{metric.name.lower()}"
         else:
             return metric.name.lower()
 
     @staticmethod
     def get_probability_based_metric_types():
-        return [ClassificationMetric.LOG_LOSS, ClassificationMetric.AUC]
+        return [ClassificationMetric.LOG_LOSS, ClassificationMetric.AUC, ClassificationMetric.BRIER_SCORE]

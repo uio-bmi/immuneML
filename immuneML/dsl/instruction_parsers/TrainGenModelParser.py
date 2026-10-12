@@ -7,6 +7,9 @@ from immuneML.hyperparameter_optimization.config.ManualSplitConfig import Manual
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.workflows.instructions.train_gen_model.TrainGenModelInstruction import TrainGenModelInstruction
+from immuneML.reports.train_gen_model_reports.TrainGenModelReport import TrainGenModelReport
+from immuneML.reports.data_reports.DataReport import DataReport
+from immuneML.reports.gen_model_reports.GenModelReport import GenModelReport
 
 
 class TrainGenModelParser:
@@ -56,6 +59,8 @@ class TrainGenModelParser:
 
         valid_report_ids = symbol_table.get_keys_by_type(SymbolType.REPORT)
         ParameterValidator.assert_all_in_valid_list(instruction['reports'], valid_report_ids, TrainGenModelParser.__name__, 'reports')
+        ParameterValidator.assert_report_types(instruction['reports'], symbol_table, (TrainGenModelReport, DataReport, GenModelReport),
+                                               TrainGenModelParser.__name__, 'reports')
 
         reports = [symbol_table.get(report_id) for report_id in instruction['reports']]
 

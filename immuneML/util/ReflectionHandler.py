@@ -34,13 +34,16 @@ class ReflectionHandler:
         return ReflectionHandler._import_class(path, class_name)
 
     @staticmethod
-    def _import_class(path: Path, class_name: str):
+    def _import_class(path: Path, class_name: str, raise_on_missing_dependency: bool = False):
         try:
             module_path = ".".join(path.parts[len(list(path.parts)) - list(path.parts)[::-1].index("immuneML") - 1:])[:-3]
             mod = import_module(module_path)
             cls = getattr(mod, class_name)
             return cls
         except ImportError as e:
+            if raise_on_missing_dependency:
+                raise ImportError(f"Class {class_name} could not be imported as the dependency {e.name} is not installed. "
+                                  f"Please install it to use {class_name}.", name=e.name) from e
             logging.warning(f"Class {class_name} could not be imported as the dependency {e.name} is not installed.")
 
         return None
@@ -52,7 +55,7 @@ class ReflectionHandler:
         assert len(filenames) == 1, (f"ReflectionHandler could not find class named {class_name}. "
                                      f"Found: {filenames}\nCheck spelling and try again.")
 
-        return ReflectionHandler._import_class(filenames[0], class_name)
+        return ReflectionHandler._import_class(filenames[0], class_name, raise_on_missing_dependency=True)
 
     @staticmethod
     def _get_filenames(class_name: str, subdirectory_name: str = "", partial=False):

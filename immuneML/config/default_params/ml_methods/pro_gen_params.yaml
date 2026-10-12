@@ -12,3 +12,6 @@ top_p: 0.9
 prompt: '1'
 num_gen_batches: 1
 per_device_train_batch_size: 2
+remove_affixes: true
+region_type: IMGT_JUNCTION
+seed: null

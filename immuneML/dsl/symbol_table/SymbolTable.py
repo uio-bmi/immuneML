@@ -1,5 +1,3 @@
-import logging
-
 from immuneML.dsl.symbol_table.SymbolTableEntry import SymbolTableEntry
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 
@@ -34,9 +32,9 @@ class SymbolTable:
 
     def add(self, symbol: str, symbol_type: SymbolType, item, config: dict = None):
         if symbol in self._items.keys() and self._items[symbol] is not None:
-            logging.warning(
-                f"An item with the key {symbol} was already set in the SymbolTable during parsing. If overwriting "
-                "it was the intended behavior, please ignore this warning.")
+            raise ValueError(f"SymbolTable: the name '{symbol}' is already defined as "
+                             f"{self._items[symbol].symbol_type.name.lower()}. Names must be unique across the whole "
+                             f"specification, please rename one of them.")
 
         self._items[symbol] = SymbolTableEntry(symbol=symbol, symbol_type=symbol_type, item=item, config=config)
 

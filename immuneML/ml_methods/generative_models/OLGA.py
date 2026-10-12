@@ -69,7 +69,6 @@ class OLGA(GenerativeModel):
             ml_methods:
                 generative_model:
                     type: OLGA
-                    model_path: None
                     default_model_name: humanTRB
 
     """

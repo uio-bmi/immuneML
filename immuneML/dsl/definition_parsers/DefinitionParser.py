@@ -28,6 +28,7 @@ from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.reports.gen_model_reports.GenModelReport import GenModelReport
 from immuneML.reports.ml_reports.MLReport import MLReport
 from immuneML.reports.multi_dataset_reports.MultiDatasetReport import MultiDatasetReport
+from immuneML.reports.train_gen_model_reports.TrainGenModelReport import TrainGenModelReport
 from immuneML.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from immuneML.simulation.SimConfig import SimConfig
 from immuneML.simulation.SimConfigItem import SimConfigItem
@@ -115,7 +116,7 @@ class DefinitionParser:
         mode = "w"
 
         report_types = [DataReport, EncodingReport, MLReport, ClusteringMethodReport, GenModelReport,
-                        TrainMLModelReport, ClusteringReport, MultiDatasetReport]
+                        TrainMLModelReport, TrainGenModelReport, ClusteringReport, MultiDatasetReport]
 
         for report_type_class in report_types:
             with file_path.open(mode) as file:

@@ -70,7 +70,7 @@ class LigoSimInstruction(Instruction):
 
         instructions:
             my_simulation_instruction: # user-defined name of the instruction
-                type: LIgOSim # which instruction to execute
+                type: LigoSim # which instruction to execute
                 simulation: sim1
                 sequence_batch_size: 1000
                 max_iterations: 1000

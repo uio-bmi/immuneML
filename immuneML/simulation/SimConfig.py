@@ -52,7 +52,6 @@ class SimConfig:
                     sim_items:
                         sim_item1: # group of sequences with same simulation params
                             generative_model:
-                                chain: beta
                                 default_model_name: humanTRB
                                 model_path: null
                                 type: OLGA

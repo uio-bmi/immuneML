@@ -81,7 +81,7 @@ class TrainGenModelInstruction(Instruction):
       value is 0.7. When export_combined_dataset is set to True, the splitting of sequences into train, test, and
       generated will be shown in column dataset_split.
 
-    - manual_config (dict): if split_strategy is set to MANUAL, this parameter can be used to specify the ids of examples
+    - split_config (dict): if split_strategy is set to MANUAL, this parameter can be used to specify the ids of examples
       that should be in train and test sets; the paths to csv files with ids for train and test data should be provided
       under keys 'train_metadata_path' and 'test_metadata_path'
 

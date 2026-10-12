@@ -20,6 +20,9 @@ from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.workflows.instructions.clustering.ClusteringInstruction import ClusteringInstruction
 from immuneML.workflows.instructions.clustering.ClusteringState import StabilityConfig
 from immuneML.workflows.instructions.clustering.clustering_run_model import ClusteringSetting
+from immuneML.reports.clustering_reports.ClusteringReport import ClusteringReport
+from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
+from immuneML.reports.clustering_method_reports.ClusteringMethodReport import ClusteringMethodReport
 
 
 class ClusteringParser:
@@ -49,7 +52,7 @@ class ClusteringParser:
 
 def parse_stability_config(instruction) -> StabilityConfig:
     ParameterValidator.assert_type_and_value(instruction['stability_config']['split_count'], int, StabilityConfig.__name__, 'stability_config:split_count', min_inclusive=1)
-    ParameterValidator.assert_type_and_value(instruction['stability_config']['random_seed'], int, StabilityConfig.__name__, 'stability_config:random_seed')
+    ParameterValidator.assert_type_and_value(instruction['stability_config']['random_seed'], int, StabilityConfig.__name__, 'stability_config:random_seed', nullable=True)
     return StabilityConfig(split_count=instruction['stability_config']['split_count'], random_seed=instruction['stability_config']['random_seed'])
 
 
@@ -65,10 +68,10 @@ def parse_sample_config(instruction) -> SampleConfig:
                                                  'split_count', min_inclusive=1)
 
         ParameterValidator.assert_type_and_value(instruction[split_key]['percentage'], float, ClusteringParser.__name__, 'percentage', None, None, 0, 1)
-        ParameterValidator.assert_type_and_value(instruction[split_key]['random_seed'], int, ClusteringParser.__name__, 'random_seed')
+        ParameterValidator.assert_type_and_value(instruction[split_key]['random_seed'], int, ClusteringParser.__name__, 'random_seed', nullable=True)
 
         percentage = float(instruction[split_key]["percentage"])
-        random_seed = int(instruction[split_key]["random_seed"])
+        random_seed = instruction[split_key]["random_seed"]
 
         return SampleConfig(split_count=instruction[split_key]['split_count'], percentage=percentage, random_seed=random_seed)
 
@@ -95,6 +98,9 @@ def parse_reports(key, instruction, symbol_table) -> List[Report]:
         ParameterValidator.assert_all_type_and_value(instruction['reports'], str, 'ClusteringParser', f'{key}:reports')
         ParameterValidator.assert_all_in_valid_list(instruction['reports'], valid_reports, 'ClusteringParser',
                                                     f'{key}:reports')
+        ParameterValidator.assert_report_types(instruction['reports'], symbol_table,
+                                               (ClusteringReport, EncodingReport, ClusteringMethodReport),
+                                               'ClusteringParser', f'{key}:reports')
 
         reports = [symbol_table.get(report_id) for report_id in instruction['reports']]
         return reports

@@ -25,6 +25,14 @@ class ParameterValidator:
             ParameterValidator.assert_in_valid_list(value, valid_values, location, parameter_name)
 
     @staticmethod
+    def assert_report_types(report_ids: list, symbol_table, allowed_types: tuple, location: str, parameter_name: str):
+        for report_id in report_ids:
+            report = symbol_table.get(report_id)
+            assert isinstance(report, allowed_types), \
+                (f"{location}: report {report_id} of type {type(report).__name__} cannot be used under {parameter_name}. "
+                 f"Allowed report categories are: {', '.join(t.__name__ for t in allowed_types)}.")
+
+    @staticmethod
     def assert_in_valid_list(value, valid_values: list, location: str, parameter_name: str):
         assert value in valid_values, \
             f"{location}: {value} is not a valid value for parameter {parameter_name}. Valid values are {str(valid_values)[1:-1]}."

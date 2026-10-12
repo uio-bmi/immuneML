@@ -172,15 +172,14 @@ def fit_and_apply_gen_model(gen_model):
         "definitions": {
             "reports": {
                 "sld_rep": {"SequenceLengthDistribution": {'region_type': 'IMGT_JUNCTION'}},
-                "aa_freq": "AminoAcidFrequencyDistribution",
-                "kl_gen_model": "KLKmerComparison"
+                "aa_freq": "AminoAcidFrequencyDistribution"
             }
         },
         "instructions": {
             "inst1": {
                 "type": "ApplyGenModel",
                 "gen_examples_count": 100,
-                "reports": ['sld_rep', 'aa_freq', 'kl_gen_model'],
+                "reports": ['sld_rep', 'aa_freq'],
                 "ml_config_path": str(
                     generated_model_path / "output/inst1/trained_model_gen_model/trained_model_gen_model.zip"),
             }

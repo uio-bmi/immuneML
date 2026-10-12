@@ -10,6 +10,8 @@ from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from immuneML.workflows.instructions.apply_gen_model.ApplyGenModelInstruction import ApplyGenModelInstruction
+from immuneML.reports.data_reports.DataReport import DataReport
+from immuneML.reports.ml_reports.MLReport import MLReport
 
 
 class ApplyGenModelParser:
@@ -37,6 +39,7 @@ class ApplyGenModelParser:
                                                  'gen_examples_count', 1)
         valid_report_ids = symbol_table.get_keys_by_type(SymbolType.REPORT)
         ParameterValidator.assert_all_in_valid_list(instruction['reports'], valid_report_ids, location, 'reports')
+        ParameterValidator.assert_report_types(instruction['reports'], symbol_table, (DataReport, MLReport), location, 'reports')
         ParameterValidator.assert_type_and_value(instruction['ml_config_path'], str, location, f'{key}: ml_config_path')
 
         gen_model = self._load_model(instruction['ml_config_path'], key, path)

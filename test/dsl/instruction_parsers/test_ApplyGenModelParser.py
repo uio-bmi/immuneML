@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 from immuneML.dsl.instruction_parsers.ApplyGenModelParser import ApplyGenModelParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
+from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.workflows.instructions.apply_gen_model.ApplyGenModelInstruction import ApplyGenModelInstruction
 
 
@@ -19,7 +20,7 @@ class TestApplyGenModelParser(TestCase):
             'ml_config_path': 'path/to/config.zip'
         }
         symbol_table = SymbolTable()
-        report1 = MagicMock()
+        report1 = MagicMock(spec=DataReport)
         base_model = MagicMock()
         expected_model = MagicMock()
         symbol_table.add("report_1", SymbolType.REPORT, report1)

@@ -28,6 +28,9 @@ from immuneML.reports.train_ml_model_reports.TrainMLModelReport import TrainMLMo
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from immuneML.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
+from immuneML.reports.data_reports.DataReport import DataReport
+from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
+from immuneML.reports.ml_reports.MLReport import MLReport
 
 
 class TrainMLModelParser:
@@ -241,9 +244,12 @@ class TrainMLModelParser:
             ParameterValidator.assert_all_in_valid_list(instruction[split_key]["reports"].keys(), report_types,
                                                         location, "reports")
 
+            allowed_types = {'data': (DataReport,), 'data_splits': (DataReport,), 'encoding': (EncodingReport,), 'models': (MLReport,)}
             for report_type in instruction[split_key]["reports"]:
                 ParameterValidator.assert_type_and_value(instruction[split_key]["reports"][report_type], list, f"{location}/{report_type}",
                                                          report_type)
+                ParameterValidator.assert_report_types(instruction[split_key]["reports"][report_type], symbol_table,
+                                                       allowed_types[report_type], location, report_type)
 
             report_config_input = {report_type: {report_id: symbol_table.get(report_id) for report_id in instruction[split_key]["reports"][report_type]}
                                    for report_type in instruction[split_key]["reports"]}

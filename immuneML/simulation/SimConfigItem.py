@@ -61,7 +61,6 @@ class SimConfigItem:
                         seed: null # don't use seed
                         receptors_in_repertoire_count: 100
                         generative_model:
-                            chain: beta
                             default_model_name: humanTRB
                             model_path: null
                             type: OLGA
@@ -74,7 +73,6 @@ class SimConfigItem:
                         receptors_in_repertoire_count: 150
                         seed: 10 #
                         generative_model:
-                            chain: beta
                             default_model_name: humanTRB
                             model_path: null
                             type: OLGA

@@ -36,7 +36,6 @@ Step 2: Define frequency of each individual signal and the pair of signals in a 
         sim_items:
           AIRR1:
             generative_model:
-              chain: beta
               default_model_name: humanTRB
               model_path: null
               type: OLGA
@@ -74,7 +73,6 @@ Step 3: Run the simulation with the following yaml file
         sim_items:
           AIRR1:
             generative_model:
-              chain: beta
               default_model_name: humanTRB
               model_path: null
               type: OLGA

@@ -1,5 +1,3 @@
-import inspect
-import logging
 import shutil
 import tempfile
 from pathlib import Path
@@ -8,15 +6,14 @@ from typing import List
 import sklearn.metrics as sklearn_metrics
 
 from immuneML.IO.ml_method.ClusteringImporter import ClusteringImporter
-from immuneML.reports.clustering_method_reports.ClusteringMethodReport import ClusteringMethodReport
-from immuneML.reports.data_reports.DataReport import DataReport
-from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.data_model.SequenceParams import RegionType
-from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.reports.clustering_method_reports.ClusteringMethodReport import ClusteringMethodReport
+from immuneML.reports.data_reports.DataReport import DataReport
+from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.workflows.instructions.clustering.ValidateClusteringInstruction import ValidateClusteringInstruction
 
@@ -116,13 +113,9 @@ class ValidateClusteringParser:
 
     def _parse_reports(self, instruction: dict, symbol_table: SymbolTable) -> List:
         """Parse reports from the symbol table."""
-        reports = []
         if 'reports' in instruction and instruction['reports'] is not None:
-            for report_name in instruction['reports']:
-                report = symbol_table.get(report_name)
-                if any(isinstance(report, cls) for cls in [ClusteringMethodReport, DataReport, EncodingReport]):
-                    reports.append(report)
-                else:
-                    logging.warning(f"Report {report_name} (type: {type(report)}) could not be added "
-                                    f"to ValidateClusteringInstruction.")
-        return reports
+            ParameterValidator.assert_report_types(instruction['reports'], symbol_table,
+                                                   (ClusteringMethodReport, DataReport, EncodingReport),
+                                                   ValidateClusteringParser.__name__, 'reports')
+            return [symbol_table.get(report_name) for report_name in instruction['reports']]
+        return []

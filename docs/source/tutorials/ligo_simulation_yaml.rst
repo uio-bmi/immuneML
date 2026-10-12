@@ -71,7 +71,6 @@ An example of a simulation with disease-associated signals is given below.
                       number_of_examples: 10 # simulate 10 repertoires
                       receptors_in_repertoire_count: 6 # how many receptor sequences should be in each repertoire
                       generative_model: # how to generate background AIRs
-                        chain: heavy
                         default_model_name: humanIGH # use default model
                         type: OLGA # use OLGA for background simulation
                     AIRR2: # another set of repertoires, but with different parameters
@@ -82,7 +81,6 @@ An example of a simulation with disease-associated signals is given below.
                       number_of_examples: 10
                       receptors_in_repertoire_count: 6
                       generative_model:
-                        chain: heavy
                         default_model_name: humanIGH
                         model_path: null # if there was a custom model to use, path to the folder should be given here
                         type: OLGA

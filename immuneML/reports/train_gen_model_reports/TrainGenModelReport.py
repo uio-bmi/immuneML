@@ -13,6 +13,8 @@ class TrainGenModelReport(Report):
     created from the trained model.
     """
 
+    DOCS_TITLE = "Train generative model reports"
+
     def __init__(self, original_dataset: Dataset = None, generated_dataset: Dataset = None, result_path: Path = None,
                  name: str = None, number_of_processes: int = 1, model: GenerativeModel = None):
         """

@@ -11,6 +11,8 @@ from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisInstruction import ExploratoryAnalysisInstruction
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
+from immuneML.reports.data_reports.DataReport import DataReport
+from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 
 
 class ExploratoryAnalysisParser:
@@ -39,6 +41,11 @@ class ExploratoryAnalysisParser:
         ParameterValidator.assert_keys(list(analysis.keys()), valid_keys, "ExploratoryAnalysisParser", "analysis", False)
 
         params = {"dataset": symbol_table.get(analysis["dataset"])}
+
+        report_ids = analysis['reports'] if "reports" in analysis else [analysis['report']] if "report" in analysis else []
+        report_ids = [report_id for report_id in report_ids if report_id is not None]
+        ParameterValidator.assert_report_types(report_ids, symbol_table, (DataReport, EncodingReport), "ExploratoryAnalysisParser",
+                                               f"{yaml_location}/reports")
 
         if "reports" in analysis:
             params['reports'] = [copy.deepcopy(symbol_table.get(report)) for report in analysis['reports']]

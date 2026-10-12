@@ -83,7 +83,6 @@ Here is the complete YAML specification for the simulation:
                 sim_items:
                   sim_item1: # group of AIRs with the same parameters
                     generative_model:
-                      chain: beta
                       default_model_name: humanTRB
                       model_path: null
                       type: OLGA
@@ -92,7 +91,6 @@ Here is the complete YAML specification for the simulation:
                       signal1: 1
                   sim_item2:
                     generative_model:
-                      chain: beta
                       default_model_name: humanTRB
                       model_path: null
                       type: OLGA
@@ -101,7 +99,6 @@ Here is the complete YAML specification for the simulation:
                       signal2: 1
                   sim_item3:
                     generative_model:
-                      chain: beta
                       default_model_name: humanTRB
                       model_path: null
                       type: OLGA
@@ -237,7 +234,6 @@ Here is the complete YAML specification for the simulation:
                       is_noise: False
                       receptors_in_repertoire_count: 6,
                       generative_model:
-                        chain: heavy
                         default_model_name: humanIGH
                         model_path: null
                         type: OLGA
@@ -250,7 +246,6 @@ Here is the complete YAML specification for the simulation:
                       is_noise: False
                       receptors_in_repertoire_count: 6,
                       generative_model:
-                        chain: heavy
                         default_model_name: humanIGH
                         model_path: null
                         type: OLGA

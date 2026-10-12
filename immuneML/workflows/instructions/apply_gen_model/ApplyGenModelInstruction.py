@@ -6,9 +6,9 @@ from typing import Dict
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.SequenceType import SequenceType
-from immuneML.ml_methods.generative_models import GenerativeModel
+from immuneML.ml_methods.generative_models.GenerativeModel import GenerativeModel
 from immuneML.reports.data_reports.DataReport import DataReport
-from immuneML.reports.ml_reports.MLReport import MLReport
+from immuneML.reports.gen_model_reports.GenModelReport import GenModelReport
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
@@ -80,6 +80,7 @@ class ApplyGenModelInstruction(Instruction):
                                                  SequenceType.AMINO_ACID, False)
 
         self.generated_dataset = dataset
+        self.state.generated_dataset = dataset
         print_log(f"{self.state.name}: generated {self.state.gen_examples_count} examples from the fitted model",
                   True)
 
@@ -96,7 +97,7 @@ class ApplyGenModelInstruction(Instruction):
                 rep.dataset = self.generated_dataset
                 rep.name = rep.name + " (generated dataset)"
                 self.state.report_results['data_reports'].append(rep.generate_report())
-            elif isinstance(report, MLReport):
+            elif isinstance(report, GenModelReport):
                 rep = copy.deepcopy(report)
                 rep.method = self.method
                 rep.name = rep.name
