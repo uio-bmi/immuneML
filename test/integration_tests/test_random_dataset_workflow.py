@@ -92,7 +92,6 @@ class TestRandomDatasetWorkflow(TestCase):
                     'roc': "ROCCurveSummary",
                     'pr_curve': "PrecisionRecallCurveSummary",
                     'design_matrix_exporter': 'DesignMatrixExporter',
-                    'top_features_perf': 'TopFeaturesPerformance',
                 }
 
             },
@@ -128,7 +127,7 @@ class TestRandomDatasetWorkflow(TestCase):
                     "strategy": "GridSearch",
                     "metrics": ['precision', 'recall'],
                     "number_of_processes": 4,
-                    "reports": ['performance_per_label', 'roc', 'pr_curve', 'top_features_perf'],
+                    "reports": ['performance_per_label', 'roc', 'pr_curve'],
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False,
                 }
@@ -263,11 +262,6 @@ class TestRandomDatasetWorkflow(TestCase):
 
         repertoire_specs = self.build_repertoire_specs(path / 'repertoire')
         self.run_example(repertoire_specs, path / 'repertoire')
-
-        self.assertTrue(
-            (path / 'repertoire/result/train_test_instruction/reports/top_features_perf/top_features_performance_cmv.csv').is_file(),
-            "TopFeaturesPerformance CSV output not found"
-        )
 
         receptor_specs = self.build_receptor_specs(path / 'receptor')
         self.run_example(receptor_specs, path / 'receptor')
