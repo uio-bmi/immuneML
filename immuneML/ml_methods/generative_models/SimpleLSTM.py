@@ -22,9 +22,11 @@ class SimpleLSTM(GenerativeModel):
     """
     This is a simple generative model for receptor sequences based on LSTM.
 
-    Similar models have been proposed in:
+    It is based on Akbar et al. (2022), which trains on all sequences concatenated into one character stream:
 
     Akbar, R. et al. (2022). In silico proof of principle of machine learning-based antibody design at unconstrained scale. mAbs, 14(1), 2031482. https://doi.org/10.1080/19420862.2022.2031482
+
+    A related model, trained on each sequence separately, was proposed in:
 
     Saka, K. et al. (2021). Antibody design using LSTM based deep generative model from phage display library for affinity maturation. Scientific Reports, 11(1), Article 1. https://doi.org/10.1038/s41598-021-85274-7
 
@@ -45,9 +47,18 @@ class SimpleLSTM(GenerativeModel):
 
     - embed_size (int): the dimension of the sequence embedding
 
-    - temperature (float): a higher temperature leads to faster yet more unstable learning
+    - temperature (float): controls sampling when generating sequences, with no effect on training; below 1 makes
+      generation more conservative, above 1 more diverse
 
     - prime_str (str): the initial sequence to start generating from
+
+    - window_size (int): the length of the windows the training sequences are cut into; each window provides an
+      input-target pair of length window_size - 1
+
+    - window_step (int): how many characters to move forward between two consecutive windows; the default of 1 starts
+      a window at every position, which yields window_size times more (highly overlapping) training examples than a
+      step of window_size, where the windows are disjoint; num_epochs should be reduced accordingly when using a
+      small step
 
     - seed (int): random seed for the model or None
 
@@ -91,7 +102,7 @@ class SimpleLSTM(GenerativeModel):
     def __init__(self, locus: str, sequence_type: str, hidden_size: int, learning_rate: float, num_epochs: int,
                  batch_size: int, num_layers: int, embed_size: int, temperature, device: str, name=None,
                  region_type: str = RegionType.IMGT_CDR3.name, prime_str: str = "C", window_size: int = 64,
-                 seed: int = None, iter_to_report: int = 1):
+                 window_step: int = 1, seed: int = None, iter_to_report: int = 1):
 
         super().__init__(locus, region_type=RegionType.get_object(region_type), name=name, seed=seed)
         self._model = None
@@ -105,6 +116,7 @@ class SimpleLSTM(GenerativeModel):
         self.temperature = temperature
         self.prime_str = prime_str
         self.window_size = window_size
+        self.window_step = window_step
         self.device = device
         self.iter_to_report = iter_to_report
         self.unique_letters = EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + ["*"]
@@ -117,7 +129,8 @@ class SimpleLSTM(GenerativeModel):
         from torch import as_tensor
         model = SimpleLSTMGenerator(input_size=self.num_letters, hidden_size=self.hidden_size,
                                     embed_size=self.embed_size, output_size=self.num_letters,
-                                    batch_size=self.batch_size, device=self.device)
+                                    batch_size=self.batch_size, num_layers=self.num_layers,
+                                    device=self.device)
 
         if isinstance(state_dict_file, Path) and state_dict_file.is_file():
             state_dict = read_yaml(state_dict_file)
@@ -207,9 +220,13 @@ class SimpleLSTM(GenerativeModel):
 
         sequences = as_tensor(sequences, device=self.device).long()
 
-        # Create overlapping windows of size window_size
-        # stride=1 means each window overlaps with previous window by window_size-1 elements
-        windows = sequences.unfold(0, self.window_size, 1)
+        assert len(sequences) >= self.window_size, \
+            (f"{SimpleLSTM.__name__}: the training data has {len(sequences)} characters in total, which is fewer than "
+             f"window_size ({self.window_size}); use a smaller window_size or a larger dataset.")
+
+        # Create windows of size window_size, starting every window_step characters: with the default step of 1,
+        # consecutive windows overlap in window_size-1 characters, while a step of window_size makes them disjoint
+        windows = sequences.unfold(0, self.window_size, self.window_step)
 
         # Create input-target pairs from windows
         x = windows[:, :-1]  # All but last character of each window
@@ -268,7 +285,9 @@ class SimpleLSTM(GenerativeModel):
                 inp = inp.unsqueeze(0).unsqueeze(0)
 
                 if predicted_char == "*":
-                    last_seq = predicted.split('*')[-2]
+                    seq_end = len(predicted) - 1
+                    seq_start = predicted.rfind('*', 0, seq_end) + 1
+                    last_seq = predicted[seq_start:seq_end]
                     if len(last_seq) > 0:
                         gen_seq_count += 1
                         print_log(f"Generated valid sequence {gen_seq_count}/{count}", True)

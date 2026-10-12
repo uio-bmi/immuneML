@@ -37,6 +37,18 @@ from .ProGenConfig import ProGenConfig
 logger = logging.get_logger(__name__)
 
 
+def to_legacy_cache(past_key_values):
+    """Converts past_key_values to the tuple format used throughout this implementation.
+
+    transformers hands a Cache object to prepare_inputs_for_generation (empty at the first generation step),
+    while the blocks below keep the original ProGen tuple-of-tuples layout, which is also what forward returns
+    from the second step onwards.
+    """
+    if past_key_values is None or isinstance(past_key_values, tuple):
+        return past_key_values
+    return past_key_values.to_legacy_cache() if past_key_values.get_seq_length() > 0 else None
+
+
 def fixed_pos_embedding(x, seq_dim=1, seq_len=None):
     dim = x.shape[-1]
     if seq_len is None:
@@ -413,6 +425,8 @@ class ProGenModel(ProGenPreTrainedModel):
         if position_ids is not None:
             position_ids = position_ids.view(-1, input_shape[-1])
 
+        past_key_values = to_legacy_cache(past_key_values)
+
         if past_key_values is None:
             past_length = 0
             past_key_values = tuple([None] * len(self.h))
@@ -581,10 +595,12 @@ class ProGenForCausalLM(ProGenPreTrainedModel, GenerationMixin):
     def set_output_embeddings(self, new_embeddings):
         return
 
-    def prepare_inputs_for_generation(self, input_ids, past=None, **kwargs):
+    def prepare_inputs_for_generation(self, input_ids, past_key_values=None, **kwargs):
+        past_key_values = to_legacy_cache(past_key_values)
         token_type_ids = kwargs.get("token_type_ids", None)
-        # only last token for inputs_ids if past is defined in kwargs
-        if past:
+
+        # only last token for input_ids if the keys and values of the previous ones are already cached
+        if past_key_values is not None:
             input_ids = input_ids[:, -1].unsqueeze(-1)
             if token_type_ids is not None:
                 token_type_ids = token_type_ids[:, -1].unsqueeze(-1)
@@ -596,14 +612,13 @@ class ProGenForCausalLM(ProGenPreTrainedModel, GenerationMixin):
             # create position_ids on the fly for batch generation
             position_ids = attention_mask.long().cumsum(-1) - 1
             position_ids.masked_fill_(attention_mask == 0, 1)
-            if past:
+            if past_key_values is not None:
                 position_ids = position_ids[:, -1].unsqueeze(-1)
-        else:
-            position_ids = None
+
         return {
             "input_ids": input_ids,
-            "past_key_values": past,
-            "use_cache": kwargs.get("use_cache"),
+            "past_key_values": past_key_values,
+            "use_cache": kwargs.get("use_cache", True),
             "position_ids": position_ids,
             "attention_mask": attention_mask,
             "token_type_ids": token_type_ids,
