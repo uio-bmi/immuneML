@@ -259,6 +259,6 @@ def fit_and_apply_gen_model(gen_model, dataset: dict = None, compute_p_gens: boo
     if compute_p_gens:
         df = pd.read_csv(applied_model_path / 'output/inst1/datasets_with_p_gens/d1_p_gens.tsv', sep='\t')
         assert df.shape[0] == 10
-        assert df['p_gen'].between(0, 1).all()
+        assert df['p_gen_gen_model'].between(0, 1).all()
 
     shutil.rmtree(base_path)

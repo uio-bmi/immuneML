@@ -38,7 +38,7 @@ class ApplyGenModelInstruction(Instruction):
 
     Optionally, one or more datasets can be provided (p_gen_datasets) to compute the generation probabilities of their
     sequences under the trained model. The sequences of each dataset are then stored along with their generation
-    probabilities (column p_gen) in a separate tsv file in the datasets_with_p_gens folder. This is only available for
+    probabilities (column p_gen_<model name>) in a separate tsv file in the datasets_with_p_gens folder. This is only available for
     models that can compute generation probabilities.
 
 
@@ -113,11 +113,12 @@ class ApplyGenModelInstruction(Instruction):
             return
 
         path = PathBuilder.build(self.state.result_path / 'datasets_with_p_gens')
+        p_gen_column = f"p_gen_{self.method.name or type(self.method).__name__}"
 
         for name, dataset in self.p_gen_datasets.items():
             p_gens = self.method.compute_p_gens(dataset.data, SequenceType.AMINO_ACID)
             df = dataset.data.topandas()
-            df['p_gen'] = np.asarray(p_gens, dtype=float)
+            df[p_gen_column] = np.asarray(p_gens, dtype=float)
             df.to_csv(path / f'{name}_p_gens.tsv', sep='\t', index=False)
 
             print_log(f"{self.state.name}: computed generation probabilities for {df.shape[0]} sequences from "

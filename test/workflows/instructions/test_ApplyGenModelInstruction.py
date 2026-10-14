@@ -57,6 +57,7 @@ class TestApplyGenModelInstruction(TestCase):
         mock_model = Mock()
         mock_model.generate_sequences.return_value = RandomDatasetGenerator.generate_sequence_dataset(
             2, {2: 1.}, {}, path / "Test/generated_sequences/")
+        mock_model.name = "my_model"
         mock_model.compute_p_gens.side_effect = [np.array([0.1, 0.2, 0.3, 0.4, 0.5]), np.array([0.6, 0.7, 0.8])]
 
         instruction = ApplyGenModelInstruction(method=mock_model, reports=[], name="Test", gen_examples_count=2,
@@ -67,11 +68,11 @@ class TestApplyGenModelInstruction(TestCase):
         self.assertEqual(path / "Test/datasets_with_p_gens", result.exported_datasets['datasets_with_p_gens'])
 
         df = pd.read_csv(path / "Test/datasets_with_p_gens/d1_p_gens.tsv", sep='\t')
-        self.assertTrue(np.allclose([0.1, 0.2, 0.3, 0.4, 0.5], df['p_gen']))
+        self.assertTrue(np.allclose([0.1, 0.2, 0.3, 0.4, 0.5], df['p_gen_my_model']))
         self.assertListEqual(d1.data.topandas()['cdr3_aa'].tolist(), df['cdr3_aa'].tolist())
 
         df = pd.read_csv(path / "Test/datasets_with_p_gens/d2_p_gens.tsv", sep='\t')
-        self.assertTrue(np.allclose([0.6, 0.7, 0.8], df['p_gen']))
+        self.assertTrue(np.allclose([0.6, 0.7, 0.8], df['p_gen_my_model']))
 
         shutil.rmtree(path)
 
