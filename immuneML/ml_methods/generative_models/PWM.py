@@ -150,7 +150,7 @@ class PWM(GenerativeModel):
         raise NotImplementedError
 
     def can_compute_p_gens(self) -> bool:
-        return True
+        return False
 
     def can_generate_from_skewed_gene_models(self) -> bool:
         return False
