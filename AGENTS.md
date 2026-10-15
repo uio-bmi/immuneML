@@ -77,3 +77,8 @@ Other folders in `immuneML/`: `data_model/` (datasets, AIRR sequence sets, Encod
 
 ## Keeping this up to date
 Edit this file and the files in `agentic_readme/` only when rules change, such as instruction structure, base classes or parser validation. Keep them short and addressed to agents, and do not add parameter or component lists.
+
+## Writing and running analyses
+
+Best practice is always to run a spec on either a random dataset or on a small real dataset to see if everything works.
+See Random*Dataset and Subsampling instruction for how to do the two options.
