@@ -22,9 +22,11 @@ class MetadataFilter(Filter):
     - criteria (dict): a nested dictionary that specifies the criteria for keeping the dataset examples based on the
       column values; it contains the type of evaluation, name of the column, and additional parameters depending on
       evaluation; alternatively, it can contain a combination of multiple (evaluation, column, parameters) groups;
-      evaluation_types: IN, NOT_IN, NOT_NA, GREATER_THAN, LESS_THAN, TOP_N, RANDOM_N; for IN, NOT_IN the parameter name
-      is 'values', for GREATER_THAN, LESS_THAN the parameter name is 'threshold' and for TOP_N, RANDOM_N the parameter
-      name is 'number'; supported boolean combinations of groups are AND and OR with (evaluation, column, parameter)
+      evaluation_types: IN, NOT_IN, CONTAINS_ANY, NOT_NA, GREATER_THAN, LESS_THAN, TOP_N, RANDOM_N; for IN, NOT_IN and
+      CONTAINS_ANY the parameter name is 'values', for GREATER_THAN, LESS_THAN the parameter name is 'threshold' and for
+      TOP_N, RANDOM_N the parameter name is 'number'; CONTAINS_ANY is for columns that hold several values per example
+      joined by a delimiter (';' unless 'delimiter' is given) and keeps the examples where any of those values is among
+      'values'; supported boolean combinations of groups are AND and OR with (evaluation, column, parameter)
       groups specified under 'operands' key; see the YAML below for example.
 
 
@@ -48,6 +50,13 @@ class MetadataFilter(Filter):
                         type: IN
                         values: [label_val1, label_val2]
                         column: label
+            my_contains_any_preprocessing:
+                - my_filter3: # keeps examples reported by study1 or study2, for a column such as "study1;study3"
+                    MetadataFilter:
+                        type: CONTAINS_ANY
+                        values: [study1, study2]
+                        column: study_id
+                        delimiter: ';'
             my_third_preprocessing_example:
                 - my_combined_filter:
                     MetadataFilter:

@@ -85,3 +85,31 @@ class TestCriteriaMatcher(TestCase):
         matcher = CriteriaMatcher()
         result = matcher.match(filter_params, df)
         self.assertTrue(np.array_equal(result, np.array([False, False, True, True, True, True, False])))
+
+    def test_match_contains_any(self):
+        df = pd.DataFrame({"study_id": ["ref_1;ref_2", "ref_3", "ref_2", "ref_4;ref_5", "ref_11"]})
+
+        filter_params = {
+            "type": OperationType.CONTAINS_ANY,
+            "column": "study_id",
+            "values": ["ref_1", "ref_4"]
+        }
+
+        matcher = CriteriaMatcher()
+        result = matcher.match(filter_params, df)
+        # ref_11 must not match ref_1: values are compared per element, not as substrings
+        self.assertTrue(np.array_equal(result, np.array([True, False, False, True, False])))
+
+    def test_match_contains_any_custom_delimiter(self):
+        df = pd.DataFrame({"alleles": ["A,B", "C", "B,C"]})
+
+        filter_params = {
+            "type": OperationType.CONTAINS_ANY,
+            "column": "alleles",
+            "values": ["B"],
+            "delimiter": ","
+        }
+
+        matcher = CriteriaMatcher()
+        result = matcher.match(filter_params, df)
+        self.assertTrue(np.array_equal(result, np.array([True, False, True])))

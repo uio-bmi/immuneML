@@ -10,3 +10,4 @@ class OperationType(Enum):
     LESS_THAN = 4
     TOP_N = 5
     RANDOM_N = 6
+    CONTAINS_ANY = 7

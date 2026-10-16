@@ -28,6 +28,15 @@ class CriteriaMatcher:
         return result.values
 
     @staticmethod
+    def evaluate_contains_any(data: pd.Series, criteria: dict):
+        """For columns that hold several values per example joined by a delimiter: a row matches when any of
+        its values is among the given ones."""
+        delimiter = criteria.get("delimiter", ";")
+        values = set(criteria["values"])
+        result = data.astype(str).apply(lambda element: not values.isdisjoint(element.split(delimiter)))
+        return result.values
+
+    @staticmethod
     def evaluate_not_na(data: pd.Series, criteria: dict):
         result = data.notna()
         return result.values
