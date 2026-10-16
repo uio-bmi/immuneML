@@ -376,7 +376,7 @@ class SimpleVAE(GenerativeModel):
                                                      {'gen_model_name': [self.name]}, {'gen_model_name': str})
 
     def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
-        pass
+        raise NotImplementedError
 
     def compute_p_gen(self, sequence: dict, sequence_type: SequenceType) -> float:
         import torch
@@ -416,7 +416,7 @@ class SimpleVAE(GenerativeModel):
         return sum(log_prob_estimates) / self.iter_count_prob_estimation
 
     def can_compute_p_gens(self) -> bool:
-        return True
+        return False
 
     def can_generate_from_skewed_gene_models(self) -> bool:
         return False
