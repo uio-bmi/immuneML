@@ -37,7 +37,10 @@ class ProtT5Encoder(ProteinEmbeddingEncoder):
     - device (str): Which device to use for model inference - 'cpu', 'cuda', 'mps' - as defined by pytorch.
       Defaults to 'cpu'.
 
-    - num_processes (int): Number of processes to use for parallel processing. Defaults to 1.
+    - num_threads (int): How many threads torch may use for the forward pass when device is 'cpu'; it has no
+      effect on other devices. On cpu torch parallelises within the model rather than across processes, so
+      this is a thread count and not the num_processes used elsewhere in immuneML. Defaults to 1, which
+      leaves torch's own setting (all available cores) in place.
 
     - batch_size (int): The number of sequences to encode at the same time. This could have large impact on memory usage.
       If memory is an issue, try with smaller batch sizes. Defaults to 4096.
@@ -57,15 +60,15 @@ class ProtT5Encoder(ProteinEmbeddingEncoder):
                     ProtT5::
                         region_type: IMGT_CDR3
                         device: cpu
-                        num_processes: 1
+                        num_threads: 1
                         batch_size: 4096
 
     """
 
     def __init__(self, name: str = None, region_type: RegionType = RegionType.IMGT_CDR3, device: str = 'cpu',
-                 num_processes: int = 1, batch_size: int = 4096, scale_to_zero_mean: bool = True,
+                 num_threads: int = 1, batch_size: int = 4096, scale_to_zero_mean: bool = True,
                  scale_to_unit_variance: bool = True):
-        super().__init__(region_type, name, num_processes, device, batch_size, scale_to_zero_mean=scale_to_zero_mean,
+        super().__init__(region_type, name, num_threads, device, batch_size, scale_to_zero_mean=scale_to_zero_mean,
                          scale_to_unit_variance=scale_to_unit_variance)
         self.transformer_link = "Rostlab/prot_t5_xl_half_uniref50-enc"
         self.batch_size = batch_size

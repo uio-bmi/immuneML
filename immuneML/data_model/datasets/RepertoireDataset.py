@@ -139,11 +139,15 @@ class RepertoireDataset(Dataset):
             self.metadata_fields = df.columns.values.tolist()
         return self.metadata_fields
 
-    def get_label_names(self, refresh=False):
+    def get_label_names(self, refresh=False, include_gene_labels: bool = False):
         """Returns the list of metadata fields which can be used as labels; if refresh=True, it reloads the fields
-        from disk"""
+        from disk; V and J gene fields are excluded unless include_gene_labels is True"""
         all_metadata_fields = set(self.get_metadata_fields(refresh))
-        for non_label in ["subject_id", "filename", "repertoire_id", "identifier", "type_dict_dynamic_fields", "dataset_type"]:
+        non_labels = ["subject_id", "filename", "repertoire_id", "identifier", "type_dict_dynamic_fields",
+                      "dataset_type"]
+        if not include_gene_labels:
+            non_labels += Dataset.GENE_LABEL_NAMES
+        for non_label in non_labels:
             if non_label in all_metadata_fields:
                 all_metadata_fields.remove(non_label)
 

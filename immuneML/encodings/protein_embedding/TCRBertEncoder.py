@@ -49,6 +49,11 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
     - device (str): Which device to use for model inference - 'cpu', 'cuda', 'mps' - as defined by pytorch.
       Defaults to 'cpu'.
 
+    - num_threads (int): How many threads torch may use for the forward pass when device is 'cpu'; it has no
+      effect on other devices. On cpu torch parallelises within the model rather than across processes, so
+      this is a thread count and not the num_processes used elsewhere in immuneML. Defaults to 1, which
+      leaves torch's own setting (all available cores) in place.
+
     - scale_to_zero_mean (bool): Whether to scale the embeddings to zero mean. Defaults to True.
 
     - scale_to_unit_variance (bool): Whether to scale the embeddings to unit variance. Defaults to True.
@@ -65,8 +70,8 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
     """
     def __init__(self, name: str = None, region_type: RegionType = RegionType.IMGT_CDR3, model: str = None,
                  layers: list = None, method: str = None, batch_size: int = None, device: str = 'cpu',
-                 scale_to_zero_mean: bool = True, scale_to_unit_variance: bool = True):
-        super().__init__(region_type, name, num_processes=1, device=device, batch_size=batch_size,
+                 num_threads: int = 1, scale_to_zero_mean: bool = True, scale_to_unit_variance: bool = True):
+        super().__init__(region_type, name, num_threads=num_threads, device=device, batch_size=batch_size,
                          scale_to_zero_mean=scale_to_zero_mean, scale_to_unit_variance=scale_to_unit_variance)
         self.model = model
         self.layers = layers
@@ -80,19 +85,21 @@ class TCRBertEncoder(ProteinEmbeddingEncoder):
 
     @staticmethod
     def _prepare_parameters(name: str = None, model: str = None, layers: list = None, method: str = None,
-                            batch_size: int = None, device: str = None, scale_to_zero_mean: bool = False, scale_to_unit_variance: bool = False):
+                            batch_size: int = None, device: str = None, num_threads: int = 1,
+                            scale_to_zero_mean: bool = False, scale_to_unit_variance: bool = False):
         location = TCRBertEncoder.__name__
         ParameterValidator.assert_in_valid_list(model, ["tcr-bert", "tcr-bert-mlm-only"], location, "model")
         ParameterValidator.assert_type_and_value(layers, list, location, "layers")
         ParameterValidator.assert_in_valid_list(method, ["mean", "max", "attn_mean", "cls", "pool"], location, "method")
         ParameterValidator.assert_type_and_value(batch_size, int, location, "batch_size")
+        ParameterValidator.assert_type_and_value(num_threads, int, location, "num_threads", min_inclusive=1)
         ParameterValidator.assert_type_and_value(scale_to_zero_mean, bool, location, "scale_to_zero_mean")
         ParameterValidator.assert_type_and_value(scale_to_unit_variance, bool, location, "scale_to_unit_variance")
         ParameterValidator.assert_type_and_value(device, str, location, 'device')
         if len(re.findall("cuda:[0-9]*", device)) == 0:
             ParameterValidator.assert_in_valid_list(device, ['cpu', 'mps', 'cuda'], location, 'device')
         return {"name": name, "model": model, "layers": layers, "method": method, "batch_size": batch_size,
-                'device': device}
+                'device': device, 'num_threads': num_threads}
 
     def _get_caching_params(self, dataset, params: EncoderParams, step: str = None):
         return (dataset.identifier, tuple(params.label_config.get_labels_by_name()), self.scale_to_zero_mean,

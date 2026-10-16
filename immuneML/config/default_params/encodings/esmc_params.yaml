@@ -1,4 +1,4 @@
 region_type: IMGT_CDR3
 device: cpu
-num_processes: 4
+num_threads: 1 # torch threads for the forward pass on cpu; 1 leaves torch's own setting in place
 batch_size: 4096

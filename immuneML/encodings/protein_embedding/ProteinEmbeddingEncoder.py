@@ -1,4 +1,5 @@
 import itertools
+import logging
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -26,11 +27,11 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
     Subclasses must implement the _embed_sequence_set method.
     """
 
-    def __init__(self, region_type: RegionType, name: str = None, num_processes: int = 1, device: str = 'cpu',
+    def __init__(self, region_type: RegionType, name: str = None, num_threads: int = 1, device: str = 'cpu',
                  batch_size: int = 4096, scale_to_zero_mean: bool = True, scale_to_unit_variance: bool = True):
         super().__init__(name)
         self.region_type = region_type
-        self.num_processes = num_processes
+        self.num_threads = num_threads
         self.device = device
         self.batch_size = batch_size
         self.scale_to_zero_mean = scale_to_zero_mean
@@ -44,8 +45,7 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
 
     def encode(self, dataset: Dataset, params: EncoderParams) -> Dataset:
 
-        import torch
-        torch.device(self.device)
+        self._set_up_cpu_threads()
 
         cache_params = self._get_caching_params(dataset, params)
         if isinstance(dataset, SequenceDataset):
@@ -56,6 +56,20 @@ class ProteinEmbeddingEncoder(DatasetEncoder, ABC):
             return CacheHandler.memo_by_params(cache_params, lambda: self._encode_repertoire_dataset(dataset, params))
         else:
             raise RuntimeError(f"{self.__class__.__name__}: {self.name}: invalid dataset type: {type(dataset)}.")
+
+    def _set_up_cpu_threads(self):
+        """On cpu the forward pass is parallelised by torch's intra-op threads rather than by processes:
+        the model is held once and its operations are split over the threads. Running copies of the model
+        in several processes instead would duplicate the weights per process and, unless the threads were
+        capped inside each one, oversubscribe the cores.
+
+        The default of 1 leaves torch's own setting alone, where it uses all available cores; forcing a
+        single thread there would slow down every analysis that does not set the parameter."""
+        import torch
+
+        if self.device == 'cpu' and self.num_threads > 1:
+            torch.set_num_threads(self.num_threads)
+            logging.info(f"{self.__class__.__name__} ({self.name}): using {self.num_threads} torch threads on cpu.")
 
     def _encode_sequence_dataset(self, dataset: SequenceDataset, params: EncoderParams):
         seq_field = get_sequence_field_name(self.region_type, SequenceType.AMINO_ACID)

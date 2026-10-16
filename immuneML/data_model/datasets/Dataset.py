@@ -18,6 +18,7 @@ class Dataset:
     TEST = "test"
     SUBSAMPLED = "subsampled"
     PREPROCESSED = "preprocessed"
+    GENE_LABEL_NAMES = ['v_call', 'j_call']
 
     def __post_init__(self):
         if self.name is None:
@@ -54,7 +55,7 @@ class Dataset:
         pass
 
     @abc.abstractmethod
-    def get_label_names(self):
+    def get_label_names(self, include_gene_labels: bool = False):
         pass
 
     @abc.abstractmethod

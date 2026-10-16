@@ -80,8 +80,13 @@ class ElementDataset(Dataset, ABC):
         dataset.element_ids = self.element_ids
         return dataset
 
-    def get_label_names(self):
-        invalid_label_names = ['type_dict_dynamic_fields', 'organism', 'j_gene', 'v_gene', 'j_call', 'v_call']
+    def get_label_names(self, include_gene_labels: bool = False):
+        """Returns the labels that can be used as a prediction target. V and J gene columns are excluded by
+        default, since they are a property of the receptor rather than something to predict; set
+        include_gene_labels to True to get them as well, e.g. to compare another label against the germline."""
+        invalid_label_names = ['type_dict_dynamic_fields', 'organism']
+        if not include_gene_labels:
+            invalid_label_names += Dataset.GENE_LABEL_NAMES
         return [el for el in list(self.labels.keys()) if el not in invalid_label_names] \
             if isinstance(self.labels, dict) else []
 

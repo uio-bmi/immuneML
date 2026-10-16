@@ -66,6 +66,28 @@ class TestLabelOverlap(TestCase):
         self.assertEqual(len(result.output_tables), 1)
         self.assertIsNotNone(result.info)
 
+    def test_gene_label(self):
+        # v_call is not a prediction target and is left out of get_label_names by default, but this report
+        # asks for it explicitly, so epitope-against-germline heatmaps are not skipped
+        labels = {**{key: list(values) for key, values in self.dataset.labels.items()},
+                  "v_call": ["TRBV1", "TRBV1", "TRBV2", "TRBV2", "TRBV2"]}
+        metadata_filepath = self.path / "metadata_with_genes.csv"
+        pd.DataFrame(labels).to_csv(metadata_filepath, index=False)
+        dataset = RepertoireDataset(labels=labels, metadata_file=metadata_filepath)
+
+        self.assertNotIn("v_call", dataset.get_label_names())
+        self.assertIn("v_call", dataset.get_label_names(include_gene_labels=True))
+
+        report = LabelOverlap(dataset=dataset, result_path=self.path / "gene_results/",
+                              name="label_overlap_report", column_label="v_call", row_label="disease")
+
+        self.assertTrue(report.check_prerequisites())
+        report._generate()
+
+        df = pd.read_csv(self.path / "gene_results/label_overlap.csv", index_col=0)
+        self.assertEqual(df.loc["healthy", "TRBV1"], 2)
+        self.assertEqual(df.loc["sick", "TRBV2"], 2)
+
     def test_invalid_labels(self):
         # Test with invalid label names
         report = LabelOverlap(dataset=self.dataset,

@@ -25,6 +25,8 @@ class LabelOverlap(DataReport):
 
     - row_label (str): Name of the label to be used as rows in the heatmap.
 
+    Either label may also be a V or J gene column (v_call, j_call).
+
     **YAML specification:**
 
     .. code-block:: yaml
@@ -33,6 +35,12 @@ class LabelOverlap(DataReport):
             LabelOverlap:
                 column_label: epitope
                 row_label: batch
+
+        # how much of the epitope label is already determined by the V gene
+        my_germline_report:
+            LabelOverlap:
+                column_label: v_call
+                row_label: epitope
 
     """
 
@@ -52,7 +60,10 @@ class LabelOverlap(DataReport):
         return LabelOverlap(column_label=kwargs["column_label"], row_label=kwargs["row_label"], name=kwargs.get("name", "LabelOverlap"))
 
     def check_prerequisites(self):
-        if self.column_label not in self.dataset.get_label_names() or self.row_label not in self.dataset.get_label_names():
+        # gene labels are included here: comparing a label against V or J gene is one of the main uses of
+        # this report, even though the genes are not prediction targets
+        label_names = self.dataset.get_label_names(include_gene_labels=True)
+        if self.column_label not in label_names or self.row_label not in label_names:
             logging.warning(f"One or both of the specified labels ({[self.column_label, self.row_label]}) do not exist in the dataset.")
             return False
         return True
