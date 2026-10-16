@@ -150,9 +150,7 @@ class LigoSimInstruction(Instruction):
         self.state.paths = exporter_output['paths']
 
     def _simulate_dataset(self):
-
-        labels = {**{signal.id: [True, False] for signal in self.state.signals},
-                  **{'species': self.state.simulation.species}}
+        labels = {signal.id: [True, False] for signal in self.state.signals}
 
         if self.state.simulation.is_repertoire:
             self._simulate_repertoire_dataset(labels)
@@ -196,7 +194,8 @@ class LigoSimInstruction(Instruction):
                                                          filename=data_filename,
                                                          type_dict=type_dict,
                                                          name=dataset_name,
-                                                         labels=labels) # todo: identifier not explicitly passed on to dataset
+                                                         labels=labels,
+                                                         extra_metadata={'species': self.state.simulation.species})
 
         write_dataset_yaml(metadata_filename, metadata_yaml)
 

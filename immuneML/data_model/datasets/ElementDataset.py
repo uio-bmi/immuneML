@@ -43,13 +43,18 @@ class ElementDataset(Dataset, ABC):
             self.identifier = uuid4().hex
 
     @classmethod
-    def create_metadata_dict(cls, dataset_class, filename, type_dict, name, labels, identifier=None):
+    def create_metadata_dict(cls, dataset_class, filename, type_dict, name, labels, identifier=None,
+                             extra_metadata: dict = None):
+        """Properties of the dataset as a whole (e.g., the species the sequences were simulated for) are passed as
+        extra_metadata and stored next to the dataset name: unlike labels, they describe the dataset rather than its
+        elements, so they have no corresponding column."""
         return {"type_dict_dynamic_fields": {key: AIRRSequenceSet.TYPE_TO_STR[val] for key, val in type_dict.items()},
                 "identifier": identifier if identifier is not None else uuid4().hex,
                 "dataset_type": dataset_class if isinstance(dataset_class, str) else dataset_class.__name__,
                 "filename": filename,
                 "name": name,
                 "labels": {} if labels is None else labels,
+                **({} if extra_metadata is None else extra_metadata),
                 "timestamp": str(datetime.now())}
 
     @property

@@ -202,4 +202,11 @@ def test_simulation():
             assert df.shape[0] == 20
             assert all(df.junction_aa.str.len() > 0)
 
+            # species describes the dataset, so it is stored next to the dataset name and not as a label:
+            # as a label it would be requested as per-example metadata, for which there is no column
+            with open(path / "result/inst1/exported_dataset/airr/simulated_dataset.yaml") as file:
+                dataset_yaml = yaml.safe_load(file)
+            assert dataset_yaml["species"] == "human"
+            assert "species" not in dataset_yaml["labels"]
+
         shutil.rmtree(path)
