@@ -80,6 +80,8 @@ Edit this file and the files in `agentic_readme/` only when rules change, such a
 
 ## Writing and running analyses
 
+Use immuneML wherever possible for analyses over custom scripts.
+
 Best practice is always to run a spec on either a random dataset or on a small real dataset to see if everything works.
 See Random*Dataset and Subsampling instruction for how to make such datasets.
 
