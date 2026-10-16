@@ -2,7 +2,9 @@ from pathlib import Path
 from typing import List, Tuple
 
 import numpy as np
+import pandas as pd
 import plotly.express as px
+from scipy.sparse import issparse
 
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.reports.PlotlyUtil import PlotlyUtil
@@ -101,21 +103,73 @@ class FeatureValueBarplot(FeatureReport):
         self.plot_all_features = plot_all_features
         self.plot_top_n = plot_top_n
         self.plot_bottom_n = plot_bottom_n
+        self._feature_summary = None
 
     def _generate(self):
-        result = self._generate_report_result()
+        label_cols = self._get_label_cols()
+        self._feature_summary = self._summarise_feature_values([])
+        result = self._generate_report_result(
+            self._summarise_feature_values(label_cols) if label_cols else self._feature_summary)
         result.info = "A barplot of the feature values in a given encoded data matrix, averaged across examples. Each bar in the barplot represents the mean value of a given feature, and along the x-axis are the different features."
         return result
 
+    def _get_label_cols(self) -> List[str]:
+        return [col for col in [self.color, self.facet_row, self.facet_column] if col is not None]
+
+    def _summarise_feature_values(self, group_cols: List[str]) -> pd.DataFrame:
+        """Mean and error per feature, computed directly from the (possibly sparse) encoded matrix, so that the
+        example by feature matrix is never expanded to long format."""
+        matrix = self.dataset.encoded_data.examples
+        feature_names = self.dataset.encoded_data.feature_names
+        feature_names = list(feature_names) if feature_names is not None else list(range(matrix.shape[1]))
+
+        if len(group_cols) == 0:
+            groups = {(): np.arange(matrix.shape[0])}
+        else:
+            metadata = pd.DataFrame(self.dataset.get_metadata(group_cols, return_df=True))
+            groups = {key if isinstance(key, tuple) else (key,): np.asarray(indices)
+                      for key, indices in metadata.groupby(group_cols, sort=False).indices.items()}
+
+        annotations = self.dataset.encoded_data.feature_annotations
+        if annotations is not None:
+            annotations = annotations.reset_index(drop=True).drop(columns=[self.x], errors='ignore')
+
+        error_name = self._get_error_function().__name__
+        summaries = []
+        for group_values, row_indices in groups.items():
+            mean, error = self._mean_and_error(matrix[row_indices], error_name)
+            summary = pd.DataFrame({self.x: feature_names, "valuemean": mean, f"value{error_name}": error})
+            for col, value in zip(group_cols, group_values):
+                summary[col] = value
+            # annotations are in the same order as the features, so they are added by position: feature names
+            # are not necessarily unique and joining on them could duplicate rows
+            summaries.append(summary if annotations is None else pd.concat([summary, annotations], axis=1))
+
+        return pd.concat(summaries, ignore_index=True)
+
+    def _mean_and_error(self, matrix, error_name: str) -> Tuple[np.ndarray, np.ndarray]:
+        if issparse(matrix):
+            mean = np.asarray(matrix.mean(axis=0)).ravel()
+            mean_of_squares = np.asarray(matrix.multiply(matrix).mean(axis=0)).ravel()
+        else:
+            matrix = np.asarray(matrix)
+            mean = matrix.mean(axis=0)
+            mean_of_squares = np.square(matrix).mean(axis=0)
+
+        # population variance, to match the ddof=0 standard deviation used by FeatureReport
+        error = np.sqrt(np.clip(mean_of_squares - np.square(mean), 0, None))
+        if error_name == "sem":
+            error = error / (matrix.shape[0] ** 0.5)
+
+        return mean, error
+
     def _plot(self, data_long_format) -> Tuple[List[ReportOutput], List[ReportOutput]]:
-        groupby_cols_features = [self.x]
-        data_groupedby_features = self._get_grouped_data(data_long_format, groupby_cols_features)
-        groupby_cols_labels = [self.x, self.color, self.facet_row, self.facet_column]
-        data_groupedby_labels = self._get_grouped_data(data_long_format, groupby_cols_labels)
+        data_groupedby_features = self._feature_summary
+        data_groupedby_labels = data_long_format
 
         plotting_data_dict = {'all': data_groupedby_labels} if self.plot_all_features else {}
 
-        error_y = f"value{self.error_function}" if self.show_error_bar else None
+        error_y = f"value{self._get_error_function().__name__}" if self.show_error_bar else None
         output_figures = []
         output_tables = []
 

@@ -81,4 +81,8 @@ Edit this file and the files in `agentic_readme/` only when rules change, such a
 ## Writing and running analyses
 
 Best practice is always to run a spec on either a random dataset or on a small real dataset to see if everything works.
-See Random*Dataset and Subsampling instruction for how to do the two options.
+See Random*Dataset and Subsampling instruction for how to make such datasets.
+
+When deciding on details of an analysis (eg which kmers to use for simulation), and an overview of options
+could be obtained by running preliminary analyses, use immuneML for the purpose and keep the specs and results for 
+transparency and reproducibility.

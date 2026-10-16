@@ -25,9 +25,10 @@ class FeatureReport(EncodingReport):
         self.facet_column = column_grouping_label
         self.error_function = error_function
 
-    def _generate_report_result(self) -> ReportResult:
+    def _generate_report_result(self, data_long_format=None) -> ReportResult:
         PathBuilder.build(self.result_path)
-        data_long_format = DataReshaper.reshape(self.dataset, self.dataset.get_label_names())
+        if data_long_format is None:
+            data_long_format = DataReshaper.reshape(self.dataset, self.dataset.get_label_names())
         table_result = self._write_results_table(data_long_format)
         report_output = self._safe_plot(data_long_format=data_long_format)
         output_tables = [table_result]

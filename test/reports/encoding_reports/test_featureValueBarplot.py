@@ -76,9 +76,18 @@ class TestFeatureValueBarplot(TestCase):
         self.assertEqual(result.output_figures[0].path, path / "feature_value_barplot_all.html")
         self.assertEqual(result.output_tables[0].path, path / "feature_value_barplot_all.csv")
 
+        # feature values are aggregated per feature and per group, not listed per example
         content = pd.read_csv(path / "feature_values.csv")
-        self.assertListEqual(list(content.columns),
-                             ["patient", "disease", "timepoint", "example_id", "sequence", "feature", "value"])
+        self.assertSetEqual(set(content.columns), {"feature", "valuesem", "valuemean", "disease", "timepoint", "sequence"})
+        self.assertEqual(len(content), 30 * 4)
+
+        examples = dataset.encoded_data.examples.toarray()
+        metadata = pd.read_csv(path / "metadata.csv")
+        group_rows = (metadata["disease"] == "disease 1") & (metadata["timepoint"] == "timepoint 1")
+        expected_mean = examples[group_rows.values].mean(axis=0)
+        reported = content[(content["disease"] == "disease 1") & (content["timepoint"] == "timepoint 1")]
+        self.assertListEqual(list(reported["feature"]), list(dataset.encoded_data.feature_names))
+        self.assertTrue(np.allclose(reported["valuemean"].values, expected_mean))
 
         # report should succeed to build_from_objects but check_prerequisites should be false when data is not encoded
         report = FeatureValueBarplot.build_object(**{"dataset": RepertoireDataset(),
