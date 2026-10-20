@@ -8,4 +8,5 @@ temperature: 0.4
 num_layers: 2
 device: cpu
 seed: null
+p_gen_batch_size: 1000
 locus: null

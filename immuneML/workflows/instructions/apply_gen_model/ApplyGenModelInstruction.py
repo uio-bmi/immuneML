@@ -117,7 +117,8 @@ class ApplyGenModelInstruction(Instruction):
         p_gen_column = f"p_gen_{self.method.name or type(self.method).__name__}"
 
         for name, dataset in self.p_gen_datasets.items():
-            p_gens = self.method.compute_p_gens(dataset.data, SequenceType.AMINO_ACID)
+            p_gens = self.method.compute_p_gens(dataset.data,
+                                                getattr(self.method, 'sequence_type', SequenceType.AMINO_ACID))
             df = dataset.data.topandas()
             df[p_gen_column] = np.asarray(p_gens, dtype=float)
             df.to_csv(path / f'{name}_p_gens.tsv', sep='\t', index=False)
