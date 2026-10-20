@@ -66,6 +66,8 @@ class ProGen(GenerativeModel):
 
     - remove_affixes (bool): whether to remove prefix and suffix from generated sequences
 
+    - p_gen_batch_size (int): number of sequences scored at once when computing generation probabilities
+
     - seed (int): random seed for reproducibility
 
 
@@ -97,6 +99,7 @@ class ProGen(GenerativeModel):
                         remove_affixes: True
                         name: 'progen_finetuned_model'
                         region_type: 'IMGT_JUNCTION'
+                        p_gen_batch_size: 64
                         seed: 42
 
     """
@@ -125,7 +128,8 @@ class ProGen(GenerativeModel):
                  learning_rate: float, device: str, fp16: bool = False, prefix_text: str = "", suffix_text: str = "",
                  max_new_tokens: int = 1024, temperature: float = 1.0, top_p: float = 0.9, prompt: str = "1",
                  num_gen_batches: int = 1, per_device_train_batch_size: int = 2, remove_affixes: bool = True,
-                 name: str = None, region_type: str = RegionType.IMGT_JUNCTION.name, seed: int = None, ):
+                 name: str = None, region_type: str = RegionType.IMGT_JUNCTION.name, seed: int = None,
+                 p_gen_batch_size: int = 64):
         super().__init__(locus, seed=seed, name=name, region_type=RegionType.get_object(region_type))
         self.sequence_type = SequenceType.AMINO_ACID
         self.tokenizer_path = tokenizer_path
@@ -144,6 +148,7 @@ class ProGen(GenerativeModel):
         self.num_gen_batches = num_gen_batches
         self.per_device_train_batch_size = per_device_train_batch_size
         self.remove_affixes = remove_affixes
+        self.p_gen_batch_size = p_gen_batch_size
         self.model = None
 
         from tokenizers import Tokenizer
@@ -297,14 +302,72 @@ class ProGen(GenerativeModel):
     def is_same(self, model) -> bool:
         raise NotImplementedError
 
-    def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
-        raise RuntimeError
+    def compute_p_gens(self, sequences, sequence_type: SequenceType, sequence_field: str = None) -> np.ndarray:
+        import torch
 
-    def compute_p_gen(self, sequence: dict, sequence_type: SequenceType) -> float:
-        raise RuntimeError
+        assert sequence_type == self.sequence_type, \
+            f"{ProGen.__name__}: expected {self.sequence_type}, got {sequence_type}."
+        assert self.model is not None, f"{ProGen.__name__}: the model has not been fitted or loaded yet."
+
+        seqs = self._extract_sequence_strings(sequences, sequence_type, sequence_field)
+        prompt_ids = self.hf_tokenizer(self.prompt).input_ids
+        log_p_gens = np.zeros(len(seqs))
+
+        self.model.eval()
+        with torch.inference_mode():
+            for start in range(0, len(seqs), self.p_gen_batch_size):
+                batch = seqs[start:start + self.p_gen_batch_size]
+                log_p_gens[start:start + len(batch)] = self._score_batch(prompt_ids, batch)
+
+        return np.exp(log_p_gens)
+
+    def compute_p_gen(self, sequence: dict, sequence_type: SequenceType, sequence_field: str = None) -> float:
+        return float(self.compute_p_gens([sequence], sequence_type, sequence_field)[0])
+
+    def _score_batch(self, prompt_ids: list, seqs: list) -> np.ndarray:
+        """Returns the log-probability of each sequence followed by the suffix text, given the prompt."""
+        import torch
+
+        continuations = [self.hf_tokenizer(seq + self.suffix_text).input_ids for seq in seqs]
+        max_length = len(prompt_ids) + max(len(ids) for ids in continuations)
+
+        input_ids = torch.full((len(seqs), max_length), self.hf_tokenizer.pad_token_id, dtype=torch.long)
+        attention_mask = torch.zeros((len(seqs), max_length), dtype=torch.long)
+        # targets are -1 where the token is not scored: the prompt and the padding
+        targets = torch.full((len(seqs), max_length), -1, dtype=torch.long)
+
+        for index, ids in enumerate(continuations):
+            length = len(prompt_ids) + len(ids)
+            input_ids[index, :length] = torch.tensor(prompt_ids + ids)
+            attention_mask[index, :length] = 1
+            targets[index, len(prompt_ids):length] = torch.tensor(ids)
+
+        logits = self.model(input_ids=input_ids.to(self.device), attention_mask=attention_mask.to(self.device)).logits
+        log_probs = torch.nn.functional.log_softmax(logits[:, :-1].float(), dim=-1)
+
+        targets = targets[:, 1:].to(self.device)
+        scored = targets >= 0
+        token_log_probs = log_probs.gather(2, targets.clamp(min=0).unsqueeze(-1)).squeeze(-1)
+
+        return (token_log_probs * scored).sum(dim=1).double().cpu().numpy()
+
+    def _extract_sequence_strings(self, sequences, sequence_type: SequenceType, sequence_field: str = None) -> list:
+        """Accepts a bionumpy sequence set (e.g., dataset.data), a list of dicts, or a list of strings, and returns
+        plain strings."""
+        field = sequence_field if sequence_field is not None \
+            else get_sequence_field_name(self.region_type, sequence_type)
+
+        def to_str(value):
+            return value.to_string() if hasattr(value, 'to_string') else str(value)
+
+        if hasattr(sequences, field):
+            return [to_str(value) for value in getattr(sequences, field)]
+
+        return [to_str(seq[field] if field in seq else seq['sequence']) if isinstance(seq, dict) else to_str(seq)
+                for seq in sequences]
 
     def can_compute_p_gens(self) -> bool:
-        return False
+        return True
 
     def can_generate_from_skewed_gene_models(self) -> bool:
         return False
