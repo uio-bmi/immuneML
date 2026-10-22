@@ -62,7 +62,7 @@ class PWM(GenerativeModel):
         pwm_matrix = {}
 
         pwm = PWM(locus=model_overview['locus'], sequence_type=model_overview['sequence_type'],
-                  region_type=model_overview['region_type'])
+                  region_type=model_overview['region_type'], name=model_overview.get('name'))
 
         for file, length in [(path / f'pwm_len_{length}.csv', length) for length in length_probs.keys()]:
             assert file.exists(), f"{cls.__name__}: {file} is not a file."
@@ -143,14 +143,50 @@ class PWM(GenerativeModel):
         return SequenceDataset.build_from_partial_df(df, PathBuilder.build(path), 'synthetic_dataset',
                                                      {'gen_model_name': [self.name]}, {'gen_model_name': str})
 
-    def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
-        raise NotImplementedError
+    def compute_p_gens(self, sequences, sequence_type: SequenceType, sequence_field: str = None) -> np.ndarray:
+        """Generation probability per sequence: the probability of its length, times the product of the
+        probabilities of its characters at each position in the PWM for that length. Sequences of a length that was
+        not seen in training, or with characters outside the alphabet, get a probability of 0."""
+        assert sequence_type == self.sequence_type, \
+            f"{PWM.__name__}: expected {self.sequence_type}, got {sequence_type}."
+        assert self.pwm_matrix is not None, f"{PWM.__name__}: the model has not been fitted or loaded yet."
 
-    def compute_p_gen(self, sequence: dict, sequence_type: SequenceType) -> float:
-        raise NotImplementedError
+        seqs = self._extract_sequence_strings(sequences, sequence_type, sequence_field)
+        alphabet = EnvironmentSettings.get_sequence_alphabet(self.sequence_type)
+        letter_to_index = {letter: i for i, letter in enumerate(alphabet)}
+        p_gens = np.zeros(len(seqs))
+
+        for index, seq in enumerate(seqs):
+            length = len(seq)
+            if length not in self.pwm_matrix or length == 0 or any(letter not in letter_to_index for letter in seq):
+                continue
+
+            letter_indices = [letter_to_index[letter] for letter in seq]
+            position_probs = self.pwm_matrix[length][letter_indices, np.arange(length)]
+            p_gens[index] = self.length_probs[length] * np.prod(position_probs)
+
+        return p_gens
+
+    def compute_p_gen(self, sequence: dict, sequence_type: SequenceType, sequence_field: str = None) -> float:
+        return float(self.compute_p_gens([sequence], sequence_type, sequence_field)[0])
+
+    def _extract_sequence_strings(self, sequences, sequence_type: SequenceType, sequence_field: str = None) -> list:
+        """Accepts a bionumpy sequence set (e.g., dataset.data), a list of dicts, or a list of strings, and returns
+        plain strings."""
+        field = sequence_field if sequence_field is not None \
+            else get_sequence_field_name(self.region_type, sequence_type)
+
+        def to_str(value):
+            return value.to_string() if hasattr(value, 'to_string') else str(value)
+
+        if hasattr(sequences, field):
+            return [to_str(value) for value in getattr(sequences, field)]
+
+        return [to_str(seq[field] if field in seq else seq['sequence']) if isinstance(seq, dict) else to_str(seq)
+                for seq in sequences]
 
     def can_compute_p_gens(self) -> bool:
-        return False
+        return True
 
     def can_generate_from_skewed_gene_models(self) -> bool:
         return False
@@ -169,6 +205,6 @@ class PWM(GenerativeModel):
 
         write_yaml(filename=model_path / 'model_overview.yaml',
                    yaml_dict={'type': 'PWM', 'locus': self.locus.name, 'sequence_type': self.sequence_type.name,
-                              'region_type': self.region_type.name})
+                              'region_type': self.region_type.name, 'name': self.name})
 
         return Path(shutil.make_archive(str(path / f'trained_model_{self.name}'), "zip", str(path / 'model'))).absolute()
