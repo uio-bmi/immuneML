@@ -8,7 +8,7 @@ batch_size: 10000
 pretrains: 10
 warmup_epochs: 20
 patience: 20
-iter_count_prob_estimation: 5
+iter_count_prob_estimation: 500
 device: cpu
 learning_rate: 0.001
 cdr3_embed_dim: null
