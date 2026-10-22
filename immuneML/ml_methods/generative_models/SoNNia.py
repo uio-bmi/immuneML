@@ -91,6 +91,7 @@ class SoNNia(GenerativeModel):
 
         sonnia._model = InternalSoNNia(custom_pgen_model=sonnia._model_path, seed=sonnia.seed,
                                        chain_type=sonnia._chain_type,
+                                       deep=sonnia.deep,
                                        vj=sonnia.locus in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
                                        include_joint_genes=sonnia.include_joint_genes,
                                        include_indep_genes=not sonnia.include_joint_genes)
@@ -155,6 +156,7 @@ class SoNNia(GenerativeModel):
         self._model = InternalSoNNia(data_seqs=data_seqs,
                                      gen_seqs=[],
                                      custom_pgen_model=self._model_path, chain_type=self._chain_type,
+                                     deep=self.deep,
                                      vj=self.locus in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
                                      include_joint_genes=self.include_joint_genes,
                                      include_indep_genes=not self.include_joint_genes)
