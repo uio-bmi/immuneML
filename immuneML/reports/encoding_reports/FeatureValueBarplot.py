@@ -1,3 +1,5 @@
+import logging
+from itertools import combinations
 from pathlib import Path
 from typing import List, Tuple
 
@@ -5,6 +7,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 from scipy.sparse import issparse
+from scipy.spatial.distance import jensenshannon
 
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.reports.PlotlyUtil import PlotlyUtil
@@ -64,6 +67,21 @@ class FeatureValueBarplot(FeatureReport):
     - error_function (str): which error function to use for the error bar. Options are 'std' (standard deviation) or
       'sem' (standard error of the mean). Default: std.
 
+    - compute_jensen_shannon (bool): whether to compute the Jensen-Shannon divergence between the feature
+      distributions of the classes of color_grouping_label (for example, between the original and each generated
+      dataset). Each class's vector of mean feature values is normalized to sum to 1 and treated as a distribution
+      over the features, and the divergence is computed with base 2, so it is 0 for identical distributions and 1 for
+      distributions with no overlap. The values are written to jensen_shannon_divergence.csv (one row per pair of
+      classes, with both the divergence and the Jensen-Shannon distance, which is its square root) and shown as a
+      subtitle on the bar plots. This requires color_grouping_label to be set and the mean feature values to be
+      non-negative, since a negative mean cannot be read as part of a distribution (which happens when the encoded
+      values are scaled, for example by scale_to_zero_mean); when either does not hold, the divergence is skipped
+      with a warning and the rest of the report is produced as usual. By default, this is False.
+
+    - jensen_shannon_reference (str): one class of color_grouping_label to compare all other classes against, instead
+      of comparing every pair of classes. Useful when one dataset is the reference the others are judged by. By
+      default, this is null, and all pairs are compared.
+
 
     **YAML specification:**
 
@@ -80,6 +98,8 @@ class FeatureValueBarplot(FeatureReport):
                         plot_all_features: true
                         plot_top_n: 10
                         plot_bottom_n: 5
+                        compute_jensen_shannon: true
+                        jensen_shannon_reference: original
 
     """
 
@@ -91,7 +111,8 @@ class FeatureValueBarplot(FeatureReport):
                  color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
                  x_title: str = None, y_title: str = None, show_error_bar=True, name: str = None,
                  plot_all_features: bool = True, error_function: str = None,
-                 number_of_processes: int = 1, plot_top_n: int = None, plot_bottom_n: int = None):
+                 number_of_processes: int = 1, plot_top_n: int = None, plot_bottom_n: int = None,
+                 compute_jensen_shannon: bool = False, jensen_shannon_reference: str = None):
         super().__init__(dataset=dataset, result_path=result_path, color_grouping_label=color_grouping_label,
                          row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label,
                          name=name, number_of_processes=number_of_processes, error_function=error_function)
@@ -103,6 +124,8 @@ class FeatureValueBarplot(FeatureReport):
         self.plot_all_features = plot_all_features
         self.plot_top_n = plot_top_n
         self.plot_bottom_n = plot_bottom_n
+        self.compute_jensen_shannon = compute_jensen_shannon
+        self.jensen_shannon_reference = jensen_shannon_reference
         self._feature_summary = None
 
     def _generate(self):
@@ -163,6 +186,69 @@ class FeatureValueBarplot(FeatureReport):
 
         return mean, error
 
+    def _jensen_shannon_divergences(self, data_long_format) -> pd.DataFrame:
+        """Jensen-Shannon divergence between the feature distributions of the classes of color_grouping_label.
+
+        Each class's vector of mean feature values is normalized to sum to 1 and read as a distribution over the
+        features. When facet labels are set, the comparison is made within each facet, since the panels hold
+        different subsets of the examples.
+        """
+        location = self.__class__.__name__
+
+        if self.color is None:
+            logging.warning(f"{location}: compute_jensen_shannon is set but color_grouping_label is not, so there "
+                            f"are no groups to compare. Skipping the Jensen-Shannon divergence.")
+            return pd.DataFrame()
+
+        if (data_long_format["valuemean"] < 0).any():
+            logging.warning(f"{location}: the mean feature values include negative numbers, which cannot be read as "
+                            f"part of a distribution over features (this happens when the encoded values are scaled). "
+                            f"Skipping the Jensen-Shannon divergence.")
+            return pd.DataFrame()
+
+        facet_cols = [col for col in [self.facet_row, self.facet_column] if col is not None]
+        panels = data_long_format.groupby(facet_cols, sort=False) if facet_cols else [((), data_long_format)]
+
+        rows = []
+        for facet_values, panel in panels:
+            facet_values = facet_values if isinstance(facet_values, tuple) else (facet_values,)
+            distributions = panel.pivot_table(index=self.x, columns=self.color, values="valuemean",
+                                              aggfunc="sum", fill_value=0)
+            totals = distributions.sum(axis=0)
+            # a class whose feature values are all zero has no distribution to compare
+            classes = [cls for cls in distributions.columns if totals[cls] > 0]
+
+            pairs = self._class_pairs(classes, location)
+            for first, second in pairs:
+                distance = jensenshannon(distributions[first] / totals[first],
+                                         distributions[second] / totals[second], base=2)
+                rows.append({**dict(zip(facet_cols, facet_values)), "group_1": first, "group_2": second,
+                             "jensen_shannon_divergence": distance ** 2, "jensen_shannon_distance": distance})
+
+        return pd.DataFrame(rows)
+
+    def _class_pairs(self, classes: List, location: str) -> List[Tuple]:
+        if self.jensen_shannon_reference is None:
+            return list(combinations(classes, 2))
+        if self.jensen_shannon_reference not in classes:
+            logging.warning(f"{location}: jensen_shannon_reference '{self.jensen_shannon_reference}' is not one of "
+                            f"the classes of '{self.color}' ({classes}). Comparing all pairs instead.")
+            return list(combinations(classes, 2))
+        return [(self.jensen_shannon_reference, cls) for cls in classes if cls != self.jensen_shannon_reference]
+
+    def _jensen_shannon_subtitle(self, divergences: pd.DataFrame) -> str:
+        """A one-line summary for the figure; the full table is always written to csv."""
+        if divergences.empty:
+            return ""
+        values = divergences["jensen_shannon_divergence"]
+        if len(divergences) <= 6:
+            pairs = ", ".join(f"{row.group_1} vs {row.group_2}: {row.jensen_shannon_divergence:.3f}"
+                              for row in divergences.itertuples())
+            return f"Jensen-Shannon divergence (base 2) - {pairs}"
+        return (f"Jensen-Shannon divergence (base 2) over {len(divergences)} pairs of '{self.color}': "
+                f"median {values.median():.3f}, range {values.min():.3f}-{values.max():.3f} "
+                f"(per pair in jensen_shannon_divergence.csv)")
+
     def _plot(self, data_long_format) -> Tuple[List[ReportOutput], List[ReportOutput]]:
         data_groupedby_features = self._feature_summary
         data_groupedby_labels = data_long_format
@@ -172,6 +258,16 @@ class FeatureValueBarplot(FeatureReport):
         error_y = f"value{self._get_error_function().__name__}" if self.show_error_bar else None
         output_figures = []
         output_tables = []
+
+        subtitle = ""
+        if self.compute_jensen_shannon:
+            divergences = self._jensen_shannon_divergences(data_groupedby_labels)
+            subtitle = self._jensen_shannon_subtitle(divergences)
+            if not divergences.empty:
+                divergence_path = self.result_path / "jensen_shannon_divergence.csv"
+                divergences.to_csv(divergence_path, index=False)
+                output_tables.append(ReportOutput(path=divergence_path,
+                                                  name="Jensen-Shannon divergence between feature distributions"))
 
         if self.plot_top_n:
             top_n_features = data_groupedby_features.iloc[
@@ -195,6 +291,8 @@ class FeatureValueBarplot(FeatureReport):
                             }, template='plotly_white',
                             color_discrete_sequence=px.colors.diverging.Tealrose)
             figure.update_layout(xaxis={'categoryorder': 'total descending'})
+            if subtitle:
+                figure.update_layout(title={'text': f"<sup>{subtitle}</sup>", 'x': 0.5, 'xanchor': 'center'})
 
             file_path = self.result_path / f"{self.result_name}_{key}.html"
 

@@ -99,3 +99,122 @@ class TestFeatureValueBarplot(TestCase):
         self.assertFalse(report.check_prerequisites())
 
         shutil.rmtree(path)
+
+    def _create_two_group_dataset(self, path, examples):
+        """Two groups of two examples each over three features, so the divergence is known exactly."""
+        encoded_data = {'examples': sparse.csr_matrix(np.array(examples, dtype=float)),
+                        'example_ids': ["e1", "e2", "e3", "e4"],
+                        'labels': {},
+                        'feature_names': ["AAA", "CCC", "DDD"],
+                        'encoding': "random"}
+
+        metadata_filepath = path / "metadata.csv"
+        pd.DataFrame({"subject": [1, 2, 3, 4],
+                      "origin": ["original", "original", "generated", "generated"]}).to_csv(metadata_filepath,
+                                                                                            index=False)
+
+        return RepertoireDataset(encoded_data=EncodedData(**encoded_data), metadata_file=metadata_filepath)
+
+    def _build_report(self, dataset, path, **kwargs):
+        params = {"dataset": dataset, "result_path": path, "plot_all_features": True,
+                  "color_grouping_label": "origin", "row_grouping_label": None, "column_grouping_label": None,
+                  "error_function": "std", "compute_jensen_shannon": True}
+        params.update(kwargs)
+        return FeatureValueBarplot.build_object(**params)
+
+    def test_jensen_shannon_divergence(self):
+        path = EnvironmentSettings.tmp_test_path / "featurevaluebarplot_js/"
+        PathBuilder.remove_old_and_build(path)
+
+        # the two groups put all their mass on different features, so the divergence is at its maximum of 1
+        disjoint = [[1., 0., 0.], [1., 0., 0.], [0., 1., 0.], [0., 1., 0.]]
+        report = self._build_report(self._create_two_group_dataset(path, disjoint), path)
+        result = report._generate()
+
+        divergence_path = path / "jensen_shannon_divergence.csv"
+        self.assertTrue(divergence_path.is_file())
+        self.assertIn(divergence_path, [output.path for output in result.output_tables])
+
+        divergences = pd.read_csv(divergence_path)
+        self.assertSetEqual(set(divergences.columns),
+                            {"group_1", "group_2", "jensen_shannon_divergence", "jensen_shannon_distance"})
+        self.assertEqual(len(divergences), 1)
+        self.assertSetEqual({divergences.loc[0, "group_1"], divergences.loc[0, "group_2"]},
+                            {"original", "generated"})
+        self.assertAlmostEqual(divergences.loc[0, "jensen_shannon_divergence"], 1.0)
+        # the distance is the square root of the divergence
+        self.assertAlmostEqual(divergences.loc[0, "jensen_shannon_distance"] ** 2,
+                               divergences.loc[0, "jensen_shannon_divergence"])
+
+        shutil.rmtree(path)
+
+    def test_jensen_shannon_divergence_identical_groups(self):
+        path = EnvironmentSettings.tmp_test_path / "featurevaluebarplot_js_identical/"
+        PathBuilder.remove_old_and_build(path)
+
+        # the same feature distribution in both groups, at different scales: the divergence is 0 either way
+        identical = [[1., 2., 1.], [1., 2., 1.], [2., 4., 2.], [2., 4., 2.]]
+        report = self._build_report(self._create_two_group_dataset(path, identical), path)
+        report._generate()
+
+        divergences = pd.read_csv(path / "jensen_shannon_divergence.csv")
+        self.assertAlmostEqual(divergences.loc[0, "jensen_shannon_divergence"], 0.)
+
+        shutil.rmtree(path)
+
+    def test_jensen_shannon_divergence_against_reference(self):
+        path = EnvironmentSettings.tmp_test_path / "featurevaluebarplot_js_reference/"
+        PathBuilder.remove_old_and_build(path)
+
+        encoded_data = {'examples': sparse.csr_matrix(np.array([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]])),
+                        'example_ids': ["e1", "e2", "e3"],
+                        'labels': {},
+                        'feature_names': ["AAA", "CCC", "DDD"],
+                        'encoding': "random"}
+        metadata_filepath = path / "metadata.csv"
+        pd.DataFrame({"subject": [1, 2, 3],
+                      "origin": ["original", "model_a", "model_b"]}).to_csv(metadata_filepath, index=False)
+        dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data), metadata_file=metadata_filepath)
+
+        # with a reference, every other class is compared against it instead of all pairs being compared
+        report = self._build_report(dataset, path, jensen_shannon_reference="original")
+        report._generate()
+
+        divergences = pd.read_csv(path / "jensen_shannon_divergence.csv")
+        self.assertEqual(len(divergences), 2)
+        self.assertListEqual(list(divergences["group_1"]), ["original", "original"])
+        self.assertSetEqual(set(divergences["group_2"]), {"model_a", "model_b"})
+
+        # a reference that is not one of the classes falls back to all pairs, with a warning
+        report = self._build_report(dataset, path, jensen_shannon_reference="not_a_class")
+        with self.assertLogs(level="WARNING"):
+            report._generate()
+
+        divergences = pd.read_csv(path / "jensen_shannon_divergence.csv")
+        self.assertEqual(len(divergences), 3)
+
+        shutil.rmtree(path)
+
+    def test_jensen_shannon_divergence_skipped(self):
+        path = EnvironmentSettings.tmp_test_path / "featurevaluebarplot_js_skipped/"
+        PathBuilder.remove_old_and_build(path)
+
+        disjoint = [[1., 0., 0.], [1., 0., 0.], [0., 1., 0.], [0., 1., 0.]]
+        dataset = self._create_two_group_dataset(path, disjoint)
+
+        # not requested at all: no file, and the rest of the report is still produced
+        report = self._build_report(dataset, path, compute_jensen_shannon=False)
+        result = report._generate()
+        self.assertFalse((path / "jensen_shannon_divergence.csv").is_file())
+        self.assertIsInstance(result, ReportResult)
+
+        # a negative mean feature value, as scaling produces, cannot be read as part of a distribution,
+        # so the divergence is skipped with a warning while the rest of the report is still produced
+        negative = [[-1., 0., 0.], [-1., 0., 0.], [0., 1., 0.], [0., 1., 0.]]
+        report = self._build_report(self._create_two_group_dataset(path, negative), path)
+        with self.assertLogs(level="WARNING"):
+            result = report._generate()
+        self.assertFalse((path / "jensen_shannon_divergence.csv").is_file())
+        self.assertIsInstance(result, ReportResult)
+
+        shutil.rmtree(path)

@@ -3,3 +3,5 @@ row_grouping_label: null
 column_grouping_label: null
 show_error_bar: true
 error_function: std
+compute_jensen_shannon: false
+jensen_shannon_reference: null
