@@ -3,7 +3,9 @@ import shutil
 import urllib
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
+import torch
 from transformers import PreTrainedTokenizerFast
 
 from immuneML.data_model.SequenceParams import Chain
@@ -80,4 +82,30 @@ def test_progen():
     assert (path / 'generated_dataset/synthetic_dataset.tsv').exists()
     assert pd.read_csv(str(path / 'generated_dataset/synthetic_dataset.tsv'), sep='\t').shape[0] == 7
 
+    _test_p_gens(progen, dataset)
+
     shutil.rmtree(path)
+
+
+def _test_p_gens(progen: ProGen, dataset):
+    assert progen.can_compute_p_gens()
+
+    progen.p_gen_batch_size = 3
+    p_gens = progen.compute_p_gens(dataset.data, SequenceType.AMINO_ACID)
+
+    assert p_gens.shape == (20,)
+    assert np.all((p_gens > 0) & (p_gens <= 1))
+
+    seqs = dataset.data.topandas()['junction_aa'].tolist()
+    assert np.allclose(progen.compute_p_gens(seqs, SequenceType.AMINO_ACID), p_gens)
+    assert np.isclose(progen.compute_p_gen({'junction_aa': seqs[0]}, SequenceType.AMINO_ACID), p_gens[0])
+
+    # an unbatched computation of the probability of the sequence and the suffix given the prompt
+    prompt_ids = progen.hf_tokenizer(progen.prompt).input_ids
+    seq_ids = progen.hf_tokenizer(seqs[0] + progen.suffix_text).input_ids
+    with torch.no_grad():
+        logits = progen.model(input_ids=torch.tensor([prompt_ids + seq_ids])).logits[0]
+    log_probs = torch.log_softmax(logits, dim=-1)
+    expected = sum(log_probs[len(prompt_ids) - 1 + i, token].item() for i, token in enumerate(seq_ids))
+
+    assert np.isclose(np.log(p_gens[0]), expected, atol=1e-4)

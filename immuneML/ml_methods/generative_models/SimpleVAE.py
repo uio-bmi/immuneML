@@ -5,7 +5,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import scipy
 
 from immuneML import Constants
 from immuneML.data_model.SequenceParams import RegionType
@@ -63,7 +62,7 @@ class SimpleVAE(GenerativeModel):
 
     - patience (int): number of epochs to wait before the training is stopped when the loss is not improving
 
-    - iter_count_prob_estimation (int): how many iterations to use to estimate the log probability of the generated sequence (the more iterations, the better the estimated log probability)
+    - iter_count_prob_estimation (int): how many importance samples to use to estimate the generation probability of a sequence (the more samples, the better the estimate, but the slower the computation); the default of 500 matches the original implementation
 
     - vocab (list): which letters (amino acids) are allowed - this is automatically filled for new models (no need to set)
 
@@ -377,48 +376,113 @@ class SimpleVAE(GenerativeModel):
         return SequenceDataset.build_from_partial_df(df, PathBuilder.build(path), 'synthetic_dataset',
                                                      {'gen_model_name': [self.name]}, {'gen_model_name': str})
 
-    def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
-        raise NotImplementedError
+    def compute_p_gens(self, sequences, sequence_type: SequenceType, sequence_field: str = None) -> np.ndarray:
+        """
+        Estimates p(x) of each sequence (CDR3 together with its V and J gene) by importance sampling with
+        iter_count_prob_estimation samples from q(z|x), as in Davidsen et al. 2019:
+        log p(x) ~ logsumexp_k(log p(x|z_k) + log p(z_k) - log q(z_k|x)) - log K. Sequences longer than max_cdr3_len,
+        with letters outside the vocabulary, or with V or J genes not seen in training get p_gen 0. Sequences can be
+        given as a bionumpy dataclass (e.g., dataset.data), a pandas DataFrame or a list of dicts, and need v_call and
+        j_call.
+        """
+        import torch
 
-    def compute_p_gen(self, sequence: dict, sequence_type: SequenceType) -> float:
+        assert sequence_type == self.sequence_type, \
+            f"{SimpleVAE.__name__}: expected {self.sequence_type}, got {sequence_type}."
+        assert self.model is not None, f"{SimpleVAE.__name__}: the model has not been fitted or loaded yet."
+
+        df = self._extract_sequence_df(sequences, sequence_field)
+        valid = self._is_valid_for_p_gen(df)
+        p_gens = np.zeros(df.shape[0])
+
+        if not valid.any():
+            return p_gens
+
+        cdr3s, v_genes, j_genes = self._encode_for_p_gen(df[valid])
+        generator = torch.Generator(device=self.device)
+        if self.seed is not None:
+            generator.manual_seed(self.seed)
+
+        log_p_gens = np.zeros(cdr3s.shape[0])
+
+        self.model.eval()
+        with torch.no_grad():
+            for start in range(0, cdr3s.shape[0], self.batch_size):
+                batch = slice(start, start + self.batch_size)
+                log_p_gens[batch] = self._log_p_gen_batch(cdr3s[batch], v_genes[batch], j_genes[batch], generator)
+
+        p_gens[valid] = np.exp(log_p_gens)
+        return p_gens
+
+    def compute_p_gen(self, sequence: dict, sequence_type: SequenceType, sequence_field: str = None) -> float:
+        return float(self.compute_p_gens([sequence], sequence_type, sequence_field)[0])
+
+    def _log_p_gen_batch(self, cdr3s, v_genes, j_genes, generator) -> np.ndarray:
+        import torch
+        from torch.distributions import Normal
+        from torch.nn.functional import log_softmax
+
+        z_mean, z_log_var = self.model.encode(cdr3s, v_genes, j_genes)
+        q_z_given_x = Normal(z_mean, (z_log_var / 2).exp())
+        p_z = Normal(torch.zeros_like(z_mean), torch.ones_like(z_mean))
+
+        log_weights = torch.zeros((self.iter_count_prob_estimation, cdr3s.shape[0]), dtype=torch.float64,
+                                  device=self.device)
+
+        for k in range(self.iter_count_prob_estimation):
+            z = z_mean + (z_log_var / 2).exp() * torch.randn(z_mean.shape, generator=generator, device=self.device)
+            cdr3_logits, v_gene_logits, j_gene_logits = self.model.decode(z)
+
+            log_p_x_given_z = ((log_softmax(cdr3_logits, dim=2) * cdr3s).sum(dim=(1, 2))
+                               + (log_softmax(v_gene_logits, dim=1) * v_genes).sum(dim=1)
+                               + (log_softmax(j_gene_logits, dim=1) * j_genes).sum(dim=1))
+
+            log_weights[k] = (log_p_x_given_z + p_z.log_prob(z).sum(dim=1)
+                              - q_z_given_x.log_prob(z).sum(dim=1)).double()
+
+        return (torch.logsumexp(log_weights, dim=0) - np.log(self.iter_count_prob_estimation)).cpu().numpy()
+
+    def _extract_sequence_df(self, sequences, sequence_field: str = None) -> pd.DataFrame:
+        field = sequence_field if sequence_field is not None \
+            else get_sequence_field_name(self.region_type, self.sequence_type)
+
+        if isinstance(sequences, SequenceDataset):
+            sequences = sequences.data
+        if hasattr(sequences, 'topandas'):
+            sequences = sequences.topandas()
+        elif not isinstance(sequences, pd.DataFrame):
+            sequences = pd.DataFrame(list(sequences))
+
+        missing = [col for col in [field, 'v_call', 'j_call'] if col not in sequences.columns]
+        assert not missing, f"{SimpleVAE.__name__}: cannot compute p_gen, missing fields: {missing}."
+
+        return pd.DataFrame({'cdr3': sequences[field].astype(str).values,
+                             'v_gene': [str(v).split("*")[0] for v in sequences['v_call']],
+                             'j_gene': [str(j).split("*")[0] for j in sequences['j_call']]})
+
+    def _is_valid_for_p_gen(self, df: pd.DataFrame) -> np.ndarray:
+        vocab = set(self.vocab) - {Constants.GAP_LETTER}
+        return np.array([len(cdr3) <= self.max_cdr3_len and set(cdr3) <= vocab and v in self.unique_v_genes
+                         and j in self.unique_j_genes for cdr3, v, j in zip(df['cdr3'], df['v_gene'], df['j_gene'])],
+                        dtype=bool)
+
+    def _encode_for_p_gen(self, df: pd.DataFrame):
         import torch
         from torch.nn.functional import one_hot
 
-        with torch.no_grad():
-            encoded_v_genes = one_hot(
-                torch.as_tensor([self.unique_v_genes.index(sequence['v_call'].split("*")[0])]),
-                num_classes=len(self.unique_v_genes))
-            encoded_j_genes = one_hot(
-                torch.as_tensor([self.unique_j_genes.index(sequence['j_call'].split("*")[0])]),
-                num_classes=len(self.unique_j_genes))
-            padded_encoded_cdr3s = one_hot(torch.as_tensor([
-                [self.vocab.index(letter) for letter in
-                 StringHelper.pad_sequence_in_the_middle(sequence[self.sequence_type.value], self.max_cdr3_len,
-                                                         Constants.GAP_LETTER)]]), num_classes=self.vocab_size)
+        v_genes = one_hot(torch.as_tensor([self.unique_v_genes.index(v) for v in df['v_gene']], device=self.device),
+                          num_classes=len(self.unique_v_genes)).float()
+        j_genes = one_hot(torch.as_tensor([self.unique_j_genes.index(j) for j in df['j_gene']], device=self.device),
+                          num_classes=len(self.unique_j_genes)).float()
+        cdr3s = one_hot(torch.as_tensor([
+            [self.vocab.index(letter) for letter in
+             StringHelper.pad_sequence_in_the_middle(seq, self.max_cdr3_len, Constants.GAP_LETTER)]
+            for seq in df['cdr3']], device=self.device), num_classes=self.vocab_size).float()
 
-            log_prob_estimates = []
-
-            for _ in range(self.iter_count_prob_estimation):
-                z_mean, z_log_var = self.model.encode(padded_encoded_cdr3s, encoded_v_genes, encoded_j_genes)
-                z_sd = (z_log_var / 2).exp()
-                z_sample = torch.as_tensor(np.array([scipy.stats.norm.rvs(loc=z_mean, scale=z_sd)])).float()
-                aa_probs, v_gene_probs, j_gene_probs = self.model.decode(z_sample)
-                aa_probs, v_gene_probs, j_gene_probs = aa_probs.numpy(), v_gene_probs.numpy(), j_gene_probs.numpy()
-
-                log_p_x_given_z = (np.sum(np.log(np.sum(aa_probs[0] * padded_encoded_cdr3s[0].numpy(), axis=1))) +
-                                   np.log(np.sum(v_gene_probs[0] * encoded_v_genes[0].numpy())) +
-                                   np.log(np.sum(j_gene_probs[0] * encoded_j_genes[0].numpy())))
-
-                log_p_z = np.sum(scipy.stats.norm.logpdf(z_sample[0], 0, 1))
-                log_q_z_given_x = np.sum(scipy.stats.norm.logpdf(z_sample[0], z_mean[0], z_sd[0]))
-
-                log_imp_weight = log_p_z - log_q_z_given_x
-                log_prob_estimates.append(float(log_p_x_given_z + log_imp_weight))
-
-        return sum(log_prob_estimates) / self.iter_count_prob_estimation
+        return cdr3s, v_genes, j_genes
 
     def can_compute_p_gens(self) -> bool:
-        return False
+        return True
 
     def can_generate_from_skewed_gene_models(self) -> bool:
         return False

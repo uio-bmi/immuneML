@@ -58,13 +58,14 @@ class TestApplyGenModelInstruction(TestCase):
         mock_model.generate_sequences.return_value = RandomDatasetGenerator.generate_sequence_dataset(
             2, {2: 1.}, {}, path / "Test/generated_sequences/")
         mock_model.name = "my_model"
+        mock_model.sequence_type = SequenceType.NUCLEOTIDE
         mock_model.compute_p_gens.side_effect = [np.array([0.1, 0.2, 0.3, 0.4, 0.5]), np.array([0.6, 0.7, 0.8])]
 
         instruction = ApplyGenModelInstruction(method=mock_model, reports=[], name="Test", gen_examples_count=2,
                                                p_gen_datasets={'d1': d1, 'd2': d2})
         result = instruction.run(path)
 
-        self.assertEqual(SequenceType.AMINO_ACID, mock_model.compute_p_gens.call_args[0][1])
+        self.assertEqual(SequenceType.NUCLEOTIDE, mock_model.compute_p_gens.call_args[0][1])
         self.assertEqual(path / "Test/datasets_with_p_gens", result.exported_datasets['datasets_with_p_gens'])
 
         df = pd.read_csv(path / "Test/datasets_with_p_gens/d1_p_gens.tsv", sep='\t')

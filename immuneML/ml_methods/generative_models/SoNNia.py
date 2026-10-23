@@ -47,7 +47,12 @@ class SoNNia(GenerativeModel):
 
     - seed (int): random seed for the model or None
 
-    - num_processes (int): number of processes to use for sequence generation (default: 4)
+    - num_processes (int): number of processes to use for sequence generation and p_gen computation (default: 4)
+
+    Generation probabilities (p_gen) are computed as the probability of the sequence under the selection model
+    (Ppost = Q * Pgen, where Pgen comes from the underlying OLGA model and Q is the selection factor), using the
+    EvaluateModel class from the SONIA package. They can only be computed for amino acid sequences with v_call and
+    j_call.
 
 
      **YAML specification:**
@@ -85,13 +90,25 @@ class SoNNia(GenerativeModel):
             model_data = json.load(json_file)
 
         sonnia._model = InternalSoNNia(custom_pgen_model=sonnia._model_path, seed=sonnia.seed,
+                                       chain_type=sonnia._chain_type,
+                                       deep=sonnia.deep,
                                        vj=sonnia.locus in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
                                        include_joint_genes=sonnia.include_joint_genes,
                                        include_indep_genes=not sonnia.include_joint_genes)
 
         sonnia._model.model.set_weights([np.array(w) for w in model_data['model_weights']])
+        # Z (normalization of the selection factor Q, needed for p_gen) is not part of the weights; SONIA writes it
+        # to the first line of log.txt
+        with open(path / 'log.txt', 'r') as file:
+            sonnia._model.Z = float(file.readline().strip().split('=')[1])
 
         return sonnia
+
+    @property
+    def _chain_type(self) -> str:
+        # SONIA uses chain_type to set the normalization of Pgen to productive sequences; custom OLGA models have no
+        # known normalization, so SONIA's default is used for them
+        return self.default_model_name if self.default_model_name is not None else 'humanTRB'
 
     def __init__(self, locus=None, batch_size: int = None, epochs: int = None, deep: bool = False, name: str = None,
                  default_model_name: str = None, n_gen_seqs: int = None, include_joint_genes: bool = True,
@@ -138,7 +155,8 @@ class SoNNia(GenerativeModel):
 
         self._model = InternalSoNNia(data_seqs=data_seqs,
                                      gen_seqs=[],
-                                     custom_pgen_model=self._model_path,
+                                     custom_pgen_model=self._model_path, chain_type=self._chain_type,
+                                     deep=self.deep,
                                      vj=self.locus in [Chain.ALPHA, Chain.KAPPA, Chain.LIGHT],
                                      include_joint_genes=self.include_joint_genes,
                                      include_indep_genes=not self.include_joint_genes)
@@ -168,18 +186,64 @@ class SoNNia(GenerativeModel):
             'locus': [self.locus.to_string()] * count
         })
 
+        if compute_p_gen:
+            df['p_gen'] = self._compute_p_gens([list(seq[:3]) for seq in sequences])
+
         return SequenceDataset.build_from_partial_df(df, path=PathBuilder.build(path), name='SoNNiaDataset',
                                                      labels={'gen_model_name': [self.name]},
-                                                     type_dict={'gen_model_name': str})
+                                                     type_dict={'gen_model_name': str,
+                                                                **({'p_gen': float} if compute_p_gen else {})})
 
-    def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
-        raise NotImplementedError
+    def compute_p_gens(self, sequences, sequence_type: SequenceType, sequence_field: str = None) -> np.ndarray:
+        """
+        Computes Ppost = Q * Pgen for each sequence. Sequences can be given as a SequenceDataset, a pandas DataFrame or
+        a bionumpy dataclass (e.g., AIRRSequenceSet), and must include v_call and j_call.
+        """
+        if sequence_type != SequenceType.AMINO_ACID:
+            raise NotImplementedError(f"{SoNNia.__name__}: p_gen can only be computed for amino acid sequences.")
 
-    def compute_p_gen(self, sequence: dict, sequence_type: SequenceType) -> float:
-        raise NotImplementedError
+        seqs, v_calls, j_calls = self._extract_sequences(sequences, sequence_field)
+        return self._compute_p_gens([[s, v, j] for s, v, j in zip(seqs, v_calls, j_calls)])
+
+    def compute_p_gen(self, sequence: dict, sequence_type: SequenceType, sequence_field: str = None) -> float:
+        field = sequence_field if sequence_field is not None else \
+            get_sequence_field_name(self.region_type, SequenceType.AMINO_ACID)
+        df = pd.DataFrame({key: [sequence[key]] for key in [field, 'v_call', 'j_call'] if key in sequence})
+        return float(self.compute_p_gens(df, sequence_type, field)[0])
+
+    def _extract_sequences(self, sequences, sequence_field: str = None):
+        if isinstance(sequences, SequenceDataset):
+            sequences = sequences.data
+
+        field = sequence_field if sequence_field is not None else \
+            get_sequence_field_name(self.region_type, SequenceType.AMINO_ACID)
+        if isinstance(sequences, pd.DataFrame):
+            columns = sequences.columns
+            get_col = lambda col: sequences[col].astype(str).tolist()
+        else:
+            columns = [f for f in [field, 'v_call', 'j_call'] if hasattr(sequences, f)]
+            get_col = lambda col: [str(s) for s in getattr(sequences, col).tolist()]
+
+        assert field in columns, f"{SoNNia.__name__}: sequence field {field} not found in the input."
+
+        genes = [get_col(col) if col in columns else [] for col in ['v_call', 'j_call']]
+        assert all(len(g) > 0 and all(gene not in ['', 'nan', 'None'] for gene in g) for g in genes), \
+            f"{SoNNia.__name__}: v_call and j_call are required for all sequences to compute p_gen."
+
+        return get_col(field), *genes
+
+    def _compute_p_gens(self, seqs: list) -> np.ndarray:
+        from sonia.evaluate_model import EvaluateModel
+
+        assert self._model is not None, f"{SoNNia.__name__}: the model has to be fitted or loaded first."
+
+        evaluator = EvaluateModel(sonia_model=self._model, include_genes=True, processes=self.num_processes)
+        _, _, p_posts = evaluator.evaluate_seqs(seqs)
+
+        return np.asarray(p_posts, dtype=float)
 
     def can_compute_p_gens(self) -> bool:
-        return False
+        return True
 
     def can_generate_from_skewed_gene_models(self) -> bool:
         return False

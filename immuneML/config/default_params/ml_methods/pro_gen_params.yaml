@@ -14,4 +14,5 @@ num_gen_batches: 1
 per_device_train_batch_size: 2
 remove_affixes: true
 region_type: IMGT_JUNCTION
+p_gen_batch_size: 64
 seed: null

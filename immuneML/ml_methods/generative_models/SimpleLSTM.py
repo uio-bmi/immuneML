@@ -64,6 +64,8 @@ class SimpleLSTM(GenerativeModel):
 
     - iter_to_report (int): number of epochs between training progress reports
 
+    - p_gen_batch_size (int): number of sequences scored at once when computing generation probabilities
+
 
     **YAML specification:**
 
@@ -104,7 +106,7 @@ class SimpleLSTM(GenerativeModel):
     def __init__(self, locus: str, sequence_type: str, hidden_size: int, learning_rate: float, num_epochs: int,
                  batch_size: int, num_layers: int, embed_size: int, temperature, device: str, name=None,
                  region_type: str = RegionType.IMGT_CDR3.name, prime_str: str = "C", window_size: int = 64,
-                 window_step: int = 1, seed: int = None, iter_to_report: int = 1):
+                 window_step: int = 1, seed: int = None, iter_to_report: int = 1, p_gen_batch_size: int = 1000):
 
         super().__init__(locus, region_type=RegionType.get_object(region_type), name=name, seed=seed)
         self._model = None
@@ -121,6 +123,7 @@ class SimpleLSTM(GenerativeModel):
         self.window_step = window_step
         self.device = device
         self.iter_to_report = iter_to_report
+        self.p_gen_batch_size = p_gen_batch_size
         self.unique_letters = EnvironmentSettings.get_sequence_alphabet(self.sequence_type) + ["*"]
         self.num_letters = len(self.unique_letters)
         self.letter_to_index = {letter: i for i, letter in enumerate(self.unique_letters)}
@@ -318,15 +321,77 @@ class SimpleLSTM(GenerativeModel):
         return SequenceDataset.build_from_partial_df(df, PathBuilder.build(path), 'synthetic_lstm_dataset',
                                                      {'gen_model_name': [self.name]}, {'gen_model_name': str})
 
+    def compute_p_gens(self, sequences, sequence_type: SequenceType, sequence_field: str = None) -> np.ndarray:
+        import torch
 
-    def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
-        raise RuntimeError
+        assert sequence_type == self.sequence_type, \
+            f"{SimpleLSTM.__name__}: expected {self.sequence_type}, got {sequence_type}."
+        assert self._model is not None, f"{SimpleLSTM.__name__}: the model has not been fitted or loaded yet."
 
-    def compute_p_gen(self, sequence: dict, sequence_type: SequenceType) -> float:
-        raise RuntimeError
+        seqs = self._extract_sequence_strings(sequences, sequence_type, sequence_field)
+        log_p_gens = np.zeros(len(seqs))
+
+        self._model.eval()
+        with torch.no_grad():
+            for start in range(0, len(seqs), self.p_gen_batch_size):
+                batch = seqs[start:start + self.p_gen_batch_size]
+                log_p_gens[start:start + len(batch)] = self._score_batch(batch)
+
+        return np.exp(log_p_gens)
+
+    def compute_p_gen(self, sequence: dict, sequence_type: SequenceType, sequence_field: str = None) -> float:
+        return float(self.compute_p_gens([sequence], sequence_type, sequence_field)[0])
+
+    def _score_batch(self, seqs: list) -> np.ndarray:
+        """Returns the log-probability of each sequence followed by the end token, given the end token and a zero
+        state."""
+        import torch
+
+        end_index = self.letter_to_index['*']
+        try:
+            encoded = [[self.letter_to_index[letter] for letter in seq] for seq in seqs]
+        except KeyError as e:
+            raise KeyError(f"{SimpleLSTM.__name__}: cannot compute the generation probability of a sequence "
+                           f"containing {e}, which is not in the alphabet for {self.sequence_type.name}.")
+
+        max_length = max(len(ids) for ids in encoded) + 1
+
+        # inputs are the end token followed by the sequence, targets the sequence followed by the end token; the
+        # LSTM reads left to right, so the padding after a sequence does not change the outputs before it
+        x = torch.full((len(seqs), max_length), end_index, dtype=torch.long)
+        # targets are -1 where the token is not scored: the padding
+        y = torch.full((len(seqs), max_length), -1, dtype=torch.long)
+
+        for index, ids in enumerate(encoded):
+            x[index, 1:len(ids) + 1] = torch.tensor(ids, dtype=torch.long)
+            y[index, :len(ids) + 1] = torch.tensor(ids + [end_index], dtype=torch.long)
+
+        x, y = x.to(self.device), y.to(self.device)
+        outputs, _ = self._model(x, self._model.init_zero_state(batch_size=len(seqs)))
+        log_probs = torch.nn.functional.log_softmax(outputs, dim=-1)
+
+        scored = y >= 0
+        token_log_probs = log_probs.gather(2, y.clamp(min=0).unsqueeze(-1)).squeeze(-1)
+
+        return (token_log_probs * scored).sum(dim=1).double().cpu().numpy()
+
+    def _extract_sequence_strings(self, sequences, sequence_type: SequenceType, sequence_field: str = None) -> list:
+        """Accepts a bionumpy sequence set (e.g., dataset.data), a list of dicts, or a list of strings, and returns
+        plain strings."""
+        field = sequence_field if sequence_field is not None \
+            else get_sequence_field_name(self.region_type, sequence_type)
+
+        def to_str(value):
+            return value.to_string() if hasattr(value, 'to_string') else str(value)
+
+        if hasattr(sequences, field):
+            return [to_str(value) for value in getattr(sequences, field)]
+
+        return [to_str(seq[field] if field in seq else seq['sequence']) if isinstance(seq, dict) else to_str(seq)
+                for seq in sequences]
 
     def can_compute_p_gens(self) -> bool:
-        return False
+        return True
 
     def can_generate_from_skewed_gene_models(self) -> bool:
         return False
