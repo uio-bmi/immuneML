@@ -107,7 +107,7 @@ class TCRpeg(GenerativeModel):
     STATE_DICT_FILE_NAME = 'state_dict.pt'
 
     @classmethod
-    def load_model(cls, path: Path):
+    def load_model(cls, path: Path, device: str = None):
         assert path.exists(), f"{cls.__name__}: {path} does not exist."
 
         for file in [path / 'model_overview.yaml', path / cls.STATE_DICT_FILE_NAME, path / cls.EMBEDDING_FILE_NAME]:
@@ -115,6 +115,8 @@ class TCRpeg(GenerativeModel):
 
         model_overview = read_yaml(path / 'model_overview.yaml')
         genes = model_overview.pop('genes', {'v': [], 'j': []})
+        if device is not None:
+            model_overview['device'] = device
         model = TCRpeg(**{k: v for k, v in model_overview.items() if k != 'type'})
         model._v_genes, model._j_genes = list(genes['v']), list(genes['j'])
         model._embedding_file = path / cls.EMBEDDING_FILE_NAME

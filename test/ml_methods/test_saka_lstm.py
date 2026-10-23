@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 
 from immuneML.data_model.SequenceParams import Chain
+from immuneML.data_model.bnp_util import read_yaml, write_yaml
 from immuneML.data_model.SequenceParams import RegionType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
@@ -113,6 +114,13 @@ def test_saka_lstm_save_load():
 
     sequences = dataset.get_attribute('cdr3_aa').tolist()
     assert np.allclose(loaded.compute_p_gens(sequences, SequenceType.AMINO_ACID),
+                       model.compute_p_gens(sequences, SequenceType.AMINO_ACID))
+
+    # a model trained on gpu can be loaded on cpu by overriding the stored device
+    write_yaml(model_path / 'model_overview.yaml', {**read_yaml(model_path / 'model_overview.yaml'), 'device': 'cuda'})
+    loaded_on_cpu = SakaLSTM.load_model(model_path, device='cpu')
+    assert loaded_on_cpu.device == 'cpu'
+    assert np.allclose(loaded_on_cpu.compute_p_gens(sequences, SequenceType.AMINO_ACID),
                        model.compute_p_gens(sequences, SequenceType.AMINO_ACID))
 
     shutil.rmtree(path)

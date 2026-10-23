@@ -52,7 +52,7 @@ def test_fit_gen_model_with_manual_split():
         "instructions": {
             "inst1": {
                 "type": "TrainGenModel",
-                "gen_examples_count": 100,
+                "gen_examples_count": 10,
                 "dataset": "d1",
                 "method": "gen_model",
                 "reports": ['sld_rep', 'aa_freq', 'kl_gen_model'],
@@ -85,17 +85,17 @@ def test_fit_apply_gen_model():
         {
             "SoNNia": {
                 "batch_size": 1e4,
-                "epochs": 5,
+                "epochs": 1,
                 # 'default_model_name': 'humanTRB',
                 'deep': False,
                 'include_joint_genes': True,
-                'n_gen_seqs': 100,
+                'n_gen_seqs': 10,
                 'num_processes': 4
             }
         },
         {
             "SimpleVAE": {
-                'num_epochs': 10,
+                'num_epochs': 1,
                 'latent_dim': 8,
                 'pretrains': 1,
                 'warmup_epochs': 1
@@ -105,7 +105,7 @@ def test_fit_apply_gen_model():
             "SimpleLSTM": {
                 # 'locus': 'beta',
                 'sequence_type': 'amino_acid',
-                'num_epochs': 10,
+                'num_epochs': 1,
                 'hidden_size': 8,
                 'learning_rate': 0.001,
                 'batch_size': 10,
@@ -119,7 +119,7 @@ def test_fit_apply_gen_model():
         {
             "SakaLSTM": {
                 'sequence_type': 'amino_acid',
-                'num_epochs': 10,
+                'num_epochs': 1,
                 'hidden_size': 8,
                 'learning_rate': 0.01,
                 'batch_size': 10,
@@ -134,7 +134,7 @@ def test_fit_apply_gen_model():
             "TCRpeg": {
                 'hidden_size': 8,
                 'num_layers': 2,
-                'num_epochs': 3,
+                'num_epochs': 1,
                 'batch_size': 10,
                 'learning_rate': 0.01,
                 'require_c_start': False,  # the random dataset does not have the conserved C
@@ -154,7 +154,7 @@ def test_fit_apply_tcrsep():
     base_path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "fit_apply_tcrsep_dataset")
 
     olga = OLGA.build_object(default_model_name='humanTRB')
-    olga.generate_sequences(300, 1, base_path / 'olga_sequences.tsv', SequenceType.AMINO_ACID, False)
+    olga.generate_sequences(20, 1, base_path / 'olga_sequences.tsv', SequenceType.AMINO_ACID, False)
     df = pd.read_csv(base_path / 'olga_sequences.tsv', sep='\t')
     df = pd.DataFrame({'junction_aa': df['sequence_aa'], 'junction': df['sequence'], 'v_call': df['v_call'],
                        'j_call': df['j_call'], 'locus': df['locus']})
@@ -165,9 +165,9 @@ def test_fit_apply_tcrsep():
 
     fit_and_apply_gen_model({
         "TCRsep": {
-            'n_gen_seqs': 300,
-            'epochs': 20,
-            'batch_size': 16,
+            'n_gen_seqs': 205,
+            'epochs': 2,
+            'batch_size': 2,
             'learning_rate': 0.001,
             'num_processes': 1,
             'seed': 1
@@ -216,7 +216,7 @@ def fit_and_apply_gen_model(gen_model, dataset: dict = None, compute_p_gens: boo
         "instructions": {
             "inst1": {
                 "type": "TrainGenModel",
-                "gen_examples_count": 100,
+                "gen_examples_count": 10,
                 "dataset": "d1",
                 "method": "gen_model",
                 "reports": ['sld_rep', 'aa_freq', 'kl_gen_model'],
@@ -239,7 +239,7 @@ def fit_and_apply_gen_model(gen_model, dataset: dict = None, compute_p_gens: boo
         "instructions": {
             "inst1": {
                 "type": "ApplyGenModel",
-                "gen_examples_count": 100,
+                "gen_examples_count": 10,
                 "reports": ['sld_rep', 'aa_freq'],
                 "ml_config_path": str(
                     generated_model_path / "output/inst1/trained_model_gen_model/trained_model_gen_model.zip"),

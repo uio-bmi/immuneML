@@ -124,7 +124,7 @@ class OLGA(GenerativeModel):
         return OLGA(**{**kwargs, **{'locus': locus}})
 
     @classmethod
-    def load_model(cls, path: Path):
+    def load_model(cls, path: Path, device: str = None):
         assert path.exists(), f"{cls.__name__}: {path} does not exist."
 
         model_overview_file = path / 'model_overview.yaml'

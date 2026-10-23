@@ -101,7 +101,7 @@ class ProGen(GenerativeModel):
 
     """
     @classmethod
-    def load_model(cls, path: Path):
+    def load_model(cls, path: Path, device: str = None):
         import torch
         assert path.exists(), f"{cls.__name__}: {path} does not exist."
 
@@ -110,6 +110,8 @@ class ProGen(GenerativeModel):
 
         # Uses ProGen weights/tokenizer paths from training. Override in model_overview.yaml if needed.
         model_overview = read_yaml(model_overview_file)
+        if device is not None:
+            model_overview['device'] = device
         progen = ProGen(**{k: v for k, v in model_overview.items() if k != 'type'})
 
         config = ProGenConfig.from_pretrained(path)

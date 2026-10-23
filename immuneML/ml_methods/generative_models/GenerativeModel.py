@@ -1,4 +1,5 @@
 import abc
+from abc import ABC
 from pathlib import Path
 
 import numpy as np
@@ -9,7 +10,7 @@ from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.environment.SequenceType import SequenceType
 
 
-class GenerativeModel:
+class GenerativeModel(ABC):
     """
 
     Generative models are algorithms which can be trained to learn patterns in existing datasets,
@@ -69,7 +70,8 @@ class GenerativeModel:
 
     @classmethod
     @abc.abstractmethod
-    def load_model(cls, path: Path):
+    def load_model(cls, path: Path, device: str = None):
+        # device, if set, overrides the device stored with the model (for models that have a device parameter)
         pass
 
     def set_locus(self, dataset: Dataset):

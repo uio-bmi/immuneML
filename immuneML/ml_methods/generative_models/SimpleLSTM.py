@@ -85,7 +85,7 @@ class SimpleLSTM(GenerativeModel):
     """
 
     @classmethod
-    def load_model(cls, path: Path):
+    def load_model(cls, path: Path, device: str = None):
         assert path.exists(), f"{cls.__name__}: {path} does not exist."
 
         model_overview_file = path / 'model_overview.yaml'
@@ -95,6 +95,8 @@ class SimpleLSTM(GenerativeModel):
             assert file.exists(), f"{cls.__name__}: {file} is not a file."
 
         model_overview = read_yaml(model_overview_file)
+        if device is not None:
+            model_overview['device'] = device
         lstm = SimpleLSTM(**{k: v for k, v in model_overview.items() if k != 'type'})
         lstm._model = lstm.make_new_model(state_dict_file)
         return lstm

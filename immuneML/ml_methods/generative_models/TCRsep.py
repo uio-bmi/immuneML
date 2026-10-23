@@ -116,7 +116,7 @@ class TCRsep(GenerativeModel):
     MIN_TRAINING_ITERATIONS = 200  # the package checks the initialization after 200 iterations
 
     @classmethod
-    def load_model(cls, path: Path):
+    def load_model(cls, path: Path, device: str = None):
         import torch
 
         assert path.exists(), f"{cls.__name__}: {path} does not exist."
@@ -125,6 +125,8 @@ class TCRsep(GenerativeModel):
 
         model_overview = read_yaml(path / 'model_overview.yaml')
         z = float(model_overview.pop('Z'))
+        if device is not None:
+            model_overview['device'] = device
         params = {k: v for k, v in model_overview.items() if k != 'type'}
 
         # the OLGA model stored with the trained model is used, so the original custom_model_path does not have to exist

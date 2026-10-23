@@ -108,7 +108,7 @@ class SimpleVAE(GenerativeModel):
     """
 
     @classmethod
-    def load_model(cls, path: Path):
+    def load_model(cls, path: Path, device: str = None):
         assert path.exists(), f"{cls.__name__}: {path} does not exist."
 
         model_overview_file = path / 'model_overview.yaml'
@@ -118,6 +118,8 @@ class SimpleVAE(GenerativeModel):
             assert file.exists(), f"{cls.__name__}: {file} is not a file."
 
         model_overview = read_yaml(model_overview_file)
+        if device is not None:
+            model_overview['device'] = device
         vae = SimpleVAE(**{k: v for k, v in model_overview.items() if k != 'type'})
         vae.model = vae.make_new_model(state_dict_file)
 
