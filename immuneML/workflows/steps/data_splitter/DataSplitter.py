@@ -6,6 +6,7 @@ from sklearn.model_selection import KFold, StratifiedKFold
 from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.workflows.steps.Step import Step
 from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
+from immuneML.workflows.steps.data_splitter.GroupKFoldSplitter import GroupKFoldSplitter
 from immuneML.workflows.steps.data_splitter.LeaveOneOutSplitter import LeaveOneOutSplitter
 from immuneML.workflows.steps.data_splitter.ManualSplitter import ManualSplitter
 from immuneML.workflows.steps.data_splitter.Util import Util
@@ -35,6 +36,10 @@ class DataSplitter(Step):
     @staticmethod
     def leave_one_out_stratification_split(input_params: DataSplitterParams):
         return LeaveOneOutSplitter.split_dataset(input_params)
+
+    @staticmethod
+    def group_k_fold_split(input_params: DataSplitterParams):
+        return GroupKFoldSplitter.split_dataset(input_params)
 
     @staticmethod
     def loocv_split(input_params: DataSplitterParams):

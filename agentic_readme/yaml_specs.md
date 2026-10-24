@@ -82,7 +82,8 @@ Nested cross-validation for classifiers.
 - Keys: `clustering_config_path` (the zip exported by Clustering), `dataset`, `metrics`, `validation_type: [method_based, result_based]`.
 
 ### SplitDataset
-- `split_config` must contain `split_count: 1` and a `random` or `manual` strategy.
+- `split_config` takes a `random` or `manual` strategy with `split_count: 1`, or `group_k_fold` with `split_count` ≥ 2 and a `group_k_fold_config` (see the SplitConfig docstring).
+- One split is exported to `<inst>/train/` and `<inst>/test/`; group_k_fold exports `<inst>/split_<i>/train/` and `test/` plus `group_assignment.csv`.
 - It is typically used to create discovery and validation sets for clustering.
 
 ### Subsampling

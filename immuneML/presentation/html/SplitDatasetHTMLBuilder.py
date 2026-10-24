@@ -42,16 +42,24 @@ class SplitDatasetHTMLBuilder:
 
     @staticmethod
     def make_html_map(state: SplitDatasetState, base_path: Path) -> dict:
-        train_zip_path = None
-        test_zip_path = None
+        training_percentage = state.split_config.training_percentage
+        has_percentage = training_percentage is not None and training_percentage > 0
+        multiple_splits = len(state.train_data_paths) > 1
 
-        if state.train_data_path:
-            zip_file = Util.make_downloadable_zip(state.result_path, state.train_data_path, "train_dataset")
-            train_zip_path = os.path.relpath(zip_file, base_path)
+        splits = []
+        for index, (train_path, test_path) in enumerate(zip(state.train_data_paths, state.test_data_paths)):
+            suffix = f"_split_{index + 1}" if multiple_splits else ""
+            train_zip = Util.make_downloadable_zip(state.result_path, train_path, f"train_dataset{suffix}")
+            test_zip = Util.make_downloadable_zip(state.result_path, test_path, f"test_dataset{suffix}")
+            splits.append({
+                "split_name": f"Split {index + 1}" if multiple_splits else "",
+                "train_dataset_download_link": os.path.relpath(train_zip, base_path),
+                "test_dataset_download_link": os.path.relpath(test_zip, base_path),
+                "train_dataset_file": Path(train_zip).name,
+                "test_dataset_file": Path(test_zip).name,
+            })
 
-        if state.test_data_path:
-            zip_file = Util.make_downloadable_zip(state.result_path, state.test_data_path, "test_dataset")
-            test_zip_path = os.path.relpath(zip_file, base_path)
+        group_config = state.split_config.group_k_fold_config
 
         html_map = {
             "css_style": Util.get_css_content(SplitDatasetHTMLBuilder.CSS_PATH),
@@ -60,12 +68,14 @@ class SplitDatasetHTMLBuilder:
             "full_specs": Util.get_full_specs_path(base_path),
             "logfile": Util.get_logfile_path(base_path),
             "split_strategy": state.split_config.split_strategy.name.lower(),
-            "training_percentage": f"{state.split_config.training_percentage * 100:.0f}%"
-                if state.split_config.training_percentage else "N/A",
-            "test_percentage": f"{(1 - state.split_config.training_percentage) * 100:.0f}%"
-                if state.split_config.training_percentage else "N/A",
-            "train_dataset_download_link": train_zip_path,
-            "test_dataset_download_link": test_zip_path,
+            "split_count": state.split_config.split_count,
+            "training_percentage": f"{training_percentage * 100:.0f}%" if has_percentage else "N/A",
+            "test_percentage": f"{(1 - training_percentage) * 100:.0f}%" if has_percentage else "N/A",
+            "show_group_config": group_config is not None,
+            "group_label": group_config.group_label if group_config else None,
+            "train_only_groups": ", ".join(str(group) for group in group_config.train_only_groups)
+                if group_config and group_config.train_only_groups else "none",
+            "splits": splits,
             **Util.make_dataset_html_map(state.dataset, dataset_key="original_dataset")
         }
 

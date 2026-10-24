@@ -55,6 +55,20 @@
                                     <td><b>Test Percentage</b></td>
                                     <td>{{test_percentage}}</td>
                                 </tr>
+                                <tr>
+                                    <td><b>Number of splits</b></td>
+                                    <td>{{split_count}}</td>
+                                </tr>
+                                {{#show_group_config}}
+                                <tr>
+                                    <td><b>Groups defined by</b></td>
+                                    <td>{{group_label}}</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Groups always in training</b></td>
+                                    <td>{{train_only_groups}}</td>
+                                </tr>
+                                {{/show_group_config}}
                             </table>
                         </div>
                     </div>
@@ -106,19 +120,22 @@
             </div>
 
             <h2>Split Results</h2>
-            <p>The dataset has been split into two subsets exported in AIRR format.</p>
+            <p>The dataset has been split into training and test subsets exported in AIRR format.</p>
+            {{#splits}}
+            {{#split_name}}<h3>{{split_name}}</h3>{{/split_name}}
             <div class="split-results">
                 <div class="split-dataset-box">
-                    <h4>Training Dataset ({{training_percentage}})</h4>
-                    <p>Download: <a href="{{train_dataset_download_link}}" download>train_dataset.zip</a></p>
+                    <h4>Training Dataset</h4>
+                    <p>Download: <a href="{{train_dataset_download_link}}" download>{{train_dataset_file}}</a></p>
                     <p><small>Location: <code>{{train_dataset_download_link}}</code></small></p>
                 </div>
                 <div class="split-dataset-box">
-                    <h4>Test Dataset ({{test_percentage}})</h4>
-                    <p>Download: <a href="{{test_dataset_download_link}}" download>test_dataset.zip</a></p>
+                    <h4>Test Dataset</h4>
+                    <p>Download: <a href="{{test_dataset_download_link}}" download>{{test_dataset_file}}</a></p>
                     <p><small>Location: <code>{{test_dataset_download_link}}</code></small></p>
                 </div>
             </div>
+            {{/splits}}
         </div>
     </div>
 </body>
