@@ -199,7 +199,7 @@ class FeasibilitySummaryInstruction(Instruction):
             print_log(f"Estimated generation probability distribution for model {model_name}.", include_datetime=True)
 
     def _make_sequences(self, model, path: Path, model_name: str) -> BackgroundSequences:
-        seq_path = model.generate_sequences(self.state.sequence_count, seed=0, path=path,
+        seq_path = model.generate_sequences(self.state.sequence_count, seed=None, path=path,
                                             sequence_type=self.state.simulation.sequence_type,
                                             compute_p_gen=model.can_compute_p_gens() and self.state.simulation.keep_p_gen_dist and self.state.simulation.p_gen_bin_count > 0)
 

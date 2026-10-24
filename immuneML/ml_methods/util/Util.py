@@ -129,9 +129,9 @@ class Util:
     def get_train_val_indices(n_examples, training_percentage, random_seed=None):
         indices = list(range(n_examples))
 
-        random.seed(random_seed)
-        random.shuffle(indices)
-        random.seed(None)
+        # a seeded local generator leaves the global random state alone; without a seed, the global one is used
+        rng = random.Random(random_seed) if random_seed is not None else random
+        rng.shuffle(indices)
 
         limit = int(n_examples * training_percentage)
         train_indices = indices[:limit]

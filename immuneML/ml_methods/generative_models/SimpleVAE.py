@@ -353,7 +353,8 @@ class SimpleVAE(GenerativeModel):
         from torch.nn.functional import softmax
         from torch.distributions import Categorical
 
-        torch.manual_seed(seed)
+        if seed is not None:
+            torch.manual_seed(seed)
         self.model.eval()
 
         with torch.no_grad():

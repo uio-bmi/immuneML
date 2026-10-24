@@ -246,7 +246,8 @@ class SimpleLSTM(GenerativeModel):
                            max_failed_trials: int = 1000):
         import torch
 
-        torch.manual_seed(seed)
+        if seed is not None:
+            torch.manual_seed(seed)
 
         self._model.eval()
         input_vector = torch.as_tensor([self.letter_to_index[letter] for letter in self.prime_str],

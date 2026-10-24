@@ -248,8 +248,9 @@ class SakaLSTM(GenerativeModel):
         assert sequence_type == self.sequence_type, \
             f"{SakaLSTM.__name__}: expected {self.sequence_type.name}, got {sequence_type.name}."
 
-        torch.manual_seed(seed)
-        np.random.seed(seed)
+        if seed is not None:
+            torch.manual_seed(seed)
+            np.random.seed(seed)
 
         # all lengths are sampled up front so that the sequences sharing a length can be generated in one batch,
         # which is what makes generating a large number of sequences tractable

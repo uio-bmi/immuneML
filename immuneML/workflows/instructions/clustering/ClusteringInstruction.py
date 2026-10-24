@@ -413,8 +413,9 @@ class ClusteringInstruction(Instruction):
         """Compute clustering stability using the Lange et al. approach."""
         print_log(f"{self.__class__.__name__} ({self.state.name}): computing stability.")
 
-        random.seed(self.state.config.stability_config.random_seed)
-        np.random.seed(self.state.config.stability_config.random_seed)
+        if self.state.config.stability_config.random_seed is not None:
+            random.seed(self.state.config.stability_config.random_seed)
+            np.random.seed(self.state.config.stability_config.random_seed)
         discovery_datasets, tuning_datasets = HPUtil.split_data(
             self.state.config.dataset,
             SplitConfig(SplitType.RANDOM, self.state.config.stability_config.split_count, 0.5),

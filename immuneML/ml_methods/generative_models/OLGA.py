@@ -177,7 +177,8 @@ class OLGA(GenerativeModel):
     def _generate_productive_sequences(self, count: int, path: Path, seed: int, olga_model: InternalOlgaModel,
                                        compute_p_gen: bool,
                                        sequence_type: SequenceType, **kwargs):
-        np.random.seed(seed)
+        if seed is not None:
+            np.random.seed(seed)
         sequences = pd.DataFrame(index=np.arange(count), columns=OLGA.OUTPUT_COLUMNS)
 
         for i in range(count):
