@@ -17,6 +17,7 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeightingStrategy
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
+from immuneML.hyperparameter_optimization.config.GroupKFoldConfig import GroupKFoldConfig
 from immuneML.hyperparameter_optimization.config.LeaveOneOutConfig import LeaveOneOutConfig
 from immuneML.hyperparameter_optimization.config.ManualSplitConfig import ManualSplitConfig
 from immuneML.hyperparameter_optimization.config.ReportConfig import ReportConfig
@@ -224,6 +225,10 @@ class TrainMLModelParser:
                                                valid_keys=["stratification_label"],
                                                location=TrainMLModelParser.__name__, parameter_name="stratified_k_fold_config", exclusive=True)
 
+            group_k_fold_config = GroupKFoldConfig.parse(instruction[split_key].get("group_k_fold_config"),
+                                                         f"{TrainMLModelParser.__name__}/{instruction_key}/{split_key}") \
+                if split_strategy == SplitType.GROUP_K_FOLD else None
+
             return SplitConfig(split_strategy=split_strategy,
                                split_count=int(instruction[split_key]["split_count"]),
                                training_percentage=training_percentage,
@@ -232,7 +237,8 @@ class TrainMLModelParser:
                                leave_one_out_config=LeaveOneOutConfig(**instruction[split_key]["leave_one_out_config"])
                                if "leave_one_out_config" in instruction[split_key] else None,
                                stratified_k_fold_config=StratifiedKFoldConfig(**instruction[split_key]["stratified_k_fold_config"])
-                               if instruction[split_key].get("stratified_k_fold_config") is not None else None)
+                               if instruction[split_key].get("stratified_k_fold_config") is not None else None,
+                               group_k_fold_config=group_k_fold_config)
 
         except KeyError as key_error:
             raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under {split_key}.") from key_error

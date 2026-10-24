@@ -1,3 +1,4 @@
+from immuneML.hyperparameter_optimization.config.GroupKFoldConfig import GroupKFoldConfig
 from immuneML.hyperparameter_optimization.config.LeaveOneOutConfig import LeaveOneOutConfig
 from immuneML.hyperparameter_optimization.config.ManualSplitConfig import ManualSplitConfig
 from immuneML.hyperparameter_optimization.config.ReportConfig import ReportConfig
@@ -28,11 +29,15 @@ class SplitConfig:
       in a receptor dataset, it is possible to have leave-subject-out CV; or if a dataset contains multiple batches, it
       is possible to split evaluation by batch).
 
+    - group_k_fold (k-fold cross-validation over groups of examples defined by a metadata field, e.g. study or
+      epitope: each group is held out as a whole in exactly one fold, so the test set only contains groups that are
+      not in the training set)
+
     **Specification arguments:**
 
-    - split_strategy (SplitType): one of the types of cross-validation listed above (`LOOCV`, `K_FOLD`, `STRATIFIED_K_FOLD`, `MANUAL`, ``  or `RANDOM`)
+    - split_strategy (SplitType): one of the types of cross-validation listed above (`LOOCV`, `K_FOLD`, `STRATIFIED_K_FOLD`, `MANUAL`, `LEAVE_ONE_OUT_STRATIFICATION`, `GROUP_K_FOLD` or `RANDOM`)
 
-    - split_count (int): if split_strategy is `K_FOLD`, then this defined how many splits to make (K), if split_strategy is RANDOM, split_count defines how many random splits to make, resulting in split_count training/test dataset pairs, or if split_strategy is `LOOCV`, `MANUAL` or `LEAVE_ONE_OUT_STRATIFICATION`, split_count does not need to be specified.
+    - split_count (int): if split_strategy is `K_FOLD`, `STRATIFIED_K_FOLD` or `GROUP_K_FOLD`, then this defined how many splits to make (K), if split_strategy is RANDOM, split_count defines how many random splits to make, resulting in split_count training/test dataset pairs, or if split_strategy is `LOOCV`, `MANUAL` or `LEAVE_ONE_OUT_STRATIFICATION`, split_count does not need to be specified.
 
     - training_percentage: if split_strategy is RANDOM, this defines which portion of the original dataset to use for creating the training dataset; for other values of split_strategy, this parameter is not used.
 
@@ -59,6 +64,23 @@ class SplitConfig:
       defined as a `Label` used for prediction). If `stratified_k_fold_config` is not specified, or `stratification_label` is not set within
       it, stratification falls back to the prediction label, as before. If split strategy is anything other than `STRATIFIED_K_FOLD`, this
       field has no effect and can be omitted.
+
+    - group_k_fold_config (:py:obj:`~immuneML.hyperparameter_optimization.config.GroupKFoldConfig.GroupKFoldConfig`): if split strategy is
+      `GROUP_K_FOLD`, this config defines the groups. It accepts the following inputs:
+
+      - `group_label` (required): the name of the metadata field that defines the groups (e.g., `study_id`).
+
+      - `delimiter` (optional): if set, the value of `group_label` is split on it, so that one example can belong to
+        several groups (e.g., a receptor reported by several studies, stored as `study1;study2`). Such an example is in
+        the test set of a fold only if all of its groups are held out in that fold, in the training set only if none
+        of them are, and is left out of that split otherwise. If not set, every example belongs to exactly one group.
+
+      - `train_only_groups` (optional): a list of groups that are never held out and are always in the training set,
+        e.g. a study that is so large that holding it out would leave too little data for training.
+
+      The remaining groups are shuffled and assigned to the K folds so that the folds have as similar a number of
+      examples as possible, so each held-out group is in the test set of exactly one split. If split strategy is
+      anything other than `GROUP_K_FOLD`, this field has no effect and can be omitted.
 
     **YAML specification:**
 
@@ -99,11 +121,20 @@ class SplitConfig:
             stratified_k_fold_config: # optional; if omitted, stratification is done on the prediction label
                 stratification_label: subtype # metadata field to stratify by; does not have to be a prediction label
 
+        # as a part of a TrainMLModel instruction, holding out whole studies, except one that always stays in training:
+        assessment: # outer loop of nested CV
+            split_strategy: group_k_fold
+            split_count: 3
+            group_k_fold_config:
+                group_label: study_id # metadata field that defines the groups
+                delimiter: ';' # optional; an example can belong to several groups, e.g. study1;study2
+                train_only_groups: [study1] # optional; groups that are never held out
+
     """
 
     def __init__(self, split_strategy: SplitType, split_count: int, training_percentage: float = None, reports: ReportConfig = None,
                  manual_config: ManualSplitConfig = None, leave_one_out_config: LeaveOneOutConfig = None,
-                 stratified_k_fold_config: StratifiedKFoldConfig = None):
+                 stratified_k_fold_config: StratifiedKFoldConfig = None, group_k_fold_config: GroupKFoldConfig = None):
         self.split_strategy = split_strategy
         self.split_count = split_count
         self.training_percentage = training_percentage
@@ -111,6 +142,7 @@ class SplitConfig:
         self.manual_config = manual_config
         self.leave_one_out_config = leave_one_out_config
         self.stratified_k_fold_config = stratified_k_fold_config
+        self.group_k_fold_config = group_k_fold_config
 
     def __str__(self):
         desc = ""
@@ -122,6 +154,8 @@ class SplitConfig:
             desc = "LOOCV"
         elif self.split_strategy == SplitType.STRATIFIED_K_FOLD:
             desc = f"stratified {self.split_count}-fold CV"
+        elif self.split_strategy == SplitType.GROUP_K_FOLD:
+            desc = f"{self.split_count}-fold CV over groups of {self.group_k_fold_config.group_label}"
         return desc
 
     def is_with_test_set(self):
@@ -135,7 +169,8 @@ class SplitConfig:
             "reports (ReportConfig)": "reports",
             "manual_config (:py:obj:`~immuneML.hyperparameter_optimization.config.ManualSplitConfig.ManualSplitConfig`)": "manual_config",
             "leave_one_out_config (:py:obj:`~immuneML.hyperparameter_optimization.config.LeaveOneOutConfig.LeaveOneOutConfig`)": "leave_one_out_config",
-            "stratified_k_fold_config (:py:obj:`~immuneML.hyperparameter_optimization.config.StratifiedKFoldConfig.StratifiedKFoldConfig`)": "stratified_k_fold_config"
+            "stratified_k_fold_config (:py:obj:`~immuneML.hyperparameter_optimization.config.StratifiedKFoldConfig.StratifiedKFoldConfig`)": "stratified_k_fold_config",
+            "group_k_fold_config (:py:obj:`~immuneML.hyperparameter_optimization.config.GroupKFoldConfig.GroupKFoldConfig`)": "group_k_fold_config"
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc
