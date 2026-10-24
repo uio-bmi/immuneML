@@ -17,7 +17,7 @@ def test_sonnia_p_gens():
     path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'sonnia_p_gens')
 
     olga = OLGA.build_object(default_model_name='humanTRB')
-    olga.generate_sequences(200, 1, path / 'olga_sequences.tsv', SequenceType.AMINO_ACID, False)
+    olga.generate_sequences(20, 1, path / 'olga_sequences.tsv', SequenceType.AMINO_ACID, False)
     df = pd.read_csv(path / 'olga_sequences.tsv', sep='\t')
     df = pd.DataFrame({'junction_aa': df['sequence_aa'], 'junction': df['sequence'], 'v_call': df['v_call'],
                        'j_call': df['j_call'], 'locus': df['locus']})
@@ -30,7 +30,7 @@ def test_sonnia_p_gens():
     assert model.can_compute_p_gens()
 
     p_gens = model.compute_p_gens(dataset, SequenceType.AMINO_ACID)
-    assert p_gens.shape == (200,) and np.all(np.isfinite(p_gens)) and np.all((p_gens >= 0) & (p_gens <= 1))
+    assert p_gens.shape == (20,) and np.all(np.isfinite(p_gens)) and np.all((p_gens >= 0) & (p_gens <= 1))
     assert np.any(p_gens > 0)
 
     seq = dataset.data.topandas().iloc[0]

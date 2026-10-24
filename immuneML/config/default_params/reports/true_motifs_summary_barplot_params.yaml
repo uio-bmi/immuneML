@@ -1,0 +1,5 @@
+region_type: IMGT_CDR3
+max_edit_distance: 0
+compairr_path: null
+threads: 8
+show_test_set_baseline: false
