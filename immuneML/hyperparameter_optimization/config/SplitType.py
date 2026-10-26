@@ -9,3 +9,4 @@ class SplitType(Enum):
     MANUAL = 3
     LEAVE_ONE_OUT_STRATIFICATION = 4
     STRATIFIED_K_FOLD = 5
+    GROUP_K_FOLD = 6

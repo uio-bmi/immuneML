@@ -2,6 +2,7 @@ from pathlib import Path
 
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
+from immuneML.hyperparameter_optimization.config.GroupKFoldConfig import GroupKFoldConfig
 from immuneML.hyperparameter_optimization.config.ManualSplitConfig import ManualSplitConfig
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
@@ -31,12 +32,18 @@ class SplitDatasetParser:
             training_percentage = float(
                 instruction[split_key]["training_percentage"]) if split_strategy == SplitType.RANDOM else -1
 
-            assert instruction[split_key]["split_count"] == 1, \
-                "SplitDatasetParser: this instruction only supports splitting the dataset into two."
+            assert split_strategy in [SplitType.RANDOM, SplitType.MANUAL, SplitType.GROUP_K_FOLD], \
+                (f"SplitDatasetParser: this instruction only supports the following split strategies: "
+                 f"[RANDOM, MANUAL, GROUP_K_FOLD], got {split_strategy}.")
 
-            assert split_strategy in [SplitType.RANDOM, SplitType.MANUAL], \
-                (f"SplitDatasetParser: this instruction only supports the following split strategies: [RANDOM, MANUAL],"
-                 f" got {split_strategy}.")
+            if split_strategy == SplitType.GROUP_K_FOLD:
+                assert isinstance(instruction[split_key]["split_count"], int) and instruction[split_key]["split_count"] >= 2, \
+                    (f"SplitDatasetParser: with split strategy GROUP_K_FOLD, split_count has to be an integer of at "
+                     f"least 2, got {instruction[split_key]['split_count']}.")
+            else:
+                assert instruction[split_key]["split_count"] == 1, \
+                    "SplitDatasetParser: with split strategies RANDOM and MANUAL, this instruction only supports " \
+                    "splitting the dataset into two (split_count: 1)."
 
             if split_strategy == SplitType.MANUAL:
                 ParameterValidator.assert_keys(keys=instruction[split_key]["manual_config"].keys(),
@@ -61,7 +68,10 @@ class SplitDatasetParser:
                                manual_config=ManualSplitConfig(
                                    **instruction[split_key]["manual_config"]) if "manual_config" in instruction[
                                    split_key] else None,
-                               leave_one_out_config=None)
+                               leave_one_out_config=None,
+                               group_k_fold_config=GroupKFoldConfig.parse(instruction[split_key].get("group_k_fold_config"),
+                                                                          f"{SplitDatasetParser.__name__}/{inst_name}")
+                               if split_strategy == SplitType.GROUP_K_FOLD else None)
 
         except KeyError as key_error:
             raise KeyError(
