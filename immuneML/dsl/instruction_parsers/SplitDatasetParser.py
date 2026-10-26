@@ -1,9 +1,11 @@
 from pathlib import Path
 
+from immuneML.data_model.datasets.ElementDataset import SequenceDataset, ReceptorDataset
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.hyperparameter_optimization.config.GroupKFoldConfig import GroupKFoldConfig
 from immuneML.hyperparameter_optimization.config.ManualSplitConfig import ManualSplitConfig
+from immuneML.hyperparameter_optimization.config.SequenceSimilarityConfig import SequenceSimilarityConfig
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.util.ParameterValidator import ParameterValidator
@@ -15,14 +17,32 @@ class SplitDatasetParser:
 
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> SplitDatasetInstruction:
 
-        ParameterValidator.assert_keys(list(instruction.keys()), ['dataset', 'split_config', "type"], "SplitDatasetParser", key)
+        ParameterValidator.assert_keys(list(instruction.keys()), ['dataset', 'split_config', "type", "sequence_overlap"],
+                                       "SplitDatasetParser", key, exclusive=False)
+        ParameterValidator.assert_keys_present(list(instruction.keys()), ['dataset', 'split_config', "type"],
+                                               "SplitDatasetParser", key)
 
         dataset = symbol_table.get(instruction["dataset"])
         split_config = self._parse_config(key, instruction)
-        state = SplitDatasetState(dataset=dataset, split_config=split_config, name=key)
+        sequence_overlap = self._parse_sequence_overlap(key, instruction.get("sequence_overlap"), dataset)
+        state = SplitDatasetState(dataset=dataset, split_config=split_config, name=key,
+                                  sequence_overlap=sequence_overlap)
 
         return SplitDatasetInstruction(state)
 
+
+    def _parse_sequence_overlap(self, inst_name: str, specs: dict, dataset) -> SequenceSimilarityConfig:
+        if specs is None:
+            return None
+
+        location = f"{SplitDatasetParser.__name__}/{inst_name}"
+        assert isinstance(dataset, (SequenceDataset, ReceptorDataset)), \
+            (f"{location}: sequence_overlap is only defined for sequence and receptor datasets, got "
+             f"{type(dataset).__name__}.")
+        config = SequenceSimilarityConfig.parse(specs, location, "sequence_overlap", min_edit_distance=0)
+        assert not (config.chains and isinstance(dataset, SequenceDataset)), \
+            f"{location}: sequence_overlap/chains can only be set for receptor datasets."
+        return config
 
     def _parse_config(self, inst_name: str, instruction: dict):
         split_key = 'split_config'

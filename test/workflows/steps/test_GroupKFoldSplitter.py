@@ -60,3 +60,43 @@ def test_group_k_fold_split():
     assert sorted(test.get_example_count() for test in tests) == [3, 3]
 
     shutil.rmtree(path)
+
+
+def test_group_k_fold_split_over_several_columns():
+    os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+    path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "group_k_fold_splitter_columns/")
+
+    # groups are the combinations of v and j: (V1, J1) is always in training, and the other three are held out once
+    v_genes = ["V1", "V1", "V1", "V1", "V1", "V2", "V2", "V2"]
+    j_genes = ["J1", "J1", "J1", "J2", "J2", "J1", "J1", "J2"]
+    pd.DataFrame({"v": v_genes, "j": j_genes, "filename": list(range(len(v_genes)))}).to_csv(path / "metadata.csv")
+
+    dataset = RepertoireDataset(repertoires=[Repertoire(Path(f"{index}.tsv"), None, str(index))
+                                             for index in range(len(v_genes))],
+                                metadata_file=path / "metadata.csv")
+
+    paths = [PathBuilder.build(path / f"split_{i + 1}") for i in range(3)]
+    split_config = SplitConfig(split_strategy=SplitType.GROUP_K_FOLD, split_count=3,
+                               group_k_fold_config=GroupKFoldConfig(group_label=["v", "j"],
+                                                                    train_only_groups=["V1|J1"]))
+
+    trains, tests = DataSplitter.run(DataSplitterParams(dataset=dataset, split_strategy=SplitType.GROUP_K_FOLD,
+                                                        split_count=3, paths=paths, split_config=split_config))
+
+    held_out_groups = []
+    for split_path, train, test in zip(paths, trains, tests):
+        test_metadata = test.get_metadata(["v", "j"], return_df=True)
+        test_groups = set(test_metadata["v"] + "|" + test_metadata["j"])
+        train_metadata = train.get_metadata(["v", "j"], return_df=True)
+        train_groups = set(train_metadata["v"] + "|" + train_metadata["j"])
+
+        assert len(test_groups) == 1 and "V1|J1" in train_groups
+        assert len(train_groups & test_groups) == 0
+        held_out_groups.extend(test_groups)
+
+        assignment = pd.read_csv(split_path / "group_assignment.csv")
+        assert assignment[assignment["group"] == "V1|J1"]["set"].iloc[0] == "train_only"
+
+    assert sorted(held_out_groups) == ["V1|J2", "V2|J1", "V2|J2"]
+
+    shutil.rmtree(path)

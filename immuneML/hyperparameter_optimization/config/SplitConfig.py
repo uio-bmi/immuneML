@@ -68,7 +68,10 @@ class SplitConfig:
     - group_k_fold_config (:py:obj:`~immuneML.hyperparameter_optimization.config.GroupKFoldConfig.GroupKFoldConfig`): if split strategy is
       `GROUP_K_FOLD`, this config defines the groups. It accepts the following inputs:
 
-      - `group_label` (required): the name of the metadata field that defines the groups (e.g., `study_id`).
+      - `group_label` (required unless `similarity` is set): the name of the metadata field that defines the groups
+        (e.g., `study_id`), or a list of fields, in which case a group is one combination of their values (e.g.,
+        `[v_call, j_call]`), named by joining the values with `|` (e.g., `TRBV2|TRBJ2-2`, which is also how such a
+        group is listed in `train_only_groups`).
 
       - `delimiter` (optional): if set, the value of `group_label` is split on it, so that one example can belong to
         several groups (e.g., a receptor reported by several studies, stored as `study1;study2`). Such an example is in
@@ -77,6 +80,17 @@ class SplitConfig:
 
       - `train_only_groups` (optional): a list of groups that are never held out and are always in the training set,
         e.g. a study that is so large that holding it out would leave too little data for training.
+
+      - `similarity` (instead of `group_label`, for sequence and receptor datasets): the groups are the connected
+        components of the examples, where two examples are joined when they are within `max_edit_distance` (1 or 2)
+        differences of each other, computed with CompAIRR on the amino acid sequences, ignoring genes. No test example
+        is then that close to any training example, so near-identical sequences cannot end up on both sides. It takes
+        `max_edit_distance` (required), `indels` (whether one difference at distance 1 may be an insertion or
+        deletion, default false), `region_type` (default IMGT_CDR3), `chains` (receptor datasets only: which chains to
+        compare, e.g. [TRB]; by default all, and two receptors are joined only if every compared chain is within the
+        distance, so comparing fewer chains gives larger groups), `compairr_path` and `threads` (default 4).
+        `delimiter` and `train_only_groups` cannot be used with it. For repertoire datasets, use `group_label` (e.g.
+        subject) instead.
 
       The remaining groups are shuffled and assigned to the K folds so that the folds have as similar a number of
       examples as possible, so each held-out group is in the test set of exactly one split. If split strategy is
@@ -130,6 +144,17 @@ class SplitConfig:
                 delimiter: ';' # optional; an example can belong to several groups, e.g. study1;study2
                 train_only_groups: [study1] # optional; groups that are never held out
 
+        # holding out groups of similar sequences, so that no test sequence is within one edit of a training sequence:
+        assessment:
+            split_strategy: group_k_fold
+            split_count: 5
+            group_k_fold_config:
+                similarity:
+                    max_edit_distance: 1
+                    indels: true # optional, one difference may be an insertion or deletion
+                    region_type: IMGT_CDR3 # optional
+                    compairr_path: /path/to/compairr # optional
+
     """
 
     def __init__(self, split_strategy: SplitType, split_count: int, training_percentage: float = None, reports: ReportConfig = None,
@@ -155,7 +180,7 @@ class SplitConfig:
         elif self.split_strategy == SplitType.STRATIFIED_K_FOLD:
             desc = f"stratified {self.split_count}-fold CV"
         elif self.split_strategy == SplitType.GROUP_K_FOLD:
-            desc = f"{self.split_count}-fold CV over groups of {self.group_k_fold_config.group_label}"
+            desc = f"{self.split_count}-fold CV over groups ({self.group_k_fold_config.describe_groups()})"
         return desc
 
     def is_with_test_set(self):

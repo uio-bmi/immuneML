@@ -51,12 +51,16 @@ class SplitDatasetHTMLBuilder:
             suffix = f"_split_{index + 1}" if multiple_splits else ""
             train_zip = Util.make_downloadable_zip(state.result_path, train_path, f"train_dataset{suffix}")
             test_zip = Util.make_downloadable_zip(state.result_path, test_path, f"test_dataset{suffix}")
+            overlap_path = state.sequence_overlap_paths[index] if len(state.sequence_overlap_paths) > index else None
             splits.append({
                 "split_name": f"Split {index + 1}" if multiple_splits else "",
                 "train_dataset_download_link": os.path.relpath(train_zip, base_path),
                 "test_dataset_download_link": os.path.relpath(test_zip, base_path),
                 "train_dataset_file": Path(train_zip).name,
                 "test_dataset_file": Path(test_zip).name,
+                "show_sequence_overlap": overlap_path is not None,
+                "sequence_overlap_table": Util.get_table_string_from_csv(overlap_path) if overlap_path else None,
+                "sequence_overlap_download_link": os.path.relpath(overlap_path, base_path) if overlap_path else None,
             })
 
         group_config = state.split_config.group_k_fold_config
@@ -72,10 +76,11 @@ class SplitDatasetHTMLBuilder:
             "training_percentage": f"{training_percentage * 100:.0f}%" if has_percentage else "N/A",
             "test_percentage": f"{(1 - training_percentage) * 100:.0f}%" if has_percentage else "N/A",
             "show_group_config": group_config is not None,
-            "group_label": group_config.group_label if group_config else None,
+            "group_label": group_config.describe_groups() if group_config else None,
             "train_only_groups": ", ".join(str(group) for group in group_config.train_only_groups)
                 if group_config and group_config.train_only_groups else "none",
             "splits": splits,
+            "sequence_overlap_description": state.sequence_overlap.describe() if state.sequence_overlap else None,
             **Util.make_dataset_html_map(state.dataset, dataset_key="original_dataset")
         }
 

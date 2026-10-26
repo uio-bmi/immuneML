@@ -16,9 +16,9 @@ from immuneML.simulation.implants.SeedMotif import SeedMotif
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.util.signal_annotation import annotate_sequence_dataset
 from immuneML.util.CompAIRRHelper import CompAIRRHelper
-from immuneML.util.CompAIRRParams import CompAIRRParams
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.SequenceSimilarityHelper import SequenceSimilarityHelper
 
 
 class TrueMotifsSummaryBarplot(DataReport):
@@ -191,8 +191,8 @@ class TrueMotifsSummaryBarplot(DataReport):
     def _label_near_copies(self, plotting_data, sequence_column):
         """Relabel the sequences counted as novel that are within max_edit_distance of a training sequence.
 
-        CompAIRR is run once per distance, from 1 up to max_edit_distance, over the sequences still labelled novel,
-        so each sequence ends up labelled with the smallest distance at which it matched.
+        Each sequence still labelled novel is labelled with the smallest distance at which it matched (see
+        SequenceSimilarityHelper.smallest_distance_to_reference).
         """
         train_sequences = plotting_data.loc[plotting_data['data_origin'] == 'original_train', sequence_column]
         if train_sequences.empty:
@@ -200,56 +200,16 @@ class TrueMotifsSummaryBarplot(DataReport):
                             f"distance to the training set cannot be computed. Keeping the exact-match labels.")
             return plotting_data
 
-        work_path = PathBuilder.build(self.result_path / "compairr_data")
-        reference_path = work_path / "training_sequences.tsv"
-        self._write_compairr_file(train_sequences, reference_path, "original_train")
+        still_novel = plotting_data[plotting_data['novelty_memorization'] == 'novel']
+        distances = SequenceSimilarityHelper.smallest_distance_to_reference(
+            still_novel[sequence_column], train_sequences, self.max_edit_distance, self.result_path / "compairr_data",
+            compairr_path=self.compairr_path, threads=self.threads)
 
         for distance in range(1, self.max_edit_distance + 1):
-            still_novel = plotting_data[plotting_data['novelty_memorization'] == 'novel']
-            if still_novel.empty:
-                break
-
-            query_path = work_path / f"generated_sequences_d{distance}.tsv"
-            self._write_compairr_file(still_novel[sequence_column], query_path, "generated")
-
-            matched = self._run_compairr(query_path, reference_path, work_path, distance,
-                                         [str(index) for index in still_novel.index])
             label = f"within {distance} edit" if distance == 1 else f"within {distance} edits"
-            plotting_data.loc[still_novel.index[matched], 'novelty_memorization'] = label
+            plotting_data.loc[distances.index[distances.values == distance], 'novelty_memorization'] = label
 
         return plotting_data
-
-    @staticmethod
-    def _write_compairr_file(sequences, filename, repertoire_id):
-        """CompAIRR input with genes and counts ignored, so only the amino acid sequence is compared."""
-        pd.DataFrame({"junction_aa": sequences.values,
-                      "repertoire_id": repertoire_id,
-                      "sequence_id": [str(index) for index in sequences.index]}).to_csv(filename, sep="\t",
-                                                                                        index=False)
-
-    def _run_compairr(self, query_path, reference_path, work_path, distance, query_ids):
-        import subprocess
-
-        compairr_params = CompAIRRParams(compairr_path=CompAIRRHelper.determine_compairr_path(self.compairr_path),
-                                         keep_compairr_input=True, differences=distance, indels=False,
-                                         ignore_counts=True, ignore_genes=True, threads=self.threads,
-                                         output_filename=f"compairr_out_d{distance}.txt",
-                                         log_filename=f"compairr_log_d{distance}.txt",
-                                         output_pairs=False, pairs_filename=None,
-                                         do_repertoire_overlap=False, do_sequence_matching=True)
-
-        args = CompAIRRHelper.get_cmd_args(compairr_params, [query_path, reference_path], work_path)
-        logging.info(f"{self.__class__.__name__}: running CompAIRR with the following arguments: {' '.join(args)}")
-        result = CompAIRRHelper.process_compairr_output_file(subprocess.run(args, capture_output=True, text=True),
-                                                             compairr_params, work_path)
-
-        # CompAIRR does not have to return the sequences in the order they were given in
-        result.index = result.index.astype(str)
-        assert set(result.index) == set(query_ids), \
-            (f"{self.__class__.__name__}: CompAIRR returned {len(set(result.index))} sequence identifiers for "
-             f"{len(set(query_ids))} query sequences. See the log file in {work_path} for more information.")
-
-        return (result.reindex(query_ids)["original_train"] > 0).values
 
     @staticmethod
     def _get_sequence_counts(plotting_data, signal_names):
