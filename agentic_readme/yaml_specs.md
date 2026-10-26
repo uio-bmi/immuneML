@@ -82,8 +82,10 @@ Nested cross-validation for classifiers.
 - Keys: `clustering_config_path` (the zip exported by Clustering), `dataset`, `metrics`, `validation_type: [method_based, result_based]`.
 
 ### SplitDataset
-- `split_config` takes a `random` or `manual` strategy with `split_count: 1`, or `group_k_fold` with `split_count` ≥ 2 and a `group_k_fold_config` (see the SplitConfig docstring).
-- One split is exported to `<inst>/train/` and `<inst>/test/`; group_k_fold exports `<inst>/split_<i>/train/` and `test/` plus `group_assignment.csv`.
+- `split_config` takes a `random` or `manual` strategy with `split_count: 1`, or `group_k_fold` with `split_count` ≥ 2 and a `group_k_fold_config` (see the SplitConfig docstring). For a single group hold-out, use `split_count: 2` and read only `split_1` downstream (`split_2` is the same split with sides swapped).
+- One split is exported to `<inst>/train/` and `<inst>/test/`; group_k_fold exports `<inst>/split_<i>/train/` and `test/` plus `group_assignment.csv`. Exported files are named `subset_<dataset>_train|test.tsv/.yaml`; import them downstream with `dataset_file:`.
+- group_k_fold groups by one or more metadata fields (`group_label`, a name or a list) or by sequence similarity (`similarity`, CompAIRR connected components, sequence and receptor datasets; `chains` picks the receptor chains); `train_only_groups` and `delimiter` only go with `group_label`.
+- Optional `sequence_overlap` (sequence and receptor datasets) writes `sequence_overlap.csv` per split: test examples by distance to the nearest training example. Use it to report leakage instead of a script.
 - It is typically used to create discovery and validation sets for clustering.
 
 ### Subsampling

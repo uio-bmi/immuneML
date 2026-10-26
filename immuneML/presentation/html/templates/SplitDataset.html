@@ -135,6 +135,15 @@
                     <p><small>Location: <code>{{test_dataset_download_link}}</code></small></p>
                 </div>
             </div>
+            {{#show_sequence_overlap}}
+            <h4>Distance of the test sequences to the training set</h4>
+            <p>For every test sequence, the smallest number of differences to any training sequence
+               (compared: {{sequence_overlap_description}}).
+               Download: <a href="{{sequence_overlap_download_link}}" download>sequence_overlap.csv</a></p>
+            <div class="table-container">
+                {{{sequence_overlap_table}}}
+            </div>
+            {{/show_sequence_overlap}}
             {{/splits}}
         </div>
     </div>
