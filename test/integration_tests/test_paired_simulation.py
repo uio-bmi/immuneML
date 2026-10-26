@@ -47,7 +47,6 @@ def prepare_specs(path, is_receptor_sim: bool = True) -> Path:
                             "number_of_examples": 10,
                             "receptors_in_repertoire_count": 10 if not is_receptor_sim else 0,
                             "is_noise": False,
-                            "seed": 100,
                             "generative_model": {
                                 "type": "OLGA",
                                 "default_model_name": "humanTRA",
@@ -62,7 +61,6 @@ def prepare_specs(path, is_receptor_sim: bool = True) -> Path:
                             "number_of_examples": 10,
                             "receptors_in_repertoire_count": 10 if not is_receptor_sim else 0,
                             "is_noise": False,
-                            "seed": 2,
                             "generative_model": {
                                 'type': 'OLGA',
                                 "default_model_name": "humanTRB",

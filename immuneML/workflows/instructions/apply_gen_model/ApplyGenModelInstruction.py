@@ -93,7 +93,7 @@ class ApplyGenModelInstruction(Instruction):
         if self.state.gen_examples_count == 0:
             return
 
-        dataset = self.method.generate_sequences(self.state.gen_examples_count, 1,
+        dataset = self.method.generate_sequences(self.state.gen_examples_count, None,
                                                  self.state.result_path / 'generated_sequences',
                                                  SequenceType.AMINO_ACID, False)
 

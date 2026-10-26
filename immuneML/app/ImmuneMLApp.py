@@ -1,15 +1,11 @@
 import argparse
 import logging
 import os
-import random
 import shutil
 import traceback
 from datetime import datetime
 from pathlib import Path
 from sys import exit as sys_exit
-
-import numpy as np
-import yaml
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
@@ -18,8 +14,8 @@ from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.Logger import print_log
-from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.RandomSeedHelper import RandomSeedHelper
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
@@ -52,27 +48,7 @@ class ImmuneMLApp:
         generating a random dataset under definitions) is covered as well as randomness in every instruction. If the
         key is absent, nothing is seeded and the behavior is unchanged. A seed set within an instruction (e.g.
         TrainMLModel's random_seed) is applied when that instruction runs and takes precedence from that point on."""
-        with self._specification_path.open("r") as file:
-            specification = yaml.safe_load(file)
-
-        seed = specification.get("random_seed") if isinstance(specification, dict) else None
-        if seed is None:
-            logging.info("ImmuneMLApp: no random_seed was set in the specification, so the analysis is not seeded.")
-            return
-
-        assert not isinstance(seed, bool), f"{ImmuneMLApp.__name__}: random_seed has to be an integer, got {seed}."
-        ParameterValidator.assert_type_and_value(seed, int, ImmuneMLApp.__name__, "random_seed", min_inclusive=0,
-                                                 max_inclusive=2 ** 32 - 1)
-
-        random.seed(seed)
-        np.random.seed(seed)
-        try:
-            import torch
-            torch.manual_seed(seed)
-        except ImportError:
-            pass
-
-        print_log(f"immuneML: random seed set to {seed}.\n", include_datetime=True)
+        RandomSeedHelper.set_seed_from_specification(self._specification_path, ImmuneMLApp.__name__)
 
     def run(self):
         try:

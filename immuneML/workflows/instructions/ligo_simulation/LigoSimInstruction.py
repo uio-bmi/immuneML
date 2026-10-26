@@ -41,6 +41,7 @@ from immuneML.simulation.util.util import get_bnp_data, make_annotated_dataclass
 from immuneML.util.ExporterHelper import ExporterHelper
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.RandomSeedHelper import RandomSeedHelper
 from immuneML.workflows.instructions.Instruction import Instruction
 from immuneML.workflows.instructions.ligo_simulation.runtime_reports import make_p_gen_histogram_plot
 
@@ -211,19 +212,25 @@ class LigoSimInstruction(Instruction):
         return examples
 
     def _parallel_create_seq_sets(self) -> dict:
-        if self._number_of_processes > 1:
-            chunk_size = math.ceil(len(self.state.simulation.sim_items) / self._number_of_processes)
+        sim_items = self.state.simulation.sim_items
 
-            with Pool(processes=max(self._number_of_processes, len(self.state.simulation.sim_items))) as pool:
+        # one seed is drawn from the global random state (set by the top-level random_seed, if any) and each sim item
+        # starts from it plus its index: worker processes start from copies of the same state, so they would otherwise
+        # draw the same sequences, and the result would depend on which worker gets which item
+        base_seed = int(np.random.randint(0, 2 ** 32 - len(sim_items), dtype=np.int64))
+        seeds = [base_seed + index for index in range(len(sim_items))]
+
+        if self._number_of_processes > 1:
+            chunk_size = math.ceil(len(sim_items) / self._number_of_processes)
+
+            with Pool(processes=max(self._number_of_processes, len(sim_items))) as pool:
                 result = pool.map(self._create_sequence_sets,
-                                  [dill.dumps(item) for item in self.state.simulation.sim_items],
+                                  [(dill.dumps(item), seed) for item, seed in zip(sim_items, seeds)],
                                   chunksize=chunk_size)
                 examples = self._parse_example_output(result)
         else:
-            examples = {}
-            for item in self.state.simulation.sim_items:
-                res = self._create_sequence_sets(item)
-                examples = {**examples, **{k: [dill.loads(el) for el in v] for k, v in res.items()}}
+            result = [self._create_sequence_sets((item, seed)) for item, seed in zip(sim_items, seeds)]
+            examples = self._parse_example_output(result)
 
         return examples
 
@@ -272,9 +279,11 @@ class LigoSimInstruction(Instruction):
 
         return merge_dataclass_objects([sequences1, sequences2])
 
-    def _create_sequence_sets(self, item_in) -> Dict[str, Union[List[Repertoire], Path]]:
+    def _create_sequence_sets(self, item_in: tuple) -> Dict[str, Union[List[Repertoire], Path]]:
 
-        item = dill.loads(item_in) if isinstance(item_in, bytes) else item_in
+        item, seed = item_in
+        item = dill.loads(item) if isinstance(item, bytes) else item
+        RandomSeedHelper.set_seed(seed)
 
         if self.state.simulation.is_repertoire:
             res = self._create_repertoires(item)
@@ -348,9 +357,6 @@ class LigoSimInstruction(Instruction):
 
     def _gen_necessary_sequences(self, base_path: Path, sim_item: SimConfigItem) -> Dict[str, Path]:
 
-        if sim_item.seed is not None:
-            np.random.seed(sim_item.seed)
-
         path = PathBuilder.build(base_path / sim_item.name)
         seqs_per_signal_count = get_sequence_per_signal_count(sim_item)
         seq_paths = make_sequence_paths(path, sim_item.signals)
@@ -411,7 +417,7 @@ class LigoSimInstruction(Instruction):
         if sequence_per_signal_count['no_signal'] > 0 or need_background_seqs or (
                 len(v_genes) == 0 and len(j_genes) == 0) \
                 or not sim_item.generative_model.can_generate_from_skewed_gene_models():
-            sim_item.generative_model.generate_sequences(self._sequence_batch_size, seed=sim_item.seed,
+            sim_item.generative_model.generate_sequences(self._sequence_batch_size, seed=None,
                                                          path=sequence_path,
                                                          sequence_type=self.sequence_type,
                                                          compute_p_gen=self._use_p_gens)
@@ -423,7 +429,7 @@ class LigoSimInstruction(Instruction):
         if sim_item.generative_model.can_generate_from_skewed_gene_models() and skew_model_for_signal and (
                 len(v_genes) > 0 or len(j_genes) > 0):
             sim_item.generative_model.generate_from_skewed_gene_models(v_genes=v_genes, j_genes=j_genes,
-                                                                       seed=sim_item.seed, path=sequence_path,
+                                                                       seed=None, path=sequence_path,
                                                                        sequence_type=self.sequence_type,
                                                                        batch_size=self._sequence_batch_size,
                                                                        compute_p_gen=self._use_p_gens)

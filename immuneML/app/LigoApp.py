@@ -9,6 +9,7 @@ from immuneML.dsl.semantic_model.SemanticModel import SemanticModel
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.RandomSeedHelper import RandomSeedHelper
 
 
 class SimError(Exception):
@@ -23,8 +24,16 @@ class LigoApp:
 
         PathBuilder.build(self._result_path)
 
+    def set_random_seed(self):
+        """Seeds Python's random, numpy.random and, if installed, torch from the top-level `random_seed` key of the
+        specification, as in ImmuneMLApp. It runs before the specification is parsed. If the key is absent, nothing
+        is seeded."""
+        RandomSeedHelper.set_seed_from_specification(self._specification_path, LigoApp.__name__)
+
     def run(self):
         try:
+            self.set_random_seed()
+
             print_log(f"LIgO: parsing the specification...\n", include_datetime=True)
 
             symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path,

@@ -271,7 +271,7 @@ class TrainGenModelInstruction(Instruction):
 
     def _gen_data(self):
         for method in self.methods:
-            dataset = method.generate_sequences(self.state.gen_examples_count, 1,
+            dataset = method.generate_sequences(self.state.gen_examples_count, None,
                                                 self.state.result_path / 'generated_sequences' / method.name,
                                                 SequenceType.AMINO_ACID, False)
 

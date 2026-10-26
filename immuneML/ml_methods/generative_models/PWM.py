@@ -117,7 +117,8 @@ class PWM(GenerativeModel):
         raise NotImplementedError
 
     def generate_sequences(self, count: int, seed: int, path: Path, sequence_type: SequenceType, compute_p_gen: bool):
-        np.random.seed(seed)
+        if seed is not None:
+            np.random.seed(seed)
         assert sequence_type == self.sequence_type
 
         sequences = []

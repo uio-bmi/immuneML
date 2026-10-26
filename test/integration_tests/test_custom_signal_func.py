@@ -34,7 +34,6 @@ def prepare_specs(path) -> Path:
                             "signals": {"signal1": 0.5},
                             "number_of_examples": 10,
                             "is_noise": False,
-                            "seed": 100,
                             "receptors_in_repertoire_count": 6,
                             "generative_model": {
                                 "type": "OLGA",

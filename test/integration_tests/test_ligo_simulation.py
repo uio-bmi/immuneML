@@ -5,6 +5,7 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
+from immuneML.app.ImmuneMLApp import ImmuneMLApp
 from immuneML.app.LigoApp import LigoApp
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -210,3 +211,27 @@ def test_simulation():
             assert "species" not in dataset_yaml["labels"]
 
         shutil.rmtree(path)
+
+
+def test_simulation_reproducible_with_random_seed():
+    path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "integration_ligo_simulation_seed/")
+    specs_path = prepare_seq_sim_specs(path)
+
+    with open(specs_path) as file:
+        specs = yaml.safe_load(file)
+
+    # the same top-level random_seed gives the same sequences, from either app and with any number of processes
+    sequences = []
+    for run, (app_class, processes) in enumerate([(ImmuneMLApp, 2), (ImmuneMLApp, 2), (LigoApp, 2), (ImmuneMLApp, 1)]):
+        specs["instructions"]["inst1"]["number_of_processes"] = processes
+        run_specs_path = path / f"specs_{run}.yaml"
+        with open(run_specs_path, "w") as file:
+            yaml.dump({**specs, "random_seed": 3}, file)
+
+        app_class(specification_path=run_specs_path, result_path=path / f"result_{run}/").run()
+        df = pd.read_csv(path / f"result_{run}/inst1/exported_dataset/airr/simulated_dataset.tsv", sep='\t')
+        sequences.append(df.junction_aa.tolist())
+
+    assert all(run_sequences == sequences[0] for run_sequences in sequences[1:])
+
+    shutil.rmtree(path)

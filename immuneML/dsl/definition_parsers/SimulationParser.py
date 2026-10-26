@@ -119,7 +119,7 @@ def strategy_supports_signals(sim_item, sim_strategy_cls):
 def _parse_sim_config_item(simulation_item: dict, key: str, symbol_table: SymbolTable, is_repertoire: bool) -> Tuple[
     SimConfigItem, dict]:
     location = SimulationParser.__name__
-    valid_simulation_item_keys = ["number_of_examples", "signals", "is_noise", "seed", "default_clonal_frequency",
+    valid_simulation_item_keys = ["number_of_examples", "signals", "is_noise", "default_clonal_frequency",
                                   "false_positive_prob_in_receptors", "false_negative_prob_in_receptors",
                                   "sequence_len_limits",
                                   "receptors_in_repertoire_count", "generative_model", "immune_events"]

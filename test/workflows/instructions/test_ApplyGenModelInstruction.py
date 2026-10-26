@@ -35,7 +35,7 @@ class TestApplyGenModelInstruction(TestCase):
         result = instruction.run(path)
 
         # Verify that the mock methods were called as expected
-        mock_model.generate_sequences.assert_called_with(2, 1, path / "Test/generated_sequences/",
+        mock_model.generate_sequences.assert_called_with(2, None, path / "Test/generated_sequences/",
                                                          SequenceType.AMINO_ACID, False)
 
         # Verify the results

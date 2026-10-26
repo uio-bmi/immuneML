@@ -58,7 +58,6 @@ def build_specs(parsed_args):
                             },
                             "number_of_examples": parsed_args.example_with_motif_count,
                             "signals": {"signal1": parsed_args.signal_percentage / 100},
-                            "seed": 100,
                             "receptors_in_repertoire_count": parsed_args.repertoire_size if parsed_args.dataset_type == "repertoire" else None
                         },
                         "no_signal": {
@@ -68,7 +67,6 @@ def build_specs(parsed_args):
                             },
                             "number_of_examples": parsed_args.example_without_motif_count,
                             "signals": {},
-                            "seed": 200,
                             "receptors_in_repertoire_count": parsed_args.repertoire_size if parsed_args.dataset_type == "repertoire" else None
                         }
                     },
