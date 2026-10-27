@@ -88,7 +88,10 @@ class FeatureReport(EncodingReport):
                 f"{location}: this report can only be created for a 2-dimensional encoded dataset. {location} report will not be created.")
             run_report = False
         else:
-            legal_labels = list(self.dataset.get_label_names())
+            # labels the data was encoded with (e.g. `labels` of an ExploratoryAnalysis unit) can be used as well,
+            # including gene labels such as j_call, which the dataset itself does not list as prediction targets
+            encoded_labels = list(self.dataset.encoded_data.labels.keys()) if self.dataset.encoded_data.labels else []
+            legal_labels = list(self.dataset.get_label_names(include_gene_labels=True)) + encoded_labels
 
             labels = [self.color, self.facet_row, self.facet_column]
 

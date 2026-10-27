@@ -28,7 +28,8 @@ class SimpleVAE(GenerativeModel):
     """
     SimpleVAE is a generative model on sequence level that relies on variational autoencoder. This type of model was
     proposed by Davidsen et al. 2019, and this implementation is inspired by their original implementation available
-    at https://github.com/matsengrp/vampire. It uses the sequences as given in "junction_aa" field in the input dataset.
+    at https://github.com/matsengrp/vampire. It uses the amino acid sequences of the region given by region_type
+    (by default the junction, as in the "junction_aa" field of the input dataset).
 
     References:
 
@@ -80,6 +81,9 @@ class SimpleVAE(GenerativeModel):
 
     - seed (int): random seed for the model or None
 
+    - region_type (str): which part of the sequence to train on and generate, e.g., IMGT_JUNCTION or IMGT_CDR3;
+      the generated sequences are written to that region's field only. Default: IMGT_JUNCTION.
+
 
     **YAML specification:**
 
@@ -103,6 +107,7 @@ class SimpleVAE(GenerativeModel):
                         warmup_epochs: 20
                         patience: 20
                         device: cpu
+                        region_type: IMGT_JUNCTION
 
     """
 

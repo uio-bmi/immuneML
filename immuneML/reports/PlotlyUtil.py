@@ -67,6 +67,7 @@ class PlotlyUtil:
             file_path: the path to the file where the image will be saved
 
         """
+        file_path = Path(file_path)
         figure.write_html(str(file_path))
         figure.write_json(str(file_path.with_suffix('.json')))
         if dataset_size is not None and dataset_size > EnvironmentSettings.max_points_on_plot:

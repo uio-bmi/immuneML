@@ -15,3 +15,4 @@ cdr3_embed_dim: null
 j_gene_embed_dim: null
 v_gene_embed_dim: null
 seed: null
+region_type: IMGT_JUNCTION
