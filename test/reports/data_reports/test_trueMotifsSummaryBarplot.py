@@ -121,6 +121,41 @@ class TestTrueMotifsSummaryBarplot(TestCase):
 
         shutil.rmtree(path)
 
+    def test_motif_recovery_summary(self):
+        path = EnvironmentSettings.tmp_test_path / "true_motifs_summary_table/"
+        PathBuilder.remove_old_and_build(path)
+
+        annotated = pd.DataFrame({
+            'data_origin': ['original_train', 'original_train', 'original_test', 'PWM', 'PWM', 'PWM', 'PWM'],
+            'novelty_memorization': ['original', 'original', 'original', 'memorized', 'novel', 'novel', 'novel'],
+            'signal1': [1, 0, 1, 1, 1, 0, 0],
+            'signal2': [0, 1, 0, 0, 1, 1, 0]})
+
+        report = TrueMotifsSummaryBarplot(implanted_motifs_per_signal={'signal1': {}, 'signal2': {}},
+                                          result_path=path)
+        summary = report._get_motif_recovery_summary(annotated)
+
+        # original_test is left out unless it is shown as the baseline, as in the figure
+        self.assertSetEqual(set(summary['data_origin'].astype(str)), {'original_train', 'PWM'})
+
+        pwm_novel = summary[(summary['data_origin'] == 'PWM') & (summary['novelty_memorization'] == 'novel')]
+        pwm_novel = pwm_novel.set_index('signal')
+        # a sequence carrying both signals is counted once for each of them
+        self.assertEqual(pwm_novel.loc['signal1', 'count'], 1)
+        self.assertEqual(pwm_novel.loc['signal2', 'count'], 2)
+        self.assertAlmostEqual(pwm_novel.loc['signal2', 'frequency'], 2 / 4)
+        self.assertEqual(pwm_novel.loc['signal1', 'total_sequences'], 4)
+        self.assertAlmostEqual(pwm_novel.loc['signal1', 'signal_specific_percent'], 75.)
+
+        report = TrueMotifsSummaryBarplot(implanted_motifs_per_signal={'signal1': {}, 'signal2': {}},
+                                          result_path=path, show_test_set_baseline=True)
+        summary = report._get_motif_recovery_summary(annotated)
+        # the originals come first, the held-out baseline next to them, then the models
+        self.assertListEqual(list(dict.fromkeys(summary['data_origin'].astype(str))),
+                             ['original_train', 'original_test', 'PWM'])
+
+        shutil.rmtree(path)
+
     def test_without_training_sequences(self):
         path = EnvironmentSettings.tmp_test_path / "true_motifs_summary_no_train/"
         PathBuilder.remove_old_and_build(path)

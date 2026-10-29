@@ -29,6 +29,14 @@ class TrueMotifsSummaryBarplot(DataReport):
     and the signals provided. The report also shows how many of the sequences are memorized (seen in train data) and
     how many are novel (not seen in train data).
 
+    Next to the figure, the report writes motif_recovery_summary.csv with the numbers it is built from: one row per
+    dataset origin, novelty level and signal, with the number of sequences containing the signal (count), the total
+    number of sequences of that origin (total_sequences) and their ratio (frequency), as well as the share of
+    sequences of that origin containing any of the signals (signal_specific_percent). A sequence containing several
+    signals is counted once for each of them. The table holds the same dataset origins as the figure, so the held-out
+    sequences are only included when show_test_set_baseline is set. The per-sequence annotations are written to
+    annotated_sequences.csv.
+
     **Specification arguments:**
 
     - region_type (str): which part of the sequence to check; e.g., IMGT_CDR3
@@ -147,14 +155,23 @@ class TrueMotifsSummaryBarplot(DataReport):
 
         plot_df = self._get_plotting_data()
         plot_df.to_csv(self.result_path / 'annotated_sequences.csv', index=False)
-        report_output_fig = self._plot(plot_df, "true_motifs_summary_barplot")
+        output_tables = [ReportOutput(self.result_path / 'annotated_sequences.csv', 'annotated sequences')]
+
+        if plot_df.empty:
+            logging.warning(f"Empty data, skipping true_motifs_summary_barplot plot...")
+            report_output_fig = None
+        else:
+            summary = self._get_motif_recovery_summary(plot_df)
+            summary.drop(columns=['label']).to_csv(self.result_path / 'motif_recovery_summary.csv', index=False)
+            output_tables.append(ReportOutput(self.result_path / 'motif_recovery_summary.csv',
+                                              'motif recovery per dataset origin, novelty level and signal'))
+            report_output_fig = self._plot(summary, "true_motifs_summary_barplot")
 
         return ReportResult(self.name,
                             info="This report shows how well implanted ('ground truth') motifs are recovered by "
                                  "generative models. ",
-                            output_tables=[ReportOutput(self.result_path / 'annotated_sequences.csv',
-                                                        'annotated sequences')],
-                            output_figures=[report_output_fig])
+                            output_tables=output_tables,
+                            output_figures=[report_output_fig] if report_output_fig is not None else [])
 
     def _get_plotting_data(self):
         signals = self._get_implanted_signals()
@@ -244,65 +261,66 @@ class TrueMotifsSummaryBarplot(DataReport):
 
         return df_melted
 
-    def _plot(self, plotting_data, output_name):
-        if plotting_data.empty:
-            logging.warning(f"Empty data, skipping {output_name} plot...")
-        else:
-            filename = self.result_path / f"{output_name}.html"
+    def _get_motif_recovery_summary(self, plotting_data) -> pd.DataFrame:
+        """Counts and frequencies per data origin, novelty level and signal: the numbers the bar plot is built from."""
+        if not self.show_test_set_baseline:
+            plotting_data = plotting_data[plotting_data['data_origin'] != 'original_test']
+        signal_names = list(self.implanted_motifs_per_signal.keys())
 
-            if not self.show_test_set_baseline:
-                plotting_data = plotting_data[plotting_data['data_origin'] != 'original_test']
-            signal_names = list(self.implanted_motifs_per_signal.keys())
+        seq_counts_df = self._get_sequence_counts(plotting_data, signal_names)
+        # the original sequences come first, the held-out baseline next to them, then the models
+        seq_counts_df['sort_key'] = seq_counts_df['data_origin'].apply(
+            lambda x: (0, 0) if x == 'original_train' else (0, 1) if x == 'original_test' else (
+                1, -seq_counts_df.loc[seq_counts_df['data_origin'] == x, 'signal_specific_percent'].iloc[0]))
+        sorted_data_origins = seq_counts_df.sort_values('sort_key')['data_origin'].tolist()
 
-            seq_counts_df = self._get_sequence_counts(plotting_data, signal_names)
-            # the original sequences come first, the held-out baseline next to them, then the models
-            seq_counts_df['sort_key'] = seq_counts_df['data_origin'].apply(
-                lambda x: (0, 0) if x == 'original_train' else (0, 1) if x == 'original_test' else (
-                    1, -seq_counts_df.loc[seq_counts_df['data_origin'] == x, 'signal_specific_percent'].iloc[0]))
-            sorted_data_origins = seq_counts_df.sort_values('sort_key')['data_origin'].tolist()
+        return self._prepare_and_sort_plotting_data(plotting_data, signal_names, sorted_data_origins,
+                                                    seq_counts_df.drop(columns='sort_key'))
 
-            df_melted = self._prepare_and_sort_plotting_data(plotting_data, signal_names, sorted_data_origins,
-                                                             seq_counts_df)
-            df_melted['data_origin_novelty'] = df_melted['data_origin'] + ' - ' + df_melted['novelty_memorization']
+    def _plot(self, df_melted, output_name):
+        filename = self.result_path / f"{output_name}.html"
 
-            figure = px.bar(
-                df_melted,
-                x='signal',
-                y='frequency',
-                color='data_origin_novelty',
-                facet_col='label',
-                color_discrete_sequence=px.colors.qualitative.Vivid,
-                barmode='stack',
-                title='Percentage of sequences containing signals across different generated datasets',
-            )
+        df_melted = df_melted.copy()
+        df_melted['data_origin_novelty'] = df_melted['data_origin'].astype(str) + ' - ' + df_melted['novelty_memorization']
 
-            # make bars grouped by data_origin and stacked by novelty
-            # figure.update_traces(offsetgroup=df_melted["data_origin"],  # group by data_origin
-            #                      opacity=1.0)
+        figure = px.bar(
+            df_melted,
+            x='signal',
+            y='frequency',
+            color='data_origin_novelty',
+            facet_col='label',
+            color_discrete_sequence=px.colors.qualitative.Vivid,
+            barmode='stack',
+            title='Percentage of sequences containing signals across different generated datasets',
+        )
 
-            # now reduce opacity for each novelty_memorization level
-            color_map = {data_origin: px.colors.qualitative.Vivid[i]
-                         for i, data_origin in enumerate(plotting_data['data_origin'].unique())}
-            # the near-copy levels sit between memorized and novel, so the bars shade from one to the other
-            opacity_map = {"original": 1.0, "memorized": 1., "within 1 edit": 0.8, "within 2 edits": 0.65,
-                           "novel": 0.5}
-            for trace in figure.data:
-                data_origin, novelty = trace.name.split(' - ')
-                trace.opacity = opacity_map.get(novelty, 0.5)
-                trace.marker.color = color_map[data_origin]
+        # make bars grouped by data_origin and stacked by novelty
+        # figure.update_traces(offsetgroup=df_melted["data_origin"],  # group by data_origin
+        #                      opacity=1.0)
 
-            figure.for_each_annotation(lambda a: a.update(text=a.text.replace("label=", "")))
+        # now reduce opacity for each novelty_memorization level
+        color_map = {data_origin: px.colors.qualitative.Vivid[i]
+                     for i, data_origin in enumerate(df_melted['data_origin'].astype(str).unique())}
+        # the near-copy levels sit between memorized and novel, so the bars shade from one to the other
+        opacity_map = {"original": 1.0, "memorized": 1., "within 1 edit": 0.8, "within 2 edits": 0.65,
+                       "novel": 0.5}
+        for trace in figure.data:
+            data_origin, novelty = trace.name.split(' - ')
+            trace.opacity = opacity_map.get(novelty, 0.5)
+            trace.marker.color = color_map[data_origin]
 
-            figure.update_layout(
-                xaxis_title='Signal',
-                yaxis_title='Frequency',
-                bargap=0.2, template='plotly_white'
-            )
+        figure.for_each_annotation(lambda a: a.update(text=a.text.replace("label=", "")))
 
-            filename = PlotlyUtil.write_image_to_file(figure, filename)
+        figure.update_layout(
+            xaxis_title='Signal',
+            yaxis_title='Frequency',
+            bargap=0.2, template='plotly_white'
+        )
 
-            return ReportOutput(filename,
-                                f"Summary of motif recovery for {self.name}",)
+        filename = PlotlyUtil.write_image_to_file(figure, filename)
+
+        return ReportOutput(filename,
+                            f"Summary of motif recovery for {self.name}",)
 
     def _get_implanted_signals(self):
         signals = []

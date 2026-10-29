@@ -21,6 +21,9 @@ class FeatureComparison(FeatureReport):
     This report separates the examples based on a binary metadata label, and plots the mean feature value
     of each feature in one example group against the other example group (for example: plot the feature
     value of 'sick' repertoires on the x axis, and 'healthy' repertoires on the y axis to spot consistent differences).
+    When comparison_reference is set, the label may have more than two classes, and every other class is compared
+    against the reference class in its own panel (for example: the held-out original sequences on the x axis against
+    the sequences from each generative model on the y axis).
     The plot can be separated into different colors or facets using other metadata labels
     (for example: plot the average feature values of 'cohort1', 'cohort2' and 'cohort3' in different colors to spot biases).
 
@@ -43,7 +46,13 @@ class FeatureComparison(FeatureReport):
 
     - comparison_label (str): Mandatory label. This label is used to split the encoded data matrix and define the x
       and y axes of the plot. This label is only allowed to have 2 classes (for example: sick and healthy, binding and
-      non-binding).
+      non-binding), unless comparison_reference is set.
+
+    - comparison_reference (str): Optional class of comparison_label to compare all other classes against. The
+      reference class is shown on the x axis, and each other class on the y axis of its own panel (column facet), so
+      comparison_label may then have any number of classes. Because the panels take the column facets,
+      column_grouping_label cannot be used together with this parameter. By default, this is null, and
+      comparison_label must have exactly 2 classes.
 
     - color_grouping_label (str): Optional label that is used to color the points in the scatterplot. This can not be
       the same as comparison_label.
@@ -63,8 +72,8 @@ class FeatureComparison(FeatureReport):
     - keep_fraction (float): The total number of features may be very large and only the features differing
       significantly across comparison labels may be of interest. When the keep_fraction parameter is set below 1, only
       the fraction of features that differs the most across comparison labels is kept for plotting (note that the
-      produced .csv file still contains all data). By default, keep_fraction is 1, meaning that all features are
-      plotted.
+      produced .csv file still contains all data). With comparison_reference, the fraction is kept per compared class.
+      By default, keep_fraction is 1, meaning that all features are plotted.
 
     - opacity (float): a value between 0 and 1 setting the opacity for data points making it easier to see if there are
       overlapping points
@@ -84,6 +93,10 @@ class FeatureComparison(FeatureReport):
                 my_comparison_report:
                     FeatureComparison: # compare the different classes defined in the label disease
                         comparison_label: disease
+                my_reference_comparison_report:
+                    FeatureComparison: # compare each generative model against the held-out original sequences
+                        comparison_label: data_origin
+                        comparison_reference: original_test
 
     """
 
@@ -104,16 +117,24 @@ class FeatureComparison(FeatureReport):
         assert comparison_label != row_grouping_label, f"FeatureComparison: comparison label {comparison_label} can not be used as row_grouping_label"
         assert comparison_label != column_grouping_label, f"FeatureComparison: comparison label {comparison_label} can not be used as column_grouping_label"
 
+        comparison_reference = kwargs.get("comparison_reference", None)
+        if comparison_reference is not None:
+            assert column_grouping_label is None, \
+                f"FeatureComparison: column_grouping_label can not be used together with comparison_reference, since " \
+                f"the classes compared against the reference are shown as column facets"
+
         return FeatureComparison(**kwargs)
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, comparison_label: str = None,
                  color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
                  opacity: float = 0.7, error_function: str = 'std', name: str = None,
-                 show_error_bar=True, log_scale: bool = False, keep_fraction: int = 1, number_of_processes: int = 1):
+                 show_error_bar=True, log_scale: bool = False, keep_fraction: int = 1, number_of_processes: int = 1,
+                 comparison_reference: str = None):
         super().__init__(dataset=dataset, result_path=result_path, color_grouping_label=color_grouping_label,
                          row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label,
                          number_of_processes=number_of_processes, name=name, error_function=error_function)
         self.comparison_label = comparison_label
+        self.comparison_reference = comparison_reference
         self.show_error_bar = show_error_bar
         self.log_scale = log_scale
         self.keep_fraction = keep_fraction
@@ -122,49 +143,61 @@ class FeatureComparison(FeatureReport):
         self.name = name
 
     def _generate(self):
-        result = self._generate_report_result()
+        group_cols = list(dict.fromkeys(col for col in [self.comparison_label, self.color, self.facet_row,
+                                                        self.facet_column] if col))
+        # mean and error per feature and class straight from the (possibly sparse) encoded matrix, so the example by
+        # feature matrix is never expanded to long format
+        result = self._generate_report_result(self._summarise_feature_values(group_cols))
         result.info = ("Compares the feature values in a given encoded data matrix across two values for a metadata "
                        "label. Each point in the resulting scatterplot represents one feature, and the values on the "
                        "x and y axes are the average feature values across examples of two different classes. ")
         return result
 
     def _plot(self, data_long_format) -> ReportOutput:
-        groupby_cols = [self.comparison_label, self.x, self.color, self.facet_row, self.facet_column]
-        groupby_cols = [i for i in groupby_cols if i]
-        groupby_cols = list(set(groupby_cols))
-        plotting_data = data_long_format.groupby(groupby_cols, as_index=False).agg(
-            {"value": ['mean', self._get_error_function()]})
+        plotting_data = data_long_format
+        unique_label_values = list(plotting_data[self.comparison_label].unique())
 
-        plotting_data.columns = plotting_data.columns.map(''.join)
-
-        unique_label_values = plotting_data[self.comparison_label].unique()
-        assert len(unique_label_values) == 2, \
-            f"FeatureComparison: comparison label {self.comparison_label} does not have 2 values; {unique_label_values}"
-        class_x, class_y = unique_label_values
+        if self.comparison_reference is None:
+            assert len(unique_label_values) == 2, \
+                f"FeatureComparison: comparison label {self.comparison_label} does not have 2 values; {unique_label_values}"
+            class_x, classes_y = unique_label_values[0], unique_label_values[1:]
+        else:
+            class_x = self.comparison_reference
+            classes_y = [value for value in unique_label_values if value != class_x]
 
         merge_labels = [label for label in ["feature", self.color, self.facet_row, self.facet_column] if label]
+        reference_data = plotting_data.loc[plotting_data[self.comparison_label] == class_x]
 
-        plotting_data = pd.merge(plotting_data.loc[plotting_data[self.comparison_label] == class_x],
-                                 plotting_data.loc[plotting_data[self.comparison_label] == class_y],
-                                 on=merge_labels)
+        compared = []
+        for class_y in classes_y:
+            pair = pd.merge(reference_data, plotting_data.loc[plotting_data[self.comparison_label] == class_y],
+                            on=merge_labels)
+            compared.append(self._filter_keep_fraction(pair) if self.keep_fraction < 1 else pair)
+        plotting_data = pd.concat(compared, ignore_index=True)
 
         if plotting_data.shape[0] == 0:
             logging.warning(f"{FeatureComparison.__name__}: there is no overlap between the (combination of) values of {merge_labels} for "
                             f"different values the {self.comparison_label}.")
 
-        plotting_data = self._filter_keep_fraction(plotting_data) if self.keep_fraction < 1 else plotting_data
+        error_name = self._get_error_function().__name__
+        error_x = f"value{error_name}_x" if self.show_error_bar else None
+        error_y = f"value{error_name}_y" if self.show_error_bar else None
 
-        error_x = f"value{self.error_function}_x" if self.show_error_bar else None
-        error_y = f"value{self.error_function}_y" if self.show_error_bar else None
+        # with a reference, each compared class is a column facet and the y axis is named per facet
+        facet_column = f"{self.comparison_label}_y" if self.comparison_reference is not None else self.facet_column
+        y_class = classes_y[0] if self.comparison_reference is None else "class in panel title"
+        y_title = f"Average feature values for {self.comparison_label} = {y_class}"
 
         figure = px.scatter(plotting_data, x="valuemean_x", y="valuemean_y", error_x=error_x, error_y=error_y,
-                            color=self.color, facet_row=self.facet_row, facet_col=self.facet_column, hover_name="feature",
+                            color=self.color, facet_row=self.facet_row, facet_col=facet_column, hover_name="feature",
                             log_x=self.log_scale, log_y=self.log_scale, opacity=self.opacity,
                             labels={
                                 "valuemean_x": f"Average feature values for {self.comparison_label} = {class_x}",
-                                "valuemean_y": f"Average feature values for {self.comparison_label} = {class_y}",
+                                "valuemean_y": y_title,
                             }, template='plotly_white',
                             color_discrete_sequence=px.colors.diverging.Tealrose)
+        if self.comparison_reference is not None:
+            figure.for_each_annotation(lambda a: a.update(text=a.text.replace(f"{facet_column}=", "")))
 
         self.add_diagonal(figure, x_range=(plotting_data['valuemean_x'].min(), plotting_data["valuemean_x"].max()),
                           y_range=(plotting_data['valuemean_y'].min(), plotting_data["valuemean_y"].max()))
@@ -208,9 +241,13 @@ class FeatureComparison(FeatureReport):
                 logging.warning(
                     f"{location}: comparison_label was not defined. {location} report will not be created.")
                 run_report = False
-            elif len(set(self.dataset.get_metadata([self.comparison_label])[self.comparison_label])) != 2:
+            elif self.comparison_reference is None and len(set(self.dataset.get_metadata([self.comparison_label])[self.comparison_label])) != 2:
                 logging.warning(
                     f"{location}: comparison label {self.comparison_label} does not have 2 values: {set(self.dataset.get_metadata([self.comparison_label])[self.comparison_label])}. {location} report will not be created.")
+                run_report = False
+            elif self.comparison_reference is not None and self.comparison_reference not in set(self.dataset.get_metadata([self.comparison_label])[self.comparison_label]):
+                logging.warning(
+                    f"{location}: comparison_reference '{self.comparison_reference}' is not a value of comparison label {self.comparison_label}: {set(self.dataset.get_metadata([self.comparison_label])[self.comparison_label])}. {location} report will not be created.")
                 run_report = False
             else:
                 legal_labels.remove(self.comparison_label)

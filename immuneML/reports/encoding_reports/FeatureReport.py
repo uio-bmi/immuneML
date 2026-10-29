@@ -1,6 +1,11 @@
 import abc
 import logging
 from pathlib import Path
+from typing import List, Tuple
+
+import numpy as np
+import pandas as pd
+from scipy.sparse import issparse
 
 from immuneML.analysis.data_manipulation.DataReshaper import DataReshaper
 from immuneML.data_model.datasets.Dataset import Dataset
@@ -74,6 +79,53 @@ class FeatureReport(EncodingReport):
             {"value": ['mean', error_function]})
         grouped_data.columns = grouped_data.columns.map(''.join)
         return grouped_data
+
+    def _summarise_feature_values(self, group_cols: List[str]) -> pd.DataFrame:
+        """Mean and error per feature, computed directly from the (possibly sparse) encoded matrix, so that the
+        example by feature matrix is never expanded to long format."""
+        matrix = self.dataset.encoded_data.examples
+        feature_names = self.dataset.encoded_data.feature_names
+        feature_names = list(feature_names) if feature_names is not None else list(range(matrix.shape[1]))
+
+        if len(group_cols) == 0:
+            groups = {(): np.arange(matrix.shape[0])}
+        else:
+            metadata = pd.DataFrame(self.dataset.get_metadata(group_cols, return_df=True))
+            groups = {key if isinstance(key, tuple) else (key,): np.asarray(indices)
+                      for key, indices in metadata.groupby(group_cols, sort=False).indices.items()}
+
+        annotations = self.dataset.encoded_data.feature_annotations
+        if annotations is not None:
+            annotations = annotations.reset_index(drop=True).drop(columns=[self.x], errors='ignore')
+
+        error_name = self._get_error_function().__name__
+        summaries = []
+        for group_values, row_indices in groups.items():
+            mean, error = self._mean_and_error(matrix[row_indices], error_name)
+            summary = pd.DataFrame({self.x: feature_names, "valuemean": mean, f"value{error_name}": error})
+            for col, value in zip(group_cols, group_values):
+                summary[col] = value
+            # annotations are in the same order as the features, so they are added by position: feature names
+            # are not necessarily unique and joining on them could duplicate rows
+            summaries.append(summary if annotations is None else pd.concat([summary, annotations], axis=1))
+
+        return pd.concat(summaries, ignore_index=True)
+
+    def _mean_and_error(self, matrix, error_name: str) -> Tuple[np.ndarray, np.ndarray]:
+        if issparse(matrix):
+            mean = np.asarray(matrix.mean(axis=0)).ravel()
+            mean_of_squares = np.asarray(matrix.multiply(matrix).mean(axis=0)).ravel()
+        else:
+            matrix = np.asarray(matrix)
+            mean = matrix.mean(axis=0)
+            mean_of_squares = np.square(matrix).mean(axis=0)
+
+        # population variance, to match the ddof=0 standard deviation used by FeatureReport
+        error = np.sqrt(np.clip(mean_of_squares - np.square(mean), 0, None))
+        if error_name == "sem":
+            error = error / (matrix.shape[0] ** 0.5)
+
+        return mean, error
 
     def check_prerequisites(self):
         location = self.__class__.__name__

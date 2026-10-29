@@ -3,3 +3,4 @@ keep_fraction: 1.0
 log_scale: false
 opacity: 0.7
 error_function: std
+comparison_reference: null

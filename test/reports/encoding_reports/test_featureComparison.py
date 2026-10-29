@@ -24,7 +24,7 @@ class TestFeatureComparison(TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-    def _create_dummy_encoded_data(self, path):
+    def _create_dummy_encoded_data(self, path, metadata: dict = None):
         n_subjects = 50
         n_features = 30
 
@@ -45,7 +45,8 @@ class TestFeatureComparison(TestCase):
 
         metadata_filepath = path / "metadata.csv"
 
-        metadata = pd.DataFrame({"patient": np.array([i % 2 == 0 for i in range(n_subjects)])})
+        metadata = pd.DataFrame(metadata if metadata is not None else
+                                {"patient": np.array([i % 2 == 0 for i in range(n_subjects)])})
         metadata.to_csv(metadata_filepath, index=False)
 
         dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data), metadata_file=metadata_filepath)
@@ -71,14 +72,49 @@ class TestFeatureComparison(TestCase):
         self.assertEqual(result.output_figures[0].path, path / "feature_comparison.html")
         self.assertEqual(result.output_tables[0].path, path / "feature_values.csv")
 
+        # one row per feature and class, summarised from the encoded matrix rather than one row per example
         content = pd.read_csv(path / "feature_values.csv")
         self.assertListEqual(list(content.columns),
-                             ["patient", "example_id", "sequence", "feature", "value"])
+                             ["feature", "valuemean", "valuestd", "patient", "sequence"])
+        self.assertEqual(content.shape[0], 30 * 2)
 
         # report should succeed to build_from_objects but check_prerequisites should be false when data is not encoded
         report = FeatureDistribution.build_object(**{"dataset": RepertoireDataset(),
                                                      "result_path": path})
 
         self.assertFalse(report.check_prerequisites())
+
+        shutil.rmtree(path)
+
+    def test_comparison_reference(self):
+        path = EnvironmentSettings.tmp_test_path / "feature_comparison_reference/"
+        PathBuilder.remove_old_and_build(path)
+
+        origins = ["original", "model_a", "model_b"]
+        dataset = self._create_dummy_encoded_data(path, {"data_origin": [origins[i % 3] for i in range(50)]})
+
+        # without a reference, a label with three classes is refused
+        report = FeatureComparison.build_object(**{"dataset": dataset, "result_path": path,
+                                                   "comparison_label": "data_origin", "log_scale": False})
+        self.assertFalse(report.check_prerequisites())
+
+        report = FeatureComparison.build_object(**{"dataset": dataset, "result_path": path,
+                                                   "comparison_label": "data_origin", "log_scale": False,
+                                                   "comparison_reference": "original", "keep_fraction": 0.5})
+        self.assertTrue(report.check_prerequisites())
+        result = report._generate()
+        self.assertEqual(result.output_figures[0].path, path / "feature_comparison.html")
+        content = pd.read_csv(path / "feature_values.csv")
+        self.assertSetEqual(set(content["data_origin"]), set(origins))
+
+        report = FeatureComparison.build_object(**{"dataset": dataset, "result_path": path,
+                                                   "comparison_label": "data_origin", "log_scale": False,
+                                                   "comparison_reference": "not_a_class"})
+        self.assertFalse(report.check_prerequisites())
+
+        with self.assertRaises(AssertionError):
+            FeatureComparison.build_object(**{"dataset": dataset, "result_path": path, "log_scale": False,
+                                              "comparison_label": "data_origin", "comparison_reference": "original",
+                                              "column_grouping_label": "other"})
 
         shutil.rmtree(path)
