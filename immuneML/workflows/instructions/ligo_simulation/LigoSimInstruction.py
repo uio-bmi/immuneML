@@ -175,10 +175,12 @@ class LigoSimInstruction(Instruction):
         data_filename = self.state.result_path / 'simulated_dataset.tsv'
         metadata_filename = self.state.result_path / 'simulated_dataset.yaml'
 
-        for file in receptor_files.values():
+        for item_name, file in receptor_files.items():
             df = pd.read_csv(str(file), sep='\t', dtype={'junction': str, 'junction_aa': str, 'cdr3': str, 'cdr3_aa': str},
                              keep_default_na=False)
-            df = prepare_data_for_airr_seq_set(df)
+            # sequence ids are drawn from the item's own seed: the global random state here depends on whether the
+            # items ran in this process or in workers, which would make the ids depend on number_of_processes
+            df = prepare_data_for_airr_seq_set(df, rng=random.Random(self._item_seeds[item_name]))
             df = df[sorted(df.columns)]
             if data_filename.exists():
                 df.to_csv(str(data_filename), sep='\t', index=False, mode='a', header=False)
@@ -219,6 +221,7 @@ class LigoSimInstruction(Instruction):
         # draw the same sequences, and the result would depend on which worker gets which item
         base_seed = int(np.random.randint(0, 2 ** 32 - len(sim_items), dtype=np.int64))
         seeds = [base_seed + index for index in range(len(sim_items))]
+        self._item_seeds = {item.name: seed for item, seed in zip(sim_items, seeds)}
 
         if self._number_of_processes > 1:
             chunk_size = math.ceil(len(sim_items) / self._number_of_processes)

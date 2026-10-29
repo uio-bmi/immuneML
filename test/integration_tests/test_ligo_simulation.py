@@ -197,11 +197,22 @@ def test_simulation():
             metadata_df = pd.read_csv(path / "result/inst1/metadata.csv", comment=Constants.COMMENT_SIGN)
             assert all(el in metadata_df.columns for el in ["signal1", "ievent1", "ievent2", "signal2"])
 
+            # every simulated sequence gets an id when it is written, so that it does not change on each import
+            repertoire_files = list((path / "result/inst1/").glob("**/repertoires/*.tsv"))
+            assert len(repertoire_files) > 0
+            for repertoire_file in repertoire_files:
+                repertoire_df = pd.read_csv(repertoire_file, sep='\t', keep_default_na=False)
+                assert all(repertoire_df.sequence_id.astype(str).str.len() > 0)
+                assert repertoire_df.sequence_id.is_unique
+
         else:
             assert os.path.isfile(path / "result/inst1/exported_dataset/airr/simulated_dataset.tsv")
-            df = pd.read_csv(path / "result/inst1/exported_dataset/airr/simulated_dataset.tsv", sep='\t')
+            df = pd.read_csv(path / "result/inst1/exported_dataset/airr/simulated_dataset.tsv", sep='\t',
+                             keep_default_na=False)
             assert df.shape[0] == 20
             assert all(df.junction_aa.str.len() > 0)
+            assert all(df.sequence_id.astype(str).str.len() > 0)
+            assert df.sequence_id.is_unique
 
             # species describes the dataset, so it is stored next to the dataset name and not as a label:
             # as a label it would be requested as per-example metadata, for which there is no column
@@ -221,7 +232,7 @@ def test_simulation_reproducible_with_random_seed():
         specs = yaml.safe_load(file)
 
     # the same top-level random_seed gives the same sequences, from either app and with any number of processes
-    sequences = []
+    sequences, sequence_ids = [], []
     for run, (app_class, processes) in enumerate([(ImmuneMLApp, 2), (ImmuneMLApp, 2), (LigoApp, 2), (ImmuneMLApp, 1)]):
         specs["instructions"]["inst1"]["number_of_processes"] = processes
         run_specs_path = path / f"specs_{run}.yaml"
@@ -231,7 +242,10 @@ def test_simulation_reproducible_with_random_seed():
         app_class(specification_path=run_specs_path, result_path=path / f"result_{run}/").run()
         df = pd.read_csv(path / f"result_{run}/inst1/exported_dataset/airr/simulated_dataset.tsv", sep='\t')
         sequences.append(df.junction_aa.tolist())
+        sequence_ids.append(df.sequence_id.astype(str).tolist())
 
     assert all(run_sequences == sequences[0] for run_sequences in sequences[1:])
+    # so are the sequence ids, which a manual train/test split may refer to
+    assert all(run_ids == sequence_ids[0] for run_ids in sequence_ids[1:])
 
     shutil.rmtree(path)

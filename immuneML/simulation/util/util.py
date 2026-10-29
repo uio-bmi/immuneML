@@ -1,4 +1,6 @@
 import logging
+import random
+import uuid
 from dataclasses import make_dataclass, fields as get_fields
 from itertools import chain
 from pathlib import Path
@@ -293,7 +295,7 @@ def prepare_data_for_repertoire_obj(sequences):
     return df.to_dict(orient='list')
 
 
-def prepare_data_for_airr_seq_set(in_df: pd.DataFrame) -> pd.DataFrame:
+def prepare_data_for_airr_seq_set(in_df: pd.DataFrame, rng: random.Random = None) -> pd.DataFrame:
     region_type = RegionType[in_df.region_type.unique()[0]].value
 
     df = in_df.rename(columns={
@@ -307,7 +309,22 @@ def prepare_data_for_airr_seq_set(in_df: pd.DataFrame) -> pd.DataFrame:
         df['cdr3_aa'] = df.junction_aa.str[1:-1]
 
     df = make_full_airr_seq_set_df(df)
+    df = add_missing_sequence_ids(df, rng)
 
+    return df
+
+
+def add_missing_sequence_ids(df: pd.DataFrame, rng: random.Random = None) -> pd.DataFrame:
+    """Gives every sequence without a sequence_id a UUID, so that the exported dataset has stable identifiers (e.g.,
+    for a manual train/test split) instead of new ones being assigned each time it is imported. The UUIDs are drawn
+    from rng, or from Python's random module if it is not given, so a run with the same random seed gives the same
+    identifiers."""
+    rng = rng if rng is not None else random
+    if 'sequence_id' not in df.columns:
+        df['sequence_id'] = ''
+    missing = df['sequence_id'].isnull() | df['sequence_id'].astype(str).eq('')
+    df.loc[missing, 'sequence_id'] = [uuid.UUID(int=rng.getrandbits(128), version=4).hex
+                                      for _ in range(missing.sum())]
     return df
 
 
