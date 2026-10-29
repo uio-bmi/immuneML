@@ -290,7 +290,9 @@ class DataImport(metaclass=abc.ABCMeta):
                                                self.params.import_empty_nt_sequences,
                                                self.params.region_type)
         df = ImportHelper.drop_illegal_character_sequences(df, self.params.import_illegal_characters,
-                                                           self.params.import_with_stop_codon, self.params.region_type)
+                                                           self.params.import_with_stop_codon, self.params.region_type,
+                                                           self.params.import_empty_aa_sequences,
+                                                           self.params.import_empty_nt_sequences)
         df = ImportHelper.filter_illegal_sequences(df, self.params, self.dataset_name)
         df = ImportHelper.extract_locus_from_data(df, self.params, self.dataset_name)
         df = ImportHelper.add_default_fields_for_airr_seq_set(df)

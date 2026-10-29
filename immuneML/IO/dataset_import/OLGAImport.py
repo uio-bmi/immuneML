@@ -24,7 +24,7 @@ class OLGAImport(DataImport):
 
     - metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. Only the OLGA files included under the column 'filename' are imported into the RepertoireDataset. SequenceDataset metadata is currently not supported.
 
-    - import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.
+    - import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, a sequence is removed when either its amino acid or its nucleotide sequence contains illegal characters; a sequence type that is missing is only checked when empty values of that type are not allowed (see import_empty_aa_sequences and import_empty_nt_sequences). By default import_illegal_characters is False.
 
     - import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.
 

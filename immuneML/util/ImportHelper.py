@@ -180,9 +180,25 @@ class ImportHelper:
 
     @staticmethod
     def standardize_none_values(dataframe: pd.DataFrame):
-        return (dataframe.replace(
+        dataframe = dataframe.replace(
             {key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown", 'nan']})
-                .replace(np.nan, AIRRSequenceSet.get_neutral_value(float)))
+
+        # the neutral value depends on the field: -1. for a numeric field, but an empty string for a sequence or
+        # other text field, which would otherwise hold the literal '-1.0' and fail the alphabet check
+        field_types = AIRRSequenceSet.get_field_type_dict()
+        for column in dataframe.columns:
+            neutral_value = ImportHelper.get_neutral_value_for_column(field_types.get(column))
+            dataframe[column] = dataframe[column].replace(np.nan, neutral_value)
+
+        return dataframe
+
+    @staticmethod
+    def get_neutral_value_for_column(field_type):
+        """The neutral value of a column's declared field type; -1. for a column the data model does not know."""
+        try:
+            return AIRRSequenceSet.get_neutral_value(field_type)
+        except KeyError:
+            return AIRRSequenceSet.get_neutral_value(float)
 
     @staticmethod
     def standardize_bool_values(dataframe: pd.DataFrame):
@@ -227,7 +243,14 @@ class ImportHelper:
 
     @staticmethod
     def drop_illegal_character_sequences(dataframe: pd.DataFrame, import_illegal_characters: bool,
-                                         import_with_stop_codon: bool, region_type: RegionType) -> pd.DataFrame:
+                                         import_with_stop_codon: bool, region_type: RegionType,
+                                         import_empty_aa_sequences: bool = False,
+                                         import_empty_nt_sequences: bool = False) -> pd.DataFrame:
+        # a sequence type whose empty values are kept is not checked here when it is missing: a dataset of
+        # amino acid sequences only (e.g. the output of a generative model) has no nucleotide sequence to check
+        allow_missing = {SequenceType.AMINO_ACID: import_empty_aa_sequences,
+                         SequenceType.NUCLEOTIDE: import_empty_nt_sequences}
+
         for sequence_type in SequenceType:
             if not import_illegal_characters:
                 sequence_name = sequence_type.name.lower().replace("_", " ")
@@ -239,7 +262,8 @@ class ImportHelper:
                 sequence_col_name = region_type.value if sequence_type == SequenceType.NUCLEOTIDE else region_type.value + "_aa"
 
                 if sequence_col_name in dataframe.columns:
-                    is_illegal_seq = [ImportHelper.is_illegal_sequence(sequence, legal_alphabet) for sequence in
+                    is_illegal_seq = [ImportHelper.is_illegal_sequence(sequence, legal_alphabet,
+                                                                       allow_missing[sequence_type]) for sequence in
                                       dataframe[sequence_col_name]]
                     n_illegal = sum(is_illegal_seq)
                     n_total = dataframe.shape[0]
@@ -257,11 +281,13 @@ class ImportHelper:
         return dataframe
 
     @staticmethod
-    def is_illegal_sequence(sequence, legal_alphabet) -> bool:
+    def is_illegal_sequence(sequence, legal_alphabet, allow_missing: bool = False) -> bool:
         if sequence is None:
             return False
         elif not isinstance(sequence, str):
-            return True
+            # a missing value reads as NaN rather than an empty string; whether it may be kept is decided by
+            # drop_empty_sequences, so it only counts as illegal when empty values are not allowed
+            return not (allow_missing and pd.isna(sequence))
         else:
             return not all(character in legal_alphabet for character in sequence)
 

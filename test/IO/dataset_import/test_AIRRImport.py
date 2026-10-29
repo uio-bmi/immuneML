@@ -177,3 +177,46 @@ rep1.tsv,1""")
         AIRRImport(params, "airr_minimal_repertoire_dataset").import_dataset()
 
         shutil.rmtree(path)
+
+    def test_amino_acid_only_sequences_are_kept(self):
+        # generative models write amino acid sequences only, so the junction column is present but empty: with
+        # import_empty_nt_sequences those rows must survive, while illegal amino acids are still removed
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "ioairr_empty_nt/")
+
+        with open(path / "rep1.tsv", "w") as file:
+            file.writelines("""sequence_id	junction	junction_aa	locus
+seq1		CASGVAGTFDYW	TRB
+seq2		CASSLAPGATNEKLFF	TRB
+seq3	TGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTGG	CASGVAGTFDYW	TRB
+seq4		CASGVAG1TFDYW	TRB""")
+
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "AIRR")
+        params = {**params, "is_repertoire": False, "paired": False, "result_path": path, "path": path,
+                  "region_type": "IMGT_JUNCTION"}
+
+        dataset = AIRRImport(params, "airr_empty_nt_dataset").import_dataset()
+
+        # seq1-seq3 are kept, seq4 is dropped for the '1' in its amino acid sequence
+        self.assertEqual(3, dataset.get_example_count())
+        self.assertListEqual(sorted(sequence.sequence_id for sequence in dataset.get_data()),
+                             ["seq1", "seq2", "seq3"])
+
+        shutil.rmtree(path)
+
+    def test_empty_nt_sequences_dropped_when_not_allowed(self):
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "ioairr_no_empty_nt/")
+
+        with open(path / "rep1.tsv", "w") as file:
+            file.writelines("""sequence_id	junction	junction_aa	locus
+seq1		CASGVAGTFDYW	TRB
+seq2	TGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTGG	CASGVAGTFDYW	TRB""")
+
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "AIRR")
+        params = {**params, "is_repertoire": False, "paired": False, "result_path": path, "path": path,
+                  "region_type": "IMGT_JUNCTION", "import_empty_nt_sequences": False}
+
+        dataset = AIRRImport(params, "airr_no_empty_nt_dataset").import_dataset()
+
+        self.assertEqual(1, dataset.get_example_count())
+
+        shutil.rmtree(path)
