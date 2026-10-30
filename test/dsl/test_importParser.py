@@ -6,12 +6,13 @@ from unittest import TestCase
 import pandas as pd
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.datasets.ElementDataset import ReceptorDataset
+from immuneML.data_model.datasets.ElementDataset import ReceptorDataset, SequenceDataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.import_parsers.ImportParser import ImportParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -165,5 +166,20 @@ class TestImportParser(TestCase):
         st, desc = ImportParser.parse(specs, SymbolTable(), path / "tmp_output/")
         self.assertTrue(isinstance(st.get("d1"), RepertoireDataset))
         self.assertEqual(2, len(st.get("d1").get_data()))
+
+        shutil.rmtree(path)
+
+    def test_parse_from_dataset_file_only(self):
+        # without path, the data file is looked up next to the dataset file, not in the working directory
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "dslimportparser_dataset_file/")
+        dataset = RandomDatasetGenerator.generate_sequence_dataset(10, {10: 1.}, {"l1": {"a": 0.5, "b": 0.5}},
+                                                                   path / "exported")
+        dataset_file = next((path / "exported").glob("*.yaml"))
+
+        st, desc = ImportParser.parse({"d1": {"format": "AIRR", "params": {"dataset_file": str(dataset_file)}}},
+                                      SymbolTable(), path / "result")
+
+        self.assertTrue(isinstance(st.get("d1"), SequenceDataset))
+        self.assertEqual(dataset.get_example_count(), st.get("d1").get_example_count())
 
         shutil.rmtree(path)

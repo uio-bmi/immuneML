@@ -88,7 +88,7 @@ class ImportParser:
         else:
             params["result_path"] = Path(params["result_path"])
 
-        if "path" in params:
+        if params.get("path") is not None:
             params["path"] = Path(params["path"])
         if "metadata_file" in params:
             params["metadata_file"] = Path(params["metadata_file"])

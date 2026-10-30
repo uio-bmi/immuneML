@@ -1,5 +1,5 @@
 is_repertoire: True
-path: ./
+path: null
 paired: False
 import_productive: True
 import_unknown_productivity: True

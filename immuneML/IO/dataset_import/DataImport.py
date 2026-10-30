@@ -173,9 +173,9 @@ class DataImport(metaclass=abc.ABCMeta):
     def import_element_dataset(self, dataset_class: Type, filter_func=None, post_process_func=None):
         if self.params.dataset_file is not None and self.params.dataset_file.is_file():
             filenames = [Path(read_yaml(self.params.dataset_file)["filename"])]
-            if self.params.path.is_file():
+            if self.params.path is not None and self.params.path.is_file():
                 filenames[0] = self.params.path
-            elif self.params.path:
+            elif self.params.path is not None:
                 filenames[0] = self.params.path / Path(filenames[0]).name
             else:
                 filenames[0] = self.params.dataset_file.parent / Path(filenames[0]).name
