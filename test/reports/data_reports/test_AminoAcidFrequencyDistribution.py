@@ -37,6 +37,37 @@ class TestAminoAcidFrequencyDistribution(TestCase):
 
         shutil.rmtree(path)
 
+    def test_generate_more_than_two_classes(self):
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "amino_acid_frequency_distribution_3_classes/")
+
+        dataset = RandomDatasetGenerator.generate_sequence_dataset(100, {10: 0.5, 11: 0.25, 20: 0.25},
+                                                                   {"l1": {"a": 0.3, "b": 0.3, "c": 0.4}},
+                                                                   path / "dataset")
+
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/",
+                                          "AminoAcidFrequencyDistribution")
+        params["dataset"] = dataset
+        params["split_by_label"] = True
+        params["result_path"] = path / "result"
+        params['label'] = 'l1'
+        params["alignment"] = "IMGT"
+
+        report = AminoAcidFrequencyDistribution.build_object(**params)
+
+        with self.assertLogs(level="WARNING"):
+            result = report._generate()
+
+        # the frequencies per class are still reported; the frequency change needs exactly two classes
+        self.assertTrue(os.path.isfile(path / "result/amino_acid_frequency_distribution.tsv"))
+        self.assertTrue(os.path.isfile(path / "result/amino_acid_frequency_distribution.html"))
+        self.assertFalse(os.path.isfile(path / "result/frequency_change.tsv"))
+        self.assertEqual(len(result.output_figures), 1)
+
+        freq_dist = pd.read_csv(path / "result/amino_acid_frequency_distribution.tsv", sep="\t")
+        self.assertSetEqual(set(freq_dist["l1"]), {"a", "b", "c"})
+
+        shutil.rmtree(path)
+
     def test_generate_receptor_dataset(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "amino_acid_frequency_distribution_receptor/")
 

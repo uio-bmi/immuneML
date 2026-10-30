@@ -61,8 +61,8 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     - split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a
       single label, or alternatively the label of interest can be specified under 'label'. If split_by_label is set to
-      true, the percentage-wise frequency difference between classes is plotted additionally. By default,
-      split_by_label is False.
+      true and the label has exactly two classes, the percentage-wise frequency difference between them is plotted
+      additionally; with more classes, only the frequencies per class are shown. By default, split_by_label is False.
 
     - label (str): if split_by_label is set to True, a label can be specified here.
 
@@ -128,7 +128,12 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         figures.append(self._safe_plot(freq_dist=freq_dist, plot_callable="_plot_distribution"))
 
-        if self.split_by_label:
+        class_count = freq_dist[self.label_name].nunique() if self.split_by_label else 0
+        if self.split_by_label and class_count != 2:
+            logging.warning(f"{AminoAcidFrequencyDistribution.__name__}: label {self.label_name} has {class_count} "
+                            f"classes, so the frequency change between classes is not computed (it needs exactly 2); "
+                            f"only the frequencies per class are shown.")
+        elif self.split_by_label:
             frequency_change = self._compute_frequency_change(freq_dist)
 
             tables.append(self._write_output_table(frequency_change,

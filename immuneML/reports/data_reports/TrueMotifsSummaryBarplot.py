@@ -235,7 +235,9 @@ class TrueMotifsSummaryBarplot(DataReport):
                                                                         name='seq_count_with_signal')
 
         seq_count_total = plotting_data.groupby('data_origin').size().reset_index(name='total_sequences')
-        seq_counts_df = seq_count_with_signals.merge(seq_count_total, on='data_origin', how='left')
+        # starting from the totals keeps a data origin without any signal-specific sequence, with a count of 0
+        seq_counts_df = seq_count_total.merge(seq_count_with_signals, on='data_origin', how='left')
+        seq_counts_df['seq_count_with_signal'] = seq_counts_df['seq_count_with_signal'].fillna(0).astype(int)
         seq_counts_df['signal_specific_percent'] = seq_counts_df['seq_count_with_signal'] / seq_counts_df['total_sequences'] * 100
         seq_counts_df['label'] = seq_counts_df.apply(
             lambda row: f"{row['data_origin']}<br>Signal-specific sequences: {row['signal_specific_percent']:.2f}%", axis=1)

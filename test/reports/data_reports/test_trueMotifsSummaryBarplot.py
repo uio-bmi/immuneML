@@ -154,6 +154,20 @@ class TestTrueMotifsSummaryBarplot(TestCase):
         self.assertListEqual(list(dict.fromkeys(summary['data_origin'].astype(str))),
                              ['original_train', 'original_test', 'PWM'])
 
+        # a model whose sequences carry no signal is kept, with zero counts, instead of losing its name
+        annotated = pd.concat([annotated, pd.DataFrame({'data_origin': ['VAE', 'VAE'],
+                                                        'novelty_memorization': ['novel', 'novel'],
+                                                        'signal1': [0, 0], 'signal2': [0, 0]})],
+                              ignore_index=True)
+        summary = report._get_motif_recovery_summary(annotated)
+        self.assertFalse(summary['data_origin'].isna().any())
+        vae = summary[summary['data_origin'] == 'VAE']
+        self.assertEqual(len(vae), 2)
+        self.assertEqual(vae['count'].sum(), 0)
+        self.assertTrue((vae['seq_count_with_signal'] == 0).all())
+        self.assertTrue((vae['total_sequences'] == 2).all())
+        self.assertTrue((vae['signal_specific_percent'] == 0).all())
+
         shutil.rmtree(path)
 
     def test_without_training_sequences(self):
