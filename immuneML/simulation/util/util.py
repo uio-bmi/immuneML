@@ -9,7 +9,7 @@ from typing import List, Dict, Union
 import bionumpy as bnp
 import numpy as np
 import pandas as pd
-from bionumpy import DNAEncoding, get_motif_scores, AminoAcidEncoding
+from bionumpy import get_motif_scores
 from bionumpy.bnpdataclass import bnpdataclass, BNPDataClass
 from bionumpy.encodings import BaseEncoding
 from bionumpy.io import delimited_buffers
@@ -123,8 +123,8 @@ def get_region_type(sequences) -> RegionType:
 
 def annotate_sequences(sequences: BackgroundSequences, is_amino_acid: bool, all_signals: list, annotated_dc, sim_item_name: str = None,
                        region_type: RegionType = RegionType.IMGT_CDR3):
-    encoding = AminoAcidEncoding if is_amino_acid else DNAEncoding
     sequence_array = sequences.sequence_aa if is_amino_acid else sequences.sequence
+    encoding = sequence_array.encoding
 
     signal_matrix = np.zeros((len(sequence_array), len(all_signals)))
     signal_positions = {}
