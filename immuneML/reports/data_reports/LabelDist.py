@@ -18,7 +18,8 @@ from immuneML.util.PathBuilder import PathBuilder
 class LabelDist(DataReport):
     """
     LabelDist report plots the distribution of label values for all labels provided as
-    input to the report.
+    input to the report. The counts are also written to label_distribution.csv, with one row per label and
+    value (columns label, value, count), most frequent first within each label.
 
     Specification arguments:
 
@@ -76,6 +77,18 @@ class LabelDist(DataReport):
         path = PathBuilder.build(self.result_path) / f"{self.name}_label_distributions.html"
         PlotlyUtil.write_image_to_file(fig, path, df.shape[0])
 
+        table_path = self.result_path / "label_distribution.csv"
+        self._get_counts(df).to_csv(table_path, index=False)
+
         return ReportResult(name=self.name, info='Label distributions',
-                            output_figures=[ReportOutput(name='Label distributions', path=path)])
+                            output_figures=[ReportOutput(name='Label distributions', path=path)],
+                            output_tables=[ReportOutput(name='Number of examples per label value',
+                                                        path=table_path)])
+
+    @staticmethod
+    def _get_counts(df: pd.DataFrame) -> pd.DataFrame:
+        """One row per label and value with the number of examples, most frequent first within each label."""
+        counts = [df[col].value_counts(dropna=False).rename_axis('value').reset_index(name='count')
+                  .assign(label=col) for col in df.columns]
+        return pd.concat(counts, ignore_index=True)[['label', 'value', 'count']]
 
