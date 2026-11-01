@@ -144,8 +144,8 @@ def parse_clustering_settings(key: str, instruction: dict, symbol_table: SymbolT
 def make_setting_obj(setting, valid_encodings, valid_clusterings, valid_dim_red, symbol_table, instruction):
     ParameterValidator.assert_keys_present(setting.keys(), ['encoding', 'method'], 'ClusteringParser',
                                            'clustering_settings')
-    ParameterValidator.assert_keys(setting.keys(), ['encoding', 'dim_reduction', 'method'], 'ClusteringParser',
-                                   'clustering_settings', exclusive=False)
+    ParameterValidator.assert_keys(setting.keys(), ['preprocessing', 'encoding', 'dim_reduction', 'method'],
+                                   'ClusteringParser', 'clustering_settings', exclusive=False)
 
     ParameterValidator.assert_in_valid_list(setting['encoding'], valid_encodings, 'ClusteringParser', 'encoding')
     ParameterValidator.assert_in_valid_list(setting['method'], valid_clusterings, 'ClusteringParser',
@@ -159,6 +159,8 @@ def make_setting_obj(setting, valid_encodings, valid_clusterings, valid_dim_red,
     else:
         dim_reduction, dim_red_params, dim_red_name = None, None, None
 
+    preproc_sequence, preproc_name = parse_preprocessing(setting, symbol_table, symbol_table.get(instruction['dataset']))
+
     encoder = make_encoder_obj(symbol_table, setting['encoding'], instruction['dataset'])
     method = copy.deepcopy(symbol_table.get(setting['method']))
 
@@ -167,7 +169,24 @@ def make_setting_obj(setting, valid_encodings, valid_clusterings, valid_dim_red,
                              encoder_name=setting['encoding'], clustering_method=method,
                              clustering_params=symbol_table.get_config(setting['method']),
                              clustering_method_name=setting['method'], dim_reduction_method=dim_reduction,
-                             dim_red_params=dim_red_params, dim_red_name=dim_red_name)
+                             dim_red_params=dim_red_params, dim_red_name=dim_red_name,
+                             preproc_sequence=preproc_sequence, preproc_sequence_name=preproc_name)
+
+
+def parse_preprocessing(setting, symbol_table, dataset):
+    if 'preprocessing' in setting and setting['preprocessing'] is not None:
+        valid_preprocessings = symbol_table.get_keys_by_type(SymbolType.PREPROCESSING)
+        ParameterValidator.assert_in_valid_list(setting['preprocessing'], valid_preprocessings, 'ClusteringParser',
+                                                'preprocessing')
+        preproc_sequence = symbol_table.get(setting['preprocessing'])
+        if not all(preproc.keeps_example_count(dataset) for preproc in preproc_sequence):
+            raise ValueError(f"ClusteringParser: preprocessing sequence {setting['preprocessing']} includes "
+                             f"preprocessing that changes the number of examples at runtime and as such cannot be "
+                             f"used with this instruction. See the documentation for the preprocessing or "
+                             f"alternatively use them with other instructions.")
+        return preproc_sequence, setting['preprocessing']
+    else:
+        return [], None
 
 
 def make_encoder_obj(symbol_table, encoding_key, dataset_key):

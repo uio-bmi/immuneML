@@ -38,10 +38,13 @@ class ClusteringSetting:
     dim_reduction_method: DimRedMethod = None
     dim_red_params: dict = None
     dim_red_name: str = None
+    preproc_sequence: list = None
+    preproc_sequence_name: str = None
     path: Path = None
 
     def get_key(self) -> str:
-        key = self.encoder_name
+        key = f"{self.preproc_sequence_name}_" if self.preproc_sequence_name else ""
+        key += self.encoder_name
         if self.dim_red_name:
             key += f"_{self.dim_red_name}"
         key += f"_{self.clustering_method_name}"

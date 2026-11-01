@@ -41,6 +41,9 @@ class DuplicateSequenceFilter(Filter):
     Note that this means the count value of a sequence with a given sequence identifier might not be the same as before
     removing duplicates, unless count_agg = FIRST is used.
 
+    When applied to a SequenceDataset, the filter removes examples, so it can be used with TrainMLModel and Clustering
+    instructions only for RepertoireDatasets.
+
     **Specification arguments:**
 
     - filter_sequence_type (:py:obj:`~immuneML.environment.SequenceType.SequenceType`): Whether the sequences should be collapsed on the nucleotide or amino acid level. Valid options are defined by the SequenceType enum.
@@ -94,6 +97,10 @@ class DuplicateSequenceFilter(Filter):
 
         self.sequence_of_interest = bnp_util.get_sequence_field_name(self.region_type, self.filter_sequence_type)
         self.sequence_to_ignore = bnp_util.get_sequence_field_name(self.region_type, [t for t in SequenceType if t != self.filter_sequence_type][0])
+
+    def keeps_example_count(self, dataset=None) -> bool:
+        # in SequenceDataset, removing duplicates removes examples
+        return isinstance(dataset, RepertoireDataset)
 
     def process_dataset(self, dataset, result_path: Path, number_of_processes=1):
         self.result_path = result_path if result_path is not None else self.result_path

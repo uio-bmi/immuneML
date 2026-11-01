@@ -1,6 +1,7 @@
 import abc
 from pathlib import Path
 
+from immuneML.data_model.datasets.Dataset import Dataset
 from immuneML.data_model.datasets.RepertoireDataset import RepertoireDataset
 
 
@@ -19,9 +20,9 @@ class Preprocessor(metaclass=abc.ABCMeta):
                                                      f"Your dataset is a {type(dataset).__name__}. " \
                                                      f"Please use a different preprocessing, or omit the preprocessing for this dataset."
 
-    def keeps_example_count(self) -> bool:
+    def keeps_example_count(self, dataset: Dataset = None) -> bool:
         """
-        Defines if the preprocessing can be run with TrainMLModel instruction; to be able to run with it, the preprocessing cannot change the
-        number of examples in the dataset
+        Defines if the preprocessing can be run with TrainMLModel and Clustering instructions; to be able to run with them, the preprocessing
+        cannot change the number of examples in the dataset; the answer can depend on the type of the dataset the preprocessing is applied to
         """
         return True

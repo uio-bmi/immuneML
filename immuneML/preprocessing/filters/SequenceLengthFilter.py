@@ -20,6 +20,9 @@ class SequenceLengthFilter(Filter):
     """
     Removes sequences with length out of the predefined range.
 
+    When applied to a SequenceDataset or ReceptorDataset, the filter removes examples, so it can be used with
+    TrainMLModel and Clustering instructions only for RepertoireDatasets.
+
     **Supported dataset types:**
 
     - SequenceDataset
@@ -76,6 +79,10 @@ class SequenceLengthFilter(Filter):
 
         return cls(min_len=kwargs['min_len'], max_len=kwargs['max_len'], sequence_type=SequenceType[kwargs['sequence_type'].upper()],
                    name=kwargs['name'] if 'name' in kwargs else SequenceLengthFilter.__name__, region_type=RegionType[kwargs['region_type']])
+
+    def keeps_example_count(self, dataset=None) -> bool:
+        # in SequenceDataset and ReceptorDataset, removing sequences removes examples
+        return isinstance(dataset, RepertoireDataset)
 
     def process_dataset(self, dataset, result_path: Path, number_of_processes: int = 1):
 

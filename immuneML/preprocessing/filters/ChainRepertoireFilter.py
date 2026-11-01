@@ -84,5 +84,5 @@ class ChainRepertoireFilter(Filter):
 
         return processed_dataset
 
-    def keeps_example_count(self) -> bool:
+    def keeps_example_count(self, dataset=None) -> bool:
         return False

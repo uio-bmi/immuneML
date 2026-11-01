@@ -18,7 +18,7 @@ If an optional dependency fails to import, the class is skipped and only a warni
 | Clustering | `ClusteringMethod.py` | `fit`, `predict`, `fit_predict`, `transform` |
 | Dimensionality reduction | `DimRedMethod.py` | fit / transform, `get_dimension_names` |
 | Generative model | `GenerativeModel.py` | `fit`, `generate_sequences`, p_gen methods, `save_model`, `load_model` |
-| Preprocessing | `Preprocessor.py` | `process_dataset`, `keeps_example_count`, `check_dataset_type` |
+| Preprocessing | `Preprocessor.py` | `process_dataset`, `keeps_example_count(dataset)` (False if it removes examples for this dataset type), `check_dataset_type` |
 | Report | the category base (e.g. `DataReport`, `MLReport`) | classmethod `build_object(**kwargs)`, `_generate() -> ReportResult`; optional `check_prerequisites` |
 | Importer | `DataImport.py` (class `<Format>Import`) | usually only `preprocess_file` |
 | Example weighting | `ExampleWeightingStrategy.py` | `build_object`, `compute_weights` |

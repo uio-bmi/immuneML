@@ -63,9 +63,14 @@ class ClusteringExporter:
                 cl_item.dim_red_method, path
             ).name
 
+        # Store preprocessing sequence if present
+        preproc_filename = None
+        if cl_item.cl_setting is not None and cl_item.cl_setting.preproc_sequence:
+            preproc_filename = MLExporter._store_preprocessing_sequence(cl_item.cl_setting.preproc_sequence, path).name
+
         # Create configuration
         config = ClusteringExporter._create_config(cl_item, encoder_filename, method_filename, dim_red_filename,
-                                                   classifier_filename)
+                                                   classifier_filename, preproc_filename)
         config_path = path / 'clustering_config.yaml'
         with config_path.open('w') as f:
             yaml.dump(config, f)
@@ -107,7 +112,8 @@ class ClusteringExporter:
 
     @staticmethod
     def _create_config(cl_item: ClusteringItem, encoder_filename: str, method_filename: str,
-                       dim_red_filename: str = None, classifier_filename: str = None) -> dict:
+                       dim_red_filename: str = None, classifier_filename: str = None,
+                       preproc_filename: str = None) -> dict:
         """Create a configuration dictionary for the clustering export."""
         config = {
             'encoding_file': encoder_filename,
@@ -125,6 +131,12 @@ class ClusteringExporter:
                 'encoder_params': cl_item.cl_setting.encoder_params,
                 'clustering_params': cl_item.cl_setting.clustering_params,
             })
+
+            if preproc_filename is not None:
+                config.update({
+                    'preprocessing_file': preproc_filename,
+                    'preprocessing_sequence_name': cl_item.cl_setting.preproc_sequence_name,
+                })
 
             if cl_item.dim_red_method is not None:
                 config.update({

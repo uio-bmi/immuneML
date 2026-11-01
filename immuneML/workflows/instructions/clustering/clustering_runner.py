@@ -14,6 +14,7 @@ from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
 from immuneML.ml_methods.clustering.ClusteringMethod import ClusteringMethod
 from immuneML.ml_methods.dim_reduction.DimRedMethod import DimRedMethod
 from immuneML.ml_methods.helper_methods.FurthestNeighborClassifier import FurthestNeighborClassifier
@@ -106,6 +107,8 @@ def run_setting(dataset: Dataset, cl_setting: ClusteringSetting, path: Path,
     print_log(f"Running clustering setting {cl_setting.get_key()}")
 
     cl_setting.path = path / f"{cl_setting.get_key()}"
+
+    dataset = preprocess_dataset(dataset, cl_setting, cl_setting.path / "preprocessed_dataset", number_of_processes)
 
     # Encode data
     encoder = copy.deepcopy(cl_setting.encoder)
@@ -255,7 +258,10 @@ def apply_cluster_classifier(dataset: Dataset, cl_setting: ClusteringSetting, cl
                              dim_red_method: DimRedMethod, predictions_path: Path, number_of_processes: int,
                              sequence_type: SequenceType, region_type: RegionType) -> ClusteringItem:
 
-    enc_dataset = encode_dataset(dataset, cl_setting, number_of_processes, LabelConfiguration(),
+    preproc_dataset = preprocess_dataset(dataset, cl_setting, predictions_path.parent / "preprocessed_dataset",
+                                 number_of_processes)
+
+    enc_dataset = encode_dataset(preproc_dataset, cl_setting, number_of_processes, LabelConfiguration(),
                                  learn_model=False, sequence_type=sequence_type,
                                  region_type=region_type, encoder=encoder, dim_red_method=dim_red_method)[0]
     features = get_features(enc_dataset, cl_setting)
@@ -283,6 +289,26 @@ def apply_cluster_classifier(dataset: Dataset, cl_setting: ClusteringSetting, cl
     return cl_item
 
 
+def preprocess_dataset(dataset: Dataset, cl_setting: ClusteringSetting, path: Path,
+                       number_of_processes: int) -> Dataset:
+    """
+    Apply the clustering setting's preprocessing sequence (if any) to the dataset. The preprocessing must keep the
+    number of examples, so that predictions and labels stay aligned with the original dataset.
+    """
+    if not cl_setting.preproc_sequence:
+        return dataset
+
+    preprocessed_dataset = HPUtil.preprocess_dataset(dataset, cl_setting.preproc_sequence, path,
+                                                     number_of_processes=number_of_processes)
+
+    assert preprocessed_dataset.get_example_count() == dataset.get_example_count(), \
+        (f"Clustering: preprocessing sequence {cl_setting.preproc_sequence_name} changed the number of examples from "
+         f"{dataset.get_example_count()} to {preprocessed_dataset.get_example_count()}. Only preprocessing that keeps "
+         f"the number of examples can be used with clustering.")
+
+    return preprocessed_dataset
+
+
 def encode_dataset(dataset: Dataset, cl_setting: ClusteringSetting, number_of_processes: int,
                    label_config: LabelConfiguration, learn_model: bool, sequence_type: SequenceType,
                    region_type: RegionType, encoder: DatasetEncoder = None, dim_red_method: DimRedMethod = None):
@@ -308,7 +334,8 @@ def encode_dataset(dataset: Dataset, cl_setting: ClusteringSetting, number_of_pr
         return tuple(sorted(d.items(), key=lambda tup: tup[0])) if d is not None else None
 
     return CacheHandler.memo_by_params(
-        (dataset.identifier, dict_to_sorted_tuple(cl_setting.encoder_params), label_config.get_labels_by_name(),
+        (dataset.identifier, cl_setting.preproc_sequence_name, dict_to_sorted_tuple(cl_setting.encoder_params),
+         label_config.get_labels_by_name(),
          sequence_type.name, region_type.name, cl_setting.dim_red_name, learn_model,
          dict_to_sorted_tuple(cl_setting.dim_red_params)),
         lambda: encode_dataset_internal(dataset, cl_setting, number_of_processes, label_config,

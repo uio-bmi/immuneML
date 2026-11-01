@@ -51,7 +51,7 @@ class CountPerSequenceFilter(Filter):
         self.remove_empty_repertoires = remove_empty_repertoires
         self.batch_size = batch_size
 
-    def keeps_example_count(self) -> bool:
+    def keeps_example_count(self, dataset=None) -> bool:
         return not self.remove_empty_repertoires
 
     def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1) -> RepertoireDataset:

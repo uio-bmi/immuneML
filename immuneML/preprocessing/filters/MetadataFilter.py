@@ -88,7 +88,7 @@ class MetadataFilter(Filter):
             result_path = None
         return cls(criteria, result_path)
 
-    def keeps_example_count(self) -> bool:
+    def keeps_example_count(self, dataset=None) -> bool:
         return False
 
     def process_dataset(self, dataset: Dataset, result_path: Path, number_of_processes=1):

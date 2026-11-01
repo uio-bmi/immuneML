@@ -77,5 +77,5 @@ class SubjectRepertoireCollector(Preprocessor):
                                                              [r.data for r in repertoires]))
         return new_repertoire
 
-    def keeps_example_count(self) -> bool:
+    def keeps_example_count(self, dataset=None) -> bool:
         return False

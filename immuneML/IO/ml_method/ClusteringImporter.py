@@ -28,6 +28,7 @@ class ClusteringImporter:
         clustering_method = ClusteringImporter._import_clustering_method(config, config_dir)
         dim_reduction = ClusteringImporter._import_dim_reduction(config, config_dir)
         classifier = ClusteringImporter._import_classifier(config, config_dir)
+        preproc_sequence = ClusteringImporter._import_preprocessing_sequence(config, config_dir)
 
         cl_setting = ClusteringSetting(
             encoder=encoder,
@@ -38,7 +39,9 @@ class ClusteringImporter:
             clustering_method_name=config.get('clustering_method_name', ''),
             dim_reduction_method=dim_reduction,
             dim_red_params=config.get('dim_reduction_params'),
-            dim_red_name=config.get('dim_reduction_name')
+            dim_red_name=config.get('dim_reduction_name'),
+            preproc_sequence=preproc_sequence,
+            preproc_sequence_name=config.get('preprocessing_sequence_name')
         )
 
         cl_item = ClusteringItem(
@@ -83,6 +86,15 @@ class ClusteringImporter:
             with dim_red_path.open('rb') as f:
                 dim_red_model = pickle.load(f)
         return dim_red_model
+
+    @staticmethod
+    def _import_preprocessing_sequence(config: dict, config_dir: Path) -> list:
+        """Import the preprocessing sequence if present."""
+        if config.get('preprocessing_file'):
+            preproc_path = config_dir / config['preprocessing_file']
+            with preproc_path.open('rb') as f:
+                return pickle.load(f)
+        return []
 
     @staticmethod
     def _import_classifier(config: dict, config_dir: Path):

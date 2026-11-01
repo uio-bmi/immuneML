@@ -71,7 +71,8 @@ Nested cross-validation for classifiers.
 - `dim_reduction` works only with KmerFrequency or Word2Vec encodings.
 
 ### Clustering
-- Required keys: `dataset`, `metrics`, `clustering_settings`, a list of `{encoding, method, dim_reduction?}`.
+- Required keys: `dataset`, `metrics`, `clustering_settings`, a list of `{encoding, method, preprocessing?, dim_reduction?}`.
+- As in TrainMLModel, preprocessing in a setting must not change the number of examples. A setting with preprocessing is named `<preprocessing>_<encoding>[_<dim_reduction>]_<method>`.
 - **Always give the full `sample_config` and `stability_config`, each with an int `random_seed`.** The default null seed fails validation.
 - Metrics:
   - internal: silhouette, calinski_harabasz, davies_bouldin;
@@ -80,6 +81,7 @@ Nested cross-validation for classifiers.
 
 ### ValidateClustering
 - Keys: `clustering_config_path` (the zip exported by Clustering), `dataset`, `metrics`, `validation_type: [method_based, result_based]`.
+- There is no `preprocessing` key: the setting's preprocessing is stored in the zip and applied to the validation dataset.
 
 ### SplitDataset
 - `split_config` takes a `random` or `manual` strategy with `split_count: 1`, or `group_k_fold` with `split_count` ≥ 2 and a `group_k_fold_config` (see the SplitConfig docstring). For a single group hold-out, use `split_count: 2` and read only `split_1` downstream (`split_2` is the same split with sides swapped).

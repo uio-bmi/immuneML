@@ -57,7 +57,8 @@ class ValidateClusteringInstruction(Instruction):
     **Specification arguments:**
 
     - clustering_config_path (str): path to the clustering exported by the Clustering instruction that will be applied
-      to the new dataset
+      to the new dataset; if the clustering setting included a preprocessing sequence, it is stored in the export and
+      applied to the validation dataset before encoding in both method-based and result-based validation
 
     - dataset (str): name of the validation dataset to which the clustering will be applied, as defined under definitions
 

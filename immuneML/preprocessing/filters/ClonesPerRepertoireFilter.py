@@ -40,7 +40,7 @@ class ClonesPerRepertoireFilter(Filter):
         self.lower_limit = lower_limit
         self.upper_limit = upper_limit
 
-    def keeps_example_count(self) -> bool:
+    def keeps_example_count(self, dataset=None) -> bool:
         return False
 
     def process_dataset(self, dataset: RepertoireDataset, result_path: Path, number_of_processes=1):

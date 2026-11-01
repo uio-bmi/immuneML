@@ -34,7 +34,7 @@ This is a snapshot, so check the source before relying on it.
 ## Preprocessing
 - Most filters are for **repertoire datasets only**: ChainRepertoireFilter, ClonesPerRepertoireFilter, CountPerSequenceFilter, SubjectRepertoireCollector.
 - DuplicateSequenceFilter also accepts sequence datasets.
-- In TrainMLModel `settings`, a preprocessing step must keep the number of examples unchanged.
+- In TrainMLModel `settings` and Clustering `clustering_settings`, a preprocessing step must keep the number of examples unchanged (`keeps_example_count(dataset)`, checked by the parser). SequenceLengthFilter and DuplicateSequenceFilter pass only on repertoire datasets; on sequence or receptor datasets they remove examples.
 
 ## Report prerequisites (selected)
 
