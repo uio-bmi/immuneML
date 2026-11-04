@@ -12,6 +12,8 @@ class Constants:
     STOP_CODON = "*"
     CACHE_TYPE = "cache_type"
     CACHE_PATH = 'cache_path'
+    # env variable: if set to "true", HTMLBuilder pickles instruction states before building the HTML (for debugging)
+    STORE_INSTRUCTION_STATES = 'store_instruction_states' # TODO: in future release, either make immuneML runs possible to continue or drop this entirely
     COMMENT_SIGN = "#"
     NOT_COMPUTED = "not computed"
     SIGNAL_DELIMITER = "__"

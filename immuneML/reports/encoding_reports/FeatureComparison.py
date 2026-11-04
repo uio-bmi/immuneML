@@ -183,21 +183,36 @@ class FeatureComparison(FeatureReport):
         error_x = f"value{error_name}_x" if self.show_error_bar else None
         error_y = f"value{error_name}_y" if self.show_error_bar else None
 
-        # with a reference, each compared class is a column facet and the y axis is named per facet
-        facet_column = f"{self.comparison_label}_y" if self.comparison_reference is not None else self.facet_column
-        y_class = classes_y[0] if self.comparison_reference is None else "class in panel title"
-        y_title = f"Average feature values for {self.comparison_label} = {y_class}"
+        # with a reference, each compared class is a column facet (named in the panel title) and gets its own color
+        if self.comparison_reference is not None:
+            facet_column = f"{self.comparison_label}_y"
+            y_title = f"Average feature value for comparison label ({self.comparison_label})"
+        else:
+            facet_column = self.facet_column
+            y_title = f"Average feature values for {self.comparison_label} = {classes_y[0]}"
+        x_title = f"Average feature values for {self.comparison_label} = {class_x}"
+        color = self.color if self.color is not None else (facet_column if self.comparison_reference is not None else None)
+
+        # colors are assigned to the sorted class names, so the same class always gets the same color
+        category_orders, color_discrete_map = {}, {}
+        if color is not None:
+            category_orders[color] = sorted(plotting_data[color].unique(), key=str)
+            palette = px.colors.qualitative.Vivid
+            color_discrete_map = {value: palette[i % len(palette)] for i, value in enumerate(category_orders[color])}
 
         figure = px.scatter(plotting_data, x="valuemean_x", y="valuemean_y", error_x=error_x, error_y=error_y,
-                            color=self.color, facet_row=self.facet_row, facet_col=facet_column, hover_name="feature",
+                            color=color, facet_row=self.facet_row, facet_col=facet_column, hover_name="feature",
                             log_x=self.log_scale, log_y=self.log_scale, opacity=self.opacity,
-                            labels={
-                                "valuemean_x": f"Average feature values for {self.comparison_label} = {class_x}",
-                                "valuemean_y": y_title,
-                            }, template='plotly_white',
-                            color_discrete_sequence=px.colors.diverging.Tealrose)
+                            labels={"valuemean_x": x_title, "valuemean_y": y_title}, template='plotly_white',
+                            category_orders=category_orders, color_discrete_map=color_discrete_map,
+                            color_discrete_sequence=px.colors.qualitative.Vivid)
         if self.comparison_reference is not None:
             figure.for_each_annotation(lambda a: a.update(text=a.text.replace(f"{facet_column}=", "")))
+        if color is not None and color == facet_column:
+            # the panel titles already name the classes
+            figure.update_layout(showlegend=False)
+
+        self._share_axis_titles(figure, x_title, y_title, has_column_facets=facet_column is not None)
 
         self.add_diagonal(figure, x_range=(plotting_data['valuemean_x'].min(), plotting_data["valuemean_x"].max()),
                           y_range=(plotting_data['valuemean_y'].min(), plotting_data["valuemean_y"].max()))
@@ -208,10 +223,22 @@ class FeatureComparison(FeatureReport):
 
         return ReportOutput(path=file_path, name=f"Comparison of feature values across {self.comparison_label}")
 
+    def _share_axis_titles(self, figure, x_title: str, y_title: str, has_column_facets: bool):
+        # plotly repeats the axis title under each facet, so show one title per axis instead
+        if has_column_facets:
+            figure.for_each_xaxis(lambda axis: axis.update(title_text=''))
+            figure.add_annotation(text=x_title, x=0.5, y=0, xref='paper', yref='paper', xanchor='center',
+                                  yanchor='top', yshift=-30, showarrow=False, font=dict(size=14))
+        if self.facet_row is not None:
+            figure.for_each_yaxis(lambda axis: axis.update(title_text=''))
+            figure.add_annotation(text=y_title, x=0, y=0.5, xref='paper', yref='paper', xanchor='right',
+                                  yanchor='middle', xshift=-50, textangle=-90, showarrow=False, font=dict(size=14))
+
     def add_diagonal(self, figure, x_range: tuple, y_range: tuple):
         figure.add_trace(go.Scatter(hoverinfo='skip', x=[min(x_range[0], y_range[0]), max(x_range[1], y_range[1])],
                                     y=[min(x_range[0], y_range[0]), max(x_range[1], y_range[1])],
-                                    mode='lines', line=dict(color="#B0C2C7", dash='dash'), zorder=1),
+                                    mode='lines', line=dict(color="#B0C2C7", dash='dash'), zorder=1,
+                                    name='x = y', showlegend=False),
                          row='all', col='all')
 
     def _filter_keep_fraction(self, plotting_data):

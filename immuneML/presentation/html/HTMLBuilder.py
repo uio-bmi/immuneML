@@ -6,6 +6,7 @@ from typing import List
 
 import dill
 
+from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.util.Util import Util as MLUtil
 from immuneML.presentation.InstructionPresentation import InstructionPresentation
@@ -76,11 +77,15 @@ class HTMLBuilder:
     @staticmethod
     def _collect_all_presentations(states: list, rel_path: Path) -> List[InstructionPresentation]:
         presentations = []
-        temp_states_dir = PathBuilder.build(rel_path / 'states')
+        store_states = os.environ.get(Constants.STORE_INSTRUCTION_STATES, '').lower() == 'true'
+        temp_states_dir = PathBuilder.build(rel_path / 'states') if store_states else None
 
         for state in states:
             presentation_builder = PresentationFactory.make_presentation_builder(state, PresentationFormat.HTML)
-            HTMLBuilder.store_state_temp(state, temp_states_dir)
+            if store_states:
+                # pickling the full state can need a lot of memory (e.g., fitted UMAP builds its search index when
+                # pickled), so it is only done on request
+                HTMLBuilder.store_state_temp(state, temp_states_dir)
             presentation_path = presentation_builder.build(state)
             if len(states) > 1:
                 presentation_path = Path(os.path.relpath(str(presentation_path), str(rel_path)))
@@ -88,7 +93,8 @@ class HTMLBuilder:
             presentation = InstructionPresentation(presentation_path, instruction_class, state.name)
             presentations.append(presentation)
 
-        HTMLBuilder.remove_temp_states(temp_states_dir)
+        if store_states:
+            HTMLBuilder.remove_temp_states(temp_states_dir)
 
         return presentations
 
