@@ -20,9 +20,11 @@ class LabelOverlap(DataReport):
     and the cells contain the number of samples that have both label values. It works for any dataset type.
 
     For labels with many values, only the most frequent values are shown in the heatmap and the rest are merged into
-    one 'other' row or column; the full table is always exported as CSV. Counts are coloured on a log scale, empty
-    cells are left blank, and the numbers are written in the cells only when the heatmap is small enough to read
-    (at most 900 cells).
+    one 'other' row or column; the full table is always exported as CSV. Rows are sorted by size, and columns are
+    ordered so that each column sits next to the row it is most common in: when most row values come mainly from one
+    column value (e.g., each epitope from one study), the dark cells form a diagonal, and a row spread over several
+    columns stands out. Counts are coloured on a log scale, empty cells are left blank, and the numbers are written in
+    the cells only when the heatmap is small enough to read (at most 900 cells).
 
     **Specification arguments:**
 
@@ -41,6 +43,11 @@ class LabelOverlap(DataReport):
       value (e.g., which share of each epitope's receptors comes from each study), and the row-normalized full table
       is exported as an additional CSV. If null, raw counts are shown. By default, it is null.
 
+    - delimiter (str): if set, label values that contain the delimiter are split into separate values, and the example
+      is counted once under each of them (e.g., with delimiter ';', a receptor with study_id 'ref_1;ref_2' is counted
+      under both ref_1 and ref_2). This applies to both labels. With normalize set to 'row', the fractions in a row can
+      then add up to more than 1. If null, values are not split. By default, it is null.
+
     **YAML specification:**
 
     .. code-block:: yaml
@@ -56,7 +63,8 @@ class LabelOverlap(DataReport):
                 column_label: v_call
                 row_label: epitope
 
-        # which share of each epitope comes from each study, for the 20 largest epitopes and studies
+        # which share of each epitope comes from each study, for the 20 largest epitopes and studies,
+        # where receptors reported in several studies have the study ids separated by ';'
         my_confounding_report:
             LabelOverlap:
                 column_label: study_id
@@ -64,6 +72,7 @@ class LabelOverlap(DataReport):
                 max_row_values: 20
                 max_column_values: 20
                 normalize: row
+                delimiter: ';'
 
     """
 
@@ -72,13 +81,14 @@ class LabelOverlap(DataReport):
     def __init__(self, dataset: Dataset = None, result_path: Path = None, name: str = None,
                  number_of_processes: int = 1,
                  column_label: str = None, row_label: str = None, max_row_values: int = None,
-                 max_column_values: int = None, normalize: str = None):
+                 max_column_values: int = None, normalize: str = None, delimiter: str = None):
         super().__init__(dataset, result_path, name, number_of_processes)
         self.column_label = column_label
         self.row_label = row_label
         self.max_row_values = max_row_values
         self.max_column_values = max_column_values
         self.normalize = normalize
+        self.delimiter = delimiter
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -91,9 +101,11 @@ class LabelOverlap(DataReport):
                                                      min_inclusive=1, nullable=True)
         if kwargs["normalize"] is not None:
             ParameterValidator.assert_in_valid_list(kwargs["normalize"], ["row"], "LabelOverlap", "normalize")
+        ParameterValidator.assert_type_and_value(kwargs["delimiter"], str, "LabelOverlap", "delimiter", nullable=True)
         return LabelOverlap(column_label=kwargs["column_label"], row_label=kwargs["row_label"],
                             max_row_values=kwargs["max_row_values"], max_column_values=kwargs["max_column_values"],
-                            normalize=kwargs["normalize"], name=kwargs.get("name", "LabelOverlap"))
+                            normalize=kwargs["normalize"], delimiter=kwargs["delimiter"],
+                            name=kwargs.get("name", "LabelOverlap"))
 
     def check_prerequisites(self):
         # gene labels are included here: comparing a label against V or J gene is one of the main uses of
@@ -105,11 +117,13 @@ class LabelOverlap(DataReport):
         return True
 
     def _generate(self) -> ReportResult:
-        # Get metadata for both labels
-        metadata = self.dataset.get_metadata([self.column_label, self.row_label])
+        metadata = self._get_label_pairs()
 
-        # Create a cross-tabulation of the two labels
+        # Create a cross-tabulation of the two labels; the row totals count each example once per row value,
+        # also when it has several column values
         overlap_matrix = pd.crosstab(metadata[self.row_label], metadata[self.column_label])
+        row_totals = metadata.drop_duplicates(subset=["example_index", self.row_label])[self.row_label] \
+            .value_counts().reindex(overlap_matrix.index)
 
         # Save the full table as CSV
         PathBuilder.build(self.result_path)
@@ -119,14 +133,13 @@ class LabelOverlap(DataReport):
 
         if self.normalize == 'row':
             fractions_path = self.result_path / 'label_overlap_row_fractions.csv'
-            overlap_matrix.div(overlap_matrix.sum(axis=1), axis=0).to_csv(fractions_path)
+            overlap_matrix.div(row_totals, axis=0).to_csv(fractions_path)
             output_tables.append(ReportOutput(fractions_path, f"Label overlap as fractions of each {self.row_label}"))
 
-        # Keep only the most frequent values for the plot
-        counts = self._keep_top_values(overlap_matrix, self.max_row_values)
-        counts = self._keep_top_values(counts.T, self.max_column_values).T
+        counts, row_totals, row_count = self._keep_top_rows(overlap_matrix, row_totals)
+        counts = self._keep_top_columns(counts, row_count)
 
-        plot_path = self._plot(counts)
+        plot_path = self._plot(counts, row_totals)
 
         return ReportResult(
             name=self.name,
@@ -135,24 +148,73 @@ class LabelOverlap(DataReport):
             output_tables=output_tables
         )
 
-    def _keep_top_values(self, matrix: pd.DataFrame, max_values: int) -> pd.DataFrame:
-        # sorts rows by their total count and merges the rows outside the top max_values into one 'other' row
-        matrix = matrix.loc[matrix.sum(axis=1).sort_values(ascending=False, kind="stable").index]
-        matrix.index = matrix.index.astype(str)
+    def _get_label_pairs(self) -> pd.DataFrame:
+        # one row per example and pair of label values (more than one pair per example only if a delimiter is set)
+        metadata = pd.DataFrame(self.dataset.get_metadata([self.column_label, self.row_label]))
+        metadata = metadata[[self.row_label, self.column_label]].reset_index(drop=True)
+        metadata["example_index"] = metadata.index
 
-        if max_values is None or matrix.shape[0] <= max_values:
+        if self.delimiter is not None:
+            for label in [self.row_label, self.column_label]:
+                metadata[label] = metadata[label].map(self._split_value)
+                metadata = metadata.explode(label)
+
+        return metadata.dropna(subset=[self.row_label, self.column_label])
+
+    def _split_value(self, value):
+        if isinstance(value, str):
+            return list(dict.fromkeys(part.strip() for part in value.split(self.delimiter) if part.strip()))
+        return value
+
+    def _keep_top_rows(self, matrix: pd.DataFrame, row_totals: pd.Series):
+        # sorts rows by size and merges the rows outside the top max_row_values into one 'other' row
+        order = row_totals.sort_values(ascending=False, kind="stable").index
+        matrix, row_totals = matrix.loc[order], row_totals.loc[order]
+        matrix.index = row_totals.index = matrix.index.astype(str)
+
+        if self.max_row_values is None or matrix.shape[0] <= self.max_row_values:
+            return matrix, row_totals, matrix.shape[0]
+
+        other_name = f"other ({matrix.shape[0] - self.max_row_values} values)"
+        rest = matrix.iloc[self.max_row_values:]
+        matrix = pd.concat([matrix.iloc[:self.max_row_values], pd.DataFrame([rest.sum(axis=0)], index=[other_name])])
+        row_totals = pd.concat([row_totals.iloc[:self.max_row_values],
+                                pd.Series([row_totals.iloc[self.max_row_values:].sum()], index=[other_name])])
+        return matrix, row_totals, self.max_row_values
+
+    def _keep_top_columns(self, matrix: pd.DataFrame, row_count: int) -> pd.DataFrame:
+        # keeps the top max_column_values columns, orders them along the diagonal and merges the rest into 'other'
+        matrix = matrix[matrix.sum(axis=0).sort_values(ascending=False, kind="stable").index]
+        matrix.columns = matrix.columns.astype(str)
+
+        other = None
+        if self.max_column_values is not None and matrix.shape[1] > self.max_column_values:
+            other = matrix.iloc[:, self.max_column_values:].sum(axis=1)
+            other.name = f"other ({matrix.shape[1] - self.max_column_values} values)"
+            matrix = matrix.iloc[:, :self.max_column_values]
+
+        matrix = self._order_columns_along_diagonal(matrix, row_count)
+
+        return matrix if other is None else pd.concat([matrix, other], axis=1)
+
+    def _order_columns_along_diagonal(self, matrix: pd.DataFrame, row_count: int) -> pd.DataFrame:
+        # each column goes to the position of the row (not 'other') where it has the most examples;
+        # columns found only in the 'other' row go last
+        if row_count == 0 or matrix.shape[1] == 0:
             return matrix
 
-        rest = matrix.iloc[max_values:]
-        other = pd.DataFrame([rest.sum(axis=0)], index=[f"other ({rest.shape[0]} values)"])
-        return pd.concat([matrix.iloc[:max_values], other])
+        values = matrix.iloc[:row_count].values
+        peak_rows, peak_counts = values.argmax(axis=0), values.max(axis=0)
+        order = sorted(range(matrix.shape[1]),
+                       key=lambda i: (peak_rows[i] if peak_counts[i] > 0 else row_count, -peak_counts[i]))
+        return matrix.iloc[:, order]
 
-    def _plot(self, counts: pd.DataFrame) -> Path:
+    def _plot(self, counts: pd.DataFrame, row_totals: pd.Series) -> Path:
         count_values = counts.values
         is_empty = count_values == 0
 
         if self.normalize == 'row':
-            values = counts.div(counts.sum(axis=1), axis=0).values
+            values = counts.div(row_totals, axis=0).values
             z = np.where(is_empty, np.nan, values)
             text = np.where(is_empty, "", np.vectorize(lambda v: f"{v:.2f}")(values))
             colorbar = dict(title="fraction of row")
@@ -169,9 +231,11 @@ class LabelOverlap(DataReport):
 
         fig = go.Figure(data=go.Heatmap(
             z=z,
-            x=counts.columns.astype(str),
+            x=counts.columns,
             y=counts.index,
-            customdata=count_values,
+            # counts as strings: plotly writes numeric 2D arrays in binary form, from which hover templates in
+            # heatmaps cannot read %{customdata}
+            customdata=count_values.astype(str),
             colorscale='Blues',
             text=text if show_text else None,
             texttemplate="%{text}" if show_text else None,

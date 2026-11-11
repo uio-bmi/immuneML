@@ -1,3 +1,4 @@
 max_row_values: 30
 max_column_values: 30
 normalize: null
+delimiter: null

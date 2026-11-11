@@ -90,7 +90,8 @@ class TestLabelOverlap(TestCase):
 
     def test_top_values_and_normalize(self):
         report = LabelOverlap.build_object(column_label="disease", row_label="subject_id", max_row_values=2,
-                                           max_column_values=None, normalize="row", name="label_overlap_report")
+                                           max_column_values=None, normalize="row", delimiter=None,
+                                           name="label_overlap_report")
         report.dataset = self.dataset
         report.result_path = self.path / "top_results/"
 
@@ -105,9 +106,37 @@ class TestLabelOverlap(TestCase):
         self.assertEqual(fractions.loc["s2", "sick"], 1.)
         self.assertEqual(len(result.output_tables), 2)
 
-        counts = report._keep_top_values(df, 2)
+        counts, row_totals, row_count = report._keep_top_rows(df, df.sum(axis=1))
         self.assertEqual(list(counts.index), ["s1", "s2", "other (1 values)"])
         self.assertEqual(counts.loc["other (1 values)", "healthy"], 1)
+        self.assertEqual(row_count, 2)
+
+        # healthy peaks in s1 (first row), sick in s2 (second row), so the columns follow the rows
+        counts = report._keep_top_columns(counts, row_count)
+        self.assertEqual(list(counts.columns), ["healthy", "sick"])
+
+    def test_delimiter(self):
+        labels = {"epitope": ["e1", "e1", "e2", "e2", "e2"],
+                  "study_id": ["ref_2", "ref_1;ref_2", "ref_1", "ref_1", "ref_1;ref_1"]}
+        metadata_filepath = self.path / "metadata_with_studies.csv"
+        pd.DataFrame(labels).to_csv(metadata_filepath, index=False)
+        dataset = RepertoireDataset(labels=labels, metadata_file=metadata_filepath)
+
+        report = LabelOverlap(dataset=dataset, result_path=self.path / "delimiter_results/", name="label_overlap_report",
+                              column_label="study_id", row_label="epitope", normalize="row", delimiter=";")
+        report._generate()
+
+        # combined values are split, and a repeated value in one example is counted once
+        df = pd.read_csv(self.path / "delimiter_results/label_overlap.csv", index_col=0)
+        self.assertEqual(sorted(df.columns), ["ref_1", "ref_2"])
+        self.assertEqual(df.loc["e1", "ref_2"], 2)
+        self.assertEqual(df.loc["e1", "ref_1"], 1)
+        self.assertEqual(df.loc["e2", "ref_1"], 3)
+
+        # fractions are per example, so the e1 row adds up to more than 1
+        fractions = pd.read_csv(self.path / "delimiter_results/label_overlap_row_fractions.csv", index_col=0)
+        self.assertEqual(fractions.loc["e1", "ref_2"], 1.)
+        self.assertEqual(fractions.loc["e1", "ref_1"], 0.5)
 
     def test_invalid_labels(self):
         # Test with invalid label names
