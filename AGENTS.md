@@ -43,7 +43,7 @@ Components are discovered by reflection; there is no registry.
 - The YAML name is the class name. Encoders, importers and instructions drop their suffix (`KmerFrequencyEncoder` → `KmerFrequency`).
 - A class is found only if its file is named after the class and sits in the folder for its kind.
 - To see what exists, list the folder. To use a component, read its class docstring.
-- Defaults are in `immuneML/config/default_params/<kind>/<snake_case_name>_params.yaml`.
+- Default parameters are always in `immuneML/config/default_params/<kind>/<snake_case_name>_params.yaml`.
 
 | YAML section | Folder (under `immuneML/`) |
 |---|---|

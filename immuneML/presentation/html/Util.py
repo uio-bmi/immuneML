@@ -162,10 +162,13 @@ class Util:
                                                 for label_name in dataset.get_label_names()],
                 f"show_{dataset_key}_labels": len(dataset.get_label_names()) > 0}
 
+MAX_LABEL_VALUES_TO_SHOW = 50
+
+
 def get_label_values_to_show(label_values: list, dataset_size: int):
     if isinstance(label_values, list):
         if len(label_values) == dataset_size:
-            return "unique per example"
+            return f"unique per example ({len(label_values)} values, not shown)"
         elif any(isinstance(label, float) and not label != np.nan for label in label_values):
             try:
                 return f"{min(label_values):.2f} to {max(label_values):.2f}"
@@ -176,6 +179,8 @@ def get_label_values_to_show(label_values: list, dataset_size: int):
                 return f"{min(label_values)} to {max(label_values)}"
             except Exception as e:
                 return 'mixed value types'
+        elif len(label_values) > MAX_LABEL_VALUES_TO_SHOW:
+            return f"{len(label_values)} distinct values (not shown)"
         else:
             return ", ".join(str(label) for label in label_values)
     else:

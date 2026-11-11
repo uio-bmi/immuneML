@@ -1,6 +1,7 @@
 from collections import Counter
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 from pandas import DataFrame
@@ -57,6 +58,8 @@ class SequenceLengthDistribution(DataReport):
                         plot_frequencies: True
 
     """
+
+    MAX_FACETS_PER_ROW = 3
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -208,10 +211,18 @@ class SequenceLengthDistribution(DataReport):
 
     def _plot(self, df: pd.DataFrame) -> ReportOutput:
 
+        facet_col = self.label_name if self.label_name in df.columns else None
+        is_receptor_dataset = isinstance(self.dataset, ReceptorDataset)
+
+        # at most 3 facets per row; plotly ignores the wrap when facet_row is set (receptor datasets)
         figure = px.bar(df, x="sequence_lengths", y="frequencies" if self.plot_frequencies else "counts",
-                        facet_col=self.label_name if self.label_name in df.columns else None,
-                        facet_row="chain" if isinstance(self.dataset, ReceptorDataset) else None)
+                        facet_col=facet_col, facet_col_wrap=self.MAX_FACETS_PER_ROW,
+                        facet_row="chain" if is_receptor_dataset else None)
         figure.update_layout(template="plotly_white")
+
+        if facet_col is not None and not is_receptor_dataset:
+            facet_rows = int(np.ceil(df[facet_col].nunique() / self.MAX_FACETS_PER_ROW))
+            figure.update_layout(height=max(450, 300 * facet_rows))
         figure.update_traces(marker_color=px.colors.qualitative.Vivid[1])
 
         for annotation in figure.layout.annotations:

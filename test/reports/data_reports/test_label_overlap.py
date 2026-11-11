@@ -88,6 +88,27 @@ class TestLabelOverlap(TestCase):
         self.assertEqual(df.loc["healthy", "TRBV1"], 2)
         self.assertEqual(df.loc["sick", "TRBV2"], 2)
 
+    def test_top_values_and_normalize(self):
+        report = LabelOverlap.build_object(column_label="disease", row_label="subject_id", max_row_values=2,
+                                           max_column_values=None, normalize="row", name="label_overlap_report")
+        report.dataset = self.dataset
+        report.result_path = self.path / "top_results/"
+
+        result = report._generate()
+
+        # the CSV keeps all values, only the plot merges the least frequent ones into 'other'
+        df = pd.read_csv(self.path / "top_results/label_overlap.csv", index_col=0)
+        self.assertEqual(df.shape, (3, 2))
+
+        fractions = pd.read_csv(self.path / "top_results/label_overlap_row_fractions.csv", index_col=0)
+        self.assertEqual(fractions.loc["s1", "healthy"], 1.)
+        self.assertEqual(fractions.loc["s2", "sick"], 1.)
+        self.assertEqual(len(result.output_tables), 2)
+
+        counts = report._keep_top_values(df, 2)
+        self.assertEqual(list(counts.index), ["s1", "s2", "other (1 values)"])
+        self.assertEqual(counts.loc["other (1 values)", "healthy"], 1)
+
     def test_invalid_labels(self):
         # Test with invalid label names
         report = LabelOverlap(dataset=self.dataset,
